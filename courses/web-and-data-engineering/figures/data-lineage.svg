@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" font-family="Source Sans Pro, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="la" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#666"/></marker>
+    <marker id="lr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#b71c1c"/></marker>
+  </defs>
+
+  <text x="380" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="#333">Data Lineage: Herkunft nachvollziehen</text>
+
+  <!-- Source systems -->
+  <rect x="10" y="45" width="100" height="35" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+  <text x="60" y="67" text-anchor="middle" font-size="9" font-weight="600" fill="#1565c0">CRM (Kunden)</text>
+
+  <rect x="10" y="90" width="100" height="35" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+  <text x="60" y="112" text-anchor="middle" font-size="9" font-weight="600" fill="#1565c0">ERP (Bestellungen)</text>
+
+  <rect x="10" y="135" width="100" height="35" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+  <text x="60" y="157" text-anchor="middle" font-size="9" font-weight="600" fill="#1565c0">Clickstream</text>
+
+  <text x="60" y="190" text-anchor="middle" font-size="10" font-weight="700" fill="#1565c0">Quellen</text>
+
+  <!-- Ingestion -->
+  <rect x="150" y="70" width="90" height="75" rx="6" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+  <text x="195" y="95" text-anchor="middle" font-size="10" font-weight="700" fill="#1b5e20">Ingestion</text>
+  <text x="195" y="112" text-anchor="middle" font-size="8" fill="#555">Schema-Check</text>
+  <text x="195" y="126" text-anchor="middle" font-size="8" fill="#555">Deduplication</text>
+  <text x="195" y="190" text-anchor="middle" font-size="10" font-weight="700" fill="#1b5e20">ETL</text>
+
+  <!-- Transformation -->
+  <rect x="280" y="70" width="100" height="75" rx="6" fill="#fff3cd" stroke="#f9ab00" stroke-width="2"/>
+  <text x="330" y="90" text-anchor="middle" font-size="10" font-weight="700" fill="#b06000">Transform</text>
+  <text x="330" y="107" text-anchor="middle" font-size="8" fill="#555">JOIN Kunden</text>
+  <text x="330" y="119" text-anchor="middle" font-size="8" fill="#555">+ Bestellungen</text>
+  <text x="330" y="133" text-anchor="middle" font-size="8" fill="#555">Aggregation</text>
+  <text x="330" y="190" text-anchor="middle" font-size="10" font-weight="700" fill="#b06000">dbt / Spark</text>
+
+  <!-- Data Warehouse -->
+  <rect x="420" y="70" width="100" height="75" rx="6" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2"/>
+  <text x="470" y="90" text-anchor="middle" font-size="10" font-weight="700" fill="#6a1b9a">Warehouse</text>
+  <text x="470" y="107" text-anchor="middle" font-size="8" fill="#555">fact_orders</text>
+  <text x="470" y="119" text-anchor="middle" font-size="8" fill="#555">dim_customers</text>
+  <text x="470" y="133" text-anchor="middle" font-size="8" fill="#555">dim_products</text>
+  <text x="470" y="190" text-anchor="middle" font-size="10" font-weight="700" fill="#6a1b9a">Star Schema</text>
+
+  <!-- Serving -->
+  <rect x="560" y="50" width="95" height="40" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="607" y="74" text-anchor="middle" font-size="9" font-weight="600" fill="#b71c1c">Dashboard</text>
+
+  <rect x="560" y="100" width="95" height="40" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="607" y="124" text-anchor="middle" font-size="9" font-weight="600" fill="#b71c1c">ML-Modell</text>
+
+  <rect x="560" y="150" width="95" height="40" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="607" y="174" text-anchor="middle" font-size="9" font-weight="600" fill="#b71c1c">API</text>
+  <text x="607" y="210" text-anchor="middle" font-size="10" font-weight="700" fill="#b71c1c">Konsumenten</text>
+
+  <!-- Arrows: Sources → Ingestion -->
+  <line x1="114" y1="62" x2="145" y2="85" stroke="#666" stroke-width="1.2" marker-end="url(#la)"/>
+  <line x1="114" y1="107" x2="145" y2="107" stroke="#666" stroke-width="1.2" marker-end="url(#la)"/>
+  <line x1="114" y1="152" x2="145" y2="130" stroke="#666" stroke-width="1.2" marker-end="url(#la)"/>
+
+  <!-- Ingestion → Transform -->
+  <line x1="244" y1="107" x2="275" y2="107" stroke="#666" stroke-width="1.5" marker-end="url(#la)"/>
+
+  <!-- Transform → Warehouse -->
+  <line x1="384" y1="107" x2="415" y2="107" stroke="#666" stroke-width="1.5" marker-end="url(#la)"/>
+
+  <!-- Warehouse → Serving -->
+  <line x1="524" y1="85" x2="555" y2="70" stroke="#666" stroke-width="1.2" marker-end="url(#la)"/>
+  <line x1="524" y1="107" x2="555" y2="120" stroke="#666" stroke-width="1.2" marker-end="url(#la)"/>
+  <line x1="524" y1="130" x2="555" y2="170" stroke="#666" stroke-width="1.2" marker-end="url(#la)"/>
+
+  <!-- Impact analysis arrow (red, dashed) -->
+  <path d="M 470 150 L 470 220 L 60 220 L 60 175" fill="none" stroke="#b71c1c" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#lr)"/>
+  <text x="270" y="216" text-anchor="middle" font-size="9" font-weight="600" fill="#b71c1c">← Impact Analysis: Schema-Änderung an der Quelle bricht Downstream</text>
+</svg>

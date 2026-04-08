@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480" role="img" aria-labelledby="title desc">
+  <title id="title">End-to-End Request Flow in Spring MVC</title>
+  <desc id="desc">Vollständiger Weg eines HTTP-Requests durch die Spring-Architektur: Browser → Tomcat → DispatcherServlet → Controller → Service → Repository → Database, und zurück als Response.</desc>
+  <rect width="1100" height="480" fill="#ffffff"/>
+
+  <text x="550" y="30" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111111">End-to-End Request Flow: GET /products/42</text>
+
+  <defs>
+    <marker id="af" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4285f4"/>
+    </marker>
+    <marker id="ag" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34a853"/>
+    </marker>
+  </defs>
+
+  <!-- REQUEST PATH (top, blue) -->
+  <text x="550" y="60" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#4285f4">↓ Request-Pfad</text>
+
+  <!-- Browser -->
+  <rect x="20" y="75" width="120" height="55" rx="10" fill="#f5f5f5" stroke="#666" stroke-width="2"/>
+  <text x="80" y="100" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#333">Browser</text>
+  <text x="80" y="118" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">HTTP GET</text>
+
+  <line x1="140" y1="102" x2="175" y2="102" stroke="#4285f4" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- Tomcat -->
+  <rect x="175" y="75" width="115" height="55" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="232" y="97" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#c5221f">Tomcat</text>
+  <text x="232" y="115" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Thread + Parse</text>
+
+  <line x1="290" y1="102" x2="325" y2="102" stroke="#4285f4" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- DispatcherServlet -->
+  <rect x="325" y="75" width="155" height="55" rx="10" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/>
+  <text x="402" y="97" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#7627bb">DispatcherServlet</text>
+  <text x="402" y="115" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">HandlerMapping</text>
+
+  <line x1="480" y1="102" x2="515" y2="102" stroke="#4285f4" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- Controller -->
+  <rect x="515" y="75" width="140" height="55" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="585" y="95" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1a73e8">@Controller</text>
+  <text x="585" y="115" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">show(id=42)</text>
+
+  <line x1="655" y1="102" x2="690" y2="102" stroke="#4285f4" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- Service -->
+  <rect x="690" y="75" width="140" height="55" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+  <text x="760" y="95" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1e8e3e">@Service</text>
+  <text x="760" y="115" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">findById(42)</text>
+
+  <line x1="830" y1="102" x2="865" y2="102" stroke="#4285f4" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- Repository -->
+  <rect x="865" y="75" width="130" height="55" rx="10" fill="#fef7e0" stroke="#f9ab00" stroke-width="2"/>
+  <text x="930" y="95" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#e37400">@Repository</text>
+  <text x="930" y="115" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">JPA Query</text>
+
+  <line x1="995" y1="102" x2="1020" y2="102" stroke="#4285f4" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- Database -->
+  <g transform="translate(1020, 75)">
+    <rect x="0" y="0" width="60" height="55" rx="10" fill="#f5f5f5" stroke="#666" stroke-width="2"/>
+    <text x="30" y="25" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#333">DB</text>
+    <text x="30" y="43" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#666">SELECT</text>
+  </g>
+
+  <!-- Detail boxes below each step -->
+  <!-- Step annotations -->
+  <g font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#555">
+    <!-- Step numbers -->
+    <circle cx="80" cy="145" r="12" fill="#4285f4"/>
+    <text x="80" y="149" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+    <text x="80" y="170" text-anchor="middle" font-size="10">GET /products/42</text>
+    <text x="80" y="183" text-anchor="middle" font-size="10">Accept: text/html</text>
+
+    <circle cx="232" cy="145" r="12" fill="#ea4335"/>
+    <text x="232" y="149" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
+    <text x="232" y="170" text-anchor="middle" font-size="10">HTTP parsen</text>
+    <text x="232" y="183" text-anchor="middle" font-size="10">Thread zuweisen</text>
+
+    <circle cx="402" cy="145" r="12" fill="#9334e6"/>
+    <text x="402" y="149" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
+    <text x="402" y="170" text-anchor="middle" font-size="10">URL → Controller</text>
+    <text x="402" y="183" text-anchor="middle" font-size="10">matchen</text>
+
+    <circle cx="585" cy="145" r="12" fill="#4285f4"/>
+    <text x="585" y="149" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
+    <text x="585" y="170" text-anchor="middle" font-size="10">@PathVariable</text>
+    <text x="585" y="183" text-anchor="middle" font-size="10">binden, Service rufen</text>
+
+    <circle cx="760" cy="145" r="12" fill="#34a853"/>
+    <text x="760" y="149" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text>
+    <text x="760" y="170" text-anchor="middle" font-size="10">@Transactional</text>
+    <text x="760" y="183" text-anchor="middle" font-size="10">Geschäftslogik</text>
+
+    <circle cx="930" cy="145" r="12" fill="#f9ab00"/>
+    <text x="930" y="149" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">6</text>
+    <text x="930" y="170" text-anchor="middle" font-size="10">SQL generieren</text>
+    <text x="930" y="183" text-anchor="middle" font-size="10">ResultSet → Entity</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="20" y1="210" x2="1080" y2="210" stroke="#ddd" stroke-width="1" stroke-dasharray="6 3"/>
+
+  <!-- RESPONSE PATH (bottom, green) -->
+  <text x="550" y="235" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#34a853">↑ Response-Pfad</text>
+
+  <!-- Database -->
+  <g transform="translate(1020, 250)">
+    <rect x="0" y="0" width="60" height="50" rx="10" fill="#f5f5f5" stroke="#666" stroke-width="2"/>
+    <text x="30" y="22" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#333">DB</text>
+    <text x="30" y="38" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#666">ResultSet</text>
+  </g>
+
+  <line x1="1020" y1="275" x2="995" y2="275" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Repository -->
+  <rect x="865" y="250" width="130" height="50" rx="10" fill="#fef7e0" stroke="#f9ab00" stroke-width="2"/>
+  <text x="930" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#e37400">Product</text>
+  <text x="930" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Entity-Objekt</text>
+
+  <line x1="865" y1="275" x2="830" y2="275" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Service -->
+  <rect x="690" y="250" width="140" height="50" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+  <text x="760" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1e8e3e">Product</text>
+  <text x="760" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">VIP-Preis berechnet</text>
+
+  <line x1="690" y1="275" x2="655" y2="275" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Controller -->
+  <rect x="515" y="250" width="140" height="50" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="585" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1a73e8">Model + View</text>
+  <text x="585" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">"products/detail"</text>
+
+  <line x1="515" y1="275" x2="480" y2="275" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- ViewResolver + Template -->
+  <rect x="325" y="250" width="155" height="50" rx="10" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/>
+  <text x="402" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#7627bb">ViewResolver</text>
+  <text x="402" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Thymeleaf → HTML</text>
+
+  <line x1="325" y1="275" x2="290" y2="275" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Tomcat -->
+  <rect x="175" y="250" width="115" height="50" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="232" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#c5221f">Tomcat</text>
+  <text x="232" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">HTTP Response</text>
+
+  <line x1="175" y1="275" x2="140" y2="275" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Browser -->
+  <rect x="20" y="250" width="120" height="50" rx="10" fill="#f5f5f5" stroke="#666" stroke-width="2"/>
+  <text x="80" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#333">Browser</text>
+  <text x="80" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">HTML rendern</text>
+
+  <!-- AOP cross-cutting box -->
+  <rect x="40" y="330" width="1020" height="70" rx="12" fill="none" stroke="#9334e6" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <text x="550" y="355" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#7627bb">Cross-Cutting Concerns (AOP)</text>
+
+  <g transform="translate(100, 365)">
+    <rect x="0" y="0" width="120" height="24" rx="6" fill="#f3e8fd" stroke="#9334e6" stroke-width="1"/>
+    <text x="60" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7627bb">@PreAuthorize</text>
+
+    <rect x="140" y="0" width="120" height="24" rx="6" fill="#f3e8fd" stroke="#9334e6" stroke-width="1"/>
+    <text x="200" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7627bb">@Transactional</text>
+
+    <rect x="280" y="0" width="120" height="24" rx="6" fill="#f3e8fd" stroke="#9334e6" stroke-width="1"/>
+    <text x="340" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7627bb">Logging Aspect</text>
+
+    <rect x="420" y="0" width="140" height="24" rx="6" fill="#f3e8fd" stroke="#9334e6" stroke-width="1"/>
+    <text x="490" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7627bb">Exception Handler</text>
+
+    <rect x="580" y="0" width="140" height="24" rx="6" fill="#f3e8fd" stroke="#9334e6" stroke-width="1"/>
+    <text x="650" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7627bb">Performance Aspect</text>
+  </g>
+
+  <!-- DI annotation -->
+  <rect x="40" y="420" width="1020" height="45" rx="12" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <text x="550" y="442" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1a73e8">Spring IoC Container — Dependency Injection verbindet alle Schichten beim Start</text>
+  <text x="550" y="458" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666">@Controller ← @Service ← @Repository — automatisch verdrahtet durch Konstruktor-Injektion</text>
+</svg>

@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="darr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555"/>
+    </marker>
+    <marker id="darr-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0d47a1"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="450" y="35" text-anchor="middle" font-size="16" font-weight="bold" fill="#0d47a1">Dijkstra's Algorithm — Weighted Shortest Path Example</text>
+
+  <!-- ===== LEFT: Weighted graph ===== -->
+  <rect x="10" y="50" width="420" height="290" rx="14" fill="#f3f8ff" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="220" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#0d47a1">Weighted Graph</text>
+
+  <!-- All edges (background) -->
+  <line x1="80" y1="200" x2="200" y2="130" stroke="#aaa" stroke-width="2" marker-end="url(#darr)"/>
+  <line x1="80" y1="200" x2="200" y2="280" stroke="#aaa" stroke-width="2" marker-end="url(#darr)"/>
+  <line x1="200" y1="130" x2="340" y2="130" stroke="#aaa" stroke-width="2" marker-end="url(#darr)"/>
+  <line x1="200" y1="280" x2="340" y2="280" stroke="#aaa" stroke-width="2" marker-end="url(#darr)"/>
+  <line x1="200" y1="130" x2="200" y2="280" stroke="#aaa" stroke-width="2" marker-end="url(#darr)"/>
+  <line x1="340" y1="130" x2="340" y2="280" stroke="#aaa" stroke-width="2" marker-end="url(#darr)"/>
+
+  <!-- Shortest path highlighted S→A→C→T -->
+  <line x1="80" y1="200" x2="196" y2="134" stroke="#0d47a1" stroke-width="3.5" marker-end="url(#darr-blue)"/>
+  <line x1="200" y1="130" x2="336" y2="130" stroke="#0d47a1" stroke-width="3.5" marker-end="url(#darr-blue)"/>
+  <line x1="340" y1="130" x2="340" y2="276" stroke="#0d47a1" stroke-width="3.5" marker-end="url(#darr-blue)"/>
+
+  <!-- Edge weight labels -->
+  <rect x="123" y="147" width="24" height="16" rx="4" fill="white" opacity="0.8"/>
+  <text x="135" y="160" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">4</text>
+
+  <rect x="118" y="230" width="24" height="16" rx="4" fill="white" opacity="0.8"/>
+  <text x="130" y="243" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">8</text>
+
+  <rect x="260" y="112" width="24" height="16" rx="4" fill="white" opacity="0.8"/>
+  <text x="272" y="125" text-anchor="middle" font-size="12" font-weight="bold" fill="#0d47a1">2</text>
+
+  <rect x="260" y="272" width="24" height="16" rx="4" fill="white" opacity="0.8"/>
+  <text x="272" y="285" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">5</text>
+
+  <rect x="183" y="196" width="24" height="16" rx="4" fill="white" opacity="0.8"/>
+  <text x="195" y="209" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">3</text>
+
+  <rect x="352" y="196" width="24" height="16" rx="4" fill="white" opacity="0.8"/>
+  <text x="364" y="209" text-anchor="middle" font-size="12" font-weight="bold" fill="#0d47a1">1</text>
+
+  <!-- Nodes -->
+  <circle cx="80" cy="200" r="24" fill="#1565c0" stroke="#0d47a1" stroke-width="2"/>
+  <text x="80" y="197" text-anchor="middle" font-size="13" font-weight="bold" fill="white">S</text>
+  <text x="80" y="212" text-anchor="middle" font-size="9" fill="#bbdefb">start</text>
+
+  <circle cx="200" cy="130" r="22" fill="#bbdefb" stroke="#1565c0" stroke-width="2.5"/>
+  <text x="200" y="135" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d47a1">A</text>
+
+  <circle cx="200" cy="280" r="22" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+  <text x="200" y="285" text-anchor="middle" font-size="13" font-weight="bold" fill="#555">B</text>
+
+  <circle cx="340" cy="130" r="22" fill="#bbdefb" stroke="#1565c0" stroke-width="2.5"/>
+  <text x="340" y="135" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d47a1">C</text>
+
+  <circle cx="340" cy="280" r="22" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+  <text x="340" y="285" text-anchor="middle" font-size="13" font-weight="bold" fill="#555">D</text>
+
+  <!-- Distance labels on nodes -->
+  <text x="80" y="175" text-anchor="middle" font-size="10" fill="#0d47a1" font-weight="bold">d=0</text>
+  <text x="200" y="107" text-anchor="middle" font-size="10" fill="#0d47a1" font-weight="bold">d=4</text>
+  <text x="340" y="107" text-anchor="middle" font-size="10" fill="#0d47a1" font-weight="bold">d=6</text>
+  <text x="200" y="260" text-anchor="middle" font-size="10" fill="#888">d=8</text>
+  <text x="340" y="260" text-anchor="middle" font-size="10" fill="#888">d=11</text>
+
+  <text x="220" y="326" text-anchor="middle" font-size="11" fill="#0d47a1">Shortest path S→A→C: total weight 4+2=6</text>
+
+  <!-- ===== RIGHT: Algorithm Steps ===== -->
+  <rect x="460" y="50" width="430" height="290" rx="14" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="675" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#1b5e20">Algorithm Steps</text>
+
+  <text x="480" y="108" font-size="12" fill="#1b5e20" font-weight="bold">Idea: greedily settle shortest distances</text>
+
+  <text x="480" y="132" font-size="11" fill="#333">1. Initialize: dist[S]=0, dist[all others]=∞</text>
+  <text x="480" y="152" font-size="11" fill="#333">2. Use a priority queue (min-heap) ordered by dist</text>
+  <text x="480" y="172" font-size="11" fill="#333">3. Extract the node u with smallest dist</text>
+  <text x="480" y="192" font-size="11" fill="#333">4. For each neighbor v of u:</text>
+  <text x="500" y="210" font-size="11" fill="#333">   if dist[u] + w(u,v) &lt; dist[v]: update dist[v]</text>
+  <text x="480" y="230" font-size="11" fill="#333">5. Repeat until all nodes settled</text>
+
+  <!-- Complexity box -->
+  <rect x="480" y="244" width="390" height="40" rx="8" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="675" y="260" text-anchor="middle" font-size="11" fill="#1b5e20" font-weight="bold">Complexity: O((|V| + |E|) log |V|)</text>
+  <text x="675" y="277" text-anchor="middle" font-size="11" fill="#1b5e20">with a binary min-heap priority queue</text>
+
+  <!-- Key note -->
+  <rect x="480" y="295" width="390" height="32" rx="8" fill="#fff9c4" stroke="#f9a825" stroke-width="1"/>
+  <text x="675" y="311" text-anchor="middle" font-size="11" fill="#795548" font-weight="bold">⚠ Requires non-negative edge weights</text>
+  <text x="675" y="323" text-anchor="middle" font-size="10.5" fill="#795548">Use Bellman-Ford for negative weights</text>
+</svg>

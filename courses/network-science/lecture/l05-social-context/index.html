@@ -1,0 +1,632 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 05: Social Context and Link Formation</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Network Science
+## Lecture 05: Social Context and Link Formation
+
+Prof. Dr. Michael Granitzer
+Dr. Kanishika Ghosh Dastidar
+Dr. Jelena Mitrovic
+
+15 April 2026
+
+This lecture extends the network model with context, attributes, and longitudinal processes.
+
+Notes:
+This lecture brings social context into the network model. So far the graph has been an abstract object with nodes and edges. Now we add:
+
+- attributes on nodes (homophily)
+- mechanisms of formation (selection vs. socialization)
+- a second node type for foci (affiliation networks)
+- temporal observations of edge formation
+
+The pedagogical anchor is that links are never neutral data points — they reflect choices and contexts that the analyst must reconstruct.
+
+---
+
+## Social Context and Link Formation
+
+This lecture extends the network model with context, attributes, and longitudinal processes.
+
+### Focus
+
+- homophily
+- selection and socialization
+- affiliation networks and closure beyond person-person ties
+- online link formation and spatial segregation
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Homophily
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Do people become friends because they are similar, or do they become similar because they are friends?
+
+</div>
+
+
+--
+
+## Formal Intuition
+
+Homophily means that edge formation is statistically biased toward similarity in node attributes.
+
+Notes:
+Introduce the structural idea before the example. The key point is that homophily is a bias in tie formation, not just a visual pattern.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Visual Intuition
+
+![Homophily as similarity-biased tie formation](/courses/network-science/figures/homophily-similarity-bias.svg)
+
+--
+
+## Interpretation
+
+Friendship ties are often biased toward similarity in attributes such as age, background, beliefs, or activity.
+
+--
+
+## Why This Matters
+
+- it shapes who meets whom <!-- .element: class="fragment" -->
+- it changes which information spreads where <!-- .element: class="fragment" -->
+- it complicates causal interpretation of network data <!-- .element: class="fragment" -->
+
+--
+
+## Mini-Exercise 5.A: Detecting Homophily
+
+In a school of 200 students, 60% are in track A and 40% in track B. Of all friendships, 78% are within-track.
+
+1. What fraction of friendships would you expect to be within-track if friendships were random with respect to track?
+2. Is the observed 78% evidence of homophily? Why or why not?
+
+Notes:
+Give them 4 minutes. (1) Random probability of within-track friendship is $0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$. (2) Yes — observed 78% is much higher than the random baseline 52%, suggesting homophily on track. The point is that "many same-group friendships" is not enough — you need a baseline.
+
+--
+
+## Mini-Exercise 5.A: Solution
+
+**1. Random baseline:** <!-- .element: class="fragment" -->
+
+$$P(\text{same track}) = 0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$$ <!-- .element: class="fragment" -->
+
+**2. Evidence of homophily:** Yes. Observed 78% is well above the 52% random baseline, indicating that friendships are biased toward within-track. The lesson: declaring homophily requires a counterfactual — "more than expected if links were random with respect to the attribute". <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Homophily is not only a descriptive pattern. It is a mechanism that shapes network formation and measurement.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Selection and Socialization
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How can we distinguish selection from social influence?
+
+</div>
+
+
+$$
+\text{homophily} = \text{selection} + \text{socialization} + \text{context}
+$$
+<!-- .element: class="fragment" -->
+
+--
+
+## Core Distinction
+
+- **selection**: people choose similar others <!-- .element: class="fragment" -->
+- **socialization**: people become more similar after linking <!-- .element: class="fragment" -->
+- **correlation**: both may reflect a third factor (shared context) <!-- .element: class="fragment" -->
+
+Notes:
+Keep the causal distinction explicit: similarity at one point in time does not identify the mechanism that produced it.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Example
+
+![Selection, socialization, and contextual correlation](/courses/network-science/figures/selection-socialization-causal.svg)
+
+Notes:
+Walk through the three causal diagrams: selection (similarity → tie), socialization (tie → similarity), context (third factor causes both). Without temporal data, all three explain the same cross-sectional correlation.
+
+--
+
+## Mini-Exercise 5.B: Designing a Test
+
+You observe that smokers tend to befriend other smokers. You want to determine whether this is selection (smokers prefer smoker friends) or socialization (people start smoking because their friends do).
+
+1. What kind of data would you need beyond a single snapshot of friendships?
+2. Sketch one observation that would favor each explanation.
+
+Notes:
+Give them 4 minutes. (1) Longitudinal data: friendships and smoking status observed at multiple time points. (2) Selection signature: people become friends *after* both already smoke. Socialization signature: people start smoking *after* their friends do. The point is that mechanism identification requires temporal sequencing.
+
+--
+
+## Mini-Exercise 5.B: Solution
+
+**1. Required data:** Longitudinal observations — friendships and smoking status at multiple time points, ideally with newly formed ties and newly adopted behavior visible. <!-- .element: class="fragment" -->
+
+**2. Distinguishing observations:** <!-- .element: class="fragment" -->
+
+- *Selection*: New friendships disproportionately form between people who already share smoking status. <!-- .element: class="fragment" -->
+- *Socialization*: People who befriend smokers become more likely to start smoking themselves over the next observation period. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Cross-sectional graphs rarely settle the causal question. Longitudinal network data is much more informative.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Affiliation Networks
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How do we represent the social settings in which ties form?
+
+</div>
+
+
+--
+
+## Bipartite Affiliation
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Affiliation network example](/courses/network-science/figures/affiliation-example.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+Affiliation networks distinguish at least two node types:
+
+- persons
+- foci such as groups, locations, classes, or organizations
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Formal Definition
+
+An affiliation network is naturally modeled as a bipartite graph:
+
+- one node set for actors
+- one node set for foci
+- edges only between actors and foci
+
+Notes:
+This slide makes the modeling step explicit. It should connect back to Lecture 02, where bipartite graphs were introduced as an extension of the simple graph model.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Example
+
+![Board affiliation network](/courses/network-science/figures/affiliation-board.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Closure Processes
+
+![Triadic, focal, and membership closure](/courses/network-science/figures/social-affiliation-closure.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+Notes:
+Three closure processes operate in affiliation networks:
+
+- *Triadic closure*: friend-of-friend → friend (person-person).
+- *Focal closure*: two persons sharing a focus become friends (person-focus-person).
+- *Membership closure*: a friend introduces you to a focus (person-person-focus).
+
+All three are mechanisms that turn structure into more structure.
+
+--
+
+## Mini-Exercise 5.C: Identify the Closure Type
+
+For each scenario, identify whether triadic, focal, or membership closure is at work.
+
+1. Two students take the same elective and become friends.
+2. A new graduate student joins the same lab as her advisor's other student, who introduces her.
+3. A friend invites you to their book club, and you join.
+
+Notes:
+Give them 3 minutes. (1) Focal closure — the elective is the shared focus. (2) Triadic closure — the new friendship forms via a shared friend (the advisor). (3) Membership closure — your friend introduces you to a focus you did not previously belong to.
+
+--
+
+## Mini-Exercise 5.C: Solution
+
+1. **Focal closure** — the elective is the shared focus that brings them into contact. <!-- .element: class="fragment" -->
+2. **Triadic closure** — the advisor is the shared friend that closes the triangle. <!-- .element: class="fragment" -->
+3. **Membership closure** — your friend brings you into a focus you did not previously belong to. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Affiliation networks make context explicit and let us formalize focal closure and membership closure alongside ordinary triadic closure.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Online Link Formation
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What can large online datasets teach us about how links form over time?
+
+</div>
+
+
+--
+
+## Formal Intuition
+
+Link formation can be studied longitudinally by observing when new edges appear and which local conditions precede them.
+
+Notes:
+Online platforms make link formation a measurable process. Every new edge has a timestamp, and every preceding state is observable. This is what makes large-scale empirical tests of homophily and closure possible.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Triadic Closure in Email
+
+![Triadic closure in email communication](/courses/network-science/figures/triadic-closure-experiment.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+The probability of a new edge rises with the number of shared contacts.
+
+Notes:
+The empirical curve shows that having 1 shared friend already raises the closure probability significantly above baseline, and additional shared friends amplify the effect. But the curve flattens — diminishing returns rather than linear growth.
+
+--
+
+## Focal and Membership Closure
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Focal closure curve](/courses/network-science/figures/focal-closure.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+![Membership closure curve](/courses/network-science/figures/membership-closure-experiment.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Interpretation
+
+Shared foci and shared friends both matter, but often with diminishing returns rather than simple linear growth.
+
+Notes:
+This is the empirical takeaway: closure is not deterministic. Shared structure raises the probability of a new edge, but always with diminishing marginal returns. No single shared contact "guarantees" closure.
+
+--
+
+## Mini-Exercise 5.D: Reading a Closure Curve
+
+A study finds that the probability of two coworkers becoming Facebook friends rises from 1% (no shared friends) to 20% (one shared friend) to 30% (two shared friends) to 33% (three or more).
+
+1. Describe the shape of the curve.
+2. What does the diminishing-returns pattern suggest about the mechanism of closure?
+
+Notes:
+Give them 3 minutes. (1) Steep initial rise, then flattening. (2) The first shared friend provides most of the information / opportunity / trust. Additional shared friends add less because much of the social-context "credit" has already been collected. The curve is not consistent with a purely additive model.
+
+--
+
+## Mini-Exercise 5.D: Solution
+
+**1. Shape:** Steep initial rise from 1% to 20% with the first shared friend, then much smaller gains (30%, 33%) for additional shared friends. <!-- .element: class="fragment" -->
+
+**2. Mechanism interpretation:** Diminishing returns suggest that the first shared contact captures most of the available "social credit" — the new opportunity, the trust, the introduction. Additional shared friends reinforce but do not multiply this effect. The mechanism is not purely additive. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Online traces make network formation measurable, but the mechanism still needs interpretation.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Spatial Segregation
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Can weak local preferences generate strong global segregation?
+
+</div>
+
+
+--
+
+## Formal Intuition
+
+Segregation can emerge from repeated local updates even when each individual preference is mild.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Empirical Motivation
+
+![Spatial segregation in Chicago](/courses/network-science/figures/spatial-segregation-chicago.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+Notes:
+The empirical map raises a puzzle: how could such sharp boundaries emerge if individual preferences are not extreme? Schelling's answer is that even mild preferences, applied repeatedly through local moves, produce sharp global patterns.
+
+--
+
+## Schelling Interpretation
+
+- agents prefer some minimum level of similar neighbors <!-- .element: class="fragment" -->
+- dissatisfied agents move locally <!-- .element: class="fragment" -->
+- many local moves can produce sharply segregated global patterns <!-- .element: class="fragment" -->
+
+--
+
+## Why This Matters
+
+The lesson is not limited to geography. Many network processes transform mild local rules into strong large-scale structure.
+
+Notes:
+The same logic applies to network homophily, online filter bubbles, and recommendation systems. Mild local preferences + repeated updates = sharp global segregation. No central planner needed.
+
+--
+
+## Mini-Exercise 5.E: Schelling in Networks
+
+Translate Schelling's spatial model into a network setting.
+
+1. What plays the role of "neighbor" in a network rather than a grid?
+2. What plays the role of "moving"?
+3. Predict: would you expect online recommendation algorithms to amplify or weaken homophily? Why?
+
+Notes:
+Give them 4 minutes. (1) Network neighbors are graph-adjacent nodes; "neighborhood" is the local subgraph. (2) "Moving" becomes rewiring — dropping ties to dissimilar contacts and adding ties to similar ones. (3) Recommendation algorithms typically amplify homophily because they recommend similar content / people, accelerating the rewiring process toward more similar neighborhoods.
+
+--
+
+## Mini-Exercise 5.E: Solution
+
+**1. Network neighbor:** A graph-adjacent node — your immediate contacts. <!-- .element: class="fragment" -->
+
+**2. Moving:** Rewiring — dropping ties to dissimilar contacts and forming new ones with similar contacts. <!-- .element: class="fragment" -->
+
+**3. Algorithmic amplification:** Recommendation systems typically *amplify* homophily. They surface similar content and similar people, which accelerates the Schelling-style rewiring toward more similar neighborhoods. The local rule ("recommend what is similar") is mild, but the global outcome (filter bubbles) is sharp. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Global polarization can emerge without anyone explicitly aiming for it. Mild local preferences plus repeated local updates produce sharp large-scale structure.
+
+
+</div>
+
+
+---
+
+## Wrap-Up
+
+- links often reflect both social similarity and social context
+- longitudinal data helps separate formation from influence
+- simple local preferences can generate strong global patterns
+
+### Looking Ahead: Lecture 06
+
+If signs (positive and negative) and not just connections matter, how do whole social structures stabilize or destabilize? Structural balance theory turns the question of friend-and-enemy relations into a graph-theoretic claim with measurable predictions.
+
+Notes:
+Plant the question for next time. The next conceptual step is to add edge attributes (sign) and ask whether the network as a whole is "consistent" — a property that turns out to have a clean structural characterization.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

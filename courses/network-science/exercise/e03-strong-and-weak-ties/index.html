@@ -1,0 +1,393 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 3 — Strong and Weak Ties</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 3
+## Strong and Weak Ties
+
+5942UE Network Science
+
+Prof. Dr. Michael Granitzer
+Dr. Kanishika Ghosh Dastidar
+Dr. Jelena Mitrovic
+
+---
+
+## Module A — Triadic Closure
+
+---
+
+## Exercise 3.A.1: Open Triads and Predicted Closures
+
+Consider the following friendship network (all edges are **strong** ties unless stated otherwise):
+
+Edges: $A$–$B$, $A$–$C$, $A$–$D$, $B$–$C$, $D$–$E$, $E$–$F$, $D$–$F$.
+
+1. List all **open triads** in the network.
+2. For each open triad, which missing edge is predicted to appear by **triadic closure**? Rank them by "closure pressure".
+3. Which open triad, if closed, would increase the clustering coefficient of node $A$ the most?
+4. Node $G$ joins and forms strong ties with $A$ and $D$. Predict which edge forms next.
+
+
+
+**Solution:**
+
+**1. Open triads:** $(B, A, D)$, $(C, A, D)$, $(A, D, E)$, $(A, D, F)$.
+
+**2. Ranking:** $B$–$D$ ≈ $C$–$D$ > $A$–$E$ ≈ $A$–$F$. Nodes sharing a strong-tie neighbour ($A$) feel the strongest pressure.
+
+**3. $A$'s clustering:** If $B$–$D$ closes, $A$'s clustering coefficient increases significantly because its neighbors $B$ and $D$ become connected.
+
+**4. Node G:** $G$, $A$, and $D$ form a closed triad immediately (since $A$–$D$ exists). $G$ will likely next close triads with neighbors of $A$ ($B, C$) or $D$ ($E, F$).
+
+
+
+---
+
+## Exercise 3.A.2: Computing Clustering Coefficients
+
+For the graph: $A$–$B$, $A$–$C$, $A$–$D$, $B$–$C$, $D$–$E$, $E$–$F$, $D$–$F$:
+
+1. Compute the **local clustering coefficient** $C_v$ for every node.
+2. Compute the **average clustering coefficient** $\bar{C}$.
+3. Interpret the result: what does it tell us about the network?
+4. Visualise the graph with nodes coloured by $C_v$.
+
+
+
+**Solution:**
+
+**1. Local coefficients:**
+
+- $C_B, C_C, C_E, C_F = 1$ (their neighbours are all connected).
+- $C_A = 1/3$ (neighbours $\{B,C,D\}$, only $\{B,C\}$ connected).
+- $C_D = 1/3$ (neighbours $\{A,E,F\}$, only $\{E,F\}$ connected).
+
+**2. Average:** $\bar{C} = (1 + 1 + 1 + 1 + 1/3 + 1/3)/6 = 14/18 = 7/9 \approx 0.78$.
+
+**3. Interpretation:** $\bar{C} \approx 0.78$ is high, indicating a "cliquey" social structure where friends of friends are likely to be friends.
+
+
+
+---
+
+## Module B — Bridges and Brokers
+
+---
+
+## Exercise 3.B.1: Finding Bridges and Structural Holes
+
+Three cliques: $\{1,2,3\}$, $\{4,5,6\}$, and $\{7,8,9\}$. Bridges: $3$–$4$ and $6$–$7$.
+
+1. Is $3$–$4$ a bridge? Is $6$–$7$ a bridge?
+2. Is $3$–$4$ a **local bridge**?
+3. Node 5 in Clique 2 connects to Cliques 1 and 3. Does it sit in a **structural hole**?
+4. If node 3 forms a direct edge with node 7, what happens to the hole and the bridges?
+
+
+
+**Solution:**
+
+- **1. Bridges:** Yes. Removing either disconnects the graph into separate cliques (components).
+- **2. Local Bridge:** Yes. Nodes 3 and 4 have no common neighbours besides each other.
+- **3. Structural Hole:** Clique 1 and Clique 3 have no direct connection. Node 5 (via 4 and 6) can broker information between these disjoint worlds, gaining an information advantage.
+- **4. Edge 3–7:** The structural hole closes. Edge $6$–$7$ is no longer a bridge because an alternative path (via 3–7) now exists.
+
+
+
+---
+
+## Exercise 3.B.2: Identifying Bridges with NetworkX
+
+Build the three-clique graph in NetworkX. Identify bridges and rank edges by edge betweenness.
+
+
+
+**Solution:**
+
+```python
+import networkx as nx
+
+G = nx.Graph()
+G.add_edges_from([(1,2),(1,3),(2,3),        # Clique 1
+                  (4,5),(4,6),(5,6),         # Clique 2
+                  (7,8),(7,9),(8,9),         # Clique 3
+                  (3,4),(6,7)])              # Bridges
+
+# 1. Bridges
+bridges = list(nx.bridges(G))
+print("Bridges:", bridges)   # [(3,4), (6,7)]
+
+# 2. Edge betweenness
+ebc = nx.edge_betweenness_centrality(G)
+sorted_ebc = sorted(ebc.items(), key=lambda x: -x[1])
+for edge, bc in sorted_ebc[:2]:
+    print(f"  {edge}: {bc:.4f}")
+```
+
+**Interpretation:**
+
+- **High Betweenness:** Bridges (3,4) and (6,7) carry all traffic between cliques, giving them maximum edge betweenness.
+- **Vulnerability:** Removing these edges fragments the network faster than removing internal clique edges, demonstrating the importance of "weak" bridging ties for global connectivity.
+
+
+
+---
+
+## Module C — Weak Ties Theorem
+
+---
+
+## Exercise 3.C.1: Verifying the Weak-Ties Theorem
+
+**Weak-Ties Theorem:** Under Strong Triadic Closure (STC), every local bridge is a weak tie.
+
+Check STC and local bridges for:
+
+- **A:** Strong $1$–$2, 1$–$3$. Weak $2$–$4$. No $2$–$3$.
+- **B:** Strong $1$–$2, 1$–$3, 2$–$3$. Weak $1$–$4$.
+- **C:** Strong $1$–$2, 2$–$3, 1$–$3, 3$–$4, 2$–$4$.
+
+
+
+**Solution:**
+
+- **A:** **STC Violated** (1 tied to 2 and 3, but no 2–3 edge). Theorem premise doesn't hold.
+- **B:** **STC Satisfied**. Edge 1–4 is a local bridge and is **weak**. Theorem holds.
+- **C:** **STC Violated** (2 tied to 1 and 4, but no 1–4 edge). Theorem doesn't apply.
+
+
+
+---
+
+## Exercise 3.C.2: Granovetter's Job Study
+
+1. Why are rarely-seen acquaintances more useful for job finding than close friends?
+2. Apply the weak-ties theorem to redundant vs. novel information.
+3. Is "unfriending all close friends" good advice based on the theorem?
+4. How does LinkedIn fit this framework?
+
+
+
+**Solution:**
+
+- **1. Novelty:** Friends share your world and information. Acquaintances bridge to different social circles, providing **non-redundant** job leads.
+- **2. Structure:** Strong ties cluster in dense groups (redundancy). Weak ties are bridges to distant clusters (novelty).
+- **3. Support vs Reach:** No. Strong ties provide trust and support; weak ties provide reach. You need both.
+- **4. LinkedIn:** Formalises weak ties with low neighborhood overlap, enabling people to scale their "reach" into structural holes.
+
+
+
+---
+
+## Module D — Evidence and Overlap
+
+---
+
+## Exercise 3.D.1: Neighbourhood Overlap Calculation
+
+$$O(u,v) = \frac{|\mathcal{N}(u) \cap \mathcal{N}(v)|}{|\mathcal{N}(u) \cup \mathcal{N}(v)|}$$
+
+(excluding $u$ and $v$ from $\mathcal{N}$)
+
+For edges: $A$–$B, A$–$C, A$–$D, B$–$C, B$–$E, C$–$F$:
+
+1. Compute $O(A,B)$, $O(A,C)$, and $O(B,E)$.
+2. Rank them. Which is most like a local bridge?
+
+
+
+**Solution:**
+
+- **$O(A,B)$** = $\{C\} / \{C,D,E\}$ = **1/3**
+- **$O(A,C)$** = $\{B\} / \{B,D,F\}$ = **1/3**
+- **$O(B,E)$** = $\emptyset / \{A,C\}$ = **0**
+
+**Ranking:** $O(B,E)$ has zero overlap, making it a perfect **local bridge**. Information entering via $E$ is likely to be completely novel to the $A,B,C$ cluster.
+
+
+
+---
+
+## Exercise 3.D.2: Neighbourhood Overlap in NetworkX
+
+Compute average neighborhood overlap within and across factions in the karate club.
+
+
+
+**Solution:**
+
+```python
+import networkx as nx
+import numpy as np
+
+G = nx.karate_club_graph()
+
+def neighborhood_overlap(G, u, v):
+    nu = set(G.neighbors(u)) - {v}
+    nv = set(G.neighbors(v)) - {u}
+    if not (nu or nv): return 0.0
+    return len(nu & nv) / len(nu | nv)
+
+# Compare within-faction vs across-faction
+within = [neighborhood_overlap(G, u, v) for u, v in G.edges()
+          if G.nodes[u]["club"] == G.nodes[v]["club"]]
+across = [neighborhood_overlap(G, u, v) for u, v in G.edges()
+          if G.nodes[u]["club"] != G.nodes[v]["club"]]
+
+print(f"Avg Overlap Within: {np.mean(within):.3f}")
+print(f"Avg Overlap Across: {np.mean(across):.3f}")
+```
+
+**Interpretation:**
+
+- **Cross-faction weakness:** Cross-faction edges have significantly lower overlap, confirming they behave as structural bridges between communities.
+- **Glue vs redundancy:** Within-faction edges have high overlap, providing structural redundancy. Low-overlap edges are the "glue" holding separate social worlds together.
+
+
+
+---
+
+## Module E — Tie Strength in Practice
+
+---
+
+## Exercise 3.E.1: Tie Strengths in Practice
+
+1. Facebook (symmetric) vs. Twitter (asymmetric): structural implications for overlap?
+2. Why do maintained relationships grow slowly while total count grows quickly?
+3. How should you design a recommender for **information diversity**?
+
+
+
+**Solution:**
+
+- **1. Symmetry:** Facebook ties are reciprocal, leading to higher local clustering and overlap. Twitter links are closer to structural bridges with near-zero overlap.
+- **2. Cognitive limits:** Maintained ties are bounded by the Dunbar number and social attention. Passive links are structural weak ties with high novelty but low investment.
+- **3. Diversity:** Recommend content from **low-overlap connections**. These structural bridges provide access to disjoint social bubbles and non-redundant information.
+
+
+
+---
+
+## Exercise 3.E.2: Simulating Tie Strength and Overlap
+
+Assign synthetic strength values to karate-club edges (within-faction strong, across-faction weak) and compute the correlation with neighborhood overlap.
+
+
+
+**Solution:**
+
+```python
+import networkx as nx
+import numpy as np
+
+G = nx.karate_club_graph()
+
+# Assign synthetic strength: within-faction = strong (0.8), cross = weak (0.2)
+strengths, overlaps = [], []
+for u, v in G.edges():
+    s = 0.8 if G.nodes[u]["club"] == G.nodes[v]["club"] else 0.2
+    strengths.append(s)
+    overlaps.append(neighborhood_overlap(G, u, v))  # defined in 3.D.2
+
+# Correlation
+r = np.corrcoef(strengths, overlaps)[0, 1]
+print(f"Pearson correlation: {r:.3f}")  # Typically > 0.6
+```
+
+**Interpretation:**
+
+- **Empirical support:** The strong positive correlation confirms that tie strength and neighborhood overlap are linked: close-knit groups share friends, while bridging ties remain socially isolated.
+- **Structural exceptions:** High-strength ties with low overlap may indicate bridging relationships that involve significant social effort (e.g., cross-community collaborations).
+
+
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

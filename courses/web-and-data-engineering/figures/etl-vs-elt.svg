@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="380" viewBox="0 0 1000 380" role="img" aria-labelledby="title desc">
+  <title id="title">ETL vs. ELT: Wann wird transformiert?</title>
+  <desc id="desc">Vergleich der Datenpipeline-Muster ETL (Transform vor Load) und ELT (Load vor Transform), mit Vor- und Nachteilen.</desc>
+  <rect width="1000" height="380" fill="#ffffff"/>
+
+  <text x="500" y="30" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111111">ETL vs. ELT</text>
+
+  <defs>
+    <marker id="fa" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- ETL Row -->
+  <text x="30" y="80" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#4285f4">ETL</text>
+  <text x="30" y="96" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666">Klassisch</text>
+
+  <!-- Extract -->
+  <rect x="100" y="65" width="130" height="50" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="165" y="87" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#c5221f">Extract</text>
+  <text x="165" y="105" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Quellsysteme</text>
+
+  <line x1="230" y1="90" x2="270" y2="90" stroke="#666" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- Transform (highlighted - happens early) -->
+  <rect x="270" y="65" width="160" height="50" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="2.5"/>
+  <text x="350" y="87" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1a73e8">Transform</text>
+  <text x="350" y="105" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Staging-Server</text>
+
+  <line x1="430" y1="90" x2="470" y2="90" stroke="#666" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- Load -->
+  <rect x="470" y="65" width="130" height="50" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+  <text x="535" y="87" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1e8e3e">Load</text>
+  <text x="535" y="105" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Data Warehouse</text>
+
+  <!-- ETL properties -->
+  <g transform="translate(640, 65)">
+    <rect x="0" y="0" width="330" height="50" rx="8" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+    <text x="15" y="20" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333">Schema-on-Write — nur saubere Daten im DWH</text>
+    <text x="15" y="38" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333">Rohdaten gehen verloren (nur Transformiertes bleibt)</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="30" y1="145" x2="970" y2="145" stroke="#eee" stroke-width="2"/>
+  <text x="500" y="165" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#999">vs.</text>
+
+  <!-- ELT Row -->
+  <text x="30" y="205" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#34a853">ELT</text>
+  <text x="30" y="221" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666">Modern</text>
+
+  <!-- Extract -->
+  <rect x="100" y="190" width="130" height="50" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="165" y="212" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#c5221f">Extract</text>
+  <text x="165" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Quellsysteme</text>
+
+  <line x1="230" y1="215" x2="270" y2="215" stroke="#666" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- Load (happens early) -->
+  <rect x="270" y="190" width="160" height="50" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="2.5"/>
+  <text x="350" y="212" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1e8e3e">Load</text>
+  <text x="350" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">Data Lake (Rohdaten)</text>
+
+  <line x1="430" y1="215" x2="470" y2="215" stroke="#666" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- Transform (later, in target) -->
+  <rect x="470" y="190" width="160" height="50" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="2.5"/>
+  <text x="550" y="212" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1a73e8">Transform</text>
+  <text x="550" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#666">dbt / Spark im DWH</text>
+
+  <!-- ELT properties -->
+  <g transform="translate(670, 190)">
+    <rect x="0" y="0" width="300" height="50" rx="8" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+    <text x="15" y="20" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333">Schema-on-Read — Rohdaten bleiben erhalten</text>
+    <text x="15" y="38" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333">Transformation wiederholbar, neue Views möglich</text>
+  </g>
+
+  <!-- Comparison table -->
+  <g transform="translate(100, 275)">
+    <!-- Header -->
+    <rect x="0" y="0" width="800" height="30" rx="6" fill="#f5f5f5"/>
+    <text x="200" y="21" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#333">Aspekt</text>
+    <text x="450" y="21" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#4285f4">ETL</text>
+    <text x="670" y="21" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#34a853">ELT</text>
+
+    <!-- Rows -->
+    <g font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333">
+      <text x="200" y="50" text-anchor="middle">Transformation</text>
+      <text x="450" y="50" text-anchor="middle">vor dem Laden (Staging)</text>
+      <text x="670" y="50" text-anchor="middle">nach dem Laden (im Zielsystem)</text>
+
+      <text x="200" y="72" text-anchor="middle">Rohdaten</text>
+      <text x="450" y="72" text-anchor="middle">gehen verloren</text>
+      <text x="670" y="72" text-anchor="middle" font-weight="700" fill="#1e8e3e">bleiben erhalten</text>
+
+      <text x="200" y="94" text-anchor="middle">Flexibilität</text>
+      <text x="450" y="94" text-anchor="middle">Schema vorab fixiert</text>
+      <text x="670" y="94" text-anchor="middle" font-weight="700" fill="#1e8e3e">neue Transformationen jederzeit</text>
+    </g>
+
+    <line x1="0" y1="30" x2="800" y2="30" stroke="#eee" stroke-width="1"/>
+    <line x1="0" y1="58" x2="800" y2="58" stroke="#eee" stroke-width="1"/>
+    <line x1="0" y1="80" x2="800" y2="80" stroke="#eee" stroke-width="1"/>
+    <line x1="340" y1="0" x2="340" y2="100" stroke="#eee" stroke-width="1"/>
+    <line x1="560" y1="0" x2="560" y2="100" stroke="#eee" stroke-width="1"/>
+  </g>
+</svg>

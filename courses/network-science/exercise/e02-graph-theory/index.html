@@ -1,0 +1,806 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 2 — Graph Theory</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 2
+## Graph Theory
+
+5942UE Network Science
+
+18 March 2026
+
+Prof. Dr. Michael Granitzer
+Dr. Kanishika Ghosh Dastidar
+Dr. Jelena Mitrovic
+
+---
+
+## Module A — Properties of Networks
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.A.1: The Five Modeling Questions
+
+A hospital wants to study how infections spread among patients and staff.
+
+Answer the five modeling questions from the lecture for this system:
+
+1. **Nodes:** What should each node represent? Is there more than one natural choice?
+2. **Edges:** What should an edge represent? (Hint: an edge should encode a transmission-relevant relationship.)
+3. **Direction:** Is the relation directed or undirected? Does it depend on how you define the edge?
+4. **Weight:** Should edges have weights? If so, what should the weight encode?
+5. **Time:** Does this network change over time? Does the order of events matter for your analysis?
+
+Finally: what does your modeling choice **reveal**, and what does it **hide**?
+
+
+
+**Solution:**
+
+**1. Nodes:** Most natural: individual patients and staff. Alternative: hospital wards or departments (coarser model). Granularity determines visible patterns.
+
+**2. Edges:** "Spent time in the same room", "direct physical contact", or "shared a care procedure". A stricter definition gives a sparser, accurate graph; a looser one gives a denser graph risking over-estimation.
+
+**3. Direction:** Depends on edge definition. "Direct contact" is symmetric (undirected). "Given treatment" is asymmetric (directed).
+
+**4. Weights:** Yes — duration of contact (minutes) naturally encodes transmission probability.
+
+**5. Time:** Strongly yes. A patient is infectious only during a specific window. A static snapshot misattributes risk; a temporal graph (edges with timestamps) is necessary.
+
+**Reveals:** Who could have transmitted the infection to whom, and via what chain.
+
+**Hides:** Airborne transmission over distance, environmental contamination, and asymptomatic carriers.
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.A.2: Two Meanings of the Same Network
+
+The ARPANET had two distinct kinds of nodes: **universities/labs** and **routers**. Depending on which you model as nodes, you get different graphs of the same physical system.
+
+- **Model R** (router-level): nodes are routers; edges are physical cables.
+- **Model U** (institution-level): nodes are institutions; an edge connects two institutions if at least one router-level path exists between them.
+
+1. For a path $A \to B$ in Model R, what does it mean in the physical system?
+2. For the same path in Model U, what does it represent? How do the two models differ in what they express?
+3. If your question is *"Can MIT reach Stanford in at most 3 hops?"*, which model do you use and why?
+4. If your question is *"Which physical cable, if cut, would disconnect the ARPANET?"*, which model do you use and why?
+5. What general principle do these questions illustrate about modeling choices?
+
+
+
+**Solution:**
+
+**1. Model R path:** A sequence of physical cable segments connecting two specific routers. Path length = number of cable hops.
+
+**2. Model U path:** A sequence of institutions reachable from each other. This hides router-level detail — one Model U "hop" may correspond to dozens of physical cable segments.
+
+**3. MIT → Stanford, 3 hops:** Use **Model U**. The question is about institutional reachability, not physical routing.
+
+**4. Critical cable:** Use **Model R**. You need physical resolution. In Model U the cable is invisible.
+
+**5. General principle:** The right model depends on the question. Using a model at the wrong level of abstraction either gives the wrong answer or hides the relevant information.
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.A.3: Bipartite vs Projected Networks
+
+Consider a university course enrollment system. Two researchers model it differently:
+
+- **Model A:** A bipartite graph $G_A = (S, C, E)$ where $S$ = students, $C$ = courses, and $(s, c) \in E$ means student $s$ is enrolled in course $c$.
+- **Model B:** A projected graph $G_B = (S, E')$ where two students are connected if they share at least one course.
+
+1. Draw a small example: 3 students (Alice, Bob, Carol) and 3 courses (Math, CS, Physics). Alice takes Math and CS; Bob takes CS and Physics; Carol takes Math.
+2. Draw both $G_A$ and $G_B$ for this example.
+3. What does $G_A$ let you analyse that $G_B$ does not? Give a concrete example question.
+4. What does $G_B$ let you analyse that $G_A$ does not? Give a concrete example question.
+5. What information is irreversibly lost in the projection from $G_A$ to $G_B$?
+
+
+
+**Solution:**
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+**Bipartite Graph $G_A$**
+
+![Bipartite graph](/courses/network-science/figures/ex02-bipartite.svg)
+
+</div>
+
+
+<div class="column">
+
+**Projected Graph $G_B$**
+
+![Projected graph](/courses/network-science/figures/ex02-projected.svg)
+
+</div>
+
+
+</div>
+
+
+**3. $G_A$ reveals:** Course popularity, bridging courses. Q: *"Which course cancellation disconnects the cohort?"*
+
+**4. $G_B$ reveals:** Social clusters, student isolation. Q: *"Are there isolated student groups?"*
+
+**5. Information lost:** The specific courses connecting two students; degree of connection (unless edge weights are added). **Lesson:** Every projection trades detail for simplicity.
+
+
+
+---
+
+## Module B — Representing Graphs
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.B.1: From Picture to Formal Notation
+
+Consider an undirected graph with five nodes $\{A, B, C, D, E\}$ and edges $A$–$B$, $A$–$C$, $B$–$C$, $B$–$D$, $D$–$E$.
+
+1. Write the formal set notation: $V = \ldots$, $E = \ldots$
+2. Draw the adjacency matrix (nodes in alphabetical order).
+3. Write the adjacency list as a Python dictionary.
+4. Compute $|V|$ and $|E|$.
+5. What is the degree of each node? Verify the handshaking lemma: $\sum_{v \in V} \deg(v) = 2|E|$.
+6. Now suppose $B$–$D$ becomes directed ($B \to D$). What changes?
+
+![5-node abstract graph](/courses/network-science/figures/ex02-graph-a.svg)
+
+
+
+**Solution:**
+
+**1.** $V = \{A, B, C, D, E\}$, $E = \{\{A,B\}, \{A,C\}, \{B,C\}, \{B,D\}, \{D,E\}\}$
+
+**2. Adjacency matrix** (order $A, B, C, D, E$):
+
+$$M = \begin{pmatrix} 0&1&1&0&0 \\ 1&0&1&1&0 \\ 1&1&0&0&0 \\ 0&1&0&0&1 \\ 0&0&0&1&0 \end{pmatrix}$$
+
+**3. Adjacency list:**
+
+```python
+{"A": ["B","C"], "B": ["A","C","D"], "C": ["A","B"],
+ "D": ["B","E"],  "E": ["D"]}
+```
+
+**4.** $|V| = 5$, $|E| = 5$.
+
+**5. Degrees:** $\deg(A)=2,\ \deg(B)=3,\ \deg(C)=2,\ \deg(D)=2,\ \deg(E)=1$.
+$\sum \deg = 10 = 2 \times 5$ ✓
+
+**6. Directed $B \to D$:** Matrix loses symmetry. $B$'s out-deg = 3, in-deg = 2; $D$'s out-deg = 1, in-deg = 1. Lemma: $\sum \text{in-deg} = \sum \text{out-deg} = |E|$.
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.B.2: Graph Representations in Python
+
+**Task (10 min):** Work with the graph from Exercise B.1 using [NetworkX](https://networkx.org/), the standard Python package for the creation, manipulation, and study of complex networks.
+
+```python
+import networkx as nx
+
+G = nx.Graph()
+G.add_edges_from([("A","B"),("A","C"),("B","C"),("B","D"),("D","E")])
+```
+
+1. Print the adjacency matrix using `nx.to_numpy_array`.
+2. Print the degree of each node. Does it match your hand calculation?
+3. Compute and print the **density** of the graph. What does density = 1 mean? What does density = 0 mean?
+4. Add a directed version: `DG = nx.DiGraph()`. Print in-degree and out-degree of $B$ and $D$.
+5. **Bonus:** Plot both graphs side by side with `matplotlib`.
+
+
+
+**Solution:**
+
+```python
+import networkx as nx
+
+G = nx.Graph()
+G.add_edges_from([("A","B"),("A","C"),("B","C"),("B","D"),("D","E")])
+
+# 1. Adjacency matrix
+nodes = sorted(G.nodes())
+print("Adjacency matrix:\n", nx.to_numpy_array(G, nodelist=nodes))
+
+# 2. Degrees
+print("Degrees:", dict(G.degree()))
+# {'A': 2, 'B': 3, 'C': 2, 'D': 2, 'E': 1}
+
+# 3. Density
+print(f"Density: {nx.density(G):.3f}")   # 0.500
+
+# 4. Directed version
+DG = nx.DiGraph()
+DG.add_edges_from([("A","B"),("A","C"),("B","C"),("B","D"),("D","E")])
+print("B:", DG.in_degree("B"),  DG.out_degree("B"))
+print("D:", DG.in_degree("D"),  DG.out_degree("D"))
+```
+
+**Density = 1** → complete graph; **density = 0** → no edges. The directed version loses matrix symmetry; $B$'s high out-degree reflects its role as a "broadcaster".
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.B.3: Reading a Network Diagram
+
+**Task (10 min):** Use Python and NetworkX to build the Zachary karate club graph — one of the most studied social networks — and answer the following programmatically:
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.karate_club_graph()
+```
+
+1. How many nodes and edges does the network have?
+2. What is the average degree? What does this mean for the "average member"?
+3. Are there any isolated nodes (degree 0)? What would an isolated node mean socially?
+4. Plot the network. Can you visually identify the two factions that the club split into?
+
+*Hint: `G.degree()` returns degree for all nodes. `nx.draw_spring` gives a reasonable layout.*
+
+
+
+**Solution:**
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.karate_club_graph()
+
+print(f"Nodes: {G.number_of_nodes()}")       # 34
+print(f"Edges: {G.number_of_edges()}")       # 78
+
+degrees = [d for _, d in G.degree()]
+avg_degree = sum(degrees) / len(degrees)
+print(f"Average degree: {avg_degree:.2f}")   # 4.59
+
+isolated = [n for n, d in G.degree() if d == 0]
+print(f"Isolated nodes: {isolated}")          # []
+
+color_map = ["steelblue" if G.nodes[n]["club"] == "Mr. Hi"
+             else "tomato" for n in G.nodes()]
+nx.draw_spring(G, node_color=color_map, with_labels=True,
+               node_size=400, font_size=8)
+plt.title("Zachary Karate Club – two factions")
+plt.show()
+```
+
+- **34 nodes, 78 edges:** small but dense.
+- **Average degree ≈ 4.6:** each member is friends with 4–5 others.
+- **No isolated nodes:** every member has at least one friend — connected.
+- **Visual factions:** the spring layout reveals two clusters; high-degree hubs ("Mr. Hi" and "Officer") are structurally central.
+
+
+
+---
+
+## Module C — Paths and Cycles
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.C.1: Walks, Paths, and Cycles
+
+Consider the undirected graph with edges $\{A\text{–}B,\ B\text{–}C,\ C\text{–}D,\ D\text{–}A,\ A\text{–}C\}$.
+
+Classify each sequence as a **walk**, **path**, **cycle**, or **none** (edge doesn't exist). Justify each answer.
+
+| Sequence | Classification | Reason |
+|----------|---------------|--------|
+| $A, B, C, A$ | ? | ? |
+| $A, C, D, A$ | ? | ? |
+| $A, B, C, D, A$ | ? | ? |
+| $A, B, A, C$ | ? | ? |
+| $A, B, C, D, C$ | ? | ? |
+| $A, E$ | ? | ? |
+
+Then: what is the **diameter** of this graph?
+
+
+
+**Solution:**
+
+| Sequence | Classification | Reason |
+|----------|---------------|--------|
+| $A, B, C, A$ | **Cycle** | All intermediate nodes distinct; all edges exist |
+| $A, C, D, A$ | **Cycle** | Edges $A$–$C$, $C$–$D$, $D$–$A$ all exist |
+| $A, B, C, D, A$ | **Cycle** | All 4 edges exist; returns to $A$ |
+| $A, B, A, C$ | **Walk** (not path) | $A$ visited twice — not simple |
+| $A, B, C, D, C$ | **Walk** (not path) | $C$ appears twice |
+| $A, E$ | **None** | Node $E$ does not exist |
+
+**Diameter:** $d(A,B)=1$, $d(A,C)=1$, $d(A,D)=1$, $d(B,C)=1$, $d(B,D)=2$, $d(C,D)=1$. **Diameter = 2.**
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.C.2: The Königsberg Bridge Problem
+
+The Königsberg bridges problem (Euler, 1736) asks: can you walk through the city crossing each of the seven bridges exactly once and return to your starting point?
+
+The city has four land masses: **North bank (N)**, **South bank (S)**, **Island (I)**, **East bank (E)**. Bridges: N–I (×2), S–I (×2), N–E (×1), S–E (×1), I–E (×1).
+
+1. Model this as a multigraph $G = (V, E)$. Write down $V$ and $E$.
+2. Write the degree of each node.
+3. Euler proved that an **Eulerian circuit** exists iff **every vertex has even degree**. Does Königsberg satisfy this condition?
+4. An **Eulerian path** exists iff **exactly two vertices have odd degree**. Does Königsberg have an Eulerian path?
+5. What does this tell us?
+
+
+
+**Solution:**
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+
+**1.** $V = \{N, S, I, E\}$.
+
+$E = \{N\text{–}I, N\text{–}I, S\text{–}I, S\text{–}I, N\text{–}E, S\text{–}E, I\text{–}E\}$ (7 edges).
+
+**2. Degrees:**
+
+- $\deg(N) = 3$, $\deg(S) = 3$
+- $\deg(I) = 5$, $\deg(E) = 3$
+
+
+</div>
+
+
+<div class="column">
+
+![Königsberg multigraph abstraction](/courses/network-science/figures/ex02-koenigsberg.svg)
+
+</div>
+
+
+</div>
+
+
+**3. Eulerian circuit:** All degrees must be even. Here all four are odd → **no Eulerian circuit**.
+
+**4. Eulerian path:** Requires exactly 2 odd-degree vertices. All four are odd → **no Eulerian path** either.
+
+**5. Lesson:** Euler's result reduces a physical puzzle to a parity check. The actual shape of the river and bridge positions are irrelevant. This is the power of graph abstraction.
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.C.3: Shortest Paths with NetworkX
+
+**Task (10 min):** The ARPANET had 20 nodes in its early topology. We will work with a small synthetic version.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+
+arpa = nx.Graph()
+arpa.add_edges_from([
+    ("UCLA", "SRI"), ("UCLA", "UCSB"), ("UCLA", "UTAH"),
+    ("SRI",  "UTAH"), ("SRI",  "BBN"),
+    ("UCSB", "SRI"), ("UTAH", "MIT"),
+    ("BBN",  "HARVARD"), ("BBN",  "MIT"), ("MIT", "HARVARD"),
+])
+```
+
+1. Plot the network using `nx.draw_spring()`.
+2. Find the shortest path from `"UCLA"` to `"HARVARD"`. Print path and length.
+3. Compute eccentricities, **diameter**, and **radius**.
+4. Which node is the center? What does this mean structurally?
+5. Remove `"BBN"` and recompute the diameter. What changed and why?
+
+</div>
+
+
+<div class="column">
+
+![ARPANET abstract graph](/courses/network-science/figures/ex02-arpa.svg)
+
+</div>
+
+
+</div>
+
+
+
+
+**Solution:**
+
+```python
+# 1. Plot
+nx.draw_spring(arpa, with_labels=True, node_color='lightblue')
+plt.show()
+
+# 2. Shortest path
+path = nx.shortest_path(arpa, "UCLA", "HARVARD")
+print(f"Path: {path}")           # ['UCLA', 'SRI', 'BBN', 'HARVARD']
+
+# 3. Eccentricity, diameter, radius
+print(f"Diameter: {nx.diameter(arpa)}")  # 4
+print(f"Radius:   {nx.radius(arpa)}")    # 2
+
+# 4. Center
+center = nx.center(arpa)
+print(f"Center: {center}")
+
+# 5. Remove BBN
+arpa2 = arpa.copy()
+arpa2.remove_node("BBN")
+print(f"Diameter after removing BBN: {nx.diameter(arpa2)}")
+```
+
+**Interpretation:** The center node(s) minimise the maximum detour any message must take. Removing `BBN` increases the diameter because it was a primary relay bridging the East Coast and West Coast clusters.
+
+
+
+---
+
+## Module D — Breadth-First Search (BFS)
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.D.1: BFS by Hand — Layer Tracing
+
+Run BFS starting from node $1$ on the following undirected graph:
+
+
+<div class="columns">
+
+
+<div class="column">
+
+Edges: $\{1\text{–}2, 1\text{–}3, 2\text{–}4, 2\text{–}5, 3\text{–}6, 4\text{–}7, 5\text{–}7, 6\text{–}8\}$
+
+1. Fill in the BFS discovery table with layer and parent for each node.
+2. Draw the BFS tree.
+3. What is $d(1, 7)$ and $d(1, 8)$? Is there more than one shortest path to 7?
+4. If we add weights $w(2\text{–}4) = 10$, $w(5\text{–}7) = 1$, does BFS still give shortest paths?
+
+</div>
+
+
+<div class="column">
+
+![BFS 8-node abstract graph](/courses/network-science/figures/ex02-graph-bfs.svg)
+
+</div>
+
+
+</div>
+
+
+
+
+**Solution:**
+
+| Node | Layer | Parent |
+|------|-------|--------|
+| 1 | 0 | — |
+| 2, 3 | 1 | 1 |
+| 4, 5 | 2 | 2 |
+| 6 | 2 | 3 |
+| 7, 8 | 3 | 4 or 5; 6 |
+
+Node 7 can have either 4 or 5 as a parent depending on tie-breakers, showing more than one shortest path.
+
+- **Shortest paths:** $d(1,7)=3$, $d(1,8)=3$.
+- **Weighted BFS:** No. BFS counts hops, not weights. Use Dijkstra for weighted shortest paths.
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.D.2: Implementing BFS and Computing Distances
+
+**Task (15 min):** Implement BFS from scratch and use it to answer structural questions about the Zachary karate club network.
+
+```python
+from collections import deque
+import networkx as nx
+
+def bfs_distances(graph, source):
+    """Return a dict {node: shortest-path distance from source}."""
+    dist = {source: 0}
+    queue = deque([source])
+    while queue:
+        node = queue.popleft()
+        # --- your code here ---
+    return dist
+
+G = nx.karate_club_graph()
+adj = {n: list(G.neighbors(n)) for n in G.nodes()}
+```
+
+1. Complete `bfs_distances`. Verify it against `nx.single_source_shortest_path_length`.
+2. Use it to find the **eccentricity** of node 0 (the instructor "Mr. Hi").
+3. What fraction of the network is reachable within 2 hops from node 0?
+4. Repeat for node 33 (the administrator "Officer"). Compare eccentricities and reachable fractions. What does the difference tell you?
+
+
+
+**Solution:**
+
+```python
+from collections import deque
+import networkx as nx
+
+def bfs_distances(graph, source):
+    dist = {source: 0}
+    queue = deque([source])
+    while queue:
+        node = queue.popleft()
+        for neighbor in graph.get(node, []):
+            if neighbor not in dist:
+                dist[neighbor] = dist[node] + 1
+                queue.append(neighbor)
+    return dist
+
+G = nx.karate_club_graph()
+adj = {n: list(G.neighbors(n)) for n in G.nodes()}
+
+d0  = bfs_distances(adj, 0)
+d33 = bfs_distances(adj, 33)
+print(f"Ecc(0): {max(d0.values())}, Ecc(33): {max(d33.values())}")
+```
+
+- **Eccentricity of Mr. Hi (0):** ≈ 4. Reaches more nodes in 2 hops than node 33.
+- **Structural insight:** Node 0's central position is reflected in lower BFS distances. The two factions are anchored by these hubs (0 and 33), but Mr. Hi is often more "central" in the unweighted friendship graph.
+
+
+
+---
+
+## Module E — Connectivity and Components
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.E.1: Components and Connectivity by Hand
+
+
+<div class="columns">
+
+
+<div class="column">
+
+Consider a directed graph with nodes $\{1,2,3,4,5,6\}$ and directed edges:
+$1 \to 2,\ 2 \to 3,\ 3 \to 1,\ 4 \to 3,\ 5 \to 6,\ 6 \to 5$.
+
+1. List all **weakly connected components** (ignoring direction).
+2. List all **strongly connected components** (following directed paths).
+3. Node 4 is a "source" node. Explain what this means for information flow. Can node 4 receive information from nodes 1, 2, or 3?
+4. If you removed edge $3 \to 1$, how would the SCCs change?
+
+</div>
+
+
+<div class="column">
+
+![Directed graph components](/courses/network-science/figures/ex02-graph-components.svg)
+
+</div>
+
+
+</div>
+
+
+
+
+**Solution:**
+
+**1. Weakly connected components** (undirected view):
+- $\{1, 2, 3, 4\}$
+- $\{5, 6\}$
+
+**2. Strongly connected components** (directed paths):
+- $\{1, 2, 3\}$ — cycle $1 \to 2 \to 3 \to 1$
+- $\{4\}$ — reaches $\{1,2,3\}$ via $4 \to 3$ but no path back
+- $\{5, 6\}$ — cycle $5 \to 6 \to 5$
+
+![Directed graph components marked](/courses/network-science/figures/ex02-graph-components-marked.svg)
+
+**3. Node 4 as source:** Information flows out of 4 into $\{1,2,3\}$ but nothing flows back. Node 4 cannot receive information from 1, 2, or 3. It acts as a "broadcaster" influencing the main cluster without being influenced in return.
+
+**4. Removing $3 \to 1$:** The cycle breaks. Each of 1, 2, 3 becomes its own trivial SCC. Dependency flow: $\{1\} \to \{2\} \to \{3\}$ alongside $\{4\} \to \{3\}$. Node 3 becomes an absolute sink.
+
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 2.E.2: Giant Components in Practice
+
+**Task (10 min):** Use NetworkX to investigate what happens to connectivity when we progressively remove nodes from the karate club network.
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+import random
+
+G = nx.karate_club_graph()
+```
+
+1. What fraction of nodes belong to the giant component of the original network?
+2. **Random failure:** repeatedly remove a randomly chosen node and record the size of the largest component after each removal. Plot the result.
+3. **Targeted attack:** repeatedly remove the node with the **highest current degree**. Plot on the same axes.
+4. Which strategy destroys the giant component faster? Why?
+
+*Hint: `max(nx.connected_components(G), key=len)` gives the largest component.*
+
+
+
+**Solution:**
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+import random
+
+def giant_fraction(G):
+    if G.number_of_nodes() == 0:
+        return 0
+    return len(max(nx.connected_components(G), key=len)) / G.number_of_nodes()
+
+def simulate(G0, strategy):
+    G = G0.copy()
+    sizes = [giant_fraction(G)]
+    while G.number_of_nodes() > 0:
+        if strategy == "random":
+            v = random.choice(list(G.nodes()))
+        else:  # targeted
+            v = max(G.nodes(), key=lambda n: G.degree(n))
+        G.remove_node(v)
+        sizes.append(giant_fraction(G))
+    return sizes
+
+G0 = nx.karate_club_graph()
+plt.plot(simulate(G0, "random"),  label="random")
+plt.plot(simulate(G0, "targeted"), label="targeted")
+plt.xlabel("nodes removed")
+plt.ylabel("giant component fraction")
+plt.legend()
+plt.show()
+```
+
+- **Robustness vs fragility:** Hub-based networks are resilient to random failure (most nodes are peripheral) but fragile under targeted attack (hubs are critical).
+- Removing the instructor (0) or administrator (33) disrupts connectivity far more than removing an average student. This principle explains why internet backbones and social hubs are high-value targets.
+
+
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

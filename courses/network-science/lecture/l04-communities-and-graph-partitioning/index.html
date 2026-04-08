@@ -1,0 +1,692 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Network Science
+## Lecture 04: Communities and Graph Partitioning
+
+Prof. Dr. Michael Granitzer
+Dr. Kanishika Ghosh Dastidar
+Dr. Jelena Mitrovic
+
+8 April 2026
+
+From single ties and nodes to groups, roles, and community structure.
+
+Notes:
+This lecture moves from the local-tie focus of Lecture 03 to group-level structure. Two complementary questions drive it:
+
+- Which nodes occupy structurally important positions? (centrality, roles)
+- How is the graph organized into denser subgroups? (community detection)
+
+These are not the same question. A central node need not belong to a community boundary, and a community need not contain the most central nodes.
+
+---
+
+## Communities and Graph Partitioning
+
+Today we move from single ties and nodes to groups, roles, and community structure.
+
+### Focus
+
+- communities, closure, and structural holes
+- centrality measures as role concepts
+- community detection vs. graph partitioning
+- hierarchical clustering and Girvan-Newman
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Roles and Social Capital
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What kinds of structurally different positions can people occupy inside the same network?
+
+</div>
+
+
+--
+
+## Formal Distinction
+
+Not all important positions are the same.
+
+- **embeddedness**: a node is surrounded by tightly connected neighbors <!-- .element: class="fragment" -->
+- **brokerage**: a node connects otherwise separated groups <!-- .element: class="fragment" -->
+- **structural hole**: a gap between groups that brokerage can span <!-- .element: class="fragment" -->
+
+Notes:
+Use this slide to separate the role vocabulary before the pictures. The point is to make students see that "important" is not a single concept.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Structural Roles
+
+![Structural hole and embedded node figure](/courses/network-science/figures/structural-hole.png)
+<span class="figure-credit">Source: Burt 1992</span>
+
+Notes:
+Point out the contrast: the embedded node sits inside a dense cluster (high clustering coefficient), the broker spans between clusters (low clustering coefficient, high betweenness).
+
+--
+
+## Interpretation
+
+- embedded nodes sit inside dense trusted neighborhoods <!-- .element: class="fragment" -->
+- structural holes connect otherwise weakly linked groups <!-- .element: class="fragment" -->
+- highly connected nodes may have power through scale, not only brokerage <!-- .element: class="fragment" -->
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Communities
+
+![Co-author community network](/courses/network-science/figures/co-author-network.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+Community structure means the network contains groups of tightly interconnected nodes.
+
+--
+
+## Mini-Exercise 4.A: Roles in a Karate Club
+
+In Zachary's karate club, two factions form around the instructor (Mr. Hi) and the administrator (Officer).
+
+1. Which structural role best describes Mr. Hi: embedded, broker, or hub?
+2. Are there any nodes that connect the two factions? What role do they play?
+
+Notes:
+Give them 3 minutes. Both Mr. Hi and the Officer are hubs (high degree, embedded in their cluster). The interesting nodes are the few that have ties to both factions — these are the brokers spanning the structural hole between groups. The split itself is predictable from the brokerage structure.
+
+--
+
+## Mini-Exercise 4.A: Solution
+
+**1. Mr. Hi:** Hub and embedded — high degree within his faction, central to a tightly connected subgroup. <!-- .element: class="fragment" -->
+
+**2. Bridging nodes:** A small number of members maintain ties across the factions. They occupy brokerage positions and span the structural hole between the two groups. When the club split, these were the nodes whose loyalty was hardest to predict. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+"Importance" is not one thing. Brokerage, embeddedness, and degree capture different social advantages.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Centrality
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How should we measure which nodes are important?
+
+</div>
+
+
+$$
+\text{importance} \neq \text{degree alone}
+$$
+<!-- .element: class="fragment" -->
+
+--
+
+## Formal View
+
+Different centrality measures formalize different intuitions about importance.
+
+- **degree**: how many links a node has <!-- .element: class="fragment" -->
+- **closeness**: how near a node is to all others <!-- .element: class="fragment" -->
+- **betweenness**: how often a node lies on shortest paths <!-- .element: class="fragment" -->
+- **eigenvector**: how strongly a node is connected to other important nodes <!-- .element: class="fragment" -->
+
+Notes:
+This is the main conceptual bridge. The slide should make it clear that centrality is not one quantity but a family of operationalizations.
+
+--
+
+## Degree-Based Views
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Degree centrality examples](/courses/network-science/figures/centrality_degree.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+![Eigenvector centrality examples](/courses/network-science/figures/centrality_eigenvector.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Degree counts neighbors directly. Eigenvector centrality refines this: a node is important if it is connected to other important nodes — a recursive definition. Google's PageRank is a directed variant of eigenvector centrality.
+
+--
+
+## Distance and Brokerage
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Closeness centrality examples](/courses/network-science/figures/centrality_closeness.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+![Betweenness centrality examples](/courses/network-science/figures/centrality_betweenness.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Closeness asks: how quickly can a node reach everyone else? Betweenness asks: how often does information have to pass through this node? They highlight very different positions.
+
+--
+
+## Interpretation
+
+Different measures answer different questions:
+
+- who has many links? <!-- .element: class="fragment" -->
+- who is linked to important others? <!-- .element: class="fragment" -->
+- who is close to everyone? <!-- .element: class="fragment" -->
+- who controls paths between groups? <!-- .element: class="fragment" -->
+
+--
+
+## Mini-Exercise 4.B: Choose the Right Centrality
+
+For each scenario, decide which centrality measure is most appropriate and justify briefly.
+
+1. You want to identify the most influential gossip in a small village.
+2. You want to find emergency-response hubs that should reach all districts within minimum time.
+3. You want to detect which router, if attacked, would slow internet traffic between continents most.
+4. You want to find the most prestigious researcher in a citation network.
+
+Notes:
+Give them 4 minutes. Answers: (1) Degree — direct contacts. (2) Closeness — average shortest-path distance. (3) Betweenness — proportion of shortest paths passing through. (4) Eigenvector / PageRank — being cited by other prestigious researchers matters more than being cited by many unknown ones.
+
+--
+
+## Mini-Exercise 4.B: Solution
+
+1. **Degree centrality** — gossip is local, direct contact matters. <!-- .element: class="fragment" -->
+2. **Closeness centrality** — minimizing average distance to all districts. <!-- .element: class="fragment" -->
+3. **Betweenness centrality** — the router's role is to lie on paths between continents. <!-- .element: class="fragment" -->
+4. **Eigenvector centrality / PageRank** — prestige flows from being cited by others who are themselves prestigious. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Centrality is always tied to a theory of influence, access, or control. Choosing a measure is choosing a theory.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Communities
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What should count as a community in a graph?
+
+</div>
+
+
+--
+
+## Formal Intuition
+
+A community is a subset of nodes with:
+
+- relatively many edges inside the subset
+- relatively few edges leaving the subset
+- a density that is meaningfully higher than the surrounding graph
+
+Notes:
+This is intentionally not a fully formal theorem-level definition. It gives students the structural criterion before the examples.
+
+--
+
+## Example Cases
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Belgium phone communities](/courses/network-science/figures/communities-in-belgium-mobile-phone-users.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+![Metabolic network communities](/courses/network-science/figures/metabolic-community.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+<div class="column">
+
+![Karate club network](/courses/network-science/figures/zachary-karate-club.png)
+<span class="figure-credit">Source: Zachary 1977 — modified; Original data: Zachary 1977; visualization redrawn</span>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Three different domains, the same structural pattern: dense internal connectivity and sparse cross-group connectivity. Belgium phones reveal the linguistic divide. Metabolic communities reflect functional groupings. Karate club shows social factions.
+
+--
+
+## Working Definition
+
+A community is a locally dense connected subgraph whose internal connectivity is stronger than its connectivity to the outside.
+
+--
+
+## Interpretation
+
+Graph partitioning and community detection are related but not identical:
+
+- **partitioning** usually fixes the number or size of groups
+- **community detection** usually lets the structure determine the grouping
+- the choice of objective function changes what counts as a good community
+
+Notes:
+This is an important distinction. Partitioning (e.g. min-cut, balanced cut) starts with a target number of groups. Detection methods (modularity-based, hierarchical) discover the natural granularity. Different objectives = different communities.
+
+--
+
+## Mini-Exercise 4.C: When Partitioning Fails
+
+A graph has two large dense clusters connected by a single edge, plus one small triangle attached to one of the clusters via a single edge.
+
+1. How many "natural" communities does this graph have?
+2. If you ask a balanced 2-partition algorithm to split it into two equal halves, what might go wrong?
+
+Notes:
+Give them 3 minutes. (1) Three: two large clusters and the small triangle. (2) A balanced 2-partition forces equal sizes, so it would either split a natural cluster or merge the triangle with one of them, ignoring the natural three-community structure. The lesson: imposing partition constraints can hide real structure.
+
+--
+
+## Mini-Exercise 4.C: Solution
+
+**1. Natural communities:** Three — the two dense clusters and the small triangle. <!-- .element: class="fragment" -->
+
+**2. What goes wrong:** A balanced 2-partition has to split nodes into equal-sized groups. It will either cut through one of the dense clusters or merge the triangle with the wrong cluster — neither matches the natural structure. The constraint distorts the answer. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Communities are not visual artifacts. They are claims about density, separation, and interpretability — and they depend on the objective function used to find them.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Hierarchical Clustering
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How can we discover communities without fixing them in advance?
+
+</div>
+
+
+--
+
+## Core Idea
+
+$$
+\text{merge or split groups according to similarity}
+$$
+<!-- .element: class="fragment" -->
+
+--
+
+## Formal View
+
+Hierarchical clustering builds a tree of nested groups.
+
+At each step it uses a similarity or distance rule to decide which clusters to merge or split.
+
+Notes:
+Make explicit that the output is a dendrogram or hierarchy, not a single flat partition. This is a strength when structure exists at multiple scales, and a weakness when you only want one answer.
+
+--
+
+## Two Strategies
+
+- **agglomerative**: start with single nodes and merge <!-- .element: class="fragment" -->
+- **divisive**: start with the whole graph and split <!-- .element: class="fragment" -->
+- both produce a hierarchy rather than a single flat answer <!-- .element: class="fragment" -->
+
+--
+
+## Interpretation
+
+The key modeling choice is the similarity or distance function:
+
+- first-order similarity uses direct links
+- second-order similarity uses neighborhood overlap
+- linkage rules define how cluster-to-cluster distances are updated
+
+--
+
+## Mini-Exercise 4.D: Choosing a Cutoff
+
+A dendrogram for a friendship network shows clear merges at three levels: 5 groups at one level, 3 groups at another, 2 groups at the highest level.
+
+1. Which level captures the "right" community structure?
+2. What information would you need to decide?
+
+Notes:
+Give them 3 minutes. Trick question — there is no single right answer without context. The right cutoff depends on what the communities will be used for: study groups (5), elective tracks (3), faculty assignment (2). The lesson: hierarchical clustering does not absolve the analyst of modeling judgment.
+
+--
+
+## Mini-Exercise 4.D: Solution
+
+**1.** There is no single correct level — each is "right" for a different question. <!-- .element: class="fragment" -->
+
+**2. Information needed:** <!-- .element: class="fragment" -->
+
+- the *purpose* of the grouping (assignment, recommendation, diagnosis) <!-- .element: class="fragment" -->
+- external validation: known group labels, modularity scores, or task performance <!-- .element: class="fragment" -->
+- domain knowledge about plausible group sizes <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Hierarchical clustering is useful when the data may contain meaningful structure at several resolutions. The cutoff is a modeling decision, not an algorithmic output.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Girvan-Newman
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Can communities be found by removing the edges that carry the most inter-group traffic?
+
+</div>
+
+
+--
+
+## Formal Rule
+
+Edge betweenness counts how many shortest paths pass through an edge.
+
+Girvan-Newman repeatedly removes the edge with the highest edge betweenness.
+
+Notes:
+The intuition: edges that lie between communities must carry many shortest paths, because all cross-community communication must use them. Removing them peels the graph apart at its natural seams.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Core Result
+
+![Edge centrality for Girvan-Newman](/courses/network-science/figures/girvan-newman-centrality-measures.png)
+<span class="figure-credit">Source: Girvan & Newman 2002</span>
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Example
+
+![Girvan-Newman clustering example](/courses/network-science/figures/girvan-newman-clustering-example.png)
+<span class="figure-credit">Source: Girvan & Newman 2002</span>
+
+--
+
+## Interpretation
+
+Edges that sit between communities tend to be crossed by many shortest paths, so removing them can reveal hidden group structure.
+
+Notes:
+Connect this back to weak ties from Lecture 03. Edges between communities are often weak ties — and they are exactly the edges Girvan-Newman targets. The community detection algorithm operationalizes the bridge concept.
+
+--
+
+## Mini-Exercise 4.E: Girvan-Newman by Hand
+
+In a small graph, the edge with the highest betweenness has been removed. The graph is now split into two components of roughly equal size, plus one isolated triangle.
+
+1. Should you stop here or continue removing edges?
+2. What would tell you the algorithm has reached a "good" stopping point?
+
+Notes:
+Give them 3 minutes. (1) Continue if structure remains within components. (2) Modularity is the standard answer: compute modularity at each split level and pick the maximum. The point is that Girvan-Newman generates a hierarchy and needs an external criterion to choose a cut level.
+
+--
+
+## Mini-Exercise 4.E: Solution
+
+**1.** Continue — the algorithm produces a *hierarchy* of nested partitions. Each removal step gives a new candidate clustering. <!-- .element: class="fragment" -->
+
+**2. Stopping criterion:** Use **modularity** $Q$ — measure how much denser the within-community edges are than expected under a random null model. Pick the level that maximizes $Q$. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Girvan-Newman is conceptually elegant and didactically useful, but computationally expensive for large graphs. Modern methods (Louvain, Leiden) optimize modularity directly without recomputing edge betweenness at every step.
+
+
+</div>
+
+
+---
+
+## Wrap-Up
+
+- centrality asks which nodes matter and why
+- communities ask where the graph is dense and where it is sparse
+- different methods optimize different notions of structure
+
+### Looking Ahead: Lecture 05
+
+If links reflect both choice and context, how do we model the social settings in which networks form? When does similarity cause friendship — and when does friendship cause similarity?
+
+Notes:
+Plant the question for next time. Lecture 05 introduces homophily, selection vs. socialization, and affiliation networks. The bridge from this lecture: communities are dense not by accident — they reflect underlying contexts and shared attributes.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Burt, Ronald S. (1992). Structural Holes: The Social Structure of Competition. *Harvard University Press*.
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Girvan, Michelle and Newman, M. E. J. (2002). Community structure in social and biological networks. *Proceedings of the National Academy of Sciences*.
+- Zachary, Wayne W. (1977). An Information Flow Model for Conflict and Fission in Small Groups. *Journal of Anthropological Research*.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

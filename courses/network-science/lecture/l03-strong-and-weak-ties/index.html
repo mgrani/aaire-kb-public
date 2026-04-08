@@ -1,0 +1,757 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 03: Strong and Weak Ties</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Network Science
+## Lecture 03: Strong and Weak Ties
+
+Prof. Dr. Michael Granitzer
+Dr. Kanishika Ghosh Dastidar
+Dr. Jelena Mitrovic
+
+1 April 2026
+
+This lecture connects local friendship structure to global information flow.
+
+Notes:
+Pedagogical approach for this lecture:
+
+- Use inquiry-first teaching throughout. Every module opens with a guiding question.
+- This lecture builds on Lecture 02 (graph theory) and introduces the first sociological concepts.
+- The key insight: local structure (triads, tie strength) has global consequences (information flow, bridging).
+- Each module follows: Question → Tension → Interpretation → Stabilization.
+
+Teaching goal for today:
+
+- students should understand triadic closure and the clustering coefficient
+- students should distinguish bridges from local bridges
+- students should see why weak ties matter structurally
+- students should be able to interpret empirical evidence from phone and social-media data
+
+---
+
+## Strong and Weak Ties
+
+This lecture connects local friendship structure to global information flow.
+
+### Focus
+
+- triadic closure and strong triadic closure
+- bridges and local bridges
+- why weak ties matter for global connectivity
+- empirical evidence from phone and social-media data
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Triadic Closure
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Why do friends-of-friends so often become linked, and what does that imply for network structure?
+
+</div>
+
+
+$$
+\text{shared friend} \Rightarrow \text{increased probability of closure}
+$$
+<!-- .element: class="fragment" -->
+
+Notes:
+Hold this question open. Do not answer it immediately. Let students offer explanations — opportunity, trust, social pressure — before moving to the formal slide.
+
+--
+
+## Triadic Closure
+
+An **open triad** has two edges and one missing edge. **Triadic closure** is the process by which the missing edge appears over time.
+
+> Consider three nodes A, B, C where A–B and A–C exist but B–C does not. Triadic closure predicts B–C will form.
+
+Ask: before we explain why, what mechanisms could drive the missing edge to appear?
+
+- **Opportunity:** Shared friends create environments to meet. <!-- .element: class="fragment" -->
+- **Trust:** Trust can be borrowed through a common contact. <!-- .element: class="fragment" -->
+- **Incentive:** Social friction rewards closing the triangle to resolve inconsistency. <!-- .element: class="fragment" -->
+
+Notes:
+The fragment reveals the three mechanisms after the question is posed in the slide body. This combines what were previously two separate slides (definition + "Why Does This Happen?") into one coherent question-then-answer slide.
+
+--
+
+## Strong Triadic Closure
+
+> If A has **strong** ties to both B and C, and B–C does not exist, then A violates the Strong Triadic Closure Property.
+
+**Strong Triadic Closure Property:** If a node maintains strong ties to two distinct neighbors, there must be at least a weak tie between those neighbors.
+
+Notes:
+Contrast the two cases: in the general case (open triad), any tie can close the triangle. In the strong case, the closing tie may be weak — but it must exist. The key distinction is that "strong" is a social label, not a graph-theoretic one.
+
+--
+
+## Measuring Closure: Clustering Coefficient
+
+What fraction of a node's potential triangles are actually closed?
+
+$$
+C_i = \frac{\text{number of edges among } i\text{'s neighbors}}{\binom{k_i}{2}}
+$$
+<!-- .element: class="fragment" -->
+
+where $k_i$ is the degree of node $i$. Values range from 0 (no triangle) to 1 (complete neighborhood). <!-- .element: class="fragment" -->
+
+Notes:
+Math First, Then Meaning. Show the formula first, then ask students: What does $C_i = 1$ mean for a person's social circle? What does $C_i = 0$ mean? Could a person with $C_i = 0$ be a structural broker?
+
+--
+
+## Mini-Exercise 3.A: Clustering Coefficient
+
+Node $B$ has 4 neighbors: $A, C, D, E$.
+Among $B$'s neighbors, exactly 2 edges exist: $(A,C)$ and $(C,D)$.
+
+1. Compute $C_B$.
+2. Is $B$'s neighborhood highly clustered or sparse? What would that imply about $B$'s social position?
+
+Notes:
+Give them 4 minutes — the second question is the important one. The numeric answer is $C_B = 2/6 = 1/3$. The interpretation is that B sits in a moderately sparse group, connecting nodes that don't all know each other. B could potentially act as a local broker between A (who knows C but not D/E) and D/E.
+
+--
+
+## Mini-Exercise 3.A: Solution
+
+**1. Compute $C_B$:** <!-- .element: class="fragment" -->
+
+$$\binom{4}{2} = 6 \text{ possible edges}, \quad 2 \text{ actual edges} \implies C_B = \frac{2}{6} = \frac{1}{3}$$ <!-- .element: class="fragment" -->
+
+**2. Interpretation:** <!-- .element: class="fragment" -->
+
+$C_B = 1/3$ indicates a sparse but not isolated neighborhood. $B$ connects nodes that do not all know each other — a position with potential brokerage value, since $B$ mediates between sub-clusters $\{A, C\}$ and $\{D\}$. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Triadic closure is a local mechanism, but repeated across a network it explains why social graphs become clustered — and why those clusters can be structurally separated by rare long-range ties.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Bridges and Local Bridges
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Which edges matter most for keeping information flowing across a network?
+
+</div>
+
+
+$$
+\text{important edge} \neq \text{strongest edge}
+$$
+<!-- .element: class="fragment" -->
+
+Notes:
+Let the gap between "important" and "strongest" sit for a moment. Students likely equate strength with importance. The rest of this module builds the case that structural position matters more.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Bridge
+
+![Bridge example — removing the central edge disconnects the graph](/courses/network-science/figures/bridge.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+A **bridge** is an edge whose removal increases the number of connected components.
+Equivalently: a bridge lies on no cycle.
+
+Notes:
+Ask students to verify the bridge condition: does the bridge edge lie on any cycle? No — removing it disconnects the graph. Ask: what happens to the distance between the endpoints after removal? It becomes infinite.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Local Bridge
+
+![Local bridge — endpoints share no common neighbors](/courses/network-science/figures/local-bridge.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+A **local bridge** links two nodes that share **no** neighbors.
+Removing it increases the distance between its endpoints to more than two.
+
+Notes:
+Contrast with a true bridge: a local bridge need not disconnect the graph. The endpoints could still reach each other via a long path — but that path goes through many hops.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Structural Holes and Social Capital
+
+A node that acts as the sole link between otherwise disconnected groups spans a **structural hole** (Burt, 1992).
+
+![Structural hole — broker between groups](/courses/network-science/figures/structural-hole.png)
+<span class="figure-credit">Source: Burt 1992</span>
+
+Why does this position matter?
+
+- **Information advantage:** The broker receives early, non-redundant information from independent groups. <!-- .element: class="fragment" -->
+- **Control advantage:** The broker mediates any flow between groups that cannot communicate directly. <!-- .element: class="fragment" -->
+
+Notes:
+Connect graph structure to social behavior. Ask: what happens to the Broker if triadic closure reconnects its contacts? The structural hole closes and the broker's monopoly evaporates. This is why individuals in brokering positions sometimes actively discourage their contacts from connecting directly.
+
+--
+
+## Mini-Exercise 3.B: Bridges and Brokers
+
+The graph below represents a small research community. Each letter is a researcher.
+
+> A — B — C — D — E, plus edges B–C and C–D forming triangles.
+
+1. Which edges in this graph are **true bridges**?
+2. Your advisor says "C is a broker". Do you agree? Justify using the definitions of local bridge and structural hole.
+
+Notes:
+Give them 4 minutes. The graph is: A–B, B–C, C–D, D–E, with additional edges B–C (already there) and C–D. So A–B is a bridge (removing it disconnects A). D–E is a bridge (removing it disconnects E). B–C and C–D are NOT bridges because they lie on cycles (triangle B–C–D). C is not a broker in the structural-hole sense — it sits inside a densely connected triangle, not between disjoint groups.
+
+--
+
+## Mini-Exercise 3.B: Solution
+
+**1. True bridges:** Edges **A–B** and **D–E** are bridges — removing either disconnects a node from the rest of the graph. Edges B–C and C–D lie on cycles and are not bridges. <!-- .element: class="fragment" -->
+
+**2. Is C a broker?** No. C sits inside the triangle B–C–D, meaning B and D are already connected. C spans no structural hole: all of C's neighbors already know each other. A true broker would connect groups with no direct path between them. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Structurally crucial edges are identified by position, not by weight. A node spanning structural holes gains information and control advantages — but loses them the moment triadic closure reconnects its contacts.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Weak Ties as Structural Connectors
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Why should local bridges tend to be weak ties rather than strong ties?
+
+</div>
+
+
+$$
+\text{local bridge} + \text{strong triadic closure} \Rightarrow \text{weak tie}
+$$
+<!-- .element: class="fragment" -->
+
+Notes:
+Let students sit with this claim before moving on. It sounds counterintuitive — bridges feel important, so why would they be *weak*? The rest of this module builds the structural argument.
+
+--
+
+## Theorem Statement
+
+**Under strong triadic closure, every local bridge must be a weak tie.**
+
+Notes:
+This is the compact formal form. Resist giving the proof immediately. Ask students: does this theorem say strong local bridges are impossible? (Answer: No — it says they cannot coexist with strong triadic closure. Real networks do violate STC, so the theorem is a conditional, not an absolute claim.)
+
+--
+
+## Why Might This Be True?
+
+Suppose A–D was a **strong** tie and also a local bridge. Then by strong triadic closure, A's other strong neighbors (B, C) must each have a tie to D. But then D shares neighbors with A — contradicting the local-bridge condition.
+
+> The assumption "A–D is strong AND a local bridge" forces a neighbor of D to exist among A's friends, destroying the local-bridge condition.
+
+Notes:
+Walk through this proof by contradiction carefully. The key move: the assumption forces a shared neighbor to exist, which destroys the local-bridge property. Ask students: what if only one of A's ties to B or C was strong? Does the contradiction still hold?
+
+--
+
+## Granovetter: "Getting a Job" (1973)
+
+Granovetter interviewed Boston-area residents who had recently found a new job through a social contact.
+
+Is it the people we see most often who provide the most useful job leads?
+
+**Result:** Most job leads came from acquaintances seen rarely — not from close friends. The contacts providing novel opportunities were on the social periphery, not the social core. <!-- .element: class="fragment" -->
+
+Notes:
+Ground the theorem in an empirical result students can relate to. Strong friends know the same people and the same opportunities you do. Weak acquaintances have access to entirely different social worlds — exactly as the theorem predicts for information flow across local bridges.
+
+--
+
+## Interpretation
+
+The theorem links a local social concept (tie strength) to a global structural one (bridging separate communities).
+
+Weak ties are the primary channels through which non-redundant information — new jobs, new ideas, different perspectives — reaches individuals across community boundaries.
+
+--
+
+## Mini-Exercise 3.C: Strong Ties and Local Bridges
+
+A network has three nodes: A, B, C.
+A–B is a **strong** tie. A–C is a **strong** tie. There is no edge between B and C.
+
+1. Does this network satisfy the **Strong Triadic Closure Property**?
+2. Is the edge A–B a local bridge? Can you tell from the information given?
+
+Notes:
+Give them 3 minutes. (1) No: A has two strong ties to B and C, but B–C does not exist, violating STC. (2) A–B is a local bridge only if B and A share no neighbors. Here B and C are not connected, so B and C are not shared neighbors of A and B. Whether A–B is a local bridge depends on whether there are other nodes — we cannot fully determine it from three nodes alone.
+
+--
+
+## Mini-Exercise 3.C: Solution
+
+**1. Strong Triadic Closure:** No. A has strong ties to B and C, but B and C are not connected — this violates STC. <!-- .element: class="fragment" -->
+
+**2. Local bridge status of A–B:** In this three-node network, A and B share no common neighbors (C connects to A but not to B). So **A–B is a local bridge in this graph**. But the Weak Tie Theorem does not apply here — its precondition (STC holds) is violated. The theorem makes no claim about what happens when STC fails. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Weak ties are structurally positioned as bridges between communities. The theorem explains *why* — not by sociology, but by graph structure: strong ties cluster locally, and local clustering destroys the bridge condition.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Cell-Phone Evidence
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Does the weak-ties theorem survive contact with real-world data at scale?
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Setup: Modeling Communication as a Graph
+
+![Local structure in cell phone network](/courses/network-science/figures/onella_structure_individual_A.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+Onnela et al. (2007) modeled nationwide cell-phone call logs as an undirected weighted graph. Edge weight = total call duration between two numbers.
+
+Notes:
+Ask students: Is call duration a good proxy for tie strength? What gets lost? (Loss: directionality, content, context, relationship history before phones.) This is the modeling choice made visible.
+
+--
+
+## Formalizing Almost-Local Bridges
+
+In a real weighted graph, true local bridges are rare. Instead, we measure **Neighborhood Overlap**:
+
+$$
+O(u,v) = \frac{|N(u) \cap N(v)|}{|N(u) \cup N(v)|}
+$$
+
+where $N(u)$ is the set of neighbors of $u$, excluding $v$ (and vice versa).
+
+What does $O(u,v) = 0$ mean?
+
+The two endpoints share **no** common neighbors — the edge is a perfect local bridge. <!-- .element: class="fragment" -->
+
+Notes:
+Math First, Then Meaning. Show the formula, ask for its value at the extremes. Note: this is the Jaccard similarity coefficient applied to neighbor sets. $O = 1$ means all neighbors are shared (deep within a clique). $O = 0$ means the edge is a local bridge.
+
+--
+
+## Evidence: Tie Strength vs. Overlap
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Tie strength versus overlap plot](/courses/network-science/figures/tie-vs-overlapp.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+Does tie strength predict neighborhood overlap?
+
+Yes: weak ties (low strength percentile) cluster near $O \approx 0$. Strong ties accumulate at higher overlap values — consistent with Granovetter's prediction. <!-- .element: class="fragment" -->
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask students to read the axes before revealing the fragment: the X-axis is call duration rank (percentile), the Y-axis is neighborhood overlap. What pattern do you expect? Then reveal.
+
+--
+
+## Evidence: Network Robustness
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Giant component shrinking experiment](/courses/network-science/figures/onella_shrinking.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+Which edge removal strategy breaks the network fastest?
+
+Removing edges in **increasing** tie-strength order (weakest first) fragments the giant component far faster than removing strongest ties first. <!-- .element: class="fragment" -->
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask: Why would removing ties that carry very few call-minutes break the network so dramatically? Answer: because those weak ties are the local bridges between communities. Remove the bridges, separate the components.
+
+--
+
+## Mini-Exercise 3.D: Neighborhood Overlap
+
+Nodes $A$ and $B$ are connected. Their neighbor sets (excluding each other) are:
+- $N(A) = \{C, D, E\}$
+- $N(B) = \{D, E, F\}$
+
+1. Compute $O(A, B)$.
+2. Is A–B closer to a local bridge or a clique edge? What does this imply about the information A would receive through B?
+
+Notes:
+Give them 4 minutes. $|N(A) \cap N(B)| = |\{D,E\}| = 2$. $|N(A) \cup N(B)| = |\{C,D,E,F\}| = 4$. $O = 2/4 = 0.5$. Interpretation: moderate overlap — neither a pure bridge nor deep inside a clique. A receives some non-redundant information from B (via F) but also redundant information (D, E already known to A).
+
+--
+
+## Mini-Exercise 3.D: Solution
+
+$$O(A,B) = \frac{|\{D,E\}|}{|\{C,D,E,F\}|} = \frac{2}{4} = 0.5$$ <!-- .element: class="fragment" -->
+
+**Interpretation:** A–B has moderate overlap. It is not a local bridge ($O > 0$), but nor is it embedded in a clique ($O < 1$). A receives partly redundant information through B. If $O$ were near 0, B would be A's primary source of information from a distant community. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+The weak-ties argument is not sociological speculation — it has measurable structural signatures at scale. Neighborhood overlap operationalizes the bridge concept, and empirical data confirm that weak ties carry it.
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Social Media
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How do strong and weak ties change when the network moves to online platforms?
+
+</div>
+
+
+--
+
+## Evidence: Facebook (2009)
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Facebook maintained-relationship results](/courses/network-science/figures/facebook-results.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+As total friend count grows, what happens to actively maintained relationships?
+
+Only a small, roughly constant number are "maintained" (reciprocal communication). The rest are passive weak ties. <!-- .element: class="fragment" -->
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The figure shows that total friends grow rapidly with network size, while maintained and directed one-way contacts plateau. Cognitive limits still bind strong tie capacity — Dunbar's number (~150) applies even online. Point this out before revealing the fragment.
+
+--
+
+## Evidence: Twitter (Huberman et al.)
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+![Posts versus followers on Twitter](/courses/network-science/figures/Huberman_twitter_posts_followers.png)
+<span class="figure-credit">Source: Huberman et al. 2009</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+![Posts versus friends on Twitter](/courses/network-science/figures/Huberman_twitter_posts_friends.png)
+<span class="figure-credit">Source: Huberman et al. 2009</span>
+
+
+</div>
+
+
+</div>
+
+
+On asymmetric platforms, the *follower* count can reach millions (zero-cost weak ties), while *friends* — mutual contacts with whom one actually interacts — remain a small subset.
+
+Notes:
+Ask: why does the follower graph (left) scatter so much more than the friends graph (right)? The relationship between posting activity and follower count is much noisier than the one with actual friends. "Friends" here is the Twitter-era term for mutual follows with actual interaction.
+
+--
+
+## Interpretation
+
+Does social media collapse the distinction between weak and strong ties?
+
+No — it amplifies it. Platforms remove the cost of maintaining weak ties (passive contact, one-click follow), but strong ties still require active, reciprocal effort. The result is a much wider weak-tie periphery surrounding an unchanged strong-tie core. <!-- .element: class="fragment" -->
+
+--
+
+## Mini-Exercise 3.E: Dense vs. Sparse Follower Networks
+
+Two students, X and Y, both use the same online platform. X follows 2000 accounts; Y follows 80 accounts but everyone follows everyone else.
+
+1. Who is likely to have a higher average neighborhood overlap across their edges?
+2. What does this imply about the kind of information X and Y each receive?
+
+Notes:
+Give them 4 minutes. For X: following 2000 accounts, many via recommendation algorithm, means few shared neighbors per edge — low average overlap, many weak-tie-like connections, access to diverse non-redundant information. For Y: 80 accounts in a dense mutual-follow cluster means high overlap — Y is embedded deeply in a clique, receiving mostly redundant information.
+
+--
+
+## Mini-Exercise 3.E: Solution
+
+**1. Neighborhood overlap:** <!-- .element: class="fragment" -->
+
+Y likely has **higher** average overlap. Y's 80 contacts form a dense mutual cluster — many shared neighbors per edge. X's 2000 contacts include many algorithm-driven follows with near-zero shared neighborhood. <!-- .element: class="fragment" -->
+
+**2. Information implications:** <!-- .element: class="fragment" -->
+
+- X receives **diverse, non-redundant** information — the structural signature of many weak ties and local bridges. <!-- .element: class="fragment" -->
+- Y receives **redundant, reinforced** information — the structural signature of a dense clique with few connections outside. <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+
+Social media does not remove the weak/strong-tie distinction — it stretches the weak-tie periphery enormously while leaving the strong-tie core bounded by human cognitive limits.
+
+
+</div>
+
+
+---
+
+## Wrap-Up
+
+- local friendship structure creates predictable global effects
+- weak ties are often not socially strongest, but structurally most valuable
+- empirical network data broadly supports the theoretical pattern
+
+### Looking Ahead: Lecture 04
+
+How do we identify groups and roles within a network? Which nodes are important — and by what definition?
+
+Notes:
+Plant the question for next time: importance is not one concept. Degree, closeness, betweenness, and eigenvector centrality each formalize a different intuition. Community detection asks a complementary question: where are the dense groups?
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Burt, Ronald S. (1992). Structural Holes: The Social Structure of Competition. *Harvard University Press*.
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Huberman, Bernardo A. and Romero, Daniel M. and Wu, Fang (2009). Social networks that matter: Twitter under the microscope. *First Monday*.
+- Onnela, J.-P. and Saram\"aki, J. and Hyv\"onen, J. and Szab\'o, G. and Lazer, D. and Kaski, K. and Kert\'esz, J. and Barab\'asi, A.-L. (2007). Structure and tie strengths in mobile communication networks. *Proceedings of the National Academy of Sciences*.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

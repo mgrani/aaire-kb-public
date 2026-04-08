@@ -1,0 +1,475 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 07: Small-World Networks</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Network Science
+## Lecture 07: Small-World Networks
+
+5942UE Network Science
+
+18 March 2026
+
+Prof. Dr. Michael Granitzer
+Dr. Kanishika Ghosh Dastidar
+Dr. Jelena Mitrovic
+
+---
+
+## Small-World Networks
+
+This lecture asks why short paths are common and when decentralized navigation is possible.
+
+### Focus
+
+- the small-world phenomenon
+- Watts–Strogatz structure and randomness
+- decentralized search
+- empirical validation and the Web as a directed information network
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Small-World Phenomenon
+
+--
+
+## Guiding Question
+
+Why are distances in large networks often surprisingly short?
+
+--
+
+## Formal Intuition
+
+The small-world claim is that typical shortest-path distances grow **slowly** relative to network size.
+
+--
+
+<!-- .slide: class="figure-68" -->
+
+## Milgram
+
+![Milgram small-world experiment](/courses/network-science/figures/milgram.png)
+
+--
+
+## Core Result
+
+$$
+d_{\text{typical}} \propto \log |V|
+$$
+
+--
+
+## Interpretation
+
+The small-world claim is **not** that everyone is directly connected. It is that typical distances grow slowly even in very large networks.
+
+--
+
+## Examples
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+![Instant messenger small-world results](/courses/network-science/figures/im-messenger.png)
+
+</div>
+
+
+<div class="column">
+
+![Erdős collaboration graph](/courses/network-science/figures/erdoes-graph.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Large networks can still be navigably small in terms of path length.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Structure and Randomness
+
+--
+
+## Guiding Question
+
+How can a network be both highly clustered and still have short paths?
+
+--
+
+## Formal Intuition
+
+Clustering and short average path length are **not mutually exclusive**.
+
+The key is that a few **long-range links** can drastically reduce distances.
+
+--
+
+<!-- .slide: class="figure-68" -->
+
+## Formation of Short Paths
+
+![Shortest paths and clustering in small-world networks](/courses/network-science/figures/Watts-strogatz-shortest-paths.png)
+
+--
+
+## Watts–Strogatz
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+![Watts–Strogatz model I](/courses/network-science/figures/Watts-Strogatz-model-I.png)
+
+</div>
+
+
+<div class="column">
+
+![Watts–Strogatz model II](/courses/network-science/figures/Watts-Strogatz-model-II.png)
+
+</div>
+
+
+</div>
+
+
+--
+
+## Interpretation
+
+Local links preserve **clustering**. A small amount of random long-range linkage collapses **path length** dramatically.
+
+
+<div class="takeaway">
+
+A tiny dose of randomness can make the world small without destroying local structure.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Decentralized Search
+
+--
+
+## Guiding Question
+
+Why do short paths not automatically imply that decentralized actors can find them?
+
+--
+
+## Problem
+
+Milgram-like routing is **not** breadth-first search. Each actor sees only local information.
+
+--
+
+## Formal Intuition
+
+Decentralized search succeeds when the network places long-range links in a way that **local decisions can exploit**.
+
+--
+
+<!-- .slide: class="figure-82" -->
+
+## Kleinberg-Style Idea
+
+![Decentralized search using local information and long-range shortcuts](/courses/network-science/figures/decentralized-search-local-global.svg)
+
+Long-range links should not be uniformly random. They should be distributed **across scales**.
+
+--
+
+## Evidence
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+![Decentralized search simulation](/courses/network-science/figures/decentralized-search-q-simulation.png)
+
+</div>
+
+
+<div class="column">
+
+![Proof sketch for decentralized search](/courses/network-science/figures/decentralized-search-proof-q.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Efficient search requires not only short paths, but the right geometry of long-range ties.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Empirical Analysis
+
+--
+
+## Guiding Question
+
+Does the decentralized-search model show up in real data?
+
+--
+
+## Formal Intuition
+
+The empirical question is whether real networks organize long-range links across scales in the way search models predict.
+
+--
+
+## Geographic Rank
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+![Population density in LiveJournal data](/courses/network-science/figures/decentralized-search-empirical-density.png)
+
+</div>
+
+
+<div class="column">
+
+![Rank-based friendship distance](/courses/network-science/figures/decentralized-search-empirical-rank.png)
+
+</div>
+
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-72" -->
+
+## Evidence
+
+![LiveJournal decentralized search result](/courses/network-science/figures/decentralized-search-livejournal-rank.png)
+
+--
+
+<!-- .slide: class="figure-68" -->
+
+## Beyond Geography
+
+![Social distance through foci](/courses/network-science/figures/decentralized-search-experimental-social-distance.png)
+
+
+<div class="takeaway">
+
+Empirical networks often organize weak ties in ways that support decentralized navigation, even when distance is social rather than geographic.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## The Web as a Directed Network
+
+--
+
+## Guiding Question
+
+What changes when we move from social networks to the Web?
+
+--
+
+## From Hypertext to Directed Graphs
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+![Unlinked text](/courses/network-science/figures/www-not-linked.png)
+
+</div>
+
+
+<div class="column">
+
+![Linked hypertext](/courses/network-science/figures/www-linked.png)
+
+</div>
+
+
+<div class="column">
+
+![Directed graph of the web](/courses/network-science/figures/www-dg.png)
+
+</div>
+
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-58" -->
+
+## Strong Connectivity
+
+In directed graphs, reachability is **asymmetric**, so connectedness must also be defined asymmetrically.
+
+![Strongly connected component example](/courses/network-science/figures/strongly-connected-example.png)
+
+Directed graphs need directed path and strongly connected component concepts.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Bow-Tie Structure
+
+![Bow-tie structure of the web](/courses/network-science/figures/bow-tie.png)
+
+
+<div class="takeaway">
+
+The Web is not just a bigger social network. Its directionality creates different notions of reachability, components, and information flow.
+
+</div>
+
+
+---
+
+## Wrap-Up
+
+- short paths alone do not guarantee navigability
+- a little randomness can shrink distances dramatically
+- information networks need directed notions of path, components, and reachability
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

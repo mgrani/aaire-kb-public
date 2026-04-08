@@ -1,0 +1,886 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 01: Introduction</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Network Science
+## Lecture 01: Introduction
+
+Prof. Dr. Michael Granitzer
+
+Dr. Kanishika Ghosh Dastidar
+
+Dr. Jelena Mitrovic 
+
+Notes:
+Pedagogical approach for this lecture:
+
+- Use inquiry-first teaching throughout. Every module opens with a guiding question.
+- Start from what students already know and build from there.
+- Ask students for their ideas before showing examples or explanations.
+- Each module follows: Question → Tension → Interpretation → Stabilization.
+- End each module with a compact takeaway that stabilizes the conceptual result.
+
+Teaching goal for today:
+
+- students should leave with a clear mental picture of what a network is
+- students should see that network structure changes what can be known, predicted, or controlled
+- students should already practice interpretation rather than passive reception
+- students should be curious about what comes next
+
+---
+
+## Welcome to Network Science 
+
+
+<div class="takeaway">
+
+Modelling, analysing and infering digitial and real-world phenomena through networks.
+
+</div>
+
+ 
+### Today
+
+- what is a network?
+- why do networks matter?
+- what can we analyse with networks?
+- what will you learn in this course?
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Networks
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What do you think a network is?
+
+</div>
+
+
+--
+
+## Your Everyday Networks
+
+Think about networks you encounter every day.
+
+
+<div class="fragment">
+
+- Who did you talk to today? → **social network**
+- Which websites link to each other? → **information network**
+- Which companies trade with each other? → **economic network**
+- Which roads connect which cities? → **infrastructure network**
+
+</div>
+
+
+Notes:
+Ask students to name their own examples before showing these. The four categories help structure the variety without being exhaustive.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Social Networks
+
+Link structures can reveal friendships, communities, and influence.
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Zachary karate club graph](/courses/network-science/figures/zachary-karate-club.png)
+<span class="figure-credit">Source: Zachary 1977 — modified; Original data: Zachary 1977; visualization redrawn</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**Zachary's Karate Club (1977).** Each node is a club member, each edge a friendship. The club split into two factions — visible as two dense clusters. One of the most-studied small social networks.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Explain why this example is famous: small enough to visualize, rich enough to show group structure. Ask: what are the entities here? What are the relationships? (People and friendships.)
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Communication Networks
+
+Link structures can reveal information flow and potential dissemination routes. 
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Email communication network](/courses/network-science/figures/online-sn-email-communication.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 2</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**Email communication in an organization.** Nodes represent employees, edges represent email exchanges. The actual communication topology differs substantially from the formal hierarchy.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask: who actually talks to whom in an organization? The formal hierarchy is one network, the real communication flow is another. Same entities, different relationships — different network.
+:::
+:::
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Information Networks
+
+Link structures can reveal clusters, polarization, and community structure — before reading a single word.
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Blog election network](/courses/network-science/figures/blog-election.png)
+<span class="figure-credit">Source: Adamic & Glance 2005</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**Political blog network (2004 US election).** Nodes are political blogs, edges are hyperlinks between them. The two dense clusters correspond to liberal and conservative blogs — structure reveals political alignment without reading any content.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Mention that hyperlink structure often reveals political camps and separation. The entities here are web pages, the relationships are hyperlinks. Ask: what does a link mean in this context?
+
+--
+
+<!-- .slide: class="figure-65" -->
+
+## Economic Networks
+
+Financial systems form networks of dependencies and influence (Easley & Kleinberg, 2010).
+
+
+<div class="columns col-3-1">
+
+
+<div class="column">
+
+![Loan network example](/courses/network-science/figures/loan-network.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 1</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**Interbank loan network.** Nodes are financial institutions, edges represent lending relationships. When one institution defaults, the impact cascades through the network — structure determines systemic risk.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask: if one bank fails, what happens to the others? This is where network structure becomes consequential. The entities are institutions, the relationships are financial obligations.
+
+--
+
+## What Do All These Examples Have in Common?
+
+
+<div class="fragment">
+
+- There are **things** (people, pages, institutions, cities).
+- There are **connections** between them (friendships, links, loans, roads).
+- The pattern of connections creates **structure** that matters.
+
+</div>
+
+
+
+<div class="fragment">
+
+$$
+\text{Network} = \text{Entities} + \text{Relationships between them}
+$$
+
+</div>
+
+
+Notes:
+Key interpretive moment. Pose the question heading, give students time to answer, then reveal the full block. Push students to articulate this before revealing.
+
+--
+
+<!-- .slide: class="figure-85" -->
+
+## What Gets Lost in a Network Model?
+
+When we turn a real situation into a network, we always leave something out.
+
+![Same situation as an affiliation network and a projection](/courses/network-science/figures/affiliation-modeling-choice.svg)
+
+
+<div class="c-note">
+
+The same relational setting can be modeled in more than one way. An affiliation structure can become a bipartite network or a projected one-mode graph depending on the question.
+
+</div>
+
+
+Notes:
+This is the first epistemological bridge. Do not over-explain the bipartite idea yet; just make students notice that one social situation can be modeled in different graphs, and that each model reveals some things while hiding others.
+
+--
+
+## Takeaway
+
+
+
+<div class="takeaway">
+
+ A network is a structured collection of entities and the relationships between them. Understanding networks means understanding how to manage, describe, and reason about these entities and their connections.
+
+</div>
+
+
+Notes:
+Stabilize the concept: no matter the domain — social, technical, economic, biological — the core abstraction is the same. This is what makes network science powerful and broadly applicable.
+
+--
+
+## Quick Check
+
+Which of the following statements about networks are correct?
+
+- A network consists of entities (nodes) and relationships between them (edges) <!-- .element: class="fragment fade-in" -->
+- The same network abstraction applies across very different domains <!-- .element: class="fragment fade-in" -->
+- Networks always have directed edges <!-- .element: class="fragment fade-in" -->
+- A network model captures every detail of the underlying system <!-- .element: class="fragment fade-in" -->
+- Edges can carry additional information such as weight or type <!-- .element: class="fragment fade-in" -->
+
+Notes:
+Quick check after Module 1. Ask students to answer mentally before revealing the lines one by one. The two incorrect statements are classic beginner misconceptions: edges are not inherently directed (that's a modelling choice), and network models are deliberately lossy abstractions.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Impacts of Networks
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Why do networks matter — what can we learn from connections?
+
+</div>
+
+
+--
+
+## The Whole Is More Than Its Parts
+
+- Knowing every person in a city does not tell you how information travels — you need to know **who talks to whom**.
+- Knowing every website does not tell you which ones are easy to find — you need to know **which pages link to which**.
+- Knowing every bank does not tell you which failure would cause a cascade — you need to know **who has financial exposure to whom**.
+
+$$
+\text{Outcome} \neq \text{actor properties alone}
+$$
+
+Notes:
+This is the central claim of network science. Outcomes depend on structure, not just on the qualities of individual actors. Push students: can they think of a case where a less talented person succeeded because of their position?
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Practical Example: Linked Information
+
+Vannevar Bush's MEMEX anticipated linked information systems and associative navigation (Bush, 1945).
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Historic MEMEX illustration](/courses/network-science/figures/memex.png)
+<span class="figure-credit">Source: Bush 1945 — public-domain</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**Vannevar Bush's MEMEX (1945).** A conceptual device for storing and linking documents through associative trails. It anticipated the idea that information becomes valuable through connections — the intellectual ancestor of hypertext and the Web.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Stress that MEMEX is not the Web itself. It matters because it anticipates the idea that information becomes valuable through connections, not just through content.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## The Web as a Network
+
+The Web operationalized hypertext at planetary scale: linked documents, user navigation, and a growing information network (Berners-Lee, 1990).
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Internet visualization](/courses/network-science/figures/internet.jpg)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+ **Visualization of internet routing paths.** Each node represents a router or autonomous system, edges are data connections. The dense core and sparse periphery illustrate the uneven topology of real technical networks.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Key insight: the Web is not just a collection of pages. It is a network. And the link structure determines what gets found, what gets attention, and what remains invisible. Google's success is fundamentally a network science insight.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Practical Example: Platform Power
+
+Surviving web companies learned to exploit network effects — users became part of the value-creation process (O'Reilly, 2005).
+
+
+<div class="columns col-3-1">
+
+
+<div class="column">
+
+![NASDAQ values during dot-com bubble](/courses/network-science/figures/nasdaq-values.png)
+<span class="figure-credit">Source: Public market data, NASDAQ composite index</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**NASDAQ composite index around the dot-com bubble (1995–2005).** 
+
+The sharp rise and crash illustrate how many early web companies failed. The survivors — Google, Amazon, Facebook — were those that understood and exploited network effects.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Do not overemphasize market history. The key message: platforms that understood network effects survived, those that did not disappeared. Network position and network effects are not visible by looking at individual companies in isolation.
+
+--
+
+## What Can We Learn from Networks?
+
+- **Who is important?** → centrality, influence 
+- **Are there groups?** → communities, clusters 
+- **How do things spread?** → diffusion, contagion 
+- **How robust is the system?** → fragility, resilience 
+- **What shapes attention?** → visibility, ranking, filtering 
+
+Notes:
+This previews the course topics. Pose the question heading first, wait for student responses, then reveal the list. Each bullet corresponds to a later lecture.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Networks matter because structure shapes visibility, coordination, influence, and lock-in. Looking at connections reveals what looking at individuals alone cannot.
+
+</div>
+
+
+Notes:
+Summarize in one sentence: a network is not just a picture of relations; it constrains and enables what actors can do. This is why we study network science.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Network Science  & Network Analysis
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What phenomena can we actually analyse with networks?
+
+</div>
+
+
+--
+
+## From Intuition to Analysis
+
+We already said networks reveal structure. But what kinds of questions can we actually answer?
+
+- **Structure**: How is the network organized? Are there clusters, hubs, or bottlenecks? 
+- **Position**: Who sits in a central or peripheral position? Who bridges groups? 
+- **Dynamics**: How does information, disease, or opinion spread through the network? 
+- **Evolution**: How does the network change over time? What drives growth? 
+
+Notes:
+Pose the question in the slide body, give students time to respond, then reveal the full list. Each category maps to concrete network science tools: structure → community detection, position → centrality, dynamics → diffusion, evolution → temporal networks.
+
+--
+<!-- .slide: class="figure-85" -->
+
+## Analysing Structure: Communities
+
+Networks often have dense internal clusters that correspond to real groups.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![Three connected components](/courses/network-science/figures/3-connected-components.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+<div class="c-note smaller">
+
+Three separate connected components — groups of nodes with no links between them. 
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+![Collaboration graph](/courses/network-science/figures/collaboration-graph.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+<div class="c-note smaller">
+
+A scientific collaboration network where clusters represent research groups.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+Notes:
+Ask: in the collaboration graph, can you see research groups? What would happen if a central person left? This previews community detection and centrality topics.
+
+--
+
+<!-- .slide: class="figure-85" -->
+
+## Analysing Dynamics: Diffusion and Spreading
+
+How a rumor, virus, or innovation spreads depends critically on network structure.
+
+
+<div class="columns col-3-1">
+
+
+<div class="column">
+
+![High school social network](/courses/network-science/figures/social-network-highschool.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note smaller">
+
+**High school friendship network.**
+
+Nodes are students, edges are reported friendships. The structure shows a dense core and peripheral chains — a rumor starting in the core spreads far faster than one starting at the edge.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask: if a rumor starts in the center of this network vs. at the periphery, does it spread equally fast? The answer is no — and un   derstanding why requires network analysis.
+
+--
+
+## Core Questions of Network Science
+
+Across all these domains, network science asks a common set of structural questions:
+
+- How do we **describe** a network formally?
+- Which structural **properties** matter?
+- How do networks shape **diffusion** and coordination?
+- Which common **patterns** appear across different domains?
+
+Notes:
+These four questions will guide the entire course. Stress that the value of graph thinking is not that all systems are the same, but that comparable structural questions become possible.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Network science gives us concrete tools to analyse structure, position, dynamics, and evolution. The same analytical questions apply whether we study friendships, web links, financial flows, or disease transmission.
+
+</div>
+
+
+Notes:
+Close with a forward-looking remark: these are not just theoretical questions. Companies, governments, and researchers use these analyses daily to make decisions about platforms, public health, and infrastructure.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Curriculum
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What do you want to learn about networks?
+
+</div>
+
+
+--
+
+## What You Will Learn
+### Course Topics
+
+1. **Graph theory** — the formal language for describing networks
+2. **Social networks** — ties, communities, and information flow
+3. **Centrality and influence** — who matters and why
+4. **Community detection** — finding groups in networks
+5. **Information networks and the Web** — links, search, and ranking
+6. **Network dynamics** — diffusion, contagion, and cascades
+
+Notes:
+Map these back to what students said they wanted to learn. The course has a logical progression: first the language (graph theory), then the structures (social networks, communities), then the dynamics (diffusion, cascades).
+
+--
+
+## Course Goal
+
+Use network analysis to understand and design social information systems.
+
+- not just learn definitions — **interpret** formal concepts
+- not just run algorithms — **critique** the models behind them
+- not just describe networks — **reason** about their consequences
+
+Notes:
+Make clear that the target is applied conceptual fluency, not mere vocabulary recall. Students should be able to explain not only what a concept is, but why it matters and when it misleads.
+
+--
+
+## Recommended Reading
+
+- David Easley and Jon Kleinberg, *Networks, Crowds, and Markets* (Easley & Kleinberg, 2010)
+- Mark Newman, *Networks: An Introduction* (Newman, 2010)
+
+Notes:
+Tell students not to read both books linearly. Use Easley and Kleinberg for intuition and Newman for a more systematic graph perspective.
+
+--
+
+## How to Learn This Course
+
+- **preview** slides before class
+- **discuss** key ideas in small groups
+- **work through** exercises yourself before comparing solutions
+- **use AI tools** to accelerate access to explanations — but if you cannot explain a concept without the tool, you do not yet own it
+
+Notes:
+Meta-learning moment. Students in the age of AI can obtain definitions cheaply, but durable learning still requires retrieval, comparison, discussion, and self-explanation.
+
+--
+
+## Forgetting and Repetition
+
+Repeated contact with the same concept reduces forgetting and improves retention.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+
+![Forgetting curve](/courses/network-science/figures/vergessenskurve.png)
+<span class="figure-credit">Source: Ebbinghaus forgetting curve, redrawn</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+![Forgetting curve with repetition](/courses/network-science/figures/vergessenskurve-mit-lernen.png)
+<span class="figure-credit">Source: Ebbinghaus curve with spaced repetition, redrawn</span>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Encourage spaced repetition and self-testing. The exercises are designed to support this.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The course is about modeling, interpretation, and critique — not only about definitions. You will build a toolkit for understanding networks that applies across social, technical, and economic systems.
+
+</div>
+
+
+Notes:
+This helps frame later AI use as well: students may obtain definitions cheaply, but they still need to interpret, compare, critique, and apply them.
+
+---
+
+## Looking Ahead: Lecture 02
+
+### Guiding Questions
+
+If networks are about entities and relationships, how do we describe their properties precisely?
+
+Think about: 
+
+- What exactly is a node? What does it represent? 
+- What exactly is an edge? What kinds of relationships can it encode? 
+- What about change over time? 
+
+Notes:
+Plant these questions as seeds. Do not answer them now. Tell students that the next lecture will give them a formal language — graph theory — to answer these questions precisely.
+
+--
+
+## Next Step
+
+Next, we move from motivation to formal graph concepts and graph-theoretic language.
+
+Notes:
+Transition explicitly: the next lecture is not just terminology. It is about building a formal language that lets us critique and improve intuitive claims about networks.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Adamic, Lada A. and Glance, Natalie (2005). The political blogosphere and the 2004 U.S. election: divided they blog. *Proceedings of the 3rd International Workshop on Link Discovery (LinkKDD '05)*.
+- Bush, Vannevar (1945). As We May Think. *The Atlantic Monthly*.
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Zachary, Wayne W. (1977). An Information Flow Model for Conflict and Fission in Small Groups. *Journal of Anthropological Research*.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

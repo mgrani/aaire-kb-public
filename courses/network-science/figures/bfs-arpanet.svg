@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 560" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <style>
+      .node-l0 { fill: #1565c0; stroke: #0d47a1; stroke-width: 2.5; }
+      .node-l1 { fill: #42a5f5; stroke: #1565c0; stroke-width: 2; }
+      .node-l2 { fill: #7ec8f7; stroke: #2196f3; stroke-width: 2; }
+      .node-l3 { fill: #b3dff9; stroke: #64b5f6; stroke-width: 2; }
+      .node-l4 { fill: #d6eefa; stroke: #90caf9; stroke-width: 2; }
+      .node-l5 { fill: #edf6fd; stroke: #bbdefb; stroke-width: 2; }
+      .lbl-w  { font-size: 12px; fill: white;  text-anchor: middle; font-weight: bold; }
+      .lbl-dk { font-size: 12px; fill: #1a3358; text-anchor: middle; font-weight: bold; }
+      .edge   { stroke: #a0bcd8; stroke-width: 1.8; }
+      .edge-il { stroke: #c8dcea; stroke-width: 1.5; stroke-dasharray: 4,3; }
+    </style>
+  </defs>
+
+  <!-- ── Title ── -->
+  <text x="625" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#1a3358">BFS on ARPANET — starting from UCLA</text>
+
+  <!-- ── Layer column labels ── -->
+  <text x="80"   y="56" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Layer 0</text>
+  <text x="245"  y="56" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Layer 1</text>
+  <text x="445"  y="56" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Layer 2</text>
+  <text x="645"  y="56" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Layer 3</text>
+  <text x="845"  y="56" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Layer 4</text>
+  <text x="1060" y="56" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Layer 5</text>
+
+  <!-- ── Layer band shading ── -->
+  <rect x="45"  y="65" width="72"  height="450" rx="8" fill="#dce8f8" opacity="0.40"/>
+  <rect x="200" y="65" width="90"  height="450" rx="8" fill="#ddeeff" opacity="0.35"/>
+  <rect x="400" y="65" width="90"  height="450" rx="8" fill="#e8f4ff" opacity="0.30"/>
+  <rect x="600" y="65" width="90"  height="450" rx="8" fill="#eff8ff" opacity="0.28"/>
+  <rect x="800" y="65" width="90"  height="450" rx="8" fill="#f4fbff" opacity="0.25"/>
+  <rect x="1015" y="65" width="90" height="450" rx="8" fill="#f8fdff" opacity="0.20"/>
+
+  <!-- ══════════════════ EDGES ══════════════════
+       Node coords:
+         UCLA      (80, 275)
+         Stanford  (245, 130)
+         SRI       (245, 230)
+         UCSB      (245, 330)
+         RAND      (245, 430)
+         UTAH      (445, 150)
+         BBN       (445, 280)
+         SDC       (445, 410)
+         MIT       (645, 195)
+         Harvard   (645, 360)
+         Lincoln   (845, 215)
+         Carnegie  (845, 380)
+         CASE      (1060, 295)
+  ═══════════════════════════════════════════ -->
+
+  <!-- UCLA → L1 -->
+  <line x1="104" y1="266" x2="221" y2="138" class="edge"/>
+  <line x1="104" y1="271" x2="221" y2="232" class="edge"/>
+  <line x1="104" y1="278" x2="221" y2="330" class="edge"/>
+  <line x1="104" y1="282" x2="221" y2="422" class="edge"/>
+
+  <!-- Within L1: SRI-Stanford, SRI-UCSB (same-layer, dashed) -->
+  <line x1="245" y1="155" x2="245" y2="207" class="edge-il"/>
+  <line x1="245" y1="254" x2="245" y2="308" class="edge-il"/>
+
+  <!-- SRI → L2 -->
+  <line x1="269" y1="224" x2="421" y2="157" class="edge"/>
+
+  <!-- RAND → L2 -->
+  <line x1="269" y1="430" x2="421" y2="286" class="edge"/>
+  <line x1="269" y1="428" x2="421" y2="406" class="edge"/>
+
+  <!-- UTAH → MIT -->
+  <line x1="469" y1="155" x2="621" y2="192" class="edge-il"/>
+
+  <!-- BBN → MIT, BBN → Harvard -->
+  <line x1="469" y1="276" x2="621" y2="199" class="edge"/>
+  <line x1="469" y1="284" x2="621" y2="354" class="edge"/>
+
+  <!-- MIT → Lincoln -->
+  <line x1="669" y1="199" x2="821" y2="216" class="edge"/>
+
+  <!-- Harvard → Carnegie -->
+  <line x1="669" y1="362" x2="821" y2="378" class="edge"/>
+
+  <!-- Lincoln → CASE -->
+  <line x1="869" y1="220" x2="1036" y2="291" class="edge"/>
+
+  <!-- Carnegie → CASE -->
+  <line x1="869" y1="377" x2="1036" y2="300" class="edge-il"/>
+
+  <!-- Lincoln → MIT (back-edge, dashed) -->
+  <line x1="821" y1="213" x2="669" y2="199" class="edge-il"/>
+
+  <!-- Carnegie → Harvard (back-edge, dashed) -->
+  <line x1="821" y1="375" x2="669" y2="358" class="edge-il"/>
+
+  <!-- CASE - Lincoln, CASE - Carnegie already covered by Lincoln→CASE, Carnegie→CASE -->
+
+  <!-- MIT - BBN back-edge covered; MIT - UTAH back-edge covered -->
+
+  <!-- ══════════════════ NODES ══════════════════ -->
+
+  <!-- Layer 0 -->
+  <circle cx="80" cy="275" r="30" class="node-l0"/>
+  <text x="80" y="279" class="lbl-w">UCLA</text>
+
+  <!-- Layer 1 -->
+  <circle cx="245" cy="130" r="26" class="node-l1"/>
+  <text x="245" y="134" class="lbl-w">Stanford</text>
+
+  <circle cx="245" cy="230" r="26" class="node-l1"/>
+  <text x="245" y="234" class="lbl-w">SRI</text>
+
+  <circle cx="245" cy="330" r="26" class="node-l1"/>
+  <text x="245" y="334" class="lbl-w">UCSB</text>
+
+  <circle cx="245" cy="430" r="26" class="node-l1"/>
+  <text x="245" y="434" class="lbl-w">RAND</text>
+
+  <!-- Layer 2 -->
+  <circle cx="445" cy="150" r="24" class="node-l2"/>
+  <text x="445" y="154" class="lbl-dk">UTAH</text>
+
+  <circle cx="445" cy="280" r="24" class="node-l2"/>
+  <text x="445" y="284" class="lbl-dk">BBN</text>
+
+  <circle cx="445" cy="410" r="24" class="node-l2"/>
+  <text x="445" y="414" class="lbl-dk">SDC</text>
+
+  <!-- Layer 3 -->
+  <circle cx="645" cy="195" r="22" class="node-l3"/>
+  <text x="645" y="199" class="lbl-dk">MIT</text>
+
+  <circle cx="645" cy="360" r="22" class="node-l3"/>
+  <text x="645" y="364" class="lbl-dk">Harvard</text>
+
+  <!-- Layer 4 -->
+  <circle cx="845" cy="215" r="22" class="node-l4"/>
+  <text x="845" y="219" class="lbl-dk">Lincoln</text>
+
+  <circle cx="845" cy="380" r="22" class="node-l4"/>
+  <text x="845" y="384" class="lbl-dk">Carnegie</text>
+
+  <!-- Layer 5 -->
+  <circle cx="1060" cy="295" r="24" class="node-l5"/>
+  <text x="1060" y="299" class="lbl-dk">CASE</text>
+
+  <!-- ── Legend ── -->
+  <circle cx="40"  cy="530" r="8" class="node-l0"/><text x="54"  cy="530" y="534" font-size="11" fill="#444">L0 (start)</text>
+  <circle cx="140" cy="530" r="8" class="node-l1"/><text x="154" y="534" font-size="11" fill="#444">L1</text>
+  <circle cx="210" cy="530" r="8" class="node-l2"/><text x="224" y="534" font-size="11" fill="#444">L2</text>
+  <circle cx="280" cy="530" r="8" class="node-l3"/><text x="294" y="534" font-size="11" fill="#444">L3</text>
+  <circle cx="350" cy="530" r="8" class="node-l4"/><text x="364" y="534" font-size="11" fill="#444">L4</text>
+  <circle cx="420" cy="530" r="8" class="node-l5"/><text x="434" y="534" font-size="11" fill="#444">L5</text>
+  <line x1="510" y1="530" x2="545" y2="530" class="edge" /><text x="560" y="534" font-size="11" fill="#444">BFS tree edge</text>
+  <line x1="660" y1="530" x2="695" y2="530" class="edge-il"/><text x="710" y="534" font-size="11" fill="#444">non-tree / within-layer edge</text>
+</svg>

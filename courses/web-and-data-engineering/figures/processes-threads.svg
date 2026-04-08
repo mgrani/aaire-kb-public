@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 320" font-family="'Source Sans Pro', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="thread-head" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1a73e8"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <!-- Background OS Container -->
+  <rect x="10" y="10" width="860" height="300" rx="12" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5"/>
+  <text x="30" y="32" font-size="14" font-weight="700" fill="#5f6368">Betriebssystem (OS) / RAM</text>
+
+  <!-- ══ Process 1: Web Server ══ -->
+  <g transform="translate(40, 50)">
+    <rect x="0" y="0" width="380" height="230" rx="10" fill="#fef7e0" stroke="#f9ab00" stroke-width="2.5" filter="url(#shadow)"/>
+    <text x="190" y="25" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Prozess 1: Web Server</text>
+    <text x="190" y="42" text-anchor="middle" font-size="11" fill="#b07800">Eigener Adressraum (Strong Isolation)</text>
+
+    <!-- Shared Space inside Process 1 -->
+    <rect x="25" y="60" width="330" height="60" rx="6" fill="#ffffff" stroke="#f9ab00" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="190" y="85" text-anchor="middle" font-size="13" font-weight="600" fill="#444">Gemeinsamer Speicher (Heap, Globals)</text>
+    <text x="190" y="100" text-anchor="middle" font-size="10" fill="#777">Thread-übergreifend zugreifbar</text>
+
+    <!-- Thread A: Request 1 -->
+    <g transform="translate(80, 135)">
+      <path d="M 0,0 Q 10,15 0,30 T 0,60" fill="none" stroke="#1a73e8" stroke-width="3" marker-end="url(#thread-head)"/>
+      <text x="0" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#1a73e8">Thread A</text>
+      <text x="0" y="90" text-anchor="middle" font-size="10" fill="#555">Request 1</text>
+    </g>
+
+    <!-- Thread B: Request 2 -->
+    <g transform="translate(300, 135)">
+      <path d="M 0,0 Q -10,15 0,30 T 0,60" fill="none" stroke="#1a73e8" stroke-width="3" marker-end="url(#thread-head)"/>
+      <text x="0" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#1a73e8">Thread B</text>
+      <text x="0" y="90" text-anchor="middle" font-size="10" fill="#555">Request 2</text>
+    </g>
+
+    <!-- Thread C: Monitoring (Inactive/Idle) -->
+    <g transform="translate(190, 135)">
+      <path d="M 0,0 Q 5,15 0,30 T 0,60" fill="none" stroke="#dadce0" stroke-width="2" marker-end="url(#thread-head)" stroke-opacity="0.5"/>
+      <text x="0" y="78" text-anchor="middle" font-size="11" fill="#9aa0a6">Thread C (Idle)</text>
+    </g>
+  </g>
+
+  <!-- ══ Process 2: Datenbank ══ -->
+  <g transform="translate(460, 50)">
+    <rect x="0" y="0" width="380" height="230" rx="10" fill="#fef7e0" stroke="#f9ab00" stroke-width="2.5" filter="url(#shadow)"/>
+    <text x="190" y="25" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Prozess 2: Datenbank</text>
+    <text x="190" y="42" text-anchor="middle" font-size="11" fill="#b07800">Isolierter Adressraum</text>
+
+    <!-- Shared Space inside Process 2 -->
+    <rect x="25" y="60" width="330" height="60" rx="6" fill="#ffffff" stroke="#f9ab00" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="190" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#444">Buffer Pool / Data Cache</text>
+
+    <!-- Thread A: Query Execution -->
+    <g transform="translate(190, 135)">
+      <path d="M 0,0 Q 15,20 0,40 T 0,60" fill="none" stroke="#1a73e8" stroke-width="3" marker-end="url(#thread-head)"/>
+      <text x="0" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#1a73e8">Worker Thread</text>
+      <text x="0" y="90" text-anchor="middle" font-size="10" fill="#555">SQL Query</text>
+    </g>
+  </g>
+
+  <!-- Legend / Key Concept -->
+  <rect x="340" y="285" width="200" height="25" rx="5" fill="#e8f0fe" stroke="#1a5fa8" stroke-width="0.5"/>
+  <text x="440" y="302" text-anchor="middle" font-size="11" fill="#1a5fa8" font-weight="600">Threads teilen sich Prozess-Speicher</text>
+
+</svg>

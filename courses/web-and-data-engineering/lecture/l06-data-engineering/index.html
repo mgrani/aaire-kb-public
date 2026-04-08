@@ -1,0 +1,1502 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Vorlesung 06: Data Engineering</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Web and Data Engineering
+## Vorlesung 06: Data Engineering
+
+Prof. Dr. Michael Granitzer
+
+25 März 2026
+
+---
+
+## Data Engineering
+
+Die Vorlesung verknüpft datengetriebene Web-Systeme mit Pipelines, Speicherarchitekturen und Betriebsfragen rund um Qualität und Skalierung.
+
+### Fokus
+
+- wie aus Rohdaten verarbeitbare Datenprodukte werden
+- welche Speicher- und Verarbeitungsmodelle Data Engineering prägen
+- warum Batch- und Stream-Verarbeitung unterschiedliche Zuschnitte brauchen
+- wie Datenqualität, Governance und Betrieb zusammenwirken
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 1
+## Datenpipelines und Datenprodukte
+
+---
+
+## Leitfrage
+
+Was ist Big Data und warum überfordert es klassische Systeme?
+
+---
+
+## Welche Daten sammeln wir überhaupt?
+
+Moderne Unternehmen und Plattformen erzeugen Daten aus sehr unterschiedlichen Quellen:
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Operative Systeme
+
+- **Case Management:** Audit-Trails, Compliance-Daten
+- **CRM / ERP:** SAP, Oracle — Kundendaten, Transaktionen
+- **Service Desk:** Tickets, Vorfälle, Reaktionszeiten
+
+</div>
+
+
+<div class="column">
+
+### Digitale & physische Welt
+
+- **Internet Clickstreams:** Seitenaufrufe, Klicks, Sessions
+- **Netflow:** Netzwerkverkehr, Sicherheitsereignisse
+- **IoT Device Events:** Sensoren, Maschinen, Fahrzeuge
+
+</div>
+
+
+</div>
+
+
+Jede dieser Quellen hat eigenes Format, eigene Geschwindigkeit, eigene Vertrauenswürdigkeit.
+
+---
+
+## Was macht Daten zu „Big Data"?
+
+### Die Fünf Vs von Big Data (IBM)
+
+Big Data ist kein Größenbegriff, sondern ein Eigenschaftsprofil: **Volume, Variety, Velocity, Veracity, Value**.
+
+Die klassische Datenbank-Annahme: Daten passen in Tabellen, kommen in moderatem Tempo, und sind im Wesentlichen korrekt. Alle fünf Vs stellen genau diese Annahmen in Frage.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## V1 — Volume: Das Mengenproblem
+
+Datenmengen übersteigen, was einzelne Maschinen verarbeiten können.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Quellen für extreme Volumina
+
+| Bereich | Beispiel |
+|---|---|
+| Web & E-Commerce | Produktaufrufe, Kaufhistorien, Reviews |
+| Banking | Zahlungstransaktionen weltweit |
+| Social Networks | Posts, Likes, Kommentare |
+| LTE / 5G | Verbindungsprotokolle, Netzwerktelemetrie |
+
+</div>
+
+
+<div class="column">
+
+### Einordnung
+
+> „Eine einzelne Google-Suche nutzt mehr Rechenleistung als die gesamte Apollo-Raumfahrtmission."
+
+- Google indiziert ~10 Mrd. Seiten = ca. 200 TB
+- Bei 50 MB/s Bandbreite: Lesen allein würde **40 Tage** dauern
+- Lösung: Parallelisierung und verteilte Verarbeitung
+
+</div>
+
+
+</div>
+
+
+RDBMS wurden für einzelne, skalierbare Maschinen entworfen. Horizontale Verteilung ist nachträglich schwer einzubauen.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## V2 — Variety: Das Formatproblem
+
+Daten kommen nicht mehr nur als Tabellen.
+
+| Datenmodell | Beschreibung | Beispiel |
+|---|---|---|
+| **Relational** | Tabellen, Transaktionen, festes Schema | Bestellungen, Konten |
+| **Text** | Freitextinhalt, unstrukturiert | Web-Seiten, E-Mails, Tickets |
+| **Semi-strukturiert** | Schema flexibel, hierarchisch | XML, JSON, Logs |
+| **Graph** | Knoten und Kanten, Beziehungsnetze | Soziale Netzwerke, RDF |
+| **Streaming** | Kontinuierlicher Datenstrom, nur einmal lesbar | Sensor-Events, Klicks |
+
+Wenn Quellsysteme ihr Format ändern, bricht nachgelagerte Verarbeitung. **Schema-Evolution** ist ein zentrales Problem im Data Engineering.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## V3 — Velocity: Das Geschwindigkeitsproblem
+
+Daten erscheinen mit sehr unterschiedlichen Geschwindigkeiten — und Entscheidungen müssen entsprechend zeitnah getroffen werden.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Konkrete Zahlen
+
+| Quelle | Geschwindigkeit |
+|---|---|
+| Globaler Internettraffic | ~50.000 GB/s |
+| Twitter | ~6.000 Tweets/Sekunde |
+| Suchanfragen (Google) | ~100.000/Sekunde |
+| Kreditkartentransaktionen | tausende/Sekunde weltweit |
+
+</div>
+
+
+<div class="column">
+
+### Konsequenz für Systeme
+
+- Systeme müssen Entscheidungen in **Millisekunden** bis Sekunden treffen
+- Betrugserkennung kann nicht auf den nächsten Batch-Job warten
+- Alerting auf Netzwerkanomalien erfordert Echtzeit-Verarbeitung
+
+</div>
+
+
+</div>
+
+
+---
+
+## V4 — Veracity: Das Vertrauensproblem
+
+Nicht alle Daten sind verlässlich. Veracity beschreibt den Grad der Unsicherheit.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Quellen von Datenunsicherheit
+
+- Fehlerhafte Eingaben (Tippfehler, falsche Werte)
+- Veraltete oder doppelte Datensätze
+- Inkonsistente Definitionen zwischen Systemen
+- Messfehler bei Sensoren
+- Absichtlich verfälschte Daten (Fraud)
+
+</div>
+
+
+<div class="column">
+
+### Empirische Einordnung
+
+Laut Unternehmensumfragen zweifelt **jeder dritte Entscheidungsträger** an der Qualität der Daten, auf denen Entscheidungen basieren.
+
+Unsichere Daten führen zu unsicheren Modellen — unabhängig von Rechenleistung oder Algorithmus.
+
+</div>
+
+
+</div>
+
+
+**Garbage In, Garbage Out:** Kein ML-Modell und kein Analysesystem kann systematisch fehlerhafte Eingaben kompensieren.
+
+---
+
+## V5 — Value: Das Nutzenproblem
+
+Daten allein schaffen keinen Wert. Großmengen zu speichern ist kostspielig — der Nutzen muss aktiv erschlossen werden.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Anwendungsfelder mit nachgewiesenem Wert
+
+| Domäne | Anwendung |
+|---|---|
+| E-Commerce / Retail | Dynamic Pricing, Customer Segmentation |
+| Industrie | Predictive Maintenance |
+| Landwirtschaft | Smart Farming (Ertragsprognosen) |
+| Banken | Kreditrisikomodelle, Betrugserkennung |
+| Wissenschaft | Genomik, Klimamodellierung |
+
+</div>
+
+
+<div class="column">
+
+### Wie Wert entsteht
+
+- **Data Science:** Muster erkennen, Prognosen ableiten
+- **Data Mining:** Strukturen in großen Datensätzen finden
+- **Machine Learning:** Modelle auf historischen Daten trainieren
+
+Wert entsteht durch die **Kombination** aus Daten, Methoden und fachlichem Kontext.
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Warum klassische Datenbanken scheitern
+
+Klassische RDBMS wurden für eine Welt entworfen, die es so nicht mehr gibt:
+
+| Annahme klassischer Systeme | Realität bei Big Data |
+|---|---|
+| Daten passen auf eine Maschine | Petabyte-Mengen erfordern Cluster |
+| Schema ist stabil und bekannt | Format ändert sich laufend (Variety) |
+| Schreibvorgänge sind moderat | Millionen Events pro Sekunde (Velocity) |
+| Daten sind im Wesentlichen korrekt | Systematische Qualitätsprobleme (Veracity) |
+| Ausfälle sind Ausnahmen | Bei 1000 Knoten: täglich Ausfälle |
+
+Die Fünf Vs erzwingen einen Paradigmenwechsel: von zentralisierten RDBMS zu verteilten, skalierbaren Systemen mit expliziter Qualitätskontrolle.
+
+---
+
+## Mini-Übung: Die 5 Vs im E-Commerce
+
+Ordnen Sie jedem V ein konkretes Beispiel aus einem Online-Shop zu.
+
+| V | Ihre Zuordnung |
+|---|---|
+| Volume | ? |
+| Variety | ? |
+| Velocity | ? |
+| Veracity | ? |
+| Value | ? |
+
+--
+
+### Musterlösung
+
+| V | E-Commerce-Beispiel |
+|---|---|
+| **Volume** | Klick-Logs aller Seitenbesuche (Milliarden Einträge/Tag) |
+| **Variety** | Produktdaten (strukturiert), Bewertungstexte (Text), Nutzersessions (Semi-strukturiert) |
+| **Velocity** | Preisanpassungen in Echtzeit bei Flash-Sales |
+| **Veracity** | Fake-Bewertungen, fehlerhafte Produktattribute, doppelte Kundendatensätze |
+| **Value** | Empfehlungsalgorithmus steigert durchschnittlichen Warenkorbwert |
+
+
+<div class="takeaway">
+
+Big Data ist kein Mengenproblem allein. Die fünf Vs beschreiben ein Eigenschaftsprofil, das klassische Datenbanken systematisch überfordert. Jedes V erfordert andere architektonische Antworten.
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Schlüsselbegriffe — Modul 1
+
+| Begriff | Erklärung |
+|---|---|
+| **Big Data** | Datensätze, die durch Volume, Variety, Velocity, Veracity oder Value klassische Verarbeitung überfordern |
+| **Volume** | Datenmenge — von Gigabyte bis Petabyte und darüber hinaus |
+| **Variety** | Vielfalt der Datenformate und -modelle (relational, Text, Graph, Stream) |
+| **Velocity** | Geschwindigkeit, mit der Daten erzeugt und verarbeitet werden müssen |
+| **Veracity** | Verlässlichkeit und Qualität der Daten; Unsicherheit über Korrektheit |
+| **Value** | Nutzen, der durch Analyse und Anwendung aus Daten gewonnen wird |
+| **ETL** | Extract, Transform, Load — klassischer Drei-Schritt-Prozess der Datenpipeline |
+| **Clickstream** | Protokoll der Aktionen eines Nutzers auf einer Website |
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 2
+## Speicher- und Verarbeitungsschichten
+
+---
+
+## Leitfrage
+
+Wie gewinnt man Wissen aus Daten?
+
+---
+
+## Data Science — eine Einordnung
+
+**Data Science** erforscht und wendet Technologien, Systeme und Algorithmen an, um Wissen aus potenziell großen, heterogenen und dynamisch veränderlichen Datensätzen zu gewinnen.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Data Science
+
+Methoden und Systeme zur Wissensgewinnung aus Daten — verbindet Statistik, Informatik und Domänenwissen.
+
+</div>
+
+
+<div class="column">
+
+### Machine Learning
+
+Algorithmen, die aus vergangener Erfahrung lernen und Entscheidungen treffen, ohne explizit programmiert zu sein.
+
+</div>
+
+
+<div class="column">
+
+### Artificial Intelligence
+
+Systeme, die intelligentes Verhalten zeigen — ML ist der aktuell dominante Ansatz, AI der übergeordnete Begriff.
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Deduktives vs. Induktives Schließen
+
+Die Art, wie Wissen gewonnen wird, unterscheidet sich grundlegend:
+
+| Aspekt | Deduktives Schließen | Induktives Schließen |
+|---|---|---|
+| **Ausgangspunkt** | Gegebene Prämissen und Regeln | Beobachtete Datenmuster |
+| **Richtung** | Allgemein → Spezifisch | Spezifisch → Allgemein |
+| **Ergebnis** | Logisch notwendige Schlussfolgerungen | Wahrscheinliche Verallgemeinerungen |
+| **Beispiel** | „Alle Menschen sind sterblich. Sokrates ist ein Mensch. → Sokrates ist sterblich." | „Diese 10.000 Kunden kauften nach A auch B. → Empfehle B nach Kauf von A." |
+| **Einsatz in DS** | Regelbasierte Systeme, Constraint-Solving | Machine Learning, Data Mining |
+
+**Data Science ist primär induktiv:** Muster werden aus Daten extrahiert — keine vollständige Gewissheit, aber probabilistisch fundierte Aussagen.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Der KDD-Prozess
+
+Knowledge Discovery in Databases (KDD) beschreibt den vollständigen Weg von Rohdaten zum Wissen:
+
+![KDD-Prozess: Selection, Preprocessing, Transformation, Data Mining, Interpretation](/courses/web-and-data-engineering/figures/kdd-process.svg)
+
+- **Selection:** Auswahl relevanter Daten aus dem Gesamtbestand
+- **Preprocessing:** Fehlende Werte, Duplikate, Ausreißer behandeln
+- **Transformation:** Merkmale ableiten, Dimensionsreduktion
+- **Data Mining:** Algorithmen auf transformierten Daten anwenden
+- **Interpretation:** Gefundene Muster fachlich bewerten und validieren
+
+In der Praxis wird der Prozess mehrfach durchlaufen. Neue Erkenntnisse im Mining-Schritt führen häufig zur Überarbeitung der Preprocessing-Schritte.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Data Mining Aufgaben im Überblick
+
+| Kategorie | Sub-Aufgabe | Beschreibung | Beispiel |
+|---|---|---|---|
+| **Predictive** | Classification | Klasse aus bekannten Attributen vorhersagen | Spam-Filter, Kreditrisiko |
+| **Predictive** | Regression | Numerischen Wert vorhersagen | Preisvorhersage, Nachfrage |
+| **Predictive** | Collaborative Filtering | Präferenzen aus ähnlichen Nutzern ableiten | Film-/Produktempfehlungen |
+| **Descriptive** | Clustering | Ähnliche Objekte ohne Klassen gruppieren | Kundensegmentierung |
+| **Descriptive** | Association Rules | Häufig gemeinsam auftretende Muster | Marktkorb-Analyse |
+| **Descriptive** | Sequential Patterns | Zeitlich geordnete Muster | Klickpfad-Analyse |
+| **Explorative** | Anomaly Detection | Abweichungen von Normalverhalten finden | Betrugserkennung |
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Classification: Vorhersage mit bekannten Klassen
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Prinzip
+
+1. **Trainingsdaten:** Datensatz mit bekanntem Klassen-Attribut
+2. **Modelltraining:** Algorithmus lernt Entscheidungsregeln
+3. **Testdaten:** Modell auf unbekannte Daten anwenden
+4. **Evaluation:** Genauigkeit messen (Accuracy, F1, etc.)
+
+### Beispiel: Entscheidungsbaum
+
+```
+Alter > 30?
+├── Ja → Einkommen > 40k?
+│         ├── Ja → Kauf wahrscheinlich ✓
+│         └── Nein → Kauf unwahrscheinlich ✗
+└── Nein → Kauf unwahrscheinlich ✗
+```
+
+</div>
+
+
+<div class="column">
+
+### Einsatz
+
+- E-Mail: Spam oder kein Spam?
+- Medizin: Diagnose aus Symptomen
+- Marketing: Kauft dieser Kunde?
+- Kredit: Kreditausfall wahrscheinlich?
+
+### Algorithmen
+
+- Decision Trees
+- Random Forests
+- Support Vector Machines
+- Neural Networks
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Clustering: Gruppierung ohne Klassen
+
+Clustering findet natürliche Gruppen in Daten — ohne vorgegebene Klassen.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Beispiel: Kundensegmentierung
+
+```
+Cluster A: Jung, hohes Einkommen, Hochschule
+  → Premium-Angebote, digitale Kanäle
+
+Cluster B: Mittleres Alter, mittleres Einkommen
+  → Familienprodukte, Newsletter
+
+Cluster C: Senioren, niedriges Einkommen
+  → Basistarife, persönliche Beratung
+```
+
+</div>
+
+
+<div class="column">
+
+### Eigenschaften
+
+- kein Klassen-Attribut notwendig
+- Anzahl der Cluster oft vorab wählen (k-Means)
+- Ergebnisse erfordern fachliche Interpretation
+
+### Algorithmen
+
+- k-Means (Partitionierung)
+- DBSCAN (Dichtebasiert)
+- Hierarchisches Clustering
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Association Rule Mining
+
+Findet Produkte oder Ereignisse, die häufig gemeinsam auftreten.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Marktkorb-Analyse
+
+| Transaktion | Produkte |
+|---|---|
+| T1 | p1, p3, p5, p8 |
+| T2 | p2, p5, p8 |
+| T3 | p1, p5, p8 |
+| T4 | p3, p4 |
+
+Regel: `{p5} → {p8}` mit Support 75%, Confidence 100%
+
+→ Wer p5 kauft, kauft fast immer auch p8.
+
+</div>
+
+
+<div class="column">
+
+### Anwendungen
+
+- **Retail:** Platzierung verwandter Produkte
+- **Online-Shop:** „Kunden, die X kauften, kauften auch Y"
+- **Medizin:** Symptom-Diagnose-Korrelationen
+
+### Kennzahlen
+
+- **Support:** Wie oft tritt die Regel auf?
+- **Confidence:** Wie zuverlässig ist die Regel?
+- **Lift:** Wie viel besser als Zufall?
+
+</div>
+
+
+</div>
+
+
+---
+
+## Text Mining und Graph Mining
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Text Mining
+
+Klassische Data-Mining-Methoden auf Textdaten:
+
+- **Web-Seiten clustern:** Ähnliche Themen automatisch gruppieren
+- **Seiten klassifizieren:** Spam, Kategorie, Sentiment
+- **Named Entity Recognition:** Personen, Orte, Unternehmen
+- **Topic Modeling:** Latente Themenstrukturen finden
+
+Herausforderung: Texte sind hochdimensional und dünn besetzt.
+
+</div>
+
+
+<div class="column">
+
+### Graph Mining
+
+Muster in Netzwerkdaten erkennen:
+
+- **Community Detection:** Gruppen in sozialen Netzwerken
+- **Link Prediction:** Wer wird mit wem verbunden?
+- **Anomalie-Erkennung:** Ungewöhnliche Verbindungsmuster
+- **Pagerank:** Zentrale Knoten im Netzwerk
+
+Beispiel: Betrugserkennung über ungewöhnliche Transaktionsnetzwerke.
+
+</div>
+
+
+</div>
+
+
+---
+
+## Mini-Übung: Mining-Aufgaben klassifizieren
+
+Ordnen Sie die folgenden Anwendungen einer Mining-Kategorie zu: **Classification, Clustering, Regression** oder **Collaborative Filtering**.
+
+| Anwendung | Kategorie |
+|---|---|
+| Netflix empfiehlt Serien basierend auf ähnlichen Nutzerprofilen | ? |
+| Ein Modell schätzt den Verkaufspreis eines Hauses | ? |
+| Kunden werden nach Kaufverhalten in Gruppen eingeteilt | ? |
+| Eine Bank entscheidet: Kreditantrag genehmigen oder ablehnen? | ? |
+
+--
+
+### Musterlösung
+
+| Anwendung | Kategorie |
+|---|---|
+| Netflix empfiehlt Serien basierend auf ähnlichen Nutzerprofilen | **Collaborative Filtering** |
+| Ein Modell schätzt den Verkaufspreis eines Hauses | **Regression** |
+| Kunden werden nach Kaufverhalten in Gruppen eingeteilt | **Clustering** |
+| Eine Bank entscheidet: Kreditantrag genehmigen oder ablehnen? | **Classification** |
+
+
+<div class="takeaway">
+
+Data Science ist die Disziplin, die aus Daten belastbares Wissen macht — durch den KDD-Prozess, induktive Lernmethoden und iterative Modellentwicklung. Wer die Aufgabe falsch wählt, erhält richtige Antworten auf die falsche Frage.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 3
+## Batch, Streaming und Orchestrierung
+
+---
+
+## Leitfrage
+
+Wie verarbeitet man Daten im Petabyte-Maßstab?
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Das klassische Werkzeug: Data Warehouse
+
+Bevor Big Data die Annahmen sprengte, war das **Data Warehouse (DWH)** die Standardantwort für analytische Datenhaltung:
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![ETL vs. ELT](/courses/web-and-data-engineering/figures/etl-vs-elt.svg)
+
+- **ETL:** Daten extrahieren, transformieren, laden — klassisch
+- **ELT:** Erst laden (Rohdaten erhalten), dann im Zielsystem transformieren — modern
+
+</div>
+
+
+<div class="column">
+
+### OLAP vs. OLTP
+
+| Aspekt | OLTP | OLAP |
+|---|---|---|
+| Zweck | Transaktionen | Analysen |
+| Abfragen | viele, kurz | wenige, komplex |
+| Daten | aktuell | historisch |
+| Beispiel | Bestellsystem | Quartalsbericht |
+
+### Star Schema
+
+- **Faktentabelle:** Große Akkumulation numerischer Fakten
+- **Dimensionstabellen:** Statische Beschreibungen von Entitäten
+- **Maßzahlen:** Aggregate über Dimensionen
+
+</div>
+
+
+</div>
+
+
+---
+
+## Star Schema: Datenmodell
+
+![Star Schema mit Faktentabelle und umliegenden Dimensionstabellen](/courses/web-and-data-engineering/figures/star-schema.svg)
+
+---
+
+## Warum das DWH an Grenzen stößt
+
+Die Fünf Vs stellen die Grundannahmen klassischer DWH-Systeme direkt in Frage:
+
+| Annahme des DWH | Herausforderung durch Big Data |
+|---|---|
+| Daten passen auf einen großen Server | **Volume:** Petabyte-Mengen erfordern Verteilung |
+| Schema ist vorab bekannt | **Variety:** JSON, Logs, Graphen, Streams |
+| ETL läuft nachts, Latenz ist akzeptabel | **Velocity:** Echtzeit-Anforderungen |
+| Quelldaten sind verlässlich | **Veracity:** Systematische Qualitätsprobleme |
+| Analytischer Mehrwert rechtfertigt Aufwand | **Value:** Kosten-Nutzen-Relation bei Rohdaten unklar |
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Scaling Up vs. Scaling Out
+
+![Vergleich Vertical Scaling vs Horizontal Scaling](/courses/web-and-data-engineering/figures/scaling-comparison.svg)
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Vertical Scaling (Scale Up)
+
+- Größere, leistungsstärkere Einzelmaschine
+- RDBMS mit ACID-Garantien funktionieren gut
+- Grenze: Hardware-Maximum irgendwann erreicht
+- Kosten steigen überproportional
+
+</div>
+
+
+<div class="column">
+
+### Horizontal Scaling (Scale Out)
+
+- Viele kleine, günstige Standard-Maschinen
+- Jenseits eines Schwellwerts günstiger als Scale Up
+- Erfordert verteilte Algorithmen und Koordination
+- Ausfalltoleranz durch Redundanz
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## CAP-Theorem: Die Grenzen verteilter Systeme
+
+![CAP-Theorem: Consistency, Availability, Partition Tolerance](/courses/web-and-data-engineering/figures/cap-theorem.svg)
+
+**CAP-Theorem (Brewer, 2000):** In einem verteilten System können nicht gleichzeitig alle drei Eigenschaften garantiert werden — es müssen zwei gewählt werden.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+| Eigenschaft | Bedeutung |
+|---|---|
+| **Consistency (C)** | Alle Knoten sehen denselben, aktuellen Zustand |
+| **Availability (A)** | Jede Anfrage erhält eine (möglicherweise veraltete) Antwort |
+| **Partition Tolerance (P)** | System funktioniert auch bei Netzwerkausfall zwischen Knoten |
+
+In der Praxis: **P muss immer gegeben sein**. Die Wahl liegt zwischen **C** und **A**.
+
+</div>
+
+
+<div class="column">
+
+### Systemtypen in der Praxis
+
+| Typ | Systeme |
+|---|---|
+| **CP** | HBase, MongoDB (strong), Zookeeper |
+| **AP** | Cassandra, CouchDB, DynamoDB |
+| **CA** | Klassische RDBMS (nur ohne Partition) |
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Der Paradigmenwechsel: SWAPPING zu CLUSTERING
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Traditionell: SWAPPING
+
+```
+Disk → RAM → Cache → Register
+```
+
+- Daten werden Block für Block von Disk geladen
+- Einzelne Maschine verarbeitet sequenziell
+- Google indiziert ~10 Mrd. Seiten = 200 TB
+- Bei 50 MB/s Bandbreite: **40 Tage** nur zum Lesen
+
+Selbst der schnellste Einzelrechner ist zu langsam für Petabyte-Datenmengen.
+
+</div>
+
+
+<div class="column">
+
+### Big Data: CLUSTERING
+
+```
+[Node 1: 10 GB Chunk] ←→ Computation
+[Node 2: 10 GB Chunk] ←→ Computation
+[Node 3: 10 GB Chunk] ←→ Computation
+         ... 1000 Nodes
+```
+
+- Daten in Chunks aufteilen, auf Nodes verteilen
+- 200 TB / 1000 Nodes = **200 GB pro Node**
+- Computation kommt zu den Daten
+
+**Data Locality:** Code wird dorthin geschickt, wo die Daten liegen.
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Netzwerk und Ausfalltoleranz im Cluster
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Netzwerk-Bandbreite
+
+- Innerhalb eines Racks: **1 Gbps**
+- Rack-übergreifend (Backbone): **2–10 Gbps**
+- Daten-Reshuffling ist teuer: 10 TB bei 1 GB/s = **2,8 Stunden**
+- Faustregel: **Reshuffling minimieren**
+
+</div>
+
+
+<div class="column">
+
+### Ausfalltoleranz
+
+- Bei **1000 Servern**: statistisch ~1 Ausfall pro Tag
+- Bei **1.000.000 Maschinen** (Google): ~1000 Ausfälle täglich
+- Ausfälle sind keine Ausnahmen — sie sind der **Normalzustand**
+
+**Konsequenz:**
+
+- Daten mehrfach replizieren
+- Berechnungen bei Ausfall automatisch neu starten
+- Kein Job darf an einem einzelnen Knoten hängen
+
+</div>
+
+
+</div>
+
+
+**Design for Failure:** Verteilte Systeme müssen von Anfang an auf Ausfälle ausgelegt sein — nicht nachträglich abgesichert werden.
+
+---
+
+## HDFS: Verteiltes Dateisystem
+
+Das Hadoop Distributed File System (HDFS) implementiert das Clustering-Paradigma:
+
+![HDFS-Architektur mit Name Node und Chunk Servern](/courses/web-and-data-engineering/figures/hdfs-architecture.svg)
+
+- **Chunk Server:** Datei wird in 16–64 MB Chunks aufgeteilt, auf verschiedene Racks verteilt
+- **Name Node:** Speichert Metadaten (welcher Chunk liegt wo) — Single Point of Trust
+- **Replikation:** Jeder Chunk 2–3× repliziert auf verschiedenen Knoten/Racks
+- **Data Locality:** Computation wird auf den Knoten gestartet, der den Chunk enthält
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## MapReduce: Berechnung auf verteilten Daten
+
+Google's Programmiermodell für verteilte Datenverarbeitung — heute Grundlage von Hadoop:
+
+### Phasen
+
+1. **Map:** Für jedes `<key, value>`-Paar: erzeugt eine Menge von `<k', v'>`-Paaren
+2. **Shuffle & Sort:** Intermediäre Paare werden nach Key gruppiert und sortiert
+3. **Reduce:** Für jede Gruppe von `<k', v'>`-Paaren: berechnet ein Aggregat
+
+### Effizienz-Prinzipien
+
+- **Streaming through data:** Sequenzielles Lesen ohne Disk Seeks
+- **Data Locality:** Map-Tasks laufen auf dem Knoten mit dem jeweiligen Chunk
+- **Automatische Fehlerbehandlung:** Fehlgeschlagene Tasks werden neu gestartet
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## MapReduce Beispiel: Wörter zählen
+
+![MapReduce Word Count Beispiel](/courses/web-and-data-engineering/figures/mapreduce-wordcount.svg)
+
+```python
+# Pseudo-Code: MapReduce Wortfrequenz
+def map_fn(key, value):
+    # value = Zeile des Dokuments
+    for word in value.split():
+        emit(word, 1)
+
+def reduce_fn(key, values):
+    # key = Wort, values = [1, 1, 1, ...]
+    emit(key, sum(values))
+```
+
+---
+
+## Stream-Zeitmodelle: Warum Reihenfolge trügt
+
+Im Streaming ist Zeit nicht trivial — dasselbe Event hat drei verschiedene Zeitstempel:
+
+![Drei Zeitachsen: Event Time, Ingestion Time, Processing Time. Events treffen out-of-order ein](/courses/web-and-data-engineering/figures/stream-time-semantics.svg)
+
+---
+
+## Backpressure und Exactly-Once-Semantik
+
+Zwei zentrale Herausforderungen im Stream Processing:
+
+![Backpressure: Consumer signalisiert Producer, langsamer zu senden. Checkpoint-basierte Exactly-Once-Semantik mit Replay nach Ausfall](/courses/web-and-data-engineering/figures/backpressure-checkpoint.svg)
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Batch vs. Streaming: Wann was einsetzen?
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Batch-Verarbeitung
+
+- Daten werden gesammelt und periodisch als Block verarbeitet
+- **Stärken:** Hoher Durchsatz, Einfachheit, Kosteneffizienz
+- **Schwächen:** Hohe Latenz (Minuten bis Stunden)
+- **Einsatz:** Reporting, ML-Training, historische Analysen, ETL
+
+</div>
+
+
+<div class="column">
+
+### Stream-Verarbeitung
+
+- Jedes Event wird sofort nach Eintreffen verarbeitet
+- **Stärken:** Niedrige Latenz (Millisekunden)
+- **Schwächen:** Komplexer (Out-of-Order, Duplikate, Checkpoints)
+- **Einsatz:** Betrugserkennung, Alerting, Echtzeit-Empfehlungen
+
+</div>
+
+
+</div>
+
+
+| Kriterium | Batch | Stream |
+|---|---|---|
+| Latenz | Minuten–Stunden | Millisekunden–Sekunden |
+| Fehlerbehandlung | Neuberechnung des Batchs | Checkpoints, Exactly-once |
+| Engineering-Aufwand | geringer | höher |
+| Wirtschaftlichkeit | günstiger bei großen Mengen | teurer bei hohem Volumen |
+
+---
+
+## Lambda- und Kappa-Architektur
+
+![Lambda vs Kappa Architektur](/courses/web-and-data-engineering/figures/lambda-kappa.svg)
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Lambda-Architektur: Batch + Stream kombiniert
+
+**Problem:** Wie bekommt man historische Vollständigkeit **und** Echtzeit-Ergebnisse?
+
+### Struktur
+
+- **Batch Layer** (Spark, Hadoop): Vollständige historische Neuberechnung periodisch — exakt, aber verzögert
+- **Speed Layer** (Flink, Kafka Streams): Nur neue Events seit letztem Batch — sofortige, approximierte Ergebnisse
+- **Serving Layer:** Kombiniert beide Pfade für Abfragen
+
+**Nachteil — Doppelte Codebasis:** Dieselbe Verarbeitungslogik muss für Batch (z.B. Spark) **und** Stream (z.B. Flink) implementiert und synchron gehalten werden. Hoher Betriebsaufwand.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Kappa-Architektur: Nur Streaming
+
+Idee: Wenn Stream-Systeme robust genug sind — warum noch Batch?
+
+### Struktur
+
+- **Alle Daten** als Events im persistenten Log (Kafka)
+- **Eine Codebasis** — dieselbe Logik für neue Events und historische Daten
+- **Replay:** Bei Logik-Änderungen gesamtes Log erneut durchlaufen → konsistente Neuberechnung
+
+| Aspekt | Lambda | Kappa |
+|---|---|---|
+| Verarbeitungspfade | zwei (Batch + Stream) | einer (nur Stream) |
+| Codebasis | doppelt | einfach |
+| Historische Daten | Batch Layer | Replay aus Event-Log |
+| Betriebsaufwand | hoch | geringer |
+
+---
+
+## Mini-Übung: Batch oder Streaming?
+
+Entscheiden Sie für jedes Szenario: **Batch** oder **Streaming** — und begründen Sie kurz.
+
+| Szenario | Batch oder Streaming? |
+|---|---|
+| Tagesabschluss-Bericht der Verkaufszahlen | ? |
+| Erkennen eines Kreditkartenbetrugs in Echtzeit | ? |
+| Wöchentlicher ML-Trainings-Job auf historischen Klick-Daten | ? |
+| Alerting bei Serverausfall innerhalb von 5 Sekunden | ? |
+| Monatliche Kundensegmentierung für E-Mail-Kampagne | ? |
+
+--
+
+### Musterlösung
+
+| Szenario | Entscheidung | Begründung |
+|---|---|---|
+| Tagesabschluss-Bericht | **Batch** | Latenz von Stunden akzeptabel, hoher Durchsatz |
+| Kreditkartenbetrug | **Streaming** | Muss in Millisekunden entschieden werden |
+| ML-Trainings-Job | **Batch** | Vollständiger historischer Datensatz nötig |
+| Server-Alerting | **Streaming** | Reaktionszeit < 5 Sekunden erforderlich |
+| Kundensegmentierung | **Batch** | Monatlicher Rhythmus, kein Echtzeit-Bedarf |
+
+
+<div class="takeaway">
+
+Batch und Stream sind keine Konkurrenten, sondern komplementäre Werkzeuge. Die Wahl hängt von Latenzbedarf, Durchsatz und Konsistenzanforderungen ab — nicht von technischer Mode.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 4
+## Datenqualität und Governance
+
+---
+
+## Leitfrage
+
+Was macht eine robuste Datenplattform aus — und warum scheitern datengetriebene Systeme oft nicht an Rechenleistung, sondern an Qualität, Verantwortlichkeiten und fehlender Transparenz?
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## MapReduce: Effizienz durch Lokalität
+
+Warum ist MapReduce so schnell, obwohl es auf tausenden günstiger Maschinen läuft?
+
+
+<div class="columns">
+
+
+<div class="column">
+
+| Prinzip | Erklärung |
+|---|---|
+| **Data Locality** | Map-Task läuft auf dem Node, der den Chunk speichert — kein Netzwerktransfer für Eingabedaten |
+| **Streaming** | Daten werden sequenziell gelesen, keine Disk-Seeks — maximale Bandbreite |
+| **Pipelining** | Map-Tasks laufen parallel auf allen Nodes — horizontale Skalierung |
+| **Fehlertoleranz** | Framework re-startet fehlgeschlagene Tasks automatisch auf Replikat |
+
+</div>
+
+
+<div class="column">
+
+### Data Locality Principle
+
+Code ist klein (wenige KB), Daten sind riesig (TB). **Bringe die Berechnung zu den Daten**, nicht umgekehrt.
+
+**Geeignete Anwendungen:**
+
+- Web-Index-Aufbau (Google!)
+- Log-Analyse
+- ETL-Pipelines
+- ML-Feature-Berechnung
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Hadoop Ökosystem
+
+![Hadoop Ökosystem](/courses/web-and-data-engineering/figures/hadoop-ecosystem.svg)
+
+| Schicht | Technologien | Aufgabe |
+|---|---|---|
+| **Anwendungen** | MapReduce, Spark, Hive, Pig, Storm, Giraph | Datenverarbeitung (Batch, Streaming, Graph, SQL) |
+| **Ressourcenmanagement** | YARN | Zuweisung von CPU, RAM an Anwendungen im Cluster |
+| **Speicher** | HDFS | Verteilte, redundante Datenhaltung in Chunks |
+
+**Hadoop ≠ MapReduce:** MapReduce ist nur **eine** Anwendung auf Hadoop. Moderne Stacks nutzen meist Spark (In-Memory, 10–100× schneller) auf YARN/HDFS.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Alternativen zum Scale-Out
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Master/Slave Replikation
+
+- Originaler GFS-Ansatz
+- Multi-Master-Replikation möglich
+- **INSERT only** — keine Updates/Deletes
+- Keine JOINs → reduziert Query-Zeit
+- Lesezugriff skaliert durch Replicas
+
+**Einsatz:** Leselastige Systeme, Content-Delivery
+
+</div>
+
+
+<div class="column">
+
+### In-Memory-Datenbanken
+
+- Gesamte Datenbank im RAM
+- SAP HANA, Oracle In-Memory, Redis
+- Extrem geringe Latenz
+- Teuer, aber ideal für Echtzeitanalysen
+
+**Einsatz:** Echtzeit-Dashboards, Trading-Systeme
+
+### Managed Cloud-Services
+
+- BigQuery, Redshift, Snowflake
+- Serverless, automatisches Scaling
+- Pay-per-Query statt Cluster-Management
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Datenqualität: Die fünf Dimensionen
+
+
+<div class="columns">
+
+
+<div class="column">
+
+| Dimension | Prüffrage | Beispiel |
+|---|---|---|
+| **Vollständigkeit** | Fehlen Werte? | 15 % der Bestellungen ohne PLZ |
+| **Konsistenz** | Widersprechen sich Quellen? | CRM sagt 500 Kunden, DWH sagt 480 |
+| **Aktualität** | Sind Daten frisch genug? | Lagerbestand 6 Stunden veraltet |
+| **Genauigkeit** | Stimmen die Werte? | GPS-Koordinaten auf falscher Straße |
+| **Eindeutigkeit** | Gibt es Duplikate? | Gleicher Kunde mit 3 IDs |
+
+</div>
+
+
+<div class="column">
+
+![Quality Gates in der Pipeline](/courses/web-and-data-engineering/figures/quality-gates.svg)
+
+</div>
+
+
+</div>
+
+
+**Qualität ist kein Feature, sondern ein Prozess:** kontinuierlich messen, automatisiert prüfen, bei Verstößen alarmieren — wie Software-Tests.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Quality Gates in der Pipeline
+
+| Pipeline-Stufe | Quality Gate | Tool-Beispiel |
+|---|---|---|
+| **Ingestion** | Schema-Validierung, Vollständigkeit, Format | Great Expectations, JSON Schema |
+| **Transformation** | Referentielle Integrität, Wertebereiche | dbt tests, SQL assertions |
+| **Aggregation** | Plausibilitätsprüfung, Ausreißer-Erkennung | Statistische Bounds, z-Score |
+| **Serving** | Freshness-Check, SLA-Monitoring | Airflow SLAs, Monte Carlo |
+
+--
+
+### Was passiert bei Qualitätsverstößen?
+
+| Strategie | Wann? |
+|---|---|
+| **Quarantäne** | Fehlerhafte Datensätze in separaten Bereich verschieben |
+| **Abort** | Pipeline stoppen, wenn kritische Schwelle überschritten |
+| **Alert** | Team benachrichtigen, Daten weiterverarbeiten |
+| **Auto-Fix** | Imputation fehlender Werte, Deduplication |
+
+**Keine dieser Strategien ist universell richtig** — die Wahl hängt vom Business-Kontext ab: Ein fehlender Sensorwert im IoT-Dashboard ist weniger kritisch als ein fehlerhafter Finanzwert.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Data Governance: Wer ist verantwortlich?
+
+
+<div class="columns">
+
+
+<div class="column">
+
+| Governance-Frage | Warum wichtig? |
+|---|---|
+| **Ownership:** Wem gehört dieses Datenprodukt? | Ohne Eigentümer wird kein Bug gefixt |
+| **Definitionen:** Was bedeutet „aktiver Kunde"? | Verschiedene Teams zählen unterschiedlich |
+| **Zugriffsrechte:** Wer darf was sehen? | DSGVO, PII, Compliance |
+| **Lineage:** Woher kommen diese Daten? | Debugging, Audit, Vertrauenswürdigkeit |
+| **Retention:** Wie lange speichern wir? | Speicherkosten, Recht auf Löschung |
+
+</div>
+
+
+<div class="column">
+
+### Data Catalog
+
+Ein **Data Catalog** ist das „Google für interne Daten":
+
+- Beschreibung jedes Datensatzes
+- Eigentümer und Kontaktperson
+- Schema, Datentypen, Beispielwerte
+- Lineage-Graph (Herkunft)
+- Qualitätsmetriken
+
+**Beispiele:** DataHub, Apache Atlas, Alation, Google Data Catalog
+
+</div>
+
+
+</div>
+
+
+---
+
+## Data Lineage: Herkunft nachvollziehen
+
+![Data Lineage Graph](/courses/web-and-data-engineering/figures/data-lineage.svg)
+
+**Warum Lineage unverzichtbar ist:**
+
+- **Debugging:** Ein Wert im Dashboard ist falsch — welche Transformation hat den Fehler eingeführt?
+- **Impact Analysis:** Wir ändern das Schema einer Quelltabelle — welche Downstream-Systeme brechen?
+- **Compliance:** Die DSGVO verlangt Auskunft, wo personenbezogene Daten verarbeitet werden
+- **Vertrauen:** Data Scientists müssen wissen, ob sie einem Datensatz vertrauen können
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Mini-Übung: Quality Check Design
+
+Ein Online-Shop hat eine Produktdaten-Pipeline: Lieferanten-CSV → Ingestion → Transformation → Data Warehouse → Produktkatalog-API.
+
+Entwerfen Sie für jede Pipeline-Stufe **einen konkreten Quality Check:**
+
+| Stufe | Was prüfen Sie? | Erwartetes Ergebnis |
+|---|---|---|
+| Ingestion | ? | ? |
+| Transformation | ? | ? |
+| Data Warehouse | ? | ? |
+| API | ? | ? |
+
+--
+
+### Musterlösung
+
+| Stufe | Quality Check | Erwartung |
+|---|---|---|
+| **Ingestion** | CSV hat alle Pflichtfelder (EAN, Name, Preis) | Keine Zeile ohne EAN |
+| **Transformation** | Preis > 0 und < 100.000 € | Keine negativen oder absurd hohen Preise |
+| **Data Warehouse** | Anzahl Produkte ändert sich max. 5 % pro Tag | Keine Masseninsertions/-löschungen ohne Grund |
+| **API** | Response enthält ≥ 95 % der Warehouse-Produkte | Keine stillen Datenverluste beim Serving |
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Gesamtüberblick: Vom Data Warehouse zu Big Data
+
+| Aspekt | Klassisches DWH | Big Data / Cloud |
+|---|---|---|
+| **Skalierung** | Vertikal (größerer Server) | Horizontal (mehr Nodes) |
+| **Datenmodell** | Star Schema, strukturiert | Schema-on-Read, polyglot |
+| **Verarbeitung** | ETL → OLAP | MapReduce, Spark, Streaming |
+| **Speicher** | RDBMS (Oracle, Teradata) | HDFS, S3, Cloud Storage |
+| **Latenz** | Stunden (Batch-ETL) | Sekunden (Streaming) |
+| **Kosten** | Hohe Lizenzkosten, wenige Server | Commodity-Hardware, Pay-per-Use |
+| **Qualität** | Manuell, selten geprüft | Automatisierte Quality Gates |
+| **Governance** | Zentral (IT-Abteilung) | Dezentral (Data Mesh / Domain Ownership) |
+
+**Kein Entweder-Oder:** Moderne Datenplattformen kombinieren DWH-Konzepte (Star Schema, SQL) mit Big-Data-Technologien (Spark, Cloud Storage). Das „Lakehouse"-Muster vereint Data Lake und Data Warehouse.
+
+
+<div class="takeaway">
+
+Data Engineering scheitert selten an Rechenleistung. Es scheitert an unklaren Eigentümerschaften, fehlender Lineage, veralteten Definitionen und ungeprüften Annahmen. Qualität, Governance und Transparenz sind keine Add-ons — sie sind das Fundament jeder belastbaren Datenplattform.
+
+</div>
+
+
+---
+
+## Wrap-Up
+
+- Data Engineering organisiert den Weg von Datenquellen zu verlässlichen, nutzbaren Datenprodukten.
+- Architekturentscheidungen zu Speicher, Verarbeitung und Orchestrierung bestimmen Skalierbarkeit und Reaktionszeit.
+- Ohne Datenqualität, Metadaten und Governance werden selbst technisch funktionierende Pipelines fachlich unbrauchbar.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

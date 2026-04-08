@@ -1,0 +1,987 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 01: Introduction, Organisation, and Motivation</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Web and Data Engineering
+## Lecture 01: Introduction, Organisation, and Motivation
+
+Prof. Dr. Michael Granitzer
+
+---
+
+## Ziel dieser Vorlesung
+
+Moderne Web-Systeme verlangen systematisches Engineering - über Architektur, Teams, Daten und AI hinweg. Diese Einheit klärt, **warum** das so ist und **was** Sie in diesem Kurs dafür lernen werden.
+
+### Leitfragen
+
+- Warum ist das Web mehr als ein Informationskanal?
+- Was macht Web-Systeme komplex - technisch und organisatorisch?
+- Warum reicht Coding allein nicht - und was tritt an seine Stelle?
+- Wie verändert AI die Rolle von Web Engineers?
+- Warum gehört die Datenperspektive dazu?
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Das Web als Infrastruktur
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Warum ist das Web mehr als nur ein Informationskanal, nämlich eine technische und gesellschaftliche Kerninfrastruktur?
+
+</div>
+
+
+--
+
+## Das Web als Infrastruktur
+
+Das World Wide Web ist heute weit mehr als eine Sammlung von Webseiten. Es ist die zentrale Infrastruktur für digitale Kommunikation, Plattformen, datengetriebene Anwendungen - und zunehmend auch für autonome AI-Systeme.
+
+Diese Infrastruktur hat sich in mehreren Paradigmenwechseln entwickelt. Jeder Schritt hat neue Engineering-Probleme erzeugt, die diesen Kurs motivieren.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Von der Vision zum Netz (Web 1.0)
+
+
+<div class="c-orange">
+
+**Problem:** Wie macht man Wissen maschinengestützt zugänglich?
+
+</div>
+
+
+
+<div class="columns col-3-1 gap-sm">
+
+
+<div class="column">
+
+- 1969: `ARPANET` zeigt, dass verteilte Netze praktisch funktionieren
+- 1989: Tim Berners-Lee schlägt am CERN das `World Wide Web` vor
+- 1991: das erste öffentliche Webangebot geht online
+
+</div>
+
+
+<div class="column">
+
+![](/courses/web-and-data-engineering/figures/web-history-memex-arpanet.jpg)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-green gap-sm">
+
+**Konsequenz:** 
+
+Offene Protokolle und verteilte Infrastruktur werden zum Fundament - aber das Web liefert zunächst nur **statische Dokumente**.
+
+</div>
+
+
+--
+
+## Von Dokumenten zu Anwendungen (Web 1.0 -> Web 2.0)
+
+
+<div class="c-orange">
+
+**Problem:** Wie wird das Web interaktiv und kommerziell nutzbar?
+
+</div>
+
+
+
+<div class="gap-lg">
+
+
+</div>
+
+
+- 1995: `JavaScript` und serverseitige Technologien (`PHP`, `CGI`) ermöglichen dynamische Seiten
+- 1995-2000: `Dotcom-Boom` - E-Commerce (`Amazon`, `eBay`), Webmail, Online-Banking
+- 2001: der Dotcom-Crash - überleben tun nur Systeme, die technisch skalierbar gebaut wurden
+- 2001: Das [Web 2.0](https://en.wikipedia.org/wiki/Web_2.0) wird propagiert: Benutzer werden zu Produzenten von Inhalten (Prosumer) und neue Geschäftsmodelle entstehen
+
+
+
+<div class="c-green gap-lg">
+
+**Konsequenz** 
+
+Interaktivität erzeugt **Zustand, Sicherheitsfragen und Serverlogik** - das Web braucht plötzlich Software-Architektur.
+
+</div>
+
+
+--
+
+## Von Anwendungen zu Plattformen (Web 2.0)
+
+
+<div class="c-orange">
+
+**Problem:** Wie wird das Web zur universellen Betriebsplattform?
+
+</div>
+
+
+- 2006: `AWS` startet - Cloud-Infrastruktur wird on-demand verfügbar
+- 2007: `iPhone` macht das Web allgegenwärtig; Responsive Design wird Pflicht
+- 2010er: `Microservices` + `Kubernetes` - kontinuierliches Deployment zum Standard; APIs als Integrationsschicht
+
+
+<div class="c-green">
+
+**Konsequenz:** 
+
+Verteilte Systeme, Skalierung und Teamkoordination werden zu **zentralen Engineering-Problemen**. Das Web ist nicht mehr Anwendung, sondern **Betriebsplattform**.
+
+</div>
+
+
+--
+
+## Von Plattformen zu datengetriebenen Systemen (Web 2.0 -> Web 3.0)
+
+
+<div class="c-orange">
+
+**Problem:** Wie nutzt man die Daten, die Web-Systeme erzeugen?
+
+</div>
+
+
+- Plattformen erzeugen kontinuierlich Daten - Klicks, Käufe, Suchanfragen
+- Personalisierung (`Netflix`, `Spotify`) wird vom Zusatzfeature zur **Kernfunktion**
+- `Data Pipelines` entstehen als eigenstaendige Infrastruktur; neue Rollen wie `Data Engineer`
+
+
+<div class="c-green">
+
+**Konsequenz:** 
+
+**Data Engineering wird integraler Bestandteil** von Web-Systemen - genau deshalb verbindet dieser Kurs beide Perspektiven.
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Vom menschlichen Nutzer zum AI-Agenten (Web 3.0)
+
+
+<div class="c-orange">
+
+**Problem:** Wer nutzt das Web in Zukunft - und wie?
+
+</div>
+
+
+
+
+<div class="columns col-2-1 gap">
+
+
+<div class="column top">
+
+- AI-Agenten nutzen zunehmend **Web-basierte Tools**: Suchmaschinen, Webseiten-Inhalte, REST-APIs
+- Protokolle wie das `Model Context Protocol (MCP)` standardisieren Nutzung durch Agenten
+- Agenten **orchestrieren Ketten von Web-Interaktionen** autonom
+- das Web wird zur **Ausführungsumgebung für autonome Systeme**, nicht nur für menschliche Nutzer
+
+</div>
+
+
+<div class="column">
+
+
+<div class="small">
+
+| Agent-Aktion | Web-Technologie |
+|---|---|
+| Informationssuche | Web Search APIs |
+| Seiteninhalt lesen | HTTP + HTML Parsing |
+| Daten abrufen | REST / GraphQL APIs |
+| Aktionen ausführen | Web APIs mit Auth |
+| Tool-Integration | MCP-Server über HTTP |
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-green">
+
+**Konsequenz (vermutlich):** 
+
+Web-APIs und -Dienste müssen nicht nur für Menschen, sondern auch für **maschinelle Konsumenten** robust, dokumentiert und sicher sein. Das verändert, wie wir Web-Systeme entwerfen.
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-100" -->
+
+## Die Paradigmenwechsel im Überblick
+
+![](/courses/web-and-data-engineering/figures/web-evolution-timeline.svg)
+
+
+<div class="takeaway">
+
+Jeder Paradigmenwechsel im Web hat neue Engineering-Probleme erzeugt. Mit AI-Agenten steht der nächste bevor: Das Web wird nicht nur Plattform für Menschen, sondern Ausführungsumgebung für autonome Systeme. Die Relevanz des Webs liegt darin, dass hier offene Protokolle, Anwendungslogik und Datenströme zu einem universellen Ausführungsraum zusammenkommen - für menschliche und maschinelle Akteure gleichermaßen.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Was Web-Systeme komplex macht
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Was genau macht Web-Systeme so komplex, dass einfaches Programmieren nicht ausreicht?
+
+</div>
+
+
+--
+
+## Definition Web Engineering
+
+> Web Engineering ist die Anwendung systematischer und quantifizierbarer Ansätze für Anforderungsbeschreibung, Entwurf, Implementierung, Test, Betrieb und Wartung qualitativ hochwertiger Web-Anwendungen.
+
+### Kerngedanke
+
+Web Engineering beschreibt sowohl eine praktische Ingenieurstätigkeit als auch eine wissenschaftliche Disziplin.
+
+--
+
+## Was sind Web-Anwendungen?
+
+### Typische Merkmale
+
+- Nutzung über Web-Protokolle und Browser
+- verteilte Komponenten
+- Kombination aus UI, Logik und Datenhaltung
+- häufig kontinuierliche Weiterentwicklung
+
+
+<div class="gap">
+
+
+</div>
+
+
+### Typische Unterschiede
+
+- informationsorientiert vs. transaktionsorientiert
+- einfache Sites vs. komplexe Plattformen
+- monolithisch vs. verteilt
+- rein webbasiert vs. stark datengetrieben
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Plattformökonomie
+
+
+<div class="columns col-1-2">
+
+
+<div class="column">
+
+Reichweite und Marktwert digitaler Plattformen entstehen über Web- und Dateninfrastrukturen. Wertschöpfung hängt oft daran, Datenflüsse systematisch zu erfassen und zu nutzen.
+
+</div>
+
+
+<div class="column">
+
+![](/courses/web-and-data-engineering/figures/commercial-success-web.jpg)
+
+</div>
+
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Daten als wirtschaftlicher Hebel
+
+
+<div class="columns col-1-2">
+
+
+<div class="column">
+
+Digitale Plattformen wachsen nicht primär durch bessere Technik, sondern durch systematische Nutzung von Daten. Wer Datenflüsse besser versteht, kann Produkte schneller anpassen, Nutzer gezielter bedienen und neue Geschäftsmodelle erschließen.
+
+</div>
+
+
+<div class="column">
+
+![](/courses/web-and-data-engineering/figures/data-success-factor.png)
+
+</div>
+
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-45" -->
+
+## Backend-Komplexität am Beispiel Spotify
+
+Moderne Web-Produkte bestehen aus vielen gekoppelten Diensten. Skalierung, Deployment und Betrieb werden zur Architekturfrage.
+
+![](/courses/web-and-data-engineering/figures/web-complexity-spotify-backend.png)
+
+--
+
+<!-- .slide: class="figure-65" -->
+
+## Teamkomplexität am Beispiel Spotify
+
+Technische Komplexitaet trifft auf verteilte Teamstrukturen. Architektur wird auch zum Mittel der Koordination.
+
+![](/courses/web-and-data-engineering/figures/web-complexity-spotify-teams.png)
+
+--
+
+<!-- .slide: class="figure-50" -->
+
+## AI-Integration am Beispiel Spotify
+
+Personalisierung ist kein Zusatzfeature, sondern Teil der Systemarchitektur. Datenpipelines, Modelle und Auslieferung müssen mit Web-Produktlogik zusammenspielen. Damit verschiebt sich Komplexität von der UI in Infrastruktur, Daten und Betrieb.
+
+![](/courses/web-and-data-engineering/figures/web-complexity-spotify-ml.png)
+
+--
+
+<!-- .slide: class="figure-100" -->
+
+## Komplexität ist der Normalzustand
+
+
+<div class="columns col-3-1 small">
+
+
+<div class="column">
+
+### Technische Dimension
+
+- Frontend, Backend und Persistenz ändern sich nicht unabhängig
+- Sicherheit, Verfügbarkeit und Performance sind Querschnittsthemen
+- Standards und Schnittstellen entscheiden über Interoperabilität
+
+<div class="gap left">
+
+![](/courses/web-and-data-engineering/figures/web-complexity-evolution.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column top">
+
+
+### Organisatorische Dimension
+
+- Teams arbeiten parallel an gekoppelten Teilsystemen
+- Änderungen müssen trotz laufendem Betrieb möglich bleiben
+- Qualität entsteht über Prozesse, nicht nur über einzelne Code-Artefakte
+
+
+<div class="takeaway small">
+
+Komplexität in Web-Systemen entsteht aus dem Zusammenspiel von Schichten, verteilten Teams und kontinuierlicher Evolution. Diese Komplexität ist kein Ausnahmezustand - sie ist der Normalfall reifer Web-Plattformen.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Vom Coding zum Engineering
+
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wenn Web-Systeme so komplex sind - was braucht es über das reine Programmieren hinaus?
+
+</div>
+
+
+--
+
+## Von der Komplexität zur Methode
+
+
+<div class="columns col-2-1">
+
+
+<div class="column top">
+
+### Was Coding allein nicht löst
+
+- ein einzelnes Feature berührt oft mehrere Schichten gleichzeitig
+- Sicherheitslücken, Performanceprobleme und Inkompatibilitäten entstehen zwischen Komponenten
+- ohne gemeinsame Methodik entstehen Widersprüche zwischen parallelen Teams
+
+</div>
+
+
+<div class="column">
+
+### Was Engineering ergänzt
+
+- explizite Anforderungen statt impliziter Annahmen
+- bewusste Architekturentscheidungen statt zufällig gewachsener Struktur
+- definierte Prozesse für Test, Deployment und Wartung
+- Qualitätskriterien, die vor der Implementierung feststehen
+
+</div>
+
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## Web Engineering als Entwicklungsprozess
+
+
+<div class="columns col-1-1">
+
+
+<div class="column">
+
+### Entwicklungszyklus
+
+- Anforderungen, Entwurf, Implementierung und Betrieb müssen zusammen gedacht werden
+- Web Engineering ist prozessorientiert, nicht nur technologieorientiert
+- Entwicklung, Deployment und Wartung bilden einen zusammenhängenden Lebenszyklus
+- Automatisierung, Automatisierung, Automatisierung
+
+</div>
+
+
+<div class="column">
+
+![](/courses/web-and-data-engineering/figures/web-engineering-lifecycle.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-green">
+
+**Konsequenz:** 
+
+Der Lebenszyklus endet nicht mit dem Deployment. Betrieb, Monitoring und Weiterentwicklung sind integraler Bestandteil des Engineering-Prozesses.
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Standards als Bedingung für Skalierung
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+### Rolle von Standards
+
+- skalierbare Web-Systeme brauchen gemeinsame technische Grundlagen
+- Standards schaffen Interoperabilität zwischen Browsern, Servern und Werkzeugen
+- Institutionen wie das W3C treiben diese Entwicklung organisatorisch voran
+
+</div>
+
+
+<div class="column">
+
+![](/courses/web-and-data-engineering/figures/w3c-overview.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-green">
+
+**Konsequenz:** Standards sind keine bürokratische Einschränkung, sondern die Voraussetzung dafür, dass verteilte Systeme überhaupt zusammenarbeiten können.
+
+</div>
+
+
+
+<div class="takeaway small">
+
+Web Engineering wird dort notwendig, wo verteilte Technik, Daten, Betrieb und Teamkoordination nicht mehr sauber durch isoliertes Coding beherrschbar sind. Methoden, Prozesse und Standards machen Komplexität handhabbar.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Web Engineering im Zeitalter von AI
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wenn AI immer mehr Implementierungsarbeit übernimmt, welche Fähigkeiten werden für Web Engineers wichtiger statt weniger wichtig?
+
+</div>
+
+
+--
+
+## Ausgangsthese
+
+Die Routine des Codings wird zunehmend delegierbar. Dadurch wird die eigentliche Engineering-Arbeit wichtiger: Problemzuschnitt, Architektur, Qualitätskriterien, Risikobewertung und Aufsicht über AI-generierte Artefakte.
+
+--
+
+## Evidenz: AI übernimmt bereits spürbare Teile der Implementierung
+
+
+<div class="columns col-1-1">
+
+
+<div class="column top">
+
+### Produktivität und Delegation
+
+- Microsoft berichtet im Juni 2025 aus drei Feldexperimenten mit 4.867 Entwicklerinnen und Entwicklern im Mittel von `+26.08%` erledigten Aufgaben mit AI-Unterstützung.
+- Anthropic analysierte im April 2025 `500.000` coding-bezogene Interaktionen; bei Claude Code wurden `79%` als stärker automatisierte Nutzung klassifiziert.
+
+</div>
+
+
+<div class="column top">
+
+### Wo die Automatisierung zuerst greift
+
+- In derselben Anthropic-Analyse dominierten Websprachen wie JavaScript, TypeScript, HTML und CSS.
+- User-facing App- und UI/UX-Aufgaben gehörten zu den häufigsten Anwendungsfällen.
+- Daraus lässt sich plausibel ableiten, dass gerade einfache Fullstack- und UI-nahe Implementierung früh delegierbar wird.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Von Layer-Spezialisierung zu breiterer Verantwortung
+
+
+<div class="columns col-1-1">
+
+
+<div class="column">
+
+### Vor-AI
+
+- viele Entwickler arbeiteten tiefer in einer Schicht des Stacks
+- Expertise war oft an ein bestimmtes Framework oder Systemsegment gebunden
+- Übergaben zwischen Frontend, Backend, Datenbank und Betrieb waren alltäglich
+
+</div>
+
+
+<div class="column">
+
+### Mit AI-Unterstützung
+
+- ein einzelner Entwickler kann heute deutlich leichter über mehrere Schichten hinweg liefern
+- Anthropic beschreibt diese Entwicklung explizit als "becoming more full-stack"
+- damit wächst auch die Verantwortung für das Gesamtsystem statt nur für ein kleines Teilgebiet
+
+</div>
+
+
+</div>
+
+
+--
+
+## Warum konzeptionelles Verständnis wichtiger wird
+
+
+<div class="columns col-1-1">
+
+
+<div class="column">
+
+### Wichtiger als früher
+
+- Systemgrenzen und Schnittstellen verstehen
+- Anforderungen in überprüfbare Teilprobleme zerlegen
+- Architektur- und Trade-off-Entscheidungen treffen
+- Korrektheits- und Qualitätskriterien explizit machen
+
+</div>
+
+
+<div class="column">
+
+### Unwichtiger als früher
+
+- jedes Detail eines Nischentools manuell auswendig beherrschen
+- Boilerplate und Standardintegration selbst schreiben
+- Implementierungswissen mit Engineering-Verantwortung verwechseln
+
+</div>
+
+
+</div>
+
+
+--
+
+## Die Aufsicht wird zur Kernaufgabe
+
+
+### Warum Supervision nötig bleibt
+
+- AI kann schnell viel Code erzeugen, aber nicht zuverlässig den fachlichen Kontext ersetzen
+- reale Entwicklung enthält Mehrdeutigkeit, implizites Domänenwissen und versteckte Randbedingungen
+- Fehler in Architektur, Sicherheit oder Datenflüssen sind teurer als Fehler in Syntax
+
+### Befund aus Studien
+
+- Anthropic berichtet, dass die meisten Mitarbeitenden nur `0-20%` ihrer Arbeit vollständig delegieren würden.
+- Die ASE-2025-Studie zu Developer-Agent-Collaboration fand mehr Erfolg bei inkrementeller Zusammenarbeit als bei One-shot-Delegation.
+- Aktive Iteration, Debugging und Testing mit dem Agenten blieben zentrale Erfolgsfaktoren.
+
+--
+
+## Neue Schwerpunktkompetenzen
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+**Wichtiger als früher**
+
+
+<div class="small">
+
+| Kompetenz | Warum |
+|---|---|
+| **Konzeptverständnis** | AI beschleunigt Implementierung, nicht die Systemidee |
+| **Problemzerlegung** | Gute Delegation setzt gute Problemformulierung voraus |
+| **Review & Supervision** | AI-Ausgaben müssen verifiziert und eingeordnet werden |
+| **Kommunikation** | Anforderungen zwischen Menschen, Agenten und Systemen |
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+**Unwichtiger als früher**
+
+- jedes Detail eines Nischentools auswendig kennen
+- Boilerplate selbst schreiben
+- Implementierungswissen mit Engineering-Verantwortung verwechseln
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Je mehr Coding delegiert wird, desto wichtiger werden **Architektururteil**, **Qualitätsmaßstäbe** und **verantwortliche Aufsicht**.
+
+</div>
+
+
+--
+
+## Vorsicht: Das ist keine vollständige Ersetzung
+
+- Die Studien belegen Produktivitäts- und Delegationsgewinne, aber nicht das Ende menschlicher Softwareentwicklung.
+- Die stärksten Aussagen zu "full-stack" und Skill-Verschiebung stammen teilweise von frühen AI-Adoptern; sie sind richtungsweisend, aber nicht automatisch repräsentativ für alle Teams.
+- Eine belastbare Schlussfolgerung ist trotzdem: Je mehr Coding delegiert wird, desto wichtiger werden Architektururteil, Qualitätsmaßstäbe und verantwortliche Aufsicht.
+
+
+<div class="takeaway">
+
+Im Zeitalter von AI verschiebt sich Web Engineering von primär manueller Implementierung hin zu Systemdenken, Delegation, Bewertung und Verantwortung. Gerade deshalb wird Web Engineering wichtiger, nicht weniger.
+
+</div>
+
+
+--
+
+## Referenzen
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+- [Microsoft Research, June 2025: _The Effects of Generative AI on High-Skilled Work_](https://www.microsoft.com/en-us/research/publication/the-effects-of-generative-ai-on-high-skilled-work-evidence-from-three-field-experiments-with-software-developers/)
+- [Anthropic, April 28, 2025: _Anthropic Economic Index: AI's impact on software development_](https://www.anthropic.com/news/impact-software-development)
+
+</div>
+
+
+<div class="column">
+
+- [ASE 2025: _Why AI Agents Still Need You_](https://conf.researchr.org/details/ase-2025/ase-2025-papers/131/Why-AI-Agents-Still-Need-You-Findings-from-Developer-Agent-Collaborations-in-the-Wil)
+- [Anthropic, December 2, 2025: _How AI is transforming work at Anthropic_](https://www.anthropic.com/news/how-ai-is-transforming-work-at-anthropic)
+
+</div>
+
+
+</div>
+
+
+
+
+Notes:
+Aktuelle Quellen für dieses Modul:
+
+- Microsoft Research, "The Effects of Generative AI on High-Skilled Work: Evidence from Three Field Experiments with Software Developers", Juni 2025.
+- Anthropic, "Anthropic Economic Index: AI's impact on software development", 28. April 2025.
+- Microsoft Research / ASE 2025, "Why AI Agents Still Need You: Findings from Developer-Agent Collaborations in the Wild", Oktober 2025.
+- Anthropic, "How AI is transforming work at Anthropic", 2. Dezember 2025.
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Web-Systeme und Daten
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Warum gehört in dieser Veranstaltung zur Web-Perspektive ausdrücklich auch eine Datenperspektive?
+
+</div>
+
+
+--
+
+## Ein konkretes Beispiel: Der personalisierte Feed
+
+**Was der Nutzer sieht:** eine personalisierte Startseite mit Empfehlungen - scheinbar einfach.
+
+### Vereinfachter Fluss
+
+<div class="small">
+
+1. Der Nutzer sendet einen HTTP-Request.
+2. Ein Load Balancer oder API Gateway leitet den Request weiter.
+3. Der Recommendation Service liest Features aus einer Data Pipeline.
+4. Ein ML-Modell erzeugt ein Ranking.
+   - Das ML-Modell muss vorab trainiert werden
+   - Das Training muss auf neuen Daten regelmäßig wiederholt werden
+   
+5. Der Service liefert die Empfehlungen über CDN und Frontend aus.
+
+</div>
+
+
+**Web und Daten sind zwei Seiten derselben Medaille** - ohne Datenpipeline kein Feed, ohne skalierbare Web-Architektur keine Auslieferung.
+
+--
+
+## Vom Web zum Data Engineering
+
+
+### Warum Data Engineering dazugehört
+
+- Web-Systeme erzeugen und konsumieren große Datenmengen
+- Daten müssen gespeichert, verarbeitet und bereitgestellt werden
+- moderne Anwendungen kombinieren APIs, Persistenz und Analyse
+
+
+<div class="c-green gap">
+
+**Konsequenz:**
+
+- viele Produktfunktionen hängen heute direkt von Datenqualität und Pipeline-Design ab
+- damit wird Data Engineering zum integralen Teil moderner Web-Systeme
+
+</div>
+
+
+
+--
+
+## Leitfragen für die nächsten Kapitel
+
+| Kapitel | Frage |
+|---|---|
+| 2 | Wie ist die Anwendung durch Architektur und Schichten strukturiert? |
+| 3 | Welche technischen Grundlagen liefern HTTP, HTML und CSS? |
+| 4 | Wie werden Web-Systeme serverseitig umgesetzt? |
+| 5 | Wie werden Web-Prinzipien auf APIs übertragen? |
+| 6 | Wie werden Datenflüsse und Datenprodukte systematisch betrieben? |
+
+---
+
+## Takeaway
+
+Die Motivation der Veranstaltung ist doppelt: Web-Systeme sind technisch und organisatorisch komplex, und ihr Wert entsteht immer häufiger aus dem Zusammenspiel mit Daten. Dieser Kurs behandelt beides als zusammenhängende Disziplin.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

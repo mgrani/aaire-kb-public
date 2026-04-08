@@ -1,0 +1,1275 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Vorlesung 02: Architektur von Web-Anwendungen</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Web and Data Engineering
+## Vorlesung 02: Architektur von Web-Anwendungen
+
+Prof. Dr. Michael Granitzer
+
+24 März 2026
+
+---
+
+## Ziel dieser Vorlesung
+
+Architektur bestimmt, wie Web-Systeme strukturiert, verteilt und betrieben werden. Diese Vorlesung klärt, **welche Architekturentscheidungen** typisch sind, **warum** sie getroffen werden und **wie** sie sich auf Wartbarkeit, Skalierung und Datenverarbeitung auswirken.
+
+### Leitfragen
+
+- Was verwaltet Software eigentlich — und warum reicht ein Rechner nicht?
+- Warum ist Architektur mehr als ein Implementierungsdetail?
+- Welche Architekturstile gibt es — und wie funktionieren sie?
+- Wie strukturiert das 3-Schichten-Modell Web-Anwendungen?
+- Wie hängen Client-Typen, Deployment und Kopplung zusammen?
+- Welche Architekturen braucht die Datenverarbeitung in Web-Systemen?
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 1
+## Rechnerarchitektur und Ressourcen
+
+---
+
+## Leitfrage
+
+Was verwaltet Software eigentlich — und warum reicht ein einzelner Rechner für Web-Systeme meist nicht aus?
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Die Von-Neumann-Architektur
+
+Nahezu alle heutigen Computer folgen dem **Von-Neumann-Modell** (1945): ein gemeinsamer Speicher für Programm und Daten, eine Verarbeitungseinheit und ein sequentieller Befehlszyklus.
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![Von-Neumann-Architektur: CPU mit Steuerwerk, Rechenwerk und Registern, verbunden mit RAM über System Bus, sowie Storage und Netzwerk als I/O](/courses/web-and-data-engineering/figures/von-neumann-architecture.svg)
+
+</div>
+
+
+<div class="column">
+
+### Kernprinzip
+
+Software verwaltet letztlich vier physische Ressourcen:
+
+- **Rechenleistung** (CPU)
+- **Arbeitsspeicher** (RAM)
+- **persistenter Speicher** (Storage)
+- **Netzwerk** (I/O)
+
+Jede Architekturentscheidung betrifft mindestens eine davon.
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Ressourcen eines Rechners
+
+| Ressource | Funktion | Typisch (Server) | Engpass-Symptom |
+|---|---|---|---|
+| **CPU** | Berechnung, Steuerung | 8–128 Kerne | hohe Latenz, lange Antwortzeiten |
+| **RAM** | aktive Daten | 32–512 GB | Out-of-Memory, Swapping |
+| **Storage** | persistente Daten | TB bis PB | langsame Reads/Writes |
+| **Netzwerk** | Kommunikation | 1–100 Gbit/s | Timeouts, Paketverlust |
+
+### Speicherhierarchie
+
+![Speicherhierarchie als Pyramide: CPU-Register oben bis Netzwerk unten](/courses/web-and-data-engineering/figures/memory-hierarchy.svg)
+
+---
+
+## Prozesse und Threads
+
+![Prozesse und Threads: zwei isolierte Prozesse mit eigenem Speicher, in denen Threads laufen und Speicher teilen](/courses/web-and-data-engineering/figures/processes-threads.svg)
+
+--
+
+## Prozess vs. Thread
+
+| | Prozess | Thread |
+|---|---|---|
+| **Speicher** | eigener Adressraum | teilt Prozess-Speicher |
+| **Isolation** | stark | schwach |
+| **Erzeugung** | aufwändig | leichtgewichtig |
+
+Ein Web-Server bedient viele gleichzeitige Requests. Ob er Threads, Prozesse oder asynchrone Events nutzt, ist eine zentrale Designentscheidung — bestimmt Durchsatz und Ressourcenverbrauch.
+
+---
+
+## Warum ein Rechner nicht reicht
+
+| Strategie | Beschreibung | Grenze |
+|---|---|---|
+| **Vertikal skalieren** | Mehr RAM, schnellere CPU, größere SSD | Physische und ökonomische Obergrenze |
+| **Horizontal skalieren** | Mehr Server, Last verteilen | Koordination, Konsistenz, Netzwerk |
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Konkrete Grenzen (Faustregeln)
+
+- **CPU:** Einfache HTTP-Requests: Tausende/s — rechenintensive Operationen (ML, Bildverarbeitung) deutlich weniger
+- **RAM:** 100.000 Sessions × 1 MB = 100 GB — Sessiongröße ist entscheidend
+- **Storage I/O:** SSD: 10.000–100.000 IOPS — komplexe DB-Queries können das schnell ausschöpfen
+- **Netzwerk:** 10 Gbit/s = 1,25 GB/s — bei 10.000 Nutzern × 1 Mbit/s bereits voll ausgelastet
+
+Notes:
+Konkrete Zahlen sind immer Faustregeln und stark workload-abhängig. Ziel ist das Verständnis der Größenordnungen und Engpass-Typen, nicht exakte Benchmarks.
+
+---
+
+## Vom einzelnen Rechner zum verteilten System
+
+![Verteiltes System: mehrere Clients zu Load Balancer zu N Server-Instanzen zu DB Primary mit Replica](/courses/web-and-data-engineering/figures/distributed-system.svg)
+
+--
+
+## Neue Herausforderungen
+
+- **Netzwerk-Latenz** — ms statt ns (RAM)
+- **Partielle Ausfälle** — einzelne Server fallen aus
+- **Konsistenz von Software** — welche Version ist aktuell?
+- **Koordination von Prozessen** — wer bearbeitet was?
+
+Sobald diese Herausforderungen entstehen, sind Architekturentscheidungen nötig — nicht erst beim Betrieb.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Takeaway
+
+Software-Architektur verwaltet physische Ressourcen: CPU, RAM, Storage und Netzwerk. Ein einzelner Rechner hat endliche Kapazität — sobald diese nicht mehr ausreicht, entsteht ein verteiltes System mit neuen Herausforderungen (Latenz, Ausfälle, Konsistenz).
+
+### Schlüsselbegriffe
+
+| Begriff | Erklärung |
+|---|---|
+| **Von-Neumann-Architektur** | Rechnermodell mit gemeinsamem Speicher für Programm und Daten |
+| **Prozess** | Laufende Instanz eines Programms mit eigenem Speicherbereich |
+| **Thread** | Leichtgewichtiger Ausführungsstrang innerhalb eines Prozesses |
+| **Concurrency** | Mehrere Aufgaben machen Fortschritt — durch Scheduling auf einem Kern |
+| **Parallelismus** | Mehrere Aufgaben laufen gleichzeitig auf verschiedenen Kernen |
+| **Vertikale Skalierung** | Leistungsstärkere Hardware für einen Server (Scale Up) |
+| **Horizontale Skalierung** | Last auf mehrere Server verteilen (Scale Out) |
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 2
+## Software-Architekturen
+
+---
+
+## Leitfrage
+
+Warum lohnt es sich, eine Web-Anwendung architektonisch zu zerlegen, bevor über Frameworks oder Programmiersprachen entschieden wird?
+
+---
+
+## Was ist Software-Architektur?
+
+> „The software architecture of a system is the set of structures needed to reason about the system, which comprise software elements, relations among them, and properties of both."
+>
+> — Bass, Clements & Kazman, *Software Architecture in Practice* (4th ed.)
+
+Software-Architektur beschreibt die **oberste Struktur** eines Systems — die schwer änderbaren Entscheidungen und die Beziehungen zwischen den wichtigsten Teilen.
+
+--
+
+### Typische Ziele
+
+- Komplexität reduzieren
+- Verantwortlichkeiten trennen
+- Schnittstellen stabilisieren
+- Wartung und Weiterentwicklung vorbereiten
+
+---
+
+## Architekturentscheidung vs. Implementierung
+
+| | Architekturentscheidung | Implementierungsentscheidung |
+|---|---|---|
+| **Änderungskosten** | hoch — betrifft viele Komponenten | gering — lokal begrenzt |
+| **Beispiel Web** | „Monolith oder Microservices?" | „Welches ORM nutzen wir?" |
+| **Beispiel Web** | „REST oder GraphQL als API-Stil?" | „Welche HTTP-Library?" |
+| **Beispiel Web** | „Wo liegt Session-State — Client oder Server?" | „Redis oder Memcached als Cache?" |
+| **Lebensdauer** | Jahre — schwer revidierbar | Wochen bis Monate — austauschbar |
+
+**Faustregel:** Wenn eine Entscheidung **teuer zu revidieren** ist und **viele Teile des Systems betrifft**, ist sie architektonisch.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Architektonische Prinzipien
+
+| Prinzip | Kernaussage | Schlecht | Gut |
+|---|---|---|---|
+| **Separation of Concerns** | Jede Komponente hat eine klar abgegrenzte Verantwortung | `<p><?= $db->query(...) ?></p>` | Controller → Service → Repository → DB |
+| **Single Responsibility** | Ein Modul tut genau eine Sache | `OrderService` speichert + mailt + berechnet Steuer | `OrderService` + `EmailService` + `TaxService` |
+| **Principle of Least Knowledge** | Komponenten kennen nur die Schnittstelle — nicht die Interna | Service A liest direkt in DB von Service B | Service A ruft Service B per API auf |
+| **Build to Change** | Architektur für Änderungen entwerfen, nicht für Stabilität | Interne Felder direkt exponiert, kein Versionierungskonzept | API-Versionierung, Feature Flags |
+| **DRY** | Logik nicht duplizieren | Validierung separat in Client und Server | Validierung zentral — einmal definiert, überall verwendet |
+| **YAGNI** | Nur bauen, was jetzt gebraucht wird | Microservice-Setup für ein Drei-Personen-Team | Monolith starten, erst bei echtem Bedarf aufteilen |
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Warum Architektur für Web-Systeme zählt
+
+Web-Anwendungen kombinieren viele Technologien und Verantwortlichkeiten in einem System. Ohne explizite Architektur wachsen Abhängigkeiten unkontrolliert.
+
+| Situation | Ohne Architektur | Mit Architektur |
+|---|---|---|
+| Datenbank wechseln | Änderungen in hunderten Dateien, da SQL direkt im Code | Data Access Layer austauschen, Rest bleibt stabil |
+| Mobile App ergänzen | Backend liefert HTML — App braucht JSON-API → großer Umbau | API existiert bereits, Mobile Client wird angebunden |
+| Team wächst | Alle arbeiten im selben Code, ständige Konflikte | Klare Modulgrenze, Teams arbeiten unabhängig |
+| Performance-Problem | Unklar, welche Komponente das Problem verursacht | Monitoring pro Schicht, gezielte Skalierung möglich |
+
+---
+
+## Typische Architekturfragen
+
+Bevor Code geschrieben wird, sollten diese Fragen beantwortet sein:
+
+- Welche Teile dürfen direkt voneinander abhängen?
+- Wo liegt Geschäftslogik — im Client, im Server, in einem separaten Service?
+- Welche Entscheidungen müssen lange stabil bleiben?
+- Wie wird das System deployt — als Monolith, als Container, als serverless Functions?
+- Welche Querschnittsthemen (Sicherheit, Logging, Monitoring) betreffen mehrere Komponenten?
+- Wie kommunizieren die Teile — synchron per API oder asynchron per Events?
+
+
+<div class="takeaway">
+
+Architektur ist keine Zusatzdokumentation. Sie ist das Mittel, um ein komplexes Web-System überhaupt beherrschbar zu machen.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 3
+## Architekturstile für Web-Anwendungen
+
+---
+
+## Leitfrage
+
+Welcher Architekturstil passt zu einer Web-Anwendung, wenn sich Anforderungen, Lastprofil und Teamstruktur unterscheiden?
+
+---
+
+## N-Tier als Referenzstil
+
+- Einteilung in Schichten mit klaren Schnittstellen und Vereinbarungen
+- eine Schicht kann nur auf die Schicht davor zugreifen (`Closed Layer`) oder auf alle darunter (`Open Layer`)
+- Schichten können logische Unterteilung (Layers) oder physische Verteilung (Tiers) darstellen
+- **Anwendungsbereiche:** Standard-Webanwendungen, heterogene Systeme
+
+![N-Tier-Architektur](/courses/web-and-data-engineering/figures/diagram-n-tier.png)
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## N-Tier: Wie funktioniert das?
+
+Ein Request durchläuft die Schichten sequentiell — die Response traversiert sie in umgekehrter Reihenfolge zurück:
+
+1. **Client** → HTTP-Request an **Web Tier**
+2. **Web Tier** → Auth, Routing, Weitergabe an **Middle Tier**
+3. **Middle Tier** → Geschäftslogik, Zugriff auf **Data Tier**
+4. **Data Tier** → Daten lesen/schreiben, Ergebnis zurück
+5. **Middle Tier** → verarbeitetes Ergebnis an Web Tier
+6. **Web Tier** → HTTP-Response an Client
+
+**Schlüsselprinzip:** Jede Schicht kennt nur die Schnittstelle der nächsten — nicht deren Implementierung. Schichten sind unabhängig austauschbar und skalierbar.
+
+**Herausforderungen:** Querschnittsthemen (Logging, Sicherheit) sind aufwändig; Änderungen betreffen oft mehrere Schichten gleichzeitig.
+
+---
+
+## Event-Driven Architecture
+
+Komponenten kommunizieren nicht direkt, sondern über **Events** — asynchrone Nachrichten, die eine Zustandsänderung beschreiben.
+
+- **Producer** erzeugt ein Event (z.B. „Bestellung aufgegeben")
+- **Broker** (z.B. Kafka, RabbitMQ) nimmt das Event entgegen und verteilt es
+- **Consumer** reagiert auf das Event unabhängig vom Producer
+
+![Event-Driven-Architektur](/courses/web-and-data-engineering/figures/diagram-event-driven.png)
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Event-Driven: Beispiel Bestellprozess
+
+1. **Bestellservice** → `OrderPlaced` an Broker
+2. Broker verteilt an **Zahlungsservice**
+3. Zahlungsservice verarbeitet Zahlung → `PaymentCompleted` an Broker
+4. Broker verteilt an **Lagerservice**
+5. Lagerservice reserviert Ware
+
+### Schlüsselprinzip
+
+Neue Consumer können hinzugefügt werden, ohne bestehende Komponenten zu ändern → hohe **Entkopplung**.
+
+### Herausforderungen
+
+- Reihenfolge nicht automatisch garantiert
+- Fehlerbehandlung komplexer (Consumer-Ausfall?)
+- Debugging über asynchrone Schritte schwieriger
+
+---
+
+## Microservices
+
+
+<div class="columns">
+
+
+<div class="column">
+
+Das System wird in **kleine, autonome Dienste** zerlegt — jeder mit abgegrenzter fachlicher Verantwortung und unabhängigem Deployment.
+
+- jeder Service hat eigene Datenbank, eigenes Deployment, eigenes Team
+- Kommunikation über REST-APIs, gRPC oder Events
+- ein **API Gateway** routet externe Anfragen an die richtigen Services
+
+</div>
+
+
+<div class="column">
+
+![Microservices-Architektur](/courses/web-and-data-engineering/figures/diagram-microservices.png)
+
+</div>
+
+
+</div>
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Microservices: Beispiel Homepage-Request
+
+1. **Client** → `GET /homepage` an **API Gateway**
+2. Gateway ruft parallel auf:
+   - `User Service` → Profildaten
+   - `Recommendations Service` → Empfehlungen
+   - `Content Service` → Katalogdaten
+3. Gateway komponiert die Antworten → zusammengesetzte Response an Client
+
+### Schlüsselprinzip
+
+Jeder Service ist autonom — eigene Sprache, eigene DB, eigener Release-Zyklus. Teams arbeiten unabhängig.
+
+### Herausforderungen
+
+- Netzwerklatenz, partielle Ausfälle
+- Jeder Service braucht Monitoring + Deployment-Pipeline
+- Service Discovery & Governance
+
+---
+
+## Architekturstile im Vergleich
+
+![Drei Architekturstile nebeneinander: N-Tier, Event-Driven, Microservices](/courses/web-and-data-engineering/figures/architecture-styles-comparison.svg)
+
+
+<div class="takeaway">
+
+Es gibt keinen universell besten Architekturstil. Die Wahl hängt von Domäne, Lastprofil, Änderungsrate und organisatorischem Setup ab. In der Praxis kombinieren viele Systeme mehrere Stile — z.B. N-Tier für die Kernapplikation mit Event-Driven für asynchrone Verarbeitung.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 4
+## Logisches 3-Schichten-Modell
+
+---
+
+## Leitfrage
+
+Wie lässt sich eine Web-Anwendung so strukturieren, dass Benutzeroberfläche, Logik und Datenhaltung getrennt, aber koordiniert bleiben?
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Logisches 3-Schichten-Modell
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![Referenzarchitektur mit drei Schichten](/courses/web-and-data-engineering/figures/diagram-layered-reference.png)
+
+</div>
+
+
+<div class="column">
+
+Das klassische 3-Schichten-Modell teilt Anwendungssysteme in drei Schichten:
+
+| Schicht | Aufgabe |
+|---|---|
+| **Präsentation** | UI und Interaktion |
+| **Anwendung** | Geschäftslogik & Regeln |
+| **Persistenz** | dauerhafte Datenspeicherung |
+
+Die Anwendungsschicht kann in Dienst- und Logikschicht unterteilt werden. Dienste kapseln die Geschäftslogik und stellen Schnittstellen für die Präsentationsschicht bereit.
+
+**Layer = logische Trennung.** Mehrere Schichten können im selben Prozess laufen — physische Verteilung folgt erst im nächsten Schritt.
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Was gehört in welche Schicht?
+
+**Aufgabe:** Ein Nutzer kauft im Online-Shop ein Produkt. Ordnen Sie diese Code-Fragmente den drei Schichten zu:
+
+```java
+// (A)
+<button onclick="order()">Kaufen</button>
+<p>Preis: € 79,99</p>
+
+// (B)
+if (stock < 1) throw new OutOfStockException();
+double total = price * quantity * taxRate;
+sendConfirmationEmail(user);
+
+// (C)
+SELECT * FROM products WHERE id = 42;
+INSERT INTO orders (user_id, product_id) ...
+```
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Lösung
+
+| Code | Schicht | Warum |
+|---|---|---|
+| **(A)** HTML/Button | Präsentation | Darstellung, Nutzereingabe |
+| **(B)** Lagerprüfung, Steuer, E-Mail | Anwendung | Geschäftsregeln |
+| **(C)** SQL-Abfragen | Persistenz | Datenzugriff |
+
+**Faustregel:** Ändert sich etwas, wenn die Datenbank ausgetauscht wird? → Persistenz. Wenn das Design geändert wird? → Präsentation. Alles dazwischen → Anwendungsschicht.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Warum die Trennung praktisch wichtig ist
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Ohne Schichtentrennung
+
+```java
+// Alles gemischt im Controller:
+String html = "<h1>Produkt</h1>";
+ResultSet rs = db.query("SELECT ...");
+if (rs.getInt("stock") > 0) {
+    html += "<button>Kaufen</button>";
+    double tax = rs.getDouble("price") * 0.19;
+    html += "<p>€ " + tax + "</p>";
+}
+out.print(html);
+```
+
+- Datenbank wechseln → ganzen Code anfassen
+- Design ändern → Geschäftslogik anfassen
+- Testen ohne Datenbank → unmöglich
+
+</div>
+
+
+<div class="column">
+
+### Mit Schichtentrennung
+
+- **Persistenzschicht** liefert `Product`-Objekt
+- **Anwendungsschicht** berechnet Preis, prüft Lager
+- **Präsentationsschicht** rendert HTML/JSON
+
+→ Datenbank austauschen: nur Persistenzschicht ändern
+
+→ Design ändern: nur Präsentation ändern
+
+→ Geschäftslogik testen: ohne DB, ohne Browser
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Das 3-Schichten-Modell ist keine veraltete Standardlösung, sondern eine robuste Denkstruktur. Die entscheidende Frage bei jeder Code-Zeile: **In welcher Schicht lebe ich gerade?**
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 5
+## 3-Tier und Web-Anwendungsformen
+
+---
+
+## Leitfrage
+
+Aus welchen Komponenten besteht eine moderne Web-Anwendung — vom Browser bis zur Datenbank — und wie arbeiten diese zusammen?
+
+---
+
+## Von Layer zu Tier
+
+| Perspektive | Layer | Tier |
+|---|---|---|
+| Trennung | logisch | physisch |
+| Kommunikation | oft im selben Prozess | über Netz und Interprozesskommunikation |
+| Hauptnutzen | Strukturierung | Verteilung, Skalierung, Isolation |
+| Zusatzkosten | gering | Deployment, Latenz, Koordination |
+
+**Layer** = logische Trennung (Architekturentscheidung). **Tier** = physische Trennung (Infrastrukturentscheidung).
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Anatomie einer modernen Web-Anwendung
+
+Der Weg eines Requests vom Nutzer bis zur Datenbank durchläuft mehrere Infrastrukturkomponenten:
+
+![Web-App-Anatomie: Nutzer zu DNS zu CDN zu WAF zu Load Balancer zu Web Tier zu App Tier zu Cache/DB/Queue/Worker](/courses/web-and-data-engineering/figures/web-app-anatomy.svg)
+
+Jede dieser Komponenten erfüllt eine spezifische Rolle — die folgenden Slides erklären sie im Detail.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Schlüsselbegriffe: Schutz & Verteilung
+
+
+<div class="columns">
+
+
+<div class="column">
+
+| Begriff | Funktion |
+|---|---|
+| **DNS** | Übersetzt `shop.example.com` → IP-Adresse — erster Schritt jedes Requests |
+| **CDN** | Statische Inhalte (JS, CSS, Bilder) vom nächstgelegenen Edge-Server ausliefern → weniger Latenz |
+| **WAF** | Analysiert HTTP-Traffic, blockiert SQL Injection, XSS etc. — bevor sie die App erreichen |
+
+</div>
+
+
+<div class="column">
+
+| Begriff | Funktion |
+|---|---|
+| **Load Balancer** | Verteilt Requests auf mehrere Server-Instanzen → horizontale Skalierung + Ausfallsicherheit |
+| **Cache / Redis** | Zwischenspeicher im RAM — Produktliste aus Cache: µs, aus DB: ms |
+| **Message Queue** | Puffert Aufgaben asynchron; **Background Worker** arbeitet sie ab (E-Mail, PDF, etc.) |
+
+</div>
+
+
+</div>
+
+
+**Merkhilfe:** DNS + CDN + WAF stehen *vor* der Anwendung (Schutz & Beschleunigung). Load Balancer + Cache + Queue stehen *in* der Anwendungsinfrastruktur (Skalierung & Entkopplung).
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Edge-Komponenten: Vor der Anwendung
+
+Bevor ein Request die eigentliche Anwendung erreicht, durchläuft er mehrere Schutz- und Beschleunigungsschichten:
+
+| Komponente | Aufgabe | Beispiele |
+|---|---|---|
+| **DNS** | Auflösung des Domainnamens zur IP-Adresse; kann geografisches Routing ermöglichen | Route 53, Cloud DNS, Azure DNS |
+| **CDN** | Cacht statische Assets (JS, CSS, Bilder) an Edge-Standorten nahe am Nutzer; reduziert Latenz und Serverlast | CloudFront, Cloud CDN, Azure CDN |
+| **WAF** | Filtert bösartigen HTTP-Traffic; schützt gegen OWASP Top 10 (SQL Injection, XSS, etc.) | AWS WAF, Azure WAF, Cloud Armor |
+| **DDoS-Schutz** | Absorbiert volumetrische Angriffe bevor sie die Infrastruktur erreichen | AWS Shield, Azure DDoS Protection |
+
+Ohne Edge-Schutz ist die Anwendung direkt dem Internet ausgesetzt. In der Praxis sind CDN und WAF keine Extras, sondern Grundvoraussetzungen für Produktion.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Traffic-Management: Load Balancer und API Gateway
+
+| Komponente | Aufgabe | Beispiele |
+|---|---|---|
+| **Load Balancer (L4/L7)** | Verteilt eingehende Requests auf mehrere Instanzen; Health Checks; SSL-Terminierung | ALB, NLB, Cloud Load Balancing |
+| **API Gateway** | Zentraler Einstiegspunkt für alle API-Anfragen; Routing, Authentifizierung, Rate Limiting | Kong, AWS API Gateway, Azure API Management |
+| **Reverse Proxy** | Leitet Client-Requests an Backend weiter; kann SSL, Kompression und Caching übernehmen | Nginx, Envoy, Traefik |
+
+### Schlüsselkonzept: Horizontale Skalierung
+
+Load Balancer ermöglichen **horizontale Skalierung** — statt einen Server größer zu machen (vertikal), werden mehrere gleichwertige Instanzen parallel betrieben. Fällt eine Instanz aus, übernehmen die anderen.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Web Tier: Präsentationsschicht
+
+Die Präsentationsschicht ist die Schnittstelle zum Nutzer. Je nach Architekturentscheidung liegt mehr oder weniger Logik im Browser:
+
+| Modell | Beschreibung | Typische Technologien |
+|---|---|---|
+| **Server-Side Rendering (SSR)** | HTML wird auf dem Server erzeugt und an den Browser gesendet | PHP, Java Servlets/JSP, Django, Rails, Next.js (SSR) |
+| **Single-Page Application (SPA)** | Browser lädt einmalig eine JS-Anwendung, die danach nur noch Daten per API abruft | React, Angular, Vue.js |
+| **Hybrid (SSR + Hydration)** | Server rendert initialen HTML, Browser übernimmt danach die Interaktion | Next.js, Nuxt.js, SvelteKit |
+| **Static Site + API** | Statische HTML-Seiten werden vorab generiert; dynamische Daten kommen per API | Gatsby, Hugo, Astro + REST/GraphQL |
+
+Moderne Frameworks wie `Next.js` und `SvelteKit` verwischen die Grenze zwischen SSR und SPA — sie rendern serverseitig für schnelle Ladezeiten und hydrieren im Browser für Interaktivität.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Application Tier: Geschäftslogik
+
+Die Anwendungsschicht enthält die eigentliche Fachlogik — Validierungen, Berechnungen, Orchestrierung von Diensten.
+
+### Typische Komponenten
+
+| Komponente | Aufgabe |
+|---|---|
+| **Application Façade** | Einheitlicher Einstiegspunkt für die Geschäftslogik; koordiniert Workflows |
+| **Business Components** | Fachliche Kernlogik (z.B. Preisberechnung, Bestellvalidierung) |
+| **Business Entities** | Domänenobjekte, die fachliche Konzepte abbilden |
+| **Data Access Components** | Abstrahieren den Zugriff auf die Persistenzschicht (Repository Pattern) |
+| **Service Agents** | Kommunikation mit externen Diensten und APIs |
+
+### Cross-Cutting Concerns
+
+- **Security:** Authentifizierung, Autorisierung, Input-Validierung
+- **Operational Management:** Logging, Monitoring, Health Checks
+- **Communication:** Serialisierung, Protokollhandling, Fehlerbehandlung
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Asynchrone Verarbeitung: Message Queues
+
+Nicht alle Aufgaben müssen synchron im Request-Zyklus erledigt werden. Message Queues entkoppeln zeitintensive Operationen:
+
+### Ablauf
+
+1. **Client** → `POST /order` an **App Tier**
+2. App speichert Bestellung in DB, legt `OrderCreated`-Event in **Queue**
+3. App antwortet sofort mit `202 Accepted` — Client wartet nicht
+4. **Worker** liest Event aus Queue, sendet E-Mail, generiert PDF, aktualisiert Lager
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Typische Einsatzfälle
+
+- E-Mail-Versand, Push-Benachrichtigungen
+- Bildverarbeitung, PDF-Generierung
+- Synchronisation mit externen Systemen
+- Langläufer: Reports, Datenexporte
+
+</div>
+
+
+<div class="column">
+
+### Technologien
+
+- `RabbitMQ` · `Apache Kafka`
+- `AWS SQS` · `Azure Service Bus`
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Caching und Data Tier
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Caching
+
+| Ebene | Aufgabe | Beispiele |
+|---|---|---|
+| **CDN Cache** | Statische Assets am Edge | CloudFront |
+| **In-Memory** | Häufig gelesene Daten im RAM | Redis, Memcached |
+| **App Cache** | Sessions, berechnete Ergebnisse | Spring Cache |
+
+</div>
+
+
+<div class="column">
+
+### Data Tier
+
+| Typ | Einsatz | Beispiele |
+|---|---|---|
+| **Relationale DB** | Transaktionale Daten (ACID) | PostgreSQL, MySQL |
+| **NoSQL DB** | Flexible Schemata | MongoDB, DynamoDB |
+| **Object Storage** | Dateien, Bilder, Backups | S3, Azure Blob |
+| **Suchmaschine** | Volltextsuche | Elasticsearch |
+
+</div>
+
+
+</div>
+
+
+---
+
+## 3-Tier in der Cloud-Praxis
+
+
+<div class="columns">
+
+
+<div class="column">
+
+In der Cloud-Praxis wird jeder Tier in einem eigenen Subnetz isoliert:
+
+- **Public Subnet:** Load Balancer, Web Tier
+- **Private Subnet:** Application Tier, Cache
+- **Isolated Subnet:** Datenbank (kein Internetzugang)
+- **Security Groups** beschränken den Traffic zwischen Tiers
+- **Auto Scaling** passt die Instanzanzahl pro Tier an die Last an
+
+</div>
+
+
+<div class="column">
+
+![Cloud 3-Tier: Public Subnet, Private Subnet, Isolated Subnet](/courses/web-and-data-engineering/figures/cloud-3tier.svg)
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Client-Varianten im Vergleich
+
+Die Verteilung von Logik zwischen Client und Server bestimmt den Anwendungstyp:
+
+| Variante | Logik im Client | Logik am Server | Typischer Einsatz |
+|---|---|---|---|
+| **Thin Client** | minimal (nur Rendering) | UI-Erzeugung + Logik + Daten | Formularsysteme, Behörden-Apps |
+| **Rich Client / SPA** | UI, Routing, Zustand | API + Logik + Daten | Interaktive Plattformen, Dashboards |
+| **Mobile Client** | UI, Offline-Fähigkeit, lokaler Speicher | API + Logik + Daten + Sync | Apps mit instabiler Konnektivität |
+| **API-only (Headless)** | beliebig (verschiedene Clients) | nur API + Logik + Daten | Multi-Client-Plattformen |
+
+---
+
+## Thin Client
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![Thin-Client-Architektur](/courses/web-and-data-engineering/figures/diagram-thin-client.png)
+
+</div>
+
+
+<div class="column">
+
+### Merkmale
+
+- Server erzeugt vollständiges HTML
+- Browser rendert — wenig Client-Logik
+- jede Interaktion = neuer HTTP-Request + voller Seiten-Reload
+
+### Einsatz
+
+- Formularsysteme, Behörden-Apps
+- einfache CRUD-Anwendungen
+- überall wo Client-Ressourcen knapp sind
+
+</div>
+
+
+</div>
+
+
+---
+
+## Rich Client / SPA
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![Rich-Client-Architektur](/courses/web-and-data-engineering/figures/diagram-rich-client.png)
+
+</div>
+
+
+<div class="column">
+
+### Merkmale
+
+- Browser lädt einmalig eine JS-Anwendung
+- API-Kommunikation per AJAX/Fetch
+- flüssige Interaktion ohne Seitenneuladen
+
+### Einsatz
+
+- interaktive Plattformen, Dashboards
+- hohe UI-Komplexität
+- Offline-Fähigkeit möglich (Service Worker)
+
+</div>
+
+
+</div>
+
+
+---
+
+## Mobile Client
+
+
+<div class="columns">
+
+
+<div class="column">
+
+- Eigene Präsentations-, Geschäfts- und Datenschicht im Client
+- Lokaler Speicher und Cache für Offline-Fähigkeit
+- Datensynchronisation über unzuverlässige Netzwerke
+- Cross-Cutting: Security, Configuration, Connectivity
+- Zunehmend: **Progressive Web Apps (PWAs)** als Alternative zu nativen Apps
+
+</div>
+
+
+<div class="column">
+
+![Mobile-Client-Architektur](/courses/web-and-data-engineering/figures/diagram-mobile-client.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Eine moderne Web-Anwendung besteht aus weit mehr als drei Schichten. Von CDN und WAF über Load Balancer und API Gateway bis zu Message Queues und Cache — jede Komponente hat eine spezifische Aufgabe. Die Architekturentscheidung ist, welche Komponenten man braucht und wie sie zusammenspielen.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul 6
+## Datenarchitekturen für Web-Systeme
+
+---
+
+## Leitfrage
+
+Welche Architekturmuster braucht es, um die Daten, die Web-Systeme erzeugen, systematisch zu verarbeiten und nutzbar zu machen?
+
+---
+
+## Warum Datenarchitektur Teil der Web-Architektur ist
+
+- Moderne Web-Systeme erzeugen kontinuierlich Daten: Klicks, Transaktionen, Logs, Sensorwerte
+- Produktfunktionen wie Personalisierung, Dashboards und Alerting hängen direkt von Datenpipelines ab
+- Ohne explizite Datenarchitektur entstehen Ad-hoc-Lösungen, die nicht skalieren und schwer wartbar sind
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Batch-Verarbeitung
+
+Daten werden in regelmäßigen Intervallen gesammelt und als Gesamtheit verarbeitet.
+
+### Ablauf
+
+1. **Datenquellen** (Web-Logs, DB-Exports, API-Dumps) → **Ingestion (Airflow)**
+2. Ingestion legt Rohdaten zeitgesteuert (z.B. täglich 02:00) im **Data Lake** ab
+3. **Transformation (Spark/dbt)** liest den gesamten Datensatz, bereinigt und aggregiert
+4. Ergebnisse werden in ein **Data Warehouse** geschrieben
+5. **BI-Dashboard** stellt analytische Abfragen an das Warehouse
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Eigenschaften
+
+- hoher Durchsatz (große Datenmengen am Stück)
+- Ergebnisse erst nach Abschluss verfügbar (Minuten bis Stunden)
+- gut für Reporting, ML-Training, historische Analysen
+
+</div>
+
+
+<div class="column">
+
+### Technologien
+
+- `Hadoop MapReduce` · `Apache Spark`
+- `dbt` · `Apache Airflow`
+
+</div>
+
+
+</div>
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Stream-Verarbeitung
+
+Daten werden sofort verarbeitet, sobald sie eintreffen — Event für Event.
+
+### Ablauf
+
+1. **Producer (Web-App)** sendet Click- und Transaction-Events an **Broker (Kafka)**
+2. **Stream Processor (Flink)** konsumiert Events in Echtzeit
+3. Prozessor filtert, aggregiert, reichert an → stellt Ergebnis sofort bereit
+4. **Dashboard / Alerting** erhält Resultate mit Latenz von ms bis Sekunden
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Eigenschaften
+
+- niedrige Latenz (Millisekunden bis Sekunden)
+- komplexere Fehlerbehandlung (Out-of-Order, Duplikate)
+- gut für Monitoring, Betrugserkennung, Echtzeit-Personalisierung
+
+</div>
+
+
+<div class="column">
+
+### Technologien
+
+- `Apache Kafka`
+- `Apache Flink`
+- `Spark Structured Streaming`
+- `Kafka Streams`
+
+</div>
+
+
+</div>
+
+
+---
+
+## Batch vs. Stream im Vergleich
+
+| Aspekt | Batch | Stream |
+|---|---|---|
+| Latenz | Minuten bis Stunden | Millisekunden bis Sekunden |
+| Durchsatz | sehr hoch (große Blöcke) | hoch (Event für Event) |
+| Komplexität | geringer (vollständiger Datensatz) | höher (Reihenfolge, Duplikate, Ausfälle) |
+| Typischer Einsatz | Reporting, ML-Training, ETL | Monitoring, Alerting, Echtzeit-Features |
+| Fehlerbehandlung | Neuberechnung des gesamten Batchs | Checkpoints, Exactly-once-Semantik |
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Lambda-Architektur
+
+**Problem:** Wie bekommt man sowohl historische Vollständigkeit als auch Echtzeit-Ergebnisse?
+
+### Struktur
+
+- **Batch Layer** (Spark, Hadoop): verarbeitet den vollständigen historischen Datensatz periodisch → exakte, aber verzögerte Ergebnisse
+- **Speed Layer** (Flink, Kafka Streams): verarbeitet neue Events in Echtzeit → sofortige, aber möglicherweise approximierte Ergebnisse
+- **Serving Layer:** kombiniert die Ergebnisse beider Pfade für Abfragen (Dashboard, API)
+
+### Herausforderungen
+
+Doppelte Codebasis — dieselbe Logik muss in Batch und Stream implementiert werden. Hoher Betriebsaufwand. Konsistenz zwischen beiden Pfaden ist nicht trivial.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Kappa-Architektur
+
+**Problem:** Kann man die Komplexität der Lambda-Architektur reduzieren?
+
+### Struktur
+
+- **alle Daten** werden als Events in einem persistenten Log gespeichert (z.B. Kafka)
+- **Stream Processing** verarbeitet sowohl neue Events als auch historische Daten mit derselben Logik
+- **Replay:** Wenn sich die Verarbeitungslogik ändert, startet ein neuer Stream-Job, der das gesamte Event-Log erneut durchläuft — alle bisherigen Ergebnisse werden konsistent neu berechnet
+
+
+<div class="columns">
+
+
+<div class="column">
+
+### Vorteile
+
+- eine einzige Codebasis für alle Verarbeitungslogik
+- einfachere Architektur, weniger Betriebsaufwand
+- Replay ermöglicht Korrektur und Neuberechnung
+
+</div>
+
+
+<div class="column">
+
+### Herausforderungen
+
+- Replay großer Event-Logs kann langsam und teuer sein
+- nicht alle Anwendungsfälle lassen sich rein als Stream modellieren
+- setzt einen skalierbaren, langlebigen Event-Log voraus
+
+</div>
+
+
+</div>
+
+
+---
+
+## Lambda vs. Kappa im Vergleich
+
+| Aspekt | Lambda | Kappa |
+|---|---|---|
+| Verarbeitungspfade | zwei (Batch + Stream) | einer (nur Stream) |
+| Codebasis | doppelt | einfach |
+| Historische Daten | Batch Layer | Replay aus Event-Log |
+| Betriebsaufwand | hoch | geringer |
+| Genauigkeit | Batch korrigiert Stream | Replay korrigiert |
+| Typischer Einsatz | Legacy-Systeme, komplexe Analysen | modernere Event-getriebene Systeme |
+
+---
+
+## Data Lake und Data Warehouse
+
+![Vergleich: Data Lake (Schema-on-Read, Rohdaten), Data Warehouse (Schema-on-Write, strukturiert), Data Lakehouse (Kombination)](/courses/web-and-data-engineering/figures/data-lake-vs-warehouse.svg)
+
+
+<div class="takeaway">
+
+Datenarchitekturen sind keine Ergänzung zur Web-Architektur, sondern ihr integraler Bestandteil. Ob Batch oder Stream, Lambda oder Kappa, Data Lake oder Warehouse — die Wahl hängt davon ab, wie schnell, vollständig und konsistent Daten verarbeitet werden müssen.
+
+</div>
+
+
+**Vertiefung in Vorlesung 06 (Data Engineering):** Die hier eingeführten Architekturen werden dort operational behandelt — Datenpipelines, Datenqualität, Orchestrierung und Governance.
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Schlüsselbegriffe
+
+| Begriff | Erklärung |
+|---|---|
+| **Ingestion** | Das Einsammeln von Rohdaten aus verschiedenen Quellen in ein zentrales System |
+| **ETL / ELT** | **Extract, Transform, Load** — der klassische Dreischritt. Bei ELT werden Rohdaten zuerst geladen und erst im Zielsystem transformiert |
+| **Data Lake** | Zentraler Speicher für Rohdaten in beliebigem Format (`Schema-on-Read`) |
+| **Data Warehouse** | Speicher für aufbereitete, strukturierte Daten mit festem Schema (`Schema-on-Write`) |
+| **Message Broker** | Infrastruktur (z.B. Kafka), die Events zwischen Producern und Consumern puffert |
+| **Checkpoint** | Regelmäßige Momentaufnahme des Verarbeitungszustands im Stream Processing |
+| **Exactly-once-Semantik** | Die Garantie, dass jedes Event genau einmal verarbeitet wird |
+| **At-least-once** | Jedes Event wird mindestens einmal verarbeitet; Consumer müssen mit Duplikaten umgehen |
+| **Backpressure** | Mechanismus, der den Datenfluss drosselt, wenn ein Consumer langsamer verarbeitet als der Producer liefert |
+| **Replay** | Das erneute Durchlaufen eines Event-Logs; ermöglicht Neuberechnung bei Logik-Änderungen |
+
+---
+
+## Wrap-Up
+
+- Software verwaltet physische Ressourcen (CPU, RAM, Storage, Netzwerk) — ihre Grenzen erzwingen Verteilung und damit Architekturentscheidungen.
+- Architektur reduziert Komplexität, indem sie Verantwortlichkeiten explizit trennt.
+- N-Tier, Event-Driven und Microservices lösen unterschiedliche Probleme — die Wahl hängt von Domäne, Last und Team ab.
+- Das 3-Schichten-Modell trennt logisch; die physische Verteilung (Tiers) bringt Skalierung, aber auch Betriebskomplexität.
+- Datenarchitekturen (Batch, Streaming, Lambda/Kappa) sind keine Ergänzung, sondern integraler Bestandteil moderner Web-Systeme.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 310" font-family="Source Sans Pro, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#1565c0"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#1b5e20"/></marker>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#ea4335"/></marker>
+    <marker id="ao" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#b06000"/></marker>
+  </defs>
+
+  <!-- Phase divider -->
+  <line x1="375" y1="5" x2="375" y2="305" stroke="#ddd" stroke-width="1.5" stroke-dasharray="6,3"/>
+
+  <!-- === PHASE 1: First Request === -->
+  <text x="180" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#333">① Erste Anfrage</text>
+
+  <rect x="10" y="28" width="90" height="30" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="55" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#1565c0">Browser</text>
+  <rect x="260" y="28" width="90" height="30" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="305" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#b71c1c">Server</text>
+
+  <!-- Timeline lines phase 1 -->
+  <line x1="55" y1="60" x2="55" y2="200" stroke="#4285f4" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="305" y1="60" x2="305" y2="200" stroke="#ea4335" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- GET request -->
+  <line x1="55" y1="80" x2="299" y2="80" stroke="#1565c0" stroke-width="2" marker-end="url(#ab)"/>
+  <text x="177" y="75" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="600">GET /api/products/42</text>
+
+  <!-- Response with headers box -->
+  <rect x="30" y="100" width="310" height="80" rx="5" fill="white" stroke="#34a853" stroke-width="2"/>
+  <rect x="30" y="100" width="310" height="20" rx="5" fill="#34a853"/>
+  <text x="185" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="white">200 OK</text>
+  <text x="42" y="134" font-size="10" font-family="monospace" fill="#333">ETag: "f7e3a1b2"</text>
+  <text x="42" y="149" font-size="10" font-family="monospace" fill="#333">Cache-Control: max-age=300</text>
+  <text x="42" y="164" font-size="10" font-family="monospace" fill="#888">{...Produktdaten, Preis: 79.99...}</text>
+  <line x1="305" y1="90" x2="61" y2="98" stroke="#34a853" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Cache stored -->
+  <rect x="10" y="196" width="200" height="28" rx="4" fill="#e6f4ea" stroke="#34a853"/>
+  <text x="110" y="214" text-anchor="middle" font-size="10" fill="#1b5e20" font-weight="600">💾 Im Browser-Cache gespeichert</text>
+
+  <!-- max-age indicator -->
+  <rect x="10" y="234" width="200" height="28" rx="4" fill="#fff3cd" stroke="#f9ab00"/>
+  <text x="110" y="252" text-anchor="middle" font-size="10" fill="#b06000">⏰ Gültig für 300 Sekunden</text>
+
+  <!-- === PHASE 2: Cache Validation === -->
+  <text x="565" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#333">② Validierung nach Ablauf</text>
+
+  <!-- Time passed -->
+  <rect x="390" y="28" width="360" height="26" rx="4" fill="#fff3cd" stroke="#f9ab00"/>
+  <text x="570" y="45" text-anchor="middle" font-size="10" font-weight="600" fill="#b06000">⏰ max-age abgelaufen — Browser muss validieren</text>
+
+  <rect x="390" y="62" width="90" height="30" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="435" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#1565c0">Browser</text>
+  <rect x="668" y="62" width="82" height="30" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="709" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#b71c1c">Server</text>
+
+  <!-- Timeline lines phase 2 -->
+  <line x1="435" y1="94" x2="435" y2="200" stroke="#4285f4" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="709" y1="94" x2="709" y2="200" stroke="#ea4335" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- Conditional GET -->
+  <rect x="390" y="104" width="320" height="40" rx="4" fill="white" stroke="#4285f4" stroke-width="1.5"/>
+  <text x="400" y="120" font-size="9" font-family="monospace" fill="#1565c0" font-weight="600">GET /api/products/42</text>
+  <text x="400" y="136" font-size="9" font-family="monospace" fill="#555">If-None-Match: "f7e3a1b2"</text>
+  <line x1="435" y1="100" x2="662" y2="100" stroke="#1565c0" stroke-width="2" marker-end="url(#ab)"/>
+
+  <!-- Branch: 304 Not Modified -->
+  <rect x="388" y="163" width="160" height="55" rx="5" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+  <text x="468" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#1b5e20">304 Not Modified</text>
+  <text x="468" y="198" text-anchor="middle" font-size="9" fill="#1b5e20">kein Body (spart Bandbreite)</text>
+  <text x="468" y="212" text-anchor="middle" font-size="9" fill="#1b5e20">→ Cache weiter gültig</text>
+  <line x1="709" y1="152" x2="554" y2="161" stroke="#34a853" stroke-width="1.5" marker-end="url(#ag)"/>
+  <text x="635" y="150" text-anchor="middle" font-size="9" fill="#34a853">unverändert</text>
+
+  <!-- Branch: 200 OK (changed) -->
+  <rect x="563" y="163" width="185" height="55" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="655" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#b71c1c">200 OK</text>
+  <text x="655" y="198" text-anchor="middle" font-size="9" fill="#b71c1c">neuer ETag + neuer Body</text>
+  <text x="655" y="212" text-anchor="middle" font-size="9" fill="#b71c1c">→ Cache aktualisieren</text>
+  <line x1="709" y1="152" x2="709" y2="161" stroke="#ea4335" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="720" y="158" font-size="9" fill="#ea4335">geändert</text>
+
+  <!-- Summary note -->
+  <rect x="388" y="232" width="360" height="28" rx="4" fill="#fff8e1" stroke="#f9ab00"/>
+  <text x="568" y="250" text-anchor="middle" font-size="10" fill="#b06000" font-weight="600">💡 304 spart Bandbreite: Server sendet keinen Body</text>
+</svg>

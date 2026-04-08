@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
+  <title id="title">Stream-Zeitmodelle: Event Time vs. Processing Time vs. Ingestion Time</title>
+  <desc id="desc">Drei Zeitachsen zeigen dasselbe Event mit unterschiedlichen Zeitstempeln: Event Time (wann passiert), Ingestion Time (wann eingetroffen), Processing Time (wann verarbeitet). Zeigt Verzögerungen und Out-of-Order-Probleme.</desc>
+  <rect width="1000" height="420" fill="#ffffff"/>
+
+  <text x="500" y="30" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111111">Stream-Zeitmodelle</text>
+
+  <defs>
+    <marker id="ta" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#aaa"/>
+    </marker>
+  </defs>
+
+  <!-- Timeline 1: Event Time -->
+  <g transform="translate(0, 60)">
+    <text x="30" y="15" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1a73e8">Event Time</text>
+    <text x="30" y="32" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666">Wann ist das Event tatsächlich passiert?</text>
+
+    <line x1="180" y1="55" x2="950" y2="55" stroke="#4285f4" stroke-width="2" marker-end="url(#ta)"/>
+
+    <!-- Events on this timeline -->
+    <g>
+      <circle cx="280" cy="55" r="10" fill="#4285f4"/>
+      <text x="280" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E1</text>
+      <text x="280" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:01</text>
+    </g>
+    <g>
+      <circle cx="420" cy="55" r="10" fill="#4285f4"/>
+      <text x="420" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E2</text>
+      <text x="420" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:05</text>
+    </g>
+    <g>
+      <circle cx="550" cy="55" r="10" fill="#4285f4"/>
+      <text x="550" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E3</text>
+      <text x="550" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:08</text>
+    </g>
+    <g>
+      <circle cx="700" cy="55" r="10" fill="#4285f4"/>
+      <text x="700" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E4</text>
+      <text x="700" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:12</text>
+    </g>
+  </g>
+
+  <!-- Timeline 2: Ingestion Time -->
+  <g transform="translate(0, 170)">
+    <text x="30" y="15" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#f9ab00">Ingestion Time</text>
+    <text x="30" y="32" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666">Wann ist das Event beim Broker (Kafka) eingetroffen?</text>
+
+    <line x1="180" y1="55" x2="950" y2="55" stroke="#f9ab00" stroke-width="2" marker-end="url(#ta)"/>
+
+    <!-- Same events, shifted and possibly reordered -->
+    <g>
+      <circle cx="350" cy="55" r="10" fill="#f9ab00"/>
+      <text x="350" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E1</text>
+      <text x="350" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:03</text>
+    </g>
+    <g>
+      <circle cx="480" cy="55" r="10" fill="#f9ab00"/>
+      <text x="480" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E3</text>
+      <text x="480" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:09</text>
+      <text x="480" y="93" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#ea4335">vor E2!</text>
+    </g>
+    <g>
+      <circle cx="560" cy="55" r="10" fill="#f9ab00"/>
+      <text x="560" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E2</text>
+      <text x="560" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:10</text>
+      <text x="560" y="93" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#ea4335">verspätet</text>
+    </g>
+    <g>
+      <circle cx="750" cy="55" r="10" fill="#f9ab00"/>
+      <text x="750" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E4</text>
+      <text x="750" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:14</text>
+    </g>
+
+    <!-- Out-of-order indicator -->
+    <path d="M 480,40 C 500,20 540,20 560,40" fill="none" stroke="#ea4335" stroke-width="1.5" stroke-dasharray="4 2"/>
+    <text x="520" y="18" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#ea4335">Out-of-Order!</text>
+  </g>
+
+  <!-- Timeline 3: Processing Time -->
+  <g transform="translate(0, 290)">
+    <text x="30" y="15" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#34a853">Processing Time</text>
+    <text x="30" y="32" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666">Wann hat Flink/Spark das Event verarbeitet?</text>
+
+    <line x1="180" y1="55" x2="950" y2="55" stroke="#34a853" stroke-width="2" marker-end="url(#ta)"/>
+
+    <g>
+      <circle cx="400" cy="55" r="10" fill="#34a853"/>
+      <text x="400" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E1</text>
+      <text x="400" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:04</text>
+    </g>
+    <g>
+      <circle cx="530" cy="55" r="10" fill="#34a853"/>
+      <text x="530" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E3</text>
+      <text x="530" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:10</text>
+    </g>
+    <g>
+      <circle cx="620" cy="55" r="10" fill="#34a853"/>
+      <text x="620" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E2</text>
+      <text x="620" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:12</text>
+    </g>
+    <g>
+      <circle cx="800" cy="55" r="10" fill="#34a853"/>
+      <text x="800" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">E4</text>
+      <text x="800" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333">10:00:16</text>
+    </g>
+  </g>
+
+  <!-- Delay arrows between timelines -->
+  <line x1="280" y1="128" x2="350" y2="212" stroke="#ddd" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="420" y1="128" x2="560" y2="212" stroke="#ea4335" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="550" y1="128" x2="480" y2="212" stroke="#ea4335" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Key insight box -->
+  <rect x="30" y="380" width="940" height="30" rx="8" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="500" y="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#c5221f">Kernproblem: Events treffen nicht in der Reihenfolge ein, in der sie passiert sind. Stream-Systeme brauchen Watermarks und Windowing, um damit umzugehen.</text>
+</svg>
