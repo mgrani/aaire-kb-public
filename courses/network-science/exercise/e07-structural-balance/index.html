@@ -31,20 +31,6 @@ Label each signed triangle as **balanced (B)** or **unbalanced (U)**:
 Which pattern is most stable, and which is "socially unstable"?
 
 
---
-
-**Solution:**
-
-A triangle is balanced iff the product of edge signs is positive (0 or 2 negatives).
-
-1. **(+,+,+):** Balanced. Three mutual friends — most stable.
-2. **(+,+,−):** Unbalanced. Classic "two of my friends hate each other" tension.
-3. **(−,−,+):** Balanced. Two allies sharing a common enemy.
-4. **(−,−,−):** Unbalanced. Three mutual enemies — no coalition possible.
-
-The (+,+,−) pattern is the most common source of social tension; (+,+,+) is the most stable.
-
-
 
 ---
 
@@ -58,19 +44,6 @@ Complete signed graph on $\{1,2,3,4,5\}$. All edges positive **except** $1$–$3
 2. If balanced, find the **two-camp partition** guaranteed by the Balance Theorem.
 3. Verify within-camp edges are positive and between-camp edges negative.
 4. What does the partition represent socially?
-
-
---
-
-**Solution:**
-
-**1.** Examples: $\{1,2,3\}$: (+,−,−) → balanced. $\{1,2,4\}$: (+,−,−) → balanced. $\{1,3,4\}$: (−,−,+) → balanced. $\{3,4,5\}$: (+,+,+) → balanced. All triangles balanced.
-
-**2. Partition:** $X = \{1,2,5\}$, $Y = \{3,4\}$.
-
-**3. Verification:** All within-$X$ edges ($1$–$2$, $1$–$5$, $2$–$5$) are positive; the within-$Y$ edge $3$–$4$ is positive; all $X$–$Y$ edges are negative. ✓
-
-**4. Interpretation:** Two allied factions in mutual conflict — the textbook two-bloc geopolitical structure ([?EasleyKleinberg2010]).
 
 
 
@@ -98,21 +71,6 @@ Graph with two triangles connected by one edge:
 4. In international relations, what does an all-negative triangle represent?
 
 
---
-
-**Solution:**
-
-**1.** $\{A,B,C\}$ — all positive: balanced under both strong and weak balance.
-
-**2.** $\{D,E,F\}$ — all negative: **unbalanced** under strong balance (product is $-1$). Weak balance *forbids only* (+,+,−) triangles, so all-negative is **balanced** (weakly).
-
-**3. Partition:**
-- *Strong balance:* impossible without resolving $\{D,E,F\}$ (one edge must flip).
-- *Weak balance:* allows **more than two camps**, e.g. $\{A,B,C\}$, $\{D\}$, $\{E\}$, $\{F\}$ — three mutual enemies form three separate factions.
-
-**4.** Three mutually hostile countries. Strong balance theory predicts an alliance forms (resolving to two camps). Weak balance treats multi-polar rivalry as stable.
-
-
 
 ---
 
@@ -126,30 +84,6 @@ A signed graph: $\{1,2,3\}$ are mutually friends, $\{4,5,6\}$ are mutually frien
 2. Find the two-camp partition.
 3. Verify within-group edges are positive, between-group negative.
 4. Add a "rogue" positive edge $1 \overset{+}{-} 4$. Which triangles become unbalanced?
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-from itertools import combinations
-
-G = nx.Graph()
-G.add_edges_from([(1,2),(1,3),(2,3),(4,5),(4,6),(5,6)], sign=1)
-G.add_edges_from([(1,4),(2,5),(3,6),(1,5),(2,6),(3,4)], sign=-1)
-
-def triangle_sign(G, t):
-    a, b, c = t
-    return G[a][b]["sign"] * G[b][c]["sign"] * G[a][c]["sign"]
-
-triangles = [t for t in combinations(G.nodes, 3)
-             if all(G.has_edge(u, v) for u, v in combinations(t, 2))]
-balanced = sum(1 for t in triangles if triangle_sign(G, t) > 0)
-```
-
-The partition $\{1,2,3\}$ vs. $\{4,5,6\}$ makes every triangle balanced. Adding the rogue edge $1 \overset{+}{-} 4$ creates unbalanced triangles such as $\{1,2,4\}$ and $\{1,3,4\}$ (each becomes (+,+,−)). The structural tension typically resolves either by breaking the rogue tie or by realigning groups.
 
 
 
@@ -177,19 +111,6 @@ Five countries during WWI:
 4. Italy switched from Germany to the Allies in 1915 — what does balance theory predict?
 
 
---
-
-**Solution:**
-
-**1.** All within-camp triangles are (+,+,+). Cross-camp triangles like $\{F, G, B\}$ are (−,−,+) — balanced. The network is perfectly balanced.
-
-**2.** Yes — exactly the two-camp realisation ([?EasleyKleinberg2010]).
-
-**3.** A new country with positive ties to both camps creates (+,+,−) triangles immediately — unstable. Balance theory predicts the country must eventually choose a side.
-
-**4.** Italy initially had a positive tie to Germany while Allies–Germany was negative — straddling two hostile camps. The (+,+,−) tension is exactly what balance theory predicts must resolve, and the historical switch in 1915 eliminated the unbalanced triangles.
-
-
 
 ---
 
@@ -203,32 +124,6 @@ Using the karate club graph, sign edges by faction (within = +, cross = −).
 2. What fraction of triangles are balanced?
 3. Remove cross-faction edges in order of how many unbalanced triangles they participate in. After removing the top 5, how does the fraction change?
 4. Plot fraction-balanced vs. edges-removed.
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-from itertools import combinations
-
-G = nx.karate_club_graph()
-factions = nx.get_node_attributes(G, "club")
-for u, v in G.edges():
-    G[u][v]["sign"] = 1 if factions[u] == factions[v] else -1
-
-def fraction_balanced(G):
-    triangles = [t for t in combinations(G.nodes, 3)
-                 if all(G.has_edge(u, v) for u, v in combinations(t, 2))]
-    if not triangles:
-        return 1.0
-    pos = sum(1 for (a, b, c) in triangles
-              if G[a][b]["sign"] * G[b][c]["sign"] * G[a][c]["sign"] > 0)
-    return pos / len(triangles)
-```
-
-Real networks are typically *approximately* balanced (often $\geq 75\%$). Removing high-impact negative edges — those in many unbalanced triangles — improves the global balance fraction sharply, mirroring how social groups resolve tension by severing conflicting ties.
 
 
 

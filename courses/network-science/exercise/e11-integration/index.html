@@ -29,32 +29,6 @@ Karate club graph — full structural profile.
 4. Are there any bridges?
 
 
---
-
-**Solution:**
-
-```python
-import networkx as nx
-
-G = nx.karate_club_graph()
-
-print(nx.is_connected(G), nx.diameter(G))
-print(nx.transitivity(G), nx.average_clustering(G))
-
-deg = nx.degree_centrality(G)
-bet = nx.betweenness_centrality(G)
-clo = nx.closeness_centrality(G)
-
-print(sorted(deg, key=deg.get, reverse=True)[:3])
-print(sorted(bet, key=bet.get, reverse=True)[:3])
-print(sorted(clo, key=clo.get, reverse=True)[:3])
-
-print(list(nx.bridges(G)))
-```
-
-The network is connected with diameter 5 and average clustering $\approx 0.57$. Nodes 0 and 33 (the two faction leaders) consistently rank highest across all centrality measures — both structural hubs and information brokers. The few bridges in the graph hint at the impending faction split.
-
-
 
 ---
 
@@ -68,22 +42,6 @@ The network is connected with diameter 5 and average clustering $\approx 0.57$. 
 4. Treat within-community ties as positive, cross as negative — is the network structurally balanced?
 
 
---
-
-**Solution:**
-
-```python
-from networkx.algorithms.community import greedy_modularity_communities
-import networkx as nx
-
-G = nx.karate_club_graph()
-comms = list(greedy_modularity_communities(G))
-mod = nx.community.modularity(G, comms)
-```
-
-Greedy modularity finds $\approx 4$ communities with modularity $\approx 0.38$, broadly aligning with the faction split. The E-I index $\approx -0.5$ confirms strong intra-club preference. The faction structure is largely balanced — within-club triangles are all-positive, cross-club triangles fit "enemy of my enemy" patterns.
-
-
 
 ---
 
@@ -94,25 +52,6 @@ Greedy modularity finds $\approx 4$ communities with modularity $\approx 0.38$, 
 1. Classify each edge as a strong tie ($\geq 2$ common neighbours) or weak tie. What fraction is weak?
 2. Are any weak ties also bridges? What does this confirm about Granovetter?
 3. Compare $L$ and $C$ to an Erdős–Rényi graph with the same $n$ and $m$. Is karate club a small-world network?
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-
-G = nx.karate_club_graph()
-def common_neighbors(u, v):
-    return len(set(G.neighbors(u)) & set(G.neighbors(v)))
-
-weak = [(u, v) for u, v in G.edges() if common_neighbors(u, v) < 2]
-bridges = set(nx.bridges(G))
-weak_bridges = [e for e in weak if tuple(sorted(e)) in {tuple(sorted(b)) for b in bridges}]
-```
-
-Bridges in the karate club are consistently weak ties — confirming Granovetter's hypothesis that local bridges are rarely reinforced by mutual neighbours. The graph has $C \gg C_{rand}$ but $L \approx L_{rand}$ — a classic small-world network combining tight local structure with rapid global reach.
 
 
 
@@ -139,40 +78,6 @@ For each: run SIR ($\beta = 0.4$, seed = 2nd-highest-degree node, 50 runs). Aver
 When does the bridge strategy beat the hub strategy?
 
 
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import random
-
-def sir_vaccinated(G, seed, vaccinated, beta=0.4, steps=20):
-    state = {n: 'S' for n in G.nodes()}
-    for v in vaccinated:
-        state[v] = 'R'
-    state[seed] = 'I'
-    for _ in range(steps):
-        ns = state.copy()
-        for n in G.nodes():
-            if state[n] == 'I':
-                ns[n] = 'R'
-            elif state[n] == 'S':
-                if any(state[nb] == 'I' and random.random() < beta
-                       for nb in G.neighbors(n)):
-                    ns[n] = 'I'
-        state = ns
-    return sum(1 for s in state.values() if s == 'R') / G.number_of_nodes()
-
-G = nx.karate_club_graph()
-hub_vacc    = [n for n, _ in sorted(G.degree, key=lambda x: x[1], reverse=True)[:5]]
-bridge_vacc = [n for n, _ in sorted(nx.betweenness_centrality(G).items(),
-                                    key=lambda x: x[1], reverse=True)[:5]]
-```
-
-Hub vaccination usually wins inside dense communities ($\approx 30\%$ infected vs $\approx 70\%$ random). But high-betweenness "bridge" nodes are key for stopping spread *between* factions. In networks with sparse links between dense groups, bridge vaccination can outperform hub vaccination.
-
-
 
 ---
 
@@ -190,15 +95,6 @@ For each, seed from node 0 (hub).
 1. Which spreads faster to 50% adoption?
 2. Which reaches more nodes total?
 3. Now seed from node 11 (peripheral, degree 1). Does the comparison change?
-
-
---
-
-**Solution:**
-
-Hubs facilitate simple contagion almost instantly — SIR from a hub reaches most of the network within a few steps. But for complex contagion, a single hub seed is often *insufficient*: each neighbour sees only one adopter, below threshold.
-
-Simple contagion is highly vulnerable to hub seeding anywhere; complex contagion is much more resilient and requires clustered "social proof". Seeding from a peripheral node makes simple contagion noticeably slower but barely changes complex contagion — what matters for cascades is local *density*, not the seed's centrality.
 
 
 
@@ -219,52 +115,6 @@ Build a complete pipeline that, for any input graph, reports basic stats, cluste
 (c) Which best models real social networks?
 
 
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import random
-from networkx.algorithms.community import greedy_modularity_communities
-
-def analyze_network(G, name="Network"):
-    print(f"\n=== {name} ===")
-    print(f"n={G.number_of_nodes()} m={G.number_of_edges()}")
-    if nx.is_connected(G):
-        print(f"D={nx.diameter(G)} L={nx.average_shortest_path_length(G):.3f}")
-    print(f"C_global={nx.transitivity(G):.3f}  C_avg={nx.average_clustering(G):.3f}")
-    deg = nx.degree_centrality(G)
-    hub = max(deg, key=deg.get)
-    comms = list(greedy_modularity_communities(G))
-    print(f"hub={hub}  communities={len(comms)}  Q={nx.community.modularity(G, comms):.3f}")
-
-    def quick_sir(G, seed, beta=0.3, steps=15):
-        state = {n: 'S' for n in G.nodes()}
-        state[seed] = 'I'
-        for _ in range(steps):
-            ns = state.copy()
-            for n in G.nodes():
-                if state[n] == 'I':
-                    ns[n] = 'R'
-                elif state[n] == 'S':
-                    if any(state[nb] == 'I' and random.random() < beta
-                           for nb in G.neighbors(n)):
-                        ns[n] = 'I'
-            state = ns
-        return sum(1 for s in state.values() if s == 'R') / G.number_of_nodes()
-
-    avg = sum(quick_sir(G, hub) for _ in range(20)) / 20
-    print(f"epidemic from hub (β=0.3): {avg:.1%}")
-
-analyze_network(nx.karate_club_graph(), "Karate")
-analyze_network(nx.barabasi_albert_graph(50, 2, seed=42), "BA")
-analyze_network(nx.watts_strogatz_graph(50, 4, 0.1, seed=42), "WS")
-```
-
-Barabási–Albert has small diameter via hubs but low clustering. Watts–Strogatz has high clustering and slightly larger paths. Real networks like the karate club combine both — hub-driven small diameter *and* dense local communities. This "clustered small world" is the most realistic model for human social structure.
-
-
 
 ---
 
@@ -279,21 +129,6 @@ No code. Connect concepts across the course:
 3. **L4–L8:** When do high-betweenness nodes matter for vaccination, and when do they not?
 4. **L5–L8:** How does homophily affect complex contagion?
 5. **L7–L8:** Which small-world property helps simple contagion? Which helps complex contagion?
-
-
---
-
-**Solution:**
-
-**1. Connectivity & epidemics:** A disconnected graph confines epidemics; within a component, diameter bounds full spread time, and giant-component size bounds the population at risk.
-
-**2. Weak ties:** Bridges *amplify* simple contagion (long-range shortcuts). They *block* complex contagion — a node on the far side of a bridge sees only one adopter and can't meet its threshold. Complex cascades stay within dense clusters.
-
-**3. Betweenness:** High-betweenness nodes are critical for inter-community choke-points. But within-community hubs may have low betweenness despite high degree. Bridge vaccination stops between-group spread; hub vaccination stops within-group explosions.
-
-**4. Homophily & complex cascades:** Homophily creates dense within-group edges → cascades sweep clusters quickly (threshold easily met) but stall at sparse cross-group ties. Complex cascades remain **confined to homophilous clusters** unless seeded in multiple groups.
-
-**5. Small worlds:** **Short paths** help **simple contagion** (few hops to reach everyone). **High clustering** helps **complex contagion** (dense triangles provide reinforcing adopters). Neither alone explains spreading; structure and process rules interact.
 
 
 

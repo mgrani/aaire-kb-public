@@ -29,20 +29,6 @@ Edges: $A$–$B$, $A$–$C$, $A$–$D$, $B$–$C$, $D$–$E$, $E$–$F$, $D$–$
 4. Node $G$ joins and forms strong ties with $A$ and $D$. Predict which edge forms next.
 
 
---
---
-
-**Solution:**
-
-**1. Open triads:** $(B, A, D)$, $(C, A, D)$, $(A, D, E)$, $(A, D, F)$.
-
-**2. Ranking:** $B$–$D$ ≈ $C$–$D$ > $A$–$E$ ≈ $A$–$F$. Nodes sharing a strong-tie neighbour ($A$) feel the strongest pressure.
-
-**3. $A$'s clustering:** If $B$–$D$ closes, $A$'s clustering coefficient increases significantly because its neighbors $B$ and $D$ become connected.
-
-**4. Node G:** $G$, $A$, and $D$ form a closed triad immediately (since $A$–$D$ exists). $G$ will likely next close triads with neighbors of $A$ ($B, C$) or $D$ ($E, F$).
-
-
 
 --
 
@@ -54,21 +40,6 @@ For the graph: $A$–$B$, $A$–$C$, $A$–$D$, $B$–$C$, $D$–$E$, $E$–$F$,
 2. Compute the **average clustering coefficient** $\bar{C}$.
 3. Interpret the result: what does it tell us about the network?
 4. Visualise the graph with nodes coloured by $C_v$.
-
-
---
-
-**Solution:**
-
-**1. Local coefficients:**
-
-- $C_B, C_C, C_E, C_F = 1$ (their neighbours are all connected).
-- $C_A = 1/3$ (neighbours $\{B,C,D\}$, only $\{B,C\}$ connected).
-- $C_D = 1/3$ (neighbours $\{A,E,F\}$, only $\{E,F\}$ connected).
-
-**2. Average:** $\bar{C} = (1 + 1 + 1 + 1 + 1/3 + 1/3)/6 = 14/18 = 7/9 \approx 0.78$.
-
-**3. Interpretation:** $\bar{C} \approx 0.78$ is high, indicating a "cliquey" social structure where friends of friends are likely to be friends.
 
 
 
@@ -90,52 +61,12 @@ Three cliques: $\{1,2,3\}$, $\{4,5,6\}$, and $\{7,8,9\}$. Bridges: $3$–$4$ and
 4. If node 3 forms a direct edge with node 7, what happens to the hole and the bridges?
 
 
---
-
-**Solution:**
-
-- **1. Bridges:** Yes. Removing either disconnects the graph into separate cliques (components).
-- **2. Local Bridge:** Yes. Nodes 3 and 4 have no common neighbours besides each other.
-- **3. Structural Hole:** Clique 1 and Clique 3 have no direct connection. Node 5 (via 4 and 6) can broker information between these disjoint worlds, gaining an information advantage.
-- **4. Edge 3–7:** The structural hole closes. Edge $6$–$7$ is no longer a bridge because an alternative path (via 3–7) now exists.
-
-
 
 --
 
 ## Exercise 3.B.2: Identifying Bridges with NetworkX
 
 Build the three-clique graph in NetworkX. Identify bridges and rank edges by edge betweenness.
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-
-G = nx.Graph()
-G.add_edges_from([(1,2),(1,3),(2,3),        # Clique 1
-                  (4,5),(4,6),(5,6),         # Clique 2
-                  (7,8),(7,9),(8,9),         # Clique 3
-                  (3,4),(6,7)])              # Bridges
-
-# 1. Bridges
-bridges = list(nx.bridges(G))
-print("Bridges:", bridges)   # [(3,4), (6,7)]
-
-# 2. Edge betweenness
-ebc = nx.edge_betweenness_centrality(G)
-sorted_ebc = sorted(ebc.items(), key=lambda x: -x[1])
-for edge, bc in sorted_ebc[:2]:
-    print(f"  {edge}: {bc:.4f}")
-```
-
-**Interpretation:**
-
-- **High Betweenness:** Bridges (3,4) and (6,7) carry all traffic between cliques, giving them maximum edge betweenness.
-- **Vulnerability:** Removing these edges fragments the network faster than removing internal clique edges, demonstrating the importance of "weak" bridging ties for global connectivity.
 
 
 
@@ -158,15 +89,6 @@ Check STC and local bridges for:
 - **C:** Strong $1$–$2, 2$–$3, 1$–$3, 3$–$4, 2$–$4$.
 
 
---
-
-**Solution:**
-
-- **A:** **STC Violated** (1 tied to 2 and 3, but no 2–3 edge). Theorem premise doesn't hold.
-- **B:** **STC Satisfied**. Edge 1–4 is a local bridge and is **weak**. Theorem holds.
-- **C:** **STC Violated** (2 tied to 1 and 4, but no 1–4 edge). Theorem doesn't apply.
-
-
 
 --
 
@@ -176,16 +98,6 @@ Check STC and local bridges for:
 2. Apply the weak-ties theorem to redundant vs. novel information.
 3. Is "unfriending all close friends" good advice based on the theorem?
 4. How does LinkedIn fit this framework?
-
-
---
-
-**Solution:**
-
-- **1. Novelty:** Friends share your world and information. Acquaintances bridge to different social circles, providing **non-redundant** job leads.
-- **2. Structure:** Strong ties cluster in dense groups (redundancy). Weak ties are bridges to distant clusters (novelty).
-- **3. Support vs Reach:** No. Strong ties provide trust and support; weak ties provide reach. You need both.
-- **4. LinkedIn:** Formalises weak ties with low neighborhood overlap, enabling people to scale their "reach" into structural holes.
 
 
 
@@ -209,55 +121,12 @@ For edges: $A$–$B, A$–$C, A$–$D, B$–$C, B$–$E, C$–$F$:
 2. Rank them. Which is most like a local bridge?
 
 
---
-
-**Solution:**
-
-- **$O(A,B)$** = $\{C\} / \{C,D,E\}$ = **1/3**
-- **$O(A,C)$** = $\{B\} / \{B,D,F\}$ = **1/3**
-- **$O(B,E)$** = $\emptyset / \{A,C\}$ = **0**
-
-**Ranking:** $O(B,E)$ has zero overlap, making it a perfect **local bridge**. Information entering via $E$ is likely to be completely novel to the $A,B,C$ cluster.
-
-
 
 --
 
 ## Exercise 3.D.2: Neighbourhood Overlap in NetworkX
 
 Compute average neighborhood overlap within and across factions in the karate club.
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import numpy as np
-
-G = nx.karate_club_graph()
-
-def neighborhood_overlap(G, u, v):
-    nu = set(G.neighbors(u)) - {v}
-    nv = set(G.neighbors(v)) - {u}
-    if not (nu or nv): return 0.0
-    return len(nu & nv) / len(nu | nv)
-
-# Compare within-faction vs across-faction
-within = [neighborhood_overlap(G, u, v) for u, v in G.edges()
-          if G.nodes[u]["club"] == G.nodes[v]["club"]]
-across = [neighborhood_overlap(G, u, v) for u, v in G.edges()
-          if G.nodes[u]["club"] != G.nodes[v]["club"]]
-
-print(f"Avg Overlap Within: {np.mean(within):.3f}")
-print(f"Avg Overlap Across: {np.mean(across):.3f}")
-```
-
-**Interpretation:**
-
-- **Cross-faction weakness:** Cross-faction edges have significantly lower overlap, confirming they behave as structural bridges between communities.
-- **Glue vs redundancy:** Within-faction edges have high overlap, providing structural redundancy. Low-overlap edges are the "glue" holding separate social worlds together.
 
 
 
@@ -276,49 +145,12 @@ print(f"Avg Overlap Across: {np.mean(across):.3f}")
 3. How should you design a recommender for **information diversity**?
 
 
---
-
-**Solution:**
-
-- **1. Symmetry:** Facebook ties are reciprocal, leading to higher local clustering and overlap. Twitter links are closer to structural bridges with near-zero overlap.
-- **2. Cognitive limits:** Maintained ties are bounded by the Dunbar number and social attention. Passive links are structural weak ties with high novelty but low investment.
-- **3. Diversity:** Recommend content from **low-overlap connections**. These structural bridges provide access to disjoint social bubbles and non-redundant information.
-
-
 
 --
 
 ## Exercise 3.E.2: Simulating Tie Strength and Overlap
 
 Assign synthetic strength values to karate-club edges (within-faction strong, across-faction weak) and compute the correlation with neighborhood overlap.
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import numpy as np
-
-G = nx.karate_club_graph()
-
-# Assign synthetic strength: within-faction = strong (0.8), cross = weak (0.2)
-strengths, overlaps = [], []
-for u, v in G.edges():
-    s = 0.8 if G.nodes[u]["club"] == G.nodes[v]["club"] else 0.2
-    strengths.append(s)
-    overlaps.append(neighborhood_overlap(G, u, v))  # defined in 3.D.2
-
-# Correlation
-r = np.corrcoef(strengths, overlaps)[0, 1]
-print(f"Pearson correlation: {r:.3f}")  # Typically > 0.6
-```
-
-**Interpretation:**
-
-- **Empirical support:** The strong positive correlation confirms that tie strength and neighborhood overlap are linked: close-knit groups share friends, while bridging ties remain socially isolated.
-- **Structural exceptions:** High-strength ties with low overlap may indicate bridging relationships that involve significant social effort (e.g., cross-community collaborations).
 
 
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;

@@ -23,7 +23,7 @@ HTTP ist das Protokoll des Webs. REST nutzt dieses Protokoll konsequent als Grun
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 1: HTTP Grundlagen
+# HTTP Grundlagen
 
 
 <div class="guiding-question">
@@ -119,6 +119,8 @@ Fingerprint zur Validierung
 </div>
 
 
+--
+
 ## HTTP: Das Request-Response-Protokoll
 
 ![HTTP-Client-Server-Modell mit Request und Response.](/courses/web-and-data-engineering/figures/http-client-server.svg)
@@ -147,7 +149,7 @@ Jetzt schauen wir auf die **Protokollseite**:
 
 Die Fetch API ist eine **JavaScript-Abstraktion über HTTP**. Wer HTTP versteht, versteht auch, warum `fetch` so funktioniert wie es funktioniert — und kann Netzwerkprobleme im DevTools-Netzwerk-Tab diagnostizieren.
 
----
+--
 
 ## HTTP-Designprinzipien {.smaller}
 
@@ -223,6 +225,8 @@ Schema → Host → Port → Pfad → Query → Fragment
 </div>
 
 
+--
+
 ## HTTP-Methoden: Safe und Idempotent in der Praxis {.smaller}
 
 **Szenario:** Ein Nutzer klickt zweimal schnell auf „Jetzt kaufen“. Netzwerk-Lag verzögert den ersten Request, beide kommen beim Server an.
@@ -237,6 +241,8 @@ Schema → Host → Port → Pfad → Query → Fragment
 --
 
 ## HTTP-Statuscodes {.smaller}
+
+
 
 | Klasse | Bedeutung | Wichtige Codes |
 |---|---|---|
@@ -284,6 +290,8 @@ Content-Type: application/json
 </div>
 
 
+--
+
 ## HTTP-Versionen im Vergleich {.smaller}
 
 | Version | Jahr | Kernverbesserung |
@@ -298,7 +306,7 @@ Content-Type: application/json
 **Frage:** Eine Produktseite lädt 60 Ressourcen (JS, CSS, Bilder). Warum dauert das mit HTTP/1.1 deutlich länger als mit HTTP/2 — obwohl die Bandbreite dieselbe ist?
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 HTTP ist nicht nur Datentransport — es ist das **Interaktionsmodell** des Webs. Methoden definieren Absichten, Statuscodes kommunizieren Ergebnisse, Header steuern Verhalten. Infrastruktur (CDN, Load Balancer, WAF) verlässt sich auf diese Semantik. Wer HTTP als Syntax behandelt, verliert die Vorteile des Protokolls.
@@ -311,7 +319,7 @@ HTTP ist nicht nur Datentransport — es ist das **Interaktionsmodell** des Webs
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 2: HTTP Kontrolle, Caching und Sicherheit
+# HTTP Kontrolle, Caching und Sicherheit
 
 
 <div class="guiding-question">
@@ -335,6 +343,8 @@ Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300`
 
 **Architekturentscheidung:** Wie lange sollen Produktdaten gecacht werden? Zu lang → veraltete Preise. Zu kurz → jeder Seitenaufruf belastet den Server.
 
+--
+
 ## Caching: Ebenen und Mechanismen {.smaller}
 
 | Cache-Ebene | Wo? | Vorteil |
@@ -342,6 +352,8 @@ Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300`
 | **Browser-Cache** | Lokal auf dem Gerät | Kein Netzwerk-Request → schnellste Variante |
 | **Proxy/CDN-Cache** | Edge-Server im Netzwerk | Reduziert Last auf Origin, niedrige Latenz |
 | **Application-Cache** | Im Server (Redis, Memcached) | Vermeidet wiederholte Datenbankabfragen |
+
+--
 
 ## Cache-Steuerung über Header {.smaller}
 
@@ -398,6 +410,8 @@ Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300`
 | `/api/cart` | `private, no-store` | Nutzerspezifisch, darf nicht im CDN landen |
 | `logo.png` | `public, max-age=86400` | Ändert sich selten, 1 Tag reicht |
 
+--
+
 ## Redirects und das PRG-Pattern {.smaller}
 
 
@@ -433,6 +447,8 @@ Server  ── 200 OK (Bestellbestätigung) ─► Browser
 </div>
 
 
+--
+
 ## Sessions und Cookies {.smaller}
 
 HTTP ist zustandslos — aber der Online-Shop braucht Login und Warenkorb. **Cookies** lösen diesen Widerspruch:
@@ -449,6 +465,8 @@ HTTP ist zustandslos — aber der Online-Shop braucht Login und Warenkorb. **Coo
 | `session=abc123; HttpOnly; Secure; SameSite=Strict` | **ja** | **ja** | **ja** |
 
 Nur die letzte Variante schützt gegen die drei häufigsten Angriffsvektoren.
+
+--
 
 ## HTTPS und TLS {.smaller}
 
@@ -482,7 +500,7 @@ _(Hinweis: TLS schützt den Transport, nicht den Endpunkt.)_
 
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zum ausdrucksstarken Steuerungsmechanismus. Caching ist der wichtigste Performance-Hebel — aber jede Caching-Entscheidung ist ein Trade-off zwischen Aktualität und Last. Redirects steuern Navigation, PRG verhindert Doppelverarbeitung. Cookies ermöglichen Zustand trotz Zustandslosigkeit — aber nur mit korrekter Konfiguration. TLS sichert den Transport.
@@ -495,7 +513,7 @@ HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zu
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 3: REST als Architekturidee
+# REST als Architekturidee
 
 
 <div class="guiding-question">
@@ -526,6 +544,8 @@ HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zu
 
 Die AI-Antwort beschreibt die **Syntax** von REST, aber nicht die **Architektur**. Das ist der häufigste Fehler.
 
+--
+
 ## REST: Ein Architekturstil, kein Protokoll {.smaller}
 
 | Constraint | Bedeutung | Konsequenz |
@@ -541,6 +561,8 @@ Die AI-Antwort beschreibt die **Syntax** von REST, aber nicht die **Architektur*
 
 REST nutzt die **vorhandene Web-Infrastruktur** (HTTP, URIs, Caching, Proxies) als Anwendungsplattform — statt ein eigenes RPC-Protokoll darüber zu bauen.
 
+--
+
 ## Welchen Constraint verletzt dieses Design? {.smaller}
 
 **Szenario 1:** Der Online-Shop speichert den Warenkorb in einer serverseitigen Session. Beim nächsten Request muss der Client denselben Server treffen (Sticky Sessions).
@@ -554,6 +576,8 @@ REST nutzt die **vorhandene Web-Infrastruktur** (HTTP, URIs, Caching, Proxies) a
 | 1: Sticky Sessions | **Stateless** | Horizontale Skalierung eingeschränkt, Server-Ausfall = Session verloren |
 | 2: Kein Cache-Control | **Cacheable** | CDN nutzlos, unnötige Serverlast, höhere Latenz |
 | 3: SQL-artige Queries | **Uniform Interface** + **Layered System** | Client an Interna gekoppelt, keine Abstraktion möglich |
+
+--
 
 ## REST vs. RPC im Vergleich {.smaller}
 
@@ -627,6 +651,8 @@ Eine **Ressource** ist ein fachliches Konzept. Was der Client empfängt, ist ein
 
 **Content Negotiation:** Client und Server einigen sich über `Accept` und `Content-Type` auf das Format — dieselbe Ressource, verschiedene Repräsentationen.
 
+--
+
 ## Wann stößt REST an Grenzen? {.smaller}
 
 | Situation | REST-Problem | Alternative |
@@ -641,7 +667,7 @@ Eine **Ressource** ist ein fachliches Konzept. Was der Client empfängt, ist ein
 Viele Systeme **kombinieren** Stile: REST für öffentliche APIs, GraphQL für flexible Frontends, gRPC für interne Services. Die Wahl hängt von **Nutzungsszenarien** ab — nicht von Dogma.
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 REST ist kein JSON-over-HTTP. Es ist ein Architekturstil mit sechs Constraints, die das Web skalierbar, cachebar und erweiterbar machen. Die Stärke liegt in der konsequenten Nutzung bestehender Web-Infrastruktur. Wer die Constraints versteht, kann beurteilen, wann REST die richtige Wahl ist und wann ein anderer Stil besser passt.
@@ -654,7 +680,7 @@ REST ist kein JSON-over-HTTP. Es ist ein Architekturstil mit sechs Constraints, 
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 4: Ressourcen und URI-Design
+# Ressourcen und URI-Design
 
 
 <div class="guiding-question">
@@ -671,6 +697,8 @@ REST ist kein JSON-over-HTTP. Es ist ein Architekturstil mit sechs Constraints, 
 Der erste Schritt beim API-Design ist die Identifikation der **Ressourcen** — die fachlichen Dinge, mit denen Clients interagieren:
 
 ![REST-Ressourcenhierarchie.](/courses/web-and-data-engineering/figures/resource-hierarchy.svg)
+
+--
 
 ## URI-Design-Regeln {.smaller}
 
@@ -697,6 +725,8 @@ POST /api/deleteAccount      →  DELETE /accounts/{id}
 GET  /api/search?action=find →  GET    /products?q=...
 POST /api/doPayment          →  POST   /orders/{id}/payments
 ```
+
+--
 
 ## Übung: API-Design für eine Domäne {.smaller}
 
@@ -738,6 +768,8 @@ Nicht alles passt in CRUD. Für **Aktionen** gibt es zwei Muster:
 - **Sub-Ressource:** `POST /orders/42/cancellations` — Stornierung als neue Ressource
 - **Controller-Ressource:** `POST /password-resets` — Aktion als eigene Ressource
 
+--
+
 ## Pagination, Filter und Sortierung {.smaller}
 
 ```text
@@ -768,7 +800,7 @@ GET /products?page=2&per_page=20&sort=-price&category=electronics&q=kopfhörer
 **Links machen die API navigierbar** — der Client muss keine URIs konstruieren.
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 Gute REST-APIs beginnen mit sauber geschnittenen Ressourcen. URI-Design ist eine **Modellierungsaufgabe**: Ressourcen identifizieren, Beziehungen als Hierarchie abbilden, Aktionen über HTTP-Methoden ausdrücken. Die Entscheidung, wo eine Ressource in der Hierarchie steht, hängt vom Nutzungskontext ab — nicht von der Datenbankstruktur.
@@ -781,7 +813,7 @@ Gute REST-APIs beginnen mit sauber geschnittenen Ressourcen. URI-Design ist eine
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 5: HTTP-Semantik für APIs
+# HTTP-Semantik für APIs
 
 
 <div class="guiding-question">
@@ -832,9 +864,13 @@ Cache-Control: no-store
 {"id": 789, "status": "pending", "total": 159.98}
 ```
 
+--
+
 ## Der vollständige Request-Response-Zyklus {.smaller}
 
 ![Anatomie eines HTTP Request und Response.](/courses/web-and-data-engineering/figures/http-request-anatomy.svg)
+
+--
 
 ## Statuscodes richtig einsetzen {.smaller}
 
@@ -852,6 +888,8 @@ Cache-Control: no-store
 ### Faustregel
 
 Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum** und **was zu tun ist**.
+
+--
 
 ## Fehlermodelle: Konsistenz ist alles {.smaller}
 
@@ -878,6 +916,8 @@ Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum*
 | **Spezifisch** | `details` pro Feld bei Validierungsfehlern |
 | **Kein Stacktrace** | Interne Details nie an den Client |
 
+--
+
 ## Authentifizierung: Wer darf was? {.smaller}
 
 | Mechanismus | Funktionsweise | Typischer Einsatz |
@@ -901,6 +941,8 @@ eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.abc123signature
 | **Signature** | Kryptografische Signatur → Manipulation erkennbar |
 
 **Diskussionsfrage:** JWT ist stateless — der Server muss keine Session speichern. Aber: Wie widerruft man einen JWT, bevor er abläuft?
+
+--
 
 ## Rate Limiting und Idempotenz {.smaller}
 
@@ -929,7 +971,7 @@ X-RateLimit-Remaining: 0
 APIs begrenzen Requests pro Zeitfenster. Die Header sagen dem Client **wann** er es erneut versuchen darf.
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizieren Ergebnisse, Header steuern Caching und Authentifizierung, konsistente Fehlermodelle machen APIs nutzbar. Idempotenz-Mechanismen schützen gegen doppelte Verarbeitung. Je klarer die HTTP-Semantik genutzt wird, desto weniger Sonderlogik brauchen Clients.
@@ -942,7 +984,7 @@ HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizie
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 6: Evolution, Fehler und API-Qualität
+# Evolution, Fehler und API-Qualität
 
 
 <div class="guiding-question">
@@ -980,6 +1022,8 @@ Der Online-Shop plant ein API-Update. Bewerten Sie jede Änderung:
 
 Neue Felder, Endpunkte, optionale Parameter → kompatibel. Entfernen, Umbenennen, Required machen → Breaking Change.
 
+--
+
 ## API-Lebenszyklus {.smaller}
 
 | Phase | Herausforderung |
@@ -997,6 +1041,8 @@ Neue Felder, Endpunkte, optionale Parameter → kompatibel. Entfernen, Umbenenne
 
 **Diskussionsfrage:** Wenn der Server „liberal" ungültige Eingaben akzeptiert, entsteht ein impliziter Vertrag. Ist das wirklich eine gute Idee?
 
+--
+
 ## Deprecation-Strategie {.smaller}
 
 Wenn Breaking Changes unvermeidbar sind, müssen sie **angekündigt** und **schrittweise** eingeführt werden:
@@ -1012,6 +1058,8 @@ Link: </docs/migration-v3>; rel="deprecation"
 | `Deprecation: true` | Endpunkt als veraltet markiert |
 | `Sunset` | Ab diesem Datum wird entfernt |
 | `Link` | Verweis auf Migrationsdokumentation |
+
+--
 
 ## API-Dokumentation mit OpenAPI {.smaller}
 
@@ -1048,6 +1096,8 @@ paths:
 | **Contract Testing** | Schema als Grundlage für automatisierte Tests |
 | **Single Source of Truth** | Dokumentation und Implementierung synchron |
 
+--
+
 ## Observability: APIs im Betrieb {.smaller}
 
 ### Die vier goldenen Signale
@@ -1064,6 +1114,8 @@ paths:
 | **Logging** | Einzelne Requests: Wer, Was, Wann, Ergebnis | ELK Stack, Loki |
 | **Metriken** | Aggregiert: Requests/s, Latenz, Fehlerrate | Prometheus, Grafana |
 | **Tracing** | Ein Request über alle Services hinweg | Jaeger, OpenTelemetry |
+
+--
 
 ## Bewerten Sie diese API {.smaller}
 
@@ -1088,7 +1140,7 @@ Fehler-Format: mal {"error": "..."}, mal {"message": "..."}
 | Inkonsistentes Fehlerformat | Client kann Fehler nicht parsen | Einheitliches Error-Schema |
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 API-Design endet nicht beim ersten Release. Die eigentliche Qualität zeigt sich in **Evolution** (additive Changes, Deprecation-Strategie, Postel's Law), **Fehlerkultur** (konsistente Fehlermodelle, spezifische Statuscodes) und **Betriebsfähigkeit** (Observability mit den vier goldenen Signalen). Eine gute API ist vorhersagbar, dokumentiert, beobachtbar und entwickelt sich weiter, ohne bestehende Clients zu brechen.
@@ -1108,18 +1160,10 @@ API-Design endet nicht beim ersten Release. Die eigentliche Qualität zeigt sich
 
 Die nächste Vorlesung zeigt, wie diese APIs **serverseitig implementiert** werden — am Beispiel des Java-Web-Stacks.
 
+Notes:
+Im Wrap-Up die großen Bögen nochmal explizit nennen: HTTP als Protokoll (Methoden/Statuscodes/Header), REST als Architekturstil (sechs Constraints, nicht „JSON over HTTP"), Ressourcendesign und HTTP-Semantik als Werkzeug, Evolution und Observability als Betriebsthemen. Dann den Übergang zu L05 bauen: „Wie implementieren wir das serverseitig?" Java-Web-Stack, Servlets, JAX-RS, Spring Boot.
 
-<div class="notes">
-
-Legacy-Quellen:
-
-- `slides/04_01_WebEng_WebTechnologies-HTTP.pptx`
-- `slides/06_01_Rest-APIs.pptx`
-- `slides/06_02_Rest-API-Konzepte.pptx`
-- `slides/06_03_Rest-API-Design.pptx`
-
-</div>
-
+Legacy-Quellen: `slides/04_01_WebEng_WebTechnologies-HTTP.pptx`, `slides/06_01_Rest-APIs.pptx`, `slides/06_02_Rest-API-Konzepte.pptx`, `slides/06_03_Rest-API-Design.pptx`.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

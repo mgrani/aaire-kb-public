@@ -30,17 +30,6 @@ Node $A$ is active at $t = 0$. At each step, an active node activates all out-ne
 3. If you add the edge $B \to C$, does anything change for this seed?
 
 
---
-
-**Solution:**
-
-**1.** $t=0$: $\{A\}$. $t=1$: $\{A,B,C\}$. $t=2$: $\{A,B,C,D\}$. $t=3$: $\{A,B,C,D,E\}$.
-
-**2.** All nodes are reachable from $A$. (An isolated node with no incoming edges from this set would never be reached.)
-
-**3.** Adding $B \to C$ changes nothing — $C$ is already activated at $t=1$ via $A \to C$. Redundant paths don't accelerate spread beyond what existing paths provide.
-
-
 
 ---
 
@@ -58,17 +47,6 @@ Two 8-node graphs with seed $S$:
 3. A single edge fails. Which topology is more affected?
 
 
---
-
-**Solution:**
-
-**1.** Star: 1 step. Line: 7 steps.
-
-**2.** The line has a bottleneck at every edge — removing any node severs everything downstream. The star has no internal bottleneck.
-
-**3.** Removing one edge from the line blocks up to 6 of 7 nodes. Removing one edge from the star isolates exactly one node. The line is vastly more vulnerable.
-
-
 
 ---
 
@@ -83,29 +61,6 @@ Load the karate club graph and BFS-diffuse from the highest-degree node.
 3. What does this say about hubs?
 
 
---
-
-**Solution:**
-
-```python
-import networkx as nx
-
-G = nx.karate_club_graph()
-cent = nx.degree_centrality(G)
-seed = max(cent, key=cent.get)
-
-active, frontier = {seed}, {seed}
-for t in range(8):
-    new_frontier = {nbr for node in frontier for nbr in G.neighbors(node)
-                    if nbr not in active}
-    active |= new_frontier
-    frontier = new_frontier
-    print(f"t={t+1}: {len(active)} active")
-```
-
-A hub seed reaches the full graph in 3–4 steps. The lowest-degree node takes 5–6+ steps with a much flatter early curve. Superspreaders have outsized impact because they bridge to the rest of the network in fewer hops.
-
-
 
 ---
 
@@ -118,17 +73,6 @@ Company-wide email cascade from CEO ($C$) must reach 500 employees. The network 
 1. Does a message from $C$ to a peripheral employee require passing through the core?
 2. If 5 of 50 managers are absent, what fraction of periphery is potentially unreachable?
 3. How could the company become more resilient?
-
-
---
-
-**Solution:**
-
-**1.** Yes — peripheral nodes only link to core nodes, so every path passes through the core.
-
-**2.** Each absent manager isolates $\approx 10$ peripheral nodes → about $50/450 \approx 11\%$ unreachable if no redundant paths exist.
-
-**3.** Add cross-edges between peripheral employees; give each peripheral employee two or more core contacts; identify high-betweenness bridge managers and ensure backup coverage. Resilience requires *redundant paths*.
 
 
 
@@ -153,25 +97,6 @@ Path graph $A - B - C - D - E$ with $B$ infected at $t = 0$, $\beta = 1.0$.
 3. With $\beta = 0.5$, what is $P(\text{C not infected at } t=1)$?
 
 
---
-
-**Solution:**
-
-**1. State trace:**
-
-| Time | A | B | C | D | E |
-|------|---|---|---|---|---|
-| $t=0$ | S | **I** | S | S | S |
-| $t=1$ | **I** | **R** | **I** | S | S |
-| $t=2$ | **R** | R | **R** | **I** | S |
-| $t=3$ | R | R | R | **R** | **I** |
-| $t=4$ | R | R | R | R | **R** |
-
-**2.** $E$ is infected at $t = 3$, recovers at $t = 4$.
-
-**3.** $C$ has one infected neighbour ($B$), so it is infected with probability 0.5. $P(\text{not infected}) = 0.5$.
-
-
 
 ---
 
@@ -189,17 +114,6 @@ SIR with $\beta = 1.0$, one-step recovery, seed = node 1.
 3. Which produces a sharper epidemic peak? Implications?
 
 
---
-
-**Solution:**
-
-**1.** Line: at any time only 1 node is infected (a moving wave).
-
-**2.** Star: at $t = 1$, all 5 spokes are infected simultaneously.
-
-**3.** The star produces a sharper, taller peak. **High-degree hubs create epidemic explosions** — a single infected hub exposes all neighbours at once. This is why superspreader events are dangerous and why targeted vaccination of hubs is so effective.
-
-
 
 ---
 
@@ -212,36 +126,6 @@ Implement synchronous SIR on the karate club graph and analyse it.
 1. At what step does the epidemic peak?
 2. What fraction ends in $R$ (ever infected)?
 3. Vary $\beta$ from 0.1 to 0.8. Where does the epidemic reliably infect $> 80\%$?
-
-
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import random
-
-def sir_simulation(G, seed_node, beta=0.3, steps=20):
-    state = {n: 'S' for n in G.nodes()}
-    state[seed_node] = 'I'
-    history = []
-    for _ in range(steps):
-        new_state = state.copy()
-        for node in G.nodes():
-            if state[node] == 'I':
-                new_state[node] = 'R'
-            elif state[node] == 'S':
-                inf_nbrs = [n for n in G.neighbors(node) if state[n] == 'I']
-                if any(random.random() < beta for _ in inf_nbrs):
-                    new_state[node] = 'I'
-        state = new_state
-        history.append(tuple(sum(1 for s in state.values() if s == k)
-                             for k in 'SIR'))
-    return history
-```
-
-With $\beta = 0.3$ and a hub seed, the peak hits around step 3–5. Below $\beta \approx 0.1$ the epidemic dies out; above $\beta \approx 0.4$ nearly the whole network is eventually infected. The dense community structure makes the karate club highly susceptible once the threshold $R_0 > 1$ is crossed.
 
 
 
@@ -260,23 +144,6 @@ For each scenario, decide whether it is **simple** (one contact sufficient) or *
 (e) Updating a belief after seeing a claim from several independent sources.
 
 For (b) and (d), how must network structure differ from simple contagion?
-
-
---
-
-**Solution:**
-
-| Scenario | Type |
-|----------|------|
-| (a) Cold | Simple |
-| (b) Software | Complex |
-| (c) Article | Simple |
-| (d) Protest | Complex |
-| (e) Belief | Complex |
-
-For (b) and (d) to spread, the network needs **dense local clusters** where multiple neighbours have already adopted. A bridge or weak tie — which excels for simple contagion — fails for complex contagion because the node on the other side has only one adopter neighbour.
-
-**Complex contagion spreads through tight communities and stalls at bridges** — exactly the opposite of simple contagion, which exploits bridges for rapid long-range diffusion.
 
 
 

@@ -7,22 +7,23 @@ Prof. Dr. Michael Granitzer
 
 ---
 
-## Programmierung von Web-Systemen in Java
+## Ziel dieser Vorlesung
 
-Die Vorlesung verbindet den klassischen Java-Web-Stack mit dem Request-Verarbeitungsmodell serverseitiger Web-Anwendungen.
+Nachdem Vorlesung 04 HTTP und REST als **Protokoll und Architekturstil** eingeführt hat, zeigt diese Vorlesung die **serverseitige Implementierung**: Wie verarbeitet ein Java-System eingehende HTTP-Requests, wie verwaltet es Zustand trotz Statelessness, und wie bleibt der Code wartbar, wenn aus einem Servlet fünfzig werden?
 
-### Fokus
+### Leitfragen
 
-- wie Requests in serverseitigen Java-Systemen verarbeitet werden
-- welche Rollen Servlet-Container, Frameworks und Komponenten übernehmen
-- wie Zustandsmanagement, Formulare und Sessions umgesetzt werden
-- warum MVC und Schichtentrennung für wartbare Web-Systeme zentral bleiben
+- Welche Infrastruktur verbirgt sich hinter einer Java-Web-Anwendung?
+- Wie verarbeitet ein Servlet-Container HTTP-Requests — von TCP-Verbindung bis HTML-Response?
+- Wie überbrückt man HTTP-Statelessness für Login, Warenkorb und Formulare?
+- Warum reichen reine Servlets für große Projekte nicht aus — und welche Architekturmuster lösen die Probleme?
+- Welche Rolle spielen Dependency Injection, MVC und JPA für wartbare Web-Systeme?
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 1: Java Web Stack und Laufzeitmodell
+# Java Web Stack und Laufzeitmodell
 
 
 <div class="guiding-question">
@@ -73,6 +74,8 @@ Er übernimmt:
 </div>
 
 
+--
+
 ## Jakarta EE — der Enterprise-Java-Standard
 
 
@@ -120,6 +123,8 @@ Seit dem Wechsel zur Eclipse Foundation heißt das Paket `jakarta.*` statt `java
 </div>
 
 
+--
+
 ## Die zentralen Jakarta-EE-Standards {.smaller}
 
 | Standard | Aufgabe |
@@ -142,6 +147,8 @@ Nicht jede Anwendung braucht alle Standards. Ein modernes Spring-Boot-Projekt nu
 
 </div>
 
+
+--
 
 ## Application Server: Tomcat vs. GlassFish {.smaller}
 
@@ -185,6 +192,8 @@ Nicht jede Anwendung braucht alle Standards. Ein modernes Spring-Boot-Projekt nu
 </div>
 
 
+--
+
 ## Der Java-Web-Stack: Schichten im Überblick
 
 
@@ -222,6 +231,8 @@ Die Container-Schicht ist horizontal: sie unterstützt alle anderen Schichten mi
 
 </div>
 
+
+--
 
 ## Warum Java für Web-Systeme?
 
@@ -292,7 +303,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 | **C** | Datenzugriff (Repository) | Datenbankabfrage, JPA-Interface |
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 Jakarta EE definiert den Standard für Java-Webanwendungen: eine Menge von APIs für HTTP, Persistenz, Messaging und Transaktionen. Application Server wie Tomcat oder GlassFish implementieren diese Standards und übernehmen Infrastrukturaufgaben, die kein Entwickler neu erfinden sollte. Der Java-Web-Stack besteht aus klar getrennten Schichten — Web, Service, Datenzugriff — und der Container verbindet sie zur Laufzeit.
@@ -305,7 +316,7 @@ Jakarta EE definiert den Standard für Java-Webanwendungen: eine Menge von APIs 
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 2: Request-Verarbeitung auf dem Server
+# Request-Verarbeitung auf dem Server
 
 
 <div class="guiding-question">
@@ -359,6 +370,8 @@ Der **Servlet-Container** (Tomcat) übernimmt das URL-Mapping — konfiguriert �
 </div>
 
 
+--
+
 ## Das Servlet-API: Klassenhierarchie {.smaller}
 
 
@@ -411,9 +424,13 @@ Sie implementieren `HttpServlet` und überschreiben die benötigten `doXXX`-Meth
 </div>
 
 
+--
+
 ## Servlet-Lifecycle: init → service → destroy
 
 ![Servlet-Lebenszyklus.](/courses/web-and-data-engineering/figures/servlet-lifecycle.svg)
+
+--
 
 ## HttpServletRequest: Eingabedaten lesen {.smaller}
 
@@ -469,6 +486,8 @@ protected void doGet(HttpServletRequest req,
 
 </div>
 
+
+--
 
 ## HttpServletResponse: Antwort schreiben {.smaller}
 
@@ -531,6 +550,8 @@ protected void doGet(HttpServletRequest req,
 </div>
 
 
+--
+
 ## Konfiguration: web.xml und @WebServlet {.smaller}
 
 
@@ -591,6 +612,8 @@ public class ProductServlet extends HttpServlet {
 </div>
 
 
+--
+
 ## Fehlerbehandlung: `sendError` und Logging {.smaller}
 
 ```java
@@ -631,6 +654,8 @@ protected void doGet(HttpServletRequest req,
 
 </div>
 
+
+--
 
 ## Inter-Servlet-Kommunikation: RequestDispatcher {.smaller}
 
@@ -676,6 +701,8 @@ header.include(req, resp);
 </div>
 
 
+--
+
 ## Mini-Übung: Welche API-Methode? {.smaller}
 
 **Aufgabe:** Bestimmen Sie für jede Aufgabe die passende Servlet-API-Methode.
@@ -701,7 +728,7 @@ header.include(req, resp);
 | Cookie setzen | `c.setMaxAge(3600); resp.addCookie(c)` |
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 Servlets sind das Fundament der Java-Web-Programmierung. Der Servlet-Container übernimmt Netzwerk, Threading und Lifecycle — der Entwickler implementiert `doGet()`/`doPost()` und arbeitet mit `HttpServletRequest` und `HttpServletResponse`. Frameworks wie Spring MVC bauen auf exakt diesem Fundament auf und abstrahieren das Boilerplate.
@@ -714,7 +741,7 @@ Servlets sind das Fundament der Java-Web-Programmierung. Der Servlet-Container �
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 3: Formulare, Sessions und Zustandsmanagement
+# Formulare, Sessions und Zustandsmanagement
 
 
 <div class="guiding-question">
@@ -765,6 +792,8 @@ Request 3:  POST /cart   → ??? Welcher Warenkorb?
 </div>
 
 
+--
+
 ## 5 Methoden für Session-Tracking {.smaller}
 
 | Methode | Funktionsprinzip | Vorteile | Risiken |
@@ -782,6 +811,8 @@ Request 3:  POST /cart   → ??? Welcher Warenkorb?
 
 </div>
 
+
+--
 
 ## Cookies: Mechanismus und Code {.smaller}
 
@@ -838,6 +869,8 @@ Ohne `HttpOnly` kann JavaScript den Cookie lesen — ein XSS-Angriff kann damit 
 </div>
 
 
+--
+
 ## Session-Tracking-API: `HttpSession` {.smaller}
 
 
@@ -892,6 +925,8 @@ Der Container überträgt die Session-ID automatisch per Cookie (`JSESSIONID`) o
 </div>
 
 
+--
+
 ## Variable Visibility: Wo lebt welcher Zustand? {.smaller}
 
 | Scope | Klasse | Sichtbar für | Lebt bis |
@@ -908,6 +943,8 @@ Der Container überträgt die Session-ID automatisch per Cookie (`JSESSIONID`) o
 
 </div>
 
+
+--
 
 ## JSP: Java-Templates für die View-Schicht
 
@@ -961,6 +998,8 @@ Java Beans: kein No-arg-Konstruktor → JSP kann den Bean nicht instanziieren.
 
 </div>
 
+
+--
 
 ## JSP-Syntax: Die drei Scripting-Elemente {.smaller}
 
@@ -1018,6 +1057,8 @@ Java Beans: kein No-arg-Konstruktor → JSP kann den Bean nicht instanziieren.
 </div>
 
 
+--
+
 ## Java Beans in JSP: `<jsp:useBean>` {.smaller}
 
 ```jsp
@@ -1037,6 +1078,8 @@ request.setAttribute("product", p);
 request.getRequestDispatcher("/WEB-INF/product.jsp")
        .forward(request, response);
 ```
+
+--
 
 ## Mini-Übung: Welche Session-Methode ist am sichersten? {.smaller}
 
@@ -1061,7 +1104,7 @@ request.getRequestDispatcher("/WEB-INF/product.jsp")
 **Zusatz:** `session.invalidate()` beim Logout ist Pflicht — ein gestohlenes Cookie wird damit sofort wertlos.
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 HTTP-Zustandslosigkeit ist kein Fehler — sie ist Voraussetzung für Skalierung. Anwendungen müssen Zustand explizit verwalten: durch Cookies, Server-Sessions oder zustandslose Tokens. Die Java-Session-Tracking-API (`HttpSession`) ist die praktischste Variante für klassische Web-Anwendungen, erfordert aber Sorgfalt bei Thread-Safety, Cookie-Sicherheit und Clustering. JSP ergänzt Servlets um eine View-Schicht — wobei modernes Java-Web-Entwicklung Template-Engines gegenüber eingebettetem Java-Code bevorzugt.
@@ -1074,7 +1117,7 @@ HTTP-Zustandslosigkeit ist kein Fehler — sie ist Voraussetzung für Skalierung
 
 <!-- .slide: class="module-slide" -->
 
-# Modul 4: MVC, Templates und Wartbarkeit
+# MVC, Templates und Wartbarkeit
 
 
 <div class="guiding-question">
@@ -1133,6 +1176,8 @@ protected void doGet(...) throws IOException {
 </div>
 
 
+--
+
 ## Spring Framework: Überblick
 
 
@@ -1176,6 +1221,8 @@ protected void doGet(...) throws IOException {
 
 </div>
 
+
+--
 
 ## Dependency Injection: Das Hollywood-Prinzip {.smaller}
 
@@ -1245,6 +1292,8 @@ public class OrderService {
 
 Spring erzeugt und verwaltet alle `@Service`, `@Repository`, `@Controller`-Objekte automatisch und injiziert Abhängigkeiten beim Start.
 
+--
+
 ## AOP: Querschnittsbelange trennen {.smaller}
 
 **Problem:** Logging, Sicherheitsprüfungen und Performance-Messungen durchziehen alle Methoden — ohne AOP muss jede Methode denselben Boilerplate-Code wiederholen.
@@ -1307,6 +1356,8 @@ public class PerformanceAspect {
 </div>
 
 
+--
+
 ## Spring Web Stack: Schichten {.smaller}
 
 ![Spring Web Stack.](/courses/web-and-data-engineering/figures/spring-web-stack.svg)
@@ -1356,9 +1407,13 @@ public class ProductController {
 </div>
 
 
+--
+
 ## Spring MVC: End-to-End Request Flow {.smaller}
 
 ![Spring MVC Request Flow.](/courses/web-and-data-engineering/figures/spring-request-flow.svg)
+
+--
 
 ## Spring MVC: DispatcherServlet-Flow {.smaller}
 
@@ -1402,6 +1457,8 @@ HTTP-Response → Browser
 </div>
 
 
+--
+
 ## MVC vs. MVP vs. MVVM {.smaller}
 
 ![MVC vs. MVP vs. MVVM.](/courses/web-and-data-engineering/figures/mvc-pattern.svg)
@@ -1421,6 +1478,8 @@ HTTP-Response → Browser
 | Server-seitiges HTML (Spring) | **MVC** mit DispatcherServlet |
 | Rich Client SPA + REST-API | **MVVM** + Spring REST |
 | Android Native | **MVP** oder MVVM |
+
+--
 
 ## Spring Data JPA: Persistenz ohne Boilerplate {.smaller}
 
@@ -1478,6 +1537,8 @@ public interface ProductRepository
 </div>
 
 
+--
+
 ## JPA Inheritance Strategies {.smaller}
 
 
@@ -1521,6 +1582,8 @@ public abstract class Animal {
 </div>
 
 
+--
+
 ## Mini-Übung: Welche Schicht? {.smaller}
 
 **Aufgabe:** Ordnen Sie jedes Code-Fragment der richtigen Schicht im Spring-Web-Stack zu (Web, Service, Repository, Entity).
@@ -1561,7 +1624,7 @@ public class Order {
 | **4** | Entity | JPA-Annotation, Datenbankstruktur |
 
 
-<div class="callout-important takeaway">
+<div class="takeaway">
 
 
 Reine Servlets lösen das HTTP-Problem, skalieren aber schlecht für große Projekte: fehlende Trennung, kein zentrales Routing, viel Boilerplate. Spring löst das durch **Dependency Injection**, **AOP** und den **DispatcherServlet-Front-Controller**. Spring Data JPA eliminiert den Persistenz-Boilerplate durch automatisch generierte Queries. Das Ergebnis: eine Architektur, in der Controller, Service und Repository klar getrennte Verantwortlichkeiten haben.
@@ -1574,19 +1637,17 @@ Reine Servlets lösen das HTTP-Problem, skalieren aber schlecht für große Proj
 
 ## Wrap-Up
 
-- Java-Web-Systeme kapseln HTTP-Verarbeitung in einem Laufzeitstack aus Container, Komponenten und Framework.
-- Zustandsmanagement ist im Web nie kostenlos und muss explizit entworfen werden.
-- MVC hilft, serverseitige Web-Anwendungen trotz wachsender Anforderungen wartbar zu halten.
+- **Java-Web-Stack:** Container (Tomcat/GlassFish) übernimmt Netzwerk, Threading und Lifecycle; Jakarta EE standardisiert die APIs für HTTP, Persistenz, Messaging und Transaktionen.
+- **Servlet-Modell:** `HttpServletRequest`/`HttpServletResponse` sind das Fundament der Java-Web-Programmierung — Spring MVC baut direkt darauf auf.
+- **Zustandsmanagement:** HTTP-Statelessness ist kein Bug, sondern Skalierungsvoraussetzung. Cookies, `HttpSession` und Tokens sind die Werkzeuge, um Zustand kontrolliert zu überbrücken — mit Sorgfalt bei Thread-Safety, `HttpOnly`, `Secure` und `SameSite`.
+- **Architekturmuster:** Reine Servlets skalieren schlecht für große Projekte. Spring löst das durch Dependency Injection, AOP, den DispatcherServlet-Front-Controller und Spring Data JPA. Das Ergebnis ist eine klare Trennung zwischen Web-, Service- und Repository-Schicht.
 
+Die nächste Vorlesung wendet sich **Data Engineering** zu: Wie skaliert man die Datenhaltung, wenn eine Java-Webanwendung auf Millionen Nutzer und Milliarden Events stößt?
 
-<div class="notes">
+Notes:
+Im Wrap-Up den Spannungsbogen nochmal aufzeigen: Container → Servlets → Zustand → Framework. Jeder Schritt löst ein konkretes Problem des vorherigen. Servlets lösen das HTTP-Boilerplate, Sessions lösen die Statelessness, Spring löst die fehlende Struktur bei skalierenden Projekten. Dann die Brücke zu L06 bauen: bisher haben wir nur die Anwendungsschicht betrachtet — aber bei großen Systemen wird die Datenhaltung selbst zum Flaschenhals. L06 behandelt Data Engineering: Batch- vs. Stream-Processing, CAP-Theorem, NoSQL, Datenpipelines.
 
-Legacy-Quelle im Kursindex:
-
-- Kapitel 5: Programmierung von Web-Systemen in Java
-
-</div>
-
+Legacy-Quelle im Kursindex: Kapitel 5: Programmierung von Web-Systemen in Java.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

@@ -36,26 +36,6 @@ Answer the five modeling questions from the lecture for this system:
 Finally: what does your modeling choice **reveal**, and what does it **hide**?
 
 
---
---
-
-**Solution:**
-
-**1. Nodes:** Most natural: individual patients and staff. Alternative: hospital wards or departments (coarser model). Granularity determines visible patterns.
-
-**2. Edges:** "Spent time in the same room", "direct physical contact", or "shared a care procedure". A stricter definition gives a sparser, accurate graph; a looser one gives a denser graph risking over-estimation.
-
-**3. Direction:** Depends on edge definition. "Direct contact" is symmetric (undirected). "Given treatment" is asymmetric (directed).
-
-**4. Weights:** Yes — duration of contact (minutes) naturally encodes transmission probability.
-
-**5. Time:** Strongly yes. A patient is infectious only during a specific window. A static snapshot misattributes risk; a temporal graph (edges with timestamps) is necessary.
-
-**Reveals:** Who could have transmitted the infection to whom, and via what chain.
-
-**Hides:** Airborne transmission over distance, environmental contamination, and asymptomatic carriers.
-
-
 
 --
 
@@ -73,22 +53,6 @@ The ARPANET had two distinct kinds of nodes: **universities/labs** and **routers
 3. If your question is *"Can MIT reach Stanford in at most 3 hops?"*, which model do you use and why?
 4. If your question is *"Which physical cable, if cut, would disconnect the ARPANET?"*, which model do you use and why?
 5. What general principle do these questions illustrate about modeling choices?
-
-
---
---
-
-**Solution:**
-
-**1. Model R path:** A sequence of physical cable segments connecting two specific routers. Path length = number of cable hops.
-
-**2. Model U path:** A sequence of institutions reachable from each other. This hides router-level detail — one Model U "hop" may correspond to dozens of physical cable segments.
-
-**3. MIT → Stanford, 3 hops:** Use **Model U**. The question is about institutional reachability, not physical routing.
-
-**4. Critical cable:** Use **Model R**. You need physical resolution. In Model U the cable is invisible.
-
-**5. General principle:** The right model depends on the question. Using a model at the wrong level of abstraction either gives the wrong answer or hides the relevant information.
 
 
 
@@ -110,43 +74,6 @@ Consider a university course enrollment system. Two researchers model it differe
 5. What information is irreversibly lost in the projection from $G_A$ to $G_B$?
 
 
---
---
-
-**Solution:**
-
-
-<div class="columns fit">
-
-
-<div class="column">
-
-**Bipartite Graph $G_A$**
-
-![Bipartite graph](/courses/network-science/figures/ex02-bipartite.svg)
-
-</div>
-
-
-<div class="column">
-
-**Projected Graph $G_B$**
-
-![Projected graph](/courses/network-science/figures/ex02-projected.svg)
-
-</div>
-
-
-</div>
-
-
-**3. $G_A$ reveals:** Course popularity, bridging courses. Q: *"Which course cancellation disconnects the cohort?"*
-
-**4. $G_B$ reveals:** Social clusters, student isolation. Q: *"Are there isolated student groups?"*
-
-**5. Information lost:** The specific courses connecting two students; degree of connection (unless edge weights are added). **Lesson:** Every projection trades detail for simplicity.
-
-
 
 ---
 
@@ -162,6 +89,13 @@ Consider a university course enrollment system. Two researchers model it differe
 
 Consider an undirected graph with five nodes $\{A, B, C, D, E\}$ and edges $A$–$B$, $A$–$C$, $B$–$C$, $B$–$D$, $D$–$E$.
 
+
+<div class="columns figure-60 small">
+
+
+<div class="column">
+
+
 1. Write the formal set notation: $V = \ldots$, $E = \ldots$
 2. Draw the adjacency matrix (nodes in alphabetical order).
 3. Write the adjacency list as a Python dictionary.
@@ -169,33 +103,18 @@ Consider an undirected graph with five nodes $\{A, B, C, D, E\}$ and edges $A$�
 5. What is the degree of each node? Verify the handshaking lemma: $\sum_{v \in V} \deg(v) = 2|E|$.
 6. Now suppose $B$–$D$ becomes directed ($B \to D$). What changes?
 
+</div>
+
+
+<div class="column">
+
 ![5-node abstract graph](/courses/network-science/figures/ex02-graph-a.svg)
 
+</div>
 
---
---
 
-**Solution:**
+</div>
 
-**1.** $V = \{A, B, C, D, E\}$, $E = \{\{A,B\}, \{A,C\}, \{B,C\}, \{B,D\}, \{D,E\}\}$
-
-**2. Adjacency matrix** (order $A, B, C, D, E$):
-
-$$M = \begin{pmatrix} 0&1&1&0&0 \\ 1&0&1&1&0 \\ 1&1&0&0&0 \\ 0&1&0&0&1 \\ 0&0&0&1&0 \end{pmatrix}$$
-
-**3. Adjacency list:**
-
-```python
-{"A": ["B","C"], "B": ["A","C","D"], "C": ["A","B"],
- "D": ["B","E"],  "E": ["D"]}
-```
-
-**4.** $|V| = 5$, $|E| = 5$.
-
-**5. Degrees:** $\deg(A)=2,\ \deg(B)=3,\ \deg(C)=2,\ \deg(D)=2,\ \deg(E)=1$.
-$\sum \deg = 10 = 2 \times 5$ ✓
-
-**6. Directed $B \to D$:** Matrix loses symmetry. $B$'s out-deg = 3, in-deg = 2; $D$'s out-deg = 1, in-deg = 1. Lemma: $\sum \text{in-deg} = \sum \text{out-deg} = |E|$.
 
 
 
@@ -221,38 +140,6 @@ G.add_edges_from([("A","B"),("A","C"),("B","C"),("B","D"),("D","E")])
 5. **Bonus:** Plot both graphs side by side with `matplotlib`.
 
 
---
---
-
-**Solution:**
-
-```python
-import networkx as nx
-
-G = nx.Graph()
-G.add_edges_from([("A","B"),("A","C"),("B","C"),("B","D"),("D","E")])
-
-# 1. Adjacency matrix
-nodes = sorted(G.nodes())
-print("Adjacency matrix:\n", nx.to_numpy_array(G, nodelist=nodes))
-
-# 2. Degrees
-print("Degrees:", dict(G.degree()))
-# {'A': 2, 'B': 3, 'C': 2, 'D': 2, 'E': 1}
-
-# 3. Density
-print(f"Density: {nx.density(G):.3f}")   # 0.500
-
-# 4. Directed version
-DG = nx.DiGraph()
-DG.add_edges_from([("A","B"),("A","C"),("B","C"),("B","D"),("D","E")])
-print("B:", DG.in_degree("B"),  DG.out_degree("B"))
-print("D:", DG.in_degree("D"),  DG.out_degree("D"))
-```
-
-**Density = 1** → complete graph; **density = 0** → no edges. The directed version loses matrix symmetry; $B$'s high out-degree reflects its role as a "broadcaster".
-
-
 
 --
 
@@ -275,41 +162,6 @@ G = nx.karate_club_graph()
 4. Plot the network. Can you visually identify the two factions that the club split into?
 
 *Hint: `G.degree()` returns degree for all nodes. `nx.draw_spring` gives a reasonable layout.*
-
-
---
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import matplotlib.pyplot as plt
-
-G = nx.karate_club_graph()
-
-print(f"Nodes: {G.number_of_nodes()}")       # 34
-print(f"Edges: {G.number_of_edges()}")       # 78
-
-degrees = [d for _, d in G.degree()]
-avg_degree = sum(degrees) / len(degrees)
-print(f"Average degree: {avg_degree:.2f}")   # 4.59
-
-isolated = [n for n, d in G.degree() if d == 0]
-print(f"Isolated nodes: {isolated}")          # []
-
-color_map = ["steelblue" if G.nodes[n]["club"] == "Mr. Hi"
-             else "tomato" for n in G.nodes()]
-nx.draw_spring(G, node_color=color_map, with_labels=True,
-               node_size=400, font_size=8)
-plt.title("Zachary Karate Club – two factions")
-plt.show()
-```
-
-- **34 nodes, 78 edges:** small but dense.
-- **Average degree ≈ 4.6:** each member is friends with 4–5 others.
-- **No isolated nodes:** every member has at least one friend — connected.
-- **Visual factions:** the spring layout reveals two clusters; high-degree hubs ("Mr. Hi" and "Officer") are structurally central.
 
 
 
@@ -341,24 +193,6 @@ Classify each sequence as a **walk**, **path**, **cycle**, or **none** (edge doe
 Then: what is the **diameter** of this graph?
 
 
---
---
---
-
-**Solution:**
-
-| Sequence | Classification | Reason |
-|----------|---------------|--------|
-| $A, B, C, A$ | **Cycle** | All intermediate nodes distinct; all edges exist |
-| $A, C, D, A$ | **Cycle** | Edges $A$–$C$, $C$–$D$, $D$–$A$ all exist |
-| $A, B, C, D, A$ | **Cycle** | All 4 edges exist; returns to $A$ |
-| $A, B, A, C$ | **Walk** (not path) | $A$ visited twice — not simple |
-| $A, B, C, D, C$ | **Walk** (not path) | $C$ appears twice |
-| $A, E$ | **None** | Node $E$ does not exist |
-
-**Diameter:** $d(A,B)=1$, $d(A,C)=1$, $d(A,D)=1$, $d(B,C)=1$, $d(B,D)=2$, $d(C,D)=1$. **Diameter = 2.**
-
-
 
 --
 
@@ -375,49 +209,6 @@ The city has four land masses: **North bank (N)**, **South bank (S)**, **Island 
 3. Euler proved that an **Eulerian circuit** exists iff **every vertex has even degree**. Does Königsberg satisfy this condition?
 4. An **Eulerian path** exists iff **exactly two vertices have odd degree**. Does Königsberg have an Eulerian path?
 5. What does this tell us?
-
-
---
---
---
-
-**Solution:**
-
-
-<div class="columns fit">
-
-
-<div class="column">
-
-
-**1.** $V = \{N, S, I, E\}$.
-
-$E = \{N\text{–}I, N\text{–}I, S\text{–}I, S\text{–}I, N\text{–}E, S\text{–}E, I\text{–}E\}$ (7 edges).
-
-**2. Degrees:**
-
-- $\deg(N) = 3$, $\deg(S) = 3$
-- $\deg(I) = 5$, $\deg(E) = 3$
-
-
-</div>
-
-
-<div class="column">
-
-![Königsberg multigraph abstraction](/courses/network-science/figures/ex02-koenigsberg.svg)
-
-</div>
-
-
-</div>
-
-
-**3. Eulerian circuit:** All degrees must be even. Here all four are odd → **no Eulerian circuit**.
-
-**4. Eulerian path:** Requires exactly 2 odd-degree vertices. All four are odd → **no Eulerian path** either.
-
-**5. Lesson:** Euler's result reduces a physical puzzle to a parity check. The actual shape of the river and bridge positions are irrelevant. This is the power of graph abstraction.
 
 
 
@@ -468,38 +259,6 @@ arpa.add_edges_from([
 
 
 
---
---
---
-
-**Solution:**
-
-```python
-# 1. Plot
-nx.draw_spring(arpa, with_labels=True, node_color='lightblue')
-plt.show()
-
-# 2. Shortest path
-path = nx.shortest_path(arpa, "UCLA", "HARVARD")
-print(f"Path: {path}")           # ['UCLA', 'SRI', 'BBN', 'HARVARD']
-
-# 3. Eccentricity, diameter, radius
-print(f"Diameter: {nx.diameter(arpa)}")  # 4
-print(f"Radius:   {nx.radius(arpa)}")    # 2
-
-# 4. Center
-center = nx.center(arpa)
-print(f"Center: {center}")
-
-# 5. Remove BBN
-arpa2 = arpa.copy()
-arpa2.remove_node("BBN")
-print(f"Diameter after removing BBN: {nx.diameter(arpa2)}")
-```
-
-**Interpretation:** The center node(s) minimise the maximum detour any message must take. Removing `BBN` increases the diameter because it was a primary relay bridging the East Coast and West Coast clusters.
-
-
 
 ---
 
@@ -542,25 +301,6 @@ Edges: $\{1\text{–}2, 1\text{–}3, 2\text{–}4, 2\text{–}5, 3\text{–}6, 
 
 
 
---
---
-
-**Solution:**
-
-| Node | Layer | Parent |
-|------|-------|--------|
-| 1 | 0 | — |
-| 2, 3 | 1 | 1 |
-| 4, 5 | 2 | 2 |
-| 6 | 2 | 3 |
-| 7, 8 | 3 | 4 or 5; 6 |
-
-Node 7 can have either 4 or 5 as a parent depending on tie-breakers, showing more than one shortest path.
-
-- **Shortest paths:** $d(1,7)=3$, $d(1,8)=3$.
-- **Weighted BFS:** No. BFS counts hops, not weights. Use Dijkstra for weighted shortest paths.
-
-
 
 --
 
@@ -591,38 +331,6 @@ adj = {n: list(G.neighbors(n)) for n in G.nodes()}
 2. Use it to find the **eccentricity** of node 0 (the instructor "Mr. Hi").
 3. What fraction of the network is reachable within 2 hops from node 0?
 4. Repeat for node 33 (the administrator "Officer"). Compare eccentricities and reachable fractions. What does the difference tell you?
-
-
---
---
-
-**Solution:**
-
-```python
-from collections import deque
-import networkx as nx
-
-def bfs_distances(graph, source):
-    dist = {source: 0}
-    queue = deque([source])
-    while queue:
-        node = queue.popleft()
-        for neighbor in graph.get(node, []):
-            if neighbor not in dist:
-                dist[neighbor] = dist[node] + 1
-                queue.append(neighbor)
-    return dist
-
-G = nx.karate_club_graph()
-adj = {n: list(G.neighbors(n)) for n in G.nodes()}
-
-d0  = bfs_distances(adj, 0)
-d33 = bfs_distances(adj, 33)
-print(f"Ecc(0): {max(d0.values())}, Ecc(33): {max(d33.values())}")
-```
-
-- **Eccentricity of Mr. Hi (0):** ≈ 4. Reaches more nodes in 2 hops than node 33.
-- **Structural insight:** Node 0's central position is reflected in lower BFS distances. The two factions are anchored by these hubs (0 and 33), but Mr. Hi is often more "central" in the unweighted friendship graph.
 
 
 
@@ -666,27 +374,6 @@ $1 \to 2,\ 2 \to 3,\ 3 \to 1,\ 4 \to 3,\ 5 \to 6,\ 6 \to 5$.
 
 
 
---
---
-
-**Solution:**
-
-**1. Weakly connected components** (undirected view):
-- $\{1, 2, 3, 4\}$
-- $\{5, 6\}$
-
-**2. Strongly connected components** (directed paths):
-- $\{1, 2, 3\}$ — cycle $1 \to 2 \to 3 \to 1$
-- $\{4\}$ — reaches $\{1,2,3\}$ via $4 \to 3$ but no path back
-- $\{5, 6\}$ — cycle $5 \to 6 \to 5$
-
-![Directed graph components marked](/courses/network-science/figures/ex02-graph-components-marked.svg)
-
-**3. Node 4 as source:** Information flows out of 4 into $\{1,2,3\}$ but nothing flows back. Node 4 cannot receive information from 1, 2, or 3. It acts as a "broadcaster" influencing the main cluster without being influenced in return.
-
-**4. Removing $3 \to 1$:** The cycle breaks. Each of 1, 2, 3 becomes its own trivial SCC. Dependency flow: $\{1\} \to \{2\} \to \{3\}$ alongside $\{4\} \to \{3\}$. Node 3 becomes an absolute sink.
-
-
 
 --
 
@@ -710,46 +397,6 @@ G = nx.karate_club_graph()
 4. Which strategy destroys the giant component faster? Why?
 
 *Hint: `max(nx.connected_components(G), key=len)` gives the largest component.*
-
-
---
---
-
-**Solution:**
-
-```python
-import networkx as nx
-import matplotlib.pyplot as plt
-import random
-
-def giant_fraction(G):
-    if G.number_of_nodes() == 0:
-        return 0
-    return len(max(nx.connected_components(G), key=len)) / G.number_of_nodes()
-
-def simulate(G0, strategy):
-    G = G0.copy()
-    sizes = [giant_fraction(G)]
-    while G.number_of_nodes() > 0:
-        if strategy == "random":
-            v = random.choice(list(G.nodes()))
-        else:  # targeted
-            v = max(G.nodes(), key=lambda n: G.degree(n))
-        G.remove_node(v)
-        sizes.append(giant_fraction(G))
-    return sizes
-
-G0 = nx.karate_club_graph()
-plt.plot(simulate(G0, "random"),  label="random")
-plt.plot(simulate(G0, "targeted"), label="targeted")
-plt.xlabel("nodes removed")
-plt.ylabel("giant component fraction")
-plt.legend()
-plt.show()
-```
-
-- **Robustness vs fragility:** Hub-based networks are resilient to random failure (most nodes are peripheral) but fragile under targeted attack (hubs are critical).
-- Removing the instructor (0) or administrator (33) disrupts connectivity far more than removing an average student. This principle explains why internet backbones and social hubs are high-value targets.
 
 
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;

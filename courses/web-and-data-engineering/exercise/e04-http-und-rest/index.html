@@ -46,25 +46,6 @@ Ordnen Sie jeder Situation die korrekte HTTP-Methode und den passenden Status-Co
 | Server-interner Fehler | — | ? |
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.A.1: HTTP-Methoden und Status-Codes — Lösung
-
-| Situation | Methode | Status-Code |
-|---|---|---|
-| Produktliste abrufen | **GET** | 200 OK |
-| Neues Produkt anlegen | **POST** | 201 Created |
-| Produktname aktualisieren (Teilupdate) | **PATCH** | 200 OK |
-| Produkt vollständig ersetzen | **PUT** | 200 OK |
-| Produkt löschen | **DELETE** | 204 No Content |
-| Ressource nicht gefunden | — | **404** Not Found |
-| Validierungsfehler | — | **400** Bad Request |
-| Server-interner Fehler | — | **500** Internal Server Error |
-
-**Merkhilfe:** POST = neu erzeugen (URL unbekannt). PUT = ersetzen (URL bekannt). PATCH = partiell ändern.
-
 
 --
 
@@ -79,21 +60,6 @@ Ein Online-Shop liefert verschiedene Ressourcen. Bestimmen Sie für jede die gee
 | Warenkorb-Inhalt (nutzerspezifisch) | ? | ? |
 | JavaScript-Bundle `app.abc123.js` (Hash im Namen) | ? | ? |
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.A.2: Caching-Strategien — Lösung
-
-| Ressource | Strategie | HTTP-Header |
-|---|---|---|
-| `logo.png` mit Hash | **Ewig** | `Cache-Control: public, max-age=31536000, immutable` |
-| Produktliste | **Kurz** | `Cache-Control: public, max-age=3600` |
-| Warenkorb | **Kein Cache** | `Cache-Control: private, no-store` |
-| `app.abc123.js` | **Ewig** | `Cache-Control: public, max-age=31536000, immutable` |
-
-**Prinzip:** Dateien mit Content-Hash im Namen können unbegrenzt gecacht werden — Änderung = neuer Hash = neue URL. Nutzerspezifische Daten nie öffentlich cachen (`private`).
 
 
 ---
@@ -117,24 +83,6 @@ Ein Fitness-App-Backend soll folgende Operationen unterstützen. Entwerfen Sie R
 Welche URL-Muster sind dabei problematisch: `/getTrainings`, `/user/deleteById?id=5`?
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.B.1: RESTful URL-Design — Lösung
-
-| Operation | Methode | URL |
-|---|---|---|
-| Trainingspläne eines Nutzers | GET | `/users/{userId}/plans` |
-| Neuen Plan erstellen | POST | `/users/{userId}/plans` |
-| Spezifische Übung abrufen | GET | `/users/{userId}/plans/{planId}/exercises/{exerciseId}` |
-| Übung aktualisieren | PUT/PATCH | `/users/{userId}/plans/{planId}/exercises/{exerciseId}` |
-| Einheiten filtern | GET | `/users/{userId}/sessions?from=2026-01-01&to=2026-03-31&completed=true` |
-
-**Problematische Muster:**
-- `/getTrainings` — Verb in der URL verletzt REST: HTTP-Methoden (GET, POST…) sind die Verben, URLs sind Substantive.
-- `/user/deleteById?id=5` — Operation im Pfad und Query-Parameter für ID; korrekt: `DELETE /users/5`.
-
 
 --
 
@@ -144,36 +92,6 @@ Welche URL-Muster sind dabei problematisch: `/getTrainings`, `/user/deleteById?i
 
 2. Nennen Sie zwei Strategien für **API-Versionierung** und diskutieren Sie je einen Vorteil und Nachteil.
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.B.2: HATEOAS und API-Versionierung — Lösung
-
-**1. HATEOAS** (Hypermedia as the Engine of Application State): Die API-Antwort enthält Links zu möglichen Folgeaktionen. Clients müssen URLs nicht hartcodieren.
-
-```json
-{
-  "id": 42,
-  "name": "Laptop Pro",
-  "price": 999.00,
-  "_links": {
-    "self":    { "href": "/products/42" },
-    "reviews": { "href": "/products/42/reviews" },
-    "order":   { "href": "/orders", "method": "POST" }
-  }
-}
-```
-
-**Vorteil:** API-URLs können sich ändern, ohne Clients zu brechen — sie folgen Links statt URLs zu kennen.
-
-**2. Versionierungsstrategien:**
-
-| Strategie | Vorteil | Nachteil |
-|---|---|---|
-| **URL-Versionierung** `/api/v1/products` | Explizit, einfach zu verstehen und zu testen | Dupliziert Routen; Clients müssen URL-Änderung mitmachen |
-| **Header-Versionierung** `Accept: application/vnd.api+json;version=2` | URL bleibt stabil | Schwerer zu testen (kein Browser-direktaufruf), komplexeres Routing |
 
 
 ---
@@ -196,21 +114,6 @@ Entscheiden Sie für jedes Szenario, ob REST oder SOAP besser geeignet ist, und 
 | Legacy-Enterprise-Integration mit strenger Vertragsbindung | ? | ? |
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.C.1: REST vs. SOAP Entscheidung — Lösung
-
-| Szenario | Empfehlung | Begründung |
-|---|---|---|
-| Mobile App | **REST** | Leichtgewichtig, JSON, HTTP-Caching, geringe Latenz |
-| Banktransfer | **SOAP** | WS-AtomicTransaction, ACID-Garantien, WS-Security für Compliance |
-| IoT-Sensoren | **REST** | Minimaler Overhead, JSON oder binäre Formate; SOAP-XML zu schwer |
-| Legacy Enterprise | **SOAP** | WSDL erzwingt stabilen Vertrag; bestehende SOAP-Infrastruktur verwenden |
-
-**Faustregel:** REST für neue, performance-kritische Systeme. SOAP wenn Transaktionssicherheit, formale Verträge oder Legacy-Integration gefordert sind.
-
 
 ---
 
@@ -227,26 +130,6 @@ Entscheiden Sie für jedes Szenario, ob REST oder SOAP besser geeignet ist, und 
 3. Erklären Sie den **TLS-Handshake** in 4 Schritten: Was wird ausgetauscht und welches Ziel hat jeder Schritt?
 4. Was bedeutet **Certificate Pinning** und für welche Art von Anwendung ist es besonders relevant?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.D.1: TLS/SSL — Transport-Sicherheit — Lösung
-
-1. **SSL 2.0 Schwächen:** Mehrere kritische Sicherheitslücken: schwache MAC-Konstruktion (MD5), anfällig für Downgrade-Angriffe, fehlender Schutz des Handshakes vor Manipulation, unzureichende Trennung von Authentifizierung und Verschlüsselung.
-
-2. **TLS heute:**
-   - **Technisch:** HTTP/2 erfordert TLS; moderne Browser markieren HTTP-Seiten als „Nicht sicher".
-   - **Regulatorisch:** DSGVO/GDPR verlangt angemessene technische Schutzmaßnahmen für personenbezogene Daten; PCI-DSS verlangt TLS für Zahlungsdaten.
-
-3. **TLS-Handshake (vereinfacht):**
-   1. **ClientHello:** Client sendet unterstützte TLS-Versionen und Cipher Suites
-   2. **ServerHello + Certificate:** Server wählt Cipher Suite, sendet X.509-Zertifikat
-   3. **Key Exchange:** Beide Seiten einigen sich auf einen gemeinsamen Session-Key
-   4. **Finished:** Beide bestätigen, dass der Handshake vollständig und unverändert war
-
-4. **Certificate Pinning:** Die Anwendung akzeptiert nur ein bestimmtes Zertifikat oder dessen Public Key. Besonders relevant für **Mobile Apps**, die Man-in-the-Middle-Angriffe über manipulierte CAs verhindern müssen.
 
 
 ## Übung 4.D.2: Swagger/OpenAPI — API-Dokumentation
@@ -275,21 +158,6 @@ Entscheiden Sie für jedes Szenario, ob REST oder SOAP besser geeignet ist, und 
    a) Welchen HTTP-Status liefert der Endpunkt bei einer nicht vorhandenen Produkt-ID?
    b) Warum ist `id` als `in: path` (nicht `in: query`) definiert?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 4.D.2: Swagger/OpenAPI — API-Dokumentation — Lösung
-
-1. **OpenAPI/Swagger:** Eine maschinenlesbare Spezifikation (YAML/JSON), die REST-APIs formal beschreibt: Endpunkte, Parameter, Request/Response-Schemata, Authentifizierung. Ohne Spezifikation ist eine API nur durch Quellcode oder informelle Dokumentation verstehbar.
-
-2. **Design-First vs. Code-First:**
-   - **Design-First:** API-Spezifikation wird vor dem Code geschrieben. Vorteil: Frontend- und Backend-Teams können parallel arbeiten.
-   - **Code-First:** Code wird zuerst geschrieben, OpenAPI-Spec aus Annotations generiert. Vorteil: Spec ist immer aktuell.
-
-3. a) **HTTP 404** — „Product not found"
-   b) `in: path` bedeutet, die ID ist Teil der URL-Struktur (`/products/42`), nicht als Query-Parameter (`/products?id=42`). Ein Pfad-Parameter identifiziert eine spezifische Ressource.
 
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

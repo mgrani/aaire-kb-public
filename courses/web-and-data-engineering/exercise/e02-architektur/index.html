@@ -45,17 +45,6 @@ Begründen Sie jede Zuordnung in einem Satz.
 
 
 
-### Lösung
-
-| Symptom | Engpass |
-|---|---|
-| Langsame Preisberechnungen | **CPU** — rechenintensive Operationen erschöpfen die Verarbeitungskapazität |
-| Absturz bei 50.000 Sessions | **RAM** — Session-Daten im Arbeitsspeicher; bei ~1 MB/Session = 50 GB RAM-Bedarf |
-| Langsame Produktbilder | **Storage I/O oder Netzwerk** — große Binärdateien; fehlender CDN-Cache |
-| Mobile API-Timeouts | **Netzwerk** — Latenz oder Bandbreitenproblem zwischen Client und Server |
-
-
-
 --
 
 ## Übung 2.A.2: Vertikale vs. Horizontale Skalierung
@@ -65,14 +54,6 @@ Ein Start-up betreibt seinen Web-Shop auf einem einzelnen Server (8 Kerne, 32 GB
 1. Beschreiben Sie eine **vertikale** Skalierungsmaßnahme und nennen Sie ihre Grenze.
 2. Beschreiben Sie eine **horizontale** Skalierungsmaßnahme und die dabei entstehenden neuen Herausforderungen.
 3. Warum ist Session-State ein kritisches Problem bei horizontaler Skalierung, und wie löst man es?
-
-
-
-### Lösung
-
-1. **Vertikal:** Server auf 32 Kerne / 128 GB RAM aufrüsten. **Grenze:** Physische Obergrenze (kein unendlich großer Einzelrechner) und exponentielle Kostensteigerung. Außerdem: Single Point of Failure bleibt bestehen.
-2. **Horizontal:** 5 identische Server hinter einem Load Balancer betreiben. **Neue Herausforderungen:** Session-State muss synchronisiert werden, Datenbankzugriffe müssen koordiniert werden (konsistenter Datenbankstand), Deployment wird komplexer.
-3. **Session-State-Problem:** Wenn Nutzer A seinen Warenkorb auf Server 1 speichert, aber der nächste Request auf Server 2 landet, ist der Warenkorb weg. **Lösung:** Session-Daten in einem zentralen Store auslagern (z.B. Redis), auf den alle Server-Instanzen zugreifen — sogenanntes *Sticky Session*-freies Design.
 
 
 
@@ -113,18 +94,6 @@ Begründen Sie jede Zuordnung.
 
 
 
-### Lösung
-
-| Fragment | Schicht | Begründung |
-|---|---|---|
-| **(A)** HTML-Formular | **Präsentation** | Darstellung für den Nutzer, Eingabe-Erfassung — ändert sich wenn das Design ändert |
-| **(B)** Lagerprüfung, Steuer, E-Mail | **Anwendung** | Geschäftsregeln, Validierung, Orchestrierung — ändert sich wenn Fachlogik sich ändert |
-| **(C)** JPA-Query | **Persistenz** | Datenbankzugriff — ändert sich wenn die Datenbank ausgetauscht wird |
-
-**Faustregel:** Fragen Sie sich, welche Änderung diesen Code berühren würde. Designänderung → Präsentation. Neue Geschäftsregel → Anwendung. Anderes DB-Schema → Persistenz.
-
-
-
 --
 
 <!-- .slide: class="smaller" -->
@@ -155,27 +124,6 @@ public String checkout(HttpServletRequest req, Model model) {
 
 
 
-### Lösung
-
-**Verletzungen:**
-
-- **SoC:** Der Controller enthält Datenbankzugriff (SQL), Geschäftslogik (Steuer), HTML-Erzeugung und E-Mail-Versand — vier verschiedene Verantwortlichkeiten in einer Methode.
-- **SRP:** Die Methode tut mehr als eine Sache: sie verwaltet Session, berechnet Preise, generiert HTML und verschickt E-Mails.
-- **DRY:** `* 1.19` für die Steuer ist auch in `/invoice` und `/quote` dupliziert — bei Steueränderung müssen drei Stellen geändert werden.
-- **SQL Injection:** `"... WHERE user_id = " + userId` ist eine Sicherheitslücke.
-
-**Verbesserte Struktur:**
-
-```
-CheckoutController       → nimmt Request entgegen, gibt View zurück
-CartService              → orchestriert Bestellprozess
-TaxService               → berechnet Steuer (eine Stelle, DRY)
-CartRepository           → Datenbankzugriff (PreparedStatement)
-EmailService             → E-Mail-Versand
-```
-
-
-
 ---
 
 <!-- .slide: class="module-slide" -->
@@ -200,17 +148,6 @@ Ordnen Sie folgende Vorfälle den Herausforderungen verteilter Systeme zu (Netzw
 
 
 
-### Lösung
-
-| Vorfall | Herausforderung |
-|---|---|
-| Server 2 fällt aus | **Partielle Ausfälle** — einzelne Knoten können unabhängig versagen |
-| Alter Kontostand nach Kauf | **Konsistenz** — Replika noch nicht synchronisiert (eventual consistency) |
-| Doppelte Bestellverarbeitung | **Koordination** — ohne Locking/Idempotenz bearbeiten mehrere Instanzen denselben Job |
-| 50 ms statt 0,1 ms | **Netzwerk-Latenz** — Netzwerkaufrufe sind Größenordnungen langsamer als lokale Operationen |
-
-
-
 ---
 
 <!-- .slide: class="module-slide" -->
@@ -226,22 +163,6 @@ Ein E-Commerce-Unternehmen hat seine Anwendung in 8 Microservices aufgeteilt. Di
 1. Was ist ein **API Gateway** und welches Problem löst es in diesem Szenario?
 2. Worin unterscheidet sich ein **API Gateway** von einem einfachen **API Proxy (Reverse Proxy)**?
 3. Diskutieren Sie **Fat Client vs. Thin Client**: Nennen Sie je zwei Vor- und Nachteile eines Fat Clients für Web-Anwendungen.
-
-
-
-### Lösung
-
-1. **API Gateway:** Ein einziger Einstiegspunkt, der Client-Requests empfängt und intern an die richtigen Microservices weiterleitet. Es aggregiert Antworten, übernimmt cross-cutting concerns (Auth, Rate Limiting, Logging) und erspart dem Client das Wissen über die interne Service-Topologie. **Lösung:** Die App ruft nur das Gateway auf; dieses orchestriert die 4 Service-Calls intern.
-
-2. **Unterschied:**
-   - **API Proxy / Reverse Proxy:** Leitet Anfragen 1:1 weiter ohne Transformation. Kein Routing-Intelligence, keine Aggregation.
-   - **API Gateway:** Bündelt, transformiert und aggregiert Anfragen. Kann Request-Composition (mehrere Services zu einer Antwort kombinieren), Auth-Enforcement, Rate Limiting und Response-Caching übernehmen.
-
-3. **Fat Client Vor- und Nachteile:**
-   - **Vorteil:** Reaktionsschnelle UI (Logik im Browser), reduziert Server-Last
-   - **Vorteil:** Offline-Fähigkeit möglich (localStorage, Service Worker)
-   - **Nachteil:** Mehr JavaScript-Code → längere Ladezeit beim ersten Aufruf
-   - **Nachteil:** Sicherheits-kritische Logik darf nie nur im Client liegen (Client ist nicht vertrauenswürdig)
 
 
 
@@ -263,25 +184,6 @@ Ordnen Sie die folgenden Technologien/Standards in die richtige Kategorie ein:
 | **Architekturstil** | ? |
 
 Hinweis: Manche Technologien können mehreren Kategorien zugeordnet werden — wählen Sie die primäre.
-
-
-
-### Lösung
-
-| Kategorie | Technologien |
-|---|---|
-| **Protokoll** | HTTP, SOAP (baut auf HTTP auf), JDBC (Datenbankprotokoll) |
-| **Adressierung** | URI |
-| **Markup-/Datenformat** | HTML, XML, JSON, CSS |
-| **Framework / Template-Engine** | JSF (Java Server Faces), Thymeleaf |
-| **Datenbankzugriff** | JDBC, SQL |
-| **Architekturstil** | REST |
-
-**Anmerkungen:**
-
-- **SOAP** ist technisch ein Protokoll (XML-basiertes Messaging), baut aber typischerweise auf HTTP auf.
-- **REST** ist kein Protokoll, sondern ein Architekturstil — ein häufiges Missverständnis.
-- **XML** ist sowohl Datenformat als auch Basis für SOAP/WSDL-Beschreibungen.
 
 
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;

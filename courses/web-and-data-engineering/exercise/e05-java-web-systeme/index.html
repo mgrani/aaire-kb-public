@@ -46,33 +46,6 @@ Ordnen Sie die folgenden Technologien der richtigen Kategorie im Java Web Stack 
 Mögliche Kategorien: View Template Engine, Application Server, Build Management Tool, Test Framework, CI/CD Tool, Datenbank, Web Framework
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.A.1: Java Web Stack Begriffe — Lösung
-
-| Technologie | Kategorie | Kurzbeschreibung |
-|---|---|---|
-| Thymeleaf | View Template Engine | Server-seitiges HTML-Templating; Templates werden im Browser ohne Server darstellbar (Natural Templates) |
-| Tomcat | Application Server | Servlet-Container, der HTTP-Anfragen entgegennimmt und Java-Webapplikationen ausführt |
-| Maven | Build Management Tool | Verwaltet Abhängigkeiten, steuert den Build-Lifecycle per `pom.xml` |
-| JUnit | Test Framework | Standard-Framework für Unit- und Integrationstests in Java |
-| Jenkins | CI/CD Tool | Automatisierungsserver für kontinuierliche Integration und Deployment |
-| H2 | Datenbank | Leichtgewichtige In-Memory-Datenbank für Entwicklung und Tests |
-| Spring Framework | Web Framework | Umfassendes Java-Framework: IoC-Container, MVC, Security, Data u.v.m. |
-
-**Zusammenhang im Stack:**
-
-```text
-Browser
-  └─► Tomcat (Application Server)
-        └─► Spring MVC Controller
-              ├─► Thymeleaf (View)
-              ├─► Spring Data JPA → H2 (Datenbank)
-              └─► Build: Maven  |  Test: JUnit  |  CI: Jenkins
-```
-
 
 --
 
@@ -82,40 +55,6 @@ Browser
 2. Was bedeutet semantische Versionierung (Semantic Versioning)? Erklären Sie `MAJOR.MINOR.PATCH` anhand eines Beispiels.
 3. Nennen Sie mindestens vier Phasen des Maven Default Lifecycle in der richtigen Reihenfolge.
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.A.2: Maven Grundlagen — Lösung
-
-**1. Maven-Artefakt und Koordinate**
-
-Ein Maven-Artefakt ist das Ergebnis eines Builds (z.B. `.jar`, `.war`). Jedes Artefakt wird durch eine eindeutige Koordinate identifiziert:
-
-```xml
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-web</artifactId>
-<version>3.2.4</version>
-```
-
-Kurznotation: `groupId:artifactId:version`.
-
-**2. Semantische Versionierung (SemVer)**
-
-| Teil | Bedeutung | Beispiel |
-|---|---|---|
-| MAJOR | Inkompatible API-Änderung | `2.0.0` → `3.0.0` |
-| MINOR | Neue Funktion, abwärtskompatibel | `3.1.0` → `3.2.0` |
-| PATCH | Bugfix, abwärtskompatibel | `3.2.3` → `3.2.4` |
-
-**3. Maven Default Lifecycle**
-
-```text
-validate → compile → test → package → verify → install → deploy
-```
-
-Jede Phase schließt alle vorigen ein.
 
 
 ---
@@ -158,21 +97,6 @@ public class HelloServlet extends HttpServlet { ... }
 Beantworten Sie außerdem: Welche Methode ruft der Container auf, wenn eine HTTP-POST-Anfrage eintrifft?
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.B.1: Servlet Lifecycle — Lösung
-
-| Schnipsel | Lifecycle-Schritt | Auslöser |
-|---|---|---|
-| D | Deployment / Registrierung | Container liest `@WebServlet` oder `web.xml` |
-| B | `init()` | Einmalig nach Erzeugung des Servlet-Objekts |
-| A | `service()` → `doGet()` | Bei jeder eingehenden HTTP-GET-Anfrage |
-| C | `destroy()` | Beim Herunterfahren oder Undeploy |
-
-Bei einer HTTP-POST-Anfrage delegiert `service()` an **`doPost()`**.
-
 
 ## Übung 5.B.2: Session Tracking Vergleich
 
@@ -189,22 +113,6 @@ Vergleichen Sie die fünf gängigen Session-Tracking-Methoden. Füllen Sie die T
 Welche Methode nutzt Spring Boot's `HttpSession` standardmäßig?
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.B.2: Session Tracking Vergleich — Lösung
-
-| Methode | Funktioniert ohne Cookies? | XSS-Risiko? | Typischer Einsatz |
-|---|---|---|---|
-| URL-Kodierung | Ja | Gering | Fallback wenn Cookies deaktiviert sind |
-| Hidden Fields | Ja | Mittel | Mehrstufige Formulare |
-| Cookies | Nein | Hoch | Standard-Session-Tracking |
-| HTTP Authorization Header | Ja | Gering | REST-APIs, JWT |
-| Session Tracking API | Nein / Ja im Fallback | Mittel | Java EE / Jakarta EE Webapplikationen |
-
-Spring Boot verwendet standardmäßig einen **Cookie mit dem Namen `JSESSIONID`**.
-
 
 ## Übung 5.B.3: JSP und Java Beans
 
@@ -215,38 +123,6 @@ Ein Formular auf `form.html` sendet eine POST-Anfrage an `/convert` mit dem Para
 3. Welche Methode des Servlets (`doGet` oder `doPost`) wird aufgerufen, und warum?
 4. Was ist ein **Java Bean** im JSP-Kontext, und welche Voraussetzungen muss eine Klasse erfüllen?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.B.3: JSP und Java Beans — Lösung
-
-**1. Verarbeitungsfluss:**
-
-```text
-Browser: POST /convert (amount=100)
-  ↓
-ConvertServlet.doPost(request, response)
-  ├── amount = request.getParameter("amount")
-  ├── result = Double.parseDouble(amount) * 1.10
-  ├── request.setAttribute("result", result)
-  └── forward("/WEB-INF/result.jsp")
-  ↓
-result.jsp: rendert HTML mit ${result}
-```
-
-**2. Ergebnis an JSP übergeben:**
-
-```java
-request.setAttribute("result", amount * 1.10);
-RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/result.jsp");
-rd.forward(request, response);
-```
-
-**3. Methode:** `doPost()` — das Formular sendet `method="POST"`.
-
-**4. Java Bean:** Eine normale Java-Klasse mit parameterlosem Konstruktor sowie öffentlichen Getter/Setter-Methoden; optional `Serializable`.
 
 
 ## Übung 5.B.4: CurrencyServlet — eigene REST-API
@@ -259,58 +135,6 @@ In Übungsblatt 4 haben Sie einen Währungsrechner gegen die `exchangerate.host`
 
 Implementieren Sie die `doGet()`-Methode des `CurrencyServlet` mit `@WebServlet`-Annotation. Welche Bibliothek verwenden Sie für die JSON-Serialisierung, und warum sollten Sie nicht von Hand `String.format` benutzen?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.B.4: CurrencyServlet — Lösung
-
-```java
-@WebServlet(urlPatterns = {"/currency"})
-public class CurrencyServlet extends HttpServlet {
-
-    private static final Map<String, Map<String, Double>> RATES = Map.of(
-        "EUR", Map.of("USD", 1.10, "CHF", 0.96),
-        "USD", Map.of("EUR", 0.91, "CHF", 0.87)
-    );
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-        String base = Optional.ofNullable(req.getParameter("base")).orElse("EUR");
-        Map<String, Double> rates = RATES.get(base);
-
-        if (rates == null) {
-            res.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                          "Unsupported base currency: " + base);
-            return;
-        }
-
-        Map<String, Object> payload = Map.of(
-            "base", base,
-            "date", LocalDate.now().toString(),
-            "rates", rates
-        );
-
-        res.setContentType("application/json");
-        res.setCharacterEncoding("UTF-8");
-        new ObjectMapper().writeValue(res.getWriter(), payload);
-    }
-}
-```
-
-**JSON-Bibliothek:** Üblich ist **Jackson** (`com.fasterxml.jackson.databind.ObjectMapper`) oder **Gson**. Manuelles Zusammenbauen mit `String.format` ist fehleranfällig (Escaping von Anführungszeichen, Sonderzeichen, Unicode), produziert ungültiges JSON bei Edge Cases und ist schwer zu warten.
-
-**Maven-Abhängigkeit (Jackson):**
-
-```xml
-<dependency>
-  <groupId>com.fasterxml.jackson.core</groupId>
-  <artifactId>jackson-databind</artifactId>
-  <version>2.17.0</version>
-</dependency>
-```
 
 
 ## Übung 5.B.5: JSP-Frontend mit FinanceBean
@@ -342,54 +166,6 @@ Erweitern Sie das CurrencyServlet aus Übung 5.B.4 um eine `doPost()`-Methode, d
 2. Implementieren Sie `doPost()`: liest `value` und `to`, rechnet um, befüllt die Bean, hängt sie als Request-Attribut `result` an und leitet auf `solution.jsp` weiter.
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.B.5: JSP + FinanceBean — Lösung
-
-**FinanceBean (parameterloser Konstruktor + Getter/Setter):**
-
-```java
-package de.unipassau.currency;
-
-public class FinanceBean implements java.io.Serializable {
-    private double amount;
-    private String currency;
-
-    public FinanceBean() { }
-
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
-
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
-}
-```
-
-**doPost im CurrencyServlet:**
-
-```java
-@Override
-protected void doPost(HttpServletRequest req, HttpServletResponse res)
-        throws ServletException, IOException {
-    double value = Double.parseDouble(req.getParameter("value"));
-    String to    = req.getParameter("to");
-
-    double rate = RATES.get("EUR").getOrDefault(to, 1.0);
-    if ("EUR".equals(to)) rate = 1.0;
-
-    FinanceBean result = new FinanceBean();
-    result.setAmount(value * rate);
-    result.setCurrency(to);
-
-    req.setAttribute("result", result);
-    req.getRequestDispatcher("/solution.jsp").forward(req, res);
-}
-```
-
-**Forward statt Redirect:** `RequestDispatcher.forward()` behält Request-Attribute (die JSP findet `result`). Ein `sendRedirect` würde einen neuen Request triggern und die Bean wäre weg.
-
 
 ---
 
@@ -410,54 +186,6 @@ Implementieren Sie einen Spring Boot REST-Controller für ein Studierenden-Verwa
 
 Verwenden Sie eine `StudentRepository`-Schnittstelle. Welche Spring-Annotationen benötigen Sie?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.C.1: Spring Boot REST-Controller — Lösung
-
-```java
-@RestController
-@RequestMapping("/students")
-public class StudentController {
-
-    private final StudentRepository repo;
-
-    public StudentController(StudentRepository repo) {
-        this.repo = repo;
-    }
-
-    @GetMapping
-    public List<Student> getAll() {
-        return repo.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Student> getById(@PathVariable Long id) {
-        return repo.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<Student> create(@RequestBody @Valid Student student,
-                                          UriComponentsBuilder ucb) {
-        Student saved = repo.save(student);
-        URI location = ucb.path("/students/{id}")
-                          .buildAndExpand(saved.getId()).toUri();
-        return ResponseEntity.created(location).body(saved);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        repo.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-}
-```
-
-Wichtige Annotationen: `@RestController`, `@RequestMapping`, `@PathVariable`, `@RequestBody`, `@Valid`.
 
 
 ## Übung 5.C.2: Dependency Injection und Testbarkeit
@@ -486,34 +214,6 @@ public class OrderService {
 3. Schreiben Sie einen Unit-Test für Version B, der `EmailService` mockt.
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.C.2: Dependency Injection und Testbarkeit — Lösung
-
-1. **Version B ist testbarer.** Der `EmailService` wird von außen injiziert → im Test kann ein Mock übergeben werden.
-2. Spring injiziert automatisch die passende Bean per Constructor Injection.
-
-```java
-@ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
-
-    @Mock
-    EmailService emailService;
-
-    @InjectMocks
-    OrderService orderService;
-
-    @Test
-    void placeOrder_sendsEmail() {
-        Order order = new Order(42L, "Laptop");
-        orderService.placeOrder(order);
-        verify(emailService, times(1)).send(order);
-    }
-}
-```
-
 
 ## Übung 5.C.3: Test-Pyramide
 
@@ -524,18 +224,6 @@ Beschreiben Sie die drei Ebenen der Test-Pyramide für eine Spring Boot Anwendun
 3. Welche Spring-Test-Annotationen oder -Bibliotheken sind typisch?
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.C.3: Test-Pyramide — Lösung
-
-**1. Unit Tests:** einzelne Klasse oder Methode isoliert, Abhängigkeiten gemockt.  
-**2. Integrationstests:** Zusammenspiel mehrerer Komponenten, z.B. Controller + JSON.  
-**3. End-to-End-Tests:** gesamter Stack inkl. HTTP und echter Datenbank.
-
-Faustregel: unten viele Tests, oben wenige.
-
 
 ## Übung 5.C.4: MVC, MVP und MVVM im Vergleich
 
@@ -543,25 +231,6 @@ Faustregel: unten viele Tests, oben wenige.
 2. Wann wählt man Spring MVC (Thymeleaf) und wann React + Spring REST?
 3. Warum ist MVP besonders testfreundlich?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.C.4: MVC, MVP und MVVM im Vergleich — Lösung
-
-| Aspekt | MVC | MVP | MVVM |
-|---|---|---|---|
-| Wer kommuniziert mit dem Model? | Controller und View direkt | Nur der Presenter | Nur das ViewModel |
-| Reaktion auf Änderungen | Direkt / Observer | Presenter aktualisiert View | Data Binding |
-| Testbarkeit | gut | sehr gut | gut |
-| Typische Plattform | Spring MVC | Android | Angular, React, Vue |
-
-**Entscheidung:**  
-- **Spring MVC + Thymeleaf** für serverseitiges Rendering und SEO.  
-- **React + Spring REST** für komplexe, interaktive Client-Anwendungen.
-
-MVP ist testfreundlich, weil die View nur als Interface vorkommt und der Presenter ohne UI-Klassen getestet werden kann.
 
 
 ## Übung 5.C.5: Spring CommandLineRunner
@@ -572,38 +241,6 @@ Bei der Entwicklung einer Spring Boot-Anwendung sollen beim Start automatisch Te
 2. Implementieren Sie einen `CommandLineRunner`, der beim Start 3 Produkte in ein `ProductRepository` (JPA) lädt.
 3. Was ist der Unterschied zwischen `CommandLineRunner` und `ApplicationRunner`?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.C.5: Spring CommandLineRunner — Lösung
-
-1. `CommandLineRunner` wird nach dem vollständigen Start des `ApplicationContext` ausgeführt.
-2. Implementierung:
-
-```java
-@Component
-public class DataInitializer implements CommandLineRunner {
-
-    private final ProductRepository productRepository;
-
-    public DataInitializer(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
-
-    @Override
-    public void run(String... args) {
-        productRepository.saveAll(List.of(
-            new Product("Laptop", 999.99),
-            new Product("Mouse", 29.99),
-            new Product("Keyboard", 79.99)
-        ));
-    }
-}
-```
-
-3. `CommandLineRunner` bekommt ein String-Array, `ApplicationRunner` ein strukturiertes `ApplicationArguments`-Objekt.
 
 
 ---
@@ -628,38 +265,6 @@ Erstellen Sie dazu ein `CourseRepository` mit einer Methode, die alle Kurse eine
 Welche JPA-Annotationen und welche Spring Data-Schnittstelle verwenden Sie?
 
 
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.D.1: Entity-Mapping und Repository — Lösung
-
-```java
-@Entity
-@Table(name = "courses")
-public class Course {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, length = 200)
-    private String title;
-
-    @Column(nullable = false)
-    @Min(1) @Max(10)
-    private int credits;
-
-    private String instructor;
-}
-```
-
-```java
-public interface CourseRepository extends JpaRepository<Course, Long> {
-    List<Course> findByInstructor(String instructor);
-}
-```
-
 
 ## Übung 5.D.2: Kursanmeldung mit Voraussetzungsprüfung
 
@@ -672,42 +277,6 @@ Implementieren Sie `EnrollmentService.enroll(studentId, courseId)` mit folgenden
 
 Welchen HTTP-Status-Code soll der Controller für jede Exception zurückgeben?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.D.2: Kursanmeldung mit Voraussetzungsprüfung — Lösung
-
-```java
-@Service
-@Transactional
-public class EnrollmentService {
-
-    public Enrollment enroll(Long studentId, Long courseId) {
-        Student student = studentRepo.findById(studentId)
-            .orElseThrow(() -> new StudentNotFoundException(studentId));
-        Course course = courseRepo.findById(courseId)
-            .orElseThrow(() -> new CourseNotFoundException(courseId));
-
-        if (enrollmentRepo.existsByStudentAndCourse(student, course))
-            throw new AlreadyEnrolledException(studentId, courseId);
-
-        Set<Course> completed = enrollmentRepo.completedCourses(student);
-        if (!completed.containsAll(course.getPrerequisites()))
-            throw new MissingPrerequisiteException(courseId);
-
-        return enrollmentRepo.save(new Enrollment(student, course));
-    }
-}
-```
-
-| Exception | HTTP-Status |
-|---|---|
-| `StudentNotFoundException` | 404 Not Found |
-| `CourseNotFoundException` | 404 Not Found |
-| `AlreadyEnrolledException` | 409 Conflict |
-| `MissingPrerequisiteException` | 400 Bad Request |
 
 
 ## Übung 5.D.3: JPA Vererbungsstrategien
@@ -722,18 +291,6 @@ Skizzieren Sie, wie die drei JPA-Vererbungsstrategien diese Hierarchie in Datenb
 
 Welche Strategie würden Sie für dieses Szenario wählen und warum?
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Übung 5.D.3: JPA Vererbungsstrategien — Lösung
-
-**SINGLE_TABLE:** Eine Tabelle mit allen Spalten und einem Diskriminator. Schnell, aber viele NULL-Werte.  
-**JOINED:** Eine Basistabelle plus Unterklassen-Tabellen. Normalisiert, aber JOINs.  
-**TABLE_PER_CLASS:** Eine Tabelle pro konkreter Klasse. Redundanz, polymorphe Queries schwierig.
-
-**Empfehlung:** `JOINED` ist für dieses Szenario die beste Wahl, weil die Hierarchie flach ist und die Unterklassen eigene Felder haben.
 
 
 ---
