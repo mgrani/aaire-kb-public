@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 560" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <style>
+      .node-visited { fill: #455a64; stroke: #263238; stroke-width: 2; }
+      .node-active { fill: #e53935; stroke: #b71c1c; stroke-width: 2.5; }
+      .node-pending { fill: #cfd8dc; stroke: #90a4ae; stroke-width: 1.5; }
+      .lbl-w { font-size: 12px; fill: white; text-anchor: middle; font-weight: bold; }
+      .lbl-dk { font-size: 12px; fill: #1a3358; text-anchor: middle; font-weight: bold; }
+      .edge-dfs { stroke: #e53935; stroke-width: 3; stroke-linecap: round; }
+      .edge-bg { stroke: #ddd; stroke-width: 1.5; }
+      .order-bubble { fill: white; stroke: #b71c1c; stroke-width: 1; }
+      .order-text { font-size: 10px; fill: #b71c1c; font-weight: bold; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="625" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a3358">DFS on ARPANET — starting from UCLA</text>
+  <text x="625" y="55" text-anchor="middle" font-size="14" fill="#546e7a">Notice the "deep" path instead of the "layered" BFS expansion.</text>
+
+  <!-- ── Nodes & Traversal ── -->
+  <!-- 
+    Path sequence:
+    0: UCLA
+    1: Stanford
+    2: SRI
+    3: UTAH
+    4: MIT
+    5: Lincoln
+    6: CASE
+    7: Carnegie
+    8: Harvard
+    9: BBN
+    10: RAND
+    11: SDC
+    12: UCSB
+  -->
+
+  <!-- Background edges -->
+  <line x1="80" y1="275" x2="245" y2="230" class="edge-bg"/> <!-- UCLA-SRI -->
+  <line x1="80" y1="275" x2="245" y2="330" class="edge-bg"/> <!-- UCLA-UCSB -->
+  <line x1="80" y1="275" x2="245" y2="430" class="edge-bg"/> <!-- UCLA-RAND -->
+  <line x1="245" y1="230" x2="245" y2="130" class="edge-bg"/> <!-- SRI-Stanford -->
+  <line x1="445" y1="280" x2="645" y2="195" class="edge-bg"/> <!-- BBN-MIT -->
+  <line x1="445" y1="410" x2="245" y2="230" class="edge-bg" stroke-dasharray="4,2"/> <!-- SDC-SRI -->
+
+  <!-- DFS Tree Edges (Highlit) -->
+  <line x1="80" y1="275" x2="245" y2="130" class="edge-dfs"/> <!-- UCLA-Stanford (1) -->
+  <line x1="245" y1="130" x2="245" y2="230" class="edge-dfs"/> <!-- Stanford-SRI (2) -->
+  <line x1="245" y1="230" x2="445" y2="150" class="edge-dfs"/> <!-- SRI-UTAH (3) -->
+  <line x1="445" y1="150" x2="645" y2="195" class="edge-dfs"/> <!-- UTAH-MIT (4) -->
+  <line x1="645" y1="195" x2="845" y2="215" class="edge-dfs"/> <!-- MIT-Lincoln (5) -->
+  <line x1="845" y1="215" x2="1060" y2="295" class="edge-dfs"/> <!-- Lincoln-CASE (6) -->
+  <line x1="1060" y1="295" x2="845" y2="380" class="edge-dfs"/> <!-- CASE-Carnegie (7) -->
+  <line x1="845" y1="380" x2="645" y2="360" class="edge-dfs"/> <!-- Carnegie-Harvard (8) -->
+  <line x1="645" y1="360" x2="445" y2="280" class="edge-dfs"/> <!-- Harvard-BBN (9) -->
+  <line x1="445" y1="280" x2="245" y2="430" class="edge-dfs"/> <!-- BBN-RAND (10) -->
+  <line x1="245" y1="430" x2="445" y2="410" class="edge-dfs"/> <!-- RAND-SDC (11) -->
+  <line x1="245" y1="430" x2="245" y2="330" class="edge-dfs"/> <!-- RAND-UCSB (12?) backtr? no, fork -->
+
+  <!-- Nodes -->
+  <!-- Start -->
+  <circle cx="80" cy="275" r="30" class="node-visited"/>
+  <text x="80" y="279" class="lbl-w">UCLA</text>
+  <rect x="95" y="245" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="105" y="256" class="order-text">0</text>
+
+  <circle cx="245" cy="130" r="26" class="node-visited"/>
+  <text x="245" y="134" class="lbl-w">Stanford</text>
+  <rect x="260" y="100" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="270" y="111" class="order-text">1</text>
+
+  <circle cx="245" cy="230" r="26" class="node-visited"/>
+  <text x="245" y="234" class="lbl-w">SRI</text>
+  <rect x="260" y="200" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="270" y="211" class="order-text">2</text>
+
+  <circle cx="445" cy="150" r="24" class="node-visited"/>
+  <text x="445" y="154" class="lbl-w">UTAH</text>
+  <rect x="460" y="120" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="470" y="131" class="order-text">3</text>
+
+  <circle cx="645" cy="195" r="22" class="node-visited"/>
+  <text x="645" y="199" class="lbl-w">MIT</text>
+  <rect x="660" y="165" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="670" y="176" class="order-text">4</text>
+
+  <circle cx="845" cy="215" r="22" class="node-visited"/>
+  <text x="845" y="219" class="lbl-w">Lincoln</text>
+  <rect x="860" y="185" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="870" y="196" class="order-text">5</text>
+
+  <circle cx="1060" cy="295" r="24" class="node-visited"/>
+  <text x="1060" y="299" class="lbl-w">CASE</text>
+  <rect x="1075" y="265" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="1085" y="276" class="order-text">6</text>
+
+  <circle cx="845" cy="380" r="22" class="node-visited"/>
+  <text x="845" y="384" class="lbl-w">Carnegie</text>
+  <rect x="860" y="350" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="870" y="361" class="order-text">7</text>
+
+  <circle cx="645" cy="360" r="22" class="node-visited"/>
+  <text x="645" y="364" class="lbl-w">Harvard</text>
+  <rect x="660" y="330" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="670" y="341" class="order-text">8</text>
+
+  <circle cx="445" cy="280" r="24" class="node-visited"/>
+  <text x="445" y="284" class="lbl-w">BBN</text>
+  <rect x="460" y="250" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="470" y="261" class="order-text">9</text>
+
+  <circle cx="245" cy="430" r="26" class="node-visited"/>
+  <text x="245" y="434" class="lbl-w">RAND</text>
+  <rect x="260" y="400" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="270" y="411" class="order-text">10</text>
+
+  <circle cx="445" cy="410" r="24" class="node-visited"/>
+  <text x="445" y="414" class="lbl-w">SDC</text>
+  <rect x="460" y="380" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="470" y="391" class="order-text">11</text>
+
+  <circle cx="245" cy="330" r="26" class="node-active"/>
+  <text x="245" y="334" class="lbl-w">UCSB</text>
+  <rect x="260" y="300" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="270" y="311" class="order-text">12</text>
+
+  <!-- Legend -->
+  <g transform="translate(50, 500)">
+    <circle cx="0" cy="0" r="8" class="node-visited"/><text x="15" y="4" font-size="11" fill="#444">Visited node</text>
+    <circle cx="100" cy="0" r="8" class="node-active"/><text x="115" y="4" font-size="11" fill="#444">Currently exploring</text>
+    <line x1="220" y1="0" x2="250" y2="0" class="edge-dfs"/><text x="260" y="4" font-size="11" fill="#444">DFS traversal path</text>
+    <rect x="380" y="-7" width="20" height="14" rx="3" class="order-bubble"/><text x="410" y="4" font-size="11" fill="#444">Discovery Order</text>
+  </g>
+</svg>

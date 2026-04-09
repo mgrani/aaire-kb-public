@@ -14,7 +14,7 @@
  * <section>. Useful for title slides and the auto-generated credits
  * slide.
  *
- * Configure via `Reveal.initialize({ tocProgress: { position: 'bottom' | 'top', hideOnOverview: true } })`.
+ * Configure via `Reveal.initialize({ tocProgress: { position: 'bottom' | 'top', hideOnOverview: true, chipMaxWidth: '24ch' } })`.
  */
 // Storage key for the live "hidden" toggle (set from the settings menu).
 const STORAGE_KEY = 'reveal-toc-progress-hidden'
@@ -35,6 +35,9 @@ window.RevealTocProgress = window.RevealTocProgress || {
     const container = document.createElement('nav')
     container.className = 'toc-progress toc-progress-' + opts.position
     container.setAttribute('aria-label', 'Table of contents')
+    if (opts.chipMaxWidth) {
+      container.style.setProperty('--toc-progress-chip-max-width', String(opts.chipMaxWidth))
+    }
     deck.getRevealElement().appendChild(container)
 
     // Honour the persisted visibility preference immediately.

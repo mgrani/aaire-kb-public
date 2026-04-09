@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Übungsblatt 1b — Einführung Web Engineering</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Übungsblatt 1b
+## Web Engineering Grundlagen
+
+5430UE Web and Data Engineering
+
+31. März 2026
+
+Prof. Dr. Michael Granitzer
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Lernziele
+
+- **Grundprinzipien** und **Kategorien** des Web Engineering kennen und abgrenzen
+- Die **Evolution des Webs** (1.0, 2.0, 3.0) verstehen
+- **CSS-Selektoren** sicher für das Frontend-Styling einsetzen können
+- **Media Queries** für responsive Layouts anwenden
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul A — Web Engineering Grundlagen
+
+--
+
+## Übung 1b.A.1: Kategorien von Web-Anwendungen
+
+Ordnen Sie folgende Systeme einer Web-Anwendungskategorie zu (statisch, dynamisch server-seitig, Single-Page Application, Web-Service/API):
+
+| System | Kategorie |
+|---|---|
+| Universitäts-Stundenplan als HTML-Seite, wöchentlich neu generiert | ? |
+| Online-Banking-Portal mit Echtzeit-Kontoübersicht | ? |
+| Wetter-REST-API, die JSON zurückgibt | ? |
+| Produktkatalog mit Suchfilter ohne Seitenneuladen | ? |
+
+Begründen Sie je eine Zuordnung kurz.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.A.1: Kategorien — Lösung
+
+| System | Kategorie |
+|---|---|
+| Stundenplan HTML | **Statisch** (vorgerendert, kein serverseitiger Code pro Request) |
+| Online-Banking | **Dynamisch server-seitig** (Session, Authentifizierung, Datenbankabfragen per Request) |
+| Wetter-REST-API | **Web-Service/API** (kein HTML, maschinenlesbare Daten) |
+| Produktkatalog mit Filter | **Single-Page Application** (JS übernimmt Routing und Datenabfragen im Browser) |
+
+**Begründung Wetter-API:** Eine API liefert strukturierte Daten (JSON/XML) für Maschinen, nicht für Menschen. Die Darstellung obliegt dem konsumierenden Client.
+
+
+--
+
+## Übung 1b.A.2: Grundprinzipien des Web Engineering
+
+Web Engineering ist die Anwendung systematischer und quantifizierbarer Ansätze (Konzepte, Methoden, Techniken, Werkzeuge).
+
+1. Erläutern Sie die **Grundprinzipien** in eigenen Worten.
+2. Welche **Ziele** verfolgt Web Engineering (Ziele und Qualitätsmerkmale)?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.A.2: Grundprinzipien — Lösung
+
+**Definition:** Web Engineering ist die systematische Disziplin zur Entwicklung von Web-Anwendungen.
+
+**Grundprinzipien:**
+- Klar definierte **Ziele und Anforderungen**
+- Systematische Entwicklung in **Phasen**
+- Kontinuierliche **Überwachung** des gesamten Entwicklungsprozesses
+- Planung der **Wartung** (Post-Launch-Plan)
+
+**Ziele:** Qualität, Wartbarkeit, Skalierbarkeit, Sicherheit, Usability, Wiederverwendbarkeit — bei vertretbaren Kosten.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.A.3: Kategorien nach Kappel
+
+Erläutern Sie kurz die Hauptunterschiede und geben Sie zu jeder Kategorie ein konkretes Beispiel:
+
+| Kategorie | Charakteristik | Beispiel |
+|---|---|---|
+| Dokumentenzentriert | ? | ? |
+| Interaktiv | ? | ? |
+| Transaktional | ? | ? |
+| Workflow-basiert | ? | ? |
+| Kollaborativ | ? | ? |
+| Portalorientiert | ? | ? |
+| Ubiquitär | ? | ? |
+| Social Web | ? | ? |
+| Semantisches Web | ? | ? |
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.A.3: Kategorien — Lösung
+
+| Kategorie | Charakteristik | Beispiel |
+|---|---|---|
+| **Dokumentenzentriert** | Statische Inhalte, kaum Interaktion | Firmen-Homepage |
+| **Interaktiv** | Auswahl, Navigation, dynamische Antworten | News-Site, Fahrplanauskunft |
+| **Transaktional** | Zustandsverändernde Operationen (Konsistenz) | Onlineshop, Online-Banking |
+| **Workflow-basiert** | Mehrstufige Prozesse, Akteure/Rollen | E-Government, Patienten-Workflow |
+| **Kollaborativ** | Mehrere Nutzer arbeiten gleichzeitig | Wiki, gemeinsame Dokumente |
+| **Portalorientiert** | Aggregation heterogener Dienste | Unternehmensportal |
+| **Ubiquitär** | Personalisiert, kontextabhängig | Wetter-App |
+| **Social Web** | Nutzer-erzeugte Inhalte, Vernetzung | Blogs, Social-Media |
+| **Semantisches Web** | Maschinenverarbeitbare Daten | Recommender-System |
+
+**Hinweis:** Reale Anwendungen sind meist Mischformen (z.B. Amazon).
+
+
+--
+
+## Übung 1b.A.4: Web Engineering — Ziele und Prinzipien
+
+Betrachten Sie die systematische Disziplin des Web Engineering.
+
+1. Was unterscheidet **Web Engineering** von klassischer Software-Entwicklung?
+2. Nennen Sie drei typische Qualitätsziele, die für Web-Anwendungen besonders kritisch sind.
+3. Welche Probleme entstehen langfristig ohne Versionskontrolle und ohne Tests?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.A.4: Ziele und Prinzipien — Lösung
+
+1. **Web Engineering** behandelt die Besonderheiten: heterogene Clients, zustandsloses HTTP, öffentliche Erreichbarkeit, schnelle Releasezyklen, hohe Nutzerzahlen. Klassische SE optimiert oft für kontrollierte Deployment-Umfelder.
+
+2. Typische Web-Qualitätsziele:
+   - **Skalierbarkeit:** Millionen gleichzeitiger Nutzer
+   - **Accessibility/Usability:** Barrierefreiheit auf allen Geräten
+   - **Performance/Ladezeit:** Kritisch für die Nutzerbindung
+
+3. **Langfristig:** Technische Schulden akkumulieren, Regression bei Änderungen, keine Basis für Compliance, schwieriges Onboarding neuer Entwickler.
+
+
+--
+
+## Übung 1b.A.5: Evolution des Web
+
+Das Web hat sich in Generationen entwickelt:
+
+| Merkmal | Web 1.0 | Web 2.0 | Web 3.0 |
+|---|---|---|---|
+| Inhaltsproduktion | ? | ? | ? |
+| Nutzerinteraktion | ? | ? | ? |
+| Typische Technologien | ? | ? | ? |
+| Beispiel-Anwendung | ? | ? | ? |
+
+Füllen Sie die Tabelle aus. Welches Web-Paradigma dominiert heute?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.A.5: Evolution des Web — Lösung
+
+| Merkmal | Web 1.0 | Web 2.0 | Web 3.0 |
+|---|---|---|---|
+| Inhaltsproduktion | Nur Betreiber | Nutzer generieren Inhalte (UGC) | Dezentralisiert, maschinenlesbar |
+| Nutzerinteraktion | Passiv (Lesen) | Aktiv (Kommentieren, Teilen) | Semantisch, personalisiert |
+| Typische Technologien | Statisches HTML | AJAX, Web-APIs, Blogs | Linked Data, RDF, KI-Integration |
+| Beispiel-Anwendung | Broschüren-Website | Facebook, YouTube | KI-Assistenten |
+
+**Heute dominiert** Web 2.0 (interaktive SPAs, REST-APIs). Web-3.0-Elemente (semantische Metadaten) werden zunehmend integriert.
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul B — CSS & Frontend Basics
+
+--
+
+## Übung 1b.B.1: CSS Dinner — Selektoren
+
+Bearbeiten Sie die **32 Level** aus dem CSS Dinner unter [flukeout.github.io](https://flukeout.github.io/).
+
+Diese Übung schärft die Grundlagen für CSS-Selektoren, die Sie im Frontend-Modul intensiv brauchen werden.
+
+**Reflexion:** Welche Selektor-Typen haben Sie bisher noch nie verwendet? Welche fanden Sie am schwersten?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.B.1: CSS Dinner — Hinweise
+
+Wichtige Selektor-Typen:
+- **Typ:** `plate`, `bento`
+- **Klasse:** `.small` | **ID:** `#fancy`
+- **Kombinatoren:** `A B` (Nachfahre), `A > B` (Kind), `A + B` (Nachbar), `A ~ B` (Geschwister)
+- **Pseudo-Klassen:** `:first-child`, `:last-child`, `:nth-child(n)`, `:not()`, `:empty`
+- **Attribut-Selektoren:** `[for]`, `[for^="val"]`
+
+Erfahrungsgemäß sind `:nth-child` und die Geschwister-Kombinatoren am schwierigsten.
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Modul C — CSS Code lesen
+
+--
+
+## Übung 1b.C.1: CSS-Selektoren — TODO-Liste
+
+Betrachten Sie einen HTML-Ausschnitt einer TODO-Liste. Ziel ist es, per CSS:
+1. Schriftgröße aller `li` ohne Klasse `styles` auf 18px zu setzen.
+2. Das zweite Element jeder Liste auszublenden.
+3. *Unbedingt* (strong) rot zu färben.
+4. Den Header (h1) zu transformieren.
+5. Selektoren mit `for^="basic"` hervorzuheben.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.C.1: CSS-Selektoren — Lösung
+
+```css
+li:not(.styles)         { font-size: 18px; }
+li:nth-child(2)         { display: none; }
+strong                  { color: red; }
+h1                      { transform: rotateZ(10deg) translate(20px, 40px); }
+li[for^="basic"]        { text-decoration: line-through; }
+```
+
+**Erklärung:**
+- `:not(.styles)` schließt Listeneinträge mit Klasse `styles` aus.
+- `:nth-child(2)` greift jeweils das zweite Geschwisterkind.
+- `[for^="basic"]` matcht alle Attribute, die mit `basic` **beginnen**.
+
+
+--
+
+## Übung 1b.C.2: Media Query
+
+Erstellen Sie eine Prüfung auf Bildschirmgröße (< 600 Pixel), um die Schriftgröße allgemein auf 10px zu verkleinern.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 1b.C.2: Media Query — Lösung
+
+```css
+@media screen and (max-width: 599px) {
+  body { font-size: 10px; }
+}
+```
+
+**Erklärung:**
+- `@media screen` schränkt die Regel auf Bildschirme ein.
+- `(max-width: 599px)` greift, wenn das Viewport schmaler als 600 Pixel ist.
+- Innerhalb des Blocks gelten die Regeln nur unter dieser Bedingung.
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Materialien zum Übungsblatt
+
+Zum Üben steht eine **leere HTML-Demo-Datei** bereit:
+
+- [`demo-empty.html`](./materials/demo-empty.html) — leeres HTML-Gerüst zum Experimentieren
+
+> Alle Materialien finden Sie auch zentral auf der **Kursseite** unter *Materials → Download*.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

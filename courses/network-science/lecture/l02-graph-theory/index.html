@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 02: Graph Theory</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 02: Graph Theory</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 02: Graph Theory
@@ -9,18 +9,7 @@ Dr. Kanishika Ghosh Dastidar
 Dr. Jelena Mitrovic
 
 Notes:
-Pedagogical approach for this lecture:
-
-- Start from the intuitive network concept and guide students toward formal graph definitions through guiding questions.
-- Use the questions from the Lecture 01 preview as entry points: What is a node? What is an edge? What about time?
-- Treat definitions as modeling decisions, not facts to memorize.
-- Ask students where each concept becomes useful in practice.
-
-Teaching goal for today:
-
-- students should understand that a graph model is always an abstraction choice
-- students should connect formal concepts to real reasoning tasks
-- students should leave able to explain not only what a concept is, but why it matters
+Graph theory serves as the formal foundation for network science. While our intuitive understanding of networks comes from daily experiences with social or technical systems, formal graph theory provides the precise mathematical language needed to analyze structures, optimize paths, and detect patterns. Today's session transitions from high-level concepts to rigorous definitions, focusing on how modeling choices—such as whether edges are directed or weighted—fundamentally change the analytical landscape.
 
 ---
 
@@ -40,8 +29,7 @@ Last time we saw that networks are everywhere: social, informational, economic, 
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## Properties of Networks
+# Properties of Networks
 
 
 <div class="guiding-question">
@@ -52,7 +40,7 @@ Last time we saw that networks are everywhere: social, informational, economic, 
 
 
 Notes:
-This is the bridge from Lecture 01 to formal graph theory. Let students brainstorm: number of entities? number of connections? who is connected to whom? are connections directed? do connections have strength? does the network change over time? Collect their answers. Each answer will map to a formal concept.
+The transition from intuitive "networks" to formal "graphs" begins by identifying the core properties of relational data. We must consider not only the number of entities and connections but also their directionality, strength, and how they evolve over time. Each of these descriptive needs directly corresponds to a specific mathematical construct in graph theory, such as directed edges, weighted functions, or temporal graphs.
 
 --
 
@@ -66,7 +54,7 @@ This is the bridge from Lecture 01 to formal graph theory. Let students brainsto
 A node is whatever entity you choose to model. That choice is never neutral — it determines what you can see and what you miss. 
 
 Notes:
-Push students: what if you modeled departments instead of people? Or paragraphs instead of web pages? The "right" node definition depends on the question you are asking. This is a modeling decision.
+Defining a "node" is a non-trivial modeling decision. The granularity of the model (e.g., modeling departments instead of individuals, or paragraphs instead of whole web pages) depends entirely on the research question. What counts as a node in one analysis might be considered internal structure in another; thus, the choice of node definition is the first step in determining what properties of the system can be observed.
 
 --
 
@@ -84,7 +72,7 @@ An edge encodes a relationship. But relationships differ:
 - binary vs. weighted. 
 
 Notes:
-Ask students for more examples. The key insight: the meaning and type of the edge is a modeling choice that affects every analysis downstream.
+The interpretation of an "edge" must align with the nature of the relationship. Symmetric relations (e.g., co-authorship) are modeled with undirected edges, while asymmetric ones (e.g., following on a social platform) require directed edges. This choice affects fundamental properties of the graph, such as reachability and flow, and must be justified by the real-world interaction being captured.
 
 --
 
@@ -98,7 +86,7 @@ Ask students for more examples. The key insight: the meaning and type of the edg
 Most real networks are dynamic. A static graph is a snapshot — useful, but incomplete. 
 
 Notes:
-This is an important conceptual point. Most of the course will work with static snapshots for simplicity, but students should understand this is always a simplification.
+While static graphs are the standard starting point for analysis, real-world networks are inherently dynamic—growing, shrinking, and evolving over time. Recognizing a graph as a "snapshot" highlight that temporal order often determines the final structure (e.g., who connected to whom first). More advanced techniques in temporal network analysis are needed when the timing of relationships is critical to the outcome.
 
 --
 
@@ -116,7 +104,7 @@ We now have a list of properties we need to capture:
 | Time | Temporal / dynamic graphs |
 
 Notes:
-This table serves as a roadmap for the rest of the lecture. Each row will be formalized in the coming slides. Graph theory is not arbitrary notation — it is a response to real descriptive needs.
+Graph theory provides a mapping between intuitive system properties and formal mathematical concepts. This lecture serves as a roadmap: moving from entities to vertices, relationships to edges, and strength to weights. This formalization is necessary to move from visual intuition to algorithmic analysis.
 
 --
 
@@ -137,11 +125,11 @@ Graph theory gives us a formal language to answer each of these questions.
 
 
 Notes:
-Transition to Module 2: now that we know what we need to describe, let us see the formal definitions.
+Before diving into formal definitions, it is essential to practice the "modeling mindset"—identifying the core components of any relational system and deciding how they should be represented to enable meaningful analysis.
 
 --
 
-## Mini-Exercise 2.A.1
+## Quick Check
 
 Pick a real-world network you interact with (e.g. your university's course system, a messaging group, a transport network). Write down:
 
@@ -152,11 +140,11 @@ Pick a real-world network you interact with (e.g. your university's course syste
 5. Does the network **change over time**?
 
 Notes:
-Give students 3 minutes. This exercise can also be done in small groups (2–3 students). The goal is to make students practice the modeling-decision mindset before seeing formal definitions.
+Practical exercise in establishing a model for everyday systems. Identifying nodes and edges—and deciding on direction and weight—forces us to articulate the assumptions we are making about how the system functions before we ever run an algorithm.
 
 --
 
-## Mini-Exercise 2.A.1 — Sample Answer
+## Quick Check — Sample Answer
 
 **Example: University course enrollment system** 
 
@@ -168,15 +156,14 @@ Give students 3 minutes. This exercise can also be done in small groups (2–3 s
 
 This is already a bipartite graph with temporal dynamics. 
 
-Notes: 
-The key point is that even a simple example already raises non-trivial modeling questions: bipartite vs. projected, directed vs. undirected, what the weight means.
+Notes:
+Even simple university systems reveal non-trivial modeling challenges, such as bipartite structures (linking students to courses) vs. projections (linking students who attend the same course). These decisions are epistemic—they change what the resulting graph reveals about the underlying social reality.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Graph Models
+# Graph Models
 
 
 <div class="guiding-question">
@@ -198,13 +185,13 @@ We identified properties we need to describe. Now we need precise definitions. G
 
 A graph $G = (V, E)$ consists of:
 
-- a set of **vertices** (nodes) $V$
-- a set of **edges** (links) $E \subseteq V \times V$
+- a set of **vertices** (nodes) $V$  
+- a set of **edges** (links) $E \subseteq V \times V$   
 
-This compact notation already encodes a modeling choice: what counts as a node, what counts as a relationship. <!-- .element: class="fragment" -->
+This compact notation already encodes a modeling choice: what counts as a node, what counts as a relationship. 
 
 Notes:
-Show the formal definition and ask: what does this notation tell us, and what does it hide? It tells us the structure but not the meaning — we supply the meaning through interpretation.
+The formal definition of a graph—a pair $(V, E)$—is a compact abstraction that strips away domain-specific meanings to focus on pure structure. This mathematical clarity is what allows us to generalize insights across different fields, provided we maintain the connection between the formal model and the real-world interpretation of what nodes and edges represent.
 
 --
 
@@ -219,7 +206,7 @@ Show the formal definition and ask: what does this notation tell us, and what do
 
 
 
-<div class="columns col-2-1 figure-60">
+<div class="columns col-2-1 figure-45">
 
 
 <div class="column">
@@ -240,7 +227,7 @@ Edges have no arrows, meaning the relation is symmetric (e.g. friendship).
 
 
 Notes:
-This makes the symmetry assumption explicit. It is the formal answer to the "what does an edge mean" question for symmetric relations.
+The undirected graph model makes a strict symmetry assumption: if there is a relationship between $u$ and $v$, it is bidirectional and identical for both nodes. This is the simplest possible model but is restricted to relations like mutual friendship or physical connectivity where no hierarchy or flow is present.
 
 --
 
@@ -255,7 +242,7 @@ This makes the symmetry assumption explicit. It is the formal answer to the "wha
 
 
 
-<div class="columns col-2-1 figure-60">
+<div class="columns col-2-1 figure-45">
 
 
 <div class="column">
@@ -277,7 +264,7 @@ Edges have arrows indicating direction. The same set of nodes can yield very dif
 
 
 Notes:
-Direction is not decoration; it changes the relation itself. Emphasize that this is a modeling decision with downstream consequences.
+Directing edges introduces a fundamental asymmetry into the graph. Directionality is not merely an aesthetic choice; it fundamentally alters the concepts of degree and reachability. In directed models, a path from $A$ to $B$ does not imply a path from $B$ to $A$, which is critical for representing flow-based systems like information dissemination or financial transactions.
 
 --
 
@@ -292,7 +279,7 @@ Before we analyse a graph, we decide how to turn a situation into one.
 Graph theory gives us a **formal language**, but the first step is still **epistemic**: choose the entities, choose the relations, and decide what abstraction is good enough for the question.
 
 Notes:
-Connect the formal definition to the earlier lecture. Mention affiliations: the same setting may become a bipartite graph or a projection depending on what the analysis needs.
+The formalization pipeline highlights the transition from messy reality to a structured graph model. Every step involves an epistemic choice about what is essential and what can be ignored. Whether a situation is modeled as a simple graph, a bipartite network, or a temporal sequence depends entirely on the analytical goal.
 
 --
 
@@ -308,7 +295,7 @@ Connect the formal definition to the earlier lecture. Mention affiliations: the 
 
 
 
-<div class="columns col-2-1 figure-60">
+<div class="columns col-2-1 figure-45">
 
 
 <div class="column">
@@ -329,7 +316,7 @@ Each edge carries a numerical value. The same topological structure can mean vas
 
 
 Notes:
-Ask students what the weight means in a transport network versus an interaction network. The same graph structure can mean different things depending on what the weights encode.
+Weights add a dimension of continuous intensity to the binary "edge versus no edge" model. In a transport network, weights typically represent costs or distances; in an interaction network, they might represent frequency or duration. The same topological structure can behave very differently under different weighting schemes.
 
 --
 
@@ -367,7 +354,7 @@ Modelling of different kinds of nodes and limited edges. Useful when tracking re
 
 
 Notes:
-Keep it simple: two kinds of nodes, edges only across the split. Mention that projections are a later step, not part of the definition itself.
+Bipartite models are specialized for tracking relationships between two disjoint sets of entities where internal connections are forbidden by the system's rules (e.g., students do not "enroll" in other students). This structure is the basis for many recommendation engines and collaborative filtering techniques.
 
 --
 
@@ -384,7 +371,7 @@ How would you store (write down) a graph on paper?
 
 
 
-<div class="fragment">
+<div class="fragment small">
 
 ![Edge list, adjacency list, and adjacency matrix representations](/courses/network-science/figures/graph-representations.svg)
 
@@ -394,9 +381,7 @@ How would you store (write down) a graph on paper?
 
 
 Notes:
-Representation is not the same as the graph itself. If students ask why it matters, point to storage, traversal, and matrix-based methods.
-
-Discuss with the students whether two differently drawn graps are the same (e.g. X/Y coordinates)
+A graph's representation is distinct from its topology. How we store a graph—as an edge list, adjacency list, or adjacency matrix—affects the scalability and performance of the algorithms we run. Matrices enable algebraic insights, while adjacency lists are the standard for efficient graph traversal. Additionally, whether two graphs drawn differently are the same (isomorphism) is a central question in structural analysis.
 
 --
 
@@ -410,13 +395,14 @@ Different representations make different operations easier.
 
 --
 
+<!-- .slide class="small" -->
 
 ## Real-World Example: ARPANET
 
 The ARPANET already shows how quickly a technical system becomes a graph with non-trivial structure (Easley & Kleinberg, 2010).
 
 
-<div class="columns col-2-1 figure-85">
+<div class="columns col-2-1 figure-65">
 
 
 <div class="column">
@@ -459,18 +445,19 @@ Lincoln:  [Case, MIT]
 
 --
 
+<!-- .slide: class="figure-60" -->
 
 ## Neighbourhood and Degree
 
 
-<div class="c-definition">
+<div class="c-definition small">
 
 **Neighbourhood.** The neighbourhood $N(v)$ of a node $v$ is the set of all nodes connected to $v$ by an edge.
 
 </div>
 
 
-<div class="c-definition">
+<div class="c-definition small">
 
 **Degree.** The degree $\deg(v)$ is the number of edges incident to $v$. In simple graphs, $\deg(v) = |N(v)|$.
 
@@ -479,10 +466,8 @@ Lincoln:  [Case, MIT]
 
 ![Neighbourhood and degree example](/courses/network-science/figures/graph-neighbourhood-degree.svg)
 
-
-
 Notes:
-In directed graphs, this splits into in-neighbourhood (in-degree) and out-neighbourhood (out-degree).
+The concepts of neighbourhood and degree allow us to quantify local node importance. In directed networks, these bifurcate into in-degree (prestige or attention) and out-degree (influence or activity). Understanding these local metrics is the first step toward more global measures like centrality.
 
 --
 
@@ -497,11 +482,11 @@ Graph theory is useful because it gives a precise language for the properties we
 
 
 Notes:
-Strong closing question: what would be different if we modeled routers, organizations, or data flows instead of links between sites?
+Concluding the formalization module: changing the node or edge definition can lead to entirely different analytical results. Graph theory provides the toolkit, but the researcher provides the critical reasoning that links the formal model to the system's consequences.
 
 --
 
-## Mini-Exercise 2.B.1
+## Quick Check
 
 Consider a simple 5-node undirected graph: A-B, B-C, C-D, D-A, A-C. Here is an edge list and a function to convert it to an adjacency dictionary, but two key lines are missing. **What goes in the blanks?**
 
@@ -520,12 +505,12 @@ def edges_to_adj(edges):
 ```
 
 Notes:
-Code substitution exercise. Give students 2-3 minutes. The goal is to enforce the symmetry of undirected graphs.
+This exercise reinforces the operational understanding of graph representations. For undirected graphs, students must remember that the adjacency entry must be symmetric—if A is linked to B, then B must also be explicitly linked to A in the representation.
 
 --
 
 
-## Mini-Exercise 2.B.1 — Solution
+## Quick Check — Solution
 
 ```python
 edges = [("A","B"), ("B","C"), ("C","D"), ("D","A"), ("A","C")]
@@ -546,14 +531,12 @@ def edges_to_adj(edges):
 **Key insight:** Undirected graphs require symmetric entries. If a graph is directed, the second `append` line is omitted. Why should we not omit the second `append` line in undirected cases?
 
 Notes:
-Ask: what would we remove if this were a directed graph? 
-
+Contrast the symmetry of undirected representations with directed ones. In a directed graph, the second symmetric entry would be omitted, as reachability becomes one-way. This transition is essential for understanding more complex flow models.
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 3
-## Paths and Distance
+# Paths and Distance
 
 
 <div class="guiding-question">
@@ -576,7 +559,7 @@ A path is a sequence of vertices where each consecutive pair is connected by an 
 > **A path highlighted in a graph.** The colored edges trace a route from a start node to an end node. The path length equals the number of edges traversed.
 
 Notes:
-Walk the highlighted path slowly and name the start node, end node, and path length explicitly.
+Paths and distance are the fundamental concepts for analyzing connectivity. A path represents a possible route through the system; the length of that route (number of edges) corresponds to the "cost" or "delay" in information dissemination. Tracking these routes allows us to quantify how easily signals can move across the network.
 
 --
 
@@ -596,12 +579,18 @@ Walk the highlighted path slowly and name the start node, end node, and path len
 </div>
 
 
+
+<div class="figure-65">
+
 ![Walk, path, and cycle examples](/courses/network-science/figures/walk-path-cycle.svg)
+
+</div>
+
 
 **Directed vs. undirected.** In an undirected graph, an edge can be traversed in either direction. In a directed graph, each step must follow the edge direction.
 
 Notes:
-Walk through the distinction between walk (may revisit vertices) and path (no revisits). Shortest paths are always simple paths — revisiting a vertex can never shorten a path.
+Formalizing the distinction between walks, paths, and cycles is critical for traversal algorithms. While a walk can revisit nodes, a simple path avoids any repetition. Shortest-path algorithms fundamentally work with simple paths, as revisiting a vertex can never shorten the distance between two points in a standard graph.
 
 --
 
@@ -621,7 +610,13 @@ Walk through the distinction between walk (may revisit vertices) and path (no re
 </div>
 
 
+
+<div class="figure-85">
+
 ![Path length and diameter examples](/courses/network-science/figures/path-length-diameter.svg)
+
+</div>
+
 
 Notes:
 In undirected graphs, distance is symmetric. In directed graphs, the shortest path from $u$ to $v$ may differ from $v$ to $u$. In weighted graphs, path length is the sum of weights, not edge count.
@@ -636,36 +631,121 @@ In undirected graphs, distance is symmetric. In directed graphs, the shortest pa
 
 --
 
-<!-- .slide: class="figure-60" -->
+<!-- .slide: class="figure-75" -->
 
 ## A Classical Motivation
 
 The Konigsberg bridges problem is one of the classic entry points into graph theory.
 
+
+<div class="columns col-3-1">
+
+
+<div class="column">
+
+
 ![Konigsberg bridges map](/courses/network-science/figures/Konigsberg_bridges.png)
+
+</div>
+
+
+<div class="column smaller">
 
 > **The Seven Bridges of Konigsberg (1736).** Euler asked whether one could walk through the city crossing each bridge exactly once. He proved it impossible — and in doing so, founded graph theory.
 
+</div>
+
+
+</div>
+
+
 Notes:
-This is the right moment to distinguish traversing edges from traversing vertices and prepare students for Eulerian versus Hamiltonian ideas.
+Leonhard Euler's solution to the Seven Bridges of Königsberg (1736) is considered the founding moment of graph theory. Euler's key insight was that the physical layout, distances, and shapes of the island and river banks were irrelevant; only the pattern of connections (the topology) determined the solution. This abstraction of physical reality into nodes and edges allowed for a rigorous proof of what is—and is not—possible in any networked system.
 
 --
 
 ## Eulerian Path and Circuit
 
 
-<div class="c-definition">
+<div class="columns col-2-1">
 
-**Eulerian Path.** A walk that traverses every edge of a graph exactly once. It exists if and only if exactly zero or two vertices have an odd degree.
 
-**Eulerian Circuit.** An Eulerian path that starts and ends on the same vertex. It exists if and only if *every* vertex has an even degree.
+<div class="column">
+
+
+<div class="c-green">
+
+**Eulerian Path.** A walk traversing every edge exactly once. Exists iff exactly 0 or 2 vertices have an odd degree.
 
 </div>
 
 
-![Eulerian path and circuit examples](/courses/network-science/figures/graph-eulerian-concepts.svg)
+</div>
 
-Notes:
+
+<div class="column">
+
+![Eulerian path](/courses/network-science/figures/graph-eulerian-path.svg)
+
+</div>
+
+
+</div>
+
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+**Eulerian Circuit.** An Eulerian path that starts and ends on the same vertex. Exists iff *every* vertex has an even degree.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+![Eulerian circuit](/courses/network-science/figures/graph-eulerian-circuit.svg)
+
+</div>
+
+
+</div>
+
+
+
+--
+
+## The Königsberg Solution
+
+
+<div class="columns">
+
+
+<div class="column">
+
+![Konigsberg bridges map](/courses/network-science/figures/Konigsberg_bridges.png)
+
+</div>
+
+
+<div class="column">
+
+![Abstract graph of Königsberg bridges](/courses/network-science/figures/graph-koenigsberg-abstract.svg)
+
+</div>
+
+
+</div>
+
+
 Connecting back to Königsberg: all four land masses had odd degrees (3, 3, 3, 5), violating both conditions.
 
 --
@@ -681,11 +761,11 @@ Paths turn connectivity into something analyzable: reachability, distance, redun
 
 
 Notes:
-If time permits, ask for a practical interpretation: recommendation chains, routing paths, citation reach, infection spread.
+The Königsberg bridge problem illustrates the power of structural reasoning. By identifying that an Eulerian path requires a limited number of odd-degree vertices, Euler moved from exhaustive trial-and-error to a universal structural rule. In practical terms, these concepts underpin routing problems where every link (road, data line, or social contact) must be utilized exactly once.
 
 --
 
-## Mini-Exercise 2.C.1
+## Quick Check 
 
 Consider a 5-node graph: `adj = {1: [2, 3], 2: [1, 4], 3: [1, 4], 4: [2, 3, 5], 5: [4]}`
 
@@ -704,13 +784,18 @@ def find_path(graph, start, end, path=[]):
 ```
 
 Notes:
-Code substitution exercise. Give students 2-3 minutes. They must realize the function needs to call itself on the neighbor.
+This recursive pathfinding exercise introduces the concept of backtracking. The function explores one branch to its end, and if the target is not found, "unwinds" to try the next available neighbor. This "deep" exploration strategy is the foundation of Depth-First Search.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Mini-Exercise 2.C.1 — Solution
+## Quick Check  — Solution
+
+The algorithm is called depth first search (DFS) - we traverse every edge as soon as we encounter it.
+
+
+<div class="c-algorithm">
 
 ```python
 def find_path(graph, start, end, path=[]):
@@ -723,19 +808,21 @@ def find_path(graph, start, end, path=[]):
             if result is not None: return result
     return None
 ```
-<!-- .element: class="fragment" -->
 
-**Key insight:** DFS explores deep first and finds *any* path. How would we change the approach to guarantee finding the *shortest* path? <!-- .element: class="fragment" -->
+</div>
+
+
+
+**Key insight:** DFS explores deep first and finds *any* path. How would we change the approach to guarantee finding the *shortest* path?
 
 Notes:
-DFS goes deep first. If we want the shortest path, we need a breadth-first approach — which sets up the next module.
+Depth-First Search (DFS) is efficient for exploring reachability but does not guarantee the discovery of the most efficient route. Because it follows a single path as far as possible, it may return a very long path even when a much shorter one exists. For shortest-path guarantees, we must shift to the breadth-first strategy.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## Breadth-First Search
+# Graph Search Algorithms
 
 
 <div class="guiding-question">
@@ -752,35 +839,47 @@ DFS goes deep first. If we want the shortest path, we need a breadth-first appro
 Breadth-first search explores a graph layer by layer, guaranteeing shortest paths in unweighted graphs.
 
 
-<div class="columns">
+<div class="columns col-2-1">
 
 
 <div class="column">
 
 
-**Algorithm: BFS** <!-- .element: class="fragment" -->
+<div class="c-algorithm">
 
-*(Input: Graph $G=(V,E)$, source node $s$)* <!-- .element: class="fragment" -->
 
-1. Initialize a **queue** $Q$ and add $s$ <!-- .element: class="fragment" -->
-2. Mark $s$ as **visited** <!-- .element: class="fragment" -->
-3. While $Q$ is not empty: <!-- .element: class="fragment" -->
-   - Extract current node $u$ from the front of $Q$ <!-- .element: class="fragment" -->
-   - For each neighbor $v$ of $u$: if $v$ is **not visited**, mark $v$ as visited and add $v$ to the back of $Q$ <!-- .element: class="fragment" -->
+**Algorithm: BFS** 
+
+*(Input: Graph $G=(V,E)$, source node $s$)* 
+
+1. Initialize a **queue** $Q$ and add $s$ 
+2. Mark $s$ as **visited** 
+3. While $Q$ is not empty: 
+   - Extract current node $u$ from the front of $Q$ 
+   - For each neighbor $v$ of $u$: if $v$ is **not visited**, mark $v$ as visited and add $v$ to the back of $Q$ 
 
 
 </div>
 
 
-<div class="column">
+</div>
 
 
-**Key Properties:** <!-- .element: class="fragment" -->
+<div class="column top">
 
-- Uses a **FIFO** (First-In, First-Out) queue. <!-- .element: class="fragment" -->
-- Discovers nodes strictly layer by layer. <!-- .element: class="fragment" -->
-- Runs in $O(|V| + |E|)$ time. <!-- .element: class="fragment" -->
-- Useful for shortest paths, components, and reachability. <!-- .element: class="fragment" -->
+
+<div class="c-note">
+
+
+**Key Properties:** 
+
+- Uses a **FIFO** (First-In, First-Out) queue. 
+- Discovers nodes strictly layer by layer. 
+- Runs in $O(|V| + |E|)$ time. 
+- Useful for shortest paths, components, and reachability. 
+
+
+</div>
 
 
 </div>
@@ -793,19 +892,31 @@ Breadth-first search explores a graph layer by layer, guaranteeing shortest path
 
 ## Visual Intuition
 
+
+<div class="figure-90">
+
 ![BFS layer-by-layer expansion](/courses/network-science/figures/bfs-layers.svg)
 
-> **BFS layer-by-layer expansion.** Starting from "You" (layer 0), BFS discovers all direct neighbors (layer 1), then all not-yet-visited neighbors of those (layer 2), and so on.
+</div>
+
+
+
+<div class="c-note">
+
+ **BFS layer-by-layer expansion.** Starting from "You" (layer 0), BFS discovers all direct neighbors (layer 1), then all not-yet-visited neighbors of those (layer 2), and so on.
+
+</div>
+
 
 Notes:
-Emphasize the layer-by-layer idea. Each layer consists of all nodes not already discovered that have an edge to some node in the previous layer.
+The core of Breadth-First Search (BFS) is the FIFO (First-In, First-Out) queue. By processing nodes in the exact order they are discovered, the algorithm creates a "ripple" effect that expands layer by layer. This ensures that when a node is first encountered, the path taken is the shortest possible in an unweighted graph, as no shorter path could have remained unvisited in the previous layers.
 
 --
 
 ## BFS on the ARPANET
 
 
-<div class="columns">
+<div class="columns col-2-1">
 
 
 <div class="column">
@@ -829,14 +940,32 @@ Emphasize the layer-by-layer idea. Each layer consists of all nodes not already 
 </div>
 
 
-> **Left:** BFS applied to the ARPANET topology starting from UCLA. Node color encodes BFS layer (distance). **Right:** The physical ARPANET map.
+
+<div class="c-note small">
+
+BFS applied to the ARPANET topology starting from UCLA. Node color encodes BFS layer (distance).
+
+</div>
+
+
+
+<div class="small">
 
 **Discussion:** The BFS visualization shows some nodes with multiple incoming edges from the previous layer. Is this possible in a strict BFS spanning tree?
 
-> **Answer:** No. A true BFS tree has exactly one parent per node. Drawing *all* shortest-path edges creates a "level graph", not a spanning tree! <!-- .element: class="fragment" -->
+</div>
+
+
+
+<div class="small fragment fade-in">
+
+**Answer:** No. A true BFS tree has exactly one parent per node. Drawing *all* shortest-path edges creates a "level graph", not a spanning tree! 
+
+</div>
+
 
 Notes:
-Use this slide to show that the abstract algorithm also makes sense on a real technical network. The side-by-side comparison helps students connect the abstract graph to the physical network.
+Applying BFS to the ARPANET demonstrates its role as a fundamental routing primitive. While the physical topology is fixed, the BFS layers project a logical "distance graph" onto the network. Note the distinction between the all-possible level graph and a single BFS spanning tree, which represents one possible set of optimal routes from the source.
 
 --
 
@@ -850,21 +979,155 @@ Use this slide to show that the abstract algorithm also makes sense on a real te
 **Weighted graphs:** BFS does **not** give shortest paths when edges have different weights. For weighted shortest paths, use Dijkstra's algorithm.
 
 Notes:
-The complexity is linear in the size of the graph, which is optimal. For weighted graphs, the layer-by-layer guarantee breaks because a two-hop path with low weights can be shorter than a one-hop path with a high weight.
+BFS achieve a linear time complexity of $O(|V| + |E|)$, visitng every reachable node and edge exactly once. This is the theoretical optimum for any algorithm that must "read" the entire graph. However, this efficiency relies on the unweighted assumption; if edges have varying costs, the BFS "layer" guarantee no longer holds, as a multi-hop high-cost path may be more expensive than a single-hop low-cost one.
 
 --
 
-## Takeaway
+
+## Depth-First Search
+
+Depth-first search traverses as deep as possible along each branch before backtracking.
 
 
-<div class="takeaway">
+<div class="columns col-2-1">
 
-BFS matters because a simple local rule produces exact shortest-path information in unweighted graphs.
+
+<div class="column">
+
+
+<div class="c-algorithm">
+
+**Algorithm: DFS** 
+
+*(Input: Graph $G=(V,E)$, source node $s$)* 
+
+1. Initialize a **stack** $S$ and add $s$ 
+2. While $S$ is not empty: 
+   - Pop current node $u$ from the top of $S$ 
+   - If $u$ is **not visited**:
+     - Mark $u$ as **visited** 
+     - Push all neighbors of $u$ onto the stack $S$ 
 
 </div>
 
 
+</div>
+
+
+<div class="column top">
+
+
+<div class="c-note">
+
+**Key Properties:** 
+
+- Uses a **LIFO** (Last-In, First-Out) stack. 
+- Explores deep before wide. 
+- Runs in $O(|V| + |E|)$ time. 
+- Standard for finding cycles and topological sorting.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+DFS is the stack-based counterpart to BFS. Instead of exploring layer-by-layer, it follows a single path to its end, pushing newly discovered neighbors onto a stack (LIFO). This means the most recently discovered node is always explored next, creating a deep, "snake-like" search pattern. Note that the order of neighbors pushed determine the exact path, but the general deep behavior is invariant.
+
 --
+
+## DFS Visual Intuition
+
+
+<div class="figure-90">
+
+![DFS expansion using a stack](/courses/network-science/figures/dfs-intuition.svg)
+
+</div>
+
+
+
+<div class="c-note">
+
+**DFS deep expansion.** Starting from "You", DFS picks one neighbor and immediately proceeds to that neighbor's neighbors. It only returns to explore other branches (backtracking) when it hits a "dead end" where all neighbors of the current node are already visited.
+
+</div>
+
+
+Notes:
+In contrast to the "ripple in a pond" behavior of BFS, DFS acts like a "snake in a maze". It creates a long, narrow spanning tree. While BFS is optimal for shortest paths, DFS is often faster for simply checking if any path exists or for exploring deep into a dense graph.
+
+--
+
+## DFS on the ARPANET
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![DFS on ARPANET starting from UCLA](/courses/network-science/figures/dfs-arpanet.svg)
+
+</div>
+
+
+<div class="column">
+
+![ARPANET real-world topology](/courses/network-science/figures/graph-internet.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note small">
+
+DFS applied to the ARPANET. Node numbers indicate the order in which nodes were discovered. Notice how the search can wander far across the network before exploring nodes physically close to the start.
+
+</div>
+
+
+
+<div class="small">
+
+**Discussion:** Why is DFS usually a poor choice for finding the shortest path between two nodes (e.g., California to Massachusetts)?
+
+</div>
+
+
+
+<div class="small fragment fade-in">
+
+**Answer:** DFS finds *any* path. In a network like the ARPANET, it might wander to Utah and Illinois before eventually returning to find a node that was only one hop away from the start!
+
+</div>
+
+
+Notes:
+This slide visualizes the fundamental difference between the "layered" BFS view and the "deep" DFS view on the same infrastructure. DFS does not guarantee shortest paths (distance = 1 in BFS), as it might take 10 hops to reach a neighbor that was actually adjacent to the start.
+
+--
+
+## BFS vs. DFS Transition
+
+| Property | Breadth-First Search (BFS) | Depth-First Search (DFS) |
+|---|---|---|
+| **Data Structure** | Queue (FIFO) | Stack (LIFO) |
+| **Expansion** | Layer by layer (Ripple) | Deep and narrow (Snake) |
+| **Shortest Path** | Guaranteed (unweighted) | No guarantee |
+| **Complexity** | $O(|V| + |E|)$ | $O(|V| + |E|)$ |
+
+--
+
+
+<!-- .slide: class="small" -->
 
 ## Dijkstra's Algorithm
 
@@ -877,6 +1140,8 @@ BFS explores layer by layer. For **weighted** graphs, we use Dijkstra's algorith
 <div class="column">
 
 
+<div class="c-algorithm">
+
 **Algorithm: Dijkstra**
 *(Input: Graph $G=(V,E)$, source $s$, weights $w \ge 0$)*
 
@@ -887,6 +1152,8 @@ BFS explores layer by layer. For **weighted** graphs, we use Dijkstra's algorith
    - For each neighbor $v$ of $u$:
      - If path through $u$ is shorter: update $v$'s distance.
 
+</div>
+
 
 </div>
 
@@ -896,21 +1163,35 @@ BFS explores layer by layer. For **weighted** graphs, we use Dijkstra's algorith
 
 ![Dijkstra's algorithm example](/courses/network-science/figures/dijkstra-example.svg)
 
-> **BFS vs. Dijkstra.** BFS explores identical layers. Dijkstra uses a priority queue to always expand the currently cheapest unvisited node. Complexity: $O((|V|+|E|)\log |V|)$.
+
+</div>
 
 
 </div>
 
+
+
+<div class="c-note">
+
+**BFS vs. Dijkstra.** BFS explores identical layers. Dijkstra uses a priority queue to always expand the currently cheapest unvisited node. Complexity: $O((|V|+|E|)\log |V|)$.
+
+</div>
+
+
+
+<div class="c-green">
+
+**Priority Queue (Min-Heap).** A data structure that allows inserting elements and efficiently extracting the element with the *minimum* value. In Dijkstra, it acts as a smart queue: instead of First-In-First-Out, the node with the shortest accumulated distance is always extracted next.
 
 </div>
 
 
 Notes:
-Explain why BFS fails on weighted graphs: a two-hop path with low weights can be shorter than a one-hop path with a high weight. Dijkstra's key invariant: when a node is extracted from the priority queue, its distance is finalized. Note the non-negative weight requirement.
+Dijkstra's algorithm addresses the limitation of BFS in weighted graphs by replacing the standard queue with a priority queue (min-heap). Instead of exploring layer by layer, it greedily expands the currently "cheapest" node. This ensures that once a node is extracted from the priority queue, the shortest possible route to it has been found. This invariant requires all edge weights to be non-negative.
 
 --
 
-## Mini-Exercise 2.D.1
+## Quick Check
 
 Consider our 5-node graph: `adj = {1: [2, 3], 2: [1, 4], 3: [1, 4], 4: [2, 3, 5], 5: [4]}`
 
@@ -932,13 +1213,16 @@ def bfs(graph, start):
 ```
 
 Notes:
-Code substitution exercise (2-3 minutes). The goal is to enforce how BFS tracks distance (current + 1) and manages the queue boundary.
+Summary of the BFS implementation details. Correct distance tracking requires updating the neighbor's distance based on the current node's value (`dist[v] = dist[u] + 1`) and ensuring that nodes are only added to the queue once to maintain the $O(|V| + |E|)$ complexity.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Mini-Exercise 2.D.1 — Solution
+## Quick Check — Solution
+
+
+<div class="c-algorithm">
 
 ```python
 from collections import deque
@@ -954,19 +1238,43 @@ def bfs(graph, start):
                 queue.append(neighbor)
     return distances
 ```
-<!-- .element: class="fragment" -->
 
-**Key insight:** Because the queue is FIFO, we always finish layer $k$ before starting layer $k+1$. The first time we see a node, we have found its shortest path. <!-- .element: class="fragment" -->
+</div>
+
+
+
+**Key insight:** Because the queue is FIFO, we always finish layer $k$ before starting layer $k+1$. The first time we see a node, we have found its shortest path. 
 
 Notes:
-Highlight that replacing queue.append() with pushing to a stack changes this to DFS. The FIFO property of the queue guarantees the shortest path property.
+The structural choice between a queue (FIFO) and a stack (LIFO) is the fundamental pivot between BFS and DFS. This small programming change completely alters the search strategy: BFS becomes a global shortest-path algorithm, while DFS becomes a deep path-finding and cycle-detection tool.
+
+--
+
+## Summary: Graph Search
+
+| Algorithm | Structure | Strategy | Guarantees |
+|---|---|---|---|
+| **BFS** | Queue (FIFO) | Layer-by-layer | Shortest path (unweighted) |
+| **DFS** | Stack (LIFO) | Deepest-first | Reachability, Cycles |
+| **Dijkstra** | Priority Q | Cheapest-first | Shortest path (weighted) |
+
+
+<div class="takeaway margin-top-1">
+
+**Key Insight:** BFS matters because a simple local rule produces exact shortest-path information in unweighted graphs. Dijkstra extends this logic to weighted networks using a priority queue.
+
+</div>
+
+
+Notes:
+This summary stabilizes the "Graph Search" module. While DFS, BFS, and Dijkstra share a common structural logic (examine a node, add its neighbors to a collection), the choice of collection—Stack, Queue, or Priority Queue—completely determines the algorithm's guarantees and behavior. Understanding this mapping is the key to algorithmic intuition in network science.
+
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 5
-## Connectivity
+# Connectivity
 
 
 <div class="guiding-question">
@@ -978,7 +1286,7 @@ Highlight that replacing queue.append() with pushing to a stack changes this to 
 
 --
 
-<!-- .slide: class="figure-60" -->
+<!-- .slide: class="figure-90" -->
 
 ## Connectedness
 
@@ -990,14 +1298,33 @@ Highlight that replacing queue.append() with pushing to a stack changes this to 
 </div>
 
 
-![Connected and disconnected graph examples](/courses/network-science/figures/connectedness-example.svg)
+
+<div class="columns">
+
+
+<div class="column">
+
+![Connected graph example](/courses/network-science/figures/graph-connected.svg)
+
+</div>
+
+
+<div class="column">
+
+![Disconnected graph example](/courses/network-science/figures/graph-disconnected.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
-The top graph is connected — a path from A to F is highlighted. The bottom graph is disconnected — two separate components with no edges between them.
+Connectedness is a global property of a graph: if a path exists between every pair of nodes, the system is a single entity. Disconnectedness indicates fragmentation, where the network has "islands" that cannot communicate or influence each other. This distinction is critical for understanding the reach of diffusion processes.
 
 --
 
-<!-- .slide: class="smaller" -->
+<!-- .slide: class="small figure-70" -->
 
 ## Connected Components
 
@@ -1016,18 +1343,21 @@ Connected components are maximal connected subgraphs.
 
 ![Two connected components](/courses/network-science/figures/graph-connected-components.svg)
 
-> Each colored cluster is a maximal connected subgraph — meaning it cannot be extended without losing separation.
+Each colored cluster is a maximal connected subgraph — meaning it cannot be extended without losing separation.
 
 Notes:
-Stress the word maximal. A component is not just any connected subset; it is one that cannot be extended without losing separation.
+Connected components are formally defined by two properties: connectivity and maximality. A component must be fully reachable internally, but it must also include every possible node—if an external node has a path to the component, that node should have been part of the component itself. Identification of these maximal sets is the first step in analyzing the large-scale structure of fragmented networks.
 
 --
 
-<!-- .slide: class="smaller" -->
+<!-- .slide: class="small" -->
 
 ## Connectedness in Directed Graphs
 
 How does connectivity change when edges have direction?
+
+
+<div class="fragement fade-in">
 
 
 <div class="c-definition">
@@ -1039,16 +1369,38 @@ How does connectivity change when edges have direction?
 </div>
 
 
-![Comparison of weakly and strongly connected directed graphs](/courses/network-science/figures/connected-vs-strongly-connected.svg)
 
-> **Left:** Weakly connected — $D$ cannot reach $A$ following arrows. **Right:** Strongly connected — every node reaches every other.
+<div class="columns">
+
+
+<div class="column">
+
+![Weakly connected graph example](/courses/network-science/figures/graph-weakly-connected.svg)
+
+</div>
+
+
+<div class="column">
+
+![Strongly connected graph example](/courses/network-science/figures/graph-strongly-connected.svg)
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
+
 
 Notes:
-Can a directed graph be weakly connected but not strongly connected? Yes — e.g. a chain A→B→C. Ask: which type describes the World Wide Web?
+In directed graphs, connectivity becomes more nuanced. Weak connectivity ignores edge direction, while strong connectivity requires paths to be traversable in both directions. This distinction is essential for modeling the Web: a page might be reachable from the "giant component" but unable to link back to it, placing it in a separate strongly connected component despite being part of the same weak structure.
 
 --
 
-<!-- .slide: class="figure-85" -->
+<!-- .slide: class="figure-85 small" -->
 
 ## Directed Graph Components
 
@@ -1059,7 +1411,7 @@ A directed graph has **weakly** and **strongly** connected components — reusin
 > **3 weakly connected components** (dashed borders). **2 strongly connected components** (shaded halos). Nodes D, G, H, I each form their own trivial SCC.
 
 Notes:
-Key insight: every WCC decomposes into one or more SCCs. Ask: why can't D join the SCC {A,B,C}? (No directed path from A,B,C back to D.)
+Every weakly connected component (WCC) can be decomposed into one or more strongly connected components (SCCs). This decomposition reveals the hierarchical and cyclical structure of a directed network, identifying which groups of nodes form "trading blocs" or "information loops" versus those that act as transient one-way links.
 
 --
 
@@ -1111,7 +1463,6 @@ Many real networks contain one large giant component and several much smaller di
 ![High school social network giant component](/courses/network-science/figures/social-network-highschool.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-> The large central structure is the giant component. The small isolated clusters at the edges represent disconnected social groups.
 
 --
 
@@ -1126,31 +1477,16 @@ Connected components and giant components tell us whether interaction, diffusion
 
 
 Notes:
-Close by linking to later topics: fragmentation, robustness, epidemics, and community detection all build on this question.
+The study of connectivity culminates in themes of robustness and fragmentation. Whether a network remains cohesive or splits into isolated components determines how effectively it can coordinate behavior or survive attacks. These structural properties set the stage for later topics such as community detection and epidemic modeling.
 
 --
 
-## Mini-Exercise 2.E.1
+## Quick Check
 
-Build on your BFS implementation to find connected components:
+We can use BFS to find all connected components by repeatedly starting search from unvisited nodes. **What goes in the blanks?**
 
-1. What is the strategy for using BFS to find connected components?
-2. Write a function `find_components(graph)` that returns a list of sets, where each set is a connected component
-3. Test it on a graph with **two disconnected parts**
-4. **Discussion Points**
-    - How does it change for directed graphs?
-    - Can removing a node from a connected component make it disconnected?
 
-Notes:
-Give students 5 minutes. The key insight is that BFS naturally finds all nodes in a connected component.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Mini-Exercise 2.E.1 — Solution
-
-**Strategy:** Start from an unvisited node, run BFS to find all reachable nodes. Repeat until all nodes visited.
+<div class="c-algorithm">
 
 ```python
 def find_components(graph):
@@ -1158,8 +1494,48 @@ def find_components(graph):
     components = []
     for node in graph:
         if node not in visited:
-            distances = bfs(graph, node)
-            component = set(distances.keys())
+            # bfs returns {node: distance} for all reachable nodes
+            reachable = bfs(graph, node)
+            component = set(reachable.keys())
+            
+            # Update global visited set and store result
+            visited |= __________
+            components.append(__________)
+    return components
+```
+
+</div>
+
+
+**Discussion Points:**
+- How does BFS naturally identify a "maximal" component?
+- For directed graphs, does this find SCCs or WCCs?
+
+
+Notes:
+Connected component detection is a direct application of BFS. By running BFS repeatedly from unvisited nodes, we can systematically bucket every node into its maximal connected set. This demonstrates the algorithmic power of simple graph search for global structural discovery.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Quick Check — Solution
+
+**Strategy:** Start from an unvisited node, run BFS to find all reachable nodes. Repeat until all nodes visited.
+
+
+<div class="c-algorithm">
+
+```python
+def find_components(graph):
+    visited = set()
+    components = []
+    for node in graph:
+        if node not in visited:
+            reachable = bfs(graph, node)
+            component = set(reachable.keys())
+            
+            # Solution:
             visited |= component
             components.append(component)
     return components
@@ -1172,10 +1548,13 @@ graph = {
 print(find_components(graph))
 # [{'A', 'B', 'C'}, {'X', 'Y', 'Z'}]
 ```
-<!-- .element: class="fragment" -->
+
+</div>
+
+
 
 Notes:
-Highlight how modules build on each other: the bfs function from Module 4 is reused here. Directed graph components require a different algorithm (Kosaraju's or Tarjan's). Removing a node that disconnects the graph is an articulation point (cut vertex).
+Identifying components is computationally straightforward for undirected graphs using BFS or DFS. However, directed graphs require more sophisticated algorithms to account for asymmetric reachability. This module concludes the structural foundations, providing the tools needed to move from individual paths to global network architecture.
 
 ---
 
@@ -1193,7 +1572,7 @@ Highlight how modules build on each other: the bfs function from Module 4 is reu
 Chapter 2 of Easley & Kleinberg (2010) covers graph theory foundations, paths, BFS, and connectivity in detail.
 
 Notes:
-Reinforce transfer: these concepts are not isolated definitions. They are the vocabulary that later topics such as centrality, diffusion, communities, and web search will reuse.
+This lecture has established the fundamental vocabulary of network science. By translating intuitive connections into formal graphs, we have moved from "knowing" a network exists to being able to precisely describe its properties, calculate its distances, and analyze its connectivity. These foundations are the prerequisite for every subsequent topic in the course, from social influence to web search.
 
 ---
 
@@ -1203,6 +1582,7 @@ Reinforce transfer: these concepts are not isolated definitions. They are the vo
 
 - Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
 
       const plugins = [
         window.RevealMarkdown,
@@ -1275,6 +1655,7 @@ Reinforce transfer: these concepts are not isolated definitions. They are the vo
         tocProgress: {
           position: "bottom",
           hideOnOverview: true,
+          ...tocProgressConfig,
         },
         plugins,
       }).then(() => {

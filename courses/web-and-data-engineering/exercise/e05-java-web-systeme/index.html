@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 5 — Programmierung von Web-Systemen in Java</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 5 — Programmierung von Web-Systemen in Java</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Übungsblatt 5
 ## Programmierung von Web-Systemen in Java
@@ -8,6 +8,18 @@
 24. März 2026
 
 Prof. Dr. Michael Granitzer
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Lernziele
+
+- Die Komponenten des **Java Web Stack** (Servlet-Container, Build-Tools, Test-Frameworks) einordnen
+- **Servlets**, **JSP** und **JavaBeans** als Grundbausteine kennen und einsetzen
+- **Spring Boot** für REST-APIs und **Spring Data / JPA** für Persistenz anwenden
+- Den **Spring Request-Flow** (DispatcherServlet → Controller → Service → Repository) verstehen
+- **Dependency Injection** und die **Test-Pyramide** (Unit / Integration / E2E) anwenden
 
 ---
 
@@ -235,6 +247,148 @@ rd.forward(request, response);
 **3. Methode:** `doPost()` — das Formular sendet `method="POST"`.
 
 **4. Java Bean:** Eine normale Java-Klasse mit parameterlosem Konstruktor sowie öffentlichen Getter/Setter-Methoden; optional `Serializable`.
+
+
+## Übung 5.B.4: CurrencyServlet — eigene REST-API
+
+In Übungsblatt 4 haben Sie einen Währungsrechner gegen die `exchangerate.host`-API gebaut. Implementieren Sie nun eine **eigene** Servlet-basierte API, die das gleiche Format liefert:
+
+- `GET /currency` → JSON mit Wechselkursen von **EUR** in Fremdwährungen (USD, CHF)
+- `GET /currency?base=USD` → Wechselkurse von **USD** in Fremdwährungen
+- Wechselkurse dürfen im Quelltext fest verdrahtet werden
+
+Implementieren Sie die `doGet()`-Methode des `CurrencyServlet` mit `@WebServlet`-Annotation. Welche Bibliothek verwenden Sie für die JSON-Serialisierung, und warum sollten Sie nicht von Hand `String.format` benutzen?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 5.B.4: CurrencyServlet — Lösung
+
+```java
+@WebServlet(urlPatterns = {"/currency"})
+public class CurrencyServlet extends HttpServlet {
+
+    private static final Map<String, Map<String, Double>> RATES = Map.of(
+        "EUR", Map.of("USD", 1.10, "CHF", 0.96),
+        "USD", Map.of("EUR", 0.91, "CHF", 0.87)
+    );
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+        String base = Optional.ofNullable(req.getParameter("base")).orElse("EUR");
+        Map<String, Double> rates = RATES.get(base);
+
+        if (rates == null) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                          "Unsupported base currency: " + base);
+            return;
+        }
+
+        Map<String, Object> payload = Map.of(
+            "base", base,
+            "date", LocalDate.now().toString(),
+            "rates", rates
+        );
+
+        res.setContentType("application/json");
+        res.setCharacterEncoding("UTF-8");
+        new ObjectMapper().writeValue(res.getWriter(), payload);
+    }
+}
+```
+
+**JSON-Bibliothek:** Üblich ist **Jackson** (`com.fasterxml.jackson.databind.ObjectMapper`) oder **Gson**. Manuelles Zusammenbauen mit `String.format` ist fehleranfällig (Escaping von Anführungszeichen, Sonderzeichen, Unicode), produziert ungültiges JSON bei Edge Cases und ist schwer zu warten.
+
+**Maven-Abhängigkeit (Jackson):**
+
+```xml
+<dependency>
+  <groupId>com.fasterxml.jackson.core</groupId>
+  <artifactId>jackson-databind</artifactId>
+  <version>2.17.0</version>
+</dependency>
+```
+
+
+## Übung 5.B.5: JSP-Frontend mit FinanceBean
+
+Erweitern Sie das CurrencyServlet aus Übung 5.B.4 um eine `doPost()`-Methode, die Formular-Daten von einer HTML-Seite entgegennimmt und das Ergebnis über eine JSP rendert.
+
+**Gegeben:**
+
+```html
+<!-- index.html -->
+<form action="currency" method="POST">
+  <input name="value" type="number" value="100"/>
+  <select name="to">
+    <option value="USD">USD</option>
+    <option value="EUR">EUR</option>
+  </select>
+  <button type="submit">Umrechnen</button>
+</form>
+```
+
+```jsp
+<!-- solution.jsp -->
+<%@ page import="de.unipassau.currency.FinanceBean" %>
+<% FinanceBean result = (FinanceBean) request.getAttribute("result"); %>
+<h1>Ergebnis: <%= result.getAmount() %> <%= result.getCurrency() %></h1>
+```
+
+1. Implementieren Sie die `FinanceBean`-Klasse.
+2. Implementieren Sie `doPost()`: liest `value` und `to`, rechnet um, befüllt die Bean, hängt sie als Request-Attribut `result` an und leitet auf `solution.jsp` weiter.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 5.B.5: JSP + FinanceBean — Lösung
+
+**FinanceBean (parameterloser Konstruktor + Getter/Setter):**
+
+```java
+package de.unipassau.currency;
+
+public class FinanceBean implements java.io.Serializable {
+    private double amount;
+    private String currency;
+
+    public FinanceBean() { }
+
+    public double getAmount() { return amount; }
+    public void setAmount(double amount) { this.amount = amount; }
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
+}
+```
+
+**doPost im CurrencyServlet:**
+
+```java
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException {
+    double value = Double.parseDouble(req.getParameter("value"));
+    String to    = req.getParameter("to");
+
+    double rate = RATES.get("EUR").getOrDefault(to, 1.0);
+    if ("EUR".equals(to)) rate = 1.0;
+
+    FinanceBean result = new FinanceBean();
+    result.setAmount(value * rate);
+    result.setCurrency(to);
+
+    req.setAttribute("result", result);
+    req.getRequestDispatcher("/solution.jsp").forward(req, res);
+}
+```
+
+**Forward statt Redirect:** `RequestDispatcher.forward()` behält Request-Attribute (die JSP findet `result`). Ein `sendRedirect` würde einen neuen Request triggern und die Bean wäre weg.
 
 
 ---
@@ -581,7 +735,27 @@ Welche Strategie würden Sie für dieses Szenario wählen und warum?
 
 **Empfehlung:** `JOINED` ist für dieses Szenario die beste Wahl, weil die Hierarchie flach ist und die Unterklassen eigene Felder haben.
 
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Materialien zum Übungsblatt
+
+Zur Übung mit Servlets, JSP und Spring Boot stehen vollständige Code-Templates bereit:
+
+**Servlets / JSP**
+
+- [`servlets-template/`](./materials/servlets-template/) — minimales Servlet-Template (`CurrencyServlet.java`, `FinanceBean.java`, `index.html`, `api.html`, `TestCurrencyServlet.java`) zum selbst Ausfüllen
+- [`servlets-filled/`](./materials/servlets-filled/) — funktionierende Referenzlösung
+
+**Spring Boot REST**
+
+- [`spring-boot-rest/`](./materials/spring-boot-rest/) — vollständige Studenten-Service-Anwendung mit `StudentController`, `StudentService`, `Student`, `Course`, DTOs, Initialisierung und Tests
+
+> Alle Materialien finden Sie auch zentral auf der **Kursseite** unter *Materials → Download*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
 
       const plugins = [
         window.RevealMarkdown,
@@ -654,6 +828,7 @@ Welche Strategie würden Sie für dieses Szenario wählen und warum?
         tocProgress: {
           position: "bottom",
           hideOnOverview: true,
+          ...tocProgressConfig,
         },
         plugins,
       }).then(() => {

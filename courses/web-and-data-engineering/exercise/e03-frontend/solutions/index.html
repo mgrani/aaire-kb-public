@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 3 — Frontend Technologies — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 3 — Frontend Technologies — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Übungsblatt 3
 ## Frontend-Technologien
@@ -8,6 +8,18 @@
 24. März 2026
 
 Prof. Dr. Michael Granitzer
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Lernziele
+
+- **Semantisches HTML** strukturieren und Barrierefreiheit (a11y) berücksichtigen
+- **Personas und Nutzerszenarien** für Frontend-Entscheidungen einsetzen
+- **CSS-Layouts** mit Flexbox/Grid und **responsive Design** mit Media Queries umsetzen
+- **JavaScript** für DOM-Manipulation, `fetch` und asynchrone Verarbeitung verwenden
+- Den Unterschied zwischen **statischem**, **server-rendertem** und **clientseitigem** Frontend einordnen
 
 ---
 
@@ -117,6 +129,86 @@ Welche drei HTML-Attribute sind für Barrierefreiheit unverzichtbar?
 3. **`type`** (auf `<input>`): Bestimmt Eingabemodus und Tastaturlayout auf Mobilgeräten.
 
 
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.A.3: Barrierefreiheit — Problemkategorien und Prinzipien
+
+Barrierefreiheit ist nach EU-Richtlinien ein verpflichtender Aspekt der Web-Entwicklung. Barrieren werden in drei Kategorien klassifiziert: **Wahrnehmungs-**, **Verständnis-** und **Zugriffsprobleme**.
+
+1. Nennen und erklären Sie zu jeder Kategorie zwei Beispiele. Welche Kategorie ist hauptsächlich technischer Natur?
+2. Was verbirgt sich hinter dem **Selbstbestimmungsprinzip**, dem **Zwei-Sinne-Prinzip** und dem **Universal-Design-Prinzip**?
+3. Nennen Sie ein Prüftool für Barrierefreiheit. Ist die Schriftfarbe `#ffffff` auf dem Hintergrund `#0aae00` barrierefrei?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.A.3: Barrierefreiheit — Lösung
+
+**1. Problemkategorien**
+
+| Kategorie | Beispiele |
+|---|---|
+| **Wahrnehmung** | Ungenügende Farbkontraste (Rotgrünblindheit, gelbe Schrift auf weiß); mangelnde Skalierbarkeit (kleine statische Texte, Bilder mit fester niedriger Auflösung) |
+| **Verständnis** | Ungenügende Semantik (Überschriften nur durch Schriftart, Screenreader erkennt sie nicht); Informationsüberfluss; keine Trennung leichte/komplexe Sprache |
+| **Zugriff** | Zu knappe Timeouts (Session läuft ab vor Submit); Eingabegerät-Abhängigkeit (Bedienung nur mit Maus, keine Tastaturnavigation) |
+
+**Zugriffsprobleme** sind hauptsächlich technischer Natur — sie ließen sich durch universellen Zugang zu Hardware und Bandbreite weitgehend beheben.
+
+**2. Drei Prinzipien**
+
+- **Selbstbestimmungsprinzip:** Die Website bietet flexible Darstellungen — Hochkontrast-Schema, Schriftgrößendynamik. Nutzende konfigurieren die Seite nach eigenen Bedürfnissen.
+- **Zwei-Sinne-Prinzip:** Jede Information wird über mindestens zwei verschiedene Sinne angeboten (z.B. Bildschirm + Screenreader-fähig).
+- **Universal-Design-Prinzip:** Keine separaten Zugänge für Menschen mit Behinderung — alles wird über ein einheitliches System ausgeliefert (Wartbarkeit + Übersicht).
+
+**3. Prüftool und Beispiel**
+
+Werkzeug: **WAVE Browser Plugin** ([wave.webaim.org/extension](https://wave.webaim.org/extension/)).
+
+Für `#ffffff` auf `#0aae00`: Kontrastverhältnis ≈ **2.97:1** — fällt sowohl bei WCAG AA als auch AAA durch. **Nicht barrierefrei.**
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.A.4: Personas — Entertainmentsystem im Flugzeug
+
+Sie unterstützen einen Flugzeughersteller bei der Entwicklung eines In-Flight-Entertainmentsystems mit Touchscreens in den Sitzlehnen der ersten Klasse. Diskutiert werden verschiedene Bedienmethoden (Touch, Tastaturpad, Armlehnenarmatur). Auch unterschiedliche technische Affinität von Passagieren und Personal soll berücksichtigt werden.
+
+1. Was ist eine **Persona** im Kontext der Anforderungserhebung, und welche Felder sollte sie typischerweise enthalten?
+2. Entwerfen Sie eine **primäre** und eine **sekundäre** Persona für das System.
+3. Beschreiben Sie für jede Persona ein **Szenario**, in dem sie das Entertainmentsystem benutzt.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.A.4: Personas — Lösung
+
+**1. Persona** = fiktive, aber repräsentative Benutzerfigur einer Zielgruppe. Typische Felder: Name, Alter, Wohnort, Bildung/Beruf, technische Affinität, Ziele, Hindernisse, eine kurze Biografie.
+
+**2. Primäre Persona — Günther Vogt (69, Erlangen)**
+
+Bäcker im Ruhestand, besitzt nur ein altes Smartphone, geringe technische Affinität. Reist gerne, lässt sich von Naturdokumentationen inspirieren. Möchte unabhängig bleiben, hat aber durch Arthritis Schwierigkeiten mit kleinen Touch-Bedienelementen.
+
+**Sekundäre Persona — Stefanie Sauer (37, München)**
+
+Fluggerätmechanikerin (Lufthansa Technik), spezialisiert auf Messtechnik. Hohe technische Affinität, im Beruf Wartung der Innenraumelektronik — also auch des Entertainmentsystems. Hat private Bluetooth-Kopfhörer und erwartet Standardkompatibilität.
+
+**3. Szenarien**
+
+- **Günther** auf dem Heimflug aus Portugal: möchte Naturdokumentationen finden, bereits besuchte Länder ausfiltern, große sortierbare Liste mit großen Bedienflächen, Pause-Funktion mit einem Tastendruck wenn das Essen serviert wird.
+- **Stefanie** als Passagierin nach Ibiza: koppelt ihre AirPods per Bluetooth, sucht aktuelle Charts, regelt Lautstärke mit max. zwei Interaktionen (initial leise als Hörschutz).
+- **Stefanie** im Wartungsmodus: identifiziert sich per RFID-Betriebsausweis, ruft technische Diagnose-Daten ab, ohne durch Nutzungsstatistiken gestört zu werden — alles unter Zeitdruck.
+
+**Erkenntnis für das Design:** Touch-Bedienung allein reicht nicht — physische Tasten und große Trefferflächen sind nötig (Günther), und ein separater Servicemodus mit RFID-Auth muss vorgesehen werden (Stefanie).
+
+
 ---
 
 <!-- .slide: class="module-slide" -->
@@ -199,6 +291,77 @@ Verwenden Sie ausschließlich Flexbox (kein Grid). Schreiben Sie das vollständi
 ```
 
 **`flex: 1 1 calc(33.33% - 1rem)`** bedeutet: grow=1, shrink=1, Basisbreite ≈ ein Drittel minus halber Gap. `flex-wrap: wrap` erlaubt Zeilenumbruch. Auf Mobile wird die Basis auf 100% gesetzt → eine Karte pro Zeile.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.B.3: CSS-Selektoren lesen und schreiben
+
+Gegeben ist folgendes HTML einer TODO-Liste:
+
+```html
+<h1>Aufgaben:</h1>
+<p>Folgende Aufgaben müssen <strong>unbedingt</strong> erledigt werden.</p>
+<ul>
+  <li class="styles" for="basic" id="entry01">Aufräumen</li>
+  <li>Einkaufen</li>
+  <li for="basicStudies">Lernen
+    <ol>
+      <li id="entry02">HTML</li>
+      <li>CSS</li>
+    </ol>
+  </li>
+  <li for="peace">Entspannen</li>
+</ul>
+```
+
+Schreiben Sie CSS-Regeln für folgende Anforderungen (jeweils ein Selektor):
+
+1. Alle Listeneinträge **ohne** die Klasse `styles` bekommen Schriftgröße 18 px.
+2. Das **zweite** Element jeder Liste (TODO und Unterliste „Lernen") wird ausgeblendet.
+3. Der Text „unbedingt" wird rot gefärbt.
+4. Der „Aufgaben:"-Header wird um 10° an der Z-Achse gedreht und um 20 px nach rechts und 40 px nach unten verschoben.
+5. Alle Listeneinträge mit `for="basic"` werden durchgestrichen.
+6. Wenn der Bildschirm schmaler als 600 px ist, wird die Schriftgröße im `body` auf 10 px reduziert.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.B.3: CSS-Selektoren — Lösung
+
+```css
+/* 1) Negation: alles außer .styles */
+li:not(.styles) { font-size: 18px; }
+
+/* 2) Strukturpseudoklasse: zweites Kind */
+li:nth-child(2) { display: none; }
+
+/* 3) Element-Selektor */
+strong { color: red; }
+
+/* 4) Zwei Transformationen kombiniert */
+h1 { transform: rotateZ(10deg) translate(20px, 40px); }
+
+/* 5) Attributselektor */
+li[for="basic"] { text-decoration: line-through; }
+
+/* 6) Media Query */
+@media screen and (max-width: 599px) {
+  body { font-size: 10px; }
+}
+```
+
+**Konzepte im Überblick:**
+
+- **`:not(...)`** — Negation, schließt Elemente vom Match aus
+- **`:nth-child(n)`** — wählt das n-te Geschwister-Element
+- **`[attr="value"]`** — Attributselektor, prüft auf konkreten Wert
+- **`transform`** — Mehrere Transformationen werden in einer Liste angegeben (Reihenfolge zählt!)
+- **`@media`** — Bedingung an das Ausgabemedium / Viewport
 
 
 ---
@@ -390,7 +553,94 @@ localStorage.setItem('formStep2', JSON.stringify(formData));
 const saved = JSON.parse(localStorage.getItem('formStep2'));
 ```
 
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.D.3: Währungsrechner mit Fetch und exchangerate.host
+
+Entwickeln Sie eine HTML-Seite, die Beträge von Euro in andere Währungen umrechnet:
+
+- Eingabefeld für den **Betrag** in Euro
+- Auswahlmenü für die **Zielwährung** (USD, CHF)
+- Ein „Umrechnen"-Button, der das Ergebnis in einem `<output>`-Element anzeigt
+- Live-Wechselkurse von [api.exchangerate.host](https://api.exchangerate.host) (kostenlose REST-API)
+- Das letzte Ergebnis soll im **`localStorage`** persistiert und beim erneuten Laden angezeigt werden
+
+Welche **Caching-Strategie** für die Wechselkurse halten Sie für sinnvoll? Begründen Sie.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Übung 3.D.3: Währungsrechner — Lösung
+
+```html
+<!DOCTYPE html>
+<html lang="de">
+<body>
+  <label for="amount">Betrag in EUR</label>
+  <input id="amount" type="number" min="0" step="0.01" value="100"/>
+
+  <label for="target">Zielwährung</label>
+  <select id="target">
+    <option value="USD">US-Dollar (USD)</option>
+    <option value="CHF">Schweizer Franken (CHF)</option>
+  </select>
+
+  <button id="convert">Umrechnen</button>
+  <output id="result"></output>
+
+  <script>
+    const out = document.getElementById('result');
+    const last = localStorage.getItem('lastResult');
+    if (last) out.textContent = `Letztes Ergebnis: ${last}`;
+
+    document.getElementById('convert').addEventListener('click', async () => {
+      const amount = parseFloat(document.getElementById('amount').value);
+      const to = document.getElementById('target').value;
+      const url = `https://api.exchangerate.host/latest?base=EUR&symbols=${to}`;
+      try {
+        const r = await fetch(url);
+        const data = await r.json();
+        const rate = data.rates[to];
+        const converted = (amount * rate).toFixed(2);
+        const text = `${amount} EUR = ${converted} ${to}`;
+        out.textContent = text;
+        localStorage.setItem('lastResult', text);
+      } catch (e) {
+        out.textContent = `Fehler: ${e.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+**Caching-Strategie:** Wechselkurse ändern sich höchstens minütlich, oft nur einmal pro Tag. Eine **kurze Cache-Zeit** (z.B. `Cache-Control: max-age=300` für 5 Minuten) reduziert API-Aufrufe drastisch ohne signifikanten Genauigkeitsverlust. Für nicht-kritische Anwendungen genügt sogar Tages-Cache.
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Materialien zum Übungsblatt
+
+Zum Üben mit den HTML/CSS/JS-Aufgaben stehen vorbereitete Vorlagen bereit:
+
+- [`luhn-raw.html`](./materials/luhn-raw.html) — leeres Gerüst für die Luhn-Prüfziffer
+- [`luhn.html`](./materials/luhn.html) + [`luhn.js`](./materials/luhn.js) — funktionierende Referenzlösung
+- [`currency-api-empty.html`](./materials/currency-api-empty.html) — Startgerüst für den Währungsrechner
+- [`currency-api.html`](./materials/currency-api.html) — vollständiger Währungsrechner mit `fetch`
+- [`media-query.html`](./materials/media-query.html) — Beispiel für responsives Layout
+- [`exercise-04.html`](./materials/exercise-04.html) — kombinierte HTML/JS-Übung
+- [`datenuebertragung.png`](./materials/datenuebertragung.png), [`persona.png`](./materials/persona.png) — Abbildungen aus den Folien
+
+> Alle Materialien finden Sie auch zentral auf der **Kursseite** unter *Materials → Download*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
 
       const plugins = [
         window.RevealMarkdown,
@@ -463,6 +713,7 @@ const saved = JSON.parse(localStorage.getItem('formStep2'));
         tocProgress: {
           position: "bottom",
           hideOnOverview: true,
+          ...tocProgressConfig,
         },
         plugins,
       }).then(() => {

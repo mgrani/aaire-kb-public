@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 5 — Programmierung von Web-Systemen in Java — Student</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UME0tmcU.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 5 — Programmierung von Web-Systemen in Java — Student</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Übungsblatt 5
 ## Programmierung von Web-Systemen in Java
@@ -8,6 +8,18 @@
 24. März 2026
 
 Prof. Dr. Michael Granitzer
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Lernziele
+
+- Die Komponenten des **Java Web Stack** (Servlet-Container, Build-Tools, Test-Frameworks) einordnen
+- **Servlets**, **JSP** und **JavaBeans** als Grundbausteine kennen und einsetzen
+- **Spring Boot** für REST-APIs und **Spring Data / JPA** für Persistenz anwenden
+- Den **Spring Request-Flow** (DispatcherServlet → Controller → Service → Repository) verstehen
+- **Dependency Injection** und die **Test-Pyramide** (Unit / Integration / E2E) anwenden
 
 ---
 
@@ -110,6 +122,48 @@ Ein Formular auf `form.html` sendet eine POST-Anfrage an `/convert` mit dem Para
 2. Wie übergibt das Servlet das Ergebnis an die JSP, ohne es in der URL zu kodieren?
 3. Welche Methode des Servlets (`doGet` oder `doPost`) wird aufgerufen, und warum?
 4. Was ist ein **Java Bean** im JSP-Kontext, und welche Voraussetzungen muss eine Klasse erfüllen?
+
+
+
+## Übung 5.B.4: CurrencyServlet — eigene REST-API
+
+In Übungsblatt 4 haben Sie einen Währungsrechner gegen die `exchangerate.host`-API gebaut. Implementieren Sie nun eine **eigene** Servlet-basierte API, die das gleiche Format liefert:
+
+- `GET /currency` → JSON mit Wechselkursen von **EUR** in Fremdwährungen (USD, CHF)
+- `GET /currency?base=USD` → Wechselkurse von **USD** in Fremdwährungen
+- Wechselkurse dürfen im Quelltext fest verdrahtet werden
+
+Implementieren Sie die `doGet()`-Methode des `CurrencyServlet` mit `@WebServlet`-Annotation. Welche Bibliothek verwenden Sie für die JSON-Serialisierung, und warum sollten Sie nicht von Hand `String.format` benutzen?
+
+
+
+## Übung 5.B.5: JSP-Frontend mit FinanceBean
+
+Erweitern Sie das CurrencyServlet aus Übung 5.B.4 um eine `doPost()`-Methode, die Formular-Daten von einer HTML-Seite entgegennimmt und das Ergebnis über eine JSP rendert.
+
+**Gegeben:**
+
+```html
+<!-- index.html -->
+<form action="currency" method="POST">
+  <input name="value" type="number" value="100"/>
+  <select name="to">
+    <option value="USD">USD</option>
+    <option value="EUR">EUR</option>
+  </select>
+  <button type="submit">Umrechnen</button>
+</form>
+```
+
+```jsp
+<!-- solution.jsp -->
+<%@ page import="de.unipassau.currency.FinanceBean" %>
+<% FinanceBean result = (FinanceBean) request.getAttribute("result"); %>
+<h1>Ergebnis: <%= result.getAmount() %> <%= result.getCurrency() %></h1>
+```
+
+1. Implementieren Sie die `FinanceBean`-Klasse.
+2. Implementieren Sie `doPost()`: liest `value` und `to`, rechnet um, befüllt die Bean, hängt sie als Request-Attribut `result` an und leitet auf `solution.jsp` weiter.
 
 
 
@@ -238,7 +292,27 @@ Skizzieren Sie, wie die drei JPA-Vererbungsstrategien diese Hierarchie in Datenb
 Welche Strategie würden Sie für dieses Szenario wählen und warum?
 
 
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Materialien zum Übungsblatt
+
+Zur Übung mit Servlets, JSP und Spring Boot stehen vollständige Code-Templates bereit:
+
+**Servlets / JSP**
+
+- [`servlets-template/`](./materials/servlets-template/) — minimales Servlet-Template (`CurrencyServlet.java`, `FinanceBean.java`, `index.html`, `api.html`, `TestCurrencyServlet.java`) zum selbst Ausfüllen
+- [`servlets-filled/`](./materials/servlets-filled/) — funktionierende Referenzlösung
+
+**Spring Boot REST**
+
+- [`spring-boot-rest/`](./materials/spring-boot-rest/) — vollständige Studenten-Service-Anwendung mit `StudentController`, `StudentService`, `Student`, `Course`, DTOs, Initialisierung und Tests
+
+> Alle Materialien finden Sie auch zentral auf der **Kursseite** unter *Materials → Download*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
 
       const plugins = [
         window.RevealMarkdown,
@@ -311,6 +385,7 @@ Welche Strategie würden Sie für dieses Szenario wählen und warum?
         tocProgress: {
           position: "bottom",
           hideOnOverview: true,
+          ...tocProgressConfig,
         },
         plugins,
       }).then(() => {
