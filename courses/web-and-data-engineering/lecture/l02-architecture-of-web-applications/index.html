@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Vorlesung 02: Architektur von Web-Anwendungen</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Vorlesung 02: Architektur von Web-Anwendungen</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Kapitel 02: Architektur von Web-Anwendungen
@@ -54,7 +54,7 @@ Nahezu alle heutigen Computer folgen dem **Von-Neumann-Modell** (1945): ein geme
 ![Von-Neumann-Architektur: CPU mit Steuerwerk, Rechenwerk und Registern, verbunden mit RAM über System Bus, sowie Storage und Netzwerk als I/O](/courses/web-and-data-engineering/figures/von-neumann-architecture.svg)
 
 
-<div class="c-note">
+<div class="c-info">
 
 Software verwaltet letztlich vier physische Ressourcen: **Rechenleistung** (CPU), **Arbeitsspeicher** (RAM), **persistenter Speicher** (Storage) und **Netzwerk** (I/O). Jede Architekturentscheidung betrifft mindestens eine davon.
 
@@ -93,7 +93,7 @@ Hier liegt die Basiserkenntnis: Architektur ist keine Abstraktion ohne Materie. 
 ![Prozesse und Threads: zwei isolierte Prozesse mit eigenem Speicher, in denen Threads laufen und Speicher teilen](/courses/web-and-data-engineering/figures/processes-threads.svg)
 
 
-<div class="c-note">
+<div class="c-info">
 
 - **Prozess**: Eine laufende Instanz eines Programms mit eigenem, isoliertem Speicherbereich.
 - **Thread**: Ein leichtgewichtiger Ausführungsstrang innerhalb eines Prozesses, der sich den Speicher mit anderen Threads desselben Prozesses teilt.
@@ -112,7 +112,7 @@ Hier liegt die Basiserkenntnis: Architektur ist keine Abstraktion ohne Materie. 
 | **Erzeugung** | aufwändig | leichtgewichtig |
 
 
-<div class="c-note gap">
+<div class="c-info gap">
 
 Ein Web-Server bedient viele gleichzeitige Requests. Ob er Threads, Prozesse oder asynchrone Events nutzt, ist eine zentrale Designentscheidung — bestimmt Durchsatz und Ressourcenverbrauch.
 
@@ -160,7 +160,7 @@ Konkrete Zahlen sind immer Faustregeln und stark workload-abhängig. Ziel ist da
 - **Koordination von Prozessen** — wer bearbeitet was?
 
 
-<div class="c-note">
+<div class="c-info">
 
 Es entstehen neue Architektureentscheidungen
 
@@ -355,7 +355,7 @@ Der Punkt ist nicht Dokumentationspflege, sondern Steuerbarkeit. Architektur ist
 <div class="column small">
 
 
-<div class="c-note">
+<div class="c-info">
 
 - Einteilung in Schichten mit klaren Schnittstellen und Vereinbarungen
 - eine Schicht kann nur auf die Schicht davor zugreifen (`Closed Layer`) oder auf alle darunter (`Open Layer`)
@@ -406,7 +406,7 @@ Ein Request durchläuft die Schichten sequentiell — die Response traversiert s
 
 
 
-<div class="c-note">
+<div class="c-info">
 
 **Schlüsselprinzip:** Jede Schicht kennt nur die Schnittstelle der nächsten — nicht deren Implementierung. Schichten sind unabhängig austauschbar und skalierbar.
 
@@ -442,7 +442,7 @@ Das Referenzmodell ist bewusst simpel, weil es Kommunikationsregeln sichtbar mac
 <div class="column small">
 
 
-<div class="c-note">
+<div class="c-info">
 
 Komponenten kommunizieren nicht direkt, sondern über **Events** — asynchrone Nachrichten, die eine Zustandsänderung beschreiben.
 
@@ -492,7 +492,7 @@ Komponenten kommunizieren nicht direkt, sondern über **Events** — asynchrone 
 
 
 
-<div class="c-note">
+<div class="c-info">
 
 **Schlüsselprinzip:** Neue Consumer können hinzugefügt werden, ohne bestehende Komponenten zu ändern → hohe **Entkopplung**.
 
@@ -532,7 +532,7 @@ Die Funktion des Event-Modells ist Entkopplung. Gleichzeitig zeigen die Nachteil
 <div class="column">
 
 
-<div class="c-note small">
+<div class="c-info small">
 
 Das System wird in **kleine, autonome Dienste** zerlegt — jeder mit abgegrenzter fachlicher Verantwortung und unabhängigem Deployment.
 
@@ -582,7 +582,7 @@ Das System wird in **kleine, autonome Dienste** zerlegt — jeder mit abgegrenzt
 
 
 
-<div class="c-note">
+<div class="c-info">
 
 **Schlüsselprinzip:** Jeder Service ist autonom — eigene Sprache, eigene DB, eigener Release-Zyklus. Teams arbeiten unabhängig.
 
@@ -1207,7 +1207,7 @@ Die Botschaft: Datenverarbeitung ist kein nachgelagerter Batch-Job, sondern Teil
 4. Ergebnisse fließen ins **Data Warehouse** für BI/Analyse
 
 
-<div class="c-note">
+<div class="c-info">
 
 - **Eigenschaften:** hoher Durchsatz, hohe Latenz (Min.-Std.)
 - **Gut für:** Reporting, ML-Training, historische Analysen
@@ -1260,7 +1260,7 @@ Batch ist stark, wenn Vollständigkeit wichtiger ist als Reaktionszeit. Das erkl
 4. **Sinks** (Dashboards, Alerts) erhalten Ergebnisse in Echtzeit
 
 
-<div class="c-note small">
+<div class="c-info small">
 
 - **Eigenschaften:** niedrige Latenz (ms-s), komplexer (Order/Duplikate)
 - **Gut für:** Monitoring, Betrugserkennung, Echtzeit-Personalisierung
@@ -1330,7 +1330,7 @@ Stream-Verarbeitung verschiebt die Schwierigkeit von der Ausführung zur Robusth
 <div class="column small">
 
 
-<div class="c-note">
+<div class="c-info">
 
 - **Batch Layer**: verarbeitet den vollständigen historischen Datensatz periodisch → exakte, aber verzögerte Ergebnisse
 - **Speed Layer**: verarbeitet neue Events in Echtzeit → sofortige, aber möglicherweise approximierte Ergebnisse
@@ -1375,7 +1375,7 @@ Stream-Verarbeitung verschiebt die Schwierigkeit von der Ausführung zur Robusth
 <div class="column small">
 
 
-<div class="c-note">
+<div class="c-info">
 
 - **Unified Log**: alle Daten werden als Events persistent gespeichert (z.B. Kafka)
 - **Stream Processing**: verarbeitet neue und historische Daten mit derselben Logik
@@ -1491,6 +1491,7 @@ Datenarchitekturen sind keine Ergänzung zur Web-Architektur, sondern ihr integr
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
+
       const plugins = [
         window.RevealMarkdown,
         window.RevealMath?.KaTeX,
@@ -1566,6 +1567,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

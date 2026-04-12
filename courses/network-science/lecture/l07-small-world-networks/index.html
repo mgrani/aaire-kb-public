@@ -1,73 +1,162 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 07: Small-World Networks</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 07: Small-World Networks</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 07: Small-World Networks
 
-5942UE Network Science
-
-18 March 2026
-
 Prof. Dr. Michael Granitzer
+
 Dr. Kanishka Ghosh Dastidar
+
 Dr. Jelena Mitrovic
 
+Notes:
+This lecture asks two deceptively similar questions that turn out to be very different: (1) Why do short paths exist in large networks? (2) Can people *find* those short paths using only local information? The Watts-Strogatz model answers the first; Kleinberg's grid model answers the second. The gap between the two is the navigational gap — the fifth kind of gap in the course arc. Milgram's letter-chain experiment (1967) is the running example that threads the entire lecture.
+
 ---
 
-## Small-World Networks
+## Milgram's Experiment — The Question That Started It All
 
-This lecture asks why short paths are common and when decentralized navigation is possible.
+In 1967, the social psychologist Stanley Milgram mailed 296 letters to random people in Nebraska and Kansas. Each letter named a **target person** — a stockbroker in Boston — and asked the recipient to forward it to someone they knew *on a first-name basis* who might be "closer" to the target.
 
-### Focus
 
-- the small-world phenomenon
-- Watts–Strogatz structure and randomness
-- decentralized search
-- empirical validation and the Web as a directed information network
+<div class="fragment">
+
+The letters that arrived took a **median of about 6 steps**.
+
+The phrase "six degrees of separation" entered popular culture — but the experiment raised more questions than it answered.
+
+</div>
+
+
+--
+
+<!-- .slide: class="figure-85" -->
+
+## The Chain
+
+![Milgram's letter-chain experiment](/courses/network-science/figures/l07-scenario.svg)
+
+
+<div class="c-info smaller">
+
+Each intermediary sees only their own contacts and must guess who is "closer" to the target. About 25% of chains completed; the rest died when someone refused to forward. The experiment demonstrates both that short paths *exist* and that finding them is *hard*.
+
+</div>
+
+
+Notes:
+This figure is the lecture anchor. Question 1 (why short paths?) leads to Module 1. Question 2 (clustering + short paths?) leads to Watts-Strogatz. Question 3 (can people find them?) leads to Kleinberg. Question 4 (why do most chains fail?) leads to the empirical anchor (Dodds et al. 2003). Refer back throughout.
+
+--
+
+## Four Questions from One Experiment
+
+
+<div class="columns">
+
+
+<div class="column col-2-1">
+
+1. **Existence.** Why do short paths exist at all in a network of 200 million people?
+2. **Coexistence.** How can a network be *locally clustered* (your friends know each other) and *globally short* (six steps to a stranger in another state)?
+3. **Navigability.** If short paths exist, can ordinary people find them using only local knowledge — no map, no search engine?
+4. **Failure.** Only ~25% of chains arrived. Does this mean short paths are rare, or that *finding* them is the bottleneck?
+
+Every concept in today's lecture answers one of these.
+
+</div>
+
+
+<div class="column top">
+
+![Milgram experiment](/courses/network-science/figures/l07-scenario.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Questions 1–2 map to Modules 1–2 (small-world phenomenon, Watts-Strogatz). Question 3 maps to Module 3 (Kleinberg). Question 4 maps to Module 4 (Dodds et al. empirical test). The Web module (Module 5) extends the navigability question to directed information networks.
+
+--
+
+## A New Kind of Gap — Existence vs. Findability
+
+L03–L04 had a **computational** gap (NP-hard ideals). L05 had a **causal** gap. L06 had a **structural** gap (completeness required).
+
+L07 has a **navigational** gap: short paths may *exist* without anyone being able to *find* them using local information.
+
+| Lecture | Gap type | Ideal | Reality | Strategy |
+|---|---|---|---|---|
+| L03–L04 | Computational | Exact optimization | NP-hard | Polynomial heuristics |
+| L05 | Causal | Mechanism identification | Snapshots insufficient | Longitudinal data |
+| L06 | Structural | Complete signed graph | Sparse, noisy data | Approximate balance |
+| L07 | Navigational | Short navigable paths | Local information only | Geometric link distribution |
+
+Notes:
+The navigational gap is structurally different from the previous ones: it is not about what we can *compute* or *measure*, but about what *actors inside the network* can do with limited information. The fix is not a better algorithm run by an external analyst — it is a specific *geometry* of long-range links that makes local decisions globally effective. Kleinberg's result identifies this geometry precisely.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The small-world phenomenon is really two phenomena: the *existence* of short paths (explained by a few random long-range links) and the *findability* of those paths (explained only by a specific geometric distribution of links). Milgram's experiment revealed both — and the gap between them.
+
+</div>
+
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## Small-World Phenomenon
+## The Small-World Phenomenon
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Why are distances in large networks often surprisingly short?
+
+</div>
+
+
+Notes:
+This module establishes the basic empirical fact — typical distances grow logarithmically with network size — and gives examples from social, collaboration, and communication networks.
 
 --
 
-## Guiding Question
+## Logarithmic Distances
 
-Why are distances in large networks often surprisingly short?
 
---
+<div class="c-definition">
 
-## Formal Intuition
+**Small-world property.** A network exhibits the small-world property if the average shortest-path distance $\bar{d}$ grows at most logarithmically with the number of nodes:
 
-The small-world claim is that typical shortest-path distances grow **slowly** relative to network size.
+$$\bar{d} \propto \log |V|$$
 
---
+In a random graph $G(n, p)$ with average degree $k$, the typical distance is approximately $\bar{d} \approx \frac{\log n}{\log k}$.
 
-<!-- .slide: class="figure-68" -->
+</div>
 
-## Milgram
 
-![Milgram small-world experiment](/courses/network-science/figures/milgram.png)
 
---
+<div class="fragment">
 
-## Core Result
+For a social network of $n = 300$ million people with average degree $k \approx 100$: $\bar{d} \approx \frac{\log(3 \times 10^8)}{\log 100} \approx \frac{19.5}{4.6} \approx 4.2$. Milgram's 6 is in the right ballpark.
 
-$$
-d_{\text{typical}} \propto \log |V|
-$$
+</div>
 
---
 
-## Interpretation
-
-The small-world claim is **not** that everyone is directly connected. It is that typical distances grow slowly even in very large networks.
+Notes:
+The logarithmic scaling is the formal content of "six degrees of separation." It explains why Milgram's result is not mysterious from a graph-theory perspective: in any network where each node has tens or hundreds of contacts, the branching factor is so high that $\log n / \log k$ remains small even for billions of nodes. The surprise is not that short paths exist — it is that ordinary people can sometimes find them.
 
 --
 
-## Examples
+## Empirical Examples
 
 
 <div class="columns fit">
@@ -75,61 +164,134 @@ The small-world claim is **not** that everyone is directly connected. It is that
 
 <div class="column">
 
-![Instant messenger small-world results](/courses/network-science/figures/im-messenger.png)
+![Instant messenger path lengths](/courses/network-science/figures/im-messenger.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 20</span>
 
 </div>
 
 
 <div class="column">
 
-![Erdős collaboration graph](/courses/network-science/figures/erdoes-graph.png)
+![Erdős collaboration number distribution](/courses/network-science/figures/erdoes-graph.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
 
 </div>
 
+
+
+<div class="c-info smaller">
+
+**Left:** Microsoft Instant Messenger network — 180 million users, median distance ~7. **Right:** Mathematical collaboration network — Erdős numbers rarely exceed 5. Both confirm logarithmic scaling across orders of magnitude.
+
+</div>
+
+
+Notes:
+The IM data (Leskovec & Horvitz 2008) is especially striking: 180 million nodes, 1.3 billion edges, average distance 6.6. The Erdős collaboration graph is smaller (~400k mathematicians) but culturally iconic. Both examples reinforce that logarithmic distances are a robust empirical fact, not a quirk of Milgram's Nebraska sample.
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
 
-Large networks can still be navigably small in terms of path length.
+Logarithmic distances are a robust empirical fact across social, communication, and collaboration networks. In any network with moderate average degree, even billions of nodes remain only a handful of hops apart.
 
 </div>
 
+
+--
+
+## Quick Check
+
+The Facebook social graph has approximately 3 billion users and an average degree of about 300.
+
+1. Estimate the average shortest-path distance using $\bar{d} \approx \log n / \log k$.
+2. Facebook reported an empirical average distance of 3.57 in 2016. Is this consistent with your estimate?
+3. Why might the empirical value be *lower* than the logarithmic estimate?
+
+Notes:
+Give them 3 minutes. (1) $\bar{d} \approx \log(3 \times 10^9) / \log(300) \approx 21.8/5.7 \approx 3.8$. (2) Yes — 3.57 is close to 3.8. (3) The formula assumes a random graph; Facebook has hubs (celebrities, organizations) with degrees far above 300, which create even shorter paths. The degree distribution is heavy-tailed, not Poisson, so a few high-degree nodes pull the average distance below the random-graph prediction.
+
+--
+
+## Quick Check — Solution
+
+**1.** $\bar{d} \approx \frac{\log(3 \times 10^9)}{\log 300} \approx \frac{21.8}{5.7} \approx 3.8$ <!-- .element: class="fragment" -->
+
+**2.** Yes — 3.57 is remarkably close to the logarithmic estimate. <!-- .element: class="fragment" -->
+
+**3.** The $\log n / \log k$ formula assumes homogeneous degree (random graph). Facebook has heavy-tailed degree — celebrities and organizations with millions of friends act as hubs, creating shortcuts that reduce $\bar{d}$ below the random-graph prediction. <!-- .element: class="fragment" -->
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Structure and Randomness
+## The Watts–Strogatz Model
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How can a network be both highly clustered *and* have short paths?
+
+</div>
+
+
+Notes:
+This is the paradox that Watts & Strogatz (1998) resolved. Regular lattices have high clustering but long paths. Random graphs have short paths but no clustering. Real social networks have *both*. The Watts-Strogatz model shows that a tiny amount of randomness bridges the gap.
 
 --
 
-## Guiding Question
+## The Paradox
 
-How can a network be both highly clustered and still have short paths?
+Real social networks have two seemingly contradictory properties:
+
+| Property | Regular lattice | Random graph | Real social network |
+|---|---|---|---|
+| **Clustering** $C$ | High ($\sim 0.5$) | Low ($\sim k/n$) | **High** ($\sim 0.1$–$0.5$) |
+| **Avg. path length** $L$ | Long ($\sim n/2k$) | Short ($\sim \log n / \log k$) | **Short** ($\sim \log n$) |
+
+
+<div class="fragment">
+
+A regular lattice is clustered but large. A random graph is small but unclustered. **Real networks are both** — high $C$ and low $L$ simultaneously.
+
+</div>
+
+
+Notes:
+The table makes the paradox concrete. The challenge is to find a model that produces the bottom-right cell: high clustering AND short paths. Neither a lattice nor a random graph does this alone. The Watts-Strogatz model interpolates between the two extremes with a single parameter $p$.
 
 --
 
-## Formal Intuition
+## The Model
 
-Clustering and short average path length are **not mutually exclusive**.
 
-The key is that a few **long-range links** can drastically reduce distances.
+<div class="c-definition">
+
+**Watts–Strogatz model (1998).**
+
+1. Start with a **ring lattice**: $n$ nodes arranged in a circle, each connected to its $k$ nearest neighbors.
+2. For each edge, with probability $p$, **rewire** one endpoint to a uniformly random node (avoiding self-loops and duplicates).
+
+The parameter $p \in [0, 1]$ controls the interpolation:
+- $p = 0$: regular lattice (high $C$, high $L$)
+- $p = 1$: random graph (low $C$, low $L$)
+- $0 < p \ll 1$: **small-world regime** (high $C$, low $L$)
+
+</div>
+
+
+Notes:
+The model is beautifully simple: one parameter, one structural transition. The key insight is that the transition in $L(p)$ and $C(p)$ happens at *different* speeds. Path length collapses rapidly (a few random shortcuts suffice) while clustering decays slowly (most triangles survive). This creates a wide window where $C(p) \approx C(0)$ but $L(p) \approx L(1)$ — the small-world regime.
 
 --
 
-<!-- .slide: class="figure-68" -->
-
-## Formation of Short Paths
-
-![Shortest paths and clustering in small-world networks](/courses/network-science/figures/Watts-strogatz-shortest-paths.png)
-
---
-
-## Watts–Strogatz
+## The Characteristic Curves
 
 
 <div class="columns fit">
@@ -137,73 +299,198 @@ The key is that a few **long-range links** can drastically reduce distances.
 
 <div class="column">
 
-![Watts–Strogatz model I](/courses/network-science/figures/Watts-Strogatz-model-I.png)
+![Watts-Strogatz model — shortest paths](/courses/network-science/figures/Watts-strogatz-shortest-paths.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 20</span>
+
+</div>
+
+
+</div>
+
+
+
+<div class="columns fit">
+
+
+<div class="column">
+
+![Watts-Strogatz model I](/courses/network-science/figures/Watts-Strogatz-model-I.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 20</span>
 
 </div>
 
 
 <div class="column">
 
-![Watts–Strogatz model II](/courses/network-science/figures/Watts-Strogatz-model-II.png)
+![Watts-Strogatz model II](/courses/network-science/figures/Watts-Strogatz-model-II.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 20</span>
 
 </div>
 
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+$C(p)/C(0)$ stays near 1 while $L(p)/L(0)$ drops sharply. The small-world regime (shaded) spans roughly $0.001 \leq p \leq 0.1$ — a few percent of edges rewired is enough to make the world small.
+
+</div>
+
+
+Notes:
+The $C(p)/L(p)$ plot is the single most important figure of the module. The visual punchline: the $L$ curve drops like a cliff while the $C$ curve barely moves. This asymmetry is what makes the small-world regime possible. In practical terms: rewiring just 1% of edges in a lattice reduces average path length to near-random-graph levels while preserving almost all clustering.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The Watts-Strogatz model resolves the clustering/path-length paradox: a tiny fraction of random long-range shortcuts collapses distances without destroying local structure. The small-world regime exists because $L(p)$ falls much faster than $C(p)$.
 
 </div>
 
 
 --
 
-## Interpretation
+## Quick Check
 
-Local links preserve **clustering**. A small amount of random long-range linkage collapses **path length** dramatically.
+A ring lattice has $n = 1000$ nodes and $k = 10$ neighbors per node.
 
+1. Estimate the average path length $L$ at $p = 0$.
+2. After rewiring 1% of edges ($p = 0.01$), how many long-range shortcuts are created?
+3. Qualitatively, what happens to $L$ and $C$?
 
-<div class="takeaway">
+Notes:
+Give them 3 minutes. (1) $L(0) \approx n/(2k) = 1000/20 = 50$. (2) The lattice has $nk/2 = 5000$ edges; 1% rewired = 50 long-range shortcuts. (3) $L$ drops dramatically — 50 random shortcuts in a 1000-node graph is enough to bring $L$ close to $\log(1000)/\log(10) \approx 3$. $C$ drops only slightly — most of the $\binom{k}{2}$ triangles per node survive because only 50 out of 5000 edges moved.
 
-A tiny dose of randomness can make the world small without destroying local structure.
+--
 
-</div>
+## Quick Check — Solution
 
+**1.** $L(0) \approx n/(2k) = 1000/20 = 50$ steps. <!-- .element: class="fragment" -->
+
+**2.** $nk/2 = 5000$ edges total; 1% = **50 long-range shortcuts**. <!-- .element: class="fragment" -->
+
+**3.** $L$ collapses — 50 random shortcuts in a 1000-node lattice bring $L$ close to $\log n / \log k \approx 3$. $C$ barely changes — only 50 of 5000 edges were rewired, so the vast majority of local triangles survive. **This is the small-world regime.** <!-- .element: class="fragment" -->
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 3
-## Decentralized Search
+## Kleinberg's Decentralized Search
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Short paths exist — but can local actors *find* them without a map?
+
+</div>
+
+
+Notes:
+This is where the navigational gap opens. Watts-Strogatz proved that short paths exist; Kleinberg (2000) asked whether a *decentralized* agent — one that sees only its own neighbors and knows the target's approximate location — can find them efficiently. The answer is: only if the long-range links have a very specific geometric distribution.
 
 --
 
-## Guiding Question
+## The Problem
 
-Why do short paths not automatically imply that decentralized actors can find them?
+In Milgram's experiment, each person forwarded the letter based on **local information only**:
+
+- they knew their own contacts
+- they knew the target's name, city, and profession
+- they did *not* know the global network structure
+
+
+<div class="fragment">
+
+**Decentralized search:** at each step, the current holder forwards to the neighbor *closest* to the target (in some distance metric). No global routing table, no BFS.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Watts-Strogatz does not guarantee this works.** Short paths exist, but the greedy algorithm may not find them — it depends on *where* the long-range links point.
+
+</div>
+
+
+Notes:
+This is the conceptual crux of the lecture. Existence of short paths is a property of the graph. Findability of short paths is a property of the *algorithm plus the graph*. Watts-Strogatz gives existence; Kleinberg gives the conditions for findability.
 
 --
 
-## Problem
+## Kleinberg's Grid Model (2000)
 
-Milgram-like routing is **not** breadth-first search. Each actor sees only local information.
+
+<div class="c-definition">
+
+**Setup.** Place $n$ nodes on a $d$-dimensional grid. Each node has:
+- **local contacts:** all grid neighbors within lattice distance $p$
+- **one long-range link:** drawn with probability proportional to $d(v, u)^{-r}$, where $d$ is grid distance and $r \geq 0$ is the distance exponent.
+
+**Greedy routing.** At each step, forward to the neighbor (local or long-range) closest to the target in grid distance.
+
+</div>
+
+
+The parameter $r$ controls the *geometry* of long-range links:
+- $r = 0$: uniform random (long-range links go anywhere)
+- $r = d$: inverse-power law matched to dimension (links span all scales equally)
+- $r \gg d$: long-range links are effectively local
+
+Notes:
+The model separates the two ingredients cleanly: the grid provides the local clustering, and the long-range links provide the shortcuts. The exponent $r$ is the single knob that controls navigability. Kleinberg's result is that only one value of $r$ makes greedy search efficient.
 
 --
 
-## Formal Intuition
+<!-- .slide: class="figure-100" -->
 
-Decentralized search succeeds when the network places long-range links in a way that **local decisions can exploit**.
+## The Three Regimes
+
+![Kleinberg's grid model — three values of r](/courses/network-science/figures/kleinberg-grid.svg)
+
+Notes:
+The figure shows why $r = d$ is special. At $r = 0$, long-range links are uniformly random — they create short paths but provide no geographic gradient for the greedy algorithm to follow. At $r \gg d$, links are so local that they add no useful shortcuts. Only at $r = d$ do the links span all scales proportionally, creating a hierarchy of shortcuts that the greedy algorithm can exploit at every distance.
+
+--
+
+## Kleinberg's Theorem
+
+
+<div class="c-definition">
+
+**Theorem (Kleinberg, 2000).**
+
+In the $d$-dimensional grid model with long-range exponent $r$:
+
+- If $r = d$: greedy routing finds the target in $O(\log^2 n)$ steps.
+- If $r \neq d$: **no** decentralized algorithm (using only local information) can find the target in fewer than $\Omega(n^c)$ steps for some constant $c > 0$.
+
+</div>
+
+
+
+<div class="fragment">
+
+The exponent $r = d$ is **unique** — it is the only value at which decentralized search is polylogarithmic. Any other value, and search degrades to polynomial.
+
+</div>
+
+
+Notes:
+This is one of the sharpest results in the course. The navigability transition is not gradual — it is a threshold phenomenon. At $r = d$, greedy search succeeds in $O(\log^2 n)$ steps; at any other $r$, it is polynomial in $n$. The uniqueness of $r = d$ means that navigability is not a generic property of small-world networks — it requires a specific geometry that most random-shortcut models (including Watts-Strogatz) do not guarantee.
 
 --
 
 <!-- .slide: class="figure-82" -->
 
-## Kleinberg-Style Idea
-
-![Decentralized search using local information and long-range shortcuts](/courses/network-science/figures/decentralized-search-local-global.svg)
-
-Long-range links should not be uniformly random. They should be distributed **across scales**.
-
---
-
-## Evidence
+## Simulation Evidence
 
 
 <div class="columns fit">
@@ -211,7 +498,8 @@ Long-range links should not be uniformly random. They should be distributed **ac
 
 <div class="column">
 
-![Decentralized search simulation](/courses/network-science/figures/decentralized-search-q-simulation.png)
+![Decentralized search simulation — delivery time vs. r](/courses/network-science/figures/decentralized-search-q-simulation.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 20</span>
 
 </div>
 
@@ -219,17 +507,152 @@ Long-range links should not be uniformly random. They should be distributed **ac
 <div class="column">
 
 ![Proof sketch for decentralized search](/courses/network-science/figures/decentralized-search-proof-q.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 20</span>
 
 </div>
 
 
 </div>
 
+
+
+<div class="c-info smaller">
+
+**Left:** delivery time vs. exponent $r$ — a sharp minimum at $r = d = 2$. **Right:** the proof intuition — at $r = d$, each "ring" of nodes at distance $2^i$ from the target receives roughly equal link probability, creating a hierarchy of scales the algorithm descends one level at a time.
+
+</div>
+
+
+Notes:
+The simulation plot is the visual proof that the theorem is not just asymptotic: even on moderate-sized grids (hundreds to thousands of nodes), the minimum at $r = d$ is sharp and clearly visible. The "equal probability per ring" intuition is the heart of the proof: if each doubling of distance carries equal total link probability, then a greedy step reduces the remaining distance by a constant factor with constant probability, yielding $O(\log n)$ rounds of $O(\log n)$ steps each.
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
 
-Efficient search requires not only short paths, but the right geometry of long-range ties.
+Short paths exist in almost any small-world network. But navigability — the ability of local actors to *find* those paths — requires a specific geometric distribution of long-range links ($r = d$). Watts-Strogatz gives existence; Kleinberg gives findability.
+
+</div>
+
+
+--
+
+## Quick Check
+
+A social network is well-modeled by a 2D grid with random long-range links.
+
+1. What exponent $r$ makes greedy search efficient?
+2. If the network's long-range links are uniformly random ($r = 0$), what happens to (a) the existence of short paths and (b) greedy routing performance?
+3. Why is the Watts-Strogatz model insufficient to explain Milgram's result?
+
+Notes:
+Give them 4 minutes. (1) $r = 2$ (matches the grid dimension $d = 2$). (2a) Short paths still exist — random shortcuts reduce $L$. (2b) Greedy routing degrades to polynomial time — the shortcuts point to random locations that provide no useful gradient toward the target. (3) Watts-Strogatz shows short paths *exist* but uses uniform rewiring ($r = 0$), which does not support efficient decentralized search. Milgram's participants actually *found* short paths, which requires $r = d$ — a stronger condition than Watts-Strogatz guarantees.
+
+--
+
+## Quick Check — Solution
+
+**1.** $r = 2 = d$ for a 2D grid. <!-- .element: class="fragment" -->
+
+**2.** <!-- .element: class="fragment" -->
+- (a) Short paths **still exist** — uniform random shortcuts reduce average path length. <!-- .element: class="fragment" -->
+- (b) Greedy routing **fails** — it takes $\Omega(n^{2/3})$ steps because the random shortcuts provide no gradient toward the target. <!-- .element: class="fragment" -->
+
+**3.** Watts-Strogatz uses **uniform** rewiring ($r = 0$). This gives short paths but not *navigable* short paths. Milgram's participants actually found short paths using local information — that requires $r = d$, a much stronger structural condition. <!-- .element: class="fragment" -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Empirical Anchor: The Global Email Experiment
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Does Milgram's result replicate at scale — and what does chain failure tell us?
+
+</div>
+
+
+Notes:
+This module provides the empirical anchor for L07, following the pattern of Kossinets-Watts (L03), Zachary (L04), Christakis-Fowler (L05), and Leskovec et al. (L06). The study is Dodds, Muhamad & Watts (2003), the largest replication of Milgram's experiment.
+
+--
+
+## The Study
+
+
+<div class="c-info">
+
+**Dodds, Muhamad & Watts (2003),** *An Experimental Study of Search in Global Social Networks*, [**Science 301, 827–829**](https://doi.org/10.1126/science.1081058).
+
+They replicated Milgram's experiment using **email** — a global medium with no geographic constraint.
+
+| Parameter | Value |
+|---|---|
+| Participants recruited | **~60 000** from 166 countries |
+| Target persons | **18** in 13 countries |
+| Chains started | **24 163** |
+| Chains completed | **384** (~1.6%) |
+| Median chain length (completed) | **4–7 steps** |
+
+</div>
+
+
+Notes:
+The scale is two orders of magnitude larger than Milgram's 296 letters, and the medium (email) removes geographic friction. The completed chains confirm logarithmic distances (~5 steps median). But the headline number is the *completion rate*: only 1.6% of chains reached their target. This is even lower than Milgram's ~25%, despite the ease of forwarding email.
+
+--
+
+## What They Found
+
+**1. Completed chains are short.** Median 4–7 steps, consistent with Milgram and with $\log n / \log k$ scaling.
+
+**2. Most chains die early.** The completion rate of ~1.6% is not because paths don't exist — it's because intermediaries *choose not to forward*. The bottleneck is **motivation**, not topology.
+
+
+<div class="fragment">
+
+**3. Successful chains use geography and profession as search dimensions.** Forwarders who brought the letter closer in *geographic* or *professional* distance were more effective — consistent with Kleinberg's model where search exploits multiple distance dimensions simultaneously.
+
+</div>
+
+
+Notes:
+Finding 3 is the empirical bridge to Kleinberg: successful Milgram-style search is not random — it exploits social coordinates (geography, profession, organizational hierarchy) that function as approximate distance metrics. The chains that succeeded were the ones where each forwarder made a good *greedy* decision relative to the target's known attributes. This is exactly what Kleinberg's theorem predicts: navigability requires that long-range links are distributed across scales in a way that local greedy decisions can exploit.
+
+--
+
+## What the Study Could Not See
+
+
+<div class="c-info">
+
+**1. Chain death ≠ path absence.** A chain that dies after 3 steps does not mean no short path existed — it means someone chose not to forward. The study measures *willingness to search*, not *path existence*. The true completion rate under full cooperation is unknown.
+
+**2. Selection bias in completions.** The 384 completed chains are a biased sample — they may systematically over-represent easy targets (well-known, geographically close, professionally distinctive). The median chain length of 4–7 steps may underestimate the true difficulty of reaching a random target.
+
+**3. Email ≠ acquaintance.** Milgram's experiment required *personal acquaintance*; the email study allowed forwarding to anyone whose email address you knew. The social network traversed by email may be larger and weaker-tied than the face-to-face network Milgram assumed.
+
+**4. No ground-truth network.** Without observing the full network, the study cannot measure whether the successful chains actually followed near-optimal paths or just happened to complete.
+
+</div>
+
+
+Notes:
+The chain-death problem is the deepest limitation: the experiment conflates the *ability* to find short paths with the *willingness* to search. Milgram's original experiment had the same issue. No routing experiment can fully separate topology from motivation without observing the complete network and making forwarding mandatory — which is ethically impossible. This is the navigational gap in its purest empirical form.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Dodds et al. (2003) confirmed Milgram at scale: short paths exist and people can sometimes find them. But the 1.6% completion rate reveals that *motivation*, not topology, is the primary bottleneck. The navigational gap is real — short paths exist but are rarely found in practice.
 
 </div>
 
@@ -238,86 +661,22 @@ Efficient search requires not only short paths, but the right geometry of long-r
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## Empirical Analysis
-
---
-
-## Guiding Question
-
-Does the decentralized-search model show up in real data?
-
---
-
-## Formal Intuition
-
-The empirical question is whether real networks organize long-range links across scales in the way search models predict.
-
---
-
-## Geographic Rank
+## The Web as a Directed Small World
 
 
-<div class="columns fit">
+<div class="guiding-question">
 
-
-<div class="column">
-
-![Population density in LiveJournal data](/courses/network-science/figures/decentralized-search-empirical-density.png)
+**Guiding Question:** What happens to navigability when links are directed?
 
 </div>
 
 
-<div class="column">
-
-![Rank-based friendship distance](/courses/network-science/figures/decentralized-search-empirical-rank.png)
-
-</div>
-
-
-</div>
-
+Notes:
+The Web is the largest information network ever built, and its links are directed — a page can link to another without being linked back. This breaks the symmetry that underpins both Watts-Strogatz and Kleinberg: in a directed graph, reachability is not mutual, and the "small world" may only exist in part of the network.
 
 --
 
-<!-- .slide: class="figure-72" -->
-
-## Evidence
-
-![LiveJournal decentralized search result](/courses/network-science/figures/decentralized-search-livejournal-rank.png)
-
---
-
-<!-- .slide: class="figure-68" -->
-
-## Beyond Geography
-
-![Social distance through foci](/courses/network-science/figures/decentralized-search-experimental-social-distance.png)
-
-
-<div class="takeaway">
-
-Empirical networks often organize weak ties in ways that support decentralized navigation, even when distance is social rather than geographic.
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 5
-## The Web as a Directed Network
-
---
-
-## Guiding Question
-
-What changes when we move from social networks to the Web?
-
---
-
-## From Hypertext to Directed Graphs
+## From Social to Information Networks
 
 
 <div class="columns fit">
@@ -326,6 +685,7 @@ What changes when we move from social networks to the Web?
 <div class="column">
 
 ![Unlinked text](/courses/network-science/figures/www-not-linked.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
@@ -333,6 +693,7 @@ What changes when we move from social networks to the Web?
 <div class="column">
 
 ![Linked hypertext](/courses/network-science/figures/www-linked.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
@@ -340,6 +701,7 @@ What changes when we move from social networks to the Web?
 <div class="column">
 
 ![Directed graph of the web](/courses/network-science/figures/www-dg.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
@@ -347,43 +709,129 @@ What changes when we move from social networks to the Web?
 </div>
 
 
---
 
-<!-- .slide: class="figure-58" -->
+<div class="c-info smaller">
 
-## Strong Connectivity
+Hyperlinks are **directed** — page A can link to page B without B linking back. This means reachability is asymmetric: you can follow links *from* A *to* B but not necessarily in reverse.
 
-In directed graphs, reachability is **asymmetric**, so connectedness must also be defined asymmetrically.
+</div>
 
-![Strongly connected component example](/courses/network-science/figures/strongly-connected-example.png)
-
-Directed graphs need directed path and strongly connected component concepts.
 
 --
+
+## The Bow-Tie Structure
 
 <!-- .slide: class="figure-70" -->
 
-## Bow-Tie Structure
-
 ![Bow-tie structure of the web](/courses/network-science/figures/bow-tie.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010, p. Ch. 13</span>
+
+
+<div class="c-definition smaller">
+
+**Broder et al. (2000)** crawled ~200 million web pages and found the Web decomposes into:
+
+- **SCC (Strongly Connected Component):** ~28% of pages — every page reachable from every other via directed paths. *This* is the "small world" of the Web.
+- **IN:** pages that can reach the SCC but are not reachable from it.
+- **OUT:** pages reachable from the SCC but that cannot reach back.
+- **Tendrils and tubes:** pages connected to IN or OUT but not to the SCC.
+
+</div>
+
+
+Notes:
+The bow-tie decomposition is the directed analogue of connected components. The SCC is the only part where mutual reachability holds — where "six degrees" makes sense. The IN, OUT, and tendril components break the small-world property because paths exist in one direction but not the other. Roughly 72% of the Web is *not* in the SCC, meaning the "small world" is a minority of the full graph.
+
+--
+
+## Navigability in Directed Networks
+
+The small-world property and navigability both change in directed networks:
+
+- **Short paths exist** within the SCC — the strongly connected core is a small world (~16 clicks between random page pairs within SCC).
+- **Short paths do not exist** from OUT back to SCC, or between tendrils.
+- **Greedy search is harder** because you can only follow outgoing links — you cannot "pull" information from a page that doesn't link to you.
+
+
+<div class="fragment">
+
+**Search engines** (Google, 1998) solve the navigability problem by building a *global index* — they observe the entire graph and compute optimal paths. This is the opposite of Kleinberg's decentralized search: it works precisely because it is *centralized*.
+
+</div>
+
+
+Notes:
+This connects to L04: PageRank (eigenvector centrality on the directed Web graph) is the tool that makes centralized Web search possible. The Web is simultaneously a small world (within the SCC) and not navigable by local greedy search (because of directionality). The resolution — a centralized search engine — sidesteps the navigational gap rather than solving it.
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
 
-The Web is not just a bigger social network. Its directionality creates different notions of reachability, components, and information flow.
+The Web's directed links create asymmetric reachability. Only the Strongly Connected Component (~28%) is a "small world." Search engines solve the navigability problem through centralized indexing — the opposite of Milgram-style decentralized routing.
 
 </div>
 
 
+--
+
+## Quick Check
+
+A directed network has 1000 nodes. The SCC contains 300 nodes. The IN component has 200 nodes, and the OUT component has 250 nodes. The rest are tendrils.
+
+1. From a random node in IN, can you reach a random node in OUT? Explain your path.
+2. From a random node in OUT, can you reach a node in IN?
+3. What fraction of all possible source-target pairs have a directed path between them?
+
+Notes:
+Give them 4 minutes. (1) Yes: IN → SCC → OUT. The IN component can reach the SCC by definition, and the SCC can reach OUT by definition. So IN → SCC → OUT is a valid directed path. (2) No — OUT cannot reach back to the SCC (by definition), and from the SCC you can reach OUT but not IN. OUT → IN has no path. (3) This is harder. Pairs within SCC: 300×299. IN→SCC: 200×300. IN→OUT via SCC: 200×250. SCC→OUT: 300×250. Others require more analysis. The point is that far fewer than 50% of all pairs are mutually reachable.
+
+--
+
+## Quick Check — Solution
+
+**1. Yes:** IN → SCC → OUT. By definition, IN nodes can reach SCC, and SCC nodes can reach OUT. The path goes through the SCC as a relay. <!-- .element: class="fragment" -->
+
+**2. No.** OUT nodes cannot reach back to the SCC (that is what defines them as OUT, not SCC). So OUT → IN has no directed path. <!-- .element: class="fragment" -->
+
+**3. Reachable pairs include:** SCC→SCC ($300 \times 299$), IN→SCC ($200 \times 300$), SCC→OUT ($300 \times 250$), IN→OUT via SCC ($200 \times 250$). That totals ~$240\,000$ pairs out of $1000 \times 999 \approx 10^6$ — roughly **24%**. Most pairs are *not* mutually reachable. <!-- .element: class="fragment" -->
+
 ---
 
-## Wrap-Up
+## Wrap-Up — The Five Gaps
 
-- short paths alone do not guarantee navigability
-- a little randomness can shrink distances dramatically
-- information networks need directed notions of path, components, and reachability
+| Lecture | Gap type | Ideal | Reality | Strategy |
+|---|---|---|---|---|
+| **L03–L04** | Computational | Exact optimization | NP-hard | Polynomial heuristics |
+| **L05** | Causal | Mechanism identification | Snapshots insufficient | Longitudinal data |
+| **L06** | Structural | Complete signed graph | Sparse, noisy data | Approximate balance |
+| **L07** | Navigational | Short navigable paths | Local info only; directed links | Geometric link distribution; centralized search |
+
+The small-world phenomenon says short paths *exist*. Watts-Strogatz explains *why*. Kleinberg explains *when* they are *findable*. Milgram and Dodds et al. tested *whether* real people find them — and the answer is: sometimes, with effort, and only when the network's geometry cooperates.
+
+### Looking Ahead: Lecture 08
+
+How do things *spread* on networks — diseases, information, behaviors? The structure we have built (ties, communities, balance, small-world shortcuts) now becomes the substrate for dynamic processes: contagion, diffusion, and cascading failure.
+
+### Reading
+
+Chapter 20 of Easley & Kleinberg (2010) covers the small-world phenomenon and Watts-Strogatz. Kleinberg (2000), *The Small-World Phenomenon: An Algorithmic Perspective*, is the source for the decentralized search theorem. Dodds, Muhamad & Watts (2003) is the email experiment. Broder et al. (2000) is the bow-tie structure of the Web.
+
+Notes:
+The five-gap table closes the L03–L07 arc. Lecture 08 introduces the final conceptual shift: from structure to dynamics. The graph is no longer just an object to analyze — it becomes a *medium* through which processes propagate. The structural properties we have studied (weak ties, communities, balance, small-world shortcuts) now determine how fast and how far a contagion or cascade spreads.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
+
 
       const plugins = [
         window.RevealMarkdown,
@@ -460,6 +908,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

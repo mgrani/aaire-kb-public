@@ -1,42 +1,112 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 04: Communities and Graph Partitioning
 
 Prof. Dr. Michael Granitzer
+
 Dr. Kanishka Ghosh Dastidar
+
 Dr. Jelena Mitrovic
 
-8 April 2026
-
-From single ties and nodes to groups, roles, and community structure.
-
 Notes:
-This lecture moves from the local-tie focus of Lecture 03 to group-level structure. Two complementary questions drive it:
-
-- Which nodes occupy structurally important positions? (centrality, roles)
-- How is the graph organized into denser subgroups? (community detection)
-
-These are not the same question. A central node need not belong to a community boundary, and a community need not contain the most central nodes.
+This lecture continues the modeling-vs-measurement arc from Lecture 03. In L03 we classified *edges* (strong vs. weak), discovered that the exact recovery problem (MaxSTC) is NP-hard, and fell back on polynomial-time structural proxies. In L04 we classify *nodes* (structural roles, centralities) and *sets of nodes* (communities), and we find exactly the same pattern: the theoretically ideal objective (modularity maximization) is NP-hard, and we fall back on heuristics. The whole course is held together by that single loop: theoretical construct → intractable recovery → polynomial-time proxy → empirical test.
 
 ---
 
-## Communities and Graph Partitioning
+## From Classifying Edges to Classifying Nodes and Groups
 
-Today we move from single ties and nodes to groups, roles, and community structure.
+In Lecture 03 we asked which *edges* carried novel information — strong vs. weak, bridges vs. embedded. Today we ask which *nodes* occupy important positions, and how the graph splits into dense groups.
 
-### Focus
+Let us return to the same workplace.
 
-- communities, closure, and structural holes
-- centrality measures as role concepts
-- community detection vs. graph partitioning
-- hierarchical clustering and Girvan-Newman
+--
+
+<!-- .slide: class="figure-75" -->
+
+## The Same Scenario, New Questions
+
+![The workplace network from Lecture 03](/courses/network-science/figures/l03-scenario.svg)
+
+
+<div class="c-info smaller">
+
+Same graph as last time — two teams linked by a single weak Dia–Fin contact. Lecture 03 asked about the edges. Today the questions are about the nodes and the groups.
+
+</div>
+
+
+Notes:
+Reusing the L03 scenario is deliberate. Students should feel that the lecture is continuing a single investigation rather than starting a new topic. The same figure will now reveal a different set of concepts depending on which question we ask.
+
+--
+
+## Four Group-Level Questions
+
+
+<div class="columns">
+
+
+<div class="column col-2-1">
+
+1. **Importance.** Who is the single most important person in this office — and what does "important" even mean?
+2. **Boundaries.** Where is the line between team A and team B, and could an algorithm discover it *without being told the labels*?
+3. **Uniqueness.** If we ran community detection on a 10 000-person company, would the answer be unique — or would different methods give different maps?
+4. **Validation.** How do we know when a detected community is real rather than an artifact of the algorithm?
+
+Every concept in today's lecture is a formal answer to one of these questions.
+
+</div>
+
+
+<div class="column top">
+
+![The workplace network from Lecture 03](/courses/network-science/figures/l03-scenario.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Each question maps to a module: (1) structural roles and centrality, (2) communities and modularity, (3) divisive vs. agglomerative community-finding heuristics, (4) the Zachary karate club as an empirical anchor. Keep referring back to the workplace figure: Ana and Ben anchor the embedded role, Dia anchors brokerage, and the Dia–Fin edge anchors the community boundary.
+
+--
+
+## Theory vs. Measurement — Continued
+
+The gap we opened in Lecture 03 does not close in Lecture 04. Every concept today has a theoretical form we cannot compute on real data and a measurable proxy we can.
+
+| Question | Theoretical construct | Measurable proxy |
+|---|---|---|
+| Who is most important? | *(no single answer — multiple theories)* | Degree / closeness / betweenness / eigenvector |
+| What makes a group a group? | Community with high internal density | Modularity $Q$ |
+| Best partition? | Global modularity maximum (NP-hard) | Girvan–Newman / Louvain heuristics |
+| Is a partition meaningful? | Agreement with ground-truth labels | Benchmark datasets (Zachary's karate club) |
+
+Notes:
+This table is L04's version of the L03 roadmap. The first row is slightly different from the others because centrality is not a single construct with a tractable/intractable split — it is a *family* of competing operationalizations, and the "measurement" column already reflects the theoretical pluralism. The second and third rows show the classical modeling/measurement split from L03, now applied to groups instead of edges.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+L03 classified edges; L04 classifies nodes and groups. The modeling–measurement loop is the same: a theoretically clean objective is NP-hard, polynomial-time heuristics approximate it, and empirical benchmarks test whether the heuristics recover meaningful structure.
+
+</div>
+
+
+Notes:
+This takeaway names the shape of the lecture before any content arrives. Refer back to it when introducing modularity ("this is the theoretical objective, and it is intractable to maximize exactly"), when introducing Girvan–Newman and Louvain ("these are the polynomial-time heuristics"), and when introducing Zachary's club ("this is the empirical test").
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
 ## Roles and Social Capital
 
 
@@ -47,69 +117,46 @@ Today we move from single ties and nodes to groups, roles, and community structu
 </div>
 
 
+Notes:
+The point of this module is to dismantle the intuitive notion that "important nodes" form a single category. A high-degree hub, an embedded clique member, and a structural broker are three distinct positions with different social and informational consequences. Students should leave the module able to name and contrast all three on the workplace figure.
+
 --
 
-## Formal Distinction
+## Three Structural Positions
 
-Not all important positions are the same.
 
-- **embeddedness**: a node is surrounded by tightly connected neighbors <!-- .element: class="fragment" -->
-- **brokerage**: a node connects otherwise separated groups <!-- .element: class="fragment" -->
-- **structural hole**: a gap between groups that brokerage can span <!-- .element: class="fragment" -->
+<div class="c-definition">
+
+**Embeddedness.** A node whose neighbors are themselves densely interconnected. High clustering coefficient.
+
+**Brokerage.** A node connecting otherwise separated groups. Low clustering coefficient, high betweenness.
+
+**Structural hole.** The empty region in the network that a brokerage position spans.
+
+</div>
+
 
 Notes:
-Use this slide to separate the role vocabulary before the pictures. The point is to make students see that "important" is not a single concept.
+Embeddedness is a property of a node, brokerage is a relational role, and a structural hole is the absence of edges that makes brokerage possible. In the workplace figure, Ana is embedded (her neighbors Ben and Cai are directly connected), Dia is a broker (the single cross-team tie runs through her), and the absence of direct Eli–Fin, Cai–Gia, Ben–Hal edges forms the structural hole between the teams.
 
 --
 
-<!-- .slide: class="figure-60" -->
+<!-- .slide: class="figure-90" -->
 
-## Structural Roles
+## Embedded vs. Broker
 
-![Structural hole and embedded node figure](/courses/network-science/figures/structural-hole.png)
-<span class="figure-credit">Source: Burt 1992</span>
+![Embedded node inside a dense neighborhood vs. broker spanning a structural hole](/courses/network-science/figures/embedded-vs-broker.svg)
+
+
+<div class="c-info smaller">
+
+The embedded node $v$ sits inside a tightly connected neighborhood — its removal barely affects connectivity. The broker $b$ is the only short link between two clusters — its removal would isolate them.
+
+</div>
+
 
 Notes:
-Point out the contrast: the embedded node sits inside a dense cluster (high clustering coefficient), the broker spans between clusters (low clustering coefficient, high betweenness).
-
---
-
-## Interpretation
-
-- embedded nodes sit inside dense trusted neighborhoods <!-- .element: class="fragment" -->
-- structural holes connect otherwise weakly linked groups <!-- .element: class="fragment" -->
-- highly connected nodes may have power through scale, not only brokerage <!-- .element: class="fragment" -->
-
---
-
-<!-- .slide: class="figure-60" -->
-
-## Communities
-
-![Co-author community network](/courses/network-science/figures/co-author-network.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
-Community structure means the network contains groups of tightly interconnected nodes.
-
---
-
-## Quick Check 4.A: Roles in a Karate Club
-
-In Zachary's karate club, two factions form around the instructor (Mr. Hi) and the administrator (Officer).
-
-1. Which structural role best describes Mr. Hi: embedded, broker, or hub?
-2. Are there any nodes that connect the two factions? What role do they play?
-
-Notes:
-Give them 3 minutes. Both Mr. Hi and the Officer are hubs (high degree, embedded in their cluster). The interesting nodes are the few that have ties to both factions — these are the brokers spanning the structural hole between groups. The split itself is predictable from the brokerage structure.
-
---
-
-## Quick Check 4.A: Solution
-
-**1. Mr. Hi:** Hub and embedded — high degree within his faction, central to a tightly connected subgroup. <!-- .element: class="fragment" -->
-
-**2. Bridging nodes:** A small number of members maintain ties across the factions. They occupy brokerage positions and span the structural hole between the two groups. When the club split, these were the nodes whose loyalty was hardest to predict. <!-- .element: class="fragment" -->
+The visual contrast highlights how the same graph structure produces two opposite kinds of importance. The embedded node enjoys trust, redundancy, and reinforced norms; the broker enjoys early information access and gatekeeping power. Burt's empirical research showed that brokers are systematically over-rewarded in organizational settings — they earn more, get promoted faster, and produce more innovations — precisely because they capture the value of structural holes.
 
 --
 
@@ -118,18 +165,38 @@ Give them 3 minutes. Both Mr. Hi and the Officer are hubs (high degree, embedded
 
 <div class="takeaway">
 
-
-"Importance" is not one thing. Brokerage, embeddedness, and degree capture different social advantages.
-
+"Importance" is not one thing. Brokerage, embeddedness, and degree capture different social advantages — and the same node can sit in multiple roles depending on the question.
 
 </div>
 
+
+--
+
+## Quick Check
+
+Look again at the workplace figure (Ana, Ben, Cai, Dia, Eli on the left; Fin, Gia, Hal, Ivo on the right).
+
+1. Which of these nine people is the clearest *broker*, and what structural feature makes them one?
+2. Which is the most clearly *embedded*?
+3. What would change structurally if Dia left the company tomorrow?
+
+Notes:
+Dia is the only broker: she is the only endpoint of the single cross-team edge. Ana, Ben, and Cai are all embedded inside the left triangle — each of them has directly connected neighbors. If Dia leaves, the only cross-team tie vanishes and the two teams become disconnected components — an extreme form of the structural-hole intuition. This quick check directly reuses the L03 scenario to make the new vocabulary concrete.
+
+--
+
+## Quick Check — Solution
+
+**1. Broker:** Dia — she is the only endpoint of the cross-team edge. Every shortest path between the two teams passes through her.
+
+**2. Embedded:** Ana, Ben, and Cai are all embedded (they sit inside the same closed triangle). Ben is perhaps the most embedded, with all three neighbors (Ana, Cai, Dia) mutually connected.
+
+**3. If Dia leaves:** the Dia–Fin edge disappears with her, and the two teams become *disconnected components*. The structural hole becomes absolute — no shortest path exists between Ana and Hal at all.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
 ## Centrality
 
 
@@ -145,121 +212,105 @@ $$
 $$
 <!-- .element: class="fragment" -->
 
+Notes:
+Centrality is not a single quantity but a family of operationalizations, each formalizing a different intuition about importance. The choice of centrality measure is a modeling choice with consequences — picking degree when betweenness is the right concept will systematically miss the most structurally critical nodes.
+
 --
 
-## Formal View
+## Four Theories of Importance — Formally
 
-Different centrality measures formalize different intuitions about importance.
 
-- **degree**: how many links a node has <!-- .element: class="fragment" -->
-- **closeness**: how near a node is to all others <!-- .element: class="fragment" -->
-- **betweenness**: how often a node lies on shortest paths <!-- .element: class="fragment" -->
-- **eigenvector**: how strongly a node is connected to other important nodes <!-- .element: class="fragment" -->
+<div class="c-definition smaller">
+
+**Degree centrality**
+$$C_D(v) = \frac{\deg(v)}{n-1}$$
+Measures local exposure — how many direct contacts a node has.
+
+**Closeness centrality**
+$$C_C(v) = \frac{n-1}{\sum_{u \neq v} d(v, u)}$$
+Measures reach — high when average shortest-path distance to everyone else is small.
+
+**Betweenness centrality**
+$$C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
+Measures control — fraction of shortest paths that pass through $v$, where $\sigma_{st}$ is the number of shortest $s$–$t$ paths and $\sigma_{st}(v)$ is the subset going through $v$.
+
+**Eigenvector centrality**
+$$C_E(v) = \frac{1}{\lambda}\sum_{u} A_{vu}\, C_E(u)$$
+Recursive — a node is important if connected to other important nodes. $A$ is the adjacency matrix and $\lambda$ its leading eigenvalue. **PageRank** is the directed, damped variant used by Google.
+
+</div>
+
 
 Notes:
-This is the main conceptual bridge. The slide should make it clear that centrality is not one quantity but a family of operationalizations.
+Each formula answers a different question. Degree asks "who has the most direct contacts?"; closeness asks "who can reach everyone fastest?"; betweenness asks "whose removal would cut the most communication paths?"; eigenvector asks "who is connected to the most influential others?". These can rank the same network completely differently — and that disagreement is itself structurally informative.
 
 --
 
-## Degree-Based Views
+<!-- .slide: class="figure-100" -->
+
+## Same Graph, Four Views of Importance
+
+![Four centrality measures applied to the same small graph](/courses/network-science/figures/centrality-quartet.svg)
+
+
+<div class="c-info smaller">
+
+Node size in each panel encodes that panel's centrality value. The same graph yields different "most important" nodes depending on which measure is used — confirming that centrality is always a theory of importance, not a neutral measurement.
+
+</div>
+
+
+Notes:
+This visualization makes the central conceptual point of the module concrete: there is no single answer to "which node is most important". The bridge node dominates betweenness but not eigenvector; the densely embedded node dominates eigenvector but not betweenness. Choosing a centrality measure is choosing a theory about what kind of influence matters in the system being analyzed.
+
+--
+
+## Back to the Workplace
+
+In the workplace figure, each measure picks a different winner:
+
+- **Degree** → Ana (or Ben): most direct contacts inside team A's core
+- **Closeness** → Dia: smallest average distance to everyone, because she sits on the only bridge
+- **Betweenness** → Dia *and* Fin: every shortest path between the teams passes through both
+- **Eigenvector** → Ana or Ben: connected to densely-connected others, which amplifies recursively
+
+Notes:
+Running through the four centralities on the same small concrete graph makes the pluralism tangible. The crucial insight: the "most important" answer depends on which theory of importance you adopt. Dia wins on betweenness because she is the only broker, but she loses on eigenvector because team B's neighbors are less densely connected than team A's. In the workplace figure there is no single "most important" node — there is only a most important node *for a given question*.
+
+--
+
+## Real-World Examples
 
 
 <div class="columns col-2-1">
 
 
 <div class="column">
-
 
 ![Degree centrality examples](/courses/network-science/figures/centrality_degree.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-
 </div>
 
 
 <div class="column">
-
 
 ![Eigenvector centrality examples](/courses/network-science/figures/centrality_eigenvector.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-
 </div>
 
 
 </div>
 
 
-Notes:
-Degree counts neighbors directly. Eigenvector centrality refines this: a node is important if it is connected to other important nodes — a recursive definition. Google's PageRank is a directed variant of eigenvector centrality.
 
---
+<div class="c-info smaller">
 
-## Distance and Brokerage
-
-
-<div class="columns col-2-1">
-
-
-<div class="column">
-
-
-![Closeness centrality examples](/courses/network-science/figures/centrality_closeness.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
+**Left:** Degree highlights raw connection counts. **Right:** Eigenvector centrality refines this — a node is important if it links to other important nodes. Google's PageRank is the directed variant of eigenvector centrality applied to the Web.
 
 </div>
 
-
-<div class="column">
-
-
-![Betweenness centrality examples](/courses/network-science/figures/centrality_betweenness.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Closeness asks: how quickly can a node reach everyone else? Betweenness asks: how often does information have to pass through this node? They highlight very different positions.
-
---
-
-## Interpretation
-
-Different measures answer different questions:
-
-- who has many links? <!-- .element: class="fragment" -->
-- who is linked to important others? <!-- .element: class="fragment" -->
-- who is close to everyone? <!-- .element: class="fragment" -->
-- who controls paths between groups? <!-- .element: class="fragment" -->
-
---
-
-## Quick Check 4.B: Choose the Right Centrality
-
-For each scenario, decide which centrality measure is most appropriate and justify briefly.
-
-1. You want to identify the most influential gossip in a small village.
-2. You want to find emergency-response hubs that should reach all districts within minimum time.
-3. You want to detect which router, if attacked, would slow internet traffic between continents most.
-4. You want to find the most prestigious researcher in a citation network.
-
-Notes:
-Give them 4 minutes. Answers: (1) Degree — direct contacts. (2) Closeness — average shortest-path distance. (3) Betweenness — proportion of shortest paths passing through. (4) Eigenvector / PageRank — being cited by other prestigious researchers matters more than being cited by many unknown ones.
-
---
-
-## Quick Check 4.B: Solution
-
-1. **Degree centrality** — gossip is local, direct contact matters. <!-- .element: class="fragment" -->
-2. **Closeness centrality** — minimizing average distance to all districts. <!-- .element: class="fragment" -->
-3. **Betweenness centrality** — the router's role is to lie on paths between continents. <!-- .element: class="fragment" -->
-4. **Eigenvector centrality / PageRank** — prestige flows from being cited by others who are themselves prestigious. <!-- .element: class="fragment" -->
 
 --
 
@@ -268,119 +319,174 @@ Give them 4 minutes. Answers: (1) Degree — direct contacts. (2) Closeness — 
 
 <div class="takeaway">
 
-
-Centrality is always tied to a theory of influence, access, or control. Choosing a measure is choosing a theory.
-
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 3
-## Communities
-
-
-<div class="guiding-question">
-
-**Guiding Question:** What should count as a community in a graph?
+Centrality is always tied to a theory of influence, access, or control. Choosing a measure is choosing a theory — not collecting an objective fact.
 
 </div>
 
 
 --
 
-## Formal Intuition
+## Quick Check
 
-A community is a subset of nodes with:
+For each scenario, decide which centrality measure is most appropriate and justify briefly.
 
-- relatively many edges inside the subset
-- relatively few edges leaving the subset
-- a density that is meaningfully higher than the surrounding graph
+1. You want to identify the most influential gossip in a small village.
+2. You want to find emergency-response hubs that can reach all districts within minimum time.
+3. You want to detect which router, if attacked, would slow internet traffic between continents most.
+4. You want to find the most prestigious researcher in a citation network.
 
 Notes:
-This is intentionally not a fully formal theorem-level definition. It gives students the structural criterion before the examples.
+The four scenarios are deliberately matched one-to-one with the four measures. Students who answer "degree" or "betweenness" to all four miss the conceptual point: each scenario embeds a different theory of what "important" means, and the right measure is the one that matches the theory.
+
+--
+
+## Quick Check — Solution
+
+1. **Degree centrality** — gossip is local, direct contacts matter.
+2. **Closeness centrality** — minimizing average distance to all districts.
+3. **Betweenness centrality** — the router's role is to lie on paths between continents.
+4. **Eigenvector centrality / PageRank** — prestige flows from being cited by others who are themselves prestigious.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## What Counts as a Community?
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Can we give "community" a mathematical definition precise enough that an algorithm could find one?
+
+</div>
+
+
+Notes:
+Communities are intuitively obvious in a drawing but surprisingly hard to define formally. The definition determines what algorithms can detect and what they will miss. This module introduces modularity as the canonical answer — and then shows that the canonical answer is computationally out of reach, exactly as MaxSTC was in Lecture 03.
+
+--
+
+## Working Definition
+
+
+<div class="c-definition">
+
+**Community (informal).** A subset of nodes $S \subseteq V$ with
+
+- relatively many edges *inside* $S$
+- relatively few edges *leaving* $S$
+- density meaningfully higher than the surrounding graph.
+
+</div>
+
+
+Different formal definitions instantiate this intuition differently. The most influential is **modularity**, which compares observed internal density against a random null model.
+
+Notes:
+The informal definition is intentional: it gives the structural criterion without committing to a specific objective function. Modularity, conductance, and density-based definitions all satisfy the informal criterion but operationalize it differently. The pluralism is a feature — different applications need different sharpnesses of community boundary — but for the rest of the lecture we focus on modularity because it is the single most widely used objective.
+
+--
+
+## Modularity — The Canonical Objective
+
+
+<div class="c-definition">
+
+**Modularity** $Q$ of a partition $\{C_1, \dots, C_k\}$ of a graph with $m$ edges and adjacency matrix $A$:
+
+$$
+Q = \frac{1}{2m} \sum_{i,j} \left( A_{ij} - \frac{k_i k_j}{2m} \right) \delta(c_i, c_j)
+$$
+
+where $k_i$ is the degree of node $i$ and $\delta(c_i, c_j) = 1$ if $i$ and $j$ are in the same community, else $0$.
+
+</div>
+
+
+**Interpretation.** For every within-community pair, compare the *observed* edge $A_{ij}$ to the *expected* edge density $k_i k_j / 2m$ under a random rewiring that preserves degrees (the **configuration model**). $Q$ is the total surplus of within-community edges over chance.
+
+
+<div class="c-info smaller">
+
+$Q$ ranges roughly in $[-\tfrac{1}{2}, 1]$. Values in $[0.3, 0.7]$ typically indicate significant community structure; $Q \approx 0$ means no more internal density than expected by chance.
+
+</div>
+
+
+Notes:
+Modularity is the single most important concept in this lecture. It converts the vague notion of "community" into a number we can optimize. The configuration-model null is what makes it statistical rather than arbitrary: instead of asking "are there many edges inside this group?" it asks "are there *more* edges inside this group than we would expect if we kept each node's degree but rewired everything at random?". That reframing is precisely why modularity can distinguish real communities from high-degree hubs whose connections merely happen to concentrate.
+
+--
+
+## The Catch — Modularity Maximization Is NP-Hard
+
+
+<div class="c-definition smaller">
+
+**Result (Brandes et al., 2008).** Finding the partition that maximizes $Q$ on a general graph is **NP-hard**. No polynomial-time algorithm for the exact optimum is known.
+
+</div>
+
+
+
+<div class="fragment">
+
+Sound familiar? This is the exact same situation as **MaxSTC** in Lecture 03: a theoretically clean objective that is computationally out of reach on real data.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Consequence.** The rest of the module introduces two families of polynomial-time *heuristics* that find partitions with high $Q$ without guaranteeing the global maximum:
+
+- **divisive** (Girvan–Newman): peel apart high-betweenness edges
+- **agglomerative** (Louvain, Leiden): greedily merge nodes that increase $Q$
+
+</div>
+
+
+Notes:
+This is the slide where the L03–L04 narrative arc closes. In L03, we had a clean theoretical construct (STC labeling) whose exact recovery (MaxSTC) was NP-hard, so we fell back on clustering coefficient and neighborhood overlap as polynomial-time proxies. In L04, we have a clean theoretical construct (modularity-optimal partition) whose exact recovery is also NP-hard, and we will fall back on Girvan–Newman and Louvain as polynomial-time proxies. Same shape, different level of the graph.
 
 --
 
 ## Example Cases
 
 
-<div class="columns col-2-1">
+<div class="columns">
 
 
 <div class="column">
 
-
 ![Belgium phone communities](/courses/network-science/figures/communities-in-belgium-mobile-phone-users.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
 
 </div>
 
 
 <div class="column">
-
 
 ![Metabolic network communities](/courses/network-science/figures/metabolic-community.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
-<div class="column">
-
-![Karate club network](/courses/network-science/figures/zachary-karate-club.png)
-<span class="figure-credit">Source: Zachary 1977 — modified; Original data: Zachary 1977; visualization redrawn</span>
 
 
 </div>
 
 
+
+<div class="c-info smaller">
+
+Three different domains, the same structural pattern: dense internal connectivity and sparse cross-group connectivity. The Belgium phone graph reveals the linguistic divide between Flemish and Walloon speakers — an external label the algorithm was never told. Metabolic communities reflect functional pathway groupings.
+
 </div>
 
 
 Notes:
-Three different domains, the same structural pattern: dense internal connectivity and sparse cross-group connectivity. Belgium phones reveal the linguistic divide. Metabolic communities reflect functional groupings. Karate club shows social factions.
-
---
-
-## Working Definition
-
-A community is a locally dense connected subgraph whose internal connectivity is stronger than its connectivity to the outside.
-
---
-
-## Interpretation
-
-Graph partitioning and community detection are related but not identical:
-
-- **partitioning** usually fixes the number or size of groups
-- **community detection** usually lets the structure determine the grouping
-- the choice of objective function changes what counts as a good community
-
-Notes:
-This is an important distinction. Partitioning (e.g. min-cut, balanced cut) starts with a target number of groups. Detection methods (modularity-based, hierarchical) discover the natural granularity. Different objectives = different communities.
-
---
-
-## Quick Check 4.C: When Partitioning Fails
-
-A graph has two large dense clusters connected by a single edge, plus one small triangle attached to one of the clusters via a single edge.
-
-1. How many "natural" communities does this graph have?
-2. If you ask a balanced 2-partition algorithm to split it into two equal halves, what might go wrong?
-
-Notes:
-Give them 3 minutes. (1) Three: two large clusters and the small triangle. (2) A balanced 2-partition forces equal sizes, so it would either split a natural cluster or merge the triangle with one of them, ignoring the natural three-community structure. The lesson: imposing partition constraints can hide real structure.
-
---
-
-## Quick Check 4.C: Solution
-
-**1. Natural communities:** Three — the two dense clusters and the small triangle. <!-- .element: class="fragment" -->
-
-**2. What goes wrong:** A balanced 2-partition has to split nodes into equal-sized groups. It will either cut through one of the dense clusters or merge the triangle with the wrong cluster — neither matches the natural structure. The constraint distorts the answer. <!-- .element: class="fragment" -->
+The cross-domain examples make the universality argument: the same modularity-based tools recover meaningful groups in social, biological, and technical networks. The Belgium example is particularly striking because the linguistic boundary was never an explicit feature of the data — it was discovered from call patterns alone by a Louvain-style modularity maximizer.
 
 --
 
@@ -389,89 +495,167 @@ Give them 3 minutes. (1) Three: two large clusters and the small triangle. (2) A
 
 <div class="takeaway">
 
-
-Communities are not visual artifacts. They are claims about density, separation, and interpretability — and they depend on the objective function used to find them.
-
+Modularity $Q$ is the canonical mathematical definition of "community": excess internal density over a random-graph null model. Maximizing it exactly is NP-hard — so every practical community detection method is a heuristic.
 
 </div>
 
+
+--
+
+## Quick Check
+
+A graph has two dense clusters of 50 nodes each connected by a single edge, plus one small triangle attached to one cluster via a single edge.
+
+1. Roughly how many natural communities does this graph have?
+2. Will modularity maximization find all of them?
+3. If you asked a balanced 2-partition algorithm to split it into two equal halves, what might go wrong?
+
+Notes:
+The graph has three natural communities, and modularity maximization should find them on a graph this size — but there is a subtle trap. Modularity has a well-known *resolution limit* (Fortunato & Barthélemy 2007): in large graphs, modularity cannot detect communities smaller than roughly $\sqrt{2m}$ edges. On the small example above the triangle is easy to find, but if the two big clusters grew to 5000 nodes each, the triangle would disappear below the resolution threshold. The balanced partition question is a separate trap: enforcing equal sizes forces the algorithm to either cut through a real community or merge the triangle with the wrong neighbor. Either way, a structural constraint hides real structure.
+
+--
+
+## Quick Check — Solution
+
+**1. Three natural communities** — the two dense clusters and the small triangle.
+
+**2. Modularity will find them on this small graph**, but in large graphs modularity has a **resolution limit**: it systematically fails to detect communities smaller than roughly $\sqrt{2m}$ edges. Scale the two clusters up to 5000 nodes each and the triangle vanishes from view.
+
+**3. Balanced 2-partition** is forced to produce equal-sized groups. It will either cut through one of the dense clusters or merge the triangle with the wrong cluster. The constraint distorts the answer.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## Hierarchical Clustering
+## Finding Communities — Divisive and Agglomerative
 
 
 <div class="guiding-question">
 
-**Guiding Question:** How can we discover communities without fixing them in advance?
+**Guiding Question:** If modularity maximization is NP-hard, how do we find good partitions in practice?
 
 </div>
 
 
---
-
-## Core Idea
-
-$$
-\text{merge or split groups according to similarity}
-$$
-<!-- .element: class="fragment" -->
-
---
-
-## Formal View
-
-Hierarchical clustering builds a tree of nested groups.
-
-At each step it uses a similarity or distance rule to decide which clusters to merge or split.
-
 Notes:
-Make explicit that the output is a dendrogram or hierarchy, not a single flat partition. This is a strength when structure exists at multiple scales, and a weakness when you only want one answer.
+This module collects the practical heuristics used to approximate modularity maximization. Two broad families: divisive (Girvan–Newman) works top-down by removing inter-community edges; agglomerative (Louvain, Leiden) works bottom-up by merging nodes that increase modularity. Both produce hierarchies, and both are chosen over exact optimization because they are polynomial-time.
 
 --
 
 ## Two Strategies
 
-- **agglomerative**: start with single nodes and merge <!-- .element: class="fragment" -->
-- **divisive**: start with the whole graph and split <!-- .element: class="fragment" -->
-- both produce a hierarchy rather than a single flat answer <!-- .element: class="fragment" -->
 
---
+<div class="c-definition">
 
-## Interpretation
+**Divisive (top-down).** Start with the whole graph as one cluster. Repeatedly remove edges that lie *between* communities, peeling the graph apart. Example: Girvan–Newman.
 
-The key modeling choice is the similarity or distance function:
+**Agglomerative (bottom-up).** Start with each node as its own cluster. Repeatedly merge the pair whose merge most *increases* modularity. Example: Louvain, Leiden.
 
-- first-order similarity uses direct links
-- second-order similarity uses neighborhood overlap
-- linkage rules define how cluster-to-cluster distances are updated
+</div>
 
---
 
-## Quick Check 4.D: Choosing a Cutoff
-
-A dendrogram for a friendship network shows clear merges at three levels: 5 groups at one level, 3 groups at another, 2 groups at the highest level.
-
-1. Which level captures the "right" community structure?
-2. What information would you need to decide?
+Both strategies produce a hierarchy — a **dendrogram** — rather than a single flat partition. Where to cut the dendrogram is the analyst's modeling decision.
 
 Notes:
-Give them 3 minutes. Trick question — there is no single right answer without context. The right cutoff depends on what the communities will be used for: study groups (5), elective tracks (3), faculty assignment (2). The lesson: hierarchical clustering does not absolve the analyst of modeling judgment.
+Divisive methods target the inter-community edges directly, which aligns with the bridge intuition from Lecture 03 — inter-community edges carry many shortest paths, so they have high edge-betweenness. Agglomerative methods are cheaper and currently dominate practice (Louvain is the default in NetworkX and Gephi, Leiden is the modern improvement). Both families produce dendrograms, so the module-level takeaway is the same: algorithms give you a hierarchy; you, the analyst, decide where to cut.
 
 --
 
-## Quick Check 4.D: Solution
+<!-- .slide: class="figure-95" -->
 
-**1.** There is no single correct level — each is "right" for a different question. <!-- .element: class="fragment" -->
+## The Dendrogram as Output
 
-**2. Information needed:** <!-- .element: class="fragment" -->
+![Dendrogram with three possible horizontal cuts producing 2, 3, and 4 communities](/courses/network-science/figures/dendrogram-cutoffs.svg)
 
-- the *purpose* of the grouping (assignment, recommendation, diagnosis) <!-- .element: class="fragment" -->
-- external validation: known group labels, modularity scores, or task performance <!-- .element: class="fragment" -->
-- domain knowledge about plausible group sizes <!-- .element: class="fragment" -->
+
+<div class="c-info smaller">
+
+Every agglomerative or divisive run produces a hierarchy like this. Each horizontal cut is a valid clustering; the "right" one depends on the downstream task. Picking the cut with the highest modularity $Q$ is the default rule.
+
+</div>
+
+
+Notes:
+The dendrogram is the explicit representation of multi-scale community structure. Cutting it at different heights produces different partitions, and each cut is structurally valid. The decision about where to cut is necessarily external to the algorithm — it depends on what the communities will be used for, or on picking the height that maximizes $Q$.
+
+--
+
+## Girvan–Newman — The Divisive Algorithm
+
+
+<div class="c-algorithm">
+
+**Algorithm: Girvan–Newman**
+
+*(Input: Graph $G = (V, E)$)*
+
+1. Compute the **edge betweenness** of every edge — the fraction of all shortest paths that pass through it.
+2. Remove the edge with the **highest** edge betweenness.
+3. Recompute edge betweenness on the remaining graph.
+4. Repeat until no edges remain — record the partition at each step.
+5. Choose the partition that maximizes **modularity** $Q$.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+Edges with high edge-betweenness are exactly the **local bridges** and **weak ties** from Lecture 03 — they carry many shortest paths because all cross-community communication must cross them. Girvan–Newman is an algorithmic version of Granovetter's weak-tie argument.
+
+</div>
+
+
+Notes:
+The recompute step in line 3 is what makes Girvan–Newman conceptually clean but computationally expensive: edge betweenness must be recalculated after every removal because removing one edge changes the shortest paths used by all the others. The whole algorithm runs in $O(|V| \cdot |E|^2)$ worst case — fine for teaching, impractical for graphs beyond a few thousand nodes. This is why modern practice uses Louvain / Leiden instead.
+
+--
+
+<!-- .slide: class="figure-95" -->
+
+## Worked Example
+
+![Girvan–Newman peeling a small graph in three steps](/courses/network-science/figures/girvan-newman-steps.svg)
+
+
+<div class="c-info smaller">
+
+**Step 0:** the bridge edge has the highest betweenness because every path between the two clusters must cross it. **Step 1:** removing it reveals two main clusters but the small triangle remains weakly attached. **Step 2:** the next-highest-betweenness edge is the link to the triangle — removing it isolates the third community. Final partition: three communities.
+
+</div>
+
+
+Notes:
+The worked example shows the algorithm's two characteristic moves: detaching a major community boundary, then peeling smaller substructures. Notice that edge-betweenness recomputation is essential — after step 1, the highest-betweenness edge changes because the graph topology has changed.
+
+--
+
+## Louvain and Leiden — Modern Practice
+
+
+<div class="c-definition smaller">
+
+**Louvain (Blondel et al., 2008).** Agglomerative modularity maximizer.
+
+*Phase 1:* For each node, try moving it to each neighbor's community; keep the move that most increases $Q$. Repeat until no move improves $Q$.
+
+*Phase 2:* Contract each community into a super-node and repeat Phase 1 on the new graph. Iterate until $Q$ converges.
+
+</div>
+
+
+
+<div class="c-definition smaller">
+
+**Leiden (Traag et al., 2019).** Fixes a subtle Louvain flaw (disconnected communities) and guarantees well-connected output at each level.
+
+</div>
+
+
+**Why these dominate practice.** Near-linear time in $|E|$; handle millions of nodes; directly optimize $Q$; no edge-betweenness recomputation.
+
+Notes:
+Louvain is currently the default community-detection algorithm in NetworkX, Gephi, and most network-analysis packages — it scales to graphs orders of magnitude larger than Girvan–Newman. Leiden is the 2019 improvement that fixed a structural bug in Louvain (it could return communities that were internally disconnected) and is now the recommended default in research. Both directly optimize modularity greedily without touching edge betweenness.
 
 --
 
@@ -480,85 +664,117 @@ Give them 3 minutes. Trick question — there is no single right answer without 
 
 <div class="takeaway">
 
-
-Hierarchical clustering is useful when the data may contain meaningful structure at several resolutions. The cutoff is a modeling decision, not an algorithmic output.
-
+Divisive and agglomerative heuristics approximate the NP-hard modularity optimum in polynomial time. Girvan–Newman is the didactic divisive method; Louvain and Leiden are the scalable agglomerative methods used in practice.
 
 </div>
 
+
+--
+
+## Quick Check
+
+You run Girvan–Newman on a small graph and get a dendrogram with a maximum $Q$ at the cut that produces 4 communities. You then run Louvain on the same graph and it reports 3 communities with a slightly lower $Q$.
+
+1. Which answer is "correct"?
+2. What could explain the discrepancy?
+
+Notes:
+Neither is correct in an absolute sense — both are heuristics approximating an NP-hard optimum. Girvan–Newman's divisive peeling can find finer structure because it tests every possible cut, but its higher $Q$ might be fragile to noise. Louvain's greedy merges can get stuck in local optima and miss small communities. The honest answer: both are reasonable, and the discrepancy itself is evidence that the solution is not unique — the student should report both and discuss the tradeoff.
+
+--
+
+## Quick Check — Solution
+
+**1. Neither is absolutely correct** — both are heuristics approximating the NP-hard modularity optimum. The higher $Q$ value is weak evidence, not proof, and the difference may be within noise.
+
+**2. Possible explanations:**
+
+- Louvain is greedy and can get stuck in local optima that miss small communities.
+- Girvan–Newman explores more cuts but is sensitive to the order of edge removals.
+- Modularity itself has a resolution limit; both methods share this blind spot.
+- The graph may genuinely admit multiple near-optimal partitions — real structure can be ambiguous.
+
+The honest practice is to run multiple algorithms, report agreement, and treat disagreement as a signal about the graph itself.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 5
-## Girvan-Newman
+## Empirical Anchor — Zachary's Karate Club
 
 
 <div class="guiding-question">
 
-**Guiding Question:** Can communities be found by removing the edges that carry the most inter-group traffic?
+**Guiding Question:** Do community-detection heuristics actually recover real social groups — and how do we know?
 
 </div>
 
 
+Notes:
+Zachary's karate club is the canonical validation dataset for community detection. It is a small, real social network with a documented ground-truth split, which makes it one of the very few graphs where we can actually check whether an algorithm "got the right answer". It has become so iconic in network science that the first speaker at a conference to mention it in a talk traditionally wins the "Zachary Karate Club Club" prize.
+
 --
 
-## Formal Rule
+<!-- .slide: class="figure-90" -->
 
-Edge betweenness counts how many shortest paths pass through an edge.
+## The Story
 
-Girvan-Newman repeatedly removes the edge with the highest edge betweenness.
+![Zachary's karate club — schematic of the 34-member network with its two factions](/courses/network-science/figures/karate-club.svg)
+
+
+<div class="c-info smaller">
+
+**Zachary (1977),** *An Information Flow Model for Conflict and Fission in Small Groups*, [**J. Anthropological Research 33, 452–473**](https://www.jstor.org/stable/3629752).
+
+Wayne Zachary observed a university karate club for two years. A conflict arose between the instructor (**Mr. Hi**) and the chief administrator (**Officer**), and the club eventually **split in two** — with each member following one or the other.
+
+</div>
+
 
 Notes:
-The intuition: edges that lie between communities must carry many shortest paths, because all cross-community communication must use them. Removing them peels the graph apart at its natural seams.
+The crucial detail: Zachary recorded the network of *friendships* between members *before* the split happened. The ground truth (who joined which faction) was the natural outcome of the conflict, not an analyst's label. That means we can run any community-detection algorithm on the pre-split graph and directly check how many members it assigns to the correct faction.
 
 --
 
-<!-- .slide: class="figure-70" -->
+## What the Algorithms Find
 
-## Core Result
+| Method | Typical result |
+|---|---|
+| **Girvan–Newman** | Recovers the two factions with **1 misclassified** node |
+| **Louvain / Leiden** | Recovers the two factions; typically finds **4 sub-groups** at max $Q$ |
+| **Max-modularity (exact on this small graph)** | Finds the same 4 sub-groups nested inside the 2 factions |
 
-![Edge centrality for Girvan-Newman](/courses/network-science/figures/girvan-newman-centrality-measures.png)
-<span class="figure-credit">Source: Girvan & Newman 2002</span>
 
---
+<div class="c-info smaller">
 
-<!-- .slide: class="figure-70" -->
+The ~1-node misclassification is structurally meaningful: the node in question genuinely sat on the boundary between the two factions during the conflict period, and which side they joined was a close call even to Zachary himself.
 
-## Example
+</div>
 
-![Girvan-Newman clustering example](/courses/network-science/figures/girvan-newman-clustering-example.png)
-<span class="figure-credit">Source: Girvan & Newman 2002</span>
-
---
-
-## Interpretation
-
-Edges that sit between communities tend to be crossed by many shortest paths, so removing them can reveal hidden group structure.
 
 Notes:
-Connect this back to weak ties from Lecture 03. Edges between communities are often weak ties — and they are exactly the edges Girvan-Newman targets. The community detection algorithm operationalizes the bridge concept.
+The karate-club result is a success story and a cautionary tale at the same time. Success: the heuristics find the real split from the friendship network alone, which is strong evidence that community structure in social networks is a real phenomenon and not a statistical mirage. Cautionary: the exact modularity maximum finds four sub-groups, not two — modularity's "best" answer disagrees with the ground-truth binary split, because internally the two factions each contain two tightly-connected sub-cliques. The algorithm is not wrong; it is answering a slightly different question.
 
 --
 
-## Quick Check 4.E: Girvan-Newman by Hand
+## What the Study Could Not See
 
-In a small graph, the edge with the highest betweenness has been removed. The graph is now split into two components of roughly equal size, plus one isolated triangle.
+Even in this iconic success case, the empirical validation has blind spots that parallel Lecture 03's gap between construct and measurement:
 
-1. Should you stop here or continue removing edges?
-2. What would tell you the algorithm has reached a "good" stopping point?
+
+<div class="c-info">
+
+**1. Modularity resolution limit (Fortunato & Barthélemy 2007).** On the 34-node karate graph the exact max-$Q$ partition has **4** communities, not **2**. The ground-truth split is not even the modularity optimum — the algorithm is answering "which partition maximizes $Q$", not "which partition matches the real factions".
+
+**2. Binary ground truth.** Zachary's data records which faction each member *eventually* joined — but not the *strength* of their preference, their uncertainty during the conflict, or whether a third "neutral" group briefly existed. The true social structure may have been continuous or overlapping.
+
+**3. Static snapshot.** The friendships were recorded at a single time. The dynamics of the conflict — who influenced whom, when someone shifted — are invisible to the algorithm.
+
+</div>
+
 
 Notes:
-Give them 3 minutes. (1) Continue if structure remains within components. (2) Modularity is the standard answer: compute modularity at each split level and pick the maximum. The point is that Girvan-Newman generates a hierarchy and needs an external criterion to choose a cut level.
-
---
-
-## Quick Check 4.E: Solution
-
-**1.** Continue — the algorithm produces a *hierarchy* of nested partitions. Each removal step gives a new candidate clustering. <!-- .element: class="fragment" -->
-
-**2. Stopping criterion:** Use **modularity** $Q$ — measure how much denser the within-community edges are than expected under a random null model. Pick the level that maximizes $Q$. <!-- .element: class="fragment" -->
+This slide is the L04 analogue of "What the Kossinets-Watts Study Could Not See" in L03. The parallel is intentional: in L03 the binary email data hid tie strength; in L04 the binary faction label hides community overlap and dynamics. Both are reminders that the empirical benchmark is always narrower than the theoretical construct we are trying to validate.
 
 --
 
@@ -567,27 +783,30 @@ Give them 3 minutes. (1) Continue if structure remains within components. (2) Mo
 
 <div class="takeaway">
 
-
-Girvan-Newman is conceptually elegant and didactically useful, but computationally expensive for large graphs. Modern methods (Louvain, Leiden) optimize modularity directly without recomputing edge betweenness at every step.
-
+Zachary's karate club shows that community-detection heuristics recover real social structure from graph topology alone — but also that even the "canonical" answer has blind spots: modularity's resolution limit, binary ground truth, and static snapshots all hide real structure the algorithm cannot see.
 
 </div>
 
 
 ---
 
-## Wrap-Up
+## Wrap-Up — Closing the Modeling Loop
 
-- centrality asks which nodes matter and why
-- communities ask where the graph is dense and where it is sparse
-- different methods optimize different notions of structure
+Across Lectures 03 and 04 we have traversed the full modeling/measurement loop twice:
 
-### Looking Ahead: Lecture 05
+| Level | Theoretical ideal | NP-hard recovery | Polynomial proxy | Empirical test |
+|---|---|---|---|---|
+| **Edges (L03)** | Strong/weak labeling | MaxSTC | Clustering coeff., overlap | Kossinets–Watts email |
+| **Nodes / Groups (L04)** | Modularity-optimal partition | Modularity maximization | Girvan–Newman, Louvain, Leiden | Zachary karate club |
 
-If links reflect both choice and context, how do we model the social settings in which networks form? When does similarity cause friendship — and when does friendship cause similarity?
+Every concept in the two lectures occupies one of those four cells.
+
+### Reading
+
+Chapter 3.6 and Chapter 9 of Easley & Kleinberg (2010) cover community structure, brokerage, and centrality. Newman (2010), Chapter 7, gives the formal treatment of centrality measures. For modularity and Louvain, see Blondel et al. (2008) and Traag et al. (2019) for Leiden.
 
 Notes:
-Plant the question for next time. Lecture 05 introduces homophily, selection vs. socialization, and affiliation networks. The bridge from this lecture: communities are dense not by accident — they reflect underlying contexts and shared attributes.
+The closing table is the summary of the L03–L04 arc: two levels of structural analysis, same four-step loop. Lecture 05 will break this pattern by asking a different kind of question: instead of modeling structure, it asks *why* structure forms — when similarity causes friendship, when friendship causes similarity, and how social contexts shape the networks that emerge from them. Homophily, selection, and affiliation networks come next.
 
 ---
 
@@ -595,12 +814,10 @@ Plant the question for next time. Lecture 05 introduces homophily, selection vs.
 
 ## Image Credits & References
 
-- Burt, Ronald S. (1992). Structural Holes: The Social Structure of Competition. *Harvard University Press*.
 - Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
-- Girvan, Michelle and Newman, M. E. J. (2002). Community structure in social and biological networks. *Proceedings of the National Academy of Sciences*.
-- Zachary, Wayne W. (1977). An Information Flow Model for Conflict and Fission in Small Groups. *Journal of Anthropological Research*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
+
 
       const plugins = [
         window.RevealMarkdown,
@@ -677,6 +894,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

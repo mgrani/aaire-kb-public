@@ -1,155 +1,325 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 08: Network Dynamics</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 08: Network Dynamics</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 08: Network Dynamics
 
-5942UE Network Science
-
-25 March 2026
-
 Prof. Dr. Michael Granitzer
+
 Dr. Kanishka Ghosh Dastidar
+
 Dr. Jelena Mitrovic
+
+Notes:
+This lecture makes the final conceptual shift of the course: from structure to dynamics. The graph is no longer just an object to analyze — it becomes a *medium* through which processes propagate. The structural properties from L03–L07 (ties, bridges, communities, hubs, small-world shortcuts) now determine how fast and how far a process spreads. The central insight is that the same network structure can help one kind of spreading (simple contagion) and block another (complex contagion). This is the sixth and final gap in the course arc: the *process-structure interaction gap* — knowing the structure alone does not predict the outcome without knowing the process.
 
 ---
 
-## Network Dynamics
+## From Structure to Dynamics
 
-This lecture moves from **static structure** to **processes that unfold on networks over time**.
+Lectures 03–07 analyzed networks as static objects: edges, roles, communities, balance, short paths. Today we ask: **what happens *on* the network?**
 
-### Focus
+The same structural features we studied — weak ties, bridges, communities, hubs — play different roles depending on *what is spreading*. Let us return to the workplace one last time.
 
-- diffusion as a network process
-- epidemic and contagion intuition
-- threshold cascades and coordination
-- temporal networks and changing structure
+--
+
+<!-- .slide: class="figure-85" -->
+
+## A Final Visit to the Workplace
+
+![Same network, two processes — opposite outcomes](/courses/network-science/figures/l08-scenario.svg)
+
+
+<div class="c-info smaller">
+
+**Left:** A rumor (simple contagion) starts with Ana. One hearing suffices — it crosses the Dia–Fin bridge and reaches everyone. **Right:** A new tool (complex contagion, threshold $q = 2$) starts with Ana. Fin needs 2 adopter contacts, but only Dia uses it — the bridge blocks adoption. Same edge, opposite effects.
+
+</div>
+
+
+Notes:
+This figure is the anchor for the entire lecture. The punchline is immediate and visible: the Dia–Fin bridge that *accelerates* the rumor *blocks* the tool. Every structural concept from the course now has a dynamical consequence, and that consequence depends on the process, not just the structure.
+
+--
+
+## Four Questions from One Comparison
+
+
+<div class="columns">
+
+
+<div class="column col-2-1">
+
+1. **Simple contagion.** If a disease spreads through any single contact, which structural features make it spread fastest?
+2. **Complex contagion.** If a behavior requires reinforcement from multiple neighbors, how does the same structure help or hinder?
+3. **Intervention.** Should we vaccinate the hub (Dia) or the peripheral node (Eli)? Does the answer change for disease vs. behavior?
+4. **Timing.** If the Dia–Fin edge only exists on Tuesdays, does the rumor still cross? Does timing change the outcome?
+
+Every concept in today's lecture answers one of these.
+
+</div>
+
+
+<div class="column top">
+
+![Two processes on the same network](/courses/network-science/figures/l08-scenario.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Questions 1–2 map to Modules 1–2 (SIR model and threshold cascades). Question 3 connects dynamics to intervention strategy. Question 4 motivates Module 4 (temporal networks). The key pedagogical point is that *all four questions require knowing both the structure and the process* — neither alone determines the answer.
+
+--
+
+## A Sixth Kind of Gap
+
+The course has accumulated five gaps between theory and data. L08 adds a sixth: the **process-structure interaction gap**.
+
+| Lecture | Gap type |
+|---|---|
+| L03–L04 | Computational (NP-hard ideals vs. polynomial proxies) |
+| L05 | Causal (mechanism unidentifiable from snapshots) |
+| L06 | Structural (completeness required but absent) |
+| L07 | Navigational (paths exist but aren't findable locally) |
+| **L08** | **Process-structure** (same structure, different outcomes depending on the process) |
+
+
+<div class="fragment">
+
+The process-structure gap is not about missing data or computational limits. It is about the fact that **network structure is necessary but not sufficient** — the spreading rule determines which structural features matter and how.
+
+</div>
+
+
+Notes:
+This slide closes the gap taxonomy. The first four gaps were about what we can *know* about a network; the fifth (L07) was about what actors *inside* the network can do; the sixth is about what happens *on* the network. All six share a common lesson: simple structural measurements never tell the whole story.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The same edge can accelerate one process and block another. Network dynamics require knowing both the structure (the graph) and the process (the spreading rule) — neither alone determines the outcome.
+
+</div>
+
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## Diffusion
+## Simple Contagion and the SIR Model
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How do diseases and rumors spread through a network, and what structural features control the speed?
+
+</div>
+
+
+Notes:
+Simple contagion means that a single contact with an infected/informed neighbor suffices for transmission. This is the right model for diseases (one exposure can infect), memes (one viewing can spread), and information forwarding (one message can propagate). The SIR model is the canonical formal framework.
 
 --
 
-## Guiding Question
+## Simple Contagion — Definition
 
-How does activity move through a network once a process has started?
 
-$$
-\text{diffusion} = \text{state change propagated along edges}
-$$
+<div class="c-definition">
+
+**Simple contagion.** A node becomes active (infected, informed) through a **single** contact with an active neighbor. The probability of transmission per contact is independent of how many other active neighbors exist.
+
+In network terms: each edge from an active to an inactive node carries independent transmission probability $\beta$ per time step.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Key structural implication:** Weak ties and bridges *help* simple contagion — they carry the process to new communities that would otherwise be unreachable. This is why epidemics and rumors spread globally: they exploit the same inter-community shortcuts that Granovetter identified as carriers of novel information.
+
+</div>
+
+
+Notes:
+The connection to L03 is direct: weak ties were valuable for information flow because they bridged communities. The same structural feature makes them dangerous for disease spread — a single infected contact in another community is enough to seed a new outbreak. The "strength of weak ties" is simultaneously the "vulnerability of weak ties" depending on whether the process is beneficial (information) or harmful (disease).
 
 --
 
-## Formal Intuition
+<!-- .slide: class="figure-90" -->
 
-In a diffusion process, nodes have **states** and edges define **who can influence whom**.
+## The SIR Model
 
-At each step, active nodes may activate their neighbors according to a rule.
+![SIR compartment model with transition rates](/courses/network-science/figures/sir-compartments.svg)
+
+
+<div class="c-definition smaller">
+
+**SIR model on a network.**
+
+Each node is in one of three states: **Susceptible** (S), **Infected** (I), or **Recovered** (R).
+
+- **Infection:** Each S–I edge transmits with probability $\beta$ per time step.
+- **Recovery:** Each I node recovers with probability $\gamma$ per time step.
+- **Basic reproduction number:** $R_0 = \frac{\beta}{\gamma} \cdot \langle k \rangle$, where $\langle k \rangle$ is the average degree.
+
+**Epidemic threshold:** The disease spreads (becomes an epidemic) if $R_0 > 1$.
+
+</div>
+
+
+Notes:
+The SIR model on networks differs from the classical well-mixed SIR in one crucial way: the *degree distribution* matters. In the classical model, every individual contacts every other with equal probability; on a network, high-degree nodes (hubs) have more contacts and therefore higher infection and transmission rates. This makes hubs both more vulnerable and more dangerous — the "superspreader" effect.
+
+--
+
+## The Role of Hubs
+
+In networks with heterogeneous degree (e.g. scale-free networks):
+
+
+<div class="c-info smaller">
+
+**Pastor-Satorras & Vespignani (2001).** On scale-free networks with power-law degree distribution $P(k) \propto k^{-\gamma}$ (with $\gamma \leq 3$), the epidemic threshold vanishes:
+
+$$R_0^{\text{critical}} \to 0 \quad \text{as } n \to \infty$$
+
+Any non-zero transmission rate leads to an epidemic — because hubs always have enough contacts to sustain spreading.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Implication for vaccination:** Targeting hubs for vaccination is far more effective than random vaccination, because removing a hub from the susceptible pool breaks many more transmission paths than removing a random node.
+
+</div>
+
+
+Notes:
+This result connects directly to L04's centrality: betweenness and degree centrality identify the nodes whose removal would most disrupt spreading. The "vaccinate the hubs" strategy is the dynamical version of L04's "identify the brokers" — both target nodes whose structural position gives them disproportionate influence.
 
 --
 
 <!-- .slide: class="figure-84" -->
 
-## Example Process
+## Diffusion on a Network
 
 ![Diffusion process across three time steps](/courses/network-science/figures/diffusion-process.svg)
 
+
+<div class="c-info smaller">
+
+A simple contagion starting from a single node. At each step, each active node transmits to each inactive neighbor with probability $\beta$. Degree and centrality determine which nodes are reached first; communities determine where the wavefront pauses.
+
+</div>
+
+
 --
 
-## Interpretation
-
-- paths constrain where influence can go
-- degree and centrality affect how quickly activity spreads
-- bottlenecks and components can block diffusion entirely
+## Takeaway
 
 
 <div class="takeaway">
 
-Diffusion is not just about *who* is active. It is about how the network *channels* activation over time.
+Simple contagion spreads through any single contact. Weak ties and bridges accelerate global spread by carrying the process to new communities. Hubs are superspreaders. Vaccination strategies should target high-degree or high-betweenness nodes.
 
 </div>
 
+
+--
+
+## Quick Check
+
+In the workplace network, a cold virus starts with Ana ($\beta = 0.3$ per contact per day, $\gamma = 0.2$ per day). Ana has 4 direct contacts (Ben, Cai, Dia, Eli).
+
+1. Estimate $R_0$ using Ana's degree as a proxy for $\langle k \rangle$.
+2. Will the cold become an epidemic in this workplace?
+3. If you could vaccinate exactly one person to slow the spread, who should it be?
+
+Notes:
+Give them 4 minutes. (1) $R_0 = \beta/\gamma \times \langle k \rangle = 0.3/0.2 \times 4 = 6$. (2) Yes — $R_0 = 6 \gg 1$. (3) Dia — she is the only bridge to Team B. Vaccinating her disconnects the two teams, confining the epidemic to Team A. This is the "vaccinate the broker" strategy from L04 applied dynamically.
+
+--
+
+## Quick Check — Solution
+
+**1.** $R_0 = \frac{\beta}{\gamma} \times \langle k \rangle = \frac{0.3}{0.2} \times 4 = 6$ <!-- .element: class="fragment" -->
+
+**2.** Yes — $R_0 = 6 \gg 1$. The virus will spread through the workplace. <!-- .element: class="fragment" -->
+
+**3. Vaccinate Dia.** She is the only bridge to Team B. Removing her from the susceptible pool severs the only transmission path between teams — confining the epidemic to Team A. This is the dynamical version of "target the broker" from L04. <!-- .element: class="fragment" -->
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Epidemics and Simple Contagion
-
---
-
-## Guiding Question
-
-What changes when contagion spreads through repeated contact on a network?
-
---
-
-## Formal Intuition
-
-**Simple contagion** treats activation as transmission through individual contacts.
-
-Examples include:
-
-- infection
-- message forwarding
-- some forms of information exposure
-
---
-
-<!-- .slide: class="figure-62" -->
-
-## Epidemic Motivation
-
-![Tuberculosis spread in a contact network](/courses/network-science/figures/epidemic-disease-tuberculosis.png)
-
---
-
-<!-- .slide: class="figure-70" -->
-
-## Cascading Communication
-
-![Cascade of email forwarding for a Japanese graphic novel](/courses/network-science/figures/japanese-novel-spread.png)
-
---
-
-## Interpretation
-
-The same broad network idea can describe both **disease spread** and **information forwarding**, but the process rules are not identical.
+## Complex Contagion and Threshold Cascades
 
 
-<div class="takeaway">
+<div class="guiding-question">
 
-Networks make contagion structured: spread depends on contact pattern, repetition, and the local transmission rule.
+**Guiding Question:** Why do some behaviors need social reinforcement — and how does this change which network structures help or hinder spreading?
 
 </div>
 
 
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 3
-## Cascades and Thresholds
+Notes:
+This module introduces the second fundamental spreading model. Where simple contagion is probabilistic and one-contact-sufficient, complex contagion is threshold-based and requires *multiple* active neighbors. The structural consequences are the opposite of simple contagion — and this reversal is the conceptual climax of the lecture.
 
 --
 
-## Guiding Question
+## Complex Contagion — Definition
 
-Why do some behaviors need reinforcement from several neighbors before they spread?
 
-$$
-\text{adopt if enough neighbors adopted}
-$$
+<div class="c-definition">
+
+**Complex contagion.** A node adopts when at least a **fraction $q$** of its neighbors have already adopted. This models behaviors that require social reinforcement:
+
+- adopting a new technology (need to see colleagues using it)
+- joining a protest (need to see enough friends going)
+- changing a social norm (need to see enough peers conforming)
+
+**Threshold rule:** Node $v$ adopts if $\frac{|\text{active neighbors of } v|}{|\text{all neighbors of } v|} \geq q$.
+
+</div>
+
+
+Notes:
+The threshold $q$ captures the idea that some adoptions are risky, costly, or norm-dependent — you will not switch to a new tool if you are the only one using it, no matter how much one enthusiastic colleague tells you. This is qualitatively different from catching a cold: for disease, one contact can suffice; for behavior, social proof matters.
 
 --
 
-## Threshold Rule
+## The Weak-Tie Paradox
 
-Each node adopts only when the **share of active neighbors** reaches a threshold.
+
+<div class="c-info">
+
+**In simple contagion:** weak ties and bridges *accelerate* spread — they carry the process to new communities. Granovetter's "strength of weak ties."
+
+**In complex contagion:** weak ties and bridges *block* spread — a single cross-community contact cannot provide enough reinforcement to trigger adoption. The bridge is *too thin*.
+
+</div>
+
+
+
+<div class="fragment">
+
+**What helps complex contagion instead?** Dense clusters and wide bridges — multiple ties between communities that can jointly provide enough reinforcement to cross the threshold.
+
+</div>
+
+
+Notes:
+This is the central insight of the lecture. The same structural feature (a bridge) has opposite dynamical effects depending on the process. In the workplace scenario: the Dia–Fin bridge is perfect for a rumor (one telling suffices) but useless for a new tool (Fin needs 2 adopter contacts, but only Dia uses it). For the tool to cross, Fin would need a *second* connection to Team A — widening the bridge.
 
 --
 
@@ -159,18 +329,181 @@ Each node adopts only when the **share of active neighbors** reaches a threshold
 
 ![Threshold cascade with local rule and global result](/courses/network-science/figures/threshold-cascade.svg)
 
+
+<div class="c-info smaller">
+
+A threshold cascade starting from two initially active nodes. At each step, nodes whose active-neighbor fraction meets the threshold $q$ adopt. The cascade may spread globally or stall — the outcome depends on both the threshold $q$ and the local network density around the wavefront.
+
+</div>
+
+
 --
 
-## Interpretation
+## When Do Cascades Go Global?
 
-- this is more than simple one-contact transmission
-- **dense local reinforcement** can help adoption start
-- bridges matter differently than in simple contagion
+
+<div class="c-definition smaller">
+
+**Cascade condition.** In a network where each node has the same threshold $q$, a global cascade starting from a small seed set is possible if:
+
+- the network contains enough **dense clusters** (where neighbors reinforce each other above $q$)
+- these clusters are linked by **wide bridges** (multiple edges providing enough reinforcement to trigger adoption in the neighboring cluster)
+- the threshold $q$ is not too high (if $q > 1/2$, cascades require majority adoption locally, which is hard to trigger)
+
+</div>
+
+
+Notes:
+The cascade condition connects to L04's community structure: communities are dense clusters that can *sustain* adoption internally, and the question is whether there are enough cross-community ties to *trigger* adoption in the next community. This is the opposite of Girvan-Newman's logic (remove inter-community edges to find communities); here, inter-community edges are needed for adoption to *cross* community boundaries.
+
+--
+
+## Back to the Workplace
+
+| Feature | Simple contagion (rumor) | Complex contagion (tool, $q=2$) |
+|---|---|---|
+| **Dia–Fin bridge** | Carries the rumor across | Blocks the tool — 1 contact < threshold |
+| **Dense Team A core** | Helps locally, not critical for crossing | Essential — sustains internal adoption |
+| **Strategy to spread globally** | Protect the bridge | Widen the bridge (add more cross-team ties) |
+| **Vaccination / blocking** | Vaccinate Dia to stop spread | No single node blocks it — density matters |
+
+Notes:
+This table summarizes the lecture's key comparison. For simple contagion, the bridge is the bottleneck — controlling it controls the process. For complex contagion, density and bridge width are the bottlenecks — you cannot control the process by targeting a single node. This has implications for policy: disease control targets bridges and hubs; behavior-change campaigns need community-level saturation.
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
 
-Cascades depend not only on exposure, but on how much local confirmation a node requires before changing state.
+Simple contagion spreads through any single contact — weak ties help. Complex contagion requires social reinforcement — weak ties block. The same network structure plays opposite roles depending on the process, and intervention strategies must account for which kind of contagion is at work.
+
+</div>
+
+
+--
+
+## Quick Check
+
+A social network has two dense communities of 20 people each, connected by:
+
+- **Scenario A:** a single bridge edge
+- **Scenario B:** 5 parallel edges between the two communities
+
+A behavior with threshold $q = 0.2$ starts in community 1 (all 20 adopt).
+
+1. In Scenario A, will the behavior cross to community 2?
+2. In Scenario B, will it cross? Show your reasoning for a node in community 2 that has 10 neighbors total.
+3. Would a *disease* (simple contagion) cross in both scenarios?
+
+Notes:
+Give them 5 minutes. (1) In Scenario A, the bridging node in community 2 has 1 active neighbor (the bridge contact) out of ~10 total. Fraction = 1/10 = 0.1 < 0.2 = $q$. Does not cross. (2) In Scenario B, a node with 5 cross-community ties has 5/10 = 0.5 ≥ 0.2. Crosses. (3) Yes to both — simple contagion only needs one contact, and both scenarios have at least one.
+
+--
+
+## Quick Check — Solution
+
+**1. Scenario A: No.** The bridging node has ~1 active neighbor out of ~10 total: $1/10 = 0.1 < q = 0.2$. The single bridge is too thin. <!-- .element: class="fragment" -->
+
+**2. Scenario B: Yes.** A node with 5 cross-community ties: $5/10 = 0.5 \geq q = 0.2$. The wide bridge provides enough reinforcement. <!-- .element: class="fragment" -->
+
+**3. A disease crosses in both.** Simple contagion needs only one S–I contact. Even Scenario A's single bridge suffices. <!-- .element: class="fragment" -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Empirical Anchor: Centola's Online Experiment
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Does the simple/complex contagion distinction hold up empirically?
+
+</div>
+
+
+Notes:
+This module provides the empirical anchor for L08, following Kossinets-Watts (L03), Zachary (L04), Christakis-Fowler (L05), Leskovec et al. (L06), and Dodds et al. (L07). The study is Centola (2010), the first experimental demonstration that complex contagion spreads faster through clustered networks.
+
+--
+
+## The Study
+
+
+<div class="c-info">
+
+**Centola (2010),** *The Spread of Behavior in an Online Social Network Experiment*, [**Science 329, 1194–1197**](https://doi.org/10.1126/science.1185231).
+
+Centola created an online health forum and randomly assigned **1 528 participants** to one of two network structures:
+
+| Condition | Structure | Clustering |
+|---|---|---|
+| **Clustered** | Lattice-like (high clustering) | High |
+| **Random** | Watts-Strogatz-style (low clustering) | Low |
+
+Both networks had the same degree and diameter. Participants could register for a health program, and registration was visible to their network neighbors.
+
+</div>
+
+
+Notes:
+The experimental design is elegant: by randomly assigning participants to different network structures while controlling for degree and diameter, Centola isolated the effect of *clustering* on behavior spreading. The behavior in question — registering for a health program — is a classic complex contagion: it is a costly action that benefits from social reinforcement ("if my friends signed up, maybe I should too").
+
+--
+
+## What Centola Found
+
+**1. Behavior spread faster and further in the clustered network.**
+
+- In the clustered condition, adoption reached **54%** of the network.
+- In the random condition, adoption reached only **38%**.
+
+**2. Adoption was driven by *multiple* exposures, not single contacts.**
+
+- Participants who saw 2+ neighbors register were far more likely to adopt than those who saw only 1 — consistent with a threshold rule.
+
+
+<div class="fragment">
+
+**3. The random network had shorter paths** — so if simple contagion were the mechanism, it should have won. It lost. **Clustering beat shortcuts for behavior spreading.**
+
+</div>
+
+
+Notes:
+Finding 3 is the punchline. The random network had all the advantages for simple contagion: shorter paths, more diverse neighborhoods, faster information flow. But for a behavior that required social reinforcement, those advantages were irrelevant — what mattered was local density (clustering) that could push multiple neighbors above the threshold simultaneously. This is the first experimental demonstration of the theoretical distinction between simple and complex contagion on networks.
+
+--
+
+## What the Study Could Not See
+
+
+<div class="c-info">
+
+**1. Binary behavior.** The study tracked registration (yes/no), not the *intensity* or *quality* of adoption. A participant who registered but never used the program was counted the same as an active user.
+
+**2. Controlled networks ≠ natural networks.** The assigned structures were regular and static. Real social networks are heterogeneous, dynamic, and have degree distributions that the experiment did not replicate.
+
+**3. Single behavior type.** The study tested one health-program registration. Whether the clustering advantage generalizes to other complex contagions (political mobilization, technology adoption, norm change) was not tested directly.
+
+**4. No decay or reversal.** Once registered, participants stayed registered. Real adoption can reverse — people abandon tools, lose interest, or face counter-influence.
+
+</div>
+
+
+Notes:
+The limitations follow the standard pattern: the experiment isolates one variable (clustering) at the cost of ecological validity. The result is clean and causal but narrow. Real spreading processes involve heterogeneous thresholds, time-varying networks, competing behaviors, and incomplete observation — all beyond the study's scope. The lesson is that the simple/complex distinction is real and experimentally confirmed, but applying it to specific real-world cases requires careful context analysis.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Centola (2010) experimentally confirmed the simple/complex contagion distinction: behavior spreading is faster in clustered networks (where local reinforcement is available), not random networks (where paths are shorter). Clustering beats shortcuts for complex contagion.
 
 </div>
 
@@ -179,22 +512,39 @@ Cascades depend not only on exposure, but on how much local confirmation a node 
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
 ## Temporal Networks
 
+
+<div class="guiding-question">
+
+**Guiding Question:** What do we miss when we replace an evolving network with a single static snapshot?
+
+</div>
+
+
+Notes:
+All prior modules treated the graph as fixed. In reality, edges appear and disappear over time — an email is sent at a specific moment, a meeting lasts a specific hour, a friendship forms and dissolves. If the spreading process is time-sensitive, the *order* of edge activations matters as much as which edges exist.
+
 --
 
-## Guiding Question
+## Time-Respecting Paths
 
-What do we miss when we replace an evolving network with one static snapshot?
 
---
+<div class="c-definition">
 
-## Formal Intuition
+A **temporal network** is a graph where each edge $e$ has an activation time $t(e)$.
 
-A **temporal network** records *when* edges exist, not just *whether* they exist.
+A **time-respecting path** from $u$ to $v$ is a sequence of edges $e_1, e_2, \dots, e_k$ where:
+- the edges form a path from $u$ to $v$
+- $t(e_1) < t(e_2) < \cdots < t(e_k)$
 
-That means reachability can depend on **order** as well as connectivity.
+A path that exists in the *aggregated* static network may not exist as a time-respecting path — the edges may activate in the wrong order.
+
+</div>
+
+
+Notes:
+This is the formal content of "timing matters." In the workplace scenario: if the Dia–Fin contact happens only on Tuesdays and the Ana–Dia contact happens on Wednesdays, a rumor starting at Ana on Wednesday cannot reach Fin until the following Tuesday. The static aggregation (all edges present) would suggest immediate reachability; the temporal reality introduces delay and potentially blocks spreading entirely if the process has a finite window.
 
 --
 
@@ -204,31 +554,88 @@ That means reachability can depend on **order** as well as connectivity.
 
 ![Temporal snapshots of a changing network](/courses/network-science/figures/temporal-snapshots.svg)
 
---
 
-## Interpretation
+<div class="c-info smaller">
 
-- the same nodes can have different paths at different times
-- diffusion may succeed or fail depending on timing
-- static aggregation can hide causal order
-
-
-<div class="takeaway">
-
-Temporal networks extend graph theory by making change and order explicit rather than treating them as noise.
+The same set of nodes at three time points. An edge present in the aggregated static graph (taking the union across all snapshots) may not support a time-respecting path if the edges activate in the wrong order.
 
 </div>
 
 
+--
+
+## Consequences for Spreading
+
+1. **Reachability shrinks.** The set of node pairs connected by time-respecting paths is generally *smaller* than the set connected by static paths.
+2. **Speed depends on timing.** A contagion may reach a node in 2 static hops but require waiting 5 time steps for edges to activate in the right order.
+3. **Aggregation hides bottlenecks.** A bridge that exists only briefly may appear permanent in the aggregated graph, masking its role as a temporal bottleneck.
+
+Notes:
+Temporal networks are the formal framework for the observation that "the same graph can support different outcomes when edges change" from the original L08. The key insight is that aggregating edges across time is an information-destroying operation — it hides causal order and can create the illusion of paths that never existed temporally.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Temporal networks make edge timing explicit. Static aggregation can hide bottlenecks and create phantom paths. For time-sensitive processes (epidemics, cascades, information flow), the order of edge activations matters as much as which edges exist.
+
+</div>
+
+
+--
+
+## Quick Check
+
+A temporal network has 4 nodes (A, B, C, D) and the following edges with activation times:
+
+- A–B at $t = 1$
+- B–C at $t = 3$
+- C–D at $t = 2$
+
+1. Does a time-respecting path from A to D exist?
+2. Does a time-respecting path from A to D exist in the *static* aggregated graph?
+3. What is the minimum change needed to create a time-respecting A→D path?
+
+Notes:
+Give them 3 minutes. (1) A–B ($t=1$) → B–C ($t=3$) is valid (1 < 3), but C–D activates at $t=2 < 3$, so the C–D edge has already "passed" by the time the process reaches C. No time-respecting path A→D exists. (2) In the static graph: A–B–C–D is a valid path. Yes. (3) Either change C–D activation to $t > 3$ (e.g., $t = 4$), or add a direct A–D or B–D edge at an appropriate time.
+
+--
+
+## Quick Check — Solution
+
+**1. No.** A–B ($t=1$) → B–C ($t=3$) works, but C–D activates at $t=2$, which is *before* the process reaches C at $t=3$. The C–D edge has already "expired." <!-- .element: class="fragment" -->
+
+**2. Yes.** The aggregated static graph has path A–B–C–D. Static analysis hides the timing conflict. <!-- .element: class="fragment" -->
+
+**3. Change C–D to $t > 3$** (e.g., $t = 4$), giving the time-respecting path A–B ($t=1$) → B–C ($t=3$) → C–D ($t=4$). <!-- .element: class="fragment" -->
+
 ---
 
-## Wrap-Up
+## Wrap-Up — The Six Gaps
 
-- dynamics depend on both network structure and process rules
-- simple contagion and complex contagion behave differently
-- timing matters: the same graph can support different outcomes when edges change
+| Lecture | Gap type | Core tension |
+|---|---|---|
+| **L03–L04** | Computational | Exact optimization is NP-hard |
+| **L05** | Causal | Mechanism unidentifiable from snapshots |
+| **L06** | Structural | Complete-graph theory meets sparse data |
+| **L07** | Navigational | Short paths exist but aren't locally findable |
+| **L08** | Process-structure | Same structure, different outcomes for different processes |
+| | Temporal | Static aggregation hides causal order |
+
+The course has built a single message: **network analysis requires matching the right structural concept to the right question**, and there is no single structural measure that answers every question. Edges, roles, communities, balance, navigability, and dynamics each require their own tools — and each reveals a different kind of gap between what we want to know and what the data can show.
+
+### Reading
+
+Chapter 19 of Easley & Kleinberg (2010) covers cascades and thresholds. Chapter 21 covers epidemics. Centola (2010), *The Spread of Behavior in an Online Social Network Experiment* (Science), is the key empirical study. Holme & Saramäki (2012), *Temporal Networks* (Physics Reports), is the standard survey on time-varying graphs.
+
+Notes:
+The six-gap table is the final version of the course summary. Each lecture contributed one or two gaps; together they form a taxonomy of the obstacles that arise when applying theoretical network concepts to real-world data. The course's overarching lesson is that network science is not a single tool but a *toolkit* — and the analyst's job is to match the right tool to the right question, with full awareness of what each tool can and cannot see.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
+
 
       const plugins = [
         window.RevealMarkdown,
@@ -305,6 +712,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

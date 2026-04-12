@@ -1,135 +1,119 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 03: Strong and Weak Ties</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 03: Strong and Weak Ties</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 03: Strong and Weak Ties
 
 Prof. Dr. Michael Granitzer
+
 Dr. Kanishka Ghosh Dastidar
+
 Dr. Jelena Mitrovic
 
-1 April 2026
-
-This lecture connects local friendship structure to global information flow.
-
 Notes:
-Pedagogical approach for this lecture:
-
-- Use inquiry-first teaching throughout. Every module opens with a guiding question.
-- This lecture builds on Lecture 02 (graph theory) and introduces the first sociological concepts.
-- The key insight: local structure (triads, tie strength) has global consequences (information flow, bridging).
-- Each module follows: Question → Tension → Interpretation → Stabilization.
-
-Teaching goal for today:
-
-- students should understand triadic closure and the clustering coefficient
-- students should distinguish bridges from local bridges
-- students should see why weak ties matter structurally
-- students should be able to interpret empirical evidence from phone and social-media data
+This lecture is structured around a single tension: the gap between what we would like to **model** in a social network (edge formation, tie strength, information shortcuts) and what we can actually **measure** on real data. Every concept today exists to bridge that gap. Triadic closure and Strong Triadic Closure give us a theory of how friendships form and how ties differ in kind. Exact recovery of that theory from data is computationally intractable, so we introduce structural heuristics — clustering coefficient, neighborhood overlap — that approximate it in polynomial time. The weak-tie theorem then gives a theoretical prediction that those heuristics can test against real-world cell-phone and social-media data.
 
 ---
 
-## Strong and Weak Ties
+## From Graphs to Social Structure
 
-This lecture connects local friendship structure to global information flow.
+Last time we built the formal language of graphs. Today we use it to ask a different kind of question: once we have the graph, how do we explain what happens on it?
 
-### Focus
+Consider a small workplace.
 
-- triadic closure and strong triadic closure
-- bridges and local bridges
-- why weak ties matter for global connectivity
-- empirical evidence from phone and social-media data
+--
 
----
+<!-- .slide: class="figure-75" -->
 
-<!-- .slide: class="module-slide" -->
-
-# Module 1
-## Triadic Closure
+## A Motivating Scenario
 
 
-<div class="guiding-question">
+![A small workplace network with two teams and a weak cross-team contact](/courses/network-science/figures/l03-scenario.svg)
 
-**Guiding Question:** Why do friends-of-friends so often become linked, and what does that imply for network structure?
+
+<div class="c-info smaller">
+
+Two teams, each tightly connected internally, linked only by a rare contact between Dia and Fin. Thick lines are close daily contacts, the thin dashed line is an occasional one.
 
 </div>
 
 
-$$
-\text{shared friend} \Rightarrow \text{increased probability of closure}
-$$
-<!-- .element: class="fragment" -->
-
 Notes:
-Hold this question open. Do not answer it immediately. Let students offer explanations — opportunity, trust, social pressure — before moving to the formal slide.
+This figure is the anchor for the entire lecture. Use it to provoke the five questions on the next slide before any definition arrives. Students should be able to point at the picture and name which concept applies where by the end of the session.
 
 --
 
-## Triadic Closure
+## Five Questions from One Picture
 
-An **open triad** has two edges and one missing edge. **Triadic closure** is the process by which the missing edge appears over time.
+Looking at the scenario, we can further ask:
 
-> Consider three nodes A, B, C where A–B and A–C exist but B–C does not. Triadic closure predicts B–C will form.
 
-Ask: before we explain why, what mechanisms could drive the missing edge to appear?
+<div class="columns">
 
-- **Opportunity:** Shared friends create environments to meet. <!-- .element: class="fragment" -->
-- **Trust:** Trust can be borrowed through a common contact. <!-- .element: class="fragment" -->
-- **Incentive:** Social friction rewards closing the triangle to resolve inconsistency. <!-- .element: class="fragment" -->
+
+<div class="column col-2-1">
+
+1. **Edge formation.** Will Eli and Ben eventually become friends, given that they share a close contact?
+2. **Tie strength.** How do we formally separate the close ties inside each team from the occasional Dia–Fin contact?
+3. **Shortcuts.** Which single edge controls all information flow between the two teams?
+4. **Diffusion.** Where would a rumor spread fastest — starting from Ana, or from Hal?
+5. **Intervention.** Which tie would we cut to isolate a leak between the teams?
+
+Every concept in today's lecture is a formal answer to one of these questions.
+
+</div>
+
+
+<div class="column top">
+
+![A small workplace network with two teams and a weak cross-team contact](/courses/network-science/figures/l03-scenario.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
-The fragment reveals the three mechanisms after the question is posed in the slide body. This combines what were previously two separate slides (definition + "Why Does This Happen?") into one coherent question-then-answer slide.
+Each question maps directly to a module: (1) triadic closure, (2) typed edges + STC, (3) bridges and local bridges, (4) weak ties and information flow, (5) robustness under edge removal. Keep this list in mind as the lecture progresses — students should be able to point back to which question is being answered at any moment.
 
 --
 
-## Strong Triadic Closure
+## The Catch: Theory vs. Measurement
 
-> If A has **strong** ties to both B and C, and B–C does not exist, then A violates the Strong Triadic Closure Property.
+Each of those five questions has a **theoretical** form and a **measurement** form — and they are not the same.
 
-**Strong Triadic Closure Property:** If a node maintains strong ties to two distinct neighbors, there must be at least a weak tie between those neighbors.
+- The theoretical form asks: *what structure would explain this behavior if we could see everything?*
+- The measurement form asks: *what can we actually compute from a real graph where tie strengths, intentions, and labels are hidden?*
+
+Today's lecture lives in the gap between those two.
+
+### Today
+
+- triadic closure as a theory of friendship formation
+- typed edges and Strong Triadic Closure as an edge-labeling model
+- why the exact labeling is NP-hard — and what to do instead
+- structural heuristics: clustering coefficient and neighborhood overlap
+- the weak-tie theorem and its empirical test at scale
 
 Notes:
-Contrast the two cases: in the general case (open triad), any tie can close the triangle. In the strong case, the closing tie may be weak — but it must exist. The key distinction is that "strong" is a social label, not a graph-theoretic one.
+This is the last slide of the intro. It states the theory-vs-measurement tension explicitly so that students recognize it as the backbone of every subsequent module. The "Today" list is then re-read through that lens: each bullet is either a theoretical construct, a measurable proxy, or a theoretical prediction that links the two.
 
 --
 
-## Measuring Closure: Clustering Coefficient
+## In a bit more detail
 
-What fraction of a node's potential triangles are actually closed?
+Every question below has a **theoretical** form and a **measurement** form. The lecture deliberately treats them as distinct tasks.
 
-$$
-C_i = \frac{\text{number of edges among } i\text{'s neighbors}}{\binom{k_i}{2}}
-$$
-<!-- .element: class="fragment" -->
-
-where $k_i$ is the degree of node $i$. Values range from 0 (no triangle) to 1 (complete neighborhood). <!-- .element: class="fragment" -->
-
-Notes:
-Math First, Then Meaning. Show the formula first, then ask students: What does $C_i = 1$ mean for a person's social circle? What does $C_i = 0$ mean? Could a person with $C_i = 0$ be a structural broker?
-
---
-
-## Quick Check 3.A: Clustering Coefficient
-
-Node $B$ has 4 neighbors: $A, C, D, E$.
-Among $B$'s neighbors, exactly 2 edges exist: $(A,C)$ and $(C,D)$.
-
-1. Compute $C_B$.
-2. Is $B$'s neighborhood highly clustered or sparse? What would that imply about $B$'s social position?
+| Question | Theoretical construct | Measurable proxy |
+|---|---|---|
+| How do new ties form? | Triadic closure | Triangle density over time |
+| Are ties of different kinds? | Strong / weak edge labeling + STC | Clustering coefficient |
+| Which edges carry novel info? | Local bridge | Neighborhood overlap |
+| Why are bridges weak? | Weak-Tie Theorem | Tie-strength vs. overlap plots |
+| Which ties keep the network together? | Robustness under edge removal | Giant-component size |
 
 Notes:
-Give them 4 minutes — the second question is the important one. The numeric answer is $C_B = 2/6 = 1/3$. The interpretation is that B sits in a moderately sparse group, connecting nodes that don't all know each other. B could potentially act as a local broker between A (who knows C but not D/E) and D/E.
-
---
-
-## Quick Check 3.A: Solution
-
-**1. Compute $C_B$:** <!-- .element: class="fragment" -->
-
-$$\binom{4}{2} = 6 \text{ possible edges}, \quad 2 \text{ actual edges} \implies C_B = \frac{2}{6} = \frac{1}{3}$$ <!-- .element: class="fragment" -->
-
-**2. Interpretation:** <!-- .element: class="fragment" -->
-
-$C_B = 1/3$ indicates a sparse but not isolated neighborhood. $B$ connects nodes that do not all know each other — a position with potential brokerage value, since $B$ mediates between sub-clusters $\{A, C\}$ and $\{D\}$. <!-- .element: class="fragment" -->
+This table is the lecture's roadmap in one slide. The left column is what we would *like* to test; the right column is what we can *actually compute* on real data. The lecture's job is to justify each row: why is the proxy a reasonable substitute for the construct, and what does the substitution cost us?
 
 --
 
@@ -138,271 +122,488 @@ $C_B = 1/3$ indicates a sparse but not isolated neighborhood. $B$ connects nodes
 
 <div class="takeaway">
 
-
-Triadic closure is a local mechanism, but repeated across a network it explains why social graphs become clustered — and why those clusters can be structurally separated by rare long-range ties.
-
+Network science in this lecture is a loop: we build a theoretical model of edge formation and tie strength, discover that exact inference from data is intractable, replace the model with polynomial-time structural proxies, and test whether the proxies match a theoretical prediction at scale.
 
 </div>
 
+
+Notes:
+This takeaway is unusual because it describes the *shape* of the lecture, not a single fact. Refer back to it when introducing each new concept — "this is a theoretical construct, not something we can measure directly" or "this is a polynomial-time proxy for the intractable exact problem we just defined".
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Bridges and Local Bridges
+## Triadic Closure
 
 
 <div class="guiding-question">
 
-**Guiding Question:** Which edges matter most for keeping information flowing across a network?
+**Guiding Question:** Why do friends-of-friends so often become linked — and what does that imply for how social graphs grow?
 
 </div>
 
 
-$$
-\text{important edge} \neq \text{strongest edge}
-$$
-<!-- .element: class="fragment" -->
-
 Notes:
-Let the gap between "important" and "strongest" sit for a moment. Students likely equate strength with importance. The rest of this module builds the case that structural position matters more.
+Triadic closure is the first theoretical construct of the lecture. It is a **generative hypothesis** about how new edges enter the graph. It is not something we measure directly; it is something we *predict* the graph will exhibit if the hypothesis holds.
 
 --
 
-<!-- .slide: class="figure-70" -->
+<!-- .slide: class="figure-80" -->
+
+## Open Triads and Closure
+
+
+<div class="c-definition">
+
+**Triadic Closure.** If a node $A$ has edges to two distinct nodes $B$ and $C$, the probability that an edge $(B, C)$ forms over time is significantly higher than for two random nodes.
+
+</div>
+
+
+
+<div class="columns">
+
+
+<div class="column col-3-1">
+
+![Open triad becoming a closed triangle](/courses/network-science/figures/triadic-closure.svg)
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+The dashed edge in the open triad is the missing one. Triadic closure predicts it will tend to appear over time, producing the closed triangle on the right.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Three mechanisms drive closure: **opportunity** (a shared friend creates contexts for $B$ and $C$ to meet), **trust** (a common contact reduces the cost of trusting a stranger), and **incentive** (psychological pressure to resolve cognitive inconsistency in unbalanced triads). Each mechanism is local, but their cumulative effect across a network is the formation of dense clusters separated by relatively few cross-cutting links — exactly the pattern we see in the scenario figure.
+
+--
+
+## Triadic Closure as a Model
+
+Triadic closure is not an observation — it is a claim about how edges appear. As a model, it makes predictions:
+
+- the graph should accumulate triangles over time
+- average distances should shrink
+- nodes with many neighbors should have increasingly clustered neighborhoods
+- long-range ties should become rarer relative to local ones
+
+Notes:
+Framing closure as a *model* — something with falsifiable predictions — is the important move. The rest of the lecture gradually tests those predictions on real data. Do neighborhoods really become more clustered? Do long-range ties really end up weak? The answers determine whether the model earns its keep.
+
+--
+
+## Empirical Test: University Email Network
+
+
+<div class="c-info">
+
+**Kossinets & Watts (2006),** *Empirical Analysis of an Evolving Social Network*, [**Science 311**, 88–90](https://www.science.org/doi/10.1126/science.1116869).
+
+They reconstructed the social network of **43 553 students, faculty, and staff** at a large US university from one year of time-stamped email headers, tracking which pairs started exchanging messages over time.
+
+</div>
+
+
+**Headline result.** Two people who shared **one** mutual email contact were roughly **30 times** more likely to begin emailing each other than two people with no mutual contact. The effect grew monotonically with the number of shared contacts — direct, longitudinal evidence for triadic closure at scale.
+
+Notes:
+This study is important for two reasons. First, it is one of the cleanest large-scale confirmations of triadic closure — not inferred from a static snapshot but measured *longitudinally*, by watching new ties appear and asking whether shared contacts predicted them. Second, the effect size is large enough to be unambiguous: 30× is not a statistical nuance, it is a structural regularity. The paper also showed that shared organizational affiliation (same department, same class) independently contributes to closure, so triadic closure is not the whole story — but it is a substantial part of it. See the full paper at https://www.science.org/doi/10.1126/science.1116869 or the author preprint at https://www.albany.edu/~ravi/pdfs/kossinets_watts_2006.pdf.
+
+--
+
+## What the Study Could Not See
+
+Kossinets & Watts observed only one signal per edge: *did an email pass between these two people, yes or no?*
+
+- They could not see whether an edge was a daily collaboration or a one-off administrative ping.
+- They could not distinguish a pair who spoke for hours off-platform from a pair who had never met.
+- Every edge in the dataset was, by construction, **binary and untyped**.
+
+
+<div class="fragment">
+
+Closure is visible in their data. **Tie strength is not.** The next module takes that limitation seriously: if we want to model strong vs. weak ties, we need a formal object — an edge labeling — that the email graph never gave us.
+
+</div>
+
+
+Notes:
+This slide is the hinge into the next module. The Kossinets–Watts study demonstrates that closure is real and measurable, but the dataset itself — binary email exchanges — is fundamentally unable to distinguish strong from weak ties. That limitation is not a flaw of the study; it is a limitation of what raw interaction logs can tell us about the social world they come from. The only way forward is to introduce tie strength as an explicit modeling choice rather than hope it will emerge from the data.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Triadic closure is a generative theory of edge formation. Kossinets & Watts confirmed it at scale on a university email network — but their binary email data could not distinguish strong from weak ties. To go further, we need to model tie strength explicitly.
+
+</div>
+
+
+--
+
+## Quick Check
+
+
+
+
+![A small workplace network with two teams and a weak cross-team contact](/courses/network-science/figures/l03-scenario.svg)
+
+Notes:
+The point is to make students treat the theory as falsifiable. (1) Closure predicts the missing tie tends to appear. (2) Failure of closure does not refute the model — it predicts a *tendency*, not a certainty — but persistent failure across many such triples would be evidence against the theory or evidence that some other mechanism (enmity, structural barrier) is interfering.
+
+--
+
+## Quick Check — Solution
+
+
+**2.** A single failed prediction does not refute a probabilistic model. But *persistent* failure across many such triples would indicate either that the closure mechanism is weak in this population or that some competing mechanism — interpersonal conflict, structural separation, or platform effects — is actively preventing closure.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Typed Edges and Strong Triadic Closure
+
+
+<div class="guiding-question">
+
+**Guiding Question:** If ties come in different *kinds*, what constraint does that place on how they coexist around a node?
+
+</div>
+
+
+Notes:
+This is the module that earlier versions of the lecture handled implicitly. The key conceptual move is to treat tie strength not as a sociological adjective but as an **edge labeling** — a mathematical object that can be formally defined, constrained, and then *recovered* (or not) from data.
+
+--
+
+## Edges Are Not All the Same
+
+In the scenario, the Ana–Ben edge and the Dia–Fin edge are clearly different:
+
+- Ana–Ben is a daily interaction between people in the same team
+- Dia–Fin is a rare, occasional contact between people in different teams
+
+Graph theory's default edge is binary: either present or absent. We now extend it.
+
+
+<div class="c-definition">
+
+**Edge labeling.** A graph $G = (V, E)$ together with a function
+$$\ell : E \to \{\mathrm{Strong}, \mathrm{Weak}\}$$
+assigning a *type* to every edge. We write $S(v)$ for the set of strong neighbors of $v$ under $\ell$.
+
+</div>
+
+
+Notes:
+This is the crucial definitional step. Instead of saying "some ties are stronger than others" informally, we introduce a formal object: a two-valued labeling function on the edge set. From here on, "strong tie" and "weak tie" mean *an edge with a specific label under a chosen labeling* — not a vague adjective.
+
+--
+
+<!-- .slide: class="figure-85" -->
+
+## Strong Triadic Closure as a Constraint on Labelings
+
+
+<div class="c-definition">
+
+**Strong Triadic Closure (STC).** A labeling $\ell$ of $G$ satisfies STC if, for every node $v$ and every pair $u_1, u_2 \in S(v)$ of strong neighbors of $v$, the edge $(u_1, u_2)$ exists in $E$ — *with any label* (Strong or Weak). STC constrains which pairs must be **connected**, not how the closing edge is labeled.
+
+</div>
+
+
+
+<div class="columns">
+
+
+<div class="column col-3-1">
+
+![A labeling that violates STC vs. a valid labeling of the same triangle](/courses/network-science/figures/edge-labeling-stc.svg)
+
+</div>
+
+
+<div class="column smaller">
+
+
+<div class="c-info smaller">
+
+STC is a *property of a labeling*, not a property of a graph. The same graph can admit valid STC labelings (right) and invalid ones (left). The question "does the graph satisfy STC?" is ill-posed — the right question is "which labelings of this graph satisfy STC?".
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Making STC a property of *labelings* rather than of graphs is the move that clears up the confusion in earlier treatments. A graph by itself can always satisfy STC trivially — label every edge Weak. The interesting question is whether we can label it with *many* strong edges while still satisfying STC. That is the MaxSTC problem.
+
+--
+
+## The Recovery Problem — MaxSTC
+
+In real data we observe the graph $G$ but not the labeling $\ell$. Given $G$, we want to recover the labeling that best explains the observed structure — the one with as many strong edges as possible subject to STC.
+
+
+<div class="c-definition">
+
+**MaxSTC.** Given $G = (V, E)$, find a labeling $\ell$ satisfying STC that maximizes $|\{e \in E : \ell(e) = \mathrm{Strong}\}|$.
+
+</div>
+
+
+Notes:
+MaxSTC is the formal bridge from theory to data. It turns the abstract STC constraint into a concrete optimization problem: find the labeling that assigns the most edges to Strong while respecting the constraint. If MaxSTC were easy to solve, we could read off the tie types directly from the graph and the whole lecture would be short. It is not easy.
+
+--
+
+## Complexity of MaxSTC
+
+
+<div class="c-definition smaller">
+
+**Result (Sintos & Tsaparas, 2014).** Deciding MaxSTC is **NP-hard** on general graphs. Polynomial-time algorithms exist for certain restricted graph classes (e.g., cographs and several bipartite-like structures).
+
+</div>
+
+
+Consequence: on any realistically sized social network, we **cannot** recover the true STC-maximizing labeling exactly.
+
+
+<div class="fragment">
+
+This is a **modeling problem**, not just an engineering problem. The theoretical construct we care about is computationally out of reach. We need a different strategy.
+
+</div>
+
+
+Notes:
+The NP-hardness result is the hinge of the lecture. Once students accept that the exact labeling cannot be computed on the graphs we care about, the rest of the lecture — clustering coefficient, neighborhood overlap, weak-tie theorem — becomes motivated: these are structural proxies designed to approximate the intractable exact problem in polynomial time. The contrast with restricted tractable classes (cographs, bipartite) is worth mentioning because it tells us the hardness is specific to the unstructured graphs of real social data, not a universal property of the problem.
+
+--
+
+## What We Do Instead
+
+Since we cannot recover the true labeling, we take a different route:
+
+1. Define structural **heuristics** that approximate the "strong"/"weak" character of edges in polynomial time.
+2. Derive a theoretical **prediction** from STC (the weak-tie theorem).
+3. **Test** the prediction on real data, using the heuristics as proxies for the unobservable labeling.
+
+This is the plan for the next three modules.
+
+Notes:
+Making the strategy explicit at this point gives students a mental map for everything that follows. They should recognize that the clustering coefficient in the next module exists *specifically* because MaxSTC is intractable. Without the intractability result, the coefficient would look like an arbitrary metric.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Tie strength is most precisely modeled as an edge labeling, and Strong Triadic Closure is a constraint on such labelings. Recovering the best labeling is NP-hard — so we must approximate the exact theory with polynomial-time structural heuristics.
+
+</div>
+
+
+--
+
+## Quick Check
+
+Consider four nodes $A, B, C, D$ with edges $A$–$B$, $A$–$C$, $A$–$D$, and $B$–$C$. No other edges exist.
+
+1. Find a labeling of this graph that satisfies STC with the maximum number of strong edges.
+2. Is the optimal labeling unique?
+
+Notes:
+(1) The interesting constraint is at node $A$. If all three of $A$'s ties were Strong, STC would require $B$–$C$, $B$–$D$, and $C$–$D$ — but $B$–$D$ and $C$–$D$ are missing. So at most two of $A$'s ties can be Strong, and they must be the pair whose endpoints are connected: $A$–$B$ and $A$–$C$ (since $B$–$C$ exists). The edge $B$–$C$ itself can be strong (no constraint violated). $A$–$D$ must be weak. Maximum is 3 strong edges. (2) Not unique: $A$–$D$ could be strong if *all* of $A$'s other ties were weak, giving only 1 strong edge — but that's not the maximum. The maximum labeling (3 strong edges: $A$–$B$, $A$–$C$, $B$–$C$; $A$–$D$ weak) is unique in this small graph.
+
+--
+
+## Quick Check — Solution
+
+**1. Optimal labeling.** At node $A$, making all three ties strong would force $B$–$D$, $C$–$D$, and $B$–$C$ to exist. Only $B$–$C$ exists, so at most *two* of $A$'s ties can be strong — and they must be the two whose endpoints are actually connected: $A$–$B$ and $A$–$C$. The edge $B$–$C$ can be strong without further constraint. So:
+
+$$\ell(A{-}B) = \ell(A{-}C) = \ell(B{-}C) = S, \quad \ell(A{-}D) = W$$
+
+gives **three** strong edges — the maximum.
+
+**2. Uniqueness.** In this small graph, yes. On larger graphs, MaxSTC can have exponentially many optimal labelings — another reason the problem is hard.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Structural Heuristics for Tie Strength
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Without access to the true edge labels, how can we estimate which parts of a network behave like "strong, embedded" regions and which behave like "weak, bridging" ones?
+
+</div>
+
+
+Notes:
+Now the clustering coefficient finally has a reason to exist. It is not an arbitrary metric — it is a polynomial-time **structural heuristic** designed to capture the feature of the network that STC would reveal if we could solve MaxSTC exactly.
+
+--
+
+## Clustering Coefficient
+
+
+<div class="c-definition">
+
+**Local clustering coefficient.** For a node $i$ with degree $k_i$:
+
+$$
+C_i = \frac{\text{edges among } i\text{'s neighbors}}{\binom{k_i}{2}}
+$$
+
+$C_i \in [0, 1]$. $C_i = 1$ means $i$'s neighborhood is a complete clique; $C_i = 0$ means none of $i$'s neighbors are linked.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**Why this works as a heuristic.** Under STC, if $v$ has many strong ties, those ties' endpoints must all be mutually connected — i.e. $v$'s neighborhood is dense. Conversely, a high $C_v$ indicates a neighborhood that *could* be labeled mostly Strong without violating STC. $C_v$ is thus a lower-bound signal for "how strong-embedded is $v$".
+
+</div>
+
+
+Notes:
+The clustering coefficient is computable in $O(k^2)$ per node — polynomial and cheap — while MaxSTC is NP-hard. The price of the heuristic is that it confounds two things: it is high both when the node is genuinely strong-embedded and when it happens to sit in a dense region for unrelated reasons. This is the typical tradeoff of intractability: we lose precision to gain computability.
+
+--
+
+## Neighborhood Overlap
+
+
+<div class="c-definition small">
+
+**Neighborhood overlap.** For an edge $(u, v)$:
+
+$$
+O(u, v) = \frac{|N(u) \cap N(v)|}{|N(u) \cup N(v)|}
+$$
+
+where $N(u)$ and $N(v)$ exclude each other. $O = 0$ identifies a pure local bridge; $O = 1$ identifies an edge embedded inside a complete clique.
+
+</div>
+
+
+![Neighborhood overlap as Jaccard similarity of neighbor sets](/courses/network-science/figures/neighborhood-overlap.svg)
+
+Notes:
+Neighborhood overlap is the edge-level analogue of the clustering coefficient: it measures how "inside" the edge lies. An edge with many shared neighbors sits deep in a dense region and is a reasonable candidate for a strong label; an edge with no shared neighbors is a local bridge and a reasonable candidate for weak. Like the clustering coefficient, it is computable in polynomial time, and like the clustering coefficient, it confounds structural and sociological strength. Both heuristics are approximations to the intractable exact labeling — but they are approximations we can actually compute at the scale of millions of nodes.
+
+--
+
+## Why These Heuristics Instead of Exact Labels
+
+| | Exact MaxSTC | Clustering coeff. | Overlap |
+|---|---|---|---|
+| **Scope** | whole graph | per node | per edge |
+| **Complexity** | NP-hard | $O(k^2)$ per node | $O(k)$ per edge |
+| **Captures** | true tie type | neighborhood density | edge embeddedness |
+| **Feasible on real graphs?** | No | Yes | Yes |
+
+Here $k$ is the **degree** of the node (or of an edge's endpoint) — i.e. its number of neighbors. Clustering coefficient checks all $\binom{k}{2}$ pairs of a node's neighbors; overlap intersects the two endpoints' neighbor sets.
+
+Notes:
+This table makes the modeling/measurement split concrete. The exact problem is what we want; the heuristics are what we can have. The rest of the lecture (bridges, weak-tie theorem, empirical tests) all operate on the heuristics, not the exact labels, because the exact labels are unavailable.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Clustering coefficient and neighborhood overlap exist because MaxSTC is intractable. They are polynomial-time structural proxies for a theoretical object we cannot compute — trading precision for feasibility on real-world networks.
+
+</div>
+
+
+--
+
+## Quick Check
+
+Node $B$ has 4 neighbors: $A, C, D, E$. Among $B$'s neighbors, exactly 2 edges exist: $(A,C)$ and $(C,D)$.
+
+1. Compute $C_B$.
+2. Under STC, what is the maximum number of strong ties $B$ can have?
+3. What does $C_B$ tell you about $B$'s structural role that STC alone does not?
+
+Notes:
+(1) $C_B = 2/6 = 1/3$. (2) For a pair of $B$'s neighbors to both receive strong labels from $B$, they must be connected. The pairs $(A,C)$ and $(C,D)$ are connected. So $B$ can make strong ties to $\{A, C\}$ or to $\{C, D\}$ — three strong ties would require all pairs among the selected triple to exist, which they don't. Max strong ties from $B$ = 2. (3) The clustering coefficient gives a continuous ranking — $B$ sits in a moderately sparse neighborhood — while STC only tells us a hard upper bound on the number of strong ties. The heuristic gives more nuance at the cost of exactness.
+
+--
+
+## Quick Check — Solution
+
+**1.** $\binom{4}{2} = 6$ possible edges, $2$ actual $\Rightarrow C_B = 1/3$.
+
+**2.** Maximum strong ties from $B$ is **2**. The only pairs of $B$'s neighbors connected by an edge are $(A, C)$ and $(C, D)$; a third strong tie would force a currently missing edge (e.g. $A$–$D$), violating STC.
+
+**3.** The clustering coefficient is a *continuous* structural measurement — $C_B = 1/3$ tells us $B$ sits in a moderately sparse neighborhood, suggesting a potential brokerage position between the sub-clusters $\{A, C\}$ and $\{D\}$. STC by itself gives only a hard upper bound on the number of strong ties but no information about the *shape* of the neighborhood. The heuristic sacrifices exactness for expressive power.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Bridges, Local Bridges, and the Weak-Tie Theorem
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Which edges are structurally most important for keeping information flowing across a network — and can we predict from theory which ones those will be?
+
+</div>
+
+
+Notes:
+This module derives the theoretical prediction that lets us test the model against real data. The weak-tie theorem says: under STC, the structurally critical edges (local bridges) must also be the weakly-labeled ones. That prediction is testable using the heuristics from the previous module.
+
+--
+
+<!-- .slide: class="figure-60" -->
 
 ## Bridge
 
-![Bridge example — removing the central edge disconnects the graph](/courses/network-science/figures/bridge.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-A **bridge** is an edge whose removal increases the number of connected components.
-Equivalently: a bridge lies on no cycle.
+<div class="c-definition">
 
-Notes:
-Ask students to verify the bridge condition: does the bridge edge lie on any cycle? No — removing it disconnects the graph. Ask: what happens to the distance between the endpoints after removal? It becomes infinite.
-
---
-
-<!-- .slide: class="figure-70" -->
-
-## Local Bridge
-
-![Local bridge — endpoints share no common neighbors](/courses/network-science/figures/local-bridge.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
-A **local bridge** links two nodes that share **no** neighbors.
-Removing it increases the distance between its endpoints to more than two.
-
-Notes:
-Contrast with a true bridge: a local bridge need not disconnect the graph. The endpoints could still reach each other via a long path — but that path goes through many hops.
-
---
-
-<!-- .slide: class="figure-60" -->
-
-## Structural Holes and Social Capital
-
-A node that acts as the sole link between otherwise disconnected groups spans a **structural hole** (Burt, 1992).
-
-![Structural hole — broker between groups](/courses/network-science/figures/structural-hole.png)
-<span class="figure-credit">Source: Burt 1992</span>
-
-Why does this position matter?
-
-- **Information advantage:** The broker receives early, non-redundant information from independent groups. <!-- .element: class="fragment" -->
-- **Control advantage:** The broker mediates any flow between groups that cannot communicate directly. <!-- .element: class="fragment" -->
-
-Notes:
-Connect graph structure to social behavior. Ask: what happens to the Broker if triadic closure reconnects its contacts? The structural hole closes and the broker's monopoly evaporates. This is why individuals in brokering positions sometimes actively discourage their contacts from connecting directly.
-
---
-
-## Quick Check 3.B: Bridges and Brokers
-
-The graph below represents a small research community. Each letter is a researcher.
-
-> A — B — C — D — E, plus edges B–C and C–D forming triangles.
-
-1. Which edges in this graph are **true bridges**?
-2. Your advisor says "C is a broker". Do you agree? Justify using the definitions of local bridge and structural hole.
-
-Notes:
-Give them 4 minutes. The graph is: A–B, B–C, C–D, D–E, with additional edges B–C (already there) and C–D. So A–B is a bridge (removing it disconnects A). D–E is a bridge (removing it disconnects E). B–C and C–D are NOT bridges because they lie on cycles (triangle B–C–D). C is not a broker in the structural-hole sense — it sits inside a densely connected triangle, not between disjoint groups.
-
---
-
-## Quick Check 3.B: Solution
-
-**1. True bridges:** Edges **A–B** and **D–E** are bridges — removing either disconnects a node from the rest of the graph. Edges B–C and C–D lie on cycles and are not bridges. <!-- .element: class="fragment" -->
-
-**2. Is C a broker?** No. C sits inside the triangle B–C–D, meaning B and D are already connected. C spans no structural hole: all of C's neighbors already know each other. A true broker would connect groups with no direct path between them. <!-- .element: class="fragment" -->
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-
-Structurally crucial edges are identified by position, not by weight. A node spanning structural holes gains information and control advantages — but loses them the moment triadic closure reconnects its contacts.
-
+**Bridge.** An edge $e \in E$ is a *bridge* if removing it increases the number of connected components. Equivalently: $e$ lies on no cycle.
 
 </div>
 
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 3
-## Weak Ties as Structural Connectors
-
-
-<div class="guiding-question">
-
-**Guiding Question:** Why should local bridges tend to be weak ties rather than strong ties?
-
-</div>
-
-
-$$
-\text{local bridge} + \text{strong triadic closure} \Rightarrow \text{weak tie}
-$$
-<!-- .element: class="fragment" -->
-
-Notes:
-Let students sit with this claim before moving on. It sounds counterintuitive — bridges feel important, so why would they be *weak*? The rest of this module builds the structural argument.
-
---
-
-## Theorem Statement
-
-**Under strong triadic closure, every local bridge must be a weak tie.**
-
-Notes:
-This is the compact formal form. Resist giving the proof immediately. Ask students: does this theorem say strong local bridges are impossible? (Answer: No — it says they cannot coexist with strong triadic closure. Real networks do violate STC, so the theorem is a conditional, not an absolute claim.)
-
---
-
-## Why Might This Be True?
-
-Suppose A–D was a **strong** tie and also a local bridge. Then by strong triadic closure, A's other strong neighbors (B, C) must each have a tie to D. But then D shares neighbors with A — contradicting the local-bridge condition.
-
-> The assumption "A–D is strong AND a local bridge" forces a neighbor of D to exist among A's friends, destroying the local-bridge condition.
-
-Notes:
-Walk through this proof by contradiction carefully. The key move: the assumption forces a shared neighbor to exist, which destroys the local-bridge property. Ask students: what if only one of A's ties to B or C was strong? Does the contradiction still hold?
-
---
-
-## Granovetter: "Getting a Job" (1973)
-
-Granovetter interviewed Boston-area residents who had recently found a new job through a social contact.
-
-Is it the people we see most often who provide the most useful job leads?
-
-**Result:** Most job leads came from acquaintances seen rarely — not from close friends. The contacts providing novel opportunities were on the social periphery, not the social core. <!-- .element: class="fragment" -->
-
-Notes:
-Ground the theorem in an empirical result students can relate to. Strong friends know the same people and the same opportunities you do. Weak acquaintances have access to entirely different social worlds — exactly as the theorem predicts for information flow across local bridges.
-
---
-
-## Interpretation
-
-The theorem links a local social concept (tie strength) to a global structural one (bridging separate communities).
-
-Weak ties are the primary channels through which non-redundant information — new jobs, new ideas, different perspectives — reaches individuals across community boundaries.
-
---
-
-## Quick Check 3.C: Strong Ties and Local Bridges
-
-A network has three nodes: A, B, C.
-A–B is a **strong** tie. A–C is a **strong** tie. There is no edge between B and C.
-
-1. Does this network satisfy the **Strong Triadic Closure Property**?
-2. Is the edge A–B a local bridge? Can you tell from the information given?
-
-Notes:
-Give them 3 minutes. (1) No: A has two strong ties to B and C, but B–C does not exist, violating STC. (2) A–B is a local bridge only if B and A share no neighbors. Here B and C are not connected, so B and C are not shared neighbors of A and B. Whether A–B is a local bridge depends on whether there are other nodes — we cannot fully determine it from three nodes alone.
-
---
-
-## Quick Check 3.C: Solution
-
-**1. Strong Triadic Closure:** No. A has strong ties to B and C, but B and C are not connected — this violates STC. <!-- .element: class="fragment" -->
-
-**2. Local bridge status of A–B:** In this three-node network, A and B share no common neighbors (C connects to A but not to B). So **A–B is a local bridge in this graph**. But the Weak Tie Theorem does not apply here — its precondition (STC holds) is violated. The theorem makes no claim about what happens when STC fails. <!-- .element: class="fragment" -->
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-
-Weak ties are structurally positioned as bridges between communities. The theorem explains *why* — not by sociology, but by graph structure: strong ties cluster locally, and local clustering destroys the bridge condition.
-
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 4
-## Cell-Phone Evidence
-
-
-<div class="guiding-question">
-
-**Guiding Question:** Does the weak-ties theorem survive contact with real-world data at scale?
-
-</div>
-
-
---
-
-<!-- .slide: class="figure-60" -->
-
-## Setup: Modeling Communication as a Graph
-
-![Local structure in cell phone network](/courses/network-science/figures/onella_structure_individual_A.png)
-<span class="figure-credit">Source: Onnela et al. 2007</span>
-
-Onnela et al. (2007) modeled nationwide cell-phone call logs as an undirected weighted graph. Edge weight = total call duration between two numbers.
-
-Notes:
-Ask students: Is call duration a good proxy for tie strength? What gets lost? (Loss: directionality, content, context, relationship history before phones.) This is the modeling choice made visible.
-
---
-
-## Formalizing Almost-Local Bridges
-
-In a real weighted graph, true local bridges are rare. Instead, we measure **Neighborhood Overlap**:
-
-$$
-O(u,v) = \frac{|N(u) \cap N(v)|}{|N(u) \cup N(v)|}
-$$
-
-where $N(u)$ is the set of neighbors of $u$, excluding $v$ (and vice versa).
-
-What does $O(u,v) = 0$ mean?
-
-The two endpoints share **no** common neighbors — the edge is a perfect local bridge. <!-- .element: class="fragment" -->
-
-Notes:
-Math First, Then Meaning. Show the formula, ask for its value at the extremes. Note: this is the Jaccard similarity coefficient applied to neighbor sets. $O = 1$ means all neighbors are shared (deep within a clique). $O = 0$ means the edge is a local bridge.
-
---
-
-## Evidence: Tie Strength vs. Overlap
 
 
 <div class="columns col-2-1">
@@ -410,10 +611,8 @@ Math First, Then Meaning. Show the formula, ask for its value at the extremes. N
 
 <div class="column">
 
-
-![Tie strength versus overlap plot](/courses/network-science/figures/tie-vs-overlapp.png)
-<span class="figure-credit">Source: Onnela et al. 2007</span>
-
+![Bridge example — removing the central edge disconnects the graph](/courses/network-science/figures/bridge.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
@@ -421,9 +620,11 @@ Math First, Then Meaning. Show the formula, ask for its value at the extremes. N
 <div class="column">
 
 
-Does tie strength predict neighborhood overlap?
+<div class="c-info smaller">
 
-Yes: weak ties (low strength percentile) cluster near $O \approx 0$. Strong ties accumulate at higher overlap values — consistent with Granovetter's prediction. <!-- .element: class="fragment" -->
+Removing the highlighted edge splits the graph in two. The endpoints' distance becomes infinite — they can no longer reach each other through any other route.
+
+</div>
 
 
 </div>
@@ -433,7 +634,249 @@ Yes: weak ties (low strength percentile) cluster near $O \approx 0$. Strong ties
 
 
 Notes:
-Ask students to read the axes before revealing the fragment: the X-axis is call duration rank (percentile), the Y-axis is neighborhood overlap. What pattern do you expect? Then reveal.
+A true bridge is the strongest possible structural claim about an edge. In real networks, true bridges are rare because alternative routes almost always exist. This motivates the weaker but more useful concept of a *local bridge*.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Local Bridge
+
+
+<div class="c-definition">
+
+**Local bridge.** An edge $(u, v)$ is a *local bridge* if $u$ and $v$ have no neighbors in common: $N(u) \cap N(v) = \emptyset$. Equivalently: $O(u, v) = 0$.
+
+</div>
+
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Local bridge — endpoints share no common neighbors](/courses/network-science/figures/local-bridge.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+A local bridge does not need to disconnect the graph — its endpoints may still reach each other via a long detour. Note that *local bridge* is already expressible in terms of the neighborhood-overlap heuristic: an edge with $O = 0$ is exactly a local bridge.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Pointing out that local bridges are exactly the $O = 0$ edges is the link between the theoretical and measurement sides of the lecture. The construct ("local bridge") is theoretical; the quantity ($O$) is measurable. The equivalence at $O = 0$ extends smoothly into the continuous case: low-$O$ edges are "almost-local-bridges", and they behave like bridges for information flow.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Structural Holes
+
+A node that acts as the sole short link between otherwise separated groups spans a *structural hole* (Burt, 1992).
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Structural hole — broker between groups](/courses/network-science/figures/structural-hole.png)
+<span class="figure-credit">Source: Burt 1992</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+- **Information advantage:** the broker receives early, non-redundant signals from independent groups.
+- **Control advantage:** the broker mediates flows between groups that cannot communicate directly.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Structural holes are the social-capital counterpart to local bridges. The advantage evaporates the moment triadic closure reconnects the broker's contacts — which is why brokers in real organizations sometimes discourage their contacts from meeting directly.
+
+--
+
+## The Weak-Tie Theorem
+
+
+<div class="c-definition">
+
+**Theorem (Granovetter).** Let $\ell$ be a labeling of $G$ that satisfies Strong Triadic Closure. Then every local bridge is labeled Weak under $\ell$.
+
+</div>
+
+
+This is the theoretical prediction we will test. It links the labeling model (STC, tie types) to a measurable structural property (local bridges) via an if–then statement.
+
+Notes:
+State the conditional form explicitly: the theorem is about labelings satisfying STC, not about real networks in general. Real networks rarely satisfy STC exactly — they violate it locally. The theorem still tells us what we should see *on average*: edges with low neighborhood overlap should tend to be weak. That averaged prediction is what we will test on cell-phone data.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## Proof Sketch by Contradiction
+
+![Proof: assuming a strong local bridge forces shared neighbors](/courses/network-science/figures/weak-tie-bridge-proof.svg)
+
+
+<div class="c-info smaller">
+
+Assume $A$–$D$ is both **strong** and a **local bridge**. $A$ also has strong ties to $B$ and $C$. By Strong Triadic Closure, $D$ must be connected to $B$ and $C$. But then $B$ and $C$ are shared neighbors of $A$ and $D$ — destroying the local-bridge condition. Contradiction.
+
+</div>
+
+
+Notes:
+The proof is one of the cleanest in network science. A single application of STC is enough to derive a contradiction. The structural lesson is that strong ties drag their endpoints into shared social environments, and shared environments destroy the bridge property by definition.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Under STC, local bridges must be weak ties. This is the theoretical prediction that connects our unobservable labeling model to the measurable neighborhood-overlap heuristic — and it is the prediction we now test against real data.
+
+</div>
+
+
+--
+
+## Quick Check
+
+A network has three nodes: $A, B, C$. The edges $A$–$B$ and $A$–$C$ are both labeled Strong. There is no edge between $B$ and $C$.
+
+1. Does this labeling satisfy Strong Triadic Closure?
+2. Is $A$–$B$ a local bridge? Does the Weak-Tie Theorem apply here?
+
+Notes:
+(1) No — $A$ has two strong neighbors $B$ and $C$ but $(B,C) \notin E$. STC is violated. (2) In this graph, $A$ and $B$ have no shared neighbors (only $C$ is a neighbor of $A$, and $C$ is not a neighbor of $B$), so $A$–$B$ is a local bridge. The Weak-Tie Theorem's precondition (STC holds) fails, so the theorem makes no prediction about $A$–$B$'s label.
+
+--
+
+## Quick Check — Solution
+
+**1.** No. $A$ has two strong neighbors, $B$ and $C$, but $(B, C) \notin E$. STC is violated.
+
+**2.** $A$ and $B$ share no common neighbors in this graph, so $A$–$B$ is technically a local bridge. But the Weak-Tie Theorem does *not* apply here: its precondition (STC holds) is violated. The theorem makes no prediction when its assumption fails.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Empirical Validation at Scale
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Does the theoretical prediction — low overlap correlates with low tie strength — survive contact with real-world data at scale?
+
+</div>
+
+
+Notes:
+Everything in the previous modules was setup for this one. The weak-tie theorem predicts that, under STC, low-overlap edges should be weak. We now test whether that prediction holds on massive real datasets where neither STC nor the true labeling is directly observable — only structural proxies.
+
+--
+
+<!-- .slide: class="figure-60" -->
+
+## Setup: Cell-Phone Networks
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Local structure in cell phone network](/courses/network-science/figures/onella_structure_individual_A.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+**Onnela et al. (2007).** Nationwide cell-phone call logs modeled as an undirected weighted graph. Nodes are phone numbers; edge weight is the cumulative call duration between two numbers — a measurable proxy for tie strength.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The operationalization matters. Call duration is not tie strength in the sociological sense — it captures one dimension (sustained communication) while ignoring others (topic, reciprocity, face-to-face history). But this is exactly the modeling/measurement gap the lecture is about: the true strength is inaccessible, the proxy is computable, and the question is whether the proxy behaves as the theory predicts.
+
+--
+
+## Evidence: Overlap vs. Tie Strength
+
+
+<div class="columns col-2-1">
+
+
+<div class="column">
+
+![Tie strength versus overlap plot](/courses/network-science/figures/tie-vs-overlapp.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+X-axis: tie strength percentile (call duration). Y-axis: neighborhood overlap. Weak ties cluster near $O \approx 0$; strong ties accumulate at higher $O$. The systematic monotonic relationship is exactly what the weak-tie theorem predicts.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This plot is the empirical heart of the lecture. Two independently computable proxies — one for tie strength (call duration) and one for structural embeddedness (overlap) — line up exactly the way the theorem says they should. The fact that the relationship is smooth and monotonic, not just a threshold effect, is evidence that the underlying mechanism scales gracefully from idealized triads to realistic graphs.
 
 --
 
@@ -445,20 +888,20 @@ Ask students to read the axes before revealing the fragment: the X-axis is call 
 
 <div class="column">
 
-
 ![Giant component shrinking experiment](/courses/network-science/figures/onella_shrinking.png)
 <span class="figure-credit">Source: Onnela et al. 2007</span>
 
-
 </div>
 
 
 <div class="column">
 
 
-Which edge removal strategy breaks the network fastest?
+<div class="c-info smaller">
 
-Removing edges in **increasing** tie-strength order (weakest first) fragments the giant component far faster than removing strongest ties first. <!-- .element: class="fragment" -->
+Removing edges in **increasing** tie-strength order (weakest first) fragments the giant component far faster than removing strongest ties first. Weak ties carry the structural connectivity of the whole network.
+
+</div>
 
 
 </div>
@@ -468,162 +911,60 @@ Removing edges in **increasing** tie-strength order (weakest first) fragments th
 
 
 Notes:
-Ask: Why would removing ties that carry very few call-minutes break the network so dramatically? Answer: because those weak ties are the local bridges between communities. Remove the bridges, separate the components.
+This is the knockout test. If weak ties were sociologically marginal *and* structurally redundant, removing them would have little effect. The opposite happens. The weak ties are the connective tissue — exactly the role the theorem assigns them. Together with the overlap plot, this gives two independent empirical confirmations of the theoretical prediction.
 
 --
 
-## Quick Check 3.D: Neighborhood Overlap
-
-Nodes $A$ and $B$ are connected. Their neighbor sets (excluding each other) are:
-- $N(A) = \{C, D, E\}$
-- $N(B) = \{D, E, F\}$
-
-1. Compute $O(A, B)$.
-2. Is A–B closer to a local bridge or a clique edge? What does this imply about the information A would receive through B?
-
-Notes:
-Give them 4 minutes. $|N(A) \cap N(B)| = |\{D,E\}| = 2$. $|N(A) \cup N(B)| = |\{C,D,E,F\}| = 4$. $O = 2/4 = 0.5$. Interpretation: moderate overlap — neither a pure bridge nor deep inside a clique. A receives some non-redundant information from B (via F) but also redundant information (D, E already known to A).
-
---
-
-## Quick Check 3.D: Solution
-
-$$O(A,B) = \frac{|\{D,E\}|}{|\{C,D,E,F\}|} = \frac{2}{4} = 0.5$$ <!-- .element: class="fragment" -->
-
-**Interpretation:** A–B has moderate overlap. It is not a local bridge ($O > 0$), but nor is it embedded in a clique ($O < 1$). A receives partly redundant information through B. If $O$ were near 0, B would be A's primary source of information from a distant community. <!-- .element: class="fragment" -->
-
---
-
-## Takeaway
+## Evidence: Social Media
 
 
-<div class="takeaway">
-
-
-The weak-ties argument is not sociological speculation — it has measurable structural signatures at scale. Neighborhood overlap operationalizes the bridge concept, and empirical data confirm that weak ties carry it.
-
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 5
-## Social Media
-
-
-<div class="guiding-question">
-
-**Guiding Question:** How do strong and weak ties change when the network moves to online platforms?
-
-</div>
-
-
---
-
-## Evidence: Facebook (2009)
-
-
-<div class="columns col-2-1">
+<div class="columns">
 
 
 <div class="column">
-
 
 ![Facebook maintained-relationship results](/courses/network-science/figures/facebook-results.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-
 </div>
 
 
 <div class="column">
-
-
-As total friend count grows, what happens to actively maintained relationships?
-
-Only a small, roughly constant number are "maintained" (reciprocal communication). The rest are passive weak ties. <!-- .element: class="fragment" -->
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The figure shows that total friends grow rapidly with network size, while maintained and directed one-way contacts plateau. Cognitive limits still bind strong tie capacity — Dunbar's number (~150) applies even online. Point this out before revealing the fragment.
-
---
-
-## Evidence: Twitter (Huberman et al.)
-
-
-<div class="columns col-2-1">
-
-
-<div class="column">
-
 
 ![Posts versus followers on Twitter](/courses/network-science/figures/Huberman_twitter_posts_followers.png)
 <span class="figure-credit">Source: Huberman et al. 2009</span>
 
-
-</div>
-
-
-<div class="column">
-
-
-![Posts versus friends on Twitter](/courses/network-science/figures/Huberman_twitter_posts_friends.png)
-<span class="figure-credit">Source: Huberman et al. 2009</span>
-
-
 </div>
 
 
 </div>
 
 
-On asymmetric platforms, the *follower* count can reach millions (zero-cost weak ties), while *friends* — mutual contacts with whom one actually interacts — remain a small subset.
+
+<div class="c-info smaller">
+
+**Facebook:** total friends grow unboundedly, but *maintained* reciprocal ties plateau around Dunbar's number (~150). **Twitter:** followers scale freely, mutual interacting friends do not. Online platforms remove the cost of weak ties but do not change the cognitive bound on strong ones — amplifying the weak/strong distinction rather than collapsing it.
+
+</div>
+
 
 Notes:
-Ask: why does the follower graph (left) scatter so much more than the friends graph (right)? The relationship between posting activity and follower count is much noisier than the one with actual friends. "Friends" here is the Twitter-era term for mutual follows with actual interaction.
+Social media is sometimes claimed to "collapse" the distinction between weak and strong ties by making everyone reachable. The empirical evidence says the opposite: platforms remove the cost of maintaining weak ties, so the weak-tie periphery expands dramatically, while the strong-tie core remains bounded by the same cognitive limits as before. The structure is stretched, not flattened.
 
 --
 
-## Interpretation
+## Closing the Loop
 
-Does social media collapse the distinction between weak and strong ties?
+We set out to test a theoretical model (typed edges + STC) on data where the true labels are unobservable and the exact recovery problem is NP-hard. The strategy was:
 
-No — it amplifies it. Platforms remove the cost of maintaining weak ties (passive contact, one-click follow), but strong ties still require active, reciprocal effort. The result is a much wider weak-tie periphery surrounding an unchanged strong-tie core. <!-- .element: class="fragment" -->
+1. Define polynomial-time structural heuristics (clustering coefficient, overlap)
+2. Derive a prediction from the theory (weak-tie theorem)
+3. Measure the heuristics on real data and compare
 
---
-
-## Quick Check 3.E: Dense vs. Sparse Follower Networks
-
-Two students, X and Y, both use the same online platform. X follows 2000 accounts; Y follows 80 accounts but everyone follows everyone else.
-
-1. Who is likely to have a higher average neighborhood overlap across their edges?
-2. What does this imply about the kind of information X and Y each receive?
+The Onnela and social-media results close the loop: the heuristics behave exactly as the theorem predicts. The model earns its keep even though we could never compute its exact solution.
 
 Notes:
-Give them 4 minutes. For X: following 2000 accounts, many via recommendation algorithm, means few shared neighbors per edge — low average overlap, many weak-tie-like connections, access to diverse non-redundant information. For Y: 80 accounts in a dense mutual-follow cluster means high overlap — Y is embedded deeply in a clique, receiving mostly redundant information.
-
---
-
-## Quick Check 3.E: Solution
-
-**1. Neighborhood overlap:** <!-- .element: class="fragment" -->
-
-Y likely has **higher** average overlap. Y's 80 contacts form a dense mutual cluster — many shared neighbors per edge. X's 2000 contacts include many algorithm-driven follows with near-zero shared neighborhood. <!-- .element: class="fragment" -->
-
-**2. Information implications:** <!-- .element: class="fragment" -->
-
-- X receives **diverse, non-redundant** information — the structural signature of many weak ties and local bridges. <!-- .element: class="fragment" -->
-- Y receives **redundant, reinforced** information — the structural signature of a dense clique with few connections outside. <!-- .element: class="fragment" -->
+This is the moment to refer back to the table from Module 1. Every row has now been addressed — the theoretical constructs on the left are connected to the measurable proxies on the right, and the empirical results validate the connection. This is what a successful model-to-data loop looks like in network science.
 
 --
 
@@ -632,27 +973,57 @@ Y likely has **higher** average overlap. Y's 80 contacts form a dense mutual clu
 
 <div class="takeaway">
 
-
-Social media does not remove the weak/strong-tie distinction — it stretches the weak-tie periphery enormously while leaving the strong-tie core bounded by human cognitive limits.
-
+The theoretical model (typed edges, STC, weak-tie theorem) cannot be inferred exactly from data, but its prediction — low overlap edges are weak — is confirmed at scale by independent empirical proxies. Model and measurement close the loop.
 
 </div>
 
+
+--
+
+## Quick Check
+
+Two students, X and Y, both use the same online platform. X follows 2000 accounts; Y follows 80 accounts but everyone follows everyone else.
+
+1. Using neighborhood overlap as a proxy, whose connections look more "strong-tie-like"?
+2. What does the weak-tie theorem predict about the diversity of information each student receives?
+
+Notes:
+(1) Y has higher average overlap — dense mutual cluster, many shared neighbors. X has low average overlap — algorithmic follows create structural bridges. (2) The theorem predicts X's low-overlap edges behave like weak ties and should carry more non-redundant information. Y's high-overlap clique delivers reinforced, redundant information. The prediction matches everyday observation about echo chambers.
+
+--
+
+## Quick Check — Solution
+
+**1.** Y's connections look more **strong-tie-like**: dense mutual follow cluster → high average neighborhood overlap. X's large following includes many algorithm-driven follows with near-zero overlap → low average, bridge-like.
+
+**2.** The weak-tie theorem predicts:
+
+- **X** receives diverse, non-redundant information — structural signature of many weak, low-overlap edges acting as local bridges.
+- **Y** receives redundant, reinforced information — structural signature of a dense clique with few outgoing shortcuts.
+
+The prediction matches the everyday pattern of algorithm-curated feeds vs. closed-friend echo chambers.
 
 ---
 
 ## Wrap-Up
 
-- local friendship structure creates predictable global effects
-- weak ties are often not socially strongest, but structurally most valuable
-- empirical network data broadly supports the theoretical pattern
+- **Modeling** gave us triadic closure, typed edges, STC, and the weak-tie theorem
+- **Measurement** forced us to abandon the exact labeling (NP-hard) and adopt polynomial-time proxies: clustering coefficient and neighborhood overlap
+- **The theorem** provided the prediction that connects the two
+- **Empirical data** at scale (Onnela, Facebook, Twitter) confirm the prediction
 
 ### Looking Ahead: Lecture 04
 
-How do we identify groups and roles within a network? Which nodes are important — and by what definition?
+If ties reveal themselves through structural position, what about *groups*? How do we formally identify communities, and which nodes occupy structurally important roles inside and between them?
+
+### Reading
+
+- Chapter 3 of Easley & Kleinberg (2010).
+- Kossinets & Watts, *Empirical Analysis of an Evolving Social Network*, [Science **311**, 88–90 (2006)](https://www.science.org/doi/10.1126/science.1116869) — longitudinal evidence for triadic closure on a university email network.
+- Sintos & Tsaparas, *Using Strong Triadic Closure to Characterize Ties in Social Networks*, KDD 2014 — NP-hardness of MaxSTC and tractable special cases.
 
 Notes:
-Plant the question for next time: importance is not one concept. Degree, closeness, betweenness, and eigenvector centrality each formalize a different intuition. Community detection asks a complementary question: where are the dense groups?
+The wrap-up deliberately restates the modeling/measurement loop rather than listing content. Students should leave the lecture with that loop as their mental model for the rest of the course: every concept we introduce will either be a theoretical construct we cannot compute exactly, a polynomial-time proxy for such a construct, or a theoretical prediction that lets us test the proxy against data.
 
 ---
 
@@ -666,6 +1037,7 @@ Plant the question for next time: importance is not one concept. Degree, closene
 - Onnela, J.-P. and Saram\"aki, J. and Hyv\"onen, J. and Szab\'o, G. and Lazer, D. and Kaski, K. and Kert\'esz, J. and Barab\'asi, A.-L. (2007). Structure and tie strengths in mobile communication networks. *Proceedings of the National Academy of Sciences*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
+
 
       const plugins = [
         window.RevealMarkdown,
@@ -742,6 +1114,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

@@ -1,62 +1,153 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 05: Social Context and Link Formation</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 05: Social Context and Link Formation</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 05: Social Context and Link Formation
 
 Prof. Dr. Michael Granitzer
+
 Dr. Kanishka Ghosh Dastidar
+
 Dr. Jelena Mitrovic
 
-15 April 2026
-
-This lecture extends the network model with context, attributes, and longitudinal processes.
-
 Notes:
-This lecture brings social context into the network model. So far the graph has been an abstract object with nodes and edges. Now we add:
-
-- attributes on nodes (homophily)
-- mechanisms of formation (selection vs. socialization)
-- a second node type for foci (affiliation networks)
-- temporal observations of edge formation
-
-The pedagogical anchor is that links are never neutral data points — they reflect choices and contexts that the analyst must reconstruct.
+Lectures 03 and 04 treated the graph as a structure of anonymous nodes and unlabeled edges — the only question was "is the edge there?". This lecture adds context: nodes get *attributes* (age, track, beliefs), edges get *timestamps*, and the graph gets *foci* (shared social settings). The central tension shifts from the **computational** gap of L03–L04 (what we want to compute is NP-hard) to a **causal** gap: the mechanism behind a network pattern — selection vs. socialization — cannot be identified from a single snapshot. The fix is not a better algorithm but richer data: longitudinal observations and explicit social contexts.
 
 ---
 
-## Social Context and Link Formation
+## From Structure to Context
 
-This lecture extends the network model with context, attributes, and longitudinal processes.
+In Lectures 03 and 04 we classified edges (strong vs. weak) and groups (communities). The graph was colorless — every node was interchangeable. Today we ask: what happens when nodes carry *attributes* and edges carry *reasons*?
 
-### Focus
+Consider a small classroom.
 
-- homophily
-- selection and socialization
-- affiliation networks and closure beyond person-person ties
-- online link formation and spatial segregation
+--
+
+<!-- .slide: class="figure-75" -->
+
+## A Motivating Scenario
+
+![A classroom friendship network colored by academic track](/courses/network-science/figures/l05-scenario.svg)
+
+
+<div class="c-info smaller">
+
+Twelve students, split equally between STEM (blue) and Arts (orange). Most friendships are within-track; only two cross-track ties exist. The clustering is visible — but why is it there?
+
+</div>
+
+
+Notes:
+This figure is the anchor for the whole lecture. Use it to provoke the four questions on the next slide before any definition arrives. By the end of the session students should be able to articulate four different explanations for the visible pattern and say which data would distinguish them.
+
+--
+
+## Four Questions from One Picture
+
+
+<div class="columns">
+
+
+<div class="column col-2-1">
+
+1. **Measurement.** Is the within-track clustering more than we would expect by chance — or could it happen under random mixing?
+2. **Mechanism.** Did students choose friends from the same track (**selection**), or did friends influence each other to pick the same track (**socialization**)?
+3. **Context.** Could shared classes or labs (**foci**) explain the clustering without any personal preference for similarity?
+4. **Dynamics.** If every student has only a mild preference for same-track friends, could that suffice to produce this sharp segregation?
+
+Every concept in today's lecture answers one of these.
+
+</div>
+
+
+<div class="column top">
+
+![Classroom friendship network](/courses/network-science/figures/l05-scenario.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Each question maps to a module: (1) homophily and its formal baseline, (2) selection vs. socialization and the causal identification problem, (3) affiliation networks and focal closure, (4) online link formation and (5) Schelling segregation as a model for how mild local preferences generate sharp global patterns. Keep referring back to the classroom figure throughout.
+
+--
+
+## A Different Kind of Gap
+
+In L03–L04 the gap between theory and measurement was **computational**: MaxSTC and modularity maximization are NP-hard, so we used polynomial-time heuristics.
+
+In L05 the gap is **causal**: even with infinite compute, a cross-sectional snapshot cannot tell us *why* a tie formed. The fix is not a better algorithm — it is richer data.
+
+| Question | What we want to know | What a snapshot shows | What we need |
+|---|---|---|---|
+| Homophily? | Is tie formation biased toward similarity? | Within-group edge fraction | Random-mixing baseline |
+| Selection or socialization? | Which came first — similarity or the tie? | Both present simultaneously | Longitudinal data |
+| Foci or preference? | Did shared context cause the tie? | Shared memberships and ties | Affiliation network model |
+| Local → global? | Can mild preferences produce sharp segregation? | A segregated pattern | A generative model (Schelling) |
+
+Notes:
+This slide is the L05 analogue of L03's "theory vs. measurement" and L04's roadmap table. The new axis is causal identification rather than computational tractability. The rest of the lecture fills in the four rows.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+L03–L04 asked "what structure is there?" and hit a computational wall. L05 asks "why is the structure there?" and hits a causal wall. Network analysis requires both algorithmic tools and causal reasoning about the mechanisms behind the observed graph.
+
+</div>
+
+
+Notes:
+This frames the shift cleanly: from computation to causation. Refer back to this framing when each module introduces its specific gap.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
 ## Homophily
 
 
 <div class="guiding-question">
 
-**Guiding Question:** Do people become friends because they are similar, or do they become similar because they are friends?
+**Guiding Question:** Do people form ties because they are similar — and how would we know?
 
 </div>
 
 
+Notes:
+The key point is that homophily is a *statistical* pattern requiring a counterfactual baseline. "Many within-group ties" is not evidence of homophily unless we know how many ties we would expect under random mixing. Students should leave this module knowing that declaring homophily requires a baseline, not just a visual impression.
+
 --
 
-## Formal Intuition
+## Homophily — Formal Definition
 
-Homophily means that edge formation is statistically biased toward similarity in node attributes.
+
+<div class="c-definition">
+
+**Homophily.** Edge formation is biased toward similarity in a node attribute $x$. Formally, for a categorical attribute with class shares $p_1, \dots, p_k$:
+
+- **Random-mixing baseline:** the probability that a random tie connects same-class nodes is
+
+$$H_{\text{base}} = \sum_{i=1}^{k} p_i^2$$
+
+- **Observed homophily:** the fraction of actual ties that connect same-class nodes, $H_{\text{obs}}$.
+
+- **Homophily index:** how much the observed same-class rate exceeds the random baseline, normalized:
+
+$$r = \frac{H_{\text{obs}} - H_{\text{base}}}{1 - H_{\text{base}}}$$
+
+$r = 0$: random mixing. $r = 1$: perfect segregation. $r < 0$: heterophily (preference for *different* attributes).
+
+</div>
+
 
 Notes:
-Introduce the structural idea before the example. The key point is that homophily is a bias in tie formation, not just a visual pattern.
+The homophily index $r$ is a variant of Newman's assortativity coefficient for categorical attributes (Newman, 2003). It is the standard way to quantify homophily in empirical network studies. The normalization by $(1 - H_{\text{base}})$ matters: in a population that is 90% one type, even random mixing produces 82% within-group ties; reporting 85% same-group without the baseline would overstate the evidence for homophily.
 
 --
 
@@ -66,41 +157,60 @@ Introduce the structural idea before the example. The key point is that homophil
 
 ![Homophily as similarity-biased tie formation](/courses/network-science/figures/homophily-similarity-bias.svg)
 
---
 
-## Interpretation
+<div class="c-info smaller">
 
-Friendship ties are often biased toward similarity in attributes such as age, background, beliefs, or activity.
+Within-group edges (colored) are far more frequent than cross-group edges (gray). But frequency alone is insufficient — we need the random-mixing baseline to decide whether this exceeds chance.
 
---
+</div>
 
-## Why This Matters
-
-- it shapes who meets whom <!-- .element: class="fragment" -->
-- it changes which information spreads where <!-- .element: class="fragment" -->
-- it complicates causal interpretation of network data <!-- .element: class="fragment" -->
 
 --
 
-## Quick Check 5.A: Detecting Homophily
+## Back to the Classroom
+
+In the scenario, both tracks have 6 students ($p_{\text{STEM}} = p_{\text{Arts}} = 0.5$).
+
+- $H_{\text{base}} = 0.5^2 + 0.5^2 = 0.50$
+- The figure has 17 within-track edges out of 19 total: $H_{\text{obs}} = 17/19 \approx 0.89$
+- $r = (0.89 - 0.50)/(1 - 0.50) = 0.78$
+
+
+<div class="fragment">
+
+The homophily index $r = 0.78$ is strong — far above random mixing. But it does not tell us *why*. Is it selection, socialization, or shared context?
+
+</div>
+
+
+Notes:
+Walk through the arithmetic on the slide. The punchline — "strong homophily, but the mechanism is unknown" — is the bridge to Module 2. The same $r = 0.78$ would arise under pure selection, pure socialization, or pure focal closure. Distinguishing them requires more than a cross-sectional snapshot.
+
+--
+
+## Quick Check
 
 In a school of 200 students, 60% are in track A and 40% in track B. Of all friendships, 78% are within-track.
 
-1. What fraction of friendships would you expect to be within-track if friendships were random with respect to track?
-2. Is the observed 78% evidence of homophily? Why or why not?
+1. Compute the random-mixing baseline $H_{\text{base}}$.
+2. Compute the homophily index $r$.
+3. Is $r$ strong evidence of homophily? What could make it misleading?
 
 Notes:
-Give them 4 minutes. (1) Random probability of within-track friendship is $0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$. (2) Yes — observed 78% is much higher than the random baseline 52%, suggesting homophily on track. The point is that "many same-group friendships" is not enough — you need a baseline.
+Give them 4 minutes. (1) $H_{\text{base}} = 0.6^2 + 0.4^2 = 0.52$. (2) $r = (0.78 - 0.52)/(1 - 0.52) = 0.26/0.48 \approx 0.54$. (3) $r = 0.54$ is moderate-to-strong, but it can be misleading if the tracks share different physical spaces (focal closure), if students were assigned to tracks based on pre-existing friend groups (reverse causation), or if family background causes both track choice and friendship patterns (confounding).
 
 --
 
-## Quick Check 5.A: Solution
+## Quick Check — Solution
 
-**1. Random baseline:** <!-- .element: class="fragment" -->
+**1.** $H_{\text{base}} = 0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$ <!-- .element: class="fragment" -->
 
-$$P(\text{same track}) = 0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$$ <!-- .element: class="fragment" -->
+**2.** $r = \frac{0.78 - 0.52}{1 - 0.52} = \frac{0.26}{0.48} \approx 0.54$ <!-- .element: class="fragment" -->
 
-**2. Evidence of homophily:** Yes. Observed 78% is well above the 52% random baseline, indicating that friendships are biased toward within-track. The lesson: declaring homophily requires a counterfactual — "more than expected if links were random with respect to the attribute". <!-- .element: class="fragment" -->
+**3.** $r = 0.54$ is moderate-to-strong evidence of homophily. It could be misleading if: <!-- .element: class="fragment" -->
+- the two tracks occupy different buildings (shared context, not personal preference) <!-- .element: class="fragment" -->
+- students were *assigned* to tracks based on pre-existing friend groups (reverse causation) <!-- .element: class="fragment" -->
+- a third factor (e.g. family background) causes both track choice and friendship patterns (confounding) <!-- .element: class="fragment" -->
 
 --
 
@@ -109,9 +219,7 @@ $$P(\text{same track}) = 0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$$ <!-- .element: cla
 
 <div class="takeaway">
 
-
-Homophily is not only a descriptive pattern. It is a mechanism that shapes network formation and measurement.
-
+Homophily is not just a visual pattern — it is a statistical claim that tie formation is biased toward similarity *relative to a random-mixing baseline*. The homophily index $r$ quantifies the excess, but it cannot identify the mechanism.
 
 </div>
 
@@ -120,13 +228,12 @@ Homophily is not only a descriptive pattern. It is a mechanism that shapes netwo
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
 ## Selection and Socialization
 
 
 <div class="guiding-question">
 
-**Guiding Question:** How can we distinguish selection from social influence?
+**Guiding Question:** How can we distinguish whether similarity caused the tie or the tie caused the similarity?
 
 </div>
 
@@ -136,50 +243,107 @@ $$
 $$
 <!-- .element: class="fragment" -->
 
+Notes:
+This is arguably the most important conceptual module in the lecture. The three mechanisms — selection, socialization, and contextual correlation — produce the same cross-sectional pattern. Distinguishing them requires temporal data and careful causal reasoning. Without longitudinal observations, the $r = 0.78$ we just computed is compatible with any mixture of the three.
+
 --
 
-## Core Distinction
+## Three Mechanisms, One Pattern
 
-- **selection**: people choose similar others <!-- .element: class="fragment" -->
-- **socialization**: people become more similar after linking <!-- .element: class="fragment" -->
-- **correlation**: both may reflect a third factor (shared context) <!-- .element: class="fragment" -->
+
+<div class="c-definition">
+
+**Selection.** People choose to form ties with others who are *already* similar to them. Similarity precedes the tie.
+
+**Socialization (social influence).** People become *more similar* to their contacts after the tie forms. The tie precedes similarity.
+
+**Contextual correlation.** A shared environment (school, workplace, neighborhood) independently causes both the attribute and the tie. Neither causes the other directly.
+
+</div>
+
 
 Notes:
-Keep the causal distinction explicit: similarity at one point in time does not identify the mechanism that produced it.
+All three mechanisms are consistent with a high homophily index. A cross-sectional snapshot — friendships and attributes measured at one point in time — cannot separate them. This is the causal wall that L05 is built around.
 
 --
 
 <!-- .slide: class="figure-70" -->
 
-## Example
+## Causal Diagrams
 
-![Selection, socialization, and contextual correlation](/courses/network-science/figures/selection-socialization-causal.svg)
+![Selection, socialization, and contextual correlation as causal pathways](/courses/network-science/figures/selection-socialization-causal.svg)
 
 Notes:
-Walk through the three causal diagrams: selection (similarity → tie), socialization (tie → similarity), context (third factor causes both). Without temporal data, all three explain the same cross-sectional correlation.
+Walk through the three causal diagrams: selection (similarity → tie), socialization (tie → similarity), context (third factor → both). Without temporal data, all three explain the same cross-sectional correlation. The point is not that one is always right; in real networks, all three usually operate simultaneously. The analyst's job is to measure their relative contributions.
 
 --
 
-## Quick Check 5.B: Designing a Test
+## Empirical Test: Christakis & Fowler — Obesity in Social Networks
 
-You observe that smokers tend to befriend other smokers. You want to determine whether this is selection (smokers prefer smoker friends) or socialization (people start smoking because their friends do).
 
-1. What kind of data would you need beyond a single snapshot of friendships?
-2. Sketch one observation that would favor each explanation.
+<div class="c-info">
+
+**Christakis & Fowler (2007),** *The Spread of Obesity in a Large Social Network Over 32 Years*, [**New England Journal of Medicine 357, 370–379**](https://www.nejm.org/doi/full/10.1056/nejmsa066082).
+
+They analyzed the **Framingham Heart Study** social network — 12 067 people tracked over **32 years** with repeated measurements of both friendship ties and body mass index. This made it possible to observe the *temporal sequence* of tie formation and weight change.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Headline result.** A person's probability of becoming obese increased by **57%** if a friend became obese in the same interval. The effect was stronger for mutual friends and showed **directionality** — it operated in the direction of the friendship nomination, suggesting socialization (influence) rather than pure selection.
+
+</div>
+
 
 Notes:
-Give them 4 minutes. (1) Longitudinal data: friendships and smoking status observed at multiple time points. (2) Selection signature: people become friends *after* both already smoke. Socialization signature: people start smoking *after* their friends do. The point is that mechanism identification requires temporal sequencing.
+The Framingham study is the canonical longitudinal analysis of selection vs. socialization. Its strength is the multi-decade time series: because both the network and the attribute (BMI) were measured repeatedly, the authors could observe the temporal order — who became obese *before* whom — and test whether the pattern fit selection, socialization, or confounding. The 57% figure is a relative risk increase among nominated friends compared to non-friends, controlling for geographic proximity.
 
 --
 
-## Quick Check 5.B: Solution
+## What the Study Could Not See
 
-**1. Required data:** Longitudinal observations — friendships and smoking status at multiple time points, ideally with newly formed ties and newly adopted behavior visible. <!-- .element: class="fragment" -->
 
-**2. Distinguishing observations:** <!-- .element: class="fragment" -->
+<div class="c-info">
 
+**1. Confounders.** Cohen-Cole & Fletcher (2008) and Lyons (2011) showed that the same statistical method would "detect" social contagion of **height** and **acne** — traits that clearly do not spread through social influence. The method may confuse *shared environment* with *social influence* when the confounders evolve over time.
+
+**2. Homophily in tie formation.** The study adjusted for *existing* attribute similarity but could not fully exclude the possibility that people selectively *formed* or *maintained* ties with others on similar weight trajectories — a dynamic form of selection invisible to static controls.
+
+**3. Missing network.** The Framingham data records nominated friends, not the full social network. Influence may flow through unobserved ties (coworkers, family, neighbors) that correlate with both friendship nominations and weight change.
+
+</div>
+
+
+Notes:
+This slide is the L05 analogue of L03's "what Kossinets-Watts could not see" and L04's "what Zachary could not see". The pattern is deliberate: each lecture celebrates an empirical result and then identifies its blind spots. The Framingham critique is not a rejection of the study — it is a reminder that even 32-year longitudinal data with repeated measures cannot eliminate all causal alternatives. The lesson is humility, not nihilism.
+
+--
+
+## Quick Check
+
+You observe that smokers tend to befriend other smokers in a college dorm.
+
+1. What kind of data would you need beyond a single snapshot to distinguish selection from socialization?
+2. Sketch one observation pattern that would favor *selection* and one that would favor *socialization*.
+3. Even with longitudinal data, what kind of confound would remain hard to rule out?
+
+Notes:
+Give them 4 minutes. (1) Longitudinal data: friendships and smoking status at multiple time points. (2) Selection: new ties form between people who already both smoke. Socialization: non-smokers start smoking after befriending smokers. (3) Shared environment: dorm floor placement may independently cause both friendship formation and smoking uptake (e.g. shared common rooms where smoking happens).
+
+--
+
+## Quick Check — Solution
+
+**1.** Longitudinal observations — friendships and smoking status at multiple time points, with newly formed ties and newly adopted behavior visible. <!-- .element: class="fragment" -->
+
+**2.** <!-- .element: class="fragment" -->
 - *Selection*: New friendships disproportionately form between people who already share smoking status. <!-- .element: class="fragment" -->
-- *Socialization*: People who befriend smokers become more likely to start smoking themselves over the next observation period. <!-- .element: class="fragment" -->
+- *Socialization*: People who befriend smokers become more likely to start smoking in the next observation period. <!-- .element: class="fragment" -->
+
+**3.** Shared *environment* — e.g. dorm floor placement causing both friendship and smoking exposure simultaneously. Even with temporal data, confounders that evolve over time alongside both the network and the attribute are hard to rule out without randomization. <!-- .element: class="fragment" -->
 
 --
 
@@ -188,9 +352,7 @@ Give them 4 minutes. (1) Longitudinal data: friendships and smoking status obser
 
 <div class="takeaway">
 
-
-Cross-sectional graphs rarely settle the causal question. Longitudinal network data is much more informative.
-
+Cross-sectional data cannot distinguish selection from socialization — the same homophily index $r$ is consistent with both. Longitudinal network data is far more informative, but even multi-decade panel studies cannot fully eliminate confounding by evolving shared environments.
 
 </div>
 
@@ -199,20 +361,22 @@ Cross-sectional graphs rarely settle the causal question. Longitudinal network d
 
 <!-- .slide: class="module-slide" -->
 
-# Module 3
 ## Affiliation Networks
 
 
 <div class="guiding-question">
 
-**Guiding Question:** How do we represent the social settings in which ties form?
+**Guiding Question:** How do we represent the social settings — classes, clubs, workplaces — in which ties form?
 
 </div>
 
 
+Notes:
+Affiliation networks make the "shared context" mechanism from Module 2 explicit and formal. Instead of treating context as an unobserved confounder, we model it directly: people are connected to foci, and ties between people arise through their shared foci. This is the modeling answer to Question 3 from the opening slide.
+
 --
 
-## Bipartite Affiliation
+## Bipartite Affiliation Model
 
 
 <div class="columns col-2-1">
@@ -231,10 +395,19 @@ Cross-sectional graphs rarely settle the causal question. Longitudinal network d
 <div class="column">
 
 
-Affiliation networks distinguish at least two node types:
 
-- persons
-- foci such as groups, locations, classes, or organizations
+<div class="c-definition">
+
+An **affiliation network** is a bipartite graph $G = (P \cup F, E)$:
+
+- **$P$**: actor nodes (persons)
+- **$F$**: focus nodes (groups, locations, classes, organizations)
+- **$E$**: edges only between $P$ and $F$ — "person $p$ participates in focus $f$"
+
+</div>
+
+
+Two persons sharing a focus creates a *potential* for a person–person tie.
 
 
 </div>
@@ -242,19 +415,9 @@ Affiliation networks distinguish at least two node types:
 
 </div>
 
-
---
-
-## Formal Definition
-
-An affiliation network is naturally modeled as a bipartite graph:
-
-- one node set for actors
-- one node set for foci
-- edges only between actors and foci
 
 Notes:
-This slide makes the modeling step explicit. It should connect back to Lecture 02, where bipartite graphs were introduced as an extension of the simple graph model.
+This connects back to Lecture 02's bipartite graphs. The bipartite structure is a modeling decision: we choose to represent contexts as a separate node type rather than as edge attributes. The payoff is that closure processes become explicit and testable. The classroom scenario can be modeled this way: the two tracks are foci, and within-track friendships arise partly through shared-focus exposure.
 
 --
 
@@ -265,27 +428,41 @@ This slide makes the modeling step explicit. It should connect back to Lecture 0
 ![Board affiliation network](/courses/network-science/figures/affiliation-board.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
+
+<div class="c-info smaller">
+
+Corporate board interlocks: directors (bottom) sit on company boards (top). Two directors sharing a board gain exposure and may form a professional tie. Two boards sharing a director gain an information channel.
+
+</div>
+
+
 --
 
-<!-- .slide: class="figure-70" -->
+## Three Closure Processes
 
-## Closure Processes
+<!-- .slide: class="figure-70" -->
 
 ![Triadic, focal, and membership closure](/courses/network-science/figures/social-affiliation-closure.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
+
+<div class="c-definition smaller">
+
+**Triadic closure.** Friend-of-friend becomes friend — a person–person–person path closes into a triangle. *(Same mechanism as Lecture 03.)*
+
+**Focal closure.** Two persons sharing a focus become friends — a person–focus–person path closes into a person–person tie. *(New — the focus mediates the introduction.)*
+
+**Membership closure.** A friend introduces you to a focus you did not belong to — a person–person–focus path closes into a person–focus tie. *(New — the friend mediates membership.)*
+
+</div>
+
+
 Notes:
-Three closure processes operate in affiliation networks:
-
-- *Triadic closure*: friend-of-friend → friend (person-person).
-- *Focal closure*: two persons sharing a focus become friends (person-focus-person).
-- *Membership closure*: a friend introduces you to a focus (person-person-focus).
-
-All three are mechanisms that turn structure into more structure.
+All three are mechanisms that turn structure into *more* structure. Triadic closure was L03's core concept; focal and membership closure are L05's additions. In the classroom figure, within-track friendships could arise through focal closure (shared labs and lectures bring STEM students together), and if an Arts student (A1) befriends a STEM student (S4) and later joins a STEM elective, that is membership closure. The distinction matters because focal and membership closure produce homophily-like patterns *without* any personal preference for similarity.
 
 --
 
-## Quick Check 5.C: Identify the Closure Type
+## Quick Check
 
 For each scenario, identify whether triadic, focal, or membership closure is at work.
 
@@ -298,7 +475,7 @@ Give them 3 minutes. (1) Focal closure — the elective is the shared focus. (2)
 
 --
 
-## Quick Check 5.C: Solution
+## Quick Check — Solution
 
 1. **Focal closure** — the elective is the shared focus that brings them into contact. <!-- .element: class="fragment" -->
 2. **Triadic closure** — the advisor is the shared friend that closes the triangle. <!-- .element: class="fragment" -->
@@ -311,9 +488,7 @@ Give them 3 minutes. (1) Focal closure — the elective is the shared focus. (2)
 
 <div class="takeaway">
 
-
-Affiliation networks make context explicit and let us formalize focal closure and membership closure alongside ordinary triadic closure.
-
+Affiliation networks make social context explicit. Focal closure and membership closure are distinct tie-formation mechanisms that can produce homophily-like patterns without any personal preference for similarity — making them a critical alternative explanation in any homophily analysis.
 
 </div>
 
@@ -322,43 +497,49 @@ Affiliation networks make context explicit and let us formalize focal closure an
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
 ## Online Link Formation
 
 
 <div class="guiding-question">
 
-**Guiding Question:** What can large online datasets teach us about how links form over time?
+**Guiding Question:** What can large-scale online data teach us about how ties form over time?
 
 </div>
 
 
---
-
-## Formal Intuition
-
-Link formation can be studied longitudinally by observing when new edges appear and which local conditions precede them.
-
 Notes:
-Online platforms make link formation a measurable process. Every new edge has a timestamp, and every preceding state is observable. This is what makes large-scale empirical tests of homophily and closure possible.
+Online platforms make link formation a measurable process at scale. Every new edge has a timestamp, and every preceding state is observable. This is what makes large-scale empirical tests of closure possible — and it is also where we finally get the longitudinal data that Modules 1–2 argued we need.
 
 --
+
+## Triadic Closure at Scale
 
 <!-- .slide: class="figure-70" -->
-
-## Triadic Closure in Email
 
 ![Triadic closure in email communication](/courses/network-science/figures/triadic-closure-experiment.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-The probability of a new edge rises with the number of shared contacts.
+The probability of a new edge rises with the number of shared contacts — but with **diminishing returns**.
 
 Notes:
-The empirical curve shows that having 1 shared friend already raises the closure probability significantly above baseline, and additional shared friends amplify the effect. But the curve flattens — diminishing returns rather than linear growth.
+The empirical curve shows that having 1 shared friend already raises the closure probability significantly above baseline, and additional shared friends amplify the effect. But the curve flattens — the 10th shared friend adds far less than the 1st. This rules out a purely additive model.
 
 --
 
-## Focal and Membership Closure
+## A Toy Model for the Shape
+
+If each shared contact independently offers an introduction opportunity with probability $q$, then the probability of closure given $k$ shared contacts is:
+
+$$P(\text{new tie} \mid k \text{ shared}) = 1 - (1 - q)^k$$
+
+This *saturating* curve rises steeply at first and flattens as $k$ grows — matching the empirical shape qualitatively. But real curves often flatten *faster* than this model predicts, suggesting that shared contacts are not fully independent.
+
+Notes:
+The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model that produces saturation. The fact that real data flattens faster than the independent model is itself informative — it suggests redundancy among shared contacts, consistent with the embeddedness idea from L04.
+
+--
+
+## Focal and Membership Closure at Scale
 
 
 <div class="columns col-2-1">
@@ -387,34 +568,36 @@ The empirical curve shows that having 1 shared friend already raises the closure
 </div>
 
 
+
+<div class="c-info smaller">
+
+Shared foci (left) and friend-mediated memberships (right) both raise the probability of new ties — again with diminishing returns. The shapes are qualitatively similar to triadic closure, reinforcing that all three closure mechanisms share a common structural logic.
+
+</div>
+
+
 --
 
-## Interpretation
+## Quick Check
 
-Shared foci and shared friends both matter, but often with diminishing returns rather than simple linear growth.
-
-Notes:
-This is the empirical takeaway: closure is not deterministic. Shared structure raises the probability of a new edge, but always with diminishing marginal returns. No single shared contact "guarantees" closure.
-
---
-
-## Quick Check 5.D: Reading a Closure Curve
-
-A study finds that the probability of two coworkers becoming Facebook friends rises from 1% (no shared friends) to 20% (one shared friend) to 30% (two shared friends) to 33% (three or more).
+A study finds that the probability of two coworkers becoming Facebook friends rises from 1% (no shared friends) to 20% (one shared friend) to 30% (two) to 33% (three or more).
 
 1. Describe the shape of the curve.
-2. What does the diminishing-returns pattern suggest about the mechanism of closure?
+2. Fit the independent-opportunity model: what value of $q$ gives $P = 0.20$ at $k = 1$?
+3. Does the model predict the observed $P = 0.30$ at $k = 2$? What does the mismatch tell you?
 
 Notes:
-Give them 3 minutes. (1) Steep initial rise, then flattening. (2) The first shared friend provides most of the information / opportunity / trust. Additional shared friends add less because much of the social-context "credit" has already been collected. The curve is not consistent with a purely additive model.
+Give them 4 minutes. (1) Steep initial rise, then flattening. (2) At $k = 1$: $1-(1-q)^1 = q$, so $q = 0.20$. But the baseline is 1%, not 0%, so more carefully $P = 0.01 + (1-0.01)(1-(1-q))$ which still gives $q \approx 0.19$. (3) At $k = 2$: the model predicts $1 - (1-0.20)^2 = 0.36$, but we observe only 0.30. The observed curve is *flatter* than the independent model, suggesting shared friends are correlated (redundant), not independent.
 
 --
 
-## Quick Check 5.D: Solution
+## Quick Check — Solution
 
-**1. Shape:** Steep initial rise from 1% to 20% with the first shared friend, then much smaller gains (30%, 33%) for additional shared friends. <!-- .element: class="fragment" -->
+**1. Shape:** Steep initial rise from 1% to 20%, then much smaller gains (30%, 33%). <!-- .element: class="fragment" -->
 
-**2. Mechanism interpretation:** Diminishing returns suggest that the first shared contact captures most of the available "social credit" — the new opportunity, the trust, the introduction. Additional shared friends reinforce but do not multiply this effect. The mechanism is not purely additive. <!-- .element: class="fragment" -->
+**2. Estimating $q$:** At $k=1$, $P \approx 0.20 \Rightarrow q \approx 0.20$. <!-- .element: class="fragment" -->
+
+**3. At $k=2$ the independent model predicts** $1 - (1-0.20)^2 = 0.36$, **but we observe 0.30** — a shortfall. The shared friends are *correlated* (typically embedded in the same group), so they provide less independent opportunity than the model assumes. The diminishing returns are steeper than independence predicts. <!-- .element: class="fragment" -->
 
 --
 
@@ -423,9 +606,7 @@ Give them 3 minutes. (1) Steep initial rise, then flattening. (2) The first shar
 
 <div class="takeaway">
 
-
-Online traces make network formation measurable, but the mechanism still needs interpretation.
-
+Online data turns link formation into a measurable, time-stamped process. Empirical closure curves show saturation — the first shared contact matters most, and additional contacts are redundant rather than independent.
 
 </div>
 
@@ -434,8 +615,7 @@ Online traces make network formation measurable, but the mechanism still needs i
 
 <!-- .slide: class="module-slide" -->
 
-# Module 5
-## Spatial Segregation
+## From Local Preferences to Global Segregation
 
 
 <div class="guiding-question">
@@ -445,11 +625,52 @@ Online traces make network formation measurable, but the mechanism still needs i
 </div>
 
 
+Notes:
+This module answers Question 4 from the opening slide: "Would mild preferences suffice to create the sharp pattern we see?" Schelling's threshold model shows that the answer is yes — and the mechanism is iterated local adjustment, not central planning.
+
 --
 
-## Formal Intuition
+## Schelling's Threshold Model
 
-Segregation can emerge from repeated local updates even when each individual preference is mild.
+
+<div class="c-definition">
+
+**Setup.** Agents of two types are arranged on a grid (or network). Each agent $i$ has a threshold $\tau \in [0, 1]$ — the minimum fraction of same-type neighbors it needs to be "satisfied".
+
+**Update rule.**
+1. Identify all *unsatisfied* agents (fewer than fraction $\tau$ of neighbors are same-type).
+2. Each unsatisfied agent moves to a random vacant cell (or rewires a random tie in a network setting).
+3. Repeat until no agent wants to move — or until a stable oscillation is reached.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Schelling's insight (1971).** Even $\tau$ as low as $1/3$ — "I just want a third of my neighbors to be like me" — produces **sharply segregated** global patterns.
+
+</div>
+
+
+Notes:
+The formal model is simple enough to simulate in a few lines of code, yet its output is dramatically disproportionate to its input. The agent asks for 33% same-type neighbors; the iterated dynamics deliver 90%+ segregation. No agent *wanted* the global outcome; it emerged from the accumulation of individually mild adjustments.
+
+--
+
+<!-- .slide: class="figure-85" -->
+
+## One Step of the Model
+
+![Schelling threshold model — one agent's move](/courses/network-science/figures/schelling-grid.svg)
+
+
+<div class="c-info smaller">
+
+The blue agent at (1,1) has 1/5 same-type neighbors — below $\tau = 3/8$. It relocates to vacant cell (4,3), where 3/5 neighbors are same-type — satisfied. Repeat across all unsatisfied agents until equilibrium.
+
+</div>
+
 
 --
 
@@ -460,48 +681,60 @@ Segregation can emerge from repeated local updates even when each individual pre
 ![Spatial segregation in Chicago](/courses/network-science/figures/spatial-segregation-chicago.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-Notes:
-The empirical map raises a puzzle: how could such sharp boundaries emerge if individual preferences are not extreme? Schelling's answer is that even mild preferences, applied repeatedly through local moves, produce sharp global patterns.
 
---
+<div class="c-info smaller">
 
-## Schelling Interpretation
+Residential segregation in Chicago by race/ethnicity. The sharp boundaries between neighborhoods are consistent with Schelling dynamics: each household's mild preference for "some" same-type neighbors, iterated over decades of moves, produces stark global segregation.
 
-- agents prefer some minimum level of similar neighbors <!-- .element: class="fragment" -->
-- dissatisfied agents move locally <!-- .element: class="fragment" -->
-- many local moves can produce sharply segregated global patterns <!-- .element: class="fragment" -->
+</div>
 
---
-
-## Why This Matters
-
-The lesson is not limited to geography. Many network processes transform mild local rules into strong large-scale structure.
 
 Notes:
-The same logic applies to network homophily, online filter bubbles, and recommendation systems. Mild local preferences + repeated updates = sharp global segregation. No central planner needed.
+The empirical map raises the puzzle: how can boundaries be *this* sharp if individual preferences are not extreme? Schelling's model answers: iterated local moves amplify mild preferences into sharp global patterns. The same logic applies to online homophily, recommendation systems, and network rewiring.
 
 --
 
-## Quick Check 5.E: Schelling in Networks
+## From Grids to Networks
+
+In a network setting, Schelling's model becomes a **rewiring** process:
+
+- "neighbors" are graph-adjacent nodes
+- "moving" becomes dropping a tie to a dissimilar contact and forming a new tie to a similar contact
+- the threshold $\tau$ controls how much same-type concentration triggers rewiring
+
+
+<div class="fragment">
+
+**Implication for recommendation algorithms.** If a platform suggests contacts who are *similar* to your current contacts, it acts as an automated Schelling rewirer — accelerating homophily-driven segregation even beyond what individual preferences would produce alone.
+
+</div>
+
+
+Notes:
+This is the network-science translation of Schelling. The move from a spatial grid to a graph model changes the topology but preserves the core insight: mild local rules plus iterated updates produce sharp global segregation. The recommendation-algorithm connection brings the 1971 model into the 2020s: algorithms now run the Schelling update at machine speed, with consequences for filter bubbles, echo chambers, and political polarization.
+
+--
+
+## Quick Check
 
 Translate Schelling's spatial model into a network setting.
 
 1. What plays the role of "neighbor" in a network rather than a grid?
 2. What plays the role of "moving"?
-3. Predict: would you expect online recommendation algorithms to amplify or weaken homophily? Why?
+3. A social media platform recommends friends similar to your existing friends. In Schelling terms, what is the platform doing — and would you expect it to amplify or weaken homophily?
 
 Notes:
-Give them 4 minutes. (1) Network neighbors are graph-adjacent nodes; "neighborhood" is the local subgraph. (2) "Moving" becomes rewiring — dropping ties to dissimilar contacts and adding ties to similar ones. (3) Recommendation algorithms typically amplify homophily because they recommend similar content / people, accelerating the rewiring process toward more similar neighborhoods.
+Give them 4 minutes. (1) Network neighbors are graph-adjacent nodes. (2) "Moving" becomes rewiring — dropping ties to dissimilar contacts and adding ties to similar ones. (3) The platform acts as a Schelling updater: it identifies "unsatisfied" tie configurations (low similarity) and offers replacements (higher similarity). It amplifies homophily by accelerating the rewiring process.
 
 --
 
-## Quick Check 5.E: Solution
+## Quick Check — Solution
 
 **1. Network neighbor:** A graph-adjacent node — your immediate contacts. <!-- .element: class="fragment" -->
 
 **2. Moving:** Rewiring — dropping ties to dissimilar contacts and forming new ones with similar contacts. <!-- .element: class="fragment" -->
 
-**3. Algorithmic amplification:** Recommendation systems typically *amplify* homophily. They surface similar content and similar people, which accelerates the Schelling-style rewiring toward more similar neighborhoods. The local rule ("recommend what is similar") is mild, but the global outcome (filter bubbles) is sharp. <!-- .element: class="fragment" -->
+**3. The platform is an automated Schelling rewirer.** It surfaces similar people, which is equivalent to offering each agent a move toward a higher same-type fraction. This *amplifies* homophily — the local rule ("recommend similar") is mild, but at machine speed it produces sharp global outcomes (filter bubbles, echo chambers). <!-- .element: class="fragment" -->
 
 --
 
@@ -510,27 +743,35 @@ Give them 4 minutes. (1) Network neighbors are graph-adjacent nodes; "neighborho
 
 <div class="takeaway">
 
-
-Global polarization can emerge without anyone explicitly aiming for it. Mild local preferences plus repeated local updates produce sharp large-scale structure.
-
+Global polarization can emerge without anyone explicitly aiming for it. Mild local preferences plus iterated local updates produce sharp large-scale structure — and recommendation algorithms now run this process at scale.
 
 </div>
 
 
 ---
 
-## Wrap-Up
+## Wrap-Up — The Three Gaps
 
-- links often reflect both social similarity and social context
-- longitudinal data helps separate formation from influence
-- simple local preferences can generate strong global patterns
+Across Lectures 03–05, the course has exposed three kinds of gap between what we *want to know* about a network and what the data *actually shows*:
+
+| Lecture | Gap type | Theoretical ideal | Practical limitation | Strategy |
+|---|---|---|---|---|
+| **L03** | Computational | True tie labels (MaxSTC) | NP-hard | Polynomial proxies (clustering, overlap) |
+| **L04** | Computational | Optimal partition ($\max Q$) | NP-hard | Heuristics (GN, Louvain, Leiden) |
+| **L05** | Causal | Mechanism (selection vs. socialization) | Not identifiable from snapshots | Longitudinal data, affiliation models |
+
+Every concept in the three lectures occupies one cell of this table.
 
 ### Looking Ahead: Lecture 06
 
-If signs (positive and negative) and not just connections matter, how do whole social structures stabilize or destabilize? Structural balance theory turns the question of friend-and-enemy relations into a graph-theoretic claim with measurable predictions.
+If signs (positive and negative) — not just connection strengths — matter, how do whole social structures stabilize or destabilize? Structural balance theory turns the question of friend-and-enemy relations into a graph-theoretic claim with measurable predictions.
+
+### Reading
+
+Chapter 4 of Easley & Kleinberg (2010) covers homophily, selection, and socialization. McPherson, Smith-Lovin & Cook (2001), *Birds of a Feather*, is the definitive review of homophily research. Christakis & Fowler (2007) is the Framingham obesity study; Lyons (2011) provides the methodological critique.
 
 Notes:
-Plant the question for next time. The next conceptual step is to add edge attributes (sign) and ask whether the network as a whole is "consistent" — a property that turns out to have a clean structural characterization.
+The three-gap table closes the L03–L05 arc. The computational gap and the causal gap are fundamentally different in character: the first is about algorithms, the second is about study design. Both are present in any real network analysis, and the responsible analyst must address both. Lecture 06 opens a new thread — signed graphs and structural balance — which introduces yet another kind of constraint: not computational or causal but *logical* (can the sign pattern be consistent across all triangles?).
 
 ---
 
@@ -541,6 +782,7 @@ Plant the question for next time. The next conceptual step is to add edge attrib
 - Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
+
 
       const plugins = [
         window.RevealMarkdown,
@@ -617,6 +859,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

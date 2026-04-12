@@ -1,187 +1,103 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 06: Structural Balance</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 06: Structural Balance</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 06: Structural Balance
 
-5942UE Network Science
-
-18 March 2026
-
 Prof. Dr. Michael Granitzer
+
 Dr. Kanishka Ghosh Dastidar
+
 Dr. Jelena Mitrovic
 
----
-
-## Structural Balance
-
-We now study **signed networks** where relations can be positive or negative.
-
-### Focus
-
-- complete signed graphs
-- structural balance and its global theorem
-- applications to politics and online trust
-- weak and relaxed balance
+Notes:
+This lecture moves from unsigned to **signed** graphs — edges carry a positive or negative label representing alliance/rivalry, trust/distrust, like/dislike. The central insight is that a simple local constraint on triangles forces a surprisingly rigid global structure. That interplay between local psychology and global organization is what makes structural balance one of the most elegant results in network science. The lecture continues the course arc by introducing a fourth kind of gap: the Balance Theorem applies to complete graphs, but real networks are sparse and noisy — so we need approximate balance measures, the same modeling/measurement pattern from L03–L05.
 
 ---
 
-<!-- .slide: class="module-slide" -->
+## From Unsigned to Signed Graphs
 
-# Module 1
-## Structural Balance Theorem
+So far, an edge meant "connected." Starting now, every edge also carries a **sign**: positive (+) for alliance, friendship, or trust; negative (−) for rivalry, hostility, or distrust.
 
---
-
-## Guiding Question
-
-What global network structures are compatible with psychologically plausible signed triangles?
+This one addition — a single bit per edge — turns out to constrain global structure powerfully.
 
 --
 
-<!-- .slide: class="figure-72" -->
+<!-- .slide: class="figure-85" -->
 
-## Structural Balance Property
+## A Motivating Scenario
 
-![Balanced and unbalanced signed triangles](/courses/network-science/figures/structural-balance-property-example.png)
-
-A complete signed graph is **structurally balanced** if every triangle is either all-positive or has exactly one positive edge.
-
---
-
-## Core Result
-
-If a complete signed graph is balanced, then its nodes can be partitioned into:
-
-- one all-positive block
-- or two internally positive blocks with all negative edges between them
-
---
-
-<!-- .slide: class="figure-72" -->
-
-## Balanced as Camps
-
-![Balanced signed network as camps](/courses/network-science/figures/structural-balance-camps.svg)
-
---
-
-## Interpretation
-
-If the graph is balanced, it must collapse into either:
-
-- one all-friends block
-- or two internally friendly blocks with hostility between them
+![Cold War alliances as a signed graph — two eras](/courses/network-science/figures/l06-scenario.svg)
 
 
-<div class="takeaway">
+<div class="c-info smaller">
 
-This is a classic example of a local constraint producing strong global organization.
+Five nations during the Cold War. **Left:** pre-1960, all alliances and rivalries form two clean blocs — every triangle is balanced. **Right:** after the 1969 Sino-Soviet split, USSR–China flips to −, creating all-negative triangles. The two-bloc structure breaks.
 
 </div>
 
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 2
-## Applications
-
---
-
-## Guiding Question
-
-What do signed-network models help us explain in real settings?
-
---
-
-## Formal Intuition
-
-Signed networks extend graphs by giving each edge a **positive or negative label**.
-
---
-
-<!-- .slide: class="figure-72" -->
-
-## International Relations
-
-![International relations and structural balance](/courses/network-science/figures/international-relations.png)
-
-Structural balance can describe alliance formation and polarization into camps.
-
---
-
-## Online Trust
-
-Signed ties can also model:
-
-- **trust and distrust**
-- **recommendation and warning**
-- **support and opposition**
-
---
-
-## Interpretation
-
-On trust platforms, positive and negative links do not behave exactly like undirected friendship and hostility, but the balance framework still suggests useful questions:
-
-- when should distrust propagate?
-- when do trust triangles stabilize?
-- what patterns indicate factional structure?
-
-
-<div class="takeaway">
-
-Applications are strongest when the signed model is treated as an approximation, not as a literal truth.
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 3
-## Weak Structural Balance
-
---
-
-## Guiding Question
-
-What changes if "the enemy of my enemy" is not forced to become my friend?
-
---
-
-<!-- .slide: class="figure-60" -->
-
-## Counterexample
-
-![Weakly balanced network example](/courses/network-science/figures/weak-balanced-network.png)
-
---
-
-## Weak Balance
-
-**Weak structural balance** forbids triangles with exactly two positive edges and one negative edge, but allows all-negative triangles.
 
 Notes:
-State the rule clearly before the interpretation. The point is that one local relaxation changes the global theorem.
+This figure is the anchor for the lecture. Use it to seed the four questions on the next slide. By the end of the session students should be able to (a) classify every triangle in both panels, (b) explain why the left panel is balanced and the right is not under strong balance, (c) show that the right panel satisfies weak balance with three coalitions, and (d) connect the triangle counts to Leskovec et al.'s empirical findings.
 
 --
 
-## Interpretation
+## Four Questions from One Picture
 
-That relaxation changes the global theorem:
 
-- instead of exactly two camps
-- the graph may split into **multiple** internally positive groups
-- with negative ties between groups
+<div class="columns">
+
+
+<div class="column col-2-1">
+
+1. **Local stability.** Which signed triangles feel psychologically "stable" — and which feel like they should change?
+2. **Global structure.** If every triangle is stable, what does that force the *whole* graph to look like?
+3. **Relaxation.** When a three-way rivalry (all −) appears, does the two-bloc theorem still hold — or do we need more camps?
+4. **Measurement.** In a real signed network with millions of edges, how close to balanced is it — and how would we know?
+
+Every concept in today's lecture answers one of these.
+
+</div>
+
+
+<div class="column top">
+
+![Cold War alliances](/courses/network-science/figures/l06-scenario.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Questions 1–2 are Module 1 (Balance Theorem). Question 3 is Module 2 (Weak Balance). Question 4 spans Modules 3–4 (empirical test and approximate balance). Keep referring back to the Cold War figure throughout.
+
+--
+
+## A New Kind of Gap
+
+L03–L04 had a **computational** gap: MaxSTC and modularity maximization are NP-hard.
+L05 had a **causal** gap: cross-sectional data cannot identify selection vs. socialization.
+
+L06 has a **structural** gap: the Balance Theorem requires a *complete* signed graph, but real networks are *sparse*. Most pairs have no observed edge, so the theorem's premise is never met exactly.
+
+| Lecture | Gap type | Ideal | Reality | Strategy |
+|---|---|---|---|---|
+| L03–L04 | Computational | Exact optimization | NP-hard | Polynomial heuristics |
+| L05 | Causal | Mechanism identification | Snapshots insufficient | Longitudinal data |
+| L06 | Structural | Complete signed graph | Sparse, noisy data | Approximate balance measures |
+
+Notes:
+Naming the gap type up front gives students a framework for understanding why the clean theorems of Module 1 do not directly apply to real data, and why Modules 3–4 are necessary.
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
 
-Changing one local rule can change the entire global picture.
+Adding a sign to each edge creates a surprisingly powerful local constraint. The structural balance theorem turns triangle-level psychology into a global two-bloc prediction — but applying it to real data requires dealing with incompleteness and approximation.
 
 </div>
 
@@ -190,60 +106,559 @@ Changing one local rule can change the entire global picture.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## Relaxed and Incomplete Balance
+## Signed Graphs and Structural Balance
+
+
+<div class="guiding-question">
+
+**Guiding Question:** If every triangle in a signed graph is "psychologically stable," what does that force the global structure to be?
+
+</div>
+
+
+Notes:
+This module introduces signed graphs formally, presents Heider's psychological motivation, classifies the four triangle types, states the Balance Theorem, and sketches its proof. It answers Questions 1 and 2 from the opening.
 
 --
 
-## Guiding Question
+## Heider's Insight (1946)
 
-How can we reason about balance when graphs are incomplete or only approximately balanced?
 
---
+<div class="c-info">
 
-## Incomplete Graphs
+**Fritz Heider (1946),** *Attitudes and Cognitive Organization*, [**Journal of Psychology 21, 107–112**](https://doi.org/10.1080/00223980.1946.9917275).
 
-Not every pair of actors has a known signed relation. That forces us to ask whether balance can still be inferred from **partial evidence**.
+Heider proposed that people experience psychological tension ("cognitive dissonance") when their relationships form certain patterns — for example, two friends who both dislike the same person feel stable, but two friends who disagree about a third person feel pressure to change.
 
---
+</div>
 
-## Odd Negative Cycles
 
-$$
-\text{odd number of negative edges on a cycle} \Rightarrow \text{not balanced}
-$$
 
---
+<div class="fragment">
 
-## Formal Intuition
+The network-science formalization: encode the tension as a constraint on **signed triangles**.
 
-Once completeness is dropped, balance is no longer a simple triangle-only condition.
+</div>
 
-Instead, the question becomes whether the observed graph is compatible with an **approximately balanced partition**.
+
+Notes:
+Heider's paper is the origin of the entire field. His psychological intuition — that certain configurations of friend/enemy relationships are stable and others are unstable — was formalized into a graph-theoretic result by Cartwright & Harary (1956). The result is one of the earliest examples of a local psychological rule producing a provable global structural constraint.
 
 --
 
-## Approximate Balance
+## Signed Graphs — Formal Definition
 
-In real data, a graph can be **mostly balanced** without satisfying the theorem perfectly. Then the right question is whether it is close to a balanced partition.
+
+<div class="c-definition">
+
+A **signed graph** is a pair $(G, \sigma)$ where $G = (V, E)$ is a graph and $\sigma : E \to \{+, -\}$ assigns a sign to every edge.
+
+- $\sigma(e) = +$: alliance, friendship, trust
+- $\sigma(e) = -$: rivalry, hostility, distrust
+
+</div>
+
+
+A **complete signed graph** has an edge (with some sign) between every pair of nodes.
+
+Notes:
+The completeness assumption matters: the Balance Theorem requires every pair to have a signed relationship. In the Cold War scenario, the five nations form a complete signed graph — every pair has a clear alliance or rivalry. In real social networks, most pairs have no observed edge, which is why Module 4 introduces approximate balance.
+
+--
+
+<!-- .slide: class="figure-100" -->
+
+## The Four Signed Triangles
+
+![The four signed triangles: +++, ++−, +−−, −−−](/courses/network-science/figures/signed-triangles.svg)
+
+
+<div class="c-info smaller">
+
+A triangle is **balanced** if and only if it has an **even** number of negative edges (0 or 2). The $(+\,+\,-)$ triangle is unstable: two friends share an enemy, creating pressure for one friendship to break. The $(- \,- \,-)$ triangle is the ambiguous case — stable under weak balance but not strong.
+
+</div>
+
+
+Notes:
+The even-number rule is the fastest way to classify triangles. The psychological interpretations are: $(+++)$ "all friends" — no tension; $(++-)$ "two friends disagree about a third" — tension, someone must change; $(+--)$ "the enemy of my friend is my enemy" — stable; $(-\!-\!-)$ "three-way rivalry" — everyone would benefit from allying with *someone*, but who? The last case is what distinguishes strong from weak balance.
+
+--
+
+## The Structural Balance Theorem
+
+
+<div class="c-definition">
+
+**Structural Balance Theorem (Cartwright & Harary, 1956).** A complete signed graph $(G, \sigma)$ is balanced — i.e., every triangle has an even number of negative edges — if and only if the nodes can be partitioned into **at most two** groups such that:
+
+- every edge *within* a group is positive
+- every edge *between* groups is negative
+
+</div>
+
+
+In other words: **balance implies two camps**.
+
+Notes:
+This is one of the cleanest results in network science. A local triangle constraint produces a rigid global structure with only two possible shapes: one all-positive group (if everyone is friends) or two internally friendly groups with mutual hostility. There is no third option. The Cold War pre-1960 panel is the canonical illustration: {USA, UK, France} vs. {USSR, China}.
+
+--
+
+## Proof Sketch
+
+
+<div class="c-info smaller">
+
+*Direction 1 (camps → balance):* If the graph splits into ≤2 camps with + inside and − between, then every triangle has 0 or 2 negative edges (check the three possible placements of three nodes across two groups). ✓
+
+*Direction 2 (balance → camps):* Pick any node $v$, and put all its friends ($+$ neighbors) in group $A$ with $v$, and all its enemies ($-$ neighbors) in group $B$. Now take any two nodes $u, w$ in group $A$. They are both friends of $v$, so the triangle $v$–$u$–$w$ has two positive edges ($v$–$u$ and $v$–$w$). For the triangle to be balanced, $u$–$w$ must be $+$. By symmetric reasoning, any two nodes in $B$ are linked by $+$, and any pair $(a \in A, b \in B)$ by $-$. ✓
+
+</div>
+
+
+Notes:
+The proof of direction 2 is worth walking through explicitly because it shows *why* the local rule cascades globally. Once you fix one node's partition, every other node's assignment is forced. The proof also reveals the key assumption: *completeness*. If some edges are missing, the cascade does not work — which is exactly the structural gap we flagged in the introduction.
+
+--
+
+## Back to the Cold War
+
+In the pre-1960 panel: **all 10 triangles** in $K_5$ are balanced.
+
+| Triangle | Signs | Count of − | Balanced? |
+|---|---|---|---|
+| USA–UK–France | $+\,+\,+$ | 0 | ✓ |
+| USA–UK–USSR | $+\,-\,-$ | 2 | ✓ |
+| USA–UK–China | $+\,-\,-$ | 2 | ✓ |
+| USA–France–USSR | $+\,-\,-$ | 2 | ✓ |
+| USA–France–China | $+\,-\,-$ | 2 | ✓ |
+| USA–USSR–China | $-\,-\,+$ | 2 | ✓ |
+| UK–France–USSR | $+\,-\,-$ | 2 | ✓ |
+| UK–France–China | $+\,-\,-$ | 2 | ✓ |
+| UK–USSR–China | $-\,-\,+$ | 2 | ✓ |
+| France–USSR–China | $-\,-\,+$ | 2 | ✓ |
+
+The theorem correctly predicts two camps: {USA, UK, France} and {USSR, China}.
+
+Notes:
+Walking through every triangle on a small example makes the theorem concrete. Students can verify each row, and the pattern becomes visible: the only triangles with 0 negative edges are all-Western; all others have exactly 2 negative edges (one cross-bloc edge per Western pair). The count confirms the prediction mechanically.
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
 
-Relaxed balance is more realistic, but it replaces sharp theorems with softer structural diagnostics.
+The Structural Balance Theorem is a rare example of a local constraint (triangle psychology) producing a clean global prediction (two camps). A single triangle rule, applied consistently across a complete signed graph, locks the entire network into a rigid two-bloc structure.
+
+</div>
+
+
+--
+
+## Quick Check
+
+Consider four nations with the following signed edges: A–B: +, A–C: +, A–D: −, B–C: +, B–D: −, C–D: −.
+
+1. List all four triangles and classify each as balanced or unbalanced.
+2. Is the graph balanced? If so, what are the two camps?
+3. If we flip the C–D edge from − to +, which triangle(s) become unbalanced?
+
+Notes:
+Give them 5 minutes. (1) ABC: +++, balanced. ABD: +−−, balanced. ACD: +−−, balanced. BCD: +−−, balanced. (2) All balanced → yes. Camps: {A,B,C} vs {D}. (3) Flipping C–D to + makes triangle BCD become ++− (unbalanced) and ACD become ++− (unbalanced), while ABC stays +++ and ABD stays +−−.
+
+--
+
+## Quick Check — Solution
+
+**1. Triangle classification:**
+
+| Triangle | Signs | Balanced? |
+|---|---|---|
+| A–B–C | $+\,+\,+$ | ✓ |
+| A–B–D | $+\,-\,-$ | ✓ |
+| A–C–D | $+\,-\,-$ | ✓ |
+| B–C–D | $+\,-\,-$ | ✓ |
+
+**2.** All balanced → **yes**. Camps: $\{A, B, C\}$ vs $\{D\}$. <!-- .element: class="fragment" -->
+
+**3.** Flipping C–D to + makes: <!-- .element: class="fragment" -->
+- A–C–D → $+\,+\,+$ ✓ (still balanced) <!-- .element: class="fragment" -->
+- B–C–D → $+\,+\,-$ ✗ (unbalanced — B and C are friends, C and D are now friends, but B and D are enemies) <!-- .element: class="fragment" -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Weak Structural Balance
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What happens to the two-camps theorem when three-way rivalries are allowed?
+
+</div>
+
+
+Notes:
+The Sino-Soviet split in the Cold War scenario motivates this module directly. After 1969, the triangle USA–USSR–China is all-negative (−−−). Under strong balance this is forbidden; under weak balance it is allowed. The global consequence: instead of exactly two camps, we get *multiple* camps.
+
+--
+
+## The Problem with All-Negative Triangles
+
+In the post-1969 Cold War panel, the triangle USA–USSR–China has three negative edges.
+
+Under strong balance, this is **unbalanced** — the theorem says the graph cannot split into two camps. But historically, the world *did* function with three separate power blocs: {USA, UK, France}, {USSR}, {China}.
+
+
+<div class="fragment">
+
+The issue is psychological: a three-way rivalry may be *unstable* (each party would benefit from allying with someone), but it is not *contradictory* in the way that $(+\,+\,-)$ is. Two friends disagreeing about a third face direct tension; three mutual enemies merely face *opportunity*.
+
+</div>
+
+
+Notes:
+The psychological distinction is important: $(+\,+\,-)$ creates active dissonance within the triangle (your friend's enemy is your friend), while $(-\,-\,-)$ creates no such contradiction — nobody expects their enemy's enemy to be their friend. Davis (1967) formalized this distinction into weak structural balance.
+
+--
+
+## Weak Balance — Definition
+
+
+<div class="c-definition">
+
+**Weak Structural Balance (Davis, 1967).** A complete signed graph is **weakly balanced** if it contains no triangle with exactly **one** negative edge $(+\,+\,-)$. All-negative triangles $(- \,- \,-)$ are permitted.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Weak Balance Theorem.** A complete signed graph is weakly balanced if and only if the nodes can be partitioned into $k \geq 1$ groups such that:
+
+- every edge *within* a group is positive
+- every edge *between* groups is negative
+
+(Strong balance is the special case $k \leq 2$.)
+
+</div>
+
+
+Notes:
+The relaxation is small — permit one additional triangle type — but the global consequence is large: instead of ≤2 camps, we can have *any number* of internally friendly, mutually hostile coalitions. The Cold War after 1969 illustrates $k = 3$: Western Bloc, Soviet Bloc, China. This is a powerful example of how changing one local rule changes the entire global picture.
+
+--
+
+## Back to the Cold War — Post-1969
+
+After the Sino-Soviet split, the five-nation graph has:
+
+- $(+\,+\,+)$ triangles: USA–UK–France ✓
+- $(+\,-\,-)$ triangles: all Western-pair + one Eastern node (6 triangles) ✓
+- $(-\,-\,-)$ triangles: USA–USSR–China, UK–USSR–China, France–USSR–China ✓ under weak balance
+
+
+<div class="fragment">
+
+No $(+\,+\,-)$ triangles exist → **weakly balanced**.
+
+Partition into 3 camps: $\{\text{USA, UK, France}\}$, $\{\text{USSR}\}$, $\{\text{China}\}$.
+
+</div>
+
+
+Notes:
+The check is now easy: students just need to confirm no $(+\,+\,-)$ triangle exists. The three all-negative triangles are exactly the ones that strong balance forbids but weak balance permits. The result: three camps instead of two, matching the historical reality of a multipolar Cold War after 1969.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Weak balance replaces the two-bloc theorem with a $k$-coalition theorem. Permitting all-negative triangles allows multiple hostile camps — a better model for real-world multipolar structures like the post-1969 Cold War.
+
+</div>
+
+
+--
+
+## Quick Check
+
+A social network of 6 people has the following signed edges (complete graph):
+
+- Within $\{A, B\}$: all +
+- Within $\{C, D\}$: all +
+- Within $\{E, F\}$: all +
+- Between any two groups: all −
+
+1. Is this graph balanced (strong)? Why or why not?
+2. Is it weakly balanced?
+3. What is the minimum number of edge flips needed to make it strongly balanced?
+
+Notes:
+Give them 4 minutes. (1) Not strongly balanced: triangles like A–C–E are all-negative (−−−). (2) Yes, weakly balanced: no $(+\,+\,-)$ triangles exist. Three camps: {A,B}, {C,D}, {E,F}. (3) To make it strongly balanced (≤2 camps), we need to merge at least two camps. Merging {C,D} into {A,B} means flipping 4 inter-group edges from − to +. So minimum 4 flips.
+
+--
+
+## Quick Check — Solution
+
+**1. Not strongly balanced.** Triangles like A–C–E have three negative edges — forbidden under strong balance. <!-- .element: class="fragment" -->
+
+**2. Yes, weakly balanced.** No $(+\,+\,-)$ triangle exists. Three camps: $\{A,B\}$, $\{C,D\}$, $\{E,F\}$. <!-- .element: class="fragment" -->
+
+**3. Minimum 4 flips.** Strong balance requires ≤2 camps. To merge {C,D} into {A,B}, flip the 4 cross-group edges (A–C, A–D, B–C, B–D) from − to +. Then the two camps are {A,B,C,D} and {E,F}. <!-- .element: class="fragment" -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Empirical Test: Signed Networks in Social Media
+
+
+<div class="guiding-question">
+
+**Guiding Question:** In real signed networks with millions of edges, does balance actually hold?
+
+</div>
+
+
+Notes:
+This module provides the empirical anchor for L06, following the same pattern as Kossinets-Watts (L03), Zachary (L04), and Christakis-Fowler (L05). The study is Leskovec, Huttenlocher & Kleinberg (2010), which analyzed three large online signed networks and found that triangle-level balance holds remarkably well — but with important caveats.
+
+--
+
+## The Study
+
+
+<div class="c-info">
+
+**Leskovec, Huttenlocher & Kleinberg (2010),** *Predicting Positive and Negative Links in Online Social Networks*, [**Proc. 19th International Conference on World Wide Web (WWW), 641–650**](https://doi.org/10.1145/1772690.1772756).
+
+They analyzed three large signed networks:
+
+| Platform | Nodes | Signed edges | Type |
+|---|---|---|---|
+| **Epinions** | 131 828 | 841 372 | trust / distrust |
+| **Slashdot** | 82 144 | 549 202 | friend / foe |
+| **Wikipedia** | 7 118 | 103 747 | support / oppose (admin elections) |
+
+</div>
+
+
+Notes:
+These are among the largest signed networks ever studied. Epinions was a product-review platform where users could mark others as trusted or distrusted. Slashdot let users tag others as "friend" or "foe." Wikipedia admin elections record public support/oppose votes. All three provide explicit positive and negative edges — no inference needed.
+
+--
+
+## What They Found
+
+**Triangle-level balance is remarkably strong:**
+
+| Triangle type | Expected (random signs) | Observed (Epinions) |
+|---|---|---|
+| $+\,+\,+$ | ~12.5% | ~47% |
+| $+\,+\,-$ | ~37.5% | ~**8%** |
+| $+\,-\,-$ | ~37.5% | ~37% |
+| $-\,-\,-$ | ~12.5% | ~8% |
+
+
+<div class="fragment">
+
+The $(+\,+\,-)$ type — the one both strong and weak balance forbid — is **massively underrepresented** (~8% vs. 37.5% expected). The balanced types $(+\,+\,+)$ and $(+\,-\,-)$ are overrepresented. Balance is not perfect, but the skew is dramatic.
+
+</div>
+
+
+Notes:
+The random baseline assumes each edge is independently + or − with the observed overall positive rate. The deviation from this baseline is the evidence for balance. The key number: $(+\,+\,-)$ is suppressed by a factor of ~5×. This is the strongest possible evidence that local balance constraints shape global structure in real signed networks. The $(- \,- \,-)$ underrepresentation is also noteworthy — it falls between the strong and weak balance predictions.
+
+--
+
+## What the Study Could Not See
+
+
+<div class="c-info">
+
+**1. Sparse, not complete.** The Balance Theorem assumes a complete signed graph. These networks are extremely sparse — most pairs have no edge. The theorem's prediction (two or k camps) does not directly apply; the study tests triangle statistics, not the global partition.
+
+**2. Directed signs.** On Epinions, trust and distrust are *directed* — A can trust B without B trusting A. The balance framework assumes undirected signs. Directed balance theory exists (Leskovec et al. explore it) but is less clean.
+
+**3. Missing negative edges.** People are less likely to *create* a negative edge than to simply *not interact*. The observed negative edges are a biased sample: they represent actively expressed hostility, not indifference. The "true" signed graph — if every pair had a relationship — might look different.
+
+**4. Temporal dynamics.** The data is a snapshot. Balance theory predicts an *equilibrium*; the snapshot might capture a network mid-transition, with unbalanced triangles that are in the process of resolving.
+
+</div>
+
+
+Notes:
+This follows the L03–L05 pattern: celebrate the result, then identify blind spots. The sparsity issue is the most fundamental: the Balance Theorem is a statement about complete graphs, and no real network is complete. The study's response — test triangle statistics rather than global partition — is a pragmatic substitute, but it leaves open whether the *global* structure is consistent with balance. Module 4 introduces tools for addressing this gap.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Leskovec et al. (2010) showed that balance holds at the triangle level in large online signed networks: the forbidden $(+\,+\,-)$ type is massively underrepresented. But real networks are sparse and directed, so the clean two-camp prediction of the Balance Theorem must be tested through approximate measures, not exact partition.
 
 </div>
 
 
 ---
 
-## Wrap-Up
+<!-- .slide: class="module-slide" -->
 
-- local triangle constraints imply strong global structure
-- signed networks are analytically powerful but assumption-heavy
-- relaxing the assumptions changes both the theorem and the interpretation
+## Incomplete and Approximate Balance
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How can we assess balance when the graph is incomplete or only approximately balanced?
+
+</div>
+
+
+Notes:
+This module addresses the structural gap identified in the introduction: the Balance Theorem requires completeness, but real networks are sparse. We need tools that work on partial data. Two approaches: the cycle-based criterion (extend balance from triangles to all cycles) and the frustration index (measure distance from the nearest balanced graph).
+
+--
+
+## From Triangles to Cycles
+
+On a complete graph, checking triangles is sufficient for balance (the theorem guarantees it). On an *incomplete* graph, triangles alone are not enough — balance must be checked on **all cycles**.
+
+
+<div class="c-definition">
+
+**Cycle criterion.** A signed graph $(G, \sigma)$ is balanced if and only if every cycle in $G$ has an **even** number of negative edges.
+
+Equivalently: no cycle has an odd number of negative edges.
+
+</div>
+
+
+Notes:
+This is Harary's generalization (1953). On a complete graph it reduces to checking triangles, because every longer cycle can be decomposed into triangles and the triangle condition implies the cycle condition. On a sparse graph, the cycle condition is strictly stronger: a graph can have all balanced triangles but still contain unbalanced longer cycles. The cycle criterion is the formally correct definition for incomplete signed graphs.
+
+--
+
+## The Frustration Index
+
+In real data, perfect balance is rare. The natural question becomes: **how far** is the graph from balanced?
+
+
+<div class="c-definition">
+
+**Frustration index** $F(G, \sigma)$: the minimum number of edges whose sign must be flipped to make the graph balanced.
+
+$$F(G, \sigma) = \min_{\sigma'} |\{e \in E : \sigma(e) \neq \sigma'(e)\}|$$
+
+subject to $(G, \sigma')$ being balanced.
+
+</div>
+
+
+
+<div class="fragment">
+
+**Normalized frustration:** $f = F / |E|$. If $f \approx 0$, the graph is near-balanced; if $f \approx 0.5$, it is no more balanced than a randomly signed graph.
+
+</div>
+
+
+Notes:
+The frustration index is the signed-graph analogue of the edit distance to the nearest balanced partition. Computing it exactly is NP-hard in general (it reduces to a graph-cut problem), but good approximations exist — including spectral methods that use the signed Laplacian. The normalized version $f$ provides a scale-independent measure that can be compared across networks.
+
+--
+
+## Computing Approximate Balance
+
+
+<div class="c-info smaller">
+
+**Exact computation.** Finding $F$ exactly is NP-hard (equivalent to a minimum-weight graph cut on a related unsigned graph). On small graphs, integer programming or brute force works; on large graphs, we need heuristics.
+
+**Spectral approach.** The **signed Laplacian** $L_\sigma = D - A_\sigma$ (where $A_\sigma$ has entries $+1$ or $-1$) has the property that $(G, \sigma)$ is balanced iff the smallest eigenvalue $\lambda_1(L_\sigma) = 0$. The magnitude of $\lambda_1$ quantifies how far the graph is from balanced.
+
+**Practical rule of thumb.** For large networks, count the fraction of balanced triangles ($T_{\text{bal}} / T_{\text{total}}$) as a fast proxy. Leskovec et al.'s Epinions data had $T_{\text{bal}} / T_{\text{total}} \approx 0.92$.
+
+</div>
+
+
+Notes:
+The spectral approach connects to L04's eigenvector centrality: both use properties of the graph's matrix representation. The signed Laplacian is the natural extension of the unsigned Laplacian to signed graphs, and its spectrum encodes balance information just as the unsigned Laplacian's spectrum encodes connectivity information. For large networks, the balanced-triangle fraction is the cheapest informative statistic — it is what Leskovec et al. actually computed.
+
+--
+
+## Quick Check
+
+A signed graph on 5 nodes has 7 edges. You compute that 8 out of 10 triangles are balanced and 2 are unbalanced (both of type $+\,+\,-$).
+
+1. Is the graph balanced? Why or why not?
+2. Can you conclude that the frustration index is exactly 2?
+3. What additional information would you need to determine the exact frustration index?
+
+Notes:
+Give them 4 minutes. (1) No — balanced requires *all* triangles (and all cycles) to be balanced. Two unbalanced triangles means the graph is not balanced. (2) No — the frustration index counts *edge flips*, not unbalanced triangles. Two unbalanced triangles might share an edge; flipping that one edge could fix both. So $F \leq 2$ but could be 1. (3) You would need the full edge list and sign assignment to determine which specific edges, when flipped, resolve all imbalances with the fewest changes.
+
+--
+
+## Quick Check — Solution
+
+**1. Not balanced.** Two unbalanced triangles violate the "every triangle must be balanced" condition. <!-- .element: class="fragment" -->
+
+**2. No.** Frustration index counts *edge flips*, not unbalanced triangles. The two bad triangles might share an edge — flipping that one shared edge could fix both. So $F \leq 2$, but $F$ could be as low as 1. <!-- .element: class="fragment" -->
+
+**3. You need the full graph** — which nodes and edges form the unbalanced triangles, and whether they share edges. Determining $F$ exactly requires solving a minimum-cut problem on the graph (NP-hard in general, but tractable on small instances). <!-- .element: class="fragment" -->
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Real signed networks are sparse and imperfect. The frustration index and the balanced-triangle fraction are the practical tools for measuring how close a network is to the balanced ideal — replacing the all-or-nothing theorem with a quantitative diagnostic.
+
+</div>
+
+
+---
+
+## Wrap-Up — The Four Gaps
+
+Across Lectures 03–06, the course has exposed four kinds of gap between theory and data:
+
+| Lecture | Gap type | Theoretical ideal | Practical limitation | Strategy |
+|---|---|---|---|---|
+| **L03** | Computational | True tie labels (MaxSTC) | NP-hard | Polynomial proxies |
+| **L04** | Computational | Optimal partition ($\max Q$) | NP-hard | GN, Louvain, Leiden |
+| **L05** | Causal | Mechanism identification | Snapshots insufficient | Longitudinal data |
+| **L06** | Structural | Complete balanced graph | Sparse, noisy data | Frustration index, spectral methods |
+
+Every concept in the four lectures occupies one cell of this table.
+
+### Looking Ahead: Lecture 07
+
+How can a network be both locally clustered *and* globally navigable? Small-world networks show that a handful of random long-range shortcuts dramatically reduce path lengths — reconciling clustering and short paths without sacrificing either.
+
+### Reading
+
+Chapter 5 of Easley & Kleinberg (2010) covers structural balance theory, weak balance, and applications. Heider (1946) and Cartwright & Harary (1956) are the original sources. Leskovec, Huttenlocher & Kleinberg (2010) is the empirical study on signed social networks.
+
+Notes:
+The four-gap table closes the L03–L06 arc. Each lecture introduced a different kind of obstacle between the theoretical construct and the real-world measurement: computational (NP-hardness), causal (unidentifiable mechanisms), and structural (completeness assumptions unmet). All four share the same response pattern: fall back on approximate tools and be explicit about what the approximation costs. Lecture 07 changes direction: instead of analyzing existing networks, it asks how networks can *simultaneously* exhibit two seemingly contradictory properties — high clustering and short paths — and introduces generative models (Watts–Strogatz) for the first time.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
+
 
       const plugins = [
         window.RevealMarkdown,
@@ -320,6 +735,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the

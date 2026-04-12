@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 02: Graph Theory</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BnQ8qxmX.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 02: Graph Theory</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 02: Graph Theory
@@ -882,7 +882,7 @@ Breadth-first search explores a graph layer by layer, guaranteeing shortest path
 <div class="column top">
 
 
-<div class="c-note">
+<div class="c-info">
 
 
 **Key Properties:** 
@@ -915,7 +915,7 @@ Breadth-first search explores a graph layer by layer, guaranteeing shortest path
 
 
 
-<div class="c-note">
+<div class="c-info">
 
  **BFS layer-by-layer expansion.** Starting from "You" (layer 0), BFS discovers all direct neighbors (layer 1), then all not-yet-visited neighbors of those (layer 2), and so on.
 
@@ -955,7 +955,7 @@ The core of Breadth-First Search (BFS) is the FIFO (First-In, First-Out) queue. 
 
 
 
-<div class="c-note small">
+<div class="c-info small">
 
 BFS applied to the ARPANET topology starting from UCLA. Node color encodes BFS layer (distance).
 
@@ -1031,7 +1031,7 @@ Depth-first search traverses as deep as possible along each branch before backtr
 <div class="column top">
 
 
-<div class="c-note">
+<div class="c-info">
 
 **Key Properties:** 
 
@@ -1065,7 +1065,7 @@ DFS is the stack-based counterpart to BFS. Instead of exploring layer-by-layer, 
 
 
 
-<div class="c-note small">
+<div class="c-info small">
 
 **DFS deep expansion.** Starting from "You", DFS picks one neighbor and immediately proceeds to that neighbor's neighbors. It only returns to explore other branches (backtracking) when it hits a "dead end" where all neighbors of the current node are already visited.
 
@@ -1101,7 +1101,7 @@ In contrast to the "ripple in a pond" behavior of BFS, DFS acts like a "snake in
 
 
 
-<div class="c-note small">
+<div class="c-info small">
 
 DFS applied to the ARPANET. Node numbers indicate the order in which nodes were discovered. Notice how the search can wander far across the network before exploring nodes physically close to the start.
 
@@ -1185,7 +1185,7 @@ BFS explores layer by layer. For **weighted** graphs, we use Dijkstra's algorith
 
 
 
-<div class="c-note">
+<div class="c-info">
 
 **BFS vs. Dijkstra.** BFS explores identical layers. Dijkstra uses a priority queue to always expand the currently cheapest unvisited node. Complexity: $O((|V|+|E|)\log |V|)$.
 
@@ -1598,6 +1598,7 @@ This lecture has established the fundamental vocabulary of network science. By t
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
+
       const plugins = [
         window.RevealMarkdown,
         window.RevealMath?.KaTeX,
@@ -1673,6 +1674,13 @@ const tocProgressConfig = {};
         },
         plugins,
       }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
         // Wire the custom menu panel controls to plugin APIs. The
         // menu panel HTML is injected synchronously by reveal.js-menu
         // during init, so by the time this promise resolves the
