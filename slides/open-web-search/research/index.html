@@ -1254,6 +1254,78 @@ OURRS (built on Vespa) extends the remote index with a full REST search API:
 | Download | owilix | B2ACCESS (LEXIS) |
 | SQL queries | DuckDB remote | B2ACCESS |
 | REST search | OURRS API | API key |
+| Conversational RAG | MosaicRAG | Open / B2ACCESS |
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### MosaicRAG — Building RAG Systems on OWI
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**From OWI Datasets to Conversational Search**
+
+MosaicRAG consumes OWI daily datasets directly — CIFF inverted index files, Parquet metadata records, and dense embeddings (published since Dec 2025) — and exposes them through a modular conversational interface.
+
+**Pipeline for building your own MosaicRAG instance:**
+
+1. Download OWI slice with `owilix` (topic, domain, or language filter)
+2. Ingest CIFF → inverted index; Parquet → DuckDB; embeddings → ChromaDB
+3. Configure retrieval pipeline: sparse, dense, or hybrid
+4. Choose reranker (TF-IDF · Embedding cross-encoder · Tournament LLM · Group LLM)
+5. Optionally add summarization and relevance marking
+
+
+<div class="c-info">
+
+Full documentation: **[openwebindex.eu/book](https://openwebindex.eu/book)** — "Building vertical search engines with MOSAIC"
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-muted small">
+
+**Supported LLMs**
+
+| Task | Models |
+|---|---|
+| Reranking | gemma2, qwen2.5, llama3.1 |
+| Summarization | + DeepSeekv3 |
+| Relevance marking | gemma2, qwen2.5, llama3.1 |
+
+</div>
+
+
+
+<div class="c-info small">
+
+**Live Demo**
+
+Try conversational search on the Open Web Index at
+
+[mosaicrag.ows.eu](https://mosaicrag.ows.eu)
+
+</div>
+
 
 
 </div>
@@ -1317,7 +1389,85 @@ OWI enables a full ecosystem of vertical search engines, RAG systems, and domain
 ---
 
 
-### Mosaic & MosaicRAG · Earth Observation Search
+### MosaicRAG — Conversational Search on the OWI
+
+
+<div class="grid-3">
+
+
+<div class="column-2">
+
+
+
+<div class="small">
+
+**Modular RAG framework** extending MOSAIC with LLM-based capabilities and dense retrieval (WEBIS / TU Graz)
+
+- **Two retrieval paths:** inverted index (CIFF) + dense retrieval via ChromaDB (jina-embeddings-v3)
+- **4 reranking strategies:** TF-IDF, Embedding cross-encoder, Tournament-style (LLM pairwise), Group-style (LLM window)
+- **LLM backends:** gemma2, qwen2.5, llama3.1 (reranking & relevance marking) + DeepSeekv3 (summarization)
+- **Conversational search:** follow-up questions about retrieval results; dual-window UI (search results + chat)
+- **Workflow:** define retrieval pipeline → issue query → converse about results
+
+</div>
+
+
+
+<div class="figure-90">
+
+![](../../_assets/ows/mosaic-rag-screenshot.png)
+
+</div>
+
+
+
+<div class="tiny">
+
+Demo: [mosaicrag.ows.eu](https://mosaicrag.ows.eu) · [mosaic.ows.eu](https://mosaic.ows.eu)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Key Features**
+
+- Relevance marking — LLM highlights relevant passages within documents
+- Summarization — user-provided instructions applied per document
+- Domain-specific indices: science, health, arts (8M+ docs)
+- Fully open-source modular pipeline
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Data Pipeline**
+
+OWI daily datasets → CIFF (inverted index) + Parquet (metadata) + dense embeddings (since Dec 2025) → MosaicRAG
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Mosaic Search Applications · Earth Observation Search
 
 
 <div class="grid-2">
@@ -1326,9 +1476,9 @@ OWI enables a full ecosystem of vertical search engines, RAG systems, and domain
 <div class="column">
 
 
-**Mosaic & MosaicRAG** (TU Graz)
+**Mosaic Vertical Search** (TU Graz)
 
-Modular framework for building vertical search engines on OWI slices — domain-specific indices for science, health, arts (8M+ docs); federated RAG with summarization, re-ranking, chat
+Modular framework for building vertical search engines on OWI slices — domain-specific indices for science, health, arts (8M+ docs)
 
 
 <div class="figure-90">
@@ -1549,10 +1699,10 @@ Deployed on [open-science-search.cern.ch](https://open-science-search.cern.ch)
 ### Towards Federated RAG Systems
 
 
-<div class="grid-2">
+<div class="grid-3">
 
 
-<div class="column">
+<div class="column-1">
 
 
 ![](../../_assets/ows/federated-rag-bubbles.png)
@@ -1561,7 +1711,7 @@ Deployed on [open-science-search.cern.ch](https://open-science-search.cern.ch)
 </div>
 
 
-<div class="column">
+<div class="column-2">
 
 
 - RAG / Agentic systems require focused, high-quality collections
@@ -1574,6 +1724,73 @@ Deployed on [open-science-search.cern.ch](https://open-science-search.cern.ch)
 - Topic-specific, deduplicated and curated content
 - Domain-optimized ranking, aggregation and summarization
 - Lightweight browser-based federation with personal data integration
+
+
+<div class="c-info small">
+
+**OwlerLite** (WWW 2026) — privacy-respecting browser extension for scope- and freshness-aware retrieval:
+user-defined **scopes** (trusted sources), semantic freshness detection via SimHash + vector similarity, Scope Fidelity improved from 0.64 → **0.83** (negligible NDCG loss)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### RAG Quality & Safety Research
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Crowdsourced RAG Evaluation** (SIGIR 2025 — Best Paper Honourable Mention)
+
+- 301 TREC 2024 RAG topics; 34 writers, 903 human responses vs GPT-4o
+- **47,320** pairwise human judgements + 10,556 LLM judgements across 7 utility dimensions
+- Findings: LLM judges show high cross-dimension correlation, low agreement with humans; BLEU/ROUGE/BERTScore weakly correlated with human preference
+- Recommendation: crowdsourced judgement-based evaluation; fine-tuned models over LLM judges
+- Dataset: **Webis Crowd RAG Corpus 2025** (Zenodo: 10.5281/zenodo.14748980)
+
+**Ad Detection in RAG** (WWW 2024 + CLEF 2025 Shared Task)
+
+- First public dataset of RAG responses with inserted native ads (GPT-4); fine-tuned MPNet achieves **F1 = 0.975**
+- CLEF 2025 shared task: DeBERTa/RoBERTa up to F1 = 0.773 on new test set; generalization remains an open challenge
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-warning small">
+
+**Why RAG evaluation matters**
+
+Standard metrics (BLEU, ROUGE, BERTScore) don't capture human preference — RAG quality requires human or crowd-sourced judgements
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Ad disclosure matters**
+
+User study (CHIIR 2024): many users don't notice embedded ads; most prefer disclosure; some want ad-free responses entirely
+
+</div>
+
 
 
 </div>
@@ -1884,36 +2101,53 @@ Gienapp, Schröder, Schweter et al. "The German Commons — 154 Billion Tokens o
 
 --
 
-### Legal Challenges
-
-- Complex regulatory landscape: **GDPR, Copyright, DSA, DMA, Data Act, AI Act**, Criminal Law
-- **Copyright is the biggest challenge** — impacts LLM training in Europe
-- No guiding court decisions yet — first time in Europe
-- Lots of opinions, limited precedent — not without risk
-
-### Expert Collaboration
-
-- Collaboration with legal and ethical experts
-- Ethical self-assessment framework and risk management
-- Artifacts: licenses, data sharing agreements, privacy policies, terms of service
-
---
-
-### Governance & Transparency
+### ELSA Framework — Values, Risks & Mitigation
 
 
 <div class="grid-3">
 
 
-<div class="column-2">
+<div class="column-2 small">
 
 
-- **Dashboard** for full transparency on collected data
-- **Webmaster interaction**: claim ownership, express constraints, takedown requests
-- **Gen AI opt-out protocols**: monitoring robots.txt, X-Robots-Tag compliance
-- **Self-services** (opt-out mechanisms) for website owners
-- Decision horizon: exploitation strategy by mid-2026
-- Sustainability requires legal clarity for European LLM training support
+**10 Ethical Values**
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+1. Transparency
+2. Safety & Security
+3. Openness
+4. Responsibility
+5. Privacy
+
+</div>
+
+
+<div class="column">
+
+6. Justice
+7. Trustworthiness
+8. Accountability
+9. Sustainability
+10. Sovereignty / Autonomy
+
+</div>
+
+
+</div>
+
+
+**5 Ethical Risks**
+
+1. Control of indexed websites & take-down requests — censorship vs. coverage
+2. Flawed content in the OWI — false, misleading, offensive material
+3. Inaccurate metadata — errors in ingestion or preprocessing
+4. Misuse by third parties — privacy violations, unethical applications
+5. Unsuitable governance — undemocratic control, security breaches
 
 
 </div>
@@ -1922,7 +2156,131 @@ Gienapp, Schröder, Schweter et al. "The German Commons — 154 Billion Tokens o
 <div class="column-1">
 
 
-![](../../_assets/ows/lexis-platform.png)
+
+<div class="c-info small">
+
+**ELSA Deliverables**
+
+Three iterations (D6.1 → D6.2 → D6.3), final version subsumes all. Developed with:
+- 3 multi-day ethics workshops (CAIS / Stiftung Mercator)
+- 3 legal FSTP projects (LISA, LOREN, ALMASTIC)
+- OSF Working Groups on Ethics & Law
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**6 Stakeholder Groups**
+
+End users · Index users · Developers · Researchers & institutions · Content providers · Governance
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Legal Challenges & Regulatory Landscape
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Regulatory Framework**
+
+- **8+ EU regulations** apply: GDPR, Copyright Directive, DSM Directive, DSA, DMA, Data Act, Data Governance Act, AI Act
+- **Copyright is the biggest challenge** — impacts crawling, redistribution, and LLM training in Europe
+- No guiding court decisions yet — first time an open web index operates in the EU
+- DSA classification unclear — OWI does not fit neatly as hosting service, platform, or search engine
+- **AI Act**: OWI classified as **"limited risk"** — research exemption applies during project; post-project needs reassessment
+
+**Legal FSTP Projects (published on Zenodo)**
+
+- **LISA** — Legal Framework for OWI (Matthias Wendland)
+- **LOREN** — Legal Open European Web Index (Paul Johannes, Maxi Nebel)
+- **ALMASTIC** — Assessing Legal Risks (Kai Erenli, Andreas Gruber)
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-warning small">
+
+**Key Legal Risks**
+
+- Personal data in crawled content (GDPR Art. 6(1)(f) legitimate interest)
+- Copyright infringement — images, paywalled articles, plain text
+- Liability as digital intermediary
+- Illegal content obligations
+- LLM training restrictions (no_genai flag)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### 10 Technical & Organisational Mitigation Measures
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+| # | Measure | Key Mechanism |
+|---|---|---|
+| M1 | Website Management | robots.txt opt-out, blacklisting, quality prioritisation |
+| M2 | Take-down Management | Dashboard submission, logged removal, blacklist propagation |
+| M3 | Content Analysis | Quality scoring, trigger warnings, ad detection, plugin architecture |
+| M4 | Access Control | B2ACCESS registration, immediate blocking of misuse |
+| M5 | Transparency Guideline | 27-aspect guideline for third-party search apps |
+| M6 | Data Protection & Privacy | Anonymised queries, minimal user data, reusable model |
+| M7 | Safety & Security | Regular security meetings, incident reporting |
+| M8 | OWI Licence | Research (default) · Commercial (OWICL) · Data Access (raw WARC) |
+| M9 | Legal & Ethical Self-Assessment | Questionnaire at download time, ethics score, signed PDF certificate |
+| M10 | Ethical & Legal Advice | Ethics workshops, legal FSTPs, OSF working groups |
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Three Licence Types**
+
+- **Research** — default; included in owilix
+- **Commercial (OWICL)** — requires personal contact with coordinator
+- **Data Access** — raw WARC; research only, personal request
+
+</div>
+
 
 ![](../../_assets/ows/owil-licence.png)
 
@@ -1999,6 +2357,105 @@ Gienapp, Schröder, Schweter et al. "The German Commons — 154 Billion Tokens o
   <source src="../../_assets/ows/webmaster-dashboard.mp4" type="video/mp4">
   <source src="../../_assets/ows/webmaster-dashboard.mov" type="video/quicktime">
 </video>
+
+--
+
+### FreeWebSearch Charter & Regulatory Reform
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**#FreeWebSearch Charter** — launched 29 September 2025
+
+10 Principles: transparency & explainability · competition & independent infrastructure · privacy without tracking · user/creator/advertiser control · equal access & non-discrimination · information diversity · environmental & social responsibility · integrity against disinformation · search competences & critical awareness · democratic control across borders
+
+Four commitments: (a) serves society, people first; (b) respects democratic values; (c) transparent and open; (d) reflects internet diversity
+
+
+<div class="c-info">
+
+**81 signatories** as of February 2026 — [openwebsearch.eu/charter](https://openwebsearch.eu)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1 small">
+
+
+
+<div class="c-warning">
+
+**3 Regulatory Reform Proposals**
+
+1. **Copyright** — new statutory exception for open web indexes in DSM Directive
+2. **Data Protection** — public-interest exemption under Art. 6(1)(e) GDPR
+3. **Interoperability** — classify OWI as neutral data intermediary under DSA
+
+</div>
+
+
+
+<div class="c-muted tiny">
+
+Promoted via EU Data Union Strategy consultation (July 2025) and European Parliament breakfast event (December 2025)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Societal Impact
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+- **Digital sovereignty** — reducing dependency on non-European search engines and AI data pipelines
+- **Environmental sustainability** — reducing redundant crawling; shared infrastructure; data centre energy efficiency (CERN heat reuse)
+- **Economic opportunity** — ecosystem enabling SMEs and startups; market potential study shows **ROI within 4 years**, projected **net benefit of ~4.5 B EUR over a decade**
+- **Democracy & inclusiveness** — unbiased information access for informed citizens; multilingual/multicultural coverage; digital literacy
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Proposal: European Web Data Clearing House**
+
+A public infrastructure that collects, preprocesses and serves bulk web data as a certified, legally compliant data source — eliminating liability risks for European innovators at scale
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
 
 --
 

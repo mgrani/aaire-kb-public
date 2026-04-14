@@ -1178,15 +1178,80 @@ All intermediate data stored on **HPC scratch** between steps — restartable on
 - Cross-DC workflow execution via LEXIS platform
 - Federated storage: iRODS + S3; client-side SQL access via owilix / DuckDB
 - Dense embeddings available on select slices
-<!-- Pipeline vertical -->
+<!-- Step 1: Crawling vertical -->
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-## The OpenWebSearch.eu Pipeline in Detail
+## Step 1: Crawling the Web
 
-TODO
+
+--
+
+
+### Step 1: Crawling the Web
+
+
+<div class="grid-3">
+
+
+<div class="column-2">
+
+
+
+<div class="figure-90">
+
+![](../../_assets/ows/crawling-animation.gif)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**OWLer — Open Web Crawler**
+
+- Up to **105 M URLs / day** across 4 European data centers
+- Central URL Frontier at **CERN** — 2 B+ URLs in crawl space
+- **1.25 PiB** collected · **1,927 machine-days** · ~39.6 B fetches
+- European language and domain bias
+
+</div>
+
+
+
+<div class="c-warning small">
+
+**Constraints**
+- Downstream processing caps: **1–2 TB/day per DC**
+- Factor ~20× below commercial freshness
+- Requires 2–4 dedicated engineers for 24/7 ops
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="figure-80">
+
+![](../../_assets/ows/dashboard-overview.png)
+
+</div>
+
 --
 
 <!-- .slide: class="interlude-slide" -->
@@ -1197,90 +1262,62 @@ TODO
 --
 
 
-### Step 1: Crawling the Web
+### OWLer — Three-Tier Crawling Architecture
 
 
-<div class="grid-2">
+<div class="grid-3">
 
 
-<div class="column">
+<div class="column-2">
 
 
-![](../../_assets/ows/crawling-animation.gif)
 
+<div class="c-info small">
 
-</div>
+**Tier 1 — Crawling Cluster (StormCrawler)**
 
-
-<div class="column">
-
-
-- 100 Million URLs/day across 25 machines in 3-4 data centers
-- Central coordinator/queue at CSC/CERN, 2 billion URLs in queue
-- Focus on European domains and European languages
-- Respects robots.txt, Gen AI opt-out directives, no-index
-- Filters potentially harmful and low-quality content
-
-
-</div>
-
-
-</div>
-
-
-![](../../_assets/ows/dashboard-overview.png)
-
-
-### Step 2: Preprocessing
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-![](../../_assets/ows/resilipipe-repo.png)
-
-
-</div>
-
-
-<div class="column">
-
-
-**Resilipipe** — open-source, modular, scalable pipeline
-
-- HTML to cleaned text at scale (reduction ratio 1:5)
-- **Metadata extraction**: JSON-LD, Microdata, OpenGraph
-- **Semantic enrichment**: language, topics, geo-locations, NER
-- **Structured data extraction** from 60% of web pages: FAQ, opening hours, products, job postings
-- Open to community contributions via plugin architecture
-
-
-</div>
-
+- StormCrawler on Apache Storm — distributed, fault-tolerant, linearly scalable
+- VMs at **LRZ**, **IT4I**, **CSC** (OpenStack)
+- Three pipeline modes:
+  - **Regular** — explorative hyperlink-following (highest coverage, highest risk)
+  - **Sitemap** — sitemap-driven discovery (lower risk, curated scope)
+  - **WARC2WARC** — ingest external WARCs (e.g. Common Crawl) without live fetching
+- Outputs WARC files → fed into downstream preprocessing pipeline
 
 </div>
 
 
 
-<div class="grid-2">
+</div>
 
 
-<div class="column">
+<div class="column-1">
 
 
-![](../../_assets/ows/google-people-also-ask.png)
 
+<div class="c-muted small">
+
+**Tier 2 — URL Frontier (CERN)**
+
+- Central gRPC service coordinating all crawlers
+- Manages 2 B+ URL crawl space in OpenSearch
+- Stream-based and batch-based APIs
+- Politeness: delay between fetches per domain
 
 </div>
 
 
-<div class="column">
 
+<div class="c-muted small">
 
-![](../../_assets/ows/google-places-passau.png)
+**Tier 3 — Persistence**
+
+- OpenSearch backend for URL state and logs
+- Apache Flink for real-time log aggregation
+- Published as OWI Dashboard datasets
+
+</div>
+
 
 
 </div>
@@ -1291,39 +1328,587 @@ TODO
 
 --
 
-### Step 3: Building and Distributing the Index
+### URL Frontier — Coordination & Scheduling
 
 
-<div class="grid-2">
+<div class="grid-3">
 
 
-<div class="column">
+<div class="column-2 small">
 
 
-![](../../_assets/ows/owi-dataset-cards.png)
+**Centralized URL Management**
 
+- Single authoritative component — simplifies monitoring, debugging, coordination
+- gRPC API with Protocol Buffers — language- and crawler-neutral
+- Benchmark: **295.9 M simulated fetches in 12 h**, 2 B URL crawl space, 80 GB RAM peak
+- Up to **5,500 URLs/second** (batch mode), 2,000/s (stream mode)
 
-</div>
+**Scheduling Strategy**
 
-
-<div class="column">
-
-
-- One dataset per day per data center
-- **Sparse full-text index**: CIFF format, SQL-based querying
-- **Feature index**: link structure, linguistic style, genre, metadata
-- **Dense index**: embeddings (in development), compression techniques for ANN search
-- Pre-computed collection indices: curlie, legal, main, metadata/microdata
-- Tooling for download and dataset management via Owilix
-
-
-</div>
+- Each URL gets a `nextFetchDate` — continuous, not round-based
+- Freshness via `If-Modified-Since` + MD5 content hash comparison
+- **Quality lists** to prioritize high-value content:
+  - ClueWeb22 Super Head (Category B)
+  - Curlie / DMOZ directory (human-curated)
+  - Wikipedia external link outlinks
 
 
 </div>
 
 
-![](../../_assets/ows/owi-dataset-structure.png)
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**URL Tagging** *(% of crawl space)*
+
+| Tag | % |
+|---|---|
+| HTML | 83.1 % |
+| GenAI allowed | 79.6 % |
+| Index allowed | 77.0 % |
+| Wikipedia outlink | 48.7 % |
+| SuperHead ClueWeb | 9.66 % |
+| Curlie category | ~3.7 % |
+| Blacklisted | 0.18 % |
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Crawl Statistics — Three Operational Phases
+
+
+<div class="c-info small tight">
+
+Three major crawl campaigns across 120 weeks (Nov 2023 – Feb 2026) at European HPC centres
+
+</div>
+
+
+| Phase | Machine-days | Data (TiB) | Fetches (B) | Hosts (M) | Unique pages | Recrawl ratio |
+|---|---:|---:|---:|---:|---:|---:|
+| Aug 2023 – Aug 2024 | 760 | 315 | 10.76 | 40.5 | 1.17 B | 9.2× |
+| Apr 2025 – Jul 2025 | 189 | 175 | 4.76 | 162.0 | 3.76 B | 1.2× |
+| Dec 2025 (validation) | — | — | — | 20.5 | 341 M | — |
+| **Total** | **1,927** | **~1,280** | **~39.6** | — | **~12.6 B** | — |
+
+
+<div class="grid-3 small">
+
+
+<div class="column-1 c-positive">
+
+**Peak throughput**
+
+~105 M URLs/day  
+88% fetch success rate  
+184 languages detected
+
+</div>
+
+
+<div class="column-1 c-warning">
+
+**Practical cap**
+
+1–2 TB/day/DC  
+(downstream processing limit)  
+~20× below commercial freshness
+
+</div>
+
+
+<div class="column-1 c-muted">
+
+**To reach production scale**
+
+2–4 dedicated engineers  
+24/7 continuous operation  
+~50× more bandwidth + storage
+
+</div>
+
+
+</div>
+
+
+--
+
+### Auxiliary Crawls — Targeted Fill-In Collections
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+Beyond general-purpose web crawling, specialized scrapers harvest structured sources that standard hyperlink-following cannot reach:
+
+| Source | Coverage | Volume |
+|---|---|---|
+| **Wikipedia** | 10 languages (en, de, fr, es, it, nl, pl, sv, ar, ja) | 83 GB WARC/month · 6.5 M external domains extracted |
+| **Mastodon** | 150 instances (top 1,000 by activity) | 5 GB/day · 150 GB/month |
+| **OpenAlex** | Scientific publications snapshot + incremental API | 117 GB compressed WARC |
+| **Pangaea / OpenAire / Eudat** | Scientific data repositories | via API → WARC |
+| **Internal GitLab** | Code repositories | via API → WARC |
+
+
+<div class="c-info tight">
+
+All auxiliary crawlers produce **WARC files** and feed into the same downstream OWI pipeline as the general-purpose crawler.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1 c-muted small">
+
+
+**Why auxiliary crawls?**
+
+- Wikipedia outlinks seed high-quality URLs into the general-purpose frontier
+- Scientific publications enable Open Science Search use cases
+- Mastodon adds social-web content beyond the crawlable public web
+- Complements gaps in general-purpose coverage (API-only content, structured dumps)
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Compliance, Transparency & Webmaster Control
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Ethical Crawling Practices**
+
+- Respects **robots.txt**, `X-Robots-Tag`, `noindex` directives
+- Two derived binary flags stored in every Parquet record:
+  - `Index` — allowed for web indexing / search
+  - `GenAI` — allowed for generative AI model training
+
+| Index | GenAI | Share |
+|---|---|---|
+| ✓ | ✓ | **76.2 %** |
+| ✓ | ✗ | 0.74 % |
+| ✗ | ✓ | 3.34 % |
+| ✗ | ✗ | 19.7 % |
+
+- **Demarcated crawling subnets** — IP ranges separated from institutional access to avoid license infringements
+- **Blacklisting**: Ultimate Hosts Blacklist + Université Toulouse Capitole lists (0.18% of URLs blacklisted)
+
+
+</div>
+
+
+<div class="column-1 small">
+
+
+
+<div class="c-info">
+
+**Open Webmaster Console**
+
+- Any webmaster can look up their domain in the OWI
+- **Domain verification** to unlock management
+- **Takedown requests** at URL or subdomain level → propagated to all index users
+- **Crawl constraint config** via OWLer wizard
+- Ethical self-assessment survey required before dataset download
+
+</div>
+
+
+
+<div class="c-muted tiny">
+
+Incident log: Bank of America (robots.txt ambiguity), ACM Digital Library (licensed content), anonymous platform (forum spam false positive) — all investigated and resolved
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+<!-- Step 2: Preprocessing vertical -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Step 2: Preprocessing
+
+
+--
+
+
+### Step 2: Preprocessing
+
+
+<div class="grid-3">
+
+
+<div class="column-2">
+
+
+
+<div class="c-info small">
+
+**Resilipipe — WARC → Parquet Pipeline**
+
+- Two-stage pipeline: **Resilipipe (CPU)** for extraction & enrichment, **Resilipipe GPU** for embeddings & classifiers
+- Modular architecture — 10+ pluggable modules (links, structured data, quality scoring, trigger warnings, …)
+- Custom parallelization on HPC: SLURM + Apache Airflow orchestration
+- Output: column-oriented **Apache Parquet** with per-document metadata, embeddings, and prediction scores
+
+</div>
+
+
+
+<div class="c-warning small">
+
+**Scale & Constraints**
+
+- **108 M documents** embedded with jina-embeddings-v3 (785 GB across 55 published datasets)
+- GPU stage bottleneck: embedding throughput limits end-to-end pipeline speed
+- Downstream cap of **1–2 TB/day per data center** inherited from crawling
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-muted small">
+
+**Key Enrichments**
+
+- Content extraction & language detection
+- Link graph & structured data (FAQs, geo, licenses)
+- Curlie taxonomy labels
+- Quality scoring (ONNX, 10–20× CPU speedup)
+- Trigger warnings (14 languages, 19 categories)
+- Dense embeddings (jina-embeddings-v3)
+- Phishing classifier & LLM detector
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="figure-80">
+
+![](../../_assets/ows/resilipipe-repo.png)
+
+</div>
+
+--
+
+<!-- .slide: class="interlude-slide" -->
+
+### In Detail
+
+
+--
+
+
+### Resilipipe (CPU) — Modular WARC → Parquet Pipeline
+
+
+<div class="grid-3">
+
+
+<div class="column-2">
+
+
+
+<div class="c-info small">
+
+**Architecture**
+
+- Input: **WARC files** from OWLer crawl → Output: **Apache Parquet** (columnar, query-friendly)
+- Custom parallelization replacing PySpark:
+  - **ProcessWorkers** → **ParsingThreads** → **WritingThread**
+- Three module types:
+  - **BasicModule** — operates on raw WARC records (headers, links)
+  - **HTMLModule** — receives parsed HTML DOM tree (structured data, quality)
+  - **PostProcessingModule** — runs after all others (collection indices, forum classification)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-muted small">
+
+**CPU Modules**
+
+| Module | Function |
+|---|---|
+| `ows_headers` | HTTP headers & metadata |
+| `links` | Link graph extraction |
+| `curlielabels` | Curlie taxonomy classification |
+| `structured_data` | FAQs, licenses, geo, opening hours, phone |
+| `pyterrier_quality` | Quality scoring (ONNX, 10–20× speedup) |
+| `trigger_warnings` | Content warnings (14 langs × 19 types) |
+| `collection_indices` | Per-collection index metadata |
+| `forum_classification` | Forum / discussion detection |
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Resilipipe GPU — Embeddings & Prediction Heads
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Embedding Pipeline**
+
+- Model: **jina-embeddings-v3** — multilingual, 8192-token context, task-specific LoRA adapters
+- Selected from evaluation on 3.3 GB multilingual OWI test dataset
+- Chunking via embedding model's tokenizer — embeddings computed **per chunk** (supports RAG retrieval)
+- **55 published datasets** containing embeddings for **108 M documents** (785 GB total)
+- Research track: embedding compression to reduce storage footprint
+
+**GPU Parallelization**
+
+- ReadingWorker → EmbeddingWorker (per GPU) → AggregationWorker → ModuleWorker (per GPU) → WritingWorker
+- Prediction heads: small `torch.nn.Module` networks trained on chunked embeddings
+- Each GPU processes batches independently; aggregation worker merges results
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Prediction Heads**
+
+| Head | Task |
+|---|---|
+| **Phishing classifier** | Detect phishing / scam pages |
+| **LLM detector** | Flag LLM-generated content |
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Why jina-embeddings-v3?**
+
+- Best multilingual performance on OWI evaluation
+- Task-specific adapters (retrieval, classification, clustering)
+- Long-context support (8192 tokens)
+- Open-weight model
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Computational Ethics — Content Safety & Detection
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Trigger Warning System**
+
+- Lexical scoring approach across **14 languages** and **19 warning categories**
+- Categories include: violence, self-harm, sexual content, hate speech, substance abuse, eating disorders, and more
+- Per-document scores stored in Parquet output — downstream consumers can filter at chosen thresholds
+- Designed for transparency: users of OWI data can apply their own policies
+
+**LLM-Generated Content Detection**
+
+- Native advertising detection research (CLEF 2025 shared task)
+- LLM detector prediction head identifies machine-generated text
+- Critical for data quality: prevents AI-generated content from polluting training corpora and search indices
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-warning small">
+
+**Why this matters**
+
+- Web-scale data inevitably contains harmful content
+- Index consumers (search engines, researchers, AI trainers) need **per-document signals** to make informed filtering decisions
+- OWI provides the signals — **not** the filtering policy
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Design Principle**
+
+Signal, don't censor — OWI enriches data with safety metadata; downstream users decide thresholds and policies.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### HPC Deployment — SLURM + Apache Airflow
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Orchestration Stack**
+
+- **Apache Airflow** manages DAG workflows across both Resilipipe stages
+- **SLURM** scheduler allocates CPU and GPU nodes at HPC data centers
+- Automated WARC staging: **S3 → scratch filesystem** before processing
+
+**Workflow Stages**
+
+1. **WARC Staging** — pull WARC files from S3/iRoDS to local scratch
+2. **Resilipipe (CPU)** — extract, enrich, write Parquet
+3. **Resilipipe GPU** — compute embeddings, run prediction heads, write enriched Parquet
+4. **Publication** — upload enriched datasets to OWI distribution (LEXIS / S3)
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Deployment at Scale**
+
+- Runs at **LRZ**, **IT4I**, **CSC** HPC centres
+- CPU and GPU jobs submitted as SLURM batch arrays
+- Airflow DAGs monitor progress, handle retries, track dataset lineage
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**End-to-End Flow**
+
+```
+WARC (crawl)
+  → Resilipipe CPU
+    → Parquet (enriched)
+      → Resilipipe GPU
+        → Parquet (+ embeddings)
+          → OWI distribution
+```
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+<!-- Step 3: Indexing & Distribution vertical -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Step 3: Building & Distributing the Index
+
+TODO
+
 <!-- Accessing OWI vertical -->
 
 ---
@@ -1637,8 +2222,9 @@ Published as an open, continuously updated online resource — aligned with deli
 |------|------|----------|
 | Dashboard | Browser | Explore, monitor |
 | owilix | CLI | Download, slice, build |
-| Remote index | DuckDB/SQL | Slow Search + Download |
+| Remote index | DuckDB/SQL | Query + download |
 | OURRS | REST API | Online search |
+| MosaicRAG | Conversational | RAG & chat over OWI |
 
 
 <div class="small">
@@ -1648,6 +2234,7 @@ Published as an open, continuously updated online resource — aligned with deli
 - Dashboard: [openwebindex.eu](https://openwebindex.eu)
 - Book: [openwebindex.eu/book](https://openwebindex.eu/book)
 - owilix CLI: [opencode.it4i.eu/…/owi-cli](https://opencode.it4i.eu/openwebsearcheu-public/owi-cli)
+- MosaicRAG: [mosaicrag.ows.eu](https://mosaicrag.ows.eu)
 - Community: [openwebsearch.eu](https://openwebsearch.eu)
 
 </div>
@@ -1929,6 +2516,78 @@ OURRS (built on Vespa) extends the remote index with a full REST search API:
 | Download | owilix | B2ACCESS (LEXIS) |
 | SQL queries | DuckDB remote | B2ACCESS |
 | REST search | OURRS API | API key |
+| Conversational RAG | MosaicRAG | Open / B2ACCESS |
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### MosaicRAG — Building RAG Systems on OWI
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**From OWI Datasets to Conversational Search**
+
+MosaicRAG consumes OWI daily datasets directly — CIFF inverted index files, Parquet metadata records, and dense embeddings (published since Dec 2025) — and exposes them through a modular conversational interface.
+
+**Pipeline for building your own MosaicRAG instance:**
+
+1. Download OWI slice with `owilix` (topic, domain, or language filter)
+2. Ingest CIFF → inverted index; Parquet → DuckDB; embeddings → ChromaDB
+3. Configure retrieval pipeline: sparse, dense, or hybrid
+4. Choose reranker (TF-IDF · Embedding cross-encoder · Tournament LLM · Group LLM)
+5. Optionally add summarization and relevance marking
+
+
+<div class="c-info">
+
+Full documentation: **[openwebindex.eu/book](https://openwebindex.eu/book)** — "Building vertical search engines with MOSAIC"
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-muted small">
+
+**Supported LLMs**
+
+| Task | Models |
+|---|---|
+| Reranking | gemma2, qwen2.5, llama3.1 |
+| Summarization | + DeepSeekv3 |
+| Relevance marking | gemma2, qwen2.5, llama3.1 |
+
+</div>
+
+
+
+<div class="c-info small">
+
+**Live Demo**
+
+Try conversational search on the Open Web Index at
+
+[mosaicrag.ows.eu](https://mosaicrag.ows.eu)
+
+</div>
+
 
 
 </div>
@@ -2006,7 +2665,85 @@ OWI enables a full ecosystem of vertical search engines, RAG systems, and domain
 --
 
 
-### Mosaic & MosaicRAG · Earth Observation Search
+### MosaicRAG — Conversational Search on the OWI
+
+
+<div class="grid-3">
+
+
+<div class="column-2">
+
+
+
+<div class="small">
+
+**Modular RAG framework** extending MOSAIC with LLM-based capabilities and dense retrieval (WEBIS / TU Graz)
+
+- **Two retrieval paths:** inverted index (CIFF) + dense retrieval via ChromaDB (jina-embeddings-v3)
+- **4 reranking strategies:** TF-IDF, Embedding cross-encoder, Tournament-style (LLM pairwise), Group-style (LLM window)
+- **LLM backends:** gemma2, qwen2.5, llama3.1 (reranking & relevance marking) + DeepSeekv3 (summarization)
+- **Conversational search:** follow-up questions about retrieval results; dual-window UI (search results + chat)
+- **Workflow:** define retrieval pipeline → issue query → converse about results
+
+</div>
+
+
+
+<div class="figure-90">
+
+![](../../_assets/ows/mosaic-rag-screenshot.png)
+
+</div>
+
+
+
+<div class="tiny">
+
+Demo: [mosaicrag.ows.eu](https://mosaicrag.ows.eu) · [mosaic.ows.eu](https://mosaic.ows.eu)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Key Features**
+
+- Relevance marking — LLM highlights relevant passages within documents
+- Summarization — user-provided instructions applied per document
+- Domain-specific indices: science, health, arts (8M+ docs)
+- Fully open-source modular pipeline
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Data Pipeline**
+
+OWI daily datasets → CIFF (inverted index) + Parquet (metadata) + dense embeddings (since Dec 2025) → MosaicRAG
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Mosaic Search Applications · Earth Observation Search
 
 
 <div class="grid-2">
@@ -2015,9 +2752,9 @@ OWI enables a full ecosystem of vertical search engines, RAG systems, and domain
 <div class="column">
 
 
-**Mosaic & MosaicRAG** (TU Graz)
+**Mosaic Vertical Search** (TU Graz)
 
-Modular framework for building vertical search engines on OWI slices — domain-specific indices for science, health, arts (8M+ docs); federated RAG with summarization, re-ranking, chat
+Modular framework for building vertical search engines on OWI slices — domain-specific indices for science, health, arts (8M+ docs)
 
 
 <div class="figure-90">
@@ -2238,10 +2975,10 @@ Deployed on [open-science-search.cern.ch](https://open-science-search.cern.ch)
 ### Towards Federated RAG Systems
 
 
-<div class="grid-2">
+<div class="grid-3">
 
 
-<div class="column">
+<div class="column-1">
 
 
 ![](../../_assets/ows/federated-rag-bubbles.png)
@@ -2250,7 +2987,7 @@ Deployed on [open-science-search.cern.ch](https://open-science-search.cern.ch)
 </div>
 
 
-<div class="column">
+<div class="column-2">
 
 
 - RAG / Agentic systems require focused, high-quality collections
@@ -2263,6 +3000,73 @@ Deployed on [open-science-search.cern.ch](https://open-science-search.cern.ch)
 - Topic-specific, deduplicated and curated content
 - Domain-optimized ranking, aggregation and summarization
 - Lightweight browser-based federation with personal data integration
+
+
+<div class="c-info small">
+
+**OwlerLite** (WWW 2026) — privacy-respecting browser extension for scope- and freshness-aware retrieval:
+user-defined **scopes** (trusted sources), semantic freshness detection via SimHash + vector similarity, Scope Fidelity improved from 0.64 → **0.83** (negligible NDCG loss)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### RAG Quality & Safety Research
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Crowdsourced RAG Evaluation** (SIGIR 2025 — Best Paper Honourable Mention)
+
+- 301 TREC 2024 RAG topics; 34 writers, 903 human responses vs GPT-4o
+- **47,320** pairwise human judgements + 10,556 LLM judgements across 7 utility dimensions
+- Findings: LLM judges show high cross-dimension correlation, low agreement with humans; BLEU/ROUGE/BERTScore weakly correlated with human preference
+- Recommendation: crowdsourced judgement-based evaluation; fine-tuned models over LLM judges
+- Dataset: **Webis Crowd RAG Corpus 2025** (Zenodo: 10.5281/zenodo.14748980)
+
+**Ad Detection in RAG** (WWW 2024 + CLEF 2025 Shared Task)
+
+- First public dataset of RAG responses with inserted native ads (GPT-4); fine-tuned MPNet achieves **F1 = 0.975**
+- CLEF 2025 shared task: DeBERTa/RoBERTa up to F1 = 0.773 on new test set; generalization remains an open challenge
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-warning small">
+
+**Why RAG evaluation matters**
+
+Standard metrics (BLEU, ROUGE, BERTScore) don't capture human preference — RAG quality requires human or crowd-sourced judgements
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Ad disclosure matters**
+
+User study (CHIIR 2024): many users don't notice embedded ads; most prefer disclosure; some want ad-free responses entirely
+
+</div>
+
 
 
 </div>
@@ -2912,36 +3716,53 @@ We hope to build an open ecosystem that puts open, fair and unbiased information
 
 --
 
-### Legal Challenges
-
-- Complex regulatory landscape: **GDPR, Copyright, DSA, DMA, Data Act, AI Act**, Criminal Law
-- **Copyright is the biggest challenge** — impacts LLM training in Europe
-- No guiding court decisions yet — first time in Europe
-- Lots of opinions, limited precedent — not without risk
-
-### Expert Collaboration
-
-- Collaboration with legal and ethical experts
-- Ethical self-assessment framework and risk management
-- Artifacts: licenses, data sharing agreements, privacy policies, terms of service
-
---
-
-### Governance & Transparency
+### ELSA Framework — Values, Risks & Mitigation
 
 
 <div class="grid-3">
 
 
-<div class="column-2">
+<div class="column-2 small">
 
 
-- **Dashboard** for full transparency on collected data
-- **Webmaster interaction**: claim ownership, express constraints, takedown requests
-- **Gen AI opt-out protocols**: monitoring robots.txt, X-Robots-Tag compliance
-- **Self-services** (opt-out mechanisms) for website owners
-- Decision horizon: exploitation strategy by mid-2026
-- Sustainability requires legal clarity for European LLM training support
+**10 Ethical Values**
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+1. Transparency
+2. Safety & Security
+3. Openness
+4. Responsibility
+5. Privacy
+
+</div>
+
+
+<div class="column">
+
+6. Justice
+7. Trustworthiness
+8. Accountability
+9. Sustainability
+10. Sovereignty / Autonomy
+
+</div>
+
+
+</div>
+
+
+**5 Ethical Risks**
+
+1. Control of indexed websites & take-down requests — censorship vs. coverage
+2. Flawed content in the OWI — false, misleading, offensive material
+3. Inaccurate metadata — errors in ingestion or preprocessing
+4. Misuse by third parties — privacy violations, unethical applications
+5. Unsuitable governance — undemocratic control, security breaches
 
 
 </div>
@@ -2950,7 +3771,131 @@ We hope to build an open ecosystem that puts open, fair and unbiased information
 <div class="column-1">
 
 
-![](../../_assets/ows/lexis-platform.png)
+
+<div class="c-info small">
+
+**ELSA Deliverables**
+
+Three iterations (D6.1 → D6.2 → D6.3), final version subsumes all. Developed with:
+- 3 multi-day ethics workshops (CAIS / Stiftung Mercator)
+- 3 legal FSTP projects (LISA, LOREN, ALMASTIC)
+- OSF Working Groups on Ethics & Law
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**6 Stakeholder Groups**
+
+End users · Index users · Developers · Researchers & institutions · Content providers · Governance
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Legal Challenges & Regulatory Landscape
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Regulatory Framework**
+
+- **8+ EU regulations** apply: GDPR, Copyright Directive, DSM Directive, DSA, DMA, Data Act, Data Governance Act, AI Act
+- **Copyright is the biggest challenge** — impacts crawling, redistribution, and LLM training in Europe
+- No guiding court decisions yet — first time an open web index operates in the EU
+- DSA classification unclear — OWI does not fit neatly as hosting service, platform, or search engine
+- **AI Act**: OWI classified as **"limited risk"** — research exemption applies during project; post-project needs reassessment
+
+**Legal FSTP Projects (published on Zenodo)**
+
+- **LISA** — Legal Framework for OWI (Matthias Wendland)
+- **LOREN** — Legal Open European Web Index (Paul Johannes, Maxi Nebel)
+- **ALMASTIC** — Assessing Legal Risks (Kai Erenli, Andreas Gruber)
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-warning small">
+
+**Key Legal Risks**
+
+- Personal data in crawled content (GDPR Art. 6(1)(f) legitimate interest)
+- Copyright infringement — images, paywalled articles, plain text
+- Liability as digital intermediary
+- Illegal content obligations
+- LLM training restrictions (no_genai flag)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### 10 Technical & Organisational Mitigation Measures
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+| # | Measure | Key Mechanism |
+|---|---|---|
+| M1 | Website Management | robots.txt opt-out, blacklisting, quality prioritisation |
+| M2 | Take-down Management | Dashboard submission, logged removal, blacklist propagation |
+| M3 | Content Analysis | Quality scoring, trigger warnings, ad detection, plugin architecture |
+| M4 | Access Control | B2ACCESS registration, immediate blocking of misuse |
+| M5 | Transparency Guideline | 27-aspect guideline for third-party search apps |
+| M6 | Data Protection & Privacy | Anonymised queries, minimal user data, reusable model |
+| M7 | Safety & Security | Regular security meetings, incident reporting |
+| M8 | OWI Licence | Research (default) · Commercial (OWICL) · Data Access (raw WARC) |
+| M9 | Legal & Ethical Self-Assessment | Questionnaire at download time, ethics score, signed PDF certificate |
+| M10 | Ethical & Legal Advice | Ethics workshops, legal FSTPs, OSF working groups |
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Three Licence Types**
+
+- **Research** — default; included in owilix
+- **Commercial (OWICL)** — requires personal contact with coordinator
+- **Data Access** — raw WARC; research only, personal request
+
+</div>
+
 
 ![](../../_assets/ows/owil-licence.png)
 
@@ -3029,6 +3974,536 @@ We hope to build an open ecosystem that puts open, fair and unbiased information
 </video>
 
 --
+
+### FreeWebSearch Charter & Regulatory Reform
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**#FreeWebSearch Charter** — launched 29 September 2025
+
+10 Principles: transparency & explainability · competition & independent infrastructure · privacy without tracking · user/creator/advertiser control · equal access & non-discrimination · information diversity · environmental & social responsibility · integrity against disinformation · search competences & critical awareness · democratic control across borders
+
+Four commitments: (a) serves society, people first; (b) respects democratic values; (c) transparent and open; (d) reflects internet diversity
+
+
+<div class="c-info">
+
+**81 signatories** as of February 2026 — [openwebsearch.eu/charter](https://openwebsearch.eu)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1 small">
+
+
+
+<div class="c-warning">
+
+**3 Regulatory Reform Proposals**
+
+1. **Copyright** — new statutory exception for open web indexes in DSM Directive
+2. **Data Protection** — public-interest exemption under Art. 6(1)(e) GDPR
+3. **Interoperability** — classify OWI as neutral data intermediary under DSA
+
+</div>
+
+
+
+<div class="c-muted tiny">
+
+Promoted via EU Data Union Strategy consultation (July 2025) and European Parliament breakfast event (December 2025)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Societal Impact
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+- **Digital sovereignty** — reducing dependency on non-European search engines and AI data pipelines
+- **Environmental sustainability** — reducing redundant crawling; shared infrastructure; data centre energy efficiency (CERN heat reuse)
+- **Economic opportunity** — ecosystem enabling SMEs and startups; market potential study shows **ROI within 4 years**, projected **net benefit of ~4.5 B EUR over a decade**
+- **Democracy & inclusiveness** — unbiased information access for informed citizens; multilingual/multicultural coverage; digital literacy
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Proposal: European Web Data Clearing House**
+
+A public infrastructure that collects, preprocesses and serves bulk web data as a certified, legally compliant data source — eliminating liability risks for European innovators at scale
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+<!-- Dissemination, Communication & Exploitation vertical -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Dissemination, Communication & Exploitation
+
+
+--
+
+
+### Dissemination, Communication & Exploitation
+
+
+<div class="grid-3">
+
+
+<div class="column-2">
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+
+<div class="c-info">
+
+**Dissemination**
+
+- **93 papers** published (target: 50) + 11 accepted/submitted
+- **3 keynotes**, 10 invited talks, 123 talks & panels
+- **#ossym** annual symposium: 2023 · 2024 · 2025 · 2026 (planned, Berlin)
+- WOWS workshop series at ECIR (2024 · 2025 · 2026)
+- 3 data challenges · 3 hackathons · 9 webinars
+- **11 master theses**, 9 bachelor theses
+
+</div>
+
+
+
+<div class="c-positive">
+
+**Community & Stakeholders**
+
+- **180+ members** on Mattermost community platform
+- #FreeWebSearch Charter: **81 signatories**
+- European Parliament breakfast (Dec 2025)
+- Web Data Working Group at EuroHPC AI Factories
+- Partnership with **EUSP** (Ecosia + Qwant)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="c-warning">
+
+**Communication**
+
+- LinkedIn: **882 followers** (+263%)
+- Mastodon: **1,700+ followers** (+353%)
+- **63 blogposts** · 12 media articles (5 countries)
+- 3 podcast appearances (Deutschlandfunk, Federal Bar)
+- **560 newsletter subscribers** (+224%)
+- OWI Dashboard: ~1,500 unique visitors/month
+
+</div>
+
+
+
+<div class="c-muted">
+
+**Exploitation**
+
+- OSF as non-profit sustainability vehicle
+- Market potential: **~4.5 B EUR net benefit** over 10 years, ROI within 4 years
+- 14 partners with individual follow-on plans
+- 20 open-source projects on public GitLab
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Governance**
+
+- OSF mandated to coordinate project legacy
+- Partners continue under MoU
+- Monthly Community Meetup (post-project)
+- Target: inclusion in EuroHPC AI Factory infrastructure
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Open Source**
+
+All code, pipelines, and data formats released as open source; FAIR principles on Zenodo; OWI treated as European public good
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+--
+
+<!-- .slide: class="interlude-slide" -->
+
+### In Detail
+
+
+--
+
+
+### Scientific Dissemination
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Publications — Exceeded All Targets**
+
+| Category | Count |
+|---|---:|
+| Journal papers | 1 |
+| Conference & workshop papers | 92 |
+| **Total published** | **93** |
+| Accepted (CHIIR 2026) | 2 |
+| Submitted | 9 |
+| **Grand total** | **104** |
+
+Target was 50 papers — **186% of goal achieved**
+
+Venues: ECIR, SIGIR, ACL, CLEF, CIKM, EMNLP, WWW, IJCAI, ICTIR, OSSYM, WOWS, and others
+
+**Talks & Events**
+
+- 3 keynotes · 10 invited talks · 123 talks, presentations, panels
+- 11 workshops · 11 lectures · 5 lectures with tutorials · 1 seminar
+- 3 data challenges · 3 hackathons · 9 webinars · 8 training events
+
+**Theses Supervised**
+
+- 11 master theses · 9 bachelor theses
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Event Series**
+
+**#ossym** — Open Search Symposium
+- 2023: inaugural
+- 2024: Garching (Munich), 100+ participants; keynotes by Minister Florian Herrmann, DG CNECT Director Roberto Viola
+- 2025: CSC Espoo (Helsinki); keynote by EU Commissioner Henna Virkkunen
+- **2026: Berlin** (with DLR, Weizenbaum Institute, Code Berlin)
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**WOWS Workshop Series**
+
+Web-scale Open Web Search at ECIR — 2024, 2025, 2026 (planned). Also: Dagstuhl Seminar on RAG (Sept 2025)
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Communication — Organic Growth Across All Channels
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Social Media** *(organic only — no paid advertising)*
+
+| Channel | Followers | Growth |
+|---|---:|---:|
+| LinkedIn | 882 | +263% since Feb 2024 |
+| Mastodon | 1,700+ | +353% since Feb 2024 |
+
+339 posts published since midterm report · avg. 2 posts/week
+
+**Media Coverage**
+
+- **12 articles** in print/online media across 5 countries (Feb 2024 – Feb 2026)
+- Outlets: CERN Courier, c't magazine, heise, tagesspiegel, The Register, HiPEAC magazine, European Perspectives, Bertelsmann Change Quarterly
+- **3 podcast appearances**: Besser Wissen Podcast, Deutschlandfunk Kultur, (R)ECHT INTERESSANT (German Federal Bar Association)
+- 63 blogposts on project website + ~18 on partner sites
+
+**Newsletter & Website**
+
+- 560 subscribers (+224%), 5 issues since March 2024
+- 59 sub-pages on openwebsearch.eu · 8 videos on Vimeo
+- OWI Dashboard (launched June 2025): ~1,500 unique visitors/month · avg. visit duration **25 min 20 sec** · 316 registered users
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**OWI Brand Identity**
+
+Complete brand created: logo kit, signet, brand colours, claim
+
+**"Time to reclaim the web"**
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Print Materials**
+
+- 1,000 project brochures
+- 500 OWI product flyers
+- 50 Policy Paper brochures (Parliamentary Breakfast)
+- 100 Economy Study copies
+- 2m × 3m back-wall display
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Community Building & Stakeholder Engagement
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Community Platform (Mattermost)**
+
+- **180+ members** — public, joinable via openwebsearch.eu/community
+- Channels: Tech & Application (most active), Economy, Legal
+- Monthly Community Meetup continues post-project (merged Community Updates + OSF WG Tech & Application)
+
+**Key Events**
+
+- **Public OWI Launch Event** (6 June 2025): 100+ live participants; index state, OWI licence, ethical self-assessment, use cases — recording on Vimeo
+- Joint community updates with **NGI Search** (Nov 2024, June 2025)
+- Index access training for FSTPs (Nov 2024): owilix + MOSAIC
+- Czech-Bavarian Supercomputing Summer School 2025
+
+**Policy Engagement**
+
+- 26 policy-level meetings · 6 member state briefings
+- **European Parliament breakfast** (Dec 2025): MEPs Alexandra Geese (Greens/EFA) + Elena Sancho Murillo (S&D); Deputy DG Renate Nikolay (DG CNECT)
+- Policy paper: *"Boosting digital sovereignty and competitiveness through a European Web Data Infrastructure"*
+- NGI Forum 2025 · EuroHPC Summit 2025 (Krakow)
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Key Partnerships**
+
+- **EUSP** (Ecosia + Qwant joint venture) — regular consultation; joint workshop in Paris
+- **OpenEuroLLM** — EU sovereign language models; interest in European-language web pages
+- **JRC** — company pages for Europe Media Monitor
+- **AGES** (Austria) — eMarketShield: online marketplace monitoring for nutritional supplements
+- **Eurostat** & national statistical offices — web analytics use cases
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**EuroHPC Web Data Working Group**
+
+Formed Summer 2025, led by LUMI and HammerHAI AI Factories — advocates for OWI as standard AI Factory infrastructure
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Exploitation Strategy & Governance
+
+
+<div class="grid-3">
+
+
+<div class="column-2 small">
+
+
+**Market Potential** (Mucke Roth & Company assessment)
+
+- **ROI within 4 years** · projected **net benefit ~4.5 B EUR over a decade**
+- Business plan modelled: EUR 25k/year per customer, 30 → 356 clients over 4 years; revenue EUR 750k (2026) → EUR 7.6M (2029); break-even at month 24
+- Decision: NGO+GmbH model **not pursued** due to regulatory risk and funding uncertainty; governance formalized in D6.9
+
+**Post-Project Sustainability**
+
+- **OSF** (Open Search Foundation) mandated to coordinate project legacy
+- Partners continue operating under **MoU** to bridge until AI Factory inclusion
+- New organization with secured long-term funding identified as key need
+- 2 new computing centres onboarded: **Exaion** (EDF Group, France) + **Universität Oldenburg** (Germany)
+
+**Open-Source Strategy**
+
+- 20 open projects on public GitLab
+- FAIR principles applied to all Zenodo records
+- Top downloaded dataset: Touche23-ValueEval — **37,421 downloads**
+- Top downloaded software: OWLer URLFrontier — 210 downloads
+
+
+</div>
+
+
+<div class="column-1">
+
+
+
+<div class="c-info small">
+
+**Individual Partner Plans**
+
+Key follow-on commitments:
+- **UNI PASSAU**: BMBF SOURCE (2026), startup incubation, OURRS
+- **BADW-LRZ**: OWS@LRZ, SOURCE (1.5 FTE), EuroHPC WG
+- **WEBIS**: Resilipipe, CORAL, Agent CRIS, 3 PhD students
+- **TUGraz**: MOSAIC frameworks, 6 master theses
+- **CERN**: OWLer continuation, 2–4 PhD positions
+- **OSF**: 3 FTE sustained, partnerships with Qwant & Ecosia
+
+</div>
+
+
+
+<div class="c-muted small">
+
+**Pending regulatory challenges**
+
+- WARC demand vs. EU copyright limits on raw data sharing
+- Commercial licence still blocked by liability risk
+- Legal certainty required for scale-up
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
 <!-- Conclusion vertical -->
 
 ---
