@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 03: Frontend-Technologien — HTML, JavaScript und CSS</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 03: Frontend-Technologien — HTML, JavaScript und CSS</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BQPjw3n4.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Kapitel 3: Frontend-Technologien — HTML, JavaScript und CSS
@@ -19,7 +19,7 @@ Jede Web-Anwendung, die ein Nutzer sieht und bedient, besteht aus drei Technolog
 - Wie arbeiten HTML, CSS und JavaScript im Browser zusammen?
 
 Notes:
-Diese Vorlesung ist bewusst kein HTML-, CSS- oder JavaScript-Kurs. Es geht nicht darum, Syntax auswendig zu können, sondern darum, die **Architekturentscheidungen** hinter den drei Technologien zu verstehen: warum HTML semantisch sein muss, warum CSS deklarativ ist, warum JavaScript single-threaded läuft. Diese Konzepte bleiben stabil, während die Frameworks alle paar Jahre wechseln. Wenn Sie am Ende der Vorlesung wissen, warum es das Technologie-Dreieck gibt und wo seine Grenzen liegen, haben wir das Lernziel erreicht.
+Die drei Frontend-Technologien haben unterschiedliche Stabilitätshorizonte: HTML-Elemente sind seit HTML5 (2014) weitgehend stabil; CSS erhält laufend neue Features (Container Queries, Cascade Layers, :has()), während die Grundprinzipien — Cascade, Box-Modell, Normal Flow — unverändert bleiben; JavaScript-Frameworks wechseln alle fünf bis acht Jahre den Dominant Player (jQuery → Backbone → Angular → React → Server-Components). Das Architekturwissen — DOM-Modell, Event Loop, Rendering-Pipeline — bleibt davon unberührt und transferiert direkt auf das jeweils aktuelle Werkzeug.
 
 ---
 
@@ -36,7 +36,7 @@ Diese Vorlesung ist bewusst kein HTML-, CSS- oder JavaScript-Kurs. Es geht nicht
 
 
 Notes:
-HTML ist die älteste der drei Frontend-Sprachen — Tim Berners-Lee hat sie 1991 entworfen, ursprünglich für den Austausch wissenschaftlicher Dokumente am CERN. Bis heute ist HTML ein **Dokumentformat**, kein Programmiersprache. Das ist kein Mangel, sondern eine bewusste Entscheidung: Eine Web-Seite ist zuerst Inhalt, dann Darstellung, dann Verhalten. Wenn Sie diese Reihenfolge umdrehen — also mit JavaScript anfangen und HTML als Beiwerk behandeln — bekommen Sie genau jene Webseiten, die ohne JavaScript leer sind, langsam laden und für Screenreader unbenutzbar bleiben.
+HTML wurde 1991 von Tim Berners-Lee am CERN für den Austausch wissenschaftlicher Dokumente entworfen und ist bis heute ein Dokumentformat, keine Programmiersprache. Diese Entscheidung ist kein historischer Zufall, sondern der Grund, warum das Web auf jedem Gerät, in jedem Browser und ohne Laufzeitumgebung funktioniert. Die Schichtung Inhalt → Darstellung → Verhalten ist ein Architekturprinzip: HTML-Inhalte sind ohne CSS lesbar, ohne JavaScript navigierbar. Webseiten, die diese Reihenfolge umkehren und JavaScript zur Voraussetzung machen, verlieren Barrierefreiheit, SEO-Sichtbarkeit und Resilience gegenüber Netzwerkproblemen.
 
 --
 
@@ -45,7 +45,7 @@ HTML ist die älteste der drei Frontend-Sprachen — Tim Berners-Lee hat sie 199
 ## Zwei Versionen derselben Seite
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -114,7 +114,7 @@ HTML ist die älteste der drei Frontend-Sprachen — Tim Berners-Lee hat sie 199
 
 
 Notes:
-Lassen Sie die Studierenden zwei Minuten das HTML vergleichen, bevor Sie auflösen. Wichtig ist die Pointe: für das Auge eines sehenden Nutzers mit modernem Browser ist *kein* Unterschied erkennbar — beide Versionen rendern visuell identisch. Der Unterschied wird erst dann sichtbar, wenn man die Perspektive wechselt: zu einem Screenreader, einer Suchmaschine, einem Reader-Mode oder einem Wartungsentwickler in zwei Jahren. Diese vier Perspektiven sind das Argument der nächsten Folie.
+Für einen sehenden Nutzer mit modernem Browser ist zwischen Version A und B kein visueller Unterschied erkennbar — beide rendern identisch. Der Unterschied wird sichtbar, sobald man die Perspektive wechselt: Ein Screenreader liest `<div>` ohne Kontext, während er `<nav>`, `<article>` und `<footer>` explizit benennt. Eine Suchmaschine kann aus `<article>` + `<h2>` den Hauptinhalt ableiten, aus `<div class="title">` nicht. Ein Browser-Reader-Mode extrahiert `<main>` zuverlässig, `<div class="middle">` nicht. Und ein Entwickler, der nach zwei Jahren zurückkommt, liest semantisches HTML ohne Kommentar — `<div>`-Soup erfordert Reverse Engineering der CSS-Klassen.
 
 --
 
@@ -145,7 +145,7 @@ HTML trennt
 - und **Verhalten** (was passiert bei Klick? → JavaScript).
 
 Notes:
-Zwei der vier Perspektiven sind rechtlich relevant: in Deutschland verlangt das Behindertengleichstellungsgesetz (BGG) und die EU-Richtlinie EN 301 549 für öffentliche Einrichtungen barrierefreie Webseiten — semantisches HTML ist die Grundlage dafür. Die SEO-Perspektive ist wirtschaftlich relevant: Google nutzt strukturelle Signale, um Hauptinhalt von Werbung zu trennen, und straft Seiten ab, die nur aus `<div>` bestehen. Die Wartbarkeit-Perspektive ist die, die Studierende oft unterschätzen — bis sie zwei Jahre alten Code ohne Doku übernehmen müssen.
+Zwei der vier Perspektiven haben rechtliche Relevanz: In Deutschland schreibt das Behindertengleichstellungsgesetz (BGG) und die EU-Richtlinie EN 301 549 für öffentliche Einrichtungen barrierefreie Webseiten vor — semantisches HTML ist deren technische Grundlage. Die WCAG-Kriterien 1.3.1 (Info and Relationships) und 2.4.6 (Headings and Labels) sind direkt mit der Wahl zwischen semantischen Elementen und `<div>` verknüpft. Der wirtschaftliche Aspekt: Seiten mit klarer semantischer Struktur erhalten in Googles Qualitätsbewertung höhere Marks für Content-to-Markup-Ratio und erhalten Rich-Snippets häufiger zugewiesen.
 
 --
 
@@ -168,7 +168,7 @@ Dasselbe HTML kann mit **verschiedenem CSS** völlig anders aussehen — dieselb
 **Diese Schichtung ist kein Zufall — sie ist das Architekturprinzip des Webs.**
 
 Notes:
-Diese Trennung wird in der Industrie regelmäßig verletzt — vor allem von Frontend-Frameworks, die HTML, CSS und JS in einer einzigen Komponentendatei bündeln (wir kommen am Ende der Vorlesung darauf zurück). Die Trennung *konzeptionell* zu verstehen, bleibt aber wichtig, weil sie erklärt, warum bestimmte Dinge funktionieren: warum eine Seite ohne JavaScript trotzdem navigierbar ist (HTML allein), warum ein Druck-Stylesheet möglich ist (CSS allein), warum derselbe HTML-Code in mehreren Layouts dargestellt werden kann. Die nächste Folie zeigt das W3C-Standardisierungs-Ökosystem dahinter.
+Moderne Komponenten-Frameworks (React, Vue, Svelte) bündeln HTML, CSS und JavaScript in einer einzigen Komponentendatei — was oberflächlich wie eine Verletzung der Trennung aussieht. Konzeptionell ist es eine andere Art der Trennung: nicht nach Technologie, sondern nach fachlicher Verantwortung. Die Trennung innerhalb der Datei bleibt erhalten: Template (Struktur) → Styles (Darstellung) → Script (Verhalten). Dasselbe Prinzip, andere organisatorische Einheit. Die Konsequenzen der Schichten-Unabhängigkeit bleiben: Ein `<a>` navigiert ohne JavaScript, ein `<form>` sendet ohne JavaScript, `:hover`-Effekte reagieren ohne JavaScript.
 
 --
 
@@ -181,7 +181,7 @@ Diese Trennung wird in der Industrie regelmäßig verletzt — vor allem von Fro
 Die drei Frontend-Technologien sind keine Produkte einer einzelnen Firma. **HTML** wird von der WHATWG (gegründet von Apple, Mozilla, Opera) als *Living Standard* gepflegt; **CSS** und **ARIA** vom W3C; **JavaScript** als *ECMAScript* von der ECMA International. Browser implementieren diese Standards — deshalb funktioniert dieselbe Seite in Chrome, Firefox und Safari.
 
 Notes:
-Standardisierung ist der Grund, warum das Web kein iOS und kein Windows ist: keine einzelne Firma kontrolliert es. Das ist auch der Grund, warum das Web so langsam neue Features bekommt — jede Browser-Engine muss zustimmen. Bis 2019 hat das W3C HTML standardisiert, dann hat die WHATWG übernommen, weil das W3C zu langsam war. Heute ist die Arbeitsteilung klar: WHATWG für HTML und DOM, W3C für CSS und ARIA, ECMA für die JavaScript-Sprache. Praktische Konsequenz für Studierende: Wenn Sie wissen wollen, was *standardisiert* ist und was nicht, ist MDN die richtige Anlaufstelle, weil MDN die Browser-Kompatibilität jeder Eigenschaft dokumentiert.
+Die Standardisierungslandschaft ist seit 2019 neu geordnet: Die WHATWG hat das W3C als primäre HTML-Standardisierungsinstanz abgelöst, nachdem jahrelange Parallelarbeit zu divergierenden Spezifikationen geführt hatte. Heute pflegt die WHATWG den HTML Living Standard (ohne Versionsnummern, kontinuierlich aktualisiert) und das DOM; das W3C ist zuständig für CSS (über das CSS Working Group) und ARIA (Accessibility); ECMA International standardisiert ECMAScript (JavaScript) in jährlichen Releases. MDN Web Docs ist die einzige Quelle, die Browser-Kompatibilität für alle drei Bereiche verlässlich dokumentiert — für `caniuse.com` lassen sich Feature-Flags prüfen, bevor man sie in Produktion einsetzt.
 
 --
 
@@ -191,7 +191,7 @@ Standardisierung ist der Grund, warum das Web kein iOS und kein Windows ist: kei
 HTML5 hat generische Container (`<div>`, `<span>`) durch bedeutungstragende Elemente ergänzt:
 
 
-<div class="columns col-2-1">
+<div class="grid-2-1">
 
 
 <div class="column">
@@ -233,7 +233,7 @@ HTML5 hat generische Container (`<div>`, `<span>`) durch bedeutungstragende Elem
 Wenn ein Element eine **inhaltliche Bedeutung** hat, gibt es dafür ein semantisches HTML-Element. `<div>` ist für Layout-Container ohne eigene Bedeutung.
 
 Notes:
-HTML5 hat 2014 etwa zwei Dutzend semantische Elemente eingeführt, von denen `<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>` und `<footer>` die wichtigsten sind. Wichtig ist die Unterscheidung zwischen `<article>` und `<section>`: `<article>` ist eigenständig wiederverwendbar (ein Blogpost, ein Produkt, eine Karte in einem Newsfeed), `<section>` ist nur ein thematischer Abschnitt innerhalb eines größeren Dokuments. `<main>` darf pro Seite nur einmal vorkommen — der Browser-Reader-Mode nutzt es, um den Hauptinhalt zu extrahieren. Für die Studierenden: Im Zweifel sollte man Semantic HTML wählen, auch wenn die visuelle Wirkung null ist — die nicht-sehenden Nutzer der Seite werden es danken.
+HTML5 hat 2014 etwa zwei Dutzend semantische Elemente eingeführt. Die häufig verwechselte Unterscheidung: `<article>` ist eigenständig wiederverwendbar und macht als Fragment außerhalb seiner Seite Sinn (ein Blogpost, ein Produkteintrag, eine Karte in einem Newsfeed); `<section>` ist dagegen nur ein thematischer Abschnitt innerhalb eines größeren Dokuments und ohne diesen Kontext bedeutungslos. `<main>` darf pro Seite nur einmal vorkommen — Browser-Reader-Mode, AMP und mehrere Accessibility-Tools verlassen sich auf diese Einmaligkeit. Screenreader wie NVDA und VoiceOver nutzen Landmark-Elemente (`<nav>`, `<main>`, `<aside>`) für Sprungbefehle, mit denen Keyboard-Nutzer effizient durch die Seitenstruktur navigieren.
 
 --
 
@@ -242,7 +242,7 @@ HTML5 hat 2014 etwa zwei Dutzend semantische Elemente eingeführt, von denen `<h
 Semantik in HTML endet nicht bei `<header>` und `<article>`. Für maschinenlesbare Zusatzinformationen gibt es auch Microformats und Microdata.
 
 
-<div class="columns col-2-1">
+<div class="grid-2-1">
 
 
 <div class="column">
@@ -287,7 +287,7 @@ Details: [MDN Microformats](https://developer.mozilla.org/en-US/docs/Web/HTML/Gu
 
 
 Notes:
-Microformats und Microdata sind keine Pflicht-Inhalte für die Klausur, aber konzeptionell wichtig: Semantik ist nicht binär — `<header>` ist die *grobe* Ebene, Microdata mit `schema.org` die *feine*. Google's Rich-Results-Snippets (Sterne-Bewertungen, Preise, Veranstaltungstermine direkt in der Trefferliste) basieren genau auf diesem strukturierten Markup. JSON-LD im `<script>`-Tag ist heute der gebräuchlichere Mechanismus, weil es das HTML nicht aufbläht — aber das Prinzip bleibt: HTML ist ein Trägermedium für maschinenlesbare Bedeutung.
+Semantik ist nicht binär: `<header>` und `<article>` sind grobe Struktur-Signale; Microdata mit `schema.org`-Vokabular ist feingranular maschinenlesbare Bedeutung. Google's Rich-Result-Snippets (Sterne-Bewertungen, Preise, Veranstaltungstermine direkt in der Trefferliste) basieren auf `schema.org/Product`, `schema.org/Event` und `schema.org/Review`-Markup. Heute ist JSON-LD in einem `<script type="application/ld+json">`-Tag der von Google empfohlene Mechanismus — es bläht das HTML nicht auf und kann server-seitig einfacher generiert werden. Microformats sind dagegen rückläufig; Microdata bleibt ein valider W3C-Standard, wird aber weniger eingesetzt als JSON-LD.
 
 --
 
@@ -303,7 +303,7 @@ Microformats und Microdata sind nützlich, wenn HTML nicht nur für Menschen les
 - **Semantic Web / schema.org:** zusätzliche Bedeutung direkt im HTML
 
 
-<div class="columns col-2-1">
+<div class="grid-2-1">
 
 
 <div class="column small">
@@ -382,7 +382,7 @@ Die wichtigste praktische Regel: Phrasing-Content (Text und alles, was im Textfl
 Unser Online-Shop braucht ein Registrierungsformular. HTML bietet dafür eingebaute Validierung:
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -431,7 +431,7 @@ Unser Online-Shop braucht ein Registrierungsformular. HTML bietet dafür eingeba
 
 
 Notes:
-Die richtige Antwort auf die Diskussionsfrage: **Niemals**. Clientseitige Validierung ist ein UX-Feature — sie liefert sofortiges Feedback, ohne den Server zu kontaktieren. Aber sie ist *trivial* zu umgehen: Browser-DevTools, `curl`, Postman, ein selbstgeschriebenes Skript. Jeder Server muss alle Eingaben unabhängig validieren — das nennt man **Defense in Depth**. Eine gute Faustregel: Clientseitige Validierung ist Höflichkeit gegenüber dem Nutzer, serverseitige Validierung ist Sicherheit. Beide sind nötig. Diese Lektion wiederholt sich in Vorlesung 6 (Datenbanken: SQL Injection) und Vorlesung 7 (Sicherheit: XSS, CSRF).
+Clientseitige Validierung ist ein UX-Feature: Sie liefert sofortiges Feedback ohne Server-Roundtrip und vermeidet unnötige HTTP-Requests für offensichtlich ungültige Eingaben. Sie ist aber trivial zu umgehen — über Browser-DevTools, `curl`, Postman oder ein selbstgeschriebenes Skript. Jeder Server muss alle Eingaben unabhängig validieren (Defense in Depth). Das gilt unabhängig davon, ob das Frontend eine HTML-Form, eine React-SPA oder eine native App ist: Der Server-Endpunkt ist die einzige verlässliche Sicherheitsgrenze. SQL-Injection (Vorlesung 6) und XSS/CSRF (Vorlesung 7) sind direkte Konsequenzen fehlender serverseitiger Validierung.
 
 --
 
@@ -456,7 +456,7 @@ HTML5 hat den Browser von einem Dokumentbetrachter zu einer **Laufzeitumgebung**
 Je mehr Fähigkeiten im Browser verfügbar sind, desto mehr Logik **kann** ins Frontend verlagert werden. **Aber sollte sie das?** Ein Online-Shop, der Preise im Client berechnet, riskiert Manipulation. Ein Offline-fähiger Warenkorb dagegen verbessert die User Experience. Die Grenze zwischen Client und Server ist eine bewusste Architekturentscheidung.
 
 Notes:
-Diese Tabelle ist ein Überblick — keine der Fähigkeiten müssen Sie heute im Detail kennen. Wichtig ist die **Konsequenz**: Der moderne Browser ist faktisch eine Anwendungsplattform, vergleichbar mit Java auf dem Desktop in den 2000ern oder iOS heute. Progressive Web Apps (PWAs) nutzen genau diese Fähigkeiten, um Web-Anwendungen offline-fähig, installierbar und push-fähig zu machen — ohne native App-Stores. Die strategische Frage lautet: Welche Logik gehört in den Browser, welche auf den Server, welche in eine native App? Das ist eine Architekturentscheidung mit Konsequenzen für Sicherheit, Wartung und Reichweite.
+Der moderne Browser ist eine vollständige Anwendungsplattform — vergleichbar mit der Java-Laufzeitumgebung der 2000er oder iOS heute. Progressive Web Apps (PWAs) kombinieren Service Workers (Offline-Cache), Web App Manifest (Installierbarkeit) und Push API (Benachrichtigungen), um native App-ähnliche Erlebnisse ohne App-Store-Distribution zu erreichen. Die strategische Grenzfrage — was gehört in den Browser, was auf den Server, was in eine native App — hängt von Sicherheitsanforderungen (sensible Berechnungen nie im Client), Offline-Anforderungen (Service Worker für Offline-Fähigkeit) und Gerätezugriff (native APIs für Kamera, Bluetooth, NFC nur in nativen Apps vollständig verfügbar) ab.
 
 --
 
@@ -465,7 +465,7 @@ Diese Tabelle ist ein Überblick — keine der Fähigkeiten müssen Sie heute im
 Ein Bild sollte nicht auf jedem Gerät gleich ausgeliefert werden. HTML bietet dafür zwei Werkzeuge:
 
 
-<div class="columns col-2-1">
+<div class="grid-2-1">
 
 
 <div class="column">
@@ -549,7 +549,7 @@ HTML definiert die Struktur und Semantik von Web-Inhalten. Der Unterschied zwisc
 
 
 Notes:
-Wenn Sie aus diesem Modul *eine Sache* mitnehmen, dann diese: HTML ist keine Formatierungssprache. Es ist die Schicht, in der die *Bedeutung* eines Dokuments festgelegt wird — und alle anderen Schichten (CSS, JS, Suchmaschinen, Screenreader, AI-Crawler) verlassen sich darauf. Wer sauberes semantisches HTML schreibt, baut die Grundlage, auf der alle weiteren Optimierungen aufsetzen. Wer Divsuppe schreibt, kämpft danach in jeder anderen Schicht gegen seine eigene Struktur.
+HTML ist das einzige Frontend-Format, das ohne Laufzeitumgebung verarbeitet wird: Suchmaschinen, Screenreader, RSS-Reader, AI-Crawler und Archivierungssysteme (Wayback Machine) lesen HTML direkt. CSS und JavaScript sind für diese Konsumenten optional oder inexistent. Semantisches HTML ist daher kein Komfortmerkmal, sondern die Interoperabilitätsschicht des Webs — der einzige gemeinsame Nenner aller Verarbeitungspipelines, die auf Web-Inhalte zugreifen.
 
 ---
 
@@ -566,92 +566,7 @@ Wenn Sie aus diesem Modul *eine Sache* mitnehmen, dann diese: HTML ist keine For
 
 
 Notes:
-JavaScript ist historisch ein Unfall — Brendan Eich hat es 1995 in zehn Tagen entworfen, um statische HTML-Seiten dynamisch zu machen. Aus diesem Provisorium ist die meistbenutzte Programmiersprache der Welt geworden. Architektonisch wichtig ist nicht die Syntax, sondern das **Ausführungsmodell**: single-threaded, ereignisbasiert, asynchron. Wer das versteht, versteht warum SPAs funktionieren und warum Node.js auf dem Server existiert.
-
---
-
-## Was gibt dieser Code aus?
-
-```javascript
-console.log("1: Start");
-
-setTimeout(() => console.log("2: Timeout"), 0);
-
-fetch('/api/products/42')
-  .then(response => response.json())
-  .then(data => console.log("3: Daten geladen"));
-
-console.log("4: Ende");
-```
-
-
-<div class="c-orange">
-
-**Aufgabe:** In welcher Reihenfolge erscheinen die vier Zeilen in der Konsole? Begründen Sie.
-
-</div>
-
-
-Notes:
-Lassen Sie die Studierenden zwei Minuten überlegen, bevor Sie auflösen. Die intuitive (falsche) Erwartung ist meistens, dass `setTimeout(..., 0)` „sofort" ausgeführt wird oder dass `fetch` synchron blockiert. Die richtige Antwort erfordert das Verständnis, dass JavaScript single-threaded ist und alle asynchronen Operationen erst nach dem aktuellen Skript abgearbeitet werden. Wer das hier richtig vorhersagt, hat das Event-Loop-Modell verstanden — und kann die meisten Bug-Berichte über „die Daten kommen zu spät an" einordnen.
-
---
-
-## Auflösung
-
-`1: Start` → `4: Ende` → `2: Timeout` → `3: Daten geladen`
-
-JavaScript ist **single-threaded** — aber `setTimeout` und `fetch` laufen im Hintergrund. Der aktuelle Code wird zuerst vollständig ausgeführt, dann kommen die Callbacks. Das ist das fundamentale Ausführungsmodell, das Web-Anwendungen performant macht.
-
-Notes:
-Wichtig zu betonen: `setTimeout(..., 0)` bedeutet *nicht* „sofort", sondern „so früh wie möglich, nachdem der aktuelle Stack leer ist". Selbst mit Verzögerung 0 wird der Callback in die Task Queue gestellt und dort vom Event Loop abgearbeitet. Das gleiche gilt für Promises (`.then`) und `fetch` — sie kommen aus der Microtask Queue, die vor der Task Queue abgearbeitet wird, weshalb `Promise.resolve().then(...)` in der Praxis vor einem `setTimeout(..., 0)` läuft. Für die Vorlesung reicht das vereinfachte Modell „aktueller Code zuerst, alles andere danach".
-
---
-
-<!-- .slide: class="figure-70" -->
-
-## Der Event Loop: Warum das Web nicht blockiert
-
-
-<div class="columns col-2-1">
-
-
-<div class="column">
-
-![](/courses/web-and-data-engineering/figures/event-loop.svg)
-
-</div>
-
-
-<div class="column">
-
-
-<div class="small">
-
-### Wie es funktioniert
-
-1. **Call Stack:** Führt den aktuellen Code synchron aus
-2. **Web APIs:** Browser übernimmt Netzwerk, Timer, Events im Hintergrund
-3. **Task Queue:** Fertige Callbacks warten hier
-4. **Event Loop:** Wenn der Call Stack leer ist, holt er den nächsten Callback
-
-### Warum das architektonisch wichtig ist
-
-- Ein **einziger Thread** für UI und Logik → blockierende Operationen frieren die Seite ein
-- Deshalb ist **alles I/O asynchron** (Netzwerk, Timer, File API)
-- Node.js nutzt dasselbe Modell serverseitig → ein Thread bedient tausende Verbindungen
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Die wichtige Konsequenz für die Praxis: Wenn Sie in JavaScript eine Schleife haben, die 500ms läuft, friert die Seite für 500ms komplett ein — keine Klicks, keine Animationen, keine Eingaben. Der Browser kann erst wieder reagieren, wenn der Call Stack leer ist. Lange Berechnungen müssen deshalb entweder in **Web Workers** ausgelagert werden (echter zweiter Thread) oder in kleine Häppchen aufgeteilt und mit `setTimeout` oder `requestIdleCallback` über die Zeit verteilt werden. Dass Node.js dasselbe Modell serverseitig verwendet, ist kein Zufall: Webserver verbringen die meiste Zeit mit Warten auf I/O — ein einziger Thread mit Event Loop kann tausende Verbindungen bedienen, weil er nie blockiert.
+JavaScript wurde 1995 von Brendan Eich in zehn Tagen entworfen und hieß ursprünglich Mocha, dann LiveScript, dann JavaScript — ein Marketingentscheid von Netscape, um von Suns Java-Popularität zu profitieren. Technisch sind JavaScript und Java vollständig unverwandt. Das Ausführungsmodell — ein einziger Call Stack, eine Event Queue, ein Event Loop — ist der Grund, warum JavaScript trotz Single-Thread nicht blockiert: I/O-Operationen (fetch, setTimeout, DOM-Events) werden an Browser-APIs delegiert und kehren als Callbacks/Promises in die Queue zurück. Dieses Modell ist identisch in Node.js, weshalb Node denselben Concurrency-Stil auf dem Server ermöglicht.
 
 --
 
@@ -662,7 +577,7 @@ Die wichtige Konsequenz für die Praxis: Wenn Sie in JavaScript eine Schleife ha
 Der Browser parst HTML und erzeugt den **Document Object Model (DOM)** — einen Baum, den JavaScript lesen und verändern kann:
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -718,7 +633,7 @@ Der DOM ist die **Brücke zwischen HTML und JavaScript**. Jede Änderung am DOM 
 
 
 Notes:
-Der DOM ist nicht das HTML — der Browser parst HTML und erzeugt daraus den DOM-Baum. Diese Unterscheidung wird wichtig, sobald JavaScript ins Spiel kommt: Sie können im DOM Knoten erzeugen, die nie im HTML-Quelltext standen. Wenn Sie im Browser „View Source" wählen, sehen Sie das ursprüngliche HTML; wenn Sie in den DevTools den Inspector öffnen, sehen Sie den aktuellen DOM-Stand. Bei einer modernen Single-Page-App können diese beiden komplett unterschiedlich aussehen — was ein Problem für SEO und View-Source-Crawler ist (Stichwort Server-Side Rendering, das wir am Ende der Vorlesung streifen).
+Der DOM ist nicht das HTML-Dokument — er ist der interne Baum, den der Browser aus dem geparsten HTML aufbaut. „View Source" im Browser zeigt das ursprüngliche HTML-Dokument; der DevTools-Inspector zeigt den aktuellen DOM-Zustand, der durch JavaScript beliebig verändert sein kann. Bei einer Single-Page-App können diese beiden vollständig auseinanderlaufen: Der Quelltext enthält nur ein leeres `<div id="root">`, der DOM enthält die vollständige gerenderte Anwendung. Das ist der Kern des SEO-Problems mit clientseitigem Rendering: Crawler, die kein JavaScript ausführen, sehen den leeren Quelltext, nicht den gerenderten DOM. Server-Side Rendering (SSR) löst dieses Problem, indem der initiale DOM serverseitig erzeugt und als vollständiges HTML ausgeliefert wird.
 
 --
 
@@ -792,7 +707,7 @@ button.addEventListener('click', async (event) => {
 **Diskussionsfrage:** Der Button wird sofort deaktiviert und der Text geändert, **bevor** die Serverantwort eintrifft. Warum macht man das? Was passiert, wenn die Netzwerkverbindung abbricht?
 
 Notes:
-Antwort auf die Diskussionsfrage: Das Muster heißt **optimistisches UI-Update**. Der Nutzer bekommt sofort Feedback, dass sein Klick angekommen ist — auch wenn der Server noch nicht geantwortet hat. Das fühlt sich schneller an, weil nicht 200ms Netzwerklatenz wahrgenommen werden müssen. Risiko: Wenn der Server fehlschlägt, muss das UI **zurückgerollt** werden — der Button-Text wird zurückgesetzt, eine Fehlermeldung erscheint. Das ist die schwierigere Hälfte des Patterns und der Grund, warum Frameworks wie React Query oder SWR einen Großteil ihrer API genau dieser Frage widmen: Wie macht man Optimistic Updates korrekt rückgängig?
+Das **optimistische UI-Update** ist ein etabliertes Muster für wahrgenommene Performance: Statt auf die Serverantwort zu warten (typisch 100–500ms Netzwerklatenz), aktualisiert der Client sofort seinen lokalen Zustand und zeigt das Feedback. Wenn der Server bestätigt, gibt es nichts zu tun. Wenn der Server fehlschlägt, muss der lokale Zustand zurückgerollt werden — der Button-Text wird zurückgesetzt, eine Fehlermeldung erscheint. Das Rollback ist die schwierigere Hälfte: Der Client muss den vorherigen Zustand zwischengespeichert haben und bei Fehler exakt wiederherstellen. Bibliotheken wie React Query oder SWR stellen dafür explizite `onMutate`/`onError`-Hooks bereit, die das Rollback strukturiert handhaben.
 
 --
 
@@ -843,7 +758,7 @@ document.querySelector('.price').textContent = product.price + ' €';
 ```
 
 Notes:
-Lassen Sie die Studierenden zwei Minuten überlegen, bevor Sie zur nächsten Folie weitergehen. Mindestens fünf Probleme sollten gefunden werden: Server unerreichbar, 404, langsame Verbindung, kein JSON, fehlendes DOM-Element. Wer alle fünf findet, hat ein gutes Gespür für Fehlerquellen entwickelt — die meisten Studierenden finden zwei oder drei. Diese Lücke zwischen „funktioniert im Glücksfall" und „funktioniert robust" ist der Kern des Unterschieds zwischen Hobby- und Produktivcode.
+Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerkbasierter Fehlerquellen ab: (1) **Netzwerk nicht erreichbar** — `fetch` wirft eine Exception, kein Response-Objekt entsteht. (2) **HTTP-Fehler (4xx/5xx)** — `fetch` liefert ein Response-Objekt mit `response.ok === false`; `.json()` parst den Fehler-Body, der häufig HTML statt JSON enthält. (3) **Langsame Verbindung** — UI zeigt veraltete oder keine Daten, kein Feedback für den Nutzer. (4) **Kein JSON im Body** — `.json()` wirft eine SyntaxError-Exception. (5) **Fehlendes DOM-Element** — `querySelector` gibt `null` zurück, Zugriff auf `.textContent` löst TypeError aus. Der Unterschied zwischen Code der nur im Normalfall funktioniert und robustem Produktivcode liegt ausschließlich in der Behandlung dieser Randfälle.
 
 --
 
@@ -930,7 +845,7 @@ JavaScript ist die **Verhaltensschicht** des Webs und zugleich der Orchestrator:
 
 
 Notes:
-Wenn Sie aus diesem Modul *eine Sache* mitnehmen sollen, dann das Event-Loop-Modell — es erklärt, warum JavaScript single-threaded sein kann und trotzdem nicht blockiert, warum `async/await` syntaktischer Zucker ist und nicht echte Parallelität, warum lange Berechnungen die UI einfrieren und warum Node.js auf demselben Server tausende Verbindungen bedienen kann. Alles andere — DOM, Events, Fetch, Frameworks — baut auf diesem einen Modell auf.
+Das Event-Loop-Modell ist das einheitliche Erklärungsmodell für scheinbar unzusammenhängende JavaScript-Verhaltensweisen: warum der Browser trotz single-threaded Ausführung nicht einfriert (asynchrone Callbacks warten in der Queue, nicht im Stack), warum `async/await` syntaktischer Zucker über Promises ist und keine echte Parallelität erzeugt, warum eine synchrone Schleife die UI blockiert (der Event Loop kann keine anderen Callbacks verarbeiten, solange der Stack besetzt ist), und warum Node.js tausende gleichzeitige Netzwerkverbindungen mit einem einzigen Thread bedienen kann (I/O ist nie blocking — die Callbacks warten in der Queue). DOM, Events, Fetch und Frameworks bauen alle auf diesem Modell auf.
 
 ---
 
@@ -947,7 +862,7 @@ Wenn Sie aus diesem Modul *eine Sache* mitnehmen sollen, dann das Event-Loop-Mod
 
 
 Notes:
-CSS wirkt auf den ersten Blick trivial — Farben, Schriftgrößen, ein bisschen Layout. Tatsächlich ist CSS die anspruchsvollste der drei Frontend-Sprachen, weil sie deklarativ ist: Sie beschreiben *Constraints*, der Browser löst sie auf. Die meisten Bugs in Frontend-Code sind keine JavaScript-Fehler, sondern unverstandene CSS-Spezifität, Cascade oder Layout-Wechselwirkungen. In diesem Modul geht es weniger um Syntax als um die mentalen Modelle, die hinter CSS stehen.
+CSS ist die anspruchsvollste der drei Frontend-Sprachen, weil sie vollständig deklarativ ist: Die Entwicklerin beschreibt Constraints, der Browser löst sie auf — der konkrete Pixel-Wert ist nie direkt spezifizierbar. Die meisten schwer debugbaren Bugs in Frontend-Code sind keine JavaScript-Fehler, sondern unverstandene CSS-Spezifität, Cascade oder Layout-Wechselwirkungen. Die Kaskade, das Spezifitätssystem und das Box-Modell sind keine Details, sondern die Kernmechanik — wer sie versteht, kann jedes CSS-Framework schnell lesen und anpassen, weil alle Frameworks auf denselben Browser-Grundlagen aufbauen.
 
 --
 
@@ -969,7 +884,7 @@ p.highlight  { color: orange; }
 **Aufgabe:** Der Paragraph matcht alle vier Selektoren. Welche Farbe wird angezeigt — und warum?
 
 Notes:
-Lassen Sie die Studierenden überlegen, bevor Sie auflösen. Die meisten werden intuitiv denken „die letzte Regel gewinnt" — das ist falsch. CSS ist nicht zeilenorientiert, sondern spezifitätsorientiert. Die Reihenfolge im Stylesheet ist nur der Tiebreaker, wenn die Spezifität identisch ist. Diese falsche Intuition ist die Wurzel der meisten CSS-Bugs in der Praxis: „Ich habe die Regel doch ganz unten geschrieben, warum greift sie nicht?"
+Die häufigste Fehlintuition bei CSS ist, dass die Reihenfolge im Stylesheet entscheidet — Spezifität hat aber Vorrang. Die Reihenfolge im Stylesheet ist nur der Tiebreaker, wenn zwei Regeln identische Spezifität haben. Das Spezifitätssystem ist deterministisch: `(1,0,0)` (ID) schlägt immer `(0,99,99)` (Klassen + Elemente). Diese Fehlintuition ist die Wurzel des häufigsten CSS-Bug-Musters — eine Regel wird hinzugefügt, greift aber nicht, weil eine existierende Regel mit höherer Spezifität gewinnt. Der DevTools-Inspector zeigt überschriebene Eigenschaften mit einem Durchstreichen — das ist das wichtigste CSS-Debug-Werkzeug im Browser.
 
 --
 
@@ -1120,7 +1035,7 @@ Bevor man JavaScript für visuelle Effekte einsetzt, lohnt die Frage: Kann CSS d
 CSS reagiert auf **Zustände** (`:hover`, `:checked`, `:focus`, `@media`) und **animiert Übergänge**. Sobald **neuer Zustand erzeugt** werden muss (Daten laden, DOM-Elemente erstellen, Server kontaktieren), braucht man JavaScript. JavaScript sollte den **Auslöser** steuern (Klasse setzen), CSS die **Darstellung** (Transition/Animation).
 
 Notes:
-Diese Tabelle ist wichtig für die Architektur-Denke. CSS kann *sehr viel* mehr, als die meisten Anfänger annehmen: Akkordeons mit `<details>`, Dropdown-Menüs mit `:focus-within`, Formular-Validierung mit `:valid`/`:invalid`, ganze Themes mit Custom Properties und `@media (prefers-color-scheme)`. Das spart JavaScript — und damit Ladezeit, Wartungsaufwand, Komplexität. Die Faustregel: Prüfen Sie immer zuerst, ob CSS das allein kann. Wenn ja, nehmen Sie CSS. Wenn nein, überlegen Sie, ob der Aufwand in JavaScript wirklich gerechtfertigt ist.
+CSS deckt seit 2020 mehr Interaktionsmuster ab als allgemein angenommen: Akkordeons mit dem nativen `<details>`/`<summary>`-Element, Dropdown-Menüs mit `:focus-within`, Formular-Validierung mit `:valid`/`:invalid`/`:user-invalid`, Themes mit Custom Properties und `@media (prefers-color-scheme: dark)`, Smooth Scroll mit `scroll-behavior: smooth`. CSS-Lösungen sind wartungsärmer (kein State-Management), performanter (keine JavaScript-Evaluation im Render-Pfad) und barrierefreundlicher (Browser-natives Verhalten). JavaScript ist nur notwendig, wenn neue Zustände aus externen Quellen entstehen: Netzwerkdaten, berechnete Werte oder dynamisch erzeugte DOM-Strukturen.
 
 --
 
@@ -1160,7 +1075,7 @@ Jedes Layoutmodell löst ein **anderes Verteilungsproblem**:
 **Faustregel:** Flexbox wenn der **Inhalt** das Layout bestimmt (Elemente verteilen sich). Grid wenn das **Layout** den Inhalt bestimmt (Raster vorgeben).
 
 Notes:
-Vor Flexbox (2012) und Grid (2017) war CSS-Layout ein Albtraum: vertikal zentrieren erforderte Tricks mit `display: table-cell`, Spaltenlayouts wurden mit `float` gebaut, das Clearen von Floats brauchte Hacks wie `clearfix`. Flexbox und Grid haben CSS-Layout fundamental vereinfacht — was früher 20 Zeilen JavaScript-Workaround brauchte, ist heute drei Zeilen CSS. Für Studierende wichtig: Die alten Techniken (Floats, Positioning, Tables) tauchen in Legacy-Code noch auf, aber für neuen Code sind Flexbox und Grid fast immer die richtige Wahl. Die Entscheidung zwischen beiden folgt der oben genannten Faustregel.
+Vor Flexbox (in allen Browsern verfügbar ab 2012) und Grid (2017) war CSS-Layout strukturell limitiert: Vertikales Zentrieren erforderte `display: table-cell`-Hacks, Spaltenlayouts wurden mit `float` und `clearfix` gebaut, gleichhohe Spalten waren ohne JavaScript kaum möglich. Flexbox und Grid ersetzen Float-basiertes Layout vollständig für neue Codebases. Die alten Techniken (Floats für Spaltenlayout, `display: table`, Inline-Block-Raster) tauchen in Legacy-Code aus der Bootstrap-2/3-Ära und in CMS-Themes aus den 2010er-Jahren auf. Floats für Textumfluss (ein Bild, um das Text fließt) sind weiterhin korrekt und zeitgemäß; Floats als Spalten-Layout-Mechanismus sind überholt.
 
 --
 
@@ -1250,7 +1165,7 @@ Notes:
 **Welches Layoutmodell wählen Sie — und warum?**
 
 Notes:
-Lassen Sie die Studierenden zwei Minuten nachdenken und ihre Entscheidung begründen, bevor Sie zur nächsten Folie gehen. Erwarten Sie die drei üblichen Vorschläge: Flexbox (weil es einfach klingt), Grid (weil es flexibel ist) und zwei separate Layouts (weil es „klar" ist). Die Aufgabe ist bewusst unterdefiniert — die Begründung ist wichtiger als die Antwort. Wer Flexbox wählt, muss erklären können, wie die Umordnung Bild-oben/Text-unten auf Mobile funktioniert. Wer Grid wählt, muss `grid-template-areas` und Media Queries erklären können. Wer zwei Layouts wählt, muss begründen, warum der doppelte Aufwand sich lohnt.
+Die drei typischen Lösungsansätze für dieses Szenario haben unterschiedliche Eigenschaften: **Flexbox** lässt sich mit `flex-direction: column` auf Mobile und `flex-direction: row` auf Desktop umschalten, erfordert aber explizite Reihenfolge-Kontrolle mit `order` wenn Bild und Text DOM-Reihenfolge tauschen sollen. **Grid mit `grid-template-areas`** ist ausdrucksstärker: Ein Media Query ändert nur die `grid-template-areas`-Deklaration von `"img text"` auf `"img" "text"`, die restliche Stilistik bleibt unverändert. **Zwei separate Layouts** duplizieren CSS und erhöhen Wartungsaufwand ohne Vorteil. Die Faustregel greift hier direkt: Das Layout soll den Inhalt bestimmen (festes 2-Spalten-Schema auf Desktop, Stack auf Mobile) — das ist ein Grid-Problem.
 
 --
 
@@ -1282,7 +1197,7 @@ CSS existiert als eigene Sprache, weil dasselbe HTML in **verschiedenen Kontexte
 
 
 Notes:
-Wenn Sie aus diesem Modul *eine Sache* mitnehmen, dann die **Deklarativität** von CSS. Das ist es, was CSS von imperativem UI-Code unterscheidet: Sie beschreiben nicht Schritte, sondern Constraints. Der Browser löst sie auf. Dieses Prinzip skaliert auf alle Bildschirmgrößen, alle Geräte, alle Eingabemodi — ohne dass Sie pro Fall Code schreiben müssen. Wer CSS imperativ denkt („JavaScript setzt Pixel"), verfehlt den Kern der Sprache und kämpft gegen sie. Wer CSS deklarativ denkt („ich beschreibe die Regeln, der Browser macht den Rest"), arbeitet mit der Sprache.
+**Deklarativität** ist das definierende Merkmal von CSS: Der Entwickler beschreibt Constraints (Breite, Abstände, Farbe, Layout-Regeln), der Browser berechnet die konkreten Pixel — abhängig von Viewport, Schriftgröße, Gerätepixeldichte und verfügbarem Raum. Das ist fundamental anders als Canvas-Rendering oder SVG-Zeichnen mit Pixelkoordinaten. Die Deklarativität ist der Grund, warum `grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))` automatisch auf 300px-Screens mit einer Spalte und auf 1400px-Screens mit sechs Spalten reagiert — ohne Media Query. Imperative CSS-Ansätze (z.B. Breiten per JavaScript explizit setzen) kämpfen gegen dieses Modell und erzeugen Layout-Bugs bei Reflows und Resize-Events.
 
 ---
 
@@ -1308,7 +1223,7 @@ Die JavaScript-Sprache (ECMAScript) ist erstaunlich klein: Variablen, Funktionen
 Web APIs sind Browser-Schnittstellen, die JavaScript zusätzliche Fähigkeiten geben: den DOM verändern, Netzwerke ansprechen, Daten speichern, Gerätefunktionen nutzen oder Medien steuern.
 
 
-<div class="columns col-2-1">
+<div class="grid-2-1">
 
 
 <div class="column small">
@@ -1530,7 +1445,7 @@ Web APIs sind die **Fähigkeiten**, die der Browser JavaScript zur Verfügung st
 
 
 Notes:
-Wenn Sie aus diesem Modul *eine Sache* mitnehmen, dann dass die Grenze zwischen Sprache und Plattform wichtig ist. JavaScript allein kann erstaunlich wenig — es sind die Web APIs, die moderne Web-Anwendungen möglich machen. Wer diese Grenze versteht, versteht warum derselbe Code auf Node.js anders läuft als im Browser, warum Polyfills existieren, warum Feature-Detection besser ist als Browser-Detection, und warum manche „JavaScript-Features" eigentlich Browser-Features sind.
+Die Trennung zwischen ECMAScript (Sprache) und Web APIs (Plattform) hat konkrete technische Konsequenzen: Derselbe JavaScript-Code läuft in unterschiedlichen Umgebungen unterschiedlich — `localStorage` ist im Browser global verfügbar, in Node.js nicht definiert; `fs.readFile` ist in Node.js verfügbar, im Browser nicht. Polyfills implementieren eine Web API für Umgebungen, die sie nicht nativ unterstützen — z.B. `fetch` in älteren Node-Versionen. Feature-Detection (`if (typeof serviceWorker !== 'undefined')`) ist stabiler als Browser-Detection, weil sie direkt prüft ob die Fähigkeit vorhanden ist, unabhängig von Browser-Version oder User-Agent-String. Isomorphic JavaScript (Code, der auf Server und Client gleich läuft) muss diese Grenze mit Adapter-Schichten oder Conditional Imports explizit handhaben.
 
 ---
 
@@ -1547,7 +1462,7 @@ Wenn Sie aus diesem Modul *eine Sache* mitnehmen, dann dass die Grenze zwischen 
 
 
 Notes:
-Bisher haben wir die drei Technologien getrennt betrachtet. Im Browser laufen sie aber in einer **gemeinsamen Pipeline**: HTML wird zum DOM, CSS zum CSSOM, dann fließen beide in den Render Tree, und JavaScript kann jederzeit dazwischenfunken. Wer Performance-Probleme im Frontend beheben oder von vornherein vermeiden will, muss diese Pipeline kennen — die meisten langsamen Webseiten sind nicht *durch* eine Technologie langsam, sondern *zwischen* den Technologien.
+Die gemeinsame Rendering-Pipeline des Browsers besteht aus sechs sequenziellen Phasen: (1) HTML parsen → DOM aufbauen, (2) CSS parsen → CSSOM aufbauen, (3) DOM + CSSOM → Render Tree (unsichtbare Elemente werden ausgeblendet), (4) Layout — Geometrie jedes Render-Tree-Knotens berechnen, (5) Paint — Pixel zeichnen, (6) Composite — Layer zusammenstellen. JavaScript kann in jeder Phase eingreifen: DOM-Mutationen invalidieren den Render Tree ab Schritt 3, `element.offsetHeight` erzwingt Layout synchron, CSS-Property-Änderungen mit `transform` können Schritte 4–5 überspringen. Performance-Probleme entstehen fast immer an diesen Schnittstellen, nicht innerhalb einer einzelnen Technologie.
 
 --
 
@@ -1562,7 +1477,7 @@ Bisher haben wir die drei Technologien getrennt betrachtet. Im Browser laufen si
 
 
 Notes:
-Diese Aufgabe sollte das Zusammenspiel aller bisherigen Inhalte auf einem konkreten Szenario zeigen. Lassen Sie die Studierenden einige Minuten nachdenken und sammeln Sie Vorschläge an der Tafel. Erwarten Sie unterschiedliche Detailtiefen: manche werden nur sagen „der Button wird geklickt, dann kommt das Produkt in den Warenkorb", andere werden schon auf den Event-Handler, den Fetch-Aufruf und das optimistische UI-Update eingehen. Beides ist richtig — die nächste Folie löst gezielt in sechs Schritten auf, die *alle* Technologien sichtbar machen.
+Der Warenkorb-Klick-Szenario veranschaulicht das Zusammenspiel aller drei Frontend-Technologien: HTML definiert Button und Badge, JavaScript registriert den Event-Handler und sendet den Fetch-Request, CSS rendert das visuelle Feedback (Button deaktiviert, Badge-Zähler). Die sechs Schritte auf der Folgefolie illustrieren das optimistische UI-Update-Muster: Schritte 2–3 (DOM-Änderung und CSS-Render) laufen synchron vor dem Netzwerk-Request, weil die wahrgenommene Latenz unter 100ms bleiben muss. Der asynchrone Fetch-Request (Schritt 4) kann in der Praxis 100–500ms dauern — nach dem sofortigen visuellen Feedback für den Nutzer nicht wahrnehmbar.
 
 --
 
@@ -1580,7 +1495,7 @@ Diese Aufgabe sollte das Zusammenspiel aller bisherigen Inhalte auf einem konkre
 **Schlüsselbeobachtung:** Das UI reagiert **sofort** (optimistisches Update), der Server wird **asynchron** kontaktiert. Das ist nur möglich, weil JavaScript non-blocking arbeitet.
 
 Notes:
-Dieser sechsstufige Ablauf macht das Zusammenspiel der drei Technologien sichtbar: HTML liefert die Button-Struktur, CSS die Darstellung, JavaScript das Verhalten und die Netzwerk-Kommunikation, und der Browser orchestriert Layout und Paint. Beobachten Sie, wie viele Schritte *sofort* ablaufen und wie wenige *asynchron* sind — das Verhältnis ist bewusst so gewählt: Der Nutzer soll nie mehr als 100ms auf Feedback warten (das ist die Grenze, ab der Menschen eine Reaktion als „verzögert" wahrnehmen). Alles andere läuft im Hintergrund.
+Dieser Ablauf zeigt das Zusammenspiel: HTML liefert die Struktur (Button, Badge), JavaScript das Verhalten (Event-Handler, Fetch), CSS die Darstellung (Zustandsübergang, Animation). Die Aufteilung in sofortige und asynchrone Schritte basiert auf der 100ms-Wahrnehmungsschwelle (aus der HCI-Forschung von Nielsen/Miller): Reaktionen unter 100ms werden als direkte Kausalität wahrgenommen, darüber als Systemlatenz. Das optimistische UI-Update (Schritte 2–3 vor Schritt 4) hält das visuelle Feedback unter dieser Schwelle, selbst wenn der Server 300ms antwortet. Die Alternative — auf den Server warten, bevor die UI reagiert — wäre für Nutzer auf mobilen Netzen deutlich spürbar.
 
 --
 
@@ -1594,58 +1509,6 @@ Die Pipeline arbeitet auf zwei internen Strukturen: dem **DOM** für HTML und de
 
 Notes:
 Die Rendering-Pipeline ist deterministisch und läuft in sechs Phasen: (1) HTML parsen → DOM, (2) CSS parsen → CSSOM, (3) Render Tree aufbauen (DOM + CSSOM zusammenführen, dabei unsichtbare Elemente ausfiltern), (4) Layout (Berechnung von Position und Größe jedes Elements), (5) Paint (Pixel zeichnen), (6) Composite (Layer zusammenstellen). Bei jeder Änderung am DOM oder CSS fragt der Browser: Wie weit muss ich zurück in die Pipeline? Nur Farbe geändert? → nur Paint + Composite. Position geändert? → Layout + Paint + Composite (Reflow). Nur Transform oder Opacity? → nur Composite (am billigsten). Diese Unterscheidung ist der Schlüssel zu 60-FPS-Animationen.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Warum ist diese Seite langsam?
-
-**Aufgabe:** Eine Produktseite des Online-Shops lädt in 4,2 Sekunden. Der Entwickler hat den HTML-Head so strukturiert:
-
-```html
-<head>
-  <script src="analytics.js"></script>
-  <script src="app.js"></script>
-  <link rel="stylesheet" href="styles.css">
-  <script src="chat-widget.js"></script>
-</head>
-```
-
-Was ist das Problem — und wie würden Sie es lösen?
-
-![](/courses/web-and-data-engineering/figures/script-loading.svg)
-
-Notes:
-Lassen Sie die Studierenden das Problem selbst finden, bevor Sie auflösen. Der springende Punkt: Jedes `<script>` ohne `defer` oder `async` stoppt den HTML-Parser. Der Browser kann nichts rendern, weil das Script potenziell `document.write` aufrufen oder den DOM ändern könnte. Drei Scripts hintereinander bedeuten drei sequenzielle Blockaden. Und weil das CSS *nach* den Scripts kommt, wartet der Browser auf die Scripts, bevor er das Stylesheet überhaupt lädt. Ergebnis: Der Nutzer sieht eine weiße Seite, bis alle Ressourcen geladen sind.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Analyse
-
-| Problem | Ursache | Lösung |
-|---|---|---|
-| **Scripts blockieren Parsing** | `<script>` ohne `defer`/`async` stoppt den HTML-Parser | `<script src="app.js" defer>` |
-| **CSS kommt nach Scripts** | Browser wartet auf Scripts, bevor er CSS sieht | CSS **vor** Scripts im `<head>` |
-| **Alles synchron geladen** | 3 Scripts + 1 CSS = sequenzielle Blockade | `defer` für alle Scripts, CSS zuerst |
-
-### Optimierte Version
-
-```html
-<head>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
-  <script src="analytics.js" defer></script>
-  <script src="chat-widget.js" defer></script>
-</head>
-```
-
-`defer` = Script wird **nach** dem Parsen ausgeführt, **in Reihenfolge**. Das ist fast immer die richtige Wahl.
-
-Notes:
-Der Unterschied zwischen `defer` und `async`: `defer` lädt parallel zum HTML-Parsing und führt nach dem Parsing in der Reihenfolge des Quelltexts aus — deshalb sicher für Scripts mit Abhängigkeiten. `async` lädt ebenfalls parallel, führt aber sofort beim Eintreffen aus, in unvorhersehbarer Reihenfolge — geeignet für unabhängige Scripts wie Analytics, die keinen anderen Code brauchen. Als Faustregel: `defer` ist die bessere Default-Wahl. `async` nur für wirklich unabhängige, feuer-und-vergiss-Scripts. Eine dritte Alternative ist, Scripts ans Ende des `<body>` zu setzen — funktioniert ebenfalls, ist aber weniger deklarativ und trennt den Head von seiner Konfiguration.
 
 --
 
@@ -1723,7 +1586,7 @@ Der Server liefert bereits fertiges HTML an den Browser. Danach lädt JavaScript
 Die klassische Web-Lehre sagt: „Trenne HTML, CSS und JavaScript in separate Dateien." React bündelt alle drei **pro Komponente**. Ist das ein Widerspruch zum Prinzip der Separation of Concerns — oder eine bessere Umsetzung davon?
 
 Notes:
-Die Evolution des Web-Frontends lässt sich in vier Ären einteilen, und jede hatte ein anderes Verständnis von Separation of Concerns. In den 2000ern bedeutete „trennen" = separate Dateien pro Technologie. In der jQuery-Ära wurde JS zur zentralen Steuerung, HTML und CSS blieben auf dem Server. Mit React (2013) kam der Paradigmenwechsel: Trennung nach fachlicher Verantwortung statt nach Technologie. Und seit 2020 pendelt die Branche wieder zurück — Server-First, aber mit Client-Hydration, um das Beste aus beiden Welten zu verbinden. Die Diskussionsfrage hat keine eindeutige Antwort: Beide Sichten sind legitim, und die richtige Wahl hängt vom Projekt ab.
+Die vier Ären des Web-Frontends repräsentieren unterschiedliche Antworten auf dieselbe architektonische Frage: Wo gehört die Rendering-Logik hin? In den 2000ern blieb sie auf dem Server (HTML-Ausgabe). In der jQuery-Ära wanderte sie schrittweise in den Client, ohne formales Zustandsmodell. Mit React/Vue (ab 2013) entstand ein formales Client-Modell mit deklarativem Zustandsmanagement. Server-First-Frameworks (Next.js, SvelteKit, ab 2020) kehren zum Server zurück, aber mit Client-Hydration als Erweiterung. Die React-Komponentenidee hebt Separation of Concerns nicht auf — sie verschiebt sie von der Technologieachse (HTML/CSS/JS-Dateien) auf die Fachlichkeitsachse (Komponente: Produktkarte, Warenkorb, Navigation). Beide Interpretationen sind gültig und spiegeln unterschiedliche Systemkomplexitäten wider.
 
 --
 
@@ -1732,7 +1595,7 @@ Die Evolution des Web-Frontends lässt sich in vier Ären einteilen, und jede ha
 **Beides stimmt:** Die Trennung bleibt — aber auf einer anderen Ebene. Statt nach Technologie (HTML/CSS/JS) wird nach **fachlicher Verantwortung** getrennt (Produktkarte, Warenkorb, Navigation). Jede Komponente kapselt ihr Markup, ihren Stil und ihr Verhalten.
 
 Notes:
-Diese Einordnung erklärt, warum beide Sichten „richtig" sind. Separation of Concerns ist ein abstraktes Prinzip — es sagt nur, dass zusammengehöriger Code zusammenbleiben und unzusammenhängender getrennt werden soll. Was „zusammengehörig" bedeutet, ist aber Auslegungssache. In den 2000ern war das die Technologie, heute ist es die Fachlichkeit. Beide Interpretationen entsprechen dem Prinzip — sie sind nur unterschiedliche Antworten auf die Frage „was hängt zusammen". Wer das einmal verstanden hat, wird in zukünftigen Technologie-Debatten nicht mehr auf falsche Dichotomien hereinfallen.
+Separation of Concerns ist ein Prinzip, kein Mechanismus — es definiert das Ziel (verwandte Logik zusammen, unverwandte getrennt), nicht den Weg dahin. Was „zusammengehörig" bedeutet, hängt von der Systemkomplexität ab. In dokumentartig aufgebauten Webseiten ist die Technologie die natürliche Trennlinie (HTML für Struktur, CSS für Darstellung, JS für Verhalten). Bei komplexen UI-Anwendungen wird die fachliche Verantwortung (Produktkarte, Warenkorb-Sidebar, Navigation) zur sinnvolleren Trennlinie — eine Komponente enthält HTML, CSS und JS, weil sie gemeinsam eine Fachlichkeit implementieren. Flexbox trennt CSS-Layoutlogik von HTML-Struktur auf Technologieebene, während Komponenten HTML+CSS+JS auf Fachebene zusammenfassen. Beide Ebenen koexistieren in modernen Frontends.
 
 --
 
@@ -1751,7 +1614,7 @@ HTML, CSS und JavaScript sind ein eng verzahntes System. Der Browser verarbeitet
 
 
 Notes:
-Das Technologie-Dreieck ist die zentrale Metapher dieser Vorlesung: drei Schichten mit klaren Verantwortungen, die im Browser zusammenfließen. Wer diese drei kennt und versteht, wie sie in der Rendering-Pipeline interagieren, hat die Grundlage für jede Frontend-Architektur — egal ob Vanilla JavaScript, React, Svelte oder ein Framework, das es in zehn Jahren noch nicht gibt. Das konkrete Werkzeug wechselt, das Modell bleibt.
+Die Drei-Schichten-Architektur von HTML (Struktur), CSS (Darstellung) und JavaScript (Verhalten) ist stabiler als jedes konkrete Framework. React, Vue, Angular und Svelte haben alle dieselbe Grundstruktur: Sie erzeugen DOM (HTML), manipulieren Styles (CSS) und reagieren auf Events (JavaScript). Der Abstraktionsgrad ändert sich mit jeder Framework-Generation, das zugrunde liegende Browser-Modell (DOM, CSSOM, Event Loop, Rendering-Pipeline) ist seit über einem Jahrzehnt stabil. Ein Verständnis dieser Pipeline erklärt, warum bestimmte Framework-Optimierungen notwendig sind — Virtual DOM Diffing minimiert Reflows, CSS-in-JS scoped Styles auf Komponenten, Server-Side Rendering löst das SEO-Problem clientseitiger Apps.
 
 ---
 
@@ -1765,7 +1628,7 @@ Das Technologie-Dreieck ist die zentrale Metapher dieser Vorlesung: drei Schicht
 Die nächste Vorlesung vertieft das **Protokoll** (HTTP) und das **API-Design** (REST), das die Brücke zwischen Frontend und Backend bildet.
 
 Notes:
-Zusammenfassend: Diese Vorlesung hat bewusst keine umfassende Abhandlung zu HTML, CSS oder JavaScript geliefert — das würde jede einzelne Technologie ein ganzes Semester füllen. Statt Syntax haben wir **Architektur** behandelt: warum HTML semantisch sein muss, warum CSS deklarativ ist, warum JavaScript single-threaded läuft, wie die Technologien im Browser zusammenspielen. Wer diese Konzepte mitnimmt, kann jede konkrete Frontend-Technologie schnell lernen. Wer nur Syntax auswendig lernt, muss bei jedem neuen Framework bei null anfangen. In der nächsten Vorlesung geht es auf die andere Seite der Leitung: HTTP als Protokoll zwischen Browser und Server, und REST als API-Stil darauf.
+HTML, CSS und JavaScript sind jeweils eigene Spezifikationen mit separaten Gremien (WHATWG, CSS Working Group, TC39) und separaten Releases — aber im Browser laufen sie in einer gemeinsamen Pipeline. Das konzeptionelle Modell dieser Vorlesung — HTML als Strukturschicht, CSS als Constraint-Solver, JavaScript als Event-gesteuerte Laufzeit — ist unabhängig vom Framework-Ökosystem gültig und überdauert Framework-Wechsel. Vorlesung 04 wechselt auf die Protokollebene: HTTP definiert, wie Browser und Server kommunizieren; REST und andere API-Stile definieren, wie diese Kommunikation semantisch strukturiert wird. Die Fetch API, die in dieser Vorlesung auf der Client-Seite betrachtet wurde, ist die JavaScript-Schnittstelle zu diesem Protokoll.
 
 Legacy-Quellen:
 

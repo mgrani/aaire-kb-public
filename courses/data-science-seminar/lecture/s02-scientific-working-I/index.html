@@ -1,0 +1,1241 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science Seminar — Session 02: Scientific Working I — The Research Loop</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BQPjw3n4.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# HS Data Science 26
+## Session 02: Scientific Working I — The Research Loop
+
+Prof. Dr. Michael Granitzer
+
+21 April 2026
+
+---
+
+## Session Overview
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Module A — The Research Loop**
+
+Steps 1–11 of the scientific cycle:
+
+- from reading literature to communicating results
+- hypothesis as the contract with the reader
+- three experiment modes: dev loop · pre-experiment · full
+
+**Module B — Experiment Design**
+
+- conditions, controls, and ablations
+- choosing and applying the right metric
+- pitfalls that invalidate results
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="c-info gap">
+
+**Why this session?**
+
+Your seminar project is a *mini research loop.*
+Every step applies — even at small scale.
+
+</div>
+
+
+
+<div class="takeaway">
+
+**The key insight:**
+A well-designed experiment with a modest model beats a sophisticated model with a broken experiment every time.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Open with the observation that most student project failures are not modelling failures — they are design failures: no clear question, no strong baseline, no pre-experiment. The session gives the vocabulary and structure to avoid that.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## The Research Loop
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What steps turn a vague question into a publishable result?
+
+</div>
+
+
+--
+
+## The Research Loop — Overview
+
+<!-- .slide: class="figure-70" -->
+
+![The Research Loop — 11 numbered steps](..//courses/data-science-seminar/figures/research-loop-steps.svg)
+
+Notes:
+Walk through the 11 steps briefly. Stress two points: (1) iteration is not failure — the dashed arcs are normal science; (2) the steps before the experiment (1–5) determine quality more than the experiment itself.
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+![The Scientific Research Loop as a cycle diagram](..//courses/data-science-seminar/figures/research-loop.svg)
+
+Notes:
+The two dashed arcs are the most important part: "iterate: fix errors → re-run" and "revise hypothesis". Most real projects loop between steps 7–9 several times before reaching write-up.
+
+--
+
+## Step 1 — Reading Literature
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**The three-pass method** (Keshav 2007)
+
+
+<div class="small">
+
+| Pass | What you read | Time |
+|------|--------------|------|
+| 1st | title, abstract, conclusion | 5 min |
+| 2nd | intro, headings, figures | 20 min |
+| 3rd | full paper, related work | 60–90 min |
+
+</div>
+
+
+Only go to pass 3 for __directly relevant__ papers.
+
+**While reading, ask:**
+
+- What claim does this paper make?
+- What evidence supports it?
+- What does it assume or leave out?
+- What would a follow-up study do?
+
+</div>
+
+
+<div class="column">
+
+**Active reading — example questions**
+
+- *"Could this result be a confound?"*
+- *"What changes if the dataset is different?"*
+- *"Does this generalise beyond the benchmark?"*
+
+**Keep a reading log:** one sentence per paper — the claim and why you care. Use Obsidian or Notion. Build this habit now.
+
+
+<div class="takeaway">
+
+Reading is not collecting — it is **understanding what is settled** and **what remains open**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The three-pass method is from Keshav (2007) "How to Read a Paper." The reading log is essential — without it, students re-read papers they have already processed and lose the thread of related work.
+
+--
+
+## Step 2 — Finding the Gap
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Types of gap** *(be complete — gaps fall into these categories)*
+
+
+<div class="small">
+
+| Type | Example signal |
+|------|---------------|
+| Missing condition | "Only tested on English" |
+| Conflicting results | "Papers A and B disagree" |
+| Missing baseline | "No comparison to simple heuristic" |
+| Scope limitation | "Offline only, not online" |
+| Scalability limit | "Fails above 1M documents" |
+| Methodological flaw | "No significance test" |
+
+</div>
+
+
+**Where to look:**
+
+- "Limitations" and "future work" sections
+- hedging language: *"we suspect", "future work should"*
+- points of disagreement across papers
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="c-info gap">
+
+**A gap is not "nobody did this".**
+
+A gap is a *tension, a limit, or an open question that matters* — and that is investigable within your constraints.
+
+</div>
+
+
+**From gap to research question:**
+
+> *"Does query reformulation improve answer quality in agentic search on the Open Web Index?"*
+
+The gap drives the question. The question drives the hypothesis. The hypothesis drives everything else.
+
+
+<div class="takeaway">
+
+Ask: *"What would a practitioner need that the literature does not yet provide?"*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Students often confuse novelty ("nobody did this exact thing") with a real gap. The gap must be interesting AND bounded — investigable within a seminar timeframe. Walk through the gap-type table with a domain example from the group's topics.
+
+--
+
+## Step 3 — The Research Question
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**From vague to sharp**
+
+
+<div class="small">
+
+| Too vague | Sharp |
+|-----------|-------|
+| "Is RAG better?" | "Does BM25 re-ranking improve answer faithfulness on TriviaQA vs. dense-only RAG?" |
+| "Does my system work?" | "Does my system outperform a keyword-search baseline on OWI Curlie using nDCG@10?" |
+
+</div>
+
+
+A sharp question names: **method · dataset · metric · comparison**.
+
+
+</div>
+
+
+<div class="column">
+
+**Criteria for a good research question**
+
+- **Specific** — names method, dataset, and metric
+- **Empirical** — requires evidence, not just reasoning
+- **Interesting** — the answer changes how someone acts
+- **Testable** — we can design an experiment to answer it
+- **Feasible** — we have the resources and time to run it
+
+
+<div class="c-orange">
+
+**Testable ≠ Feasible.**
+*Testable*: can we construct the right experiment?
+*Feasible*: do we have the compute, data, and time?
+Both must be true.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Walk through the sharpening exercise. Ask each student to state their research question out loud, then challenge: "what dataset?", "what metric?", "compared to what?" The testable/feasible distinction is important — many students have a testable question but underestimate resources.
+
+--
+
+## Step 4 — The Hypothesis
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-info">
+
+**Hypothesis template:**
+
+*"If [intervention], then [outcome], measured by [metric], on [data], compared to [baseline]."*
+
+</div>
+
+
+**Example:**
+
+> *"If we apply query reformulation before dense retrieval, nDCG@10 improves by ≥ 5% vs. direct dense retrieval on OWI Curlie queries."*
+
+**Falsifiability:**
+
+> You must be able to run an experiment that **proves you wrong**.
+
+If no result could disprove the claim, it is a belief, not a hypothesis.
+
+</div>
+
+
+<div class="column">
+
+**Properties to verify**
+
+
+<div class="small">
+
+| Property | Check |
+|----------|-------|
+| Falsifiable | What result would disprove it? |
+| Directional | Does it predict a specific direction? |
+| Operationalisable | Can you measure it? |
+| Feasible | Testable within your timeframe? |
+| Grounded | Does related work make it plausible? |
+
+</div>
+
+
+
+<div class="c-orange">
+
+**Anti-patterns**
+- "The system will be better" ← not directional
+- "LLMs are intelligent" ← not falsifiable
+- "Performance improves" ← no metric, no baseline
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The hypothesis is the contract between the researcher and the reader. If a student cannot state a falsifiable hypothesis, they are doing engineering exploration, not a scientific study. Both are valid — but they require different write-ups.
+
+--
+
+## Step 5 — Experiment Design
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Design before you code**
+
+
+<div class="small">
+
+| Element | Decision to make |
+|---------|-----------------|
+| Conditions | which system variants to compare |
+| Baseline | simplest reasonable alternative |
+| Dataset | which data, which split, held-out test |
+| Metric | primary + one secondary |
+| Protocol | how many runs, how to average |
+| Resources | GPU-hours, storage, API cost budget |
+
+</div>
+
+
+
+<div class="c-orange">
+
+**Check resources before committing.**
+A full experiment that exceeds your compute budget is a wasted design.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+**Pre-registration**
+
+Write down hypothesis + design *before* seeing results. This prevents:
+
+- p-hacking
+- HARKing (Hypothesising After Results are Known)
+- post-hoc cherry-picking
+
+**Minimum for this seminar**
+
+1. One strong baseline
+2. One primary condition
+3. One ablation
+4. Fixed train / dev / test split — no leakage
+5. ≥ 3 runs with different seeds
+
+
+<div class="takeaway">
+
+A one-paragraph design document written before running is worth more than any metric improvement.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The resource column in the design table is new and often missed by students. They design a full experiment and then discover on Day 5 that they need a GPU they don't have. Resource feasibility is a design decision.
+
+--
+
+## Steps 6 & 7 — Three Experiment Modes
+
+<!-- .slide: class="figure-80" -->
+
+![Three Experiment Modes in AI/ML Research](..//courses/data-science-seminar/figures/experiment-types.svg)
+
+Notes:
+The three modes are not sequential stages — they are nested. The development loop runs inside the pre-experiment, which gates the full experiment. Students almost always skip the pre-experiment and pay for it: a week of full-experiment runs that reveal a broken pipeline.
+
+--
+
+## Step 6 — Implementation
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**The development loop mindset**
+
+Work in small, verifiable steps:
+
+1. code → run → inspect output
+2. assert shapes, types, and ranges
+3. overfit one batch deliberately — if you can't, the pipeline is broken
+4. commit working state to Git after each milestone
+
+**Version control is not optional**
+
+```
+feat: BM25 baseline on MSMARCO dev
+
+MRR@10 = 0.187 — matches Thakur et al. 2021.
+Pipeline confirmed correct. Next: dense retrieval.
+```
+
+Each commit message is a lab notebook entry.
+
+</div>
+
+
+<div class="column">
+
+**Environment and reproducibility**
+
+- pin dependencies (`requirements.txt` or `pyproject.toml`)
+- fix random seeds at the top of every script
+- keep data preprocessing in code — never edit raw data manually
+- log every hyperparameter to a config file, not inline
+
+
+<div class="c-green">
+
+**Sanity checks before scaling up:**
+- Does random perform worse than your model?
+- Does overfitting one batch produce near-zero loss?
+- Do evaluation scores on dev match your expectation from related work?
+
+</div>
+
+
+
+<div class="takeaway">
+
+The pre-experiment is the **go / no-go gate**. Do not skip it.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The overfit-one-batch test is the single most effective debugging technique in deep learning. If a model cannot memorise 32 examples, something in the architecture, loss, or data pipeline is wrong. Spend 30 minutes here before spending 3 days on a full run.
+
+--
+
+## Step 7 — Running Experiments · Step 8 — Results
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Running experiments systematically**
+
+- one experiment = one folder with `config.yaml` + `results.json` + `README.md`
+- log **all** runs — including the ones you will not report
+- run every condition with ≥ 3 seeds
+- measure wall-clock time and GPU memory — part of your resource budget
+
+**From raw numbers to reported results**
+
+1. Compute mean ± std across seeds
+2. Compare conditions on the **held-out test set — once**
+3. Do not re-run on test after seeing results
+4. Plot distributions, not just means
+
+</div>
+
+
+<div class="column">
+
+**Honest reporting checklist**
+
+- [ ] All conditions reported, not just the best
+- [ ] Held-out test used only once
+- [ ] Variance reported (not just mean)
+- [ ] Baseline is as strong as you could make it
+- [ ] No data leakage in the split
+- [ ] Statistical significance tested
+
+
+<div class="takeaway">
+
+**A smaller honest result is more valuable than a large result that cannot be reproduced.**
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The "test set used only once" rule is frequently violated. Once students see test results, they adjust their system and re-run. This is p-hacking, even if unintentional. Emphasise: dev set for tuning, test set for the final reported number only.
+
+--
+
+## Step 9 — Ruling Out Errors
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Common error types**
+
+
+<div class="small">
+
+| Error | What it looks like |
+|-------|-------------------|
+| Data leakage | test items in training context |
+| Wrong metric | metric ≠ what the hypothesis claims |
+| Evaluation bug | off-by-one, wrong split, wrong average |
+| Confound | model memorises dataset artefacts |
+| Weak baseline | unfair comparison |
+| Random variance | one lucky seed drives the result |
+| Distribution shift | train/test from different sources |
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+**Debugging process**
+
+1. Sanity-check: does random perform worse?
+2. Overfit one batch on purpose
+3. Inspect 20–30 model outputs manually
+4. Ablate one component at a time
+5. Re-run with 3 different seeds
+6. Trace train/dev/test construction end-to-end
+
+
+<div class="c-orange">
+
+**If results are surprisingly good:**
+Stop and verify. Unexpectedly good results are more suspicious than bad ones.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Rule out errors *before* writing up — not during the reviewer response.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">Source: Pineau et al. 2021; Dodge et al. 2019</div>
+
+
+Notes:
+"Surprisingly good results are suspicious" is a practical heuristic. Some of the most-cited retractions in ML came from pipeline bugs that looked like breakthroughs. Teach students to be genuinely sceptical of their own positive results.
+
+--
+
+## Steps 10–11 — Write-up and Communicate
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**The paper is an argument, not a report**
+
+
+<div class="small">
+
+| Section | Role |
+|---------|------|
+| Abstract | claim + evidence + impact in 150 words |
+| Introduction | motivation + gap + your contribution |
+| Related Work | what exists and why it falls short |
+| Method | what you did and why |
+| Experiments | how you tested it |
+| Results | what the evidence shows |
+| Analysis | what it means and its limits |
+| Conclusion | restate claim + future work |
+
+</div>
+
+
+**Write the abstract last** — once you know what you found.
+
+</div>
+
+
+<div class="column">
+
+**Consolidation checklist**
+
+- [ ] One central claim — everything supports it
+- [ ] Every figure caption states the takeaway
+- [ ] Limitations section is honest
+- [ ] Code and config available for reproduction
+
+**Communication formats**
+
+- **Talk:** 12-minute argument — one key idea
+- **Poster:** one question, one answer, one figure
+- **Report:** ACM format, max 8 pages
+
+
+<div class="takeaway">
+
+Say one thing clearly.
+Scientists remember papers that make a single sharp point.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Close the loop: after communication, other researchers read the paper, find the gap, and start their own cycle. The consolidation checklist maps directly to the NeurIPS reproducibility checklist — good preparation for research-track submissions.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Experiment Design in AI/ML
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How do you design an experiment that actually answers your research question?
+
+</div>
+
+
+--
+
+## Experiment Design — Overview
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Topics in this module**
+
+- conditions, controls, and ablation studies
+- evaluation metrics — choosing and applying them correctly
+- common pitfalls that invalidate results
+- statistical significance and effect size
+
+</div>
+
+
+<div class="column">
+
+
+<div class="takeaway">
+
+**Practical goal:**
+After this module you can design a minimal but rigorous experiment for your seminar project — on paper, before writing a line of code.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Bridge from the loop overview to concrete mechanics. The module is deliberately focused on design, not implementation.
+
+--
+
+## Conditions, Controls, and Ablations
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Definitions**
+
+
+<div class="small">
+
+| Term | Meaning |
+|------|---------|
+| **Control** | unchanged reference — the baseline |
+| **Condition** | a variant differing in one factor |
+| **Ablation** | full system *minus* one component |
+
+</div>
+
+
+**Example — RAG pipeline**
+
+- Baseline: BM25 + GPT-4
+- Condition A: Dense retrieval + GPT-4
+- Condition B: Dense + BM25 hybrid + GPT-4
+- Ablation: B without re-ranking
+- Ablation: B without query expansion
+
+Each ablation isolates one contributing factor.
+
+</div>
+
+
+<div class="column">
+
+**Design rule: one variable at a time**
+
+If Condition B differs from A in _both_ retrieval method _and_ prompt format, you cannot isolate the cause of any difference.
+
+
+<div class="c-orange">
+
+Change one thing at a time.
+When unavoidable, document the confound explicitly.
+
+</div>
+
+
+**Minimum viable experiment**
+
+1. One baseline (simple, strong, cited)
+2. One primary condition (your system)
+3. One ablation (system minus your key component)
+4. Two metrics (primary + secondary)
+5. Fixed dataset split
+
+
+<div class="takeaway">
+
+Ablations are often more convincing than the main result — they show *what* drives the improvement.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Reviewers consistently ask for ablations. A paper with a system that outperforms baselines but has no ablation leaves open the question "but which part mattered?" — and reviewers will reject on that basis.
+
+--
+
+## Metrics and Evaluation
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**The core principle**
+
+
+<div class="c-info">
+
+The metric must directly measure the property your hypothesis claims. Derive the metric from the hypothesis — never the reverse.
+
+</div>
+
+
+**Common metrics by task** *(representative, not exhaustive)*
+
+
+<div class="small">
+
+| Task | Metric |
+|------|--------|
+| Retrieval (ranked) | nDCG@k, MAP, Recall@k |
+| Classification | F1 (macro/micro), MCC |
+| Generation | ROUGE, BERTScore, BLEURT |
+| Faithfulness (RAG) | FactScore, Ragas faithfulness |
+| Human eval | Likert, pairwise preference |
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+**Metric traps**
+
+
+<div class="small">
+
+| Trap | Problem |
+|------|---------|
+| BLEU for faithfulness | measures overlap, not factuality |
+| Accuracy on imbalanced data | majority class trivially wins |
+| Mean without variance | one lucky run inflates results |
+| Proxy without validation | high proxy, low human preference |
+
+</div>
+
+
+**Dataset quality matters as much as the metric**
+
+Before using a benchmark, check:
+- How was it constructed? By whom?
+- Does it have known biases or artefacts?
+- Are the labels reliable (inter-annotator agreement)?
+
+
+<div class="takeaway">
+
+A biased dataset with a correct metric still produces a misleading result.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+A common student mistake: choose whatever metric is easy to compute. Emphasise: metric follows from hypothesis. Also new: the dataset quality checklist. Many standard benchmarks have known biases (SNLI, SQuAD 2.0, etc.) — using them uncritically is a methodological error.
+
+--
+
+## Common Pitfalls in ML Research
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Data pitfalls**
+
+- **Train/test overlap** — shuffling before split leaks test items into training
+- **Temporal leakage** — future data used to predict past events
+- **Benchmark overfitting** — tuning on the test set, even unintentionally
+- **Label noise** — gold labels wrong in 5–15% of NLP datasets
+- **Dataset bias** — benchmark constructed from a specific source generalises poorly
+
+**Resource pitfalls**
+
+- **Insufficient compute** — full experiment requires GPU-hours not available
+- **Storage underestimated** — embeddings, checkpoints, logs exceed quota
+- **API cost overrun** — LLM calls at scale cost 10× the estimate
+
+
+<div class="c-orange">
+
+Estimate resources before running. A design that cannot be executed is not a design.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+**Model and reporting pitfalls**
+
+- **Spurious correlations** — model learns dataset artefacts, not the task
+- **LLM-as-judge trained on same distribution** — evaluator is biased toward the model it judges
+- **p-hacking** — try many metrics, report only the significant one
+- **HARKing** — present post-hoc hypothesis as pre-specified
+- **Selective ablations** — run 10, report 3
+- **No error bars** — single run, no variance
+
+**Structural safeguards**
+
+1. Write hypothesis *before* seeing results
+2. Commit evaluation script to Git *before* running on test set
+3. Log every run — runs you don't report still happened
+4. Report your worst result alongside your best
+
+
+<div class="takeaway">
+
+Pre-registration turns pitfalls into choices — you have to actively decide to violate them.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">Source: Pineau et al. 2021; Dodge et al. 2019</div>
+
+
+Notes:
+New in this version: resource pitfalls (compute, storage, API cost) and dataset bias/quality. These are the most frequent invisible failures in student projects. Walk through a concrete compute estimate: embedding 1M documents at 512-dim float32 = 2GB, plus index, plus checkpoints.
+
+--
+
+## Statistical Significance and Effect Size
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Statistical tests for ML**
+
+
+<div class="small">
+
+| Situation | Test |
+|-----------|------|
+| Two systems, paired samples | Wilcoxon signed-rank |
+| Two classifiers, same test set | McNemar's test |
+| Means over multiple runs | Paired t-test (n ≥ 30) |
+| Multiple conditions vs. one baseline | Bonferroni correction |
+
+</div>
+
+
+**Threshold:** p < 0.05 conventional, but:
+
+- report the exact p-value
+- p = 0.049 and p = 0.051 are not meaningfully different
+- apply multiple-test correction when comparing many conditions
+
+</div>
+
+
+<div class="column">
+
+**Effect size matters more than p**
+
+
+<div class="small">
+
+| Measure | Use |
+|---------|-----|
+| Cohen's d | standardised mean difference |
+| Δ metric (absolute) | nDCG +0.03 vs. +0.003 |
+| Relative improvement | "+5% over baseline" |
+
+</div>
+
+
+**Practical significance check**
+
+Even a significant +0.001 nDCG is rarely worth deploying. Ask:
+
+- Is it reproducible on other datasets?
+- Is it consistent across subgroups?
+- Would a user notice the difference?
+
+
+<div class="takeaway">
+
+Significant but tiny may matter less than non-significant but large and consistent.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Statistical significance is a necessary but not sufficient condition for a meaningful result. The practical significance questions bridge from statistical results to research conclusions. For seminar projects with small datasets, effect size is often more informative than p-values.
+
+---
+
+## Wrap-Up
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**The Research Loop**
+
+- 11 steps: Literature → Gap → Research Q. → Hypothesis → Design → Implement → Experiment → Results → Analyse → Write-up → Communicate → repeat
+- Iteration is not failure — it is the mechanism of science
+- Steps 1–5 determine quality more than steps 6–8
+
+**Experiment Design**
+
+- Conditions, controls, ablations: one variable at a time
+- Metric follows from hypothesis — never the reverse
+- Pre-register: design before you see results
+- Estimate resources before you commit to a design
+
+</div>
+
+
+<div class="column">
+
+**For your project — do this now:**
+
+1. Write your research question in one sentence (method · dataset · metric)
+2. State a falsifiable, directional hypothesis
+3. Name your baseline and justify it
+4. Define your primary metric and why it matches your hypothesis
+5. Estimate your resource budget (compute · data · time)
+
+**Next session (S03):** literature search in depth, reference management, the publication process, project management with GTD and Git.
+
+
+<div class="takeaway">
+
+Bring a written research question and hypothesis to S03. These will be reviewed as part of your research narrative (due 12/05).
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Close by asking each student to write their research question and hypothesis right now — before leaving. Even a draft is better than nothing. This is the most effective 5-minute intervention in research methods teaching.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Dodge, Jesse and Gururangan, Suchin and Card, Dallas and Schwartz, Roy and Smith, Noah A. (2019). Show Your Work: Improved Reporting of Experimental Results. *Proceedings of EMNLP-IJCNLP 2019*.
+- Keshav, S. (2007). How to Read a Paper. *ACM SIGCOMM Computer Communication Review*. [https://dl.acm.org/doi/10.1145/1273445.1273458](https://dl.acm.org/doi/10.1145/1273445.1273458)
+- Pineau, Joelle and Vincent-Lamarre, Philippe and Sinha, Koustuv and Larivi\`ere, Vincent and Beygelzimer, Alina and d'Alch\'e-Buc, Florence and Fox, Emily and Larochelle, Hugo (2021). Improving Reproducibility in Machine Learning Research. *Journal of Machine Learning Research*. [https://jmlr.org/papers/v22/20-1364.html](https://jmlr.org/papers/v22/20-1364.html)
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

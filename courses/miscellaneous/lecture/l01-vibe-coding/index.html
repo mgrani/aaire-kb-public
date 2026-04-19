@@ -1,0 +1,622 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Miscellaneous — Lecture 01: Vibe Coding, Supervision, and Productive Distrust</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BQPjw3n4.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Miscellaneous
+## Lecture 01: Vibe Coding
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Diese Einheit sammelt erste strukturierte Gedanken zum Vibe Coding. Im Zentrum steht nicht die Frage, ob AI-Coding-Tools nuetzlich sind, sondern unter welchen Bedingungen sie produktiv werden. Die Arbeitsthese lautet: Vibe Coding funktioniert vor allem dort gut, wo starke Aufsicht, klare Ziele, gute Inspektion und systematische Verifikation vorhanden sind.
+
+---
+
+## Ziel dieser Vorlesung
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Vibe Coding ist keine magische Produktivitaetstechnik. Es ist eine Arbeitsweise, in der Menschen mit generativen Modellen Software schneller entwerfen, aendern und pruefen.
+
+
+<div class="c-definition">
+
+Die zentrale Frage ist deshalb nicht: "Kann die AI coden?", sondern: **Unter welchen Arbeitsbedingungen wird daraus verlässliche Entwicklung?**
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+### Leitfragen
+
+- Warum funktioniert Vibe Coding fuer manche Teams erstaunlich gut, fuer andere aber kaum?
+- Warum ist **Supervision** wichtiger als Prompt-Eleganz?
+- Warum sollte man der AI eher das **Was** als das **Wie** vorgeben?
+- Welche Inquiry- und Inspektionsstrategien machen die Arbeit belastbar?
+- Welche Art von Tests ist im AI-unterstuetzten Coding besonders wichtig?
+
+</div>
+
+
+</div>
+
+
+Notes:
+Didaktisch lohnt sich eine Umkehr der ueblichen Perspektive. Viele Diskussionen ueber AI-Coding konzentrieren sich auf Modellfaehigkeiten. In der Praxis ist aber oft entscheidender, ob Menschen Anforderungen praezise formulieren, Ergebnisse kritisch pruefen und Fehler frueh sichtbar machen koennen.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Warum Vibe Coding funktioniert
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Welche Bedingungen machen AI-unterstuetztes Coding produktiv, statt nur schnell und gefaehrlich?
+
+</div>
+
+
+Notes:
+Die erste Haelfte der Vorlesung formuliert eine positive These: Vibe Coding ist nicht per se schlecht, sondern in bestimmten Arbeitsumgebungen sogar sehr stark. Diese Bedingungen muessen explizit gemacht werden.
+
+--
+
+## Was mit "Vibe Coding" gemeint ist
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Typische Praxis
+
+- Problem grob beschreiben
+- Implementierungsideen erzeugen lassen
+- Code direkt iterativ veraendern
+- schnell testen, verwerfen, neu ansetzen
+- viel ueber Dialog statt ueber Vorabplanung arbeiten
+
+</div>
+
+
+<div class="column">
+
+### Typischer Reiz
+
+- niedrige Einstiegshuerde
+- hohe Geschwindigkeit bei Boilerplate und Umbauten
+- schnelle Exploration unbekannter Libraries oder APIs
+- gute Unterstuetzung fuer Prototyping und Glue Code
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Vibe Coding ist damit eher ein **interaktiver Arbeitsstil** als eine klar definierte Methode.
+
+</div>
+
+
+Notes:
+Der Begriff ist unscharf und bewusst informell. Er bezeichnet meist eine Arbeitsweise mit hoher Dialogfrequenz und geringer Vorabplanung. Typisch ist, dass der Mensch Ideen, Zielbilder oder Probleme formuliert und das Modell konkrete Codevorschlaege, Umbauten oder Debugging-Hypothesen liefert.
+
+--
+
+## Warum es fuer manche gut funktioniert
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+| Bedingung | Warum hilfreich |
+|---|---|
+| Guter Problemrahmen | Die AI bekommt ein klares Zielbild |
+| Schnelle Feedbackschleifen | Fehler werden frueh sichtbar |
+| Gute Tooling-Umgebung | Diff, Tests, Logs und UI machen Ergebnisse pruefbar |
+| Erfahrener Mensch in der Schleife | Schwache Stellen werden erkannt |
+| Kleine bis mittlere Aufgaben | Komplexitaet bleibt lokal beherrschbar |
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+Vibe Coding skaliert nicht automatisch mit Modellstaerke. Es skaliert oft besser mit **Sichtbarkeit, Kritikfaehigkeit und enger Rueckkopplung**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Viele Erfolgsgeschichten stammen aus Umgebungen, in denen die Aufgabe bereits gut verstanden ist und die Rueckmeldung schnell kommt. Wer lokal testen, im Browser inspizieren, Logs lesen und Aenderungen vergleichen kann, reduziert das Risiko erheblich. In solchen Umgebungen kompensiert das Arbeitssystem viele Schwaechen des Modells.
+
+--
+
+## Warum es fuer andere scheitert
+
+| Problem | Typischer Effekt |
+|---|---|
+| Ziel unklar | Die AI produziert Aktivitaet statt Fortschritt |
+| Mensch kann Ergebnis nicht beurteilen | Halluzinationen bleiben unentdeckt |
+| Zu viel Vertrauen in fluessige Erklaerungen | Scheinplausibilitaet ersetzt Verifikation |
+| Keine gute Inspektionsoberflaeche | Fehler bleiben unsichtbar |
+| Kein Test- oder Integrationskontext | "Sieht gut aus" wird mit "funktioniert" verwechselt |
+| Zu grosse Umbauten in einem Schritt | Lokale Fehler propagieren ins Gesamtsystem |
+
+
+<div class="c-caution">
+
+Der haeufigste Fehler ist nicht, dass die AI etwas Falsches produziert. Der haeufigste Fehler ist, dass Menschen **es zu spaet merken**.
+
+</div>
+
+
+Notes:
+Vibe Coding scheitert besonders dort, wo Erkenntnis teuer ist. Wenn jemand weder die Domäne noch den Code noch die Laufzeitumgebung gut lesen kann, wird Geschwindigkeit zum Risiko. Fluent output erzeugt leicht die Illusion von Kontrolle, obwohl inhaltlich wenig abgesichert ist.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Operative Prinzipien
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wie arbeitet man mit AI-Coding-Tools so, dass man Kontrolle behaelt?
+
+</div>
+
+
+Notes:
+Hier geht es um konkrete Arbeitsprinzipien. Die Grundidee ist nicht, die AI moeglichst frei laufen zu lassen, sondern ihre Staerken in einen kontrollierten Engineering-Prozess einzubetten.
+
+--
+
+## Supervision ist der Engpass
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Die naive Sicht
+
+- Hauptproblem sei Prompting
+- bessere Formulierung loese fast alles
+- Modellqualitaet bestimme den Erfolg
+
+</div>
+
+
+<div class="column">
+
+### Die robustere Sicht
+
+- Hauptproblem ist **Aufsicht**
+- jemand muss Zwischenschritte beurteilen
+- jemand muss falsche Abzweigungen frueh stoppen
+- jemand muss Qualitaetskriterien durchsetzen
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Nicht Prompt Engineering ist die knappe Ressource, sondern **kompetente Supervision**.
+
+</div>
+
+
+Notes:
+Supervision bedeutet hier mehr als Review am Ende. Gemeint ist laufende Kontrolle: Problem zuschneiden, Zwischenresultate pruefen, Annahmen hinterfragen, Scope reduzieren und schlechte Vorschlaege abbrechen. Ohne diese Aufsicht nimmt das Modell oft den plausibelsten statt den robustesten Weg.
+
+--
+
+## Zielorientierung: Sage der AI was, nicht wie
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Oft hilfreicher
+
+- Zielzustand beschreiben
+- Randbedingungen nennen
+- Invarianten festlegen
+- unerwuenschtes Verhalten explizit verbieten
+- Erfolgskriterien benennen
+
+</div>
+
+
+<div class="column">
+
+### Oft weniger hilfreich
+
+- zu frueh die konkrete Implementierung diktieren
+- interne Struktur ohne Not festlegen
+- Modell auf einen einzigen Loesungspfad einsperren
+- die Form der Loesung mit dem Zweck verwechseln
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-definition">
+
+Ein guter Prompt beschreibt haeufig zuerst **das Problem, die Grenzen und den Pruefrahmen** - nicht sofort die interne Mechanik.
+
+</div>
+
+
+Notes:
+Das ist kein Freifahrtschein fuer unpraezise Aufgaben. Im Gegenteil: Zielorientierung verlangt sehr klare Anforderungen. "Was" meint hier Zielzustand, beobachtbares Verhalten, Constraints und Nicht-Ziele. "Nicht wie" bedeutet nur, dass man dem Modell die Ausgestaltung offen lassen kann, solange die Verifikation stark genug ist.
+
+--
+
+## Inquiry-Strategien statt blinder Generierung
+
+| Strategie | Nutzen |
+|---|---|
+| Nach Annahmen fragen | Versteckte Unsicherheit wird sichtbar |
+| Alternativen vergleichen lassen | Loesungsraum wird explizit |
+| Zwischenschritte begruenden lassen | Denkfehler fallen frueher auf |
+| Risiken und Failure Modes abfragen | Verifikation wird gezielter |
+| Diffs statt Vollausgabe bevorzugen | Aenderungen bleiben lesbar |
+| Vor dem Edit erst Analyse verlangen | Lokales Verstaendnis steigt |
+
+
+<div class="c-note">
+
+Gute Zusammenarbeit mit AI ist oft weniger "schreib mir Code" und mehr **"zeige mir, wie du das Problem gerade modellierst"**.
+
+</div>
+
+
+Notes:
+Inquiry bedeutet, das Modell nicht nur als Generator, sondern auch als Hypothesenpartner zu verwenden. Besonders wertvoll ist es, Annahmen, Alternativen und Risiken explizit zu machen. Dadurch wird die Arbeitsbeziehung weniger magisch und eher wie eine kontrollierte technische Diskussion.
+
+--
+
+## Inspection UI entscheidet ueber Vertrauen
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Was man sehen koennen sollte:
+
+- Diff statt nur Endzustand
+- Tests und Fehlermeldungen
+- relevante Logs
+- betroffene Dateien und Stellen
+- Browser- oder API-Verhalten
+- Build- und Laufzeitstatus
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+Wenn die Benutzeroberflaeche keine gute Inspektion erlaubt, wird Vertrauen schnell zu **Blindflug**.
+
+</div>
+
+
+
+<div class="c-note">
+
+Gerade deshalb funktionieren AI-Workflows oft besser in Umgebungen mit Terminal, Git-Diff, Testausgabe und DevTools als in reinen Chatfenstern.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Inspektion ist ein infrastrukturelles Thema. Wer nur natuerlichsprachige Erklaerungen sieht, aber keine Diffs, Logs, Screenshots, Requests oder Tests, kann Fehler nur schwer systematisch erkennen. Eine gute Inspection UI senkt also nicht nur Friktion, sondern erhoeht epistemische Kontrolle.
+
+--
+
+## Produktive Regel: Immer kritisch bleiben
+
+> Gute AI-Unterstuetzung reduziert Arbeit. Sie ersetzt nicht die Pflicht zum Zweifel.
+
+### Praktische Konsequenzen
+
+- nie Erklaerungen mit Korrektheit verwechseln
+- nie "klingt sinnvoll" als Abnahmekriterium verwenden
+- immer nach Gegenbeispielen suchen
+- immer an Daten, Laufzeit und Integration denken
+- immer pruefen, was sich durch eine Aenderung implizit mitveraendert
+
+Notes:
+Kritik ist kein Misstrauen aus Prinzip, sondern eine Form professioneller Qualitaetssicherung. Gerade weil die Modelle fluent und kooperativ wirken, muss der Mensch aktiv Gegenpruefungen organisieren. Sonst entsteht leicht ein Arbeitsstil, der subjektiv produktiv, aber objektiv fehleranfaellig ist.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Testen und Grenzen
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Welche Art von Verifikation passt besonders gut zu AI-unterstuetztem Coding?
+
+</div>
+
+
+Notes:
+Der letzte Block fokussiert auf Verifikation. Wenn AI schnell Varianten produziert, muss das Testregime besonders gut darin sein, reale Integrationsprobleme sichtbar zu machen.
+
+--
+
+## Testing: weniger nur Unit, mehr Integration
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Warum Integrationstests wichtiger werden
+
+- AI aendert oft mehrere Schichten gleichzeitig
+- Fehler entstehen haeufig an Schnittstellen
+- Konfigurations- und Datenflussprobleme sind oft zentral
+- lokale Korrektheit garantiert noch kein Systemverhalten
+
+</div>
+
+
+<div class="column">
+
+### Typische Pruefpunkte
+
+- API-Endpunkte mit realistischen Requests
+- Datenbank- und Persistenzpfade
+- Frontend-Backend-Interaktion
+- Auth-, Rechte- und Session-Pfade
+- Build-, Start- und Deploybarkeit
+
+</div>
+
+
+</div>
+
+
+Notes:
+Unit-Tests bleiben nuetzlich, aber sie decken oft nur kleine Ausschnitte ab. AI-generierter Code scheitert in der Praxis haeufiger daran, dass Abhaengigkeiten, Schnittstellen oder Konfigurationen nicht sauber zusammenpassen. Deshalb sind Integrations- und Systemtests im AI-Kontext besonders wertvoll.
+
+--
+
+## Synthetic Data Testing als Arbeitsmittel
+
+| Nutzen | Beispiel |
+|---|---|
+| Seltene Faelle gezielt erzeugen | Grenzwerte, Nullwerte, leere Antworten |
+| Datenschutz wahren | keine produktiven Personendaten noetig |
+| Testabdeckung verbreitern | viele Eingabevarianten systematisch pruefen |
+| Failure Modes provozieren | kaputte Formate, schlechte Reihenfolgen, Konflikte |
+
+
+<div class="c-definition">
+
+Synthetische Daten sind nicht nur Ersatz fuer echte Daten. Sie sind ein Werkzeug, um **gezielt schwierige Faelle sichtbar zu machen**.
+
+</div>
+
+
+Notes:
+Synthetic Data Testing passt gut zu AI-Workflows, weil sich damit schnell breite und kontrollierte Testsaetze erzeugen lassen. Besonders wertvoll ist das fuer Randfaelle, Privacy-sensitive Domänen und Fehlerbedingungen, die in echten Daten selten auftreten oder schwer reproduzierbar sind.
+
+--
+
+## Wo Vibe Coding besonders riskant bleibt
+
+| Bereich | Warum riskant |
+|---|---|
+| Sicherheitskritische Logik | kleine Fehler haben grosse Wirkung |
+| Verteilte Systeme | Fehler zeigen sich oft nur emergent |
+| Legacy-Systeme | implizites Wissen fehlt im Prompt |
+| Regulierte Domänen | Nachvollziehbarkeit und Compliance sind zentral |
+| Grosse Refactorings | globale Seiteneffekte schwer ueberschaubar |
+
+
+<div class="c-caution">
+
+Je teurer Fehler werden und je spaeter sie sichtbar sind, desto weniger darf man sich auf "schnelle Plausibilitaet" verlassen.
+
+</div>
+
+
+Notes:
+Nicht jede Aufgabe eignet sich gleich gut fuer exploratives AI-Coding. Besonders problematisch sind Domänen mit hohem Schadenspotenzial, starkem implizitem Kontext oder verteilten Seiteneffekten. Dort muss der Freiheitsgrad kleiner und die Verifikation dichter werden.
+
+--
+
+## Arbeitsmodell: Vibe Coding unter Aufsicht
+
+```text
+Zielbild und Constraints klaeren
+        ->
+AI fuer Analyse, Varianten und Entwurf nutzen
+        ->
+kleine Aenderung mit guter Sichtbarkeit erzeugen
+        ->
+Diff, Logs, UI und Verhalten inspizieren
+        ->
+Integration und Synthetic Data testen
+        ->
+erst dann uebernehmen oder verwerfen
+```
+
+
+<div class="takeaway">
+
+Vibe Coding wird dann belastbar, wenn es nicht als automatisches Coden verstanden wird, sondern als **schnelle Hypothesenerzeugung unter starker menschlicher Aufsicht**.
+
+</div>
+
+
+Notes:
+Das Arbeitsmodell kombiniert Geschwindigkeit mit epistemischer Kontrolle. Die AI liefert Entwuerfe und Hypothesen, der Mensch liefert Problemrahmen, Kritik, Abbruchentscheidungen und Qualitaetsmassstaebe. Genau diese Kombination erklaert, warum dieselben Tools in unterschiedlichen Haenden sehr unterschiedliche Ergebnisse erzeugen.
+
+---
+
+## Wrap-Up
+
+- Vibe Coding funktioniert vor allem dort gut, wo **Supervision, Zielklarheit und schnelle Rueckmeldung** vorhanden sind.
+- Der Mensch sollte der AI eher **das Was als das Wie** vorgeben: Ziele, Constraints, Nicht-Ziele und Erfolgskriterien.
+- Inquiry-Strategien und gute Inspection UI sind entscheidend, weil sie Annahmen, Risiken und Fehler sichtbar machen.
+- Kritisches Arbeiten bleibt Pflicht: fluessige Erklaerungen sind kein Beweis.
+- Fuer Verifikation sind **Integrationstests und Synthetic Data Testing** besonders wichtig.
+
+Notes:
+Die Kernaussage ist bewusst nuanciert: Vibe Coding ist weder bloesse Spielerei noch automatische Produktivitaetsrevolution. Es ist eine nützliche, aber riskante Arbeitsform, deren Erfolg stark von menschlicher Aufsicht, guter Sichtbarkeit und systematischer Verifikation abhaengt.
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

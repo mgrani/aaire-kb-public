@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Vorlesung 02: Architektur von Web-Anwendungen</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Vorlesung 02: Architektur von Web-Anwendungen</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BQPjw3n4.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Kapitel 02: Architektur von Web-Anwendungen
@@ -8,7 +8,7 @@ Prof. Dr. Michael Granitzer
 24 März 2026
 
 Notes:
-Kurz den Bezug zu Vorlesung 01 herstellen: Jetzt geht es von der Motivation zur Struktur. Architektur ist die Antwort auf die dort beschriebene Komplexität.
+Architektur gibt Antworten auf die in Vorlesung 01 beschriebene Komplexität: Wie werden einzelne Rechner zu Systemen? Wie lässt sich Skalierung von bloßem Hardware-Zuwachs trennen? Welche Entscheidungen legen die Grenzen späterer Änderungen fest? Diese Vorlesung beantwortet diese Fragen strukturiert — von Ressourcen über Prinzipien bis zu konkreten Architekturstilen.
 
 ---
 
@@ -26,7 +26,7 @@ Architektur bestimmt, wie Web-Systeme strukturiert, verteilt und betrieben werde
 - Welche Architekturen braucht die Datenverarbeitung in Web-Systemen?
 
 Notes:
-Diese Folie ist die Landkarte für den Rest der Sitzung. Erst Ressourcen, dann Architekturprinzipien, dann konkrete Stile und schließlich Datenarchitekturen.
+Die Reihenfolge der Themen ist nicht zufällig: Hardware-Ressourcen und ihre Grenzen motivieren verteilte Systeme; Architekturprinzipien bilden das konzeptionelle Werkzeug für Entwurfsentscheidungen; konkrete Stile wie Monolith, Event-Driven und Microservices sind Antworten auf unterschiedliche Skalierungs- und Teamanforderungen; Datenarchitekturen schließen den Kreis, weil Persistenz- und Verarbeitungsstrategie maßgeblich über Skalierbarkeit und Konsistenz entscheiden.
 
 ---
 
@@ -194,7 +194,7 @@ Software-Architektur verwaltet physische Ressourcen: CPU, RAM, Storage und Netzw
 | **Horizontale Skalierung** | Last auf mehrere Server verteilen (Scale Out) |
 
 Notes:
-Die Begriffe abschließend aufräumen: Skalierung ist hier nicht nur "mehr Hardware", sondern eine Architekturfrage mit unterschiedlichen Nebenwirkungen.
+Vertikale Skalierung (stärkere Hardware) stößt physisch an Grenzen und erzeugt Single Points of Failure. Horizontale Skalierung (mehr Instanzen) erfordert zustandslose Komponenten, Load Balancing und verteilte Datenhaltung — sie ist aufwändiger, aber unbegrenzt skalierbar. In der Praxis werden beide kombiniert: vertikale Skalierung für die Datenbankschicht, horizontale für die Applikationsschicht.
 
 ---
 
@@ -221,7 +221,7 @@ Die Begriffe abschließend aufräumen: Skalierung ist hier nicht nur "mehr Hardw
 Software-Architektur beschreibt die **oberste Struktur** eines Systems — die schwer änderbaren Entscheidungen und die Beziehungen zwischen den wichtigsten Teilen.
 
 Notes:
-Hier klar machen: Architektur ist der Teil, den man später nur teuer ändert. Genau deshalb muss man ihn bewusst gestalten.
+Architekturentscheidungen sind diejenigen, deren nachträgliche Änderung unverhältnismäßig hohen Aufwand erzeugt — etwa die Wahl des Datenbankmodells, des Kommunikationsmusters zwischen Komponenten oder der Deployment-Einheit. Implementierungsentscheidungen (Klassenname, Algorithmusdetail) sind dagegen lokal reversibel. Diese Asymmetrie erklärt, warum Architekturarbeit früh im Entwicklungsprozess den höchsten Hebel hat.
 
 --
 
@@ -342,10 +342,10 @@ Der Punkt ist nicht Dokumentationspflege, sondern Steuerbarkeit. Architektur ist
 ## N-Tier als Referenzstil
 
 
-<div class="columns">
+<div class="grid-3-1">
 
 
-<div class="column col-3-1">
+<div class="column">
 
 ![N-Tier-Architektur](/courses/web-and-data-engineering/figures/diagram-n-tier.png)
 
@@ -380,10 +380,10 @@ Der Punkt ist nicht Dokumentationspflege, sondern Steuerbarkeit. Architektur ist
 Ein Request durchläuft die Schichten sequentiell — die Response traversiert sie in umgekehrter Reihenfolge zurück:
 
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 1. **Client** → HTTP-Request an **Web Tier**
 2. **Web Tier** → Auth, Routing, Weitergabe an **Middle Tier**
@@ -429,10 +429,10 @@ Das Referenzmodell ist bewusst simpel, weil es Kommunikationsregeln sichtbar mac
 ## Event-Driven Architecture
 
 
-<div class="columns">
+<div class="grid-3-1">
 
 
-<div class="column col-3-1">
+<div class="column">
 
 ![Event-Driven-Architektur](/courses/web-and-data-engineering/figures/diagram-event-driven.png)
 
@@ -466,10 +466,10 @@ Komponenten kommunizieren nicht direkt, sondern über **Events** — asynchrone 
 ## Event-Driven: Beispiel Bestellprozess
 
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 1. **Bestellservice** → `OrderPlaced` an Broker
 2. Broker verteilt an **Zahlungsservice**
@@ -519,10 +519,10 @@ Die Funktion des Event-Modells ist Entkopplung. Gleichzeitig zeigen die Nachteil
 ## Microservices
 
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 ![Microservices-Architektur](/courses/web-and-data-engineering/figures/diagram-microservices.png)
 
@@ -556,10 +556,10 @@ Das System wird in **kleine, autonome Dienste** zerlegt — jeder mit abgegrenzt
 ## Microservices: Beispiel Homepage-Request
 
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 1. **Client** → `GET /homepage` an **API Gateway**
 2. Gateway ruft parallel auf:
@@ -619,7 +619,7 @@ Es gibt keinen universell besten Architekturstil. Die Wahl hängt von Domäne, L
 
 
 Notes:
-Hier die Botschaft gegen Architektur-Modewörter: Der Stil muss zum Problem passen. Reife Systeme kombinieren oft mehrere Stile.
+Reife Produktionssysteme kombinieren typischerweise mehrere Stile: ein monolithischer Kern für die domänenzentrale Logik, Event-Driven für asynchrone Abläufe wie Benachrichtigungen und Berichte, einzelne eigenständige Services dort, wo Teams hohe Deployment-Autonomie benötigen. Die Entscheidung zwischen Stilen hängt nicht von Präferenzen ab, sondern von Team-Größe, Änderungsfrequenz, Latenzanforderungen und Betriebskomplexität — Kriterien, die sich im Projektverlauf verschieben können.
 
 ---
 
@@ -642,7 +642,7 @@ Hier die Botschaft gegen Architektur-Modewörter: Der Stil muss zum Problem pass
 ## Logisches 3-Schichten-Modell
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -716,7 +716,7 @@ INSERT INTO orders (user_id, product_id) ...
 ## Warum die Trennung praktisch wichtig ist
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -771,7 +771,7 @@ Das 3-Schichten-Modell ist keine veraltete Standardlösung, sondern eine robuste
 
 
 Notes:
-Das ist der Prüfstein für saubere Struktur. Wenn Code in mehreren Schichten gleichzeitig lebt, wird er fast immer schwer wartbar.
+Eine häufige Verletzung des Schichtenmodells ist Datenbanklogik in der Präsentationsschicht (z.B. SQL-Aufrufe im Controller oder im Template) oder Geschäftslogik in der Datenzugriffsschicht (z.B. fachliche Berechnungen im ORM-Mapping). Beides macht Schichten nicht isoliert testbar und bindet Änderungen an mehrere Stellen gleichzeitig. Das Repository-Pattern und das Service-Layer-Pattern sind verbreitete Lösungen, um diese Grenzen strukturell durchzusetzen.
 
 ---
 
@@ -819,7 +819,7 @@ Jede dieser Komponenten erfüllt eine spezifische Rolle — die folgenden Slides
 ## Schlüsselbegriffe: Schutz & Verteilung
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -939,7 +939,7 @@ Nicht alle Aufgaben müssen synchron im Request-Zyklus erledigt werden. Message 
 4. **Worker** liest Event aus Queue, sendet E-Mail, generiert PDF, aktualisiert Lager
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -974,7 +974,7 @@ Nicht alle Aufgaben müssen synchron im Request-Zyklus erledigt werden. Message 
 ## Caching und Data Tier
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -1012,10 +1012,10 @@ Nicht alle Aufgaben müssen synchron im Request-Zyklus erledigt werden. Message 
 ## 3-Tier in der Cloud-Praxis
 
 
-<div class="columns">
+<div class="grid-3-1">
 
 
-<div class="column col-3-1">
+<div class="column">
 
 ![Cloud 3-Tier: Public Subnet, Private Subnet, Isolated Subnet](/courses/web-and-data-engineering/figures/cloud-3tier.svg)
 
@@ -1059,7 +1059,7 @@ Die Verteilung von Logik zwischen Client und Server bestimmt den Anwendungstyp:
 ## Thin Client
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -1094,7 +1094,7 @@ Die Verteilung von Logik zwischen Client und Server bestimmt den Anwendungstyp:
 ## Rich Client / SPA
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -1129,7 +1129,7 @@ Die Verteilung von Logik zwischen Client und Server bestimmt den Anwendungstyp:
 ## Mobile Client
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -1162,7 +1162,7 @@ Eine moderne Web-Anwendung besteht aus weit mehr als drei Schichten. Von CDN und
 
 
 Notes:
-Diese Folie relativiert das einfache 3-Schichten-Modell, ohne es zu verwerfen. Die eigentliche Frage ist immer die Systemgrenze und das Zusammenspiel der Komponenten.
+Das logische 3-Schichten-Modell beschreibt Verantwortlichkeiten; die Infrastrukturanatomie einer modernen Web-Anwendung zeigt, wie diese Schichten betrieblich aufgeteilt sind. Zwischen Nutzer und Applikation liegen DNS-Auflösung, CDN-Edge-Caches, WAF-Filterung, Load Balancing und Reverse Proxying als eigenständige Infrastrukturschicht — jede mit eigenen Caching-, Failover- und Sicherheitseigenschaften. Die Systemgrenze liegt nicht zwischen Browser und Server, sondern zwischen öffentlicher Infrastruktur und internem Applikationskern.
 
 ---
 
@@ -1187,7 +1187,7 @@ Diese Folie relativiert das einfache 3-Schichten-Modell, ohne es zu verwerfen. D
 - Ohne explizite Datenarchitektur entstehen Ad-hoc-Lösungen, die nicht skalieren und schwer wartbar sind
 
 Notes:
-Die Botschaft: Datenverarbeitung ist kein nachgelagerter Batch-Job, sondern Teil der Systemarchitektur. Web und Daten müssen gemeinsam entworfen werden.
+Datenarchitektur und Anwendungsarchitektur entwickeln sich in modernen Systemen gemeinsam. Lambda-Architektur kombiniert Batch- und Stream-Verarbeitung: ein Batch Layer für vollständige historische Analysen, ein Speed Layer für Echtzeit-Inkremente. Kappa-Architektur vereinfacht diesen Ansatz, indem alles als Stream behandelt wird. Die Wahl zwischen diesen Ansätzen hängt davon ab, ob Konsistenz oder Latenz die dominante Anforderung ist.
 
 --
 
@@ -1195,10 +1195,10 @@ Die Botschaft: Datenverarbeitung ist kein nachgelagerter Batch-Job, sondern Teil
 ## Batch-Verarbeitung
 
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 ### Ablauf
 1. **Quellen** (Web-Logs, DB, APIs) → **Ingestion**
@@ -1248,10 +1248,10 @@ Batch ist stark, wenn Vollständigkeit wichtiger ist als Reaktionszeit. Das erkl
 ## Stream-Verarbeitung
 
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 ### Ablauf
 1. **Producer** (Apps) senden Events an **Broker** (Kafka)
@@ -1316,10 +1316,10 @@ Stream-Verarbeitung verschiebt die Schwierigkeit von der Ausführung zur Robusth
 **Problem:** Wie bekommt man sowohl historische Vollständigkeit als auch Echtzeit-Ergebnisse?
 
 
-<div class="columns">
+<div class="grid-3-2">
 
 
-<div class="column col-3-2">
+<div class="column">
 
 
 ![Lambda-Architektur](/courses/web-and-data-engineering/figures/diagram-lambda-architecture.svg)
@@ -1362,10 +1362,10 @@ Stream-Verarbeitung verschiebt die Schwierigkeit von der Ausführung zur Robusth
 
 **Problem:** Kann man die Komplexität der Lambda-Architektur reduzieren?
 
-<div class="columns">
+<div class="grid-2-1">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 ![Kappa-Architektur](/courses/web-and-data-engineering/figures/diagram-kappa-architecture.svg)
 
@@ -1390,10 +1390,10 @@ Stream-Verarbeitung verschiebt die Schwierigkeit von der Ausführung zur Robusth
 </div>
 
 
-<div class="columns small">
+<div class="grid-2-1 small">
 
 
-<div class="column col-2-1">
+<div class="column">
 
 
 <div class="c-green gap">

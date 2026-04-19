@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc" font-family="Arial, Helvetica, sans-serif">
+  <title id="title">Zeilenbasiert vs. Spaltenbasiert (Parquet)</title>
+  <desc id="desc">Vergleich von Row-orientiertem und Column-orientiertem Speicherlayout. Zeilenbasiert liest alle Felder auch bei Spaltenabfragen. Spaltenbasiert liest nur die angefragte Spalte — besser für analytische Workloads.</desc>
+  <rect width="1000" height="420" fill="#ffffff"/>
+
+  <text x="500" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#111111">Spaltenorientiertes Speicherlayout</text>
+
+  <!-- LEFT: Row-Oriented -->
+  <text x="230" y="65" text-anchor="middle" font-size="15" font-weight="700" fill="#ea4335">Zeilenbasiert (RDBMS)</text>
+
+  <!-- Logical table header -->
+  <g transform="translate(40, 80)">
+    <rect x="0" y="0" width="390" height="28" rx="4" fill="#333"/>
+    <text x="60" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">id</text>
+    <text x="170" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">name</text>
+    <text x="280" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">preis</text>
+    <text x="360" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">kat.</text>
+    <line x1="110" y1="0" x2="110" y2="28" stroke="#666" stroke-width="1"/>
+    <line x1="220" y1="0" x2="220" y2="28" stroke="#666" stroke-width="1"/>
+    <line x1="320" y1="0" x2="320" y2="28" stroke="#666" stroke-width="1"/>
+  </g>
+
+  <!-- Row 1 -->
+  <g transform="translate(40, 108)">
+    <rect x="0" y="0" width="390" height="28" rx="0" fill="#fce8e6" stroke="#ea4335" stroke-width="1"/>
+    <text x="60" y="19" text-anchor="middle" font-size="11" fill="#333">1</text>
+    <text x="170" y="19" text-anchor="middle" font-size="11" fill="#333">Schuh</text>
+    <text x="280" y="19" text-anchor="middle" font-size="11" fill="#333">49.90</text>
+    <text x="360" y="19" text-anchor="middle" font-size="11" fill="#333">Mode</text>
+    <line x1="110" y1="0" x2="110" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+    <line x1="220" y1="0" x2="220" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+    <line x1="320" y1="0" x2="320" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+  </g>
+
+  <!-- Row 2 -->
+  <g transform="translate(40, 136)">
+    <rect x="0" y="0" width="390" height="28" rx="0" fill="#fce8e6" stroke="#ea4335" stroke-width="1"/>
+    <text x="60" y="19" text-anchor="middle" font-size="11" fill="#333">2</text>
+    <text x="170" y="19" text-anchor="middle" font-size="11" fill="#333">Hemd</text>
+    <text x="280" y="19" text-anchor="middle" font-size="11" fill="#333">29.90</text>
+    <text x="360" y="19" text-anchor="middle" font-size="11" fill="#333">Mode</text>
+    <line x1="110" y1="0" x2="110" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+    <line x1="220" y1="0" x2="220" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+    <line x1="320" y1="0" x2="320" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+  </g>
+
+  <!-- Row 3 -->
+  <g transform="translate(40, 164)">
+    <rect x="0" y="0" width="390" height="28" rx="0" fill="#fce8e6" stroke="#ea4335" stroke-width="1"/>
+    <text x="60" y="19" text-anchor="middle" font-size="11" fill="#333">3</text>
+    <text x="170" y="19" text-anchor="middle" font-size="11" fill="#333">Buch</text>
+    <text x="280" y="19" text-anchor="middle" font-size="11" fill="#333">14.90</text>
+    <text x="360" y="19" text-anchor="middle" font-size="11" fill="#333">Lit.</text>
+    <line x1="110" y1="0" x2="110" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+    <line x1="220" y1="0" x2="220" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+    <line x1="320" y1="0" x2="320" y2="28" stroke="#ea4335" stroke-width="0.5"/>
+  </g>
+
+  <!-- On-disk label -->
+  <text x="40" y="220" font-size="12" font-weight="700" fill="#555">Auf Disk gespeichert als:</text>
+  <rect x="40" y="230" width="390" height="32" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="235" y="252" text-anchor="middle" font-family="monospace" font-size="10" fill="#c5221f">[1,Schuh,49.90,Mode] [2,Hemd,29.90,Mode] [3,Buch,14.90,Lit.]</text>
+
+  <!-- Query annotation: reads all columns -->
+  <text x="40" y="290" font-size="12" fill="#333">Abfrage: <tspan font-family="monospace" font-weight="700">SELECT AVG(preis)</tspan></text>
+  <rect x="40" y="300" width="130" height="26" rx="4" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="62" y="317" font-size="10" fill="#c5221f">✗ id mitlesen</text>
+  <rect x="180" y="300" width="130" height="26" rx="4" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="202" y="317" font-size="10" fill="#c5221f">✗ name mitlesen</text>
+  <rect x="220" y="300" width="130" height="26" rx="4" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+  <text x="242" y="317" font-size="10" fill="#1e8e3e">✓ preis lesen</text>
+  <rect x="360" y="300" width="70" height="26" rx="4" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="395" y="317" font-size="10" fill="#c5221f">✗ kat.</text>
+
+  <rect x="40" y="340" width="390" height="30" rx="6" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="235" y="360" text-anchor="middle" font-size="12" font-weight="700" fill="#c5221f">→ 4× so viel I/O wie nötig</text>
+
+  <!-- Divider -->
+  <line x1="500" y1="60" x2="500" y2="400" stroke="#dddddd" stroke-width="1.5" stroke-dasharray="6,3"/>
+
+  <!-- RIGHT: Column-Oriented (Parquet) -->
+  <text x="750" y="65" text-anchor="middle" font-size="15" font-weight="700" fill="#34a853">Spaltenbasiert (Parquet)</text>
+
+  <!-- Column blocks -->
+  <g transform="translate(520, 80)">
+    <!-- id column -->
+    <rect x="0" y="0" width="80" height="112" rx="6" fill="#f5f5f5" stroke="#aaaaaa" stroke-width="1.5"/>
+    <rect x="0" y="0" width="80" height="28" rx="6" fill="#aaaaaa"/>
+    <text x="40" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">id</text>
+    <text x="40" y="55" text-anchor="middle" font-size="12" fill="#555">1</text>
+    <text x="40" y="79" text-anchor="middle" font-size="12" fill="#555">2</text>
+    <text x="40" y="103" text-anchor="middle" font-size="12" fill="#555">3</text>
+
+    <!-- name column -->
+    <rect x="95" y="0" width="80" height="112" rx="6" fill="#f5f5f5" stroke="#aaaaaa" stroke-width="1.5"/>
+    <rect x="95" y="0" width="80" height="28" rx="6" fill="#aaaaaa"/>
+    <text x="135" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">name</text>
+    <text x="135" y="55" text-anchor="middle" font-size="11" fill="#555">Schuh</text>
+    <text x="135" y="79" text-anchor="middle" font-size="11" fill="#555">Hemd</text>
+    <text x="135" y="103" text-anchor="middle" font-size="11" fill="#555">Buch</text>
+
+    <!-- preis column — highlighted -->
+    <rect x="190" y="0" width="80" height="112" rx="6" fill="#e6f4ea" stroke="#34a853" stroke-width="2.5"/>
+    <rect x="190" y="0" width="80" height="28" rx="6" fill="#34a853"/>
+    <text x="230" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">preis</text>
+    <text x="230" y="55" text-anchor="middle" font-size="12" fill="#1e8e3e">49.90</text>
+    <text x="230" y="79" text-anchor="middle" font-size="12" fill="#1e8e3e">29.90</text>
+    <text x="230" y="103" text-anchor="middle" font-size="12" fill="#1e8e3e">14.90</text>
+
+    <!-- kat column -->
+    <rect x="285" y="0" width="80" height="112" rx="6" fill="#f5f5f5" stroke="#aaaaaa" stroke-width="1.5"/>
+    <rect x="285" y="0" width="80" height="28" rx="6" fill="#aaaaaa"/>
+    <text x="325" y="19" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">kat.</text>
+    <text x="325" y="55" text-anchor="middle" font-size="11" fill="#555">Mode</text>
+    <text x="325" y="79" text-anchor="middle" font-size="11" fill="#555">Mode</text>
+    <text x="325" y="103" text-anchor="middle" font-size="11" fill="#555">Lit.</text>
+  </g>
+
+  <!-- On-disk label -->
+  <text x="520" y="220" font-size="12" font-weight="700" fill="#555">Auf Disk gespeichert als:</text>
+  <rect x="520" y="230" width="440" height="32" rx="5" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+  <text x="740" y="252" text-anchor="middle" font-family="monospace" font-size="10" fill="#1e8e3e">preis: [49.90, 29.90, 14.90, ...]  kat: [Mode, Mode, Lit., ...]</text>
+
+  <!-- Query annotation: reads only preis -->
+  <text x="520" y="290" font-size="12" fill="#333">Abfrage: <tspan font-family="monospace" font-weight="700">SELECT AVG(preis)</tspan></text>
+  <rect x="520" y="300" width="440" height="26" rx="4" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+  <text x="740" y="317" text-anchor="middle" font-size="10" fill="#1e8e3e">✓ Nur preis-Spalte lesen — alle anderen Spalten überspringen</text>
+
+  <!-- Bonus: Compression -->
+  <rect x="520" y="340" width="440" height="30" rx="6" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+  <text x="740" y="360" text-anchor="middle" font-size="12" font-weight="700" fill="#1e8e3e">✓ Gleiche Werte komprimierbar: [Mode×2, Lit.×1] → Run-Length</text>
+</svg>

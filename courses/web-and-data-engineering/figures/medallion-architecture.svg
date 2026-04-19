@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="360" viewBox="0 0 1000 360" role="img" aria-labelledby="title desc" font-family="Arial, Helvetica, sans-serif">
+  <title id="title">Medallion Architecture: Bronze, Silver, Gold</title>
+  <desc id="desc">Dreischichtiger Datenspeicher im Lakehouse: Bronze (Rohdaten, append-only), Silver (bereinigt, validiert, gejoint), Gold (aggregiert, Business-KPIs). Pfeile zeigen die Datenflussrichtung.</desc>
+  <rect width="1000" height="360" fill="#ffffff"/>
+
+  <text x="500" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#111111">Medallion Architecture (Lakehouse)</text>
+
+  <defs>
+    <marker id="med-arrow" viewBox="0 0 10 10" markerWidth="9" markerHeight="9" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Source Systems -->
+  <rect x="20" y="120" width="130" height="120" rx="10" fill="#f5f5f5" stroke="#aaaaaa" stroke-width="1.5"/>
+  <text x="85" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#444">Quellsysteme</text>
+  <text x="85" y="170" text-anchor="middle" font-size="11" fill="#666">Web-App</text>
+  <text x="85" y="188" text-anchor="middle" font-size="11" fill="#666">IoT Events</text>
+  <text x="85" y="206" text-anchor="middle" font-size="11" fill="#666">DB Export</text>
+  <text x="85" y="224" text-anchor="middle" font-size="11" fill="#666">API Feeds</text>
+
+  <!-- Arrow Source → Bronze -->
+  <line x1="150" y1="180" x2="193" y2="180" stroke="#666" stroke-width="2" marker-end="url(#med-arrow)"/>
+  <text x="172" y="172" text-anchor="middle" font-size="9" fill="#888">ingest</text>
+
+  <!-- BRONZE Layer -->
+  <rect x="195" y="70" width="200" height="220" rx="12" fill="#fce8e6" stroke="#ea4335" stroke-width="2.5"/>
+  <rect x="195" y="70" width="200" height="36" rx="12" fill="#ea4335"/>
+  <text x="295" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">Bronze</text>
+  <text x="295" y="126" text-anchor="middle" font-size="12" fill="#c5221f" font-weight="600">Rohdaten (append-only)</text>
+  <text x="295" y="148" text-anchor="middle" font-size="11" fill="#555">Original-Format erhalten</text>
+  <text x="295" y="166" text-anchor="middle" font-size="11" fill="#555">Unveränderlich</text>
+  <text x="295" y="184" text-anchor="middle" font-size="11" fill="#555">Replay-Basis</text>
+  <rect x="215" y="200" width="160" height="28" rx="5" fill="#ffffff" stroke="#ea4335" stroke-width="1"/>
+  <text x="295" y="219" text-anchor="middle" font-size="10" fill="#c5221f">Object Storage: S3 / GCS</text>
+  <rect x="215" y="234" width="160" height="28" rx="5" fill="#ffffff" stroke="#ea4335" stroke-width="1"/>
+  <text x="295" y="253" text-anchor="middle" font-size="10" fill="#c5221f">Format: JSON / CSV / Avro</text>
+  <text x="295" y="278" text-anchor="middle" font-size="10" fill="#888">Konsument: Debugging, Replay</text>
+
+  <!-- Arrow Bronze → Silver -->
+  <line x1="395" y1="180" x2="438" y2="180" stroke="#666" stroke-width="2" marker-end="url(#med-arrow)"/>
+  <text x="417" y="172" text-anchor="middle" font-size="9" fill="#888">transform</text>
+
+  <!-- SILVER Layer -->
+  <rect x="440" y="70" width="200" height="220" rx="12" fill="#e8f0fe" stroke="#4285f4" stroke-width="2.5"/>
+  <rect x="440" y="70" width="200" height="36" rx="12" fill="#4285f4"/>
+  <text x="540" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">Silver</text>
+  <text x="540" y="126" text-anchor="middle" font-size="12" fill="#1a73e8" font-weight="600">Bereinigt &amp; validiert</text>
+  <text x="540" y="148" text-anchor="middle" font-size="11" fill="#555">Deduplication</text>
+  <text x="540" y="166" text-anchor="middle" font-size="11" fill="#555">Schema-Enforcement</text>
+  <text x="540" y="184" text-anchor="middle" font-size="11" fill="#555">Joins aufgelöst</text>
+  <rect x="460" y="200" width="160" height="28" rx="5" fill="#ffffff" stroke="#4285f4" stroke-width="1"/>
+  <text x="540" y="219" text-anchor="middle" font-size="10" fill="#1a73e8">Delta Lake / Iceberg</text>
+  <rect x="460" y="234" width="160" height="28" rx="5" fill="#ffffff" stroke="#4285f4" stroke-width="1"/>
+  <text x="540" y="253" text-anchor="middle" font-size="10" fill="#1a73e8">Format: Parquet (ACID)</text>
+  <text x="540" y="278" text-anchor="middle" font-size="10" fill="#888">Konsument: Data Science, ML</text>
+
+  <!-- Arrow Silver → Gold -->
+  <line x1="640" y1="180" x2="683" y2="180" stroke="#666" stroke-width="2" marker-end="url(#med-arrow)"/>
+  <text x="662" y="172" text-anchor="middle" font-size="9" fill="#888">aggregate</text>
+
+  <!-- GOLD Layer -->
+  <rect x="685" y="70" width="200" height="220" rx="12" fill="#fef7e0" stroke="#f9ab00" stroke-width="2.5"/>
+  <rect x="685" y="70" width="200" height="36" rx="12" fill="#f9ab00"/>
+  <text x="785" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">Gold</text>
+  <text x="785" y="126" text-anchor="middle" font-size="12" fill="#e37400" font-weight="600">Business-KPIs</text>
+  <text x="785" y="148" text-anchor="middle" font-size="11" fill="#555">Aggregiert &amp; optimiert</text>
+  <text x="785" y="166" text-anchor="middle" font-size="11" fill="#555">Breite, flache Tabellen</text>
+  <text x="785" y="184" text-anchor="middle" font-size="11" fill="#555">Query-performant</text>
+  <rect x="705" y="200" width="160" height="28" rx="5" fill="#ffffff" stroke="#f9ab00" stroke-width="1"/>
+  <text x="785" y="219" text-anchor="middle" font-size="10" fill="#e37400">Spark / dbt</text>
+  <rect x="705" y="234" width="160" height="28" rx="5" fill="#ffffff" stroke="#f9ab00" stroke-width="1"/>
+  <text x="785" y="253" text-anchor="middle" font-size="10" fill="#e37400">Format: Parquet / Views</text>
+  <text x="785" y="278" text-anchor="middle" font-size="10" fill="#888">Konsument: BI, API, Reports</text>
+
+  <!-- Reprocessing annotation -->
+  <path d="M 540 300 Q 540 340 295 340 Q 50 340 50 300" fill="none" stroke="#b71c1c" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#med-arrow)"/>
+  <text x="295" y="355" text-anchor="middle" font-size="11" fill="#b71c1c">Reprocessing: Logikfehler in Silver → aus Bronze neu berechnen</text>
+</svg>

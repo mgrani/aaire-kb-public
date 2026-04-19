@@ -1,25 +1,61 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.s8djF-3N.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.BQPjw3n4.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Lecture 04: HTTP und RESTful APIs
 
 Prof. Dr. Michael Granitzer
 
+Notes:
+Diese Vorlesung behandelt HTTP als Kommunikationsprotokoll des Webs und REST als darauf aufbauenden Architekturstil fuer APIs (Application Programming Interfaces, also Programmierschnittstellen). Im Mittelpunkt stehen Nachrichtenaufbau, HTTP-Semantik, Caching, Sicherheit, Ressourcenmodellierung und der Lebenszyklus von APIs.
+
 ---
+
+
 
 ## Ziel dieser Vorlesung
 
-HTTP ist das Protokoll des Webs. REST nutzt dieses Protokoll konsequent als Grundlage für API-Design. Diese Vorlesung verbindet beides: vom **Protokollverständnis** über **Caching und Sicherheit** bis zum **Entwurf robuster, evolvierbarer APIs**.
+
+<div class="grid-2">
+
+
+<div class="column">
+
+HTTP ist das Protokoll des Webs. REST nutzt dieses Protokoll konsequent als Grundlage für API-Design.
+
+
+<div class="c-definition">
+
+Diese Vorlesung verbindet beides: vom **Protokollverständnis** über **Caching und Sicherheit** bis zum **Entwurf robuster, evolvierbarer APIs**.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
 
 ### Leitfragen
 
 - Warum ist HTTP mehr als Datentransport?
+- Wie strukturieren Header HTTP-Nachrichten und ihre Repräsentationen?
 - Wie steuern Header Caching, Sessions und Sicherheit?
 - Was unterscheidet REST von beliebigem JSON-über-HTTP?
 - Wie modelliert man Ressourcen, URIs und HTTP-Semantik für APIs?
 - Wie entwickelt man APIs weiter, ohne Clients zu brechen?
 
+</div>
+
+
+</div>
+
+
+Notes:
+HTTP definiert, wie Clients und Server Nachrichten austauschen. REST nutzt diese Mechanismen konsequent fuer API-Design. Lernziel ist, HTTP-Nachrichten fachlich zu lesen, Header, Medienformate und Statuscodes korrekt zu interpretieren und APIs (Application Programming Interfaces) anhand von Ressourcen, Semantik und Evolvierbarkeit zu bewerten.
+
 ---
+
+
 
 <!-- .slide: class="module-slide" -->
 
@@ -33,14 +69,21 @@ HTTP ist das Protokoll des Webs. REST nutzt dieses Protokoll konsequent als Grun
 </div>
 
 
+Notes:
+HTTP ist ein standardisiertes Request-Response-Protokoll. Es trennt klar zwischen Client und Server und bildet die Grundlage fuer Web-Seiten, Web-APIs, Caching-Infrastruktur und viele Sicherheitsmechanismen.
+
 --
 
-## Was sehen Sie hier? {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Was sehen Sie hier?
 
 Ein Nutzer ruft die Produktseite auf. Das Netzwerk-Tab zeigt diesen Austausch:
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -91,7 +134,7 @@ ETag: "f7e3a1b2"
 **Aufgabe:** Was ist Startzeile, Header, Body? Welche Information steckt in jedem Header?
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column small">
@@ -119,13 +162,23 @@ Fingerprint zur Validierung
 </div>
 
 
+Notes:
+Ein HTTP-Austausch besteht aus Startzeile, Headern und optionalem Body. Im Request beschreibt die Startzeile Methode, Ziel und Protokollversion. Im Response beschreibt die Startzeile Version, Statuscode und Statusmeldung. Header transportieren Metadaten wie akzeptierte Formate, Session-Informationen oder Cache-Regeln. Der Body enthaelt die eigentliche Repräsentation der Ressource, hier JSON (JavaScript Object Notation).
+
 --
+
+
 
 ## HTTP: Das Request-Response-Protokoll
 
 ![HTTP-Client-Server-Modell mit Request und Response.](/courses/web-and-data-engineering/figures/http-client-server.svg)
 
+Notes:
+HTTP arbeitet nach einem einfachen Muster: Der Client sendet einen Request an eine Adresse, der Server verarbeitet ihn und liefert einen Response. Diese Struktur ermoeglicht eine lose Kopplung zwischen Browsern, Servern, Proxies, Caches und Gateways.
+
 --
+
+
 
 ## Von der Fetch API zum Protokoll
 
@@ -149,9 +202,16 @@ Jetzt schauen wir auf die **Protokollseite**:
 
 Die Fetch API ist eine **JavaScript-Abstraktion über HTTP**. Wer HTTP versteht, versteht auch, warum `fetch` so funktioniert wie es funktioniert — und kann Netzwerkprobleme im DevTools-Netzwerk-Tab diagnostizieren.
 
+Notes:
+Die Fetch API ist eine Programmierschnittstelle im Browser, die HTTP-Nachrichten erzeugt und Responses kapselt. `method`, `headers` und Body in JavaScript entsprechen direkt Bestandteilen einer HTTP-Nachricht. Wer HTTP versteht, kann Netzwerkverhalten unabhaengig vom verwendeten Framework analysieren.
+
 --
 
-## HTTP-Designprinzipien {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## HTTP-Designprinzipien
 
 | Prinzip | Bedeutung | Konsequenz |
 |---|---|---|
@@ -162,7 +222,7 @@ Die Fetch API ist eine **JavaScript-Abstraktion über HTTP**. Wer HTTP versteht,
 | **Textbasiert** | Nachrichten sind menschenlesbar (HTTP/1.1) | Einfach zu debuggen |
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -190,9 +250,16 @@ Schema → Host → Port → Pfad → Query → Fragment
 </div>
 
 
+Notes:
+HTTP ist ressourcenorientiert, zustandslos und durch Header erweiterbar. Zustandslosigkeit bedeutet, dass jeder Request fuer sich interpretierbar sein muss. Dadurch werden Lastverteilung, Zwischenspeicherung und horizontale Skalierung erleichtert. URIs (Uniform Resource Identifiers) geben Ressourcen stabile Adressen.
+
 --
 
-## HTTP-Methoden als semantischer Vertrag {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## HTTP-Methoden als semantischer Vertrag
 
 | Methode | Absicht | Sicher? | Idempotent? | Online-Shop-Beispiel |
 |---|---|---|---|---|
@@ -205,7 +272,7 @@ Schema → Host → Port → Pfad → Query → Fragment
 | **OPTIONS** | Erlaubte Methoden abfragen | ja | ja | CORS Preflight |
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -225,9 +292,16 @@ Schema → Host → Port → Pfad → Query → Fragment
 </div>
 
 
+Notes:
+HTTP-Methoden kodieren Absichten. `GET` liest, `POST` erzeugt oder stoesst Verarbeitung an, `PUT` ersetzt, `PATCH` aendert teilweise, `DELETE` entfernt. Safe bedeutet: keine Aenderung am fachlichen Zustand. Idempotent bedeutet: Mehrfachausfuehrung hat denselben Effekt wie einmalige Ausfuehrung.
+
 --
 
-## HTTP-Methoden: Safe und Idempotent in der Praxis {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## HTTP-Methoden: Safe und Idempotent in der Praxis
 
 **Szenario:** Ein Nutzer klickt zweimal schnell auf „Jetzt kaufen“. Netzwerk-Lag verzögert den ersten Request, beide kommen beim Server an.
 
@@ -238,9 +312,16 @@ Schema → Host → Port → Pfad → Query → Fragment
 
 **Konsequenz:** Load Balancer und API-Gateways können idempotente Requests bei Timeout sicher wiederholen. CDNs cachen nur **safe** Methoden (GET, HEAD), weil diese die Ressource nie verändern.
 
+Notes:
+Die Unterscheidung zwischen safe und idempotent hat direkte Auswirkungen auf Betrieb und Fehlertoleranz. Idempotente Requests koennen bei Netzwerkproblemen sicher wiederholt werden. Nicht-idempotente POST-Requests brauchen zusaetzliche Schutzmechanismen, damit Wiederholungen keine doppelten Effekte erzeugen.
+
 --
 
-## HTTP-Statuscodes {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## HTTP-Statuscodes
 
 
 
@@ -255,7 +336,7 @@ Schema → Host → Port → Pfad → Query → Fragment
 ### Was stimmt an dieser API-Antwort nicht?
 
 
-<div class="columns">
+<div class="grid-2">
 
 
 <div class="column">
@@ -290,9 +371,16 @@ Content-Type: application/json
 </div>
 
 
+Notes:
+Statuscodes sind maschinenlesbare Standardantworten. 2xx steht fuer Erfolg, 3xx fuer Umleitungen, 4xx fuer Probleme auf Client-Seite und 5xx fuer Probleme auf Server-Seite. Der Statuscode beschreibt die eigentliche Bedeutung des Ergebnisses; ein Fehler darf nicht nur im Body versteckt werden.
+
 --
 
-## HTTP-Versionen im Vergleich {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## HTTP-Versionen im Vergleich
 
 | Version | Jahr | Kernverbesserung |
 |---|---|---|
@@ -315,7 +403,483 @@ HTTP ist nicht nur Datentransport — es ist das **Interaktionsmodell** des Webs
 </div>
 
 
+Notes:
+HTTP/1.0 oeffnete typischerweise pro Request eine neue TCP-Verbindung. HTTP/1.1 fuehrte persistent connections ein. HTTP/2 multiplexiert mehrere Requests ueber eine Verbindung und komprimiert Header. HTTP/3 basiert auf QUIC (Quick UDP Internet Connections) ueber UDP (User Datagram Protocol) und reduziert Verbindungsaufbau und Transportlatenz.
+
 ---
+
+<!-- .slide: class="module-slide" -->
+
+# HTTP Header und Repräsentationen
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wie beschreiben HTTP-Header, welches Format gesendet wird, wie es interpretiert werden soll und welche Varianten einer Ressource ausgehandelt werden?
+
+</div>
+
+
+Notes:
+HTTP trennt nicht nur zwischen Request und Response, sondern auch zwischen fachlicher Ressource und ihrer konkreten Darstellung. Header-Felder liefern die dazugehoerigen Metadaten, etwa Medienformat, Sprache, Kompression oder Cache-Regeln.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## HTTP-Header im Überblick
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Eine HTTP-Nachricht besteht aus:
+
+1. **Startzeile**  
+   Request: Methode + Ziel + Version  
+   Response: Version + Statuscode + Statusmeldung
+2. **Header-Felder**  
+   Metadaten als `Name: Wert`
+3. **Leerzeile**  
+   Trennt Header und Body
+4. **Optionaler Body**  
+   Die eigentliche Repräsentation
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+```http
+GET /products/42 HTTP/1.1
+Host: shop.example.com
+Accept: application/json
+
+```
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Header-Felder stehen zwischen Startzeile und Body. Sie beschreiben nicht die Ressource selbst, sondern Zusatzinformationen zur Nachricht, etwa Zielhost, gewuenschtes Format, Authentifizierung, Cache-Verhalten oder Cookie-Daten. Die Leerzeile ist technisch relevant, weil sie den Headerblock vom optionalen Body trennt. Erst durch diese Struktur koennen generische Werkzeuge wie Browser, Proxies oder Debugger Nachrichten systematisch lesen.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Wie sind HTTP-Header strukturiert?
+
+| Teil | Bedeutung | Beispiel |
+|---|---|---|
+| **Feldname** | Standardisierter Header-Name | `Content-Type` |
+| **Doppelpunkt** | Trennt Name und Wert | `:` |
+| **Feldwert** | Semantik des Headers | `application/json` |
+
+```http
+Content-Type: application/json; charset=utf-8
+Cache-Control: public, max-age=3600
+Authorization: Bearer eyJhbGciOi...
+```
+
+- Header-Namen sind **case-insensitive**
+- Ein Feldwert kann aus **Token, Parametern oder Listen** bestehen
+- Viele Header haben eine klar definierte **Syntax nach RFC**
+
+Notes:
+Die allgemeine Form ist immer `Feldname: Wert`. Die genaue Struktur des Werts haengt vom Header ab: Media Types haben optionale Parameter wie `charset`, Cache-Control kombiniert mehrere Direktiven, Accept-Header koennen mehrere Werte mit Prioritaeten enthalten.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Kategorien von Header-Feldern
+
+| Kategorie | Typische Header | Zweck |
+|---|---|---|
+| **Request-Header** | `Host`, `Accept`, `Authorization`, `Cookie` | Beschreiben den eingehenden Request |
+| **Response-Header** | `Server`, `Location`, `Set-Cookie` | Beschreiben Eigenschaften der Antwort |
+| **Repräsentations-Header** | `Content-Type`, `Content-Length`, `Content-Encoding`, `Content-Language` | Beschreiben den Body |
+| **Caching / Conditional** | `Cache-Control`, `ETag`, `If-None-Match`, `Last-Modified` | Steuern Wiederverwendung und Validierung |
+| **Sicherheits-Header** | `Strict-Transport-Security`, `Content-Security-Policy` | Erhoehen Sicherheitseigenschaften |
+
+**Wichtig:** Dieselbe HTTP-Ressource kann mehrere Repräsentationen haben. Die Header beschreiben, **welche Variante gerade übertragen wird**.
+
+Notes:
+Diese Kategorien helfen beim Lesen realer HTTP-Nachrichten. Besonders wichtig fuer das Verstaendnis von REST ist die Trennung zwischen Ressourcenidentitaet durch URI (Uniform Resource Identifier) und Repräsentationsbeschreibung durch Header.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Typische Request- und Response-Header
+
+| Header | Typ | Kurz erklärt |
+|---|---|---|
+| `Host` | Request | Gibt an, fuer welchen Host der Request bestimmt ist; wichtig bei virtuellen Hosts |
+| `Authorization` | Request | Uebertraegt Anmeldedaten oder Zugriffstoken |
+| `Location` | Response | Verweist auf die URI einer neuen oder anderen Ressource |
+| `Server` | Response | Kann Informationen ueber die Server-Software enthalten |
+
+```http
+POST /login HTTP/1.1
+Host: shop.example.com
+Authorization: Bearer eyJ...
+```
+
+Notes:
+`Host` ist seit HTTP/1.1 zentral, weil mehrere Websites auf derselben IP-Adresse betrieben werden koennen. `Authorization` uebertraegt Zugriffsinformationen, etwa ein Bearer-Token. `Location` wird oft bei Redirects oder `201 Created` verwendet. `Server` ist fuer Clients meist nicht funktional noetig, taucht aber in realen Responses haeufig auf.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Typische Header für Repräsentation und Kontrolle
+
+| Header | Kategorie | Kurz erklärt |
+|---|---|---|
+| `Content-Length` | Repräsentation | Nennt die Laenge des Bodys in Bytes |
+| `Content-Encoding` | Repräsentation | Gibt an, ob der Body z. B. mit gzip komprimiert wurde |
+| `Content-Security-Policy` | Sicherheit | Beschraenkt, welche Inhalte eine Seite laden oder ausfuehren darf |
+| `Strict-Transport-Security` | Sicherheit | Erzwingt fuer eine Domain die Nutzung von HTTPS |
+
+**Merksatz:**  
+Ein Teil der Header beschreibt den **Body**, ein anderer Teil steuert **Verhalten** von Clients, Caches und Browsern.
+
+Notes:
+`Content-Length` und `Content-Encoding` beschreiben Eigenschaften der uebertragenen Repräsentation, die im Alltag leicht uebersehen werden. `Content-Security-Policy` und `Strict-Transport-Security` sind typische Sicherheits-Header fuer Web-Anwendungen; letzterer wird oft als HSTS fuer HTTP Strict Transport Security abgekuerzt.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Medienrepräsentationen und MIME Types
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Eine Ressource ist nicht gleich ihr Datenformat. Dieselbe Ressource kann als verschiedene **Medientypen** übertragen werden:
+
+| Medientyp | Bedeutung | Beispiel |
+|---|---|---|
+| `text/html` | HTML-Dokument | Produktseite im Browser |
+| `application/json` | JSON-Daten | API-Response |
+| `text/css` | Stylesheet | Gestaltung einer Seite |
+| `application/javascript` | JavaScript-Code | Skriptdatei |
+| `image/png` | PNG-Bild | Produktfoto |
+| `application/pdf` | PDF-Dokument | Rechnung zum Download |
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Media Type = Typ/Subtyp**
+
+Beispiele: `text/html`, `application/json`, `image/svg+xml`
+
+</div>
+
+
+
+<div class="c-note">
+
+Der Medientyp beschreibt nicht die Ressource selbst, sondern die Form ihrer aktuellen Repräsentation.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+MIME Type bedeutet ursprünglich Multipurpose Internet Mail Extensions; im Web spricht man meist gleichbedeutend von Media Types. Der Media Type sagt Client und Infrastruktur, wie der Body interpretiert werden soll. Ohne korrekten Content-Type weiss ein Browser oder API-Client nicht verlaesslich, wie die empfangenen Bytes zu lesen sind. Ein Browser behandelt `text/html` anders als `image/png` oder `application/json`; genau deshalb ist der Medientyp Teil der HTTP-Semantik und nicht nur Dekoration.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Verschiedene Clients, verschiedene Repräsentationen
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Nicht jeder Client braucht dieselbe Darstellung derselben Ressource:
+
+| Client-Modell | Typische Repräsentation | Wofür geeignet? |
+|---|---|---|
+| **Server-gerenderter Browser-Client** | `text/html` | Der Server liefert direkt eine fertige HTML-Seite |
+| **JavaScript-Frontend / SPA** | `application/json` | Das Frontend rendert die Oberfläche selbst |
+| **Mobile App** | `application/json` | Die App verarbeitet Daten und baut die UI nativ |
+| **Download-Client** | `application/pdf`, `image/png` | Datei- oder Medienausgabe |
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+**Kernidee:**  
+Die fachliche Ressource bleibt gleich, aber die **Repräsentation** wird an den Bedarf des Clients angepasst.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Die drei Client-Modelle nutzen dieselbe Ressource, aber unterschiedliche Repräsentationen: Ein server-gerenderter Browser-Client erwartet `text/html`, weil der Browser direkt anzeigt, was der Server liefert. Ein JavaScript-SPA oder eine mobile App erwartet `application/json`, weil sie die Darstellung selbst übernehmen — die Daten kommen als maschinenlesbare Struktur, die Rendering-Logik liegt im Client. Download-Clients (PDF-Export, Bilddienste) erwarten binäre MIME-Types. Der `Accept`-Header des HTTP-Requests teilt dem Server mit, welche Repräsentation der Client verarbeiten kann — Content Negotiation erlaubt dem Server, die passende Variante auszuliefern.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## HTML vs. JSON als Repräsentation
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**HTML-Repräsentation**
+
+- Enthält Struktur und Inhalt fuer die direkte Anzeige im Browser
+- Typisch fuer **serverseitig gerenderte** Anwendungen
+- Media Type: `text/html`
+
+</div>
+
+
+<div class="column">
+
+**JSON-Repräsentation**
+
+- Enthält strukturierte Daten statt fertiger Seiten
+- Typisch fuer **APIs**, SPAs und mobile Clients
+- Media Type: `application/json`
+
+</div>
+
+
+</div>
+
+
+**Wichtig:**  
+HTML und JSON konkurrieren nicht zwingend. Beide koennen sinnvolle Repräsentationen **derselben Ressource** sein.
+
+Notes:
+Serverseitig gerendertes HTML bedeutet, dass der Server die sichtbare Seite zusammensetzt. JSON ist dagegen vor allem eine Datenrepräsentation, die von Browser-JavaScript, mobilen Apps oder anderen Diensten weiterverarbeitet wird.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## JSON kurz eingeführt
+
+**JSON** steht fuer **JavaScript Object Notation**. Es ist ein leichtgewichtiges Textformat fuer strukturierte Daten.
+
+```json
+{
+  "id": 42,
+  "name": "Funkkopfhörer",
+  "price": 79.99,
+  "in_stock": true
+}
+```
+
+| JSON-Element | Beispiel |
+|---|---|
+| Objekt | `{ "id": 42 }` |
+| Array | `[1, 2, 3]` |
+| String | `"name"` |
+| Zahl | `79.99` |
+| Boolean | `true`, `false` |
+| Null | `null` |
+
+Notes:
+JSON ist im Web so verbreitet, weil es kompakt, textbasiert und in fast allen Programmiersprachen leicht verarbeitbar ist. Fuer REST ist aber wichtig: JSON ist nur eine moegliche Repräsentation, nicht die Definition von REST.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Content Negotiation: Grundidee
+
+| Header | Richtung | Bedeutung |
+|---|---|---|
+| `Content-Type` | Request oder Response | Welches Format der Body hat |
+| `Accept` | Request | Welche Formate der Client akzeptiert |
+| `Accept-Language` | Request | Bevorzugte Sprache |
+| `Accept-Encoding` | Request | Bevorzugte Kompression, z. B. gzip oder br |
+| `Content-Encoding` | Response | Welche Kompression auf den Body angewendet wurde |
+
+```http
+GET /products/42 HTTP/1.1
+Accept: application/json
+Accept-Language: de
+Accept-Encoding: gzip, br
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Content-Language: de
+Content-Encoding: gzip
+```
+
+Notes:
+Content Negotiation bedeutet, dass der Client Praeferenzen mitteilt und der Server eine passende Repräsentation waehlt. `Accept` beschreibt das gewuenschte Format, `Content-Type` das tatsaechlich gelieferte Format. Dasselbe Muster gibt es auch fuer Sprache und Kompression.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Content Negotiation: Repräsentation auswählen
+
+Ein Client kann mehrere Formate akzeptieren und Prioritäten angeben:
+
+![Content Negotiation mit Accept-Prioritäten.](/courses/web-and-data-engineering/figures/content-negotiation-selection.svg)
+
+| Teil | Bedeutung |
+|---|---|
+| `text/html` | Bevorzugte Repräsentation |
+| `application/json;q=0.9` | Ebenfalls akzeptabel, aber etwas weniger bevorzugt |
+| `application/xml;q=0.5` | Nur niedrige Priorität |
+
+**q-Wert = Qualitätswert**  
+Je hoeher der `q`-Wert, desto staerker die Präferenz des Clients.
+
+Wenn kein gemeinsames Format gefunden wird, kann der Server z. B. mit `406 Not Acceptable` antworten.
+
+Notes:
+Diese Form der Aushandlung erklaert, wie ein Client aktiv Einfluss auf die Darstellung nimmt. Fuer die Lehrlogik ist wichtig: Nicht der Pfad allein bestimmt die Repräsentation, sondern oft das Zusammenspiel aus Ressource, Headern und Serverentscheidung.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Eine Ressource, mehrere Repräsentationen
+
+**Beispiel:** Dieselbe Produkt-Ressource `/products/42`
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Browser-orientiert**
+
+```http
+GET /products/42 HTTP/1.1
+Accept: text/html
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: text/html
+```
+
+</div>
+
+
+<div class="column">
+
+**API-orientiert**
+
+```http
+GET /products/42 HTTP/1.1
+Accept: application/json
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+```
+
+</div>
+
+
+</div>
+
+
+**Kernidee:**  
+Die **Ressource** bleibt dieselbe, aber ihre **Repräsentation** kann je nach Client unterschiedlich sein.
+
+Notes:
+Die Trennung von Ressource und Repräsentation ist das Kernkonzept hinter dem R in REST — „Representational State Transfer". Eine Ressource (z.B. Produkt mit ID 42) ist eine abstrakte fachliche Entität; ihre Repräsentation ist das konkrete Format, in dem ihr Zustand übertragen wird (JSON, HTML, XML, CSV). Dieselbe Ressource kann mehrere Repräsentationen haben — der `Content-Type`-Header identifiziert, welche ausgeliefert wurde. Caches müssen diese Unterscheidung kennen, weil sie nicht nur URL, sondern auch Repräsentation für das Caching berücksichtigen (HTTP `Vary`-Header).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Warum das für HTTP-Verständnis wichtig ist
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+- `Content-Type` und `Accept` machen Repräsentationen explizit
+- Caches muessen wissen, **welche Variante** einer Ressource gespeichert wurde
+- Infrastruktur kann nur korrekt arbeiten, wenn Header die Nachricht eindeutig beschreiben
+- Dieselbe fachliche Ressource kann fuer unterschiedliche Clients unterschiedlich dargestellt werden
+
+</div>
+
+
+<div class="column">
+
+
+<div class="takeaway">
+
+Header sind nicht Beiwerk, sondern Teil der HTTP-Semantik. Sie beschreiben Formate, Aushandlung, Kompression, Caching, Sicherheit und Zustand. Ohne dieses Verständnis bleiben spätere Themen wie Content Negotiation, Cache-Control oder API-Design unvollständig.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Dieses Modul schafft die Bruecke zwischen Grundsyntax und spaeteren Spezialfaellen. Caching, Sessions, Sicherheit und spaeter auch API-Design bauen darauf auf, dass Nachrichten und Repräsentationen durch Header praezise beschrieben werden. Besonders wichtig ist dabei die Unterscheidung zwischen fachlicher Ressource und uebertragener Variante: Ein Cache muss nicht nur wissen, dass `/products/42` gespeichert wurde, sondern auch ob dies die HTML-, JSON- oder komprimierte Variante war.
+
+---
+
+
 
 <!-- .slide: class="module-slide" -->
 
@@ -329,36 +893,119 @@ HTTP ist nicht nur Datentransport — es ist das **Interaktionsmodell** des Webs
 </div>
 
 
+Notes:
+Nachdem Header, Medienformate und Repräsentationen eingefuehrt wurden, lassen sich nun ihre wichtigsten Anwendungen behandeln: Caching, Redirects, Cookies und TLS. Diese Themen sind Spezialfaelle derselben HTTP-Semantik.
+
 --
 
-## Szenario: Der veraltete Preis {.smaller}
 
-Ein Nutzer besucht die Produktseite des Funkkopfhörers. Der Preis wird von **€ 79,99 auf € 69,99 gesenkt**. Der Nutzer lädt die Seite erneut — sieht aber weiterhin den alten Preis.
+
+<!-- .slide: class="smaller" -->
+
+## Szenario: Der veraltete Preis
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Ein Nutzer besucht die Produktseite des Funkkopfhörers. Der Preis wird von **€ 79,99 auf € 69,99 gesenkt**. Der Nutzer lädt die Seite erneut und sieht trotzdem weiter den alten Preis.
+
+
+<div class="c-important">
 
 **Aufgabe:** Was ist passiert? Welche HTTP-Mechanismen sind beteiligt?
 
-### Erklärung
+</div>
 
-Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300` Header sagte: „Diese Daten sind 5 Minuten gültig." Innerhalb dieser Frist fragt der Browser **gar nicht** beim Server nach. Der Nutzer sieht den alten Preis, bis der Cache abläuft.
 
-**Architekturentscheidung:** Wie lange sollen Produktdaten gecacht werden? Zu lang → veraltete Preise. Zu kurz → jeder Seitenaufruf belastet den Server.
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300` Header sagte: "Diese Daten sind 5 Minuten gueltig." Innerhalb dieser Frist fragt der Browser **gar nicht** beim Server nach.
+
+</div>
+
+
+
+<div class="c-caution">
+
+**Architekturentscheidung:** Wie lange sollen Produktdaten gecacht werden? Zu lang -> veraltete Preise. Zu kurz -> jeder Seitenaufruf belastet den Server.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Caching speichert Responses zwischen, um Last und Latenz zu reduzieren. `Cache-Control: max-age=300` erlaubt dem Browser, die Ressource für 300 Sekunden ohne Rückfrage wiederzuverwenden — der Request erreicht den Server in diesem Zeitfenster gar nicht. Dadurch kann der Nutzer kurzzeitig veraltete Daten sehen. Das ist kein Browser-Fehler, sondern exakt das beabsichtigte Verhalten auf Basis der vom Server gesetzten Direktive. Der Trade-off ist architektonisch explizit: Zu hohe `max-age`-Werte liefern veraltete Preise oder Lagerbestände; zu niedrige Werte erhöhen die Serverlast unnötig. `ETag`/`Last-Modified` mit Conditional Requests (`If-None-Match`, `If-Modified-Since`) bieten eine feinere Alternative: Der Cache wird validiert, ohne die vollständige Ressource erneut zu übertragen.
 
 --
 
-## Caching: Ebenen und Mechanismen {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Caching: Ebenen und Mechanismen
+
+
+<div class="grid-2">
+
+
+<div class="column">
 
 | Cache-Ebene | Wo? | Vorteil |
 |---|---|---|
-| **Browser-Cache** | Lokal auf dem Gerät | Kein Netzwerk-Request → schnellste Variante |
+| **Browser-Cache** | Lokal auf dem Gerät | Kein Netzwerk-Request -> schnellste Variante |
 | **Proxy/CDN-Cache** | Edge-Server im Netzwerk | Reduziert Last auf Origin, niedrige Latenz |
 | **Application-Cache** | Im Server (Redis, Memcached) | Vermeidet wiederholte Datenbankabfragen |
 
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+Jede Ebene spart Arbeit an einer anderen Stelle:
+
+- Browser-Cache spart Netzverkehr
+- CDN spart Origin-Last
+- Application-Cache spart Datenbank- oder Rechenaufwand
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Caches existieren auf mehreren Ebenen. Browser-Caches vermeiden Netzverkehr, CDN- oder Proxy-Caches entlasten den Ursprungsserver, serverseitige Application-Caches vermeiden teure Berechnungen oder Datenbankzugriffe. Alle drei Ebenen verbessern Performance, aber mit unterschiedlichen Trade-offs.
+
 --
 
-## Cache-Steuerung über Header {.smaller}
 
 
-<div class="columns">
+<!-- .slide: class="smaller" -->
+
+## Cache-Steuerung über Header
+
+
+<div class="grid-2">
 
 
 <div class="column small">
@@ -390,9 +1037,33 @@ Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300`
 </div>
 
 
+Notes:
+`Cache-Control` steuert, ob und wie lange eine Response gespeichert werden darf. `ETag` und `Last-Modified` ermoeglichen Validierungsrequests. Bei einer erfolgreichen Validierung kann der Server `304 Not Modified` senden, sodass der Client seinen vorhandenen Body weiterverwendet.
+
 --
 
-## Interpretationsaufgabe: Caching-Strategie {.smaller}
+<!-- .slide: class="smaller" -->
+
+## Workflow: Conditional Request und Cache-Validierung
+
+![Conditional Request mit ETag und 304 Not Modified.](/courses/web-and-data-engineering/figures/cache-validation-workflow.svg)
+
+| Schritt | Bedeutung |
+|---|---|
+| `ETag` empfangen | Client kennt Version der Repräsentation |
+| `If-None-Match` senden | Client fragt: Hat sich etwas geändert? |
+| `304 Not Modified` | Kein neuer Body nötig, Cache bleibt gültig |
+
+Notes:
+Dieser Workflow zeigt die typische Cache-Validierung fuer veraenderliche Ressourcen. Der Client speichert eine Repräsentation mit `ETag` und fragt spaeter bedingt erneut an. Wenn die Version unveraendert ist, spart `304 Not Modified` Bandbreite, weil kein neuer Body gesendet werden muss. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/304
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Interpretationsaufgabe: Caching-Strategie
 
 **Aufgabe:** Welchen `Cache-Control`-Header würden Sie für diese Ressourcen des Online-Shops setzen?
 
@@ -410,12 +1081,19 @@ Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300`
 | `/api/cart` | `private, no-store` | Nutzerspezifisch, darf nicht im CDN landen |
 | `logo.png` | `public, max-age=86400` | Ändert sich selten, 1 Tag reicht |
 
+Notes:
+Die richtige Cache-Strategie haengt vom Datentyp ab. Versionierte statische Dateien sind nahezu ideal fuer lange Cache-Zeiten. Personalisierte oder sensible Daten sollten nicht im gemeinsamen Cache landen. Veraenderliche Daten profitieren oft von Validierung statt unbedingter Frische.
+
 --
 
-## Redirects und das PRG-Pattern {.smaller}
 
 
-<div class="columns">
+<!-- .slide: class="smaller" -->
+
+## Redirects und das Post/Redirect/Get-(PRG)-Pattern
+
+
+<div class="grid-2">
 
 
 <div class="column">
@@ -436,20 +1114,45 @@ Server  ── 200 OK (Bestellbestätigung) ─► Browser
 |---|---|---|
 | **301** | Permanent verschoben | Domain-Umzug |
 | **302/307** | Temporär woanders | A/B-Test, Wartung |
-| **303** | Nach POST auf GET | **PRG-Pattern** |
+| **303** | Nach POST auf GET | **Post/Redirect/Get (PRG)** |
 | **308** | Permanent, Methode bleibt | API-Migration |
 
-**PRG verhindert doppelte Bestellungen:** Nach POST antwortet Server mit 303 → Browser folgt per GET → Neuladen der Seite wiederholt nur den GET, nicht den POST.
+**Post/Redirect/Get (PRG) verhindert doppelte Bestellungen:** Nach POST antwortet der Server mit `303 See Other` → der Browser folgt per GET → Neuladen der Seite wiederholt nur den GET, nicht den POST.
 
 </div>
 
 
 </div>
 
+
+Notes:
+Redirects verweisen Clients auf eine andere URI. `303 See Other` ist besonders wichtig nach einem schreibenden POST, weil der Browser anschliessend per GET auf eine bestaetigende Ressource wechselt. Dieses Muster heisst Post/Redirect/Get und verhindert doppelte Formularverarbeitung beim Aktualisieren der Seite.
 
 --
 
-## Sessions und Cookies {.smaller}
+<!-- .slide: class="smaller" -->
+
+## Workflow: Redirects in der Praxis
+
+![Redirect-Workflow mit 303 und Location.](/courses/web-and-data-engineering/figures/redirect-workflow.svg)
+
+| Status | Typischer Effekt |
+|---|---|
+| `301` | Dauerhaft verschoben |
+| `302` | Temporär verschoben, historisch uneinheitlich |
+| `303` | Nach POST per GET weiter |
+| `307/308` | Methode und Body bleiben erhalten |
+
+Notes:
+Der Redirect-Workflow macht sichtbar, dass nicht jeder Redirect dasselbe Verhalten ausloest. `303 See Other` ist fuer PRG besonders wichtig, weil der Folge-Request als GET ausgefuehrt wird. `307` und `308` erhalten dagegen Methode und Body. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Redirections
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Sessions und Cookies
 
 HTTP ist zustandslos — aber der Online-Shop braucht Login und Warenkorb. **Cookies** lösen diesen Widerspruch:
 
@@ -466,12 +1169,19 @@ HTTP ist zustandslos — aber der Online-Shop braucht Login und Warenkorb. **Coo
 
 Nur die letzte Variante schützt gegen die drei häufigsten Angriffsvektoren.
 
+Notes:
+HTTP selbst ist zustandslos. Cookies fuehren dennoch wiedererkennbare Clients ein, indem der Browser kleine Wertepaar-Informationen speichert und bei spaeteren Requests mitsendet. Bei serverseitigen Sessions enthaelt das Cookie meist nur eine Session-ID; der eigentliche Zustand liegt auf dem Server.
+
 --
 
-## HTTPS und TLS {.smaller}
 
 
-<div class="columns">
+<!-- .slide: class="smaller" -->
+
+## HTTPS und TLS
+
+
+<div class="grid-2">
 
 
 <div class="column small">
@@ -509,7 +1219,12 @@ HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zu
 </div>
 
 
+Notes:
+HTTPS bedeutet HTTP ueber TLS (Transport Layer Security). TLS schuetzt Vertraulichkeit durch Verschluesselung, Integritaet durch Manipulationsschutz und Authentizitaet durch Zertifikate. Es schuetzt die Transportstrecke, aber nicht automatisch den Browser selbst oder unsichere Anwendungslogik.
+
 ---
+
+
 
 <!-- .slide: class="module-slide" -->
 
@@ -523,9 +1238,71 @@ HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zu
 </div>
 
 
+Notes:
+REST ist kein Protokoll, sondern ein Architekturstil fuer verteilte Systeme. Er baut auf Web-Grundprinzipien auf und nutzt HTTP, URIs (Uniform Resource Identifiers), Repräsentationen und Caching bewusst als Infrastrukturmechanismen.
+
 --
 
-## Eine typische AI-Antwort auf diese Frage {.smaller}
+<!-- .slide: class="smaller" -->
+
+## REST kurz eingeführt
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**REST** steht fuer **Representational State Transfer**.
+
+</div>
+
+
+REST entstand nicht als Framework oder Produkt, sondern als Beschreibung dafuer, **wie das Web bereits erfolgreich funktioniert**:
+
+- Ressourcen haben stabile Adressen (`/products/42`)
+- Clients navigieren ueber standardisierte HTTP-Operationen
+- Server liefern **Repräsentationen** dieser Ressourcen
+- Infrastruktur wie Browser, Caches und Proxies kann mitarbeiten
+
+</div>
+
+
+<div class="column">
+
+### Entstehungskontext
+
+- Ende der 1990er Jahre im Umfeld der Web-Architektur
+- Geprägt durch **Roy Fielding**
+- Ausgangsfrage: Warum skaliert das Web trotz seiner Einfachheit so gut?
+
+
+<div class="c-note">
+
+**Fuer die Praxis:** REST ist zuerst ein **Programmier- und Entwurfsparadigma fuer verteilte Client-Server-Systeme**. Die formale Einordnung als Architekturstil kommt im naechsten Schritt.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+REST (Representational State Transfer) wurde 2000 von Roy Fielding in seiner Dissertation „Architectural Styles and the Design of Network-based Software Architectures” beschrieben — nicht als neue Erfindung, sondern als Formalisierung der Prinzipien, die das Web von Anfang an skalierbar gemacht haben. Fielding war maßgeblich an der Spezifikation von HTTP/1.1 beteiligt und analysierte im Rückblick, welche Architekturentscheidungen den Erfolg des Webs erklären. Der Name betont den Kern: Übertragen wird nicht die Ressource selbst (die ist ein abstraktes Konzept auf dem Server), sondern eine Repräsentation ihres aktuellen Zustands — identifiziert über eine URI. REST ist damit primär ein Beschreibungsmodell für HTTP-Nutzung, kein eigenständiges Protokoll.
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Eine typische AI-Antwort auf diese Frage
 
 > „REST ist ein Architekturstil für APIs, bei dem man JSON über HTTP verschickt. Man benutzt GET zum Lesen, POST zum Erstellen, PUT zum Aktualisieren und DELETE zum Löschen. Die URLs sollten Ressourcen beschreiben, z.B. /users/42."
 
@@ -544,9 +1321,16 @@ HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zu
 
 Die AI-Antwort beschreibt die **Syntax** von REST, aber nicht die **Architektur**. Das ist der häufigste Fehler.
 
+Notes:
+Die Antwort beschreibt verbreitete Konventionen wie JSON (JavaScript Object Notation) und CRUD-Mapping, aber nicht die eigentlichen REST-Constraints. CRUD steht fuer Create, Read, Update, Delete. REST ist nicht auf JSON festgelegt und wird nicht allein dadurch erreicht, dass man GET, POST, PUT und DELETE verwendet.
+
 --
 
-## REST: Ein Architekturstil, kein Protokoll {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## REST: Ein Architekturstil, kein Protokoll
 
 | Constraint | Bedeutung | Konsequenz |
 |---|---|---|
@@ -561,9 +1345,16 @@ Die AI-Antwort beschreibt die **Syntax** von REST, aber nicht die **Architektur*
 
 REST nutzt die **vorhandene Web-Infrastruktur** (HTTP, URIs, Caching, Proxies) als Anwendungsplattform — statt ein eigenes RPC-Protokoll darüber zu bauen.
 
+Notes:
+Die zentralen REST-Constraints sind Client-Server, Statelessness, Cacheability, Uniform Interface und Layered System; Code on Demand ist optional. Diese Constraints sollen Skalierbarkeit, Entkopplung und Wiederverwendbarkeit von Infrastruktur verbessern.
+
 --
 
-## Welchen Constraint verletzt dieses Design? {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Welchen Constraint verletzt dieses Design?
 
 **Szenario 1:** Der Online-Shop speichert den Warenkorb in einer serverseitigen Session. Beim nächsten Request muss der Client denselben Server treffen (Sticky Sessions).
 
@@ -577,12 +1368,19 @@ REST nutzt die **vorhandene Web-Infrastruktur** (HTTP, URIs, Caching, Proxies) a
 | 2: Kein Cache-Control | **Cacheable** | CDN nutzlos, unnötige Serverlast, höhere Latenz |
 | 3: SQL-artige Queries | **Uniform Interface** + **Layered System** | Client an Interna gekoppelt, keine Abstraktion möglich |
 
+Notes:
+Sticky Sessions verletzen das Ideal der Statelessness, fehlende Cache-Deklaration verhindert Cacheability und ein direkter Bezug auf interne Datenstrukturen verletzt das Uniform Interface. REST bewertet APIs also nicht nur nach URI-Form, sondern nach ihrem Verhalten als verteiltes System.
+
 --
 
-## REST vs. RPC im Vergleich {.smaller}
 
 
-<div class="columns">
+<!-- .slide: class="smaller" -->
+
+## REST vs. RPC im Vergleich
+
+
+<div class="grid-2">
 
 
 <div class="column">
@@ -636,24 +1434,69 @@ POST   /password-resets → anstoßen
 
 CDN, WAF und Monitoring verstehen HTTP-Semantik: GET wird gecacht, POST als schreibend erkannt, DELETE in Audit-Logs hervorgehoben. RPC-Stil verliert all das — jeder POST sieht gleich aus.
 
+Notes:
+RPC modelliert Endpunkte oft als Funktionen oder Aktionen. REST modelliert fachliche Ressourcen und nutzt HTTP-Methoden fuer die Operationen auf ihnen. Dadurch kann Infrastruktur HTTP-Semantik besser auswerten, etwa fuer Caching, Logging, Security oder Monitoring.
+
 --
 
-## Ressourcen und Repräsentationen {.smaller}
 
-Eine **Ressource** ist ein fachliches Konzept. Was der Client empfängt, ist eine **Repräsentation**.
+
+<!-- .slide: class="smaller" -->
+
+## Ressourcen und Repräsentationen
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Eine **Ressource** ist ein fachliches Konzept. Was der Client empfaengt, ist eine **Repräsentation**.
 
 | Konzept | Bedeutung |
 |---|---|
 | **Ressource** | Das fachliche Ding (existiert im System) |
 | **URI** | Die Adresse der Ressource (identifiziert sie eindeutig) |
-| **Repräsentation** | Die konkrete Darstellung (JSON, HTML, CSV — je nach `Accept`-Header) |
+| **Repräsentation** | Die konkrete Darstellung (JSON, HTML, CSV - je nach `Accept`-Header) |
 | **Zustandsübergang** | Aktion auf der Ressource (GET liest, POST erzeugt, DELETE entfernt) |
 
-**Content Negotiation:** Client und Server einigen sich über `Accept` und `Content-Type` auf das Format — dieselbe Ressource, verschiedene Repräsentationen.
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Content Negotiation:** Client und Server einigen sich ueber `Accept` und `Content-Type` auf das Format.
+
+</div>
+
+
+
+<div class="c-note">
+
+Dieselbe Ressource kann also ueber dieselbe URI identifiziert werden, waehrend ihre konkrete Darstellung je nach Client unterschiedlich ausfaellt.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Eine Ressource ist das fachliche Objekt im System, etwa ein Produkt oder eine Bestellung. Eine Repräsentation ist die konkrete Darstellung dieser Ressource, zum Beispiel JSON (JavaScript Object Notation), HTML (Hypertext Markup Language) oder CSV (Comma-Separated Values). Die URI identifiziert die Ressource; `Content-Type` und `Accept` betreffen ihre Darstellung. Genau diese Trennung erklaert auch, warum dieselbe Ressource in verschiedenen Formaten geliefert oder durch verschiedene Clients unterschiedlich verarbeitet werden kann.
 
 --
 
-## Wann stößt REST an Grenzen? {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Wann stößt REST an Grenzen?
 
 | Situation | REST-Problem | Alternative |
 |---|---|---|
@@ -676,7 +1519,12 @@ REST ist kein JSON-over-HTTP. Es ist ein Architekturstil mit sechs Constraints, 
 </div>
 
 
+Notes:
+REST passt gut fuer viele Web-APIs, aber nicht fuer alle Probleme. GraphQL eignet sich fuer flexible zusammengesetzte Datenabfragen, WebSockets fuer Echtzeitkommunikation und gRPC (Google Remote Procedure Call) fuer effiziente typsichere Service-zu-Service-Kommunikation. REST bleibt trotzdem oft ein robuster Default fuer oeffentliche APIs.
+
 ---
+
+
 
 <!-- .slide: class="module-slide" -->
 
@@ -690,17 +1538,31 @@ REST ist kein JSON-over-HTTP. Es ist ein Architekturstil mit sechs Constraints, 
 </div>
 
 
+Notes:
+Gute URI-Designs machen Ressourcen, Zugehoerigkeit und Filter logisch sichtbar. Dabei sollte die URI fachliche Stabilitaet ausdrucken und nicht die interne Datenbank oder Implementierung spiegeln.
+
 --
 
-## Ressourcenorientiertes Design: Online-Shop {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Ressourcenorientiertes Design: Online-Shop
 
 Der erste Schritt beim API-Design ist die Identifikation der **Ressourcen** — die fachlichen Dinge, mit denen Clients interagieren:
 
 ![REST-Ressourcenhierarchie.](/courses/web-and-data-engineering/figures/resource-hierarchy.svg)
 
+Notes:
+Typische Ressourcen eines Online-Shops sind Produkte, Kategorien, Warenkoerbe, Bestellungen und Bewertungen. Zwischen Ressourcen koennen Hierarchien oder Beziehungen bestehen, die sich in Collections und Unterressourcen ausdruecken lassen.
+
 --
 
-## URI-Design-Regeln {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## URI-Design-Regeln
 
 | Regel | Gut | Schlecht | Warum |
 |---|---|---|---|
@@ -709,6 +1571,12 @@ Der erste Schritt beim API-Design ist die Identifikation der **Ressourcen** — 
 | **Keine Verben im Pfad** | `POST /orders` | `POST /createOrder` | Methode drückt Aktion aus |
 | **Hierarchie = Zugehörigkeit** | `/users/42/orders` | `/getUserOrders?userId=42` | Beziehung sichtbar |
 | **Query für Filter/Sortierung** | `/products?sort=price` | `/products/sortByPrice` | Pfad = Identität, Query = Parameter |
+
+
+<div class="grid-2">
+
+
+<div class="column">
 
 ### Anti-Patterns erkennen
 
@@ -719,6 +1587,13 @@ GET  /api/search?action=find →  ?
 POST /api/doPayment          →  ?
 ```
 
+</div>
+
+
+<div class="column">
+
+### Ressourcenorientierte Fassung
+
 ```text
 POST /api/getUser            →  GET    /users/{id}
 POST /api/deleteAccount      →  DELETE /accounts/{id}
@@ -726,9 +1601,22 @@ GET  /api/search?action=find →  GET    /products?q=...
 POST /api/doPayment          →  POST   /orders/{id}/payments
 ```
 
+</div>
+
+
+</div>
+
+
+Notes:
+URIs sollten konsistent, lesbar und fachlich begruendet sein. Collections stehen meist im Plural, Verben gehoeren nach Moeglichkeit in die HTTP-Methode statt in den Pfad, und Query-Parameter dienen fuer Filterung, Suche oder Sortierung statt fuer Identitaet.
+
 --
 
-## Übung: API-Design für eine Domäne {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Übung: API-Design für eine Domäne
 
 **Aufgabe:** Entwerfen Sie die REST-Ressourcen für ein **Universitäts-Kursverwaltungssystem**. Welche Ressourcen gibt es? Welche URIs? Welche Hierarchien?
 
@@ -748,9 +1636,22 @@ Hinweis: Denken Sie an Kurse, Vorlesungen, Studierende, Einschreibungen, Noten.
 
 **Diskussion:** Sollte die Note unter `/students/42/grades/web-eng` oder unter `/courses/web-eng/grades/42` liegen? Beide sind valide — die Wahl hängt davon ab, **wer der primäre Nutzer der API** ist.
 
+Notes:
+Beim Ressourcenentwurf werden fachliche Entitaeten, Beziehungen und typische Operationen identifiziert. Mehrere URI-Strukturen koennen valide sein, solange sie aus Sicht der API-Nutzung konsistent und verstaendlich sind.
+
 --
 
-## CRUD-Mapping auf HTTP {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## CRUD-Mapping auf HTTP
+
+
+<div class="grid-2">
+
+
+<div class="column">
 
 | Operation | HTTP | URI | Body | Response |
 |---|---|---|---|---|
@@ -761,16 +1662,70 @@ Hinweis: Denken Sie an Kurse, Vorlesungen, Studierende, Einschreibungen, Noten.
 | **Teilweise ändern** | `PATCH` | `/products/42` | Nur Änderungen | `200` / `204` |
 | **Löschen** | `DELETE` | `/products/42` | — | `204` |
 
+</div>
+
+
+<div class="column">
+
 ### Jenseits von CRUD
 
-Nicht alles passt in CRUD. Für **Aktionen** gibt es zwei Muster:
 
-- **Sub-Ressource:** `POST /orders/42/cancellations` — Stornierung als neue Ressource
-- **Controller-Ressource:** `POST /password-resets` — Aktion als eigene Ressource
+<div class="c-note">
+
+Nicht alles passt in CRUD. Fuer **Aktionen** gibt es zwei Muster:
+
+- **Sub-Ressource:** `POST /orders/42/cancellations`
+- **Controller-Ressource:** `POST /password-resets`
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+CRUD (Create, Read, Update, Delete) deckt den häufigsten Fall — datenzentrierte Ressourcen — gut ab, stößt aber bei aktionsorientierten Operationen an Grenzen. Eine Bestellung stornieren ist keine `DELETE`-Operation auf der Bestellung selbst (die Bestellung bleibt erhalten, ihr Status ändert sich). Zwei etablierte Muster für solche Fälle: **Sub-Ressource** (`POST /orders/42/cancellations` — die Stornierung ist eine eigenständige Ressource, die durch `POST` entsteht) und **Controller-Ressource** (`POST /password-resets` — eine Ressource, die eine Aktion kapselt). Beide Muster bleiben HTTP-konform und vermeiden RPC-artige Verb-URLs wie `/cancelOrder?id=42`.
 
 --
 
-## Pagination, Filter und Sortierung {.smaller}
+<!-- .slide: class="smaller" -->
+
+## Workflow: Create / Update / Delete korrekt abbilden
+
+![CRUD-Operationen mit typischen Statuscodes.](/courses/web-and-data-engineering/figures/crud-status-workflow.svg)
+
+| Operation | Gute Response | Warum? |
+|---|---|---|
+| Anlegen | `201 Created` + `Location` | Neue Ressource ist entstanden |
+| Aktualisieren | `200` oder `204` | Ressource existierte bereits |
+| Löschen | `204 No Content` | Erfolgreich, aber kein Body nötig |
+
+Notes:
+Dieser Workflow zeigt das typische Grundmuster fuer zustandsaendernde Ressourcenoperationen. Wichtig ist die Unterscheidung zwischen Erzeugen (`201 Created`) und Veraendern oder Loeschen (`200` oder `204`). Die `Location`-Header-Angabe ist besonders bei neu erstellten Ressourcen wertvoll. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/201 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/204
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Conditional PUT mit ETag und If-Match
+
+![Conditional PUT mit If-Match und 412 Precondition Failed.](/courses/web-and-data-engineering/figures/optimistic-concurrency.svg)
+
+**Ziel:** Das `PUT` wird nur ausgeführt, wenn die Ressource noch die erwartete Version hat.
+
+Notes:
+Das ist der typische Conditional-PUT-Workflow. Der Client sendet die neue Repräsentation nur unter der Bedingung, dass der aktuelle `ETag` noch zum zuletzt gelesenen Zustand passt. So wird verhindert, dass eine inzwischen veraltete Clientkopie neuere Änderungen überschreibt. `If-Match` formuliert diese Vorbedingung; bei Konflikt ist `412 Precondition Failed` passend. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/412
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Pagination, Filter und Sortierung
 
 ```text
 GET /products?page=2&per_page=20&sort=-price&category=electronics&q=kopfhörer
@@ -809,7 +1764,12 @@ Gute REST-APIs beginnen mit sauber geschnittenen Ressourcen. URI-Design ist eine
 </div>
 
 
+Notes:
+Collection-Ressourcen brauchen oft zusaetzliche Abfrageparameter. Pagination begrenzt die Menge der Daten, Sortierung ordnet sie, Filter schraenken sie fachlich ein. Response-Metadaten und Links helfen Clients, weitere Seiten oder Suchergebnisse systematisch zu navigieren.
+
 ---
+
+
 
 <!-- .slide: class="module-slide" -->
 
@@ -823,9 +1783,16 @@ Gute REST-APIs beginnen mit sauber geschnittenen Ressourcen. URI-Design ist eine
 </div>
 
 
+Notes:
+Eine gute API nutzt HTTP-Semantik vollstaendig aus. Methoden, Statuscodes und Header bilden zusammen den Vertrag zwischen Client und Server. Je klarer dieser Vertrag ist, desto weniger Sonderwissen braucht ein Client.
+
 --
 
-## Was ist an dieser API-Antwort falsch? {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Was ist an dieser API-Antwort falsch?
 
 Ein Client sendet eine Bestellung an den Online-Shop:
 
@@ -864,15 +1831,35 @@ Cache-Control: no-store
 {"id": 789, "status": "pending", "total": 159.98}
 ```
 
+Notes:
+Beim erfolgreichen Erzeugen einer Ressource ist `201 Created` der passende Statuscode. Ein `Location`-Header verweist auf die neue Ressource. Zusaetzlich sollte klar sein, ob eine solche Response gespeichert werden darf; fuer Bestellungen ist `no-store` oft sinnvoll.
+
 --
 
-## Der vollständige Request-Response-Zyklus {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Der vollständige Request-Response-Zyklus
 
 ![Anatomie eines HTTP Request und Response.](/courses/web-and-data-engineering/figures/http-request-anatomy.svg)
 
+Notes:
+Der Zyklus umfasst Startzeilen, Header und optionale Bodies auf beiden Seiten. Requests enthalten typischerweise Ziel, Semantik und Metadaten; Responses enthalten Ergebnis, Beschreibungsdaten und die eigentliche Repräsentation.
+
 --
 
-## Statuscodes richtig einsetzen {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Statuscodes richtig einsetzen
+
+
+<div class="grid-2">
+
+
+<div class="column">
 
 | Situation | Richtiger Code | Häufiger Fehler |
 |---|---|---|
@@ -885,13 +1872,36 @@ Cache-Control: no-store
 | Ressource nicht gefunden | `404 Not Found` | `200` mit Fehlermeldung im Body |
 | Konflikt (z.B. doppelter Username) | `409 Conflict` | `400` |
 
-### Faustregel
+</div>
 
+
+<div class="column">
+
+
+<div class="c-important">
+
+**Faustregel:**  
 Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum** und **was zu tun ist**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Die Semantik der 4xx-Codes ist präziser als oft angenommen: `401 Unauthorized` bedeutet, dass die Identität fehlt oder ungültig ist — der Client soll sich neu authentifizieren. `403 Forbidden` bedeutet, dass die Identität bekannt, aber die Berechtigung nicht vorhanden ist — erneutes Einloggen hilft nicht. `400 Bad Request` beschreibt syntaktisch oder strukturell ungültige Eingaben, `422 Unprocessable Entity` fachlich ungültige (aber korrekt formatierte) Eingaben, `409 Conflict` fachliche Konflikte (z.B. Duplikat). `204 No Content` signalisiert Erfolg ohne Rückgabe-Body — für `DELETE` und `PUT` gebräuchlich. Der Statuscode ist der maschinenlesbare Kern der Antwort: Caches, Load Balancer und Monitoring-Systeme reagieren auf Codes, nicht auf Body-Inhalte. Falsch gewählte Codes (z.B. `200` mit Fehlerbeschreibung im Body) machen die API für automatisierte Verarbeitung unbrauchbar.
 
 --
 
-## Fehlermodelle: Konsistenz ist alles {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Fehlermodelle: Konsistenz ist alles
 
 ```json
 {
@@ -916,9 +1926,34 @@ Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum*
 | **Spezifisch** | `details` pro Feld bei Validierungsfehlern |
 | **Kein Stacktrace** | Interne Details nie an den Client |
 
+Notes:
+Ein konsistentes Fehlerformat macht APIs leichter nutzbar. Maschinenlesbare Felder wie `type` oder `code` helfen bei automatischer Verarbeitung; menschenlesbare Nachrichten helfen beim Debugging. Interne Details wie Stacktraces gehoeren nicht in externe Fehlermeldungen.
+
 --
 
-## Authentifizierung: Wer darf was? {.smaller}
+<!-- .slide: class="smaller" -->
+
+## Workflow: Fehler sauber kommunizieren
+
+![Fehler-Workflow mit Statuscode und JSON-Fehlerkörper.](/courses/web-and-data-engineering/figures/error-workflow.svg)
+
+| Situation | Typischer Code |
+|---|---|
+| Ungültige Eingabe | `400 Bad Request` oder `422 Unprocessable Content` |
+| Nicht gefunden | `404 Not Found` |
+| Konflikt | `409 Conflict` |
+| Interner Fehler | `500 Internal Server Error` |
+
+Notes:
+Ein Fehler-Workflow besteht nicht nur aus einem Statuscode, sondern aus Statuscode plus konsistentem Fehler-Body. Der Code liefert die maschinenlesbare Klasse des Problems, der JSON-Body die Details. So koennen Clients sowohl automatisiert reagieren als auch sinnvolle Fehlermeldungen anzeigen. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/409
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Authentifizierung: Wer darf was?
 
 | Mechanismus | Funktionsweise | Typischer Einsatz |
 |---|---|---|
@@ -942,11 +1977,40 @@ eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.abc123signature
 
 **Diskussionsfrage:** JWT ist stateless — der Server muss keine Session speichern. Aber: Wie widerruft man einen JWT, bevor er abläuft?
 
+Notes:
+Authentifizierung beantwortet die Frage, wer ein Client ist; Autorisierung beantwortet, was dieser Client tun darf. API Keys, Session Cookies, Bearer Tokens und OAuth 2.0 adressieren unterschiedliche Einsatzszenarien und Sicherheitsanforderungen. OAuth steht fuer Open Authorization und beschreibt ein Verfahren fuer delegierte Zugriffsfreigaben.
+
 --
 
-## Rate Limiting und Idempotenz {.smaller}
+<!-- .slide: class="smaller" -->
 
-### Idempotenz: Warum doppelt senden nicht doppelt bestellen sollte
+## Workflow: Authentifizierung mit 401 und 403
+
+![Authentifizierungs-Workflow mit 401 und 403.](/courses/web-and-data-engineering/figures/auth-401-403.svg)
+
+| Status | Bedeutung |
+|---|---|
+| `401 Unauthorized` | Keine gueltigen Anmeldedaten vorhanden |
+| `403 Forbidden` | Identität bekannt, aber Zugriff nicht erlaubt |
+
+Notes:
+Der Unterschied zwischen `401` und `403` ist didaktisch zentral. `401 Unauthorized` fordert zunaechst gueltige Authentifizierung an und geht oft mit `WWW-Authenticate` einher. `403 Forbidden` bedeutet dagegen, dass die Identitaet akzeptiert wurde, aber fuer diese Operation keine Berechtigung besteht. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Rate Limiting und Idempotenz
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Idempotenz
 
 | Methode | Idempotent? | Warum |
 |---|---|---|
@@ -955,9 +2019,26 @@ eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.abc123signature
 | `DELETE` | ja | Zweites Löschen hat keinen Effekt |
 | `POST` | **nein** | Jeder Aufruf kann neue Ressource erzeugen |
 
-**Szenario:** Ein Nutzer klickt „Jetzt bestellen", die Verbindung bricht ab. Hat der Server die Bestellung erhalten? Der Client weiß es nicht und sendet erneut.
 
-**Lösung:** `Idempotency-Key`-Header — der Server erkennt den Retry anhand des Schlüssels und liefert das Ergebnis des ersten Requests zurück, statt eine zweite Bestellung anzulegen.
+<div class="c-note">
+
+**Szenario:** Ein Nutzer klickt "Jetzt bestellen", die Verbindung bricht ab. Der Client weiss nicht, ob der Server die Bestellung schon verarbeitet hat.
+
+</div>
+
+
+
+<div class="c-definition">
+
+**Loesung:** `Idempotency-Key` - der Server erkennt den Retry und liefert das Ergebnis des ersten Requests zurueck.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
 
 ### Rate Limiting
 
@@ -968,7 +2049,19 @@ X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 0
 ```
 
+
+<div class="c-important">
+
 APIs begrenzen Requests pro Zeitfenster. Die Header sagen dem Client **wann** er es erneut versuchen darf.
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 
 <div class="takeaway">
@@ -980,7 +2073,46 @@ HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizie
 </div>
 
 
+Notes:
+Rate Limiting begrenzt die Anzahl von Requests innerhalb eines Zeitfensters und schuetzt Systeme vor Ueberlastung oder Missbrauch. Idempotency Keys loesen ein anderes Problem: Sie verhindern doppelte fachliche Wirkung bei wiederholten nicht-idempotenten Requests. Beides wird oft verwechselt, gehoert aber auf unterschiedliche Ebenen: Rate Limiting schuetzt die Infrastruktur, Idempotenz schuetzt die fachliche Korrektheit bei Retries.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Rate Limit und Retry-After
+
+![Rate-Limit-Workflow mit 429 und Retry-After.](/courses/web-and-data-engineering/figures/rate-limit-workflow.svg)
+
+| Header / Code | Bedeutung |
+|---|---|
+| `429 Too Many Requests` | Limit fuer dieses Zeitfenster erreicht |
+| `Retry-After: 30` | Neuer Versuch erst nach 30 Sekunden |
+| `X-RateLimit-*` | Optionale Zusatzinfos zu Limit und Restbudget |
+
+Notes:
+Beim Rate-Limit-Workflow kommuniziert der Server nicht nur Ablehnung, sondern auch Wiederanlaufbedingungen. Gute Clients respektieren `Retry-After`, reduzieren ihre Frequenz und kombinieren dies oft mit Backoff-Strategien. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Asynchrone Verarbeitung mit 202 Accepted
+
+![Asynchroner Workflow mit 202 Accepted und Job-Ressource.](/courses/web-and-data-engineering/figures/async-202-workflow.svg)
+
+| Phase | Bedeutung |
+|---|---|
+| `202 Accepted` | Auftrag angenommen, aber noch nicht abgeschlossen |
+| Job-Ressource | Fortschritt oder Status abfragbar |
+| `303 See Other` | Ergebnis liegt nun unter eigener Ressource |
+
+Notes:
+Der asynchrone Workflow ist fuer laengere Prozesse wichtig, etwa Exporte, Videoverarbeitung oder Batch-Jobs. `202 Accepted` ist nicht gleich Erfolg des eigentlichen Jobs, sondern nur Annahme zur Verarbeitung. Eine Status-Ressource entkoppelt Start und spaeteres Ergebnis sauber. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/202 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303
+
 ---
+
+
 
 <!-- .slide: class="module-slide" -->
 
@@ -994,9 +2126,16 @@ HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizie
 </div>
 
 
+Notes:
+API-Qualitaet zeigt sich nicht nur im ersten Design, sondern auch in Wartbarkeit, Beobachtbarkeit und kontrollierter Weiterentwicklung. Additive Aenderungen sind meist kompatibler als entfernende oder umbenennende Aenderungen.
+
 --
 
-## Welche dieser Änderungen brechen Clients? {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Welche dieser Änderungen brechen Clients?
 
 Der Online-Shop plant ein API-Update. Bewerten Sie jede Änderung:
 
@@ -1022,9 +2161,16 @@ Der Online-Shop plant ein API-Update. Bewerten Sie jede Änderung:
 
 Neue Felder, Endpunkte, optionale Parameter → kompatibel. Entfernen, Umbenennen, Required machen → Breaking Change.
 
+Notes:
+Rueckwaertskompatibilitaet bedeutet, dass bestehende Clients weiter funktionieren. Neue optionale Felder oder Endpunkte sind oft unkritisch. Entfernte Felder, geaenderte Namen oder neue Pflichtangaben brechen dagegen haeufig vorhandene Integrationen.
+
 --
 
-## API-Lebenszyklus {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## API-Lebenszyklus
 
 | Phase | Herausforderung |
 |---|---|
@@ -1041,9 +2187,16 @@ Neue Felder, Endpunkte, optionale Parameter → kompatibel. Entfernen, Umbenenne
 
 **Diskussionsfrage:** Wenn der Server „liberal" ungültige Eingaben akzeptiert, entsteht ein impliziter Vertrag. Ist das wirklich eine gute Idee?
 
+Notes:
+Der Lebenszyklus einer API umfasst Entwurf, Implementierung, Test, Release, Betrieb und Weiterentwicklung. In jeder Phase ist der API-Vertrag zentral: Er muss technisch korrekt, dokumentiert, beobachtbar und langfristig handhabbar bleiben.
+
 --
 
-## Deprecation-Strategie {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Deprecation-Strategie
 
 Wenn Breaking Changes unvermeidbar sind, müssen sie **angekündigt** und **schrittweise** eingeführt werden:
 
@@ -1059,9 +2212,16 @@ Link: </docs/migration-v3>; rel="deprecation"
 | `Sunset` | Ab diesem Datum wird entfernt |
 | `Link` | Verweis auf Migrationsdokumentation |
 
+Notes:
+Wenn Breaking Changes unvermeidbar sind, sollten sie frueh erkennbar und planbar sein. Deprecation- und Sunset-Hinweise markieren veraltete Endpunkte und geben Clients Zeit fuer Migration, bevor ein Endpunkt entfernt wird.
+
 --
 
-## API-Dokumentation mit OpenAPI {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## API-Dokumentation mit OpenAPI
 
 ```yaml
 openapi: 3.0.3
@@ -1096,9 +2256,16 @@ paths:
 | **Contract Testing** | Schema als Grundlage für automatisierte Tests |
 | **Single Source of Truth** | Dokumentation und Implementierung synchron |
 
+Notes:
+OpenAPI beschreibt Endpunkte, Parameter, Request- und Response-Schemata maschinenlesbar. Daraus lassen sich interaktive Dokumentation, Client-Code, Validierung und Contract Tests ableiten.
+
 --
 
-## Observability: APIs im Betrieb {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Observability: APIs im Betrieb
 
 ### Die vier goldenen Signale
 
@@ -1115,9 +2282,16 @@ paths:
 | **Metriken** | Aggregiert: Requests/s, Latenz, Fehlerrate | Prometheus, Grafana |
 | **Tracing** | Ein Request über alle Services hinweg | Jaeger, OpenTelemetry |
 
+Notes:
+Observability umfasst Logging, Metriken und Tracing. Die vier goldenen Signale sind Latenz, Traffic, Errors und Saturation. Zusammen helfen sie, Engpaesse, Fehlerraten und Verhaltensaenderungen im Betrieb zu erkennen.
+
 --
 
-## Bewerten Sie diese API {.smaller}
+
+
+<!-- .slide: class="smaller" -->
+
+## Bewerten Sie diese API
 
 **Aufgabe:** Prüfen Sie die API des Online-Shops gegen diese Checkliste. Was fehlt?
 
@@ -1149,11 +2323,17 @@ API-Design endet nicht beim ersten Release. Die eigentliche Qualität zeigt sich
 </div>
 
 
+Notes:
+Die Checkliste macht typische API-Schwaechen sichtbar: unpassende Statuscodes, fehlende Cache-Regeln, inkonsistente Fehlerdarstellung und unklare Semantik. Gute APIs sind nicht nur funktional, sondern auch vorhersagbar und systematisch interpretierbar.
+
 ---
+
+
 
 ## Wrap-Up
 
 - **HTTP** ist das Interaktionsmodell des Webs: Methoden drücken Absichten aus, Statuscodes kommunizieren Ergebnisse, Header steuern Caching, Sessions und Sicherheit.
+- **HTTP-Repräsentationen** machen sichtbar, in welchem Format eine Ressource übertragen wird und wie Clients und Server dieses Format aushandeln.
 - **REST** nutzt diese HTTP-Mechanismen konsequent für APIs — Ressourcen statt Funktionsaufrufe, einheitliche Schnittstelle statt proprietärer Protokolle.
 - **Gutes API-Design** beginnt bei sauber geschnittenen Ressourcen, nutzt HTTP-Semantik vollständig und plant Evolution von Anfang an mit.
 - **Betrieb** erfordert Observability, Rate Limiting und konsistente Fehlermodelle.
@@ -1161,9 +2341,7 @@ API-Design endet nicht beim ersten Release. Die eigentliche Qualität zeigt sich
 Die nächste Vorlesung zeigt, wie diese APIs **serverseitig implementiert** werden — am Beispiel des Java-Web-Stacks.
 
 Notes:
-Im Wrap-Up die großen Bögen nochmal explizit nennen: HTTP als Protokoll (Methoden/Statuscodes/Header), REST als Architekturstil (sechs Constraints, nicht „JSON over HTTP"), Ressourcendesign und HTTP-Semantik als Werkzeug, Evolution und Observability als Betriebsthemen. Dann den Übergang zu L05 bauen: „Wie implementieren wir das serverseitig?" Java-Web-Stack, Servlets, JAX-RS, Spring Boot.
-
-Legacy-Quellen: `slides/04_01_WebEng_WebTechnologies-HTTP.pptx`, `slides/06_01_Rest-APIs.pptx`, `slides/06_02_Rest-API-Konzepte.pptx`, `slides/06_03_Rest-API-Design.pptx`.
+HTTP liefert die grundlegende Semantik fuer Kommunikation im Web: Methoden, Statuscodes, Header und Repräsentationen. REST nutzt genau diese Semantik fuer Ressourcen und ihre Darstellungen. Gute APIs kombinieren korrekt gewaehlte Methoden, Statuscodes, Header, konsistente Fehlermodelle und einen planbaren Evolutionspfad.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
