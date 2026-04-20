@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" font-family="'Segoe UI', Arial, sans-serif">
+
+  <text x="380" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#263238">
+    Laplacian Eigenmaps — From Graph to Geometry
+  </text>
+  <text x="380" y="44" text-anchor="middle" font-size="11" fill="#546e7a">
+    Eigenvectors of the Laplacian embed each node as a point in ℝᵈ
+  </text>
+
+  <!-- ============== PANEL 1: GRAPH ============== -->
+  <g transform="translate(20,70)">
+    <rect x="0" y="0" width="230" height="340" rx="10" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.4"/>
+    <text x="115" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b5e20">1. Graph G</text>
+    <text x="115" y="40" text-anchor="middle" font-size="10" fill="#2e7d32">two weakly connected clusters</text>
+
+    <!-- Cluster A (top-left) -->
+    <line x1="60"  y1="90"  x2="110" y2="110" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="60"  y1="90"  x2="90"  y2="140" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="110" y1="110" x2="90"  y2="140" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="110" y1="110" x2="140" y2="170" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="90"  y1="140" x2="140" y2="170" stroke="#a5d6a7" stroke-width="1.6"/>
+
+    <!-- Bridge edge -->
+    <line x1="140" y1="170" x2="110" y2="220" stroke="#ff7043" stroke-width="2.2" stroke-dasharray="4,2"/>
+
+    <!-- Cluster B (bottom-right) -->
+    <line x1="110" y1="220" x2="80"  y2="270" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="110" y1="220" x2="160" y2="260" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="80"  y1="270" x2="160" y2="260" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="80"  y1="270" x2="130" y2="310" stroke="#a5d6a7" stroke-width="1.6"/>
+    <line x1="160" y1="260" x2="130" y2="310" stroke="#a5d6a7" stroke-width="1.6"/>
+
+    <!-- Nodes colored by Fiedler sign -->
+    <circle cx="60"  cy="90"  r="9" fill="#1976d2"/>
+    <circle cx="110" cy="110" r="9" fill="#1976d2"/>
+    <circle cx="90"  cy="140" r="9" fill="#1976d2"/>
+    <circle cx="140" cy="170" r="9" fill="#1976d2"/>
+    <circle cx="110" cy="220" r="9" fill="#d32f2f"/>
+    <circle cx="80"  cy="270" r="9" fill="#d32f2f"/>
+    <circle cx="160" cy="260" r="9" fill="#d32f2f"/>
+    <circle cx="130" cy="310" r="9" fill="#d32f2f"/>
+
+    <text x="115" y="334" text-anchor="middle" font-size="10" fill="#1b5e20" font-style="italic">colour = sign of Fiedler vector</text>
+  </g>
+
+  <!-- ============== MIDDLE: LAPLACIAN ============== -->
+  <g transform="translate(275,130)">
+    <rect x="0" y="0" width="170" height="220" rx="10" fill="#fff8e1" stroke="#f57f17" stroke-width="1.4"/>
+    <text x="85" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#e65100">2. Laplacian L</text>
+    <text x="85" y="40" text-anchor="middle" font-size="10" fill="#f57f17">L = D − A</text>
+
+    <!-- Matrix sketch -->
+    <g font-family="'SFMono-Regular', Consolas, monospace" font-size="9" fill="#4e342e">
+      <text x="20" y="60">⎡ 2 −1  0  0 ⋯⎤</text>
+      <text x="20" y="75">⎢−1  3 −1 −1 ⋯⎥</text>
+      <text x="20" y="90">⎢ 0 −1  3 −1 ⋯⎥</text>
+      <text x="20" y="105">⎢ 0 −1 −1  2 ⋯⎥</text>
+      <text x="20" y="120">⎣ ⋮  ⋮  ⋮  ⋮ ⋱⎦</text>
+    </g>
+
+    <text x="85" y="150" text-anchor="middle" font-size="11" fill="#e65100" font-weight="bold">eigendecomposition</text>
+    <text x="85" y="166" text-anchor="middle" font-size="10" fill="#f57f17">L vₖ = λₖ vₖ</text>
+    <text x="85" y="186" text-anchor="middle" font-size="10" fill="#f57f17">0 = λ₁ ≤ λ₂ ≤ λ₃ ≤ …</text>
+    <text x="85" y="205" text-anchor="middle" font-size="9" fill="#6d4c41">take v₂, v₃ as coords</text>
+  </g>
+
+  <!-- Arrow from graph to matrix -->
+  <path d="M 250 240 L 275 240" stroke="#455a64" stroke-width="2" marker-end="url(#arr1)"/>
+  <!-- Arrow from matrix to scatter -->
+  <path d="M 445 240 L 490 240" stroke="#455a64" stroke-width="2" marker-end="url(#arr1)"/>
+  <defs>
+    <marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <!-- ============== PANEL 3: EMBEDDING SCATTER ============== -->
+  <g transform="translate(500,70)">
+    <rect x="0" y="0" width="240" height="340" rx="10" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1.4"/>
+    <text x="120" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#4a148c">3. Embedding ℝ²</text>
+    <text x="120" y="40" text-anchor="middle" font-size="10" fill="#6a1b9a">z_v = (v₂(v), v₃(v))</text>
+
+    <!-- Axes -->
+    <line x1="30"  y1="280" x2="220" y2="280" stroke="#4a148c" stroke-width="1"/>
+    <line x1="30"  y1="280" x2="30"  y2="60"  stroke="#4a148c" stroke-width="1"/>
+    <text x="220" y="298" font-size="10" fill="#4a148c">v₂</text>
+    <text x="12"  y="68"  font-size="10" fill="#4a148c">v₃</text>
+    <line x1="125" y1="280" x2="125" y2="276" stroke="#4a148c"/>
+    <text x="125" y="294" text-anchor="middle" font-size="9" fill="#6a1b9a">0</text>
+
+    <!-- Cluster A points (left side, blue) -->
+    <circle cx="60"  cy="120" r="6" fill="#1976d2"/>
+    <circle cx="75"  cy="140" r="6" fill="#1976d2"/>
+    <circle cx="55"  cy="165" r="6" fill="#1976d2"/>
+    <circle cx="80"  cy="105" r="6" fill="#1976d2"/>
+
+    <!-- Cluster B points (right side, red) -->
+    <circle cx="175" cy="215" r="6" fill="#d32f2f"/>
+    <circle cx="190" cy="240" r="6" fill="#d32f2f"/>
+    <circle cx="165" cy="250" r="6" fill="#d32f2f"/>
+    <circle cx="195" cy="195" r="6" fill="#d32f2f"/>
+
+    <!-- Dashed separation -->
+    <line x1="125" y1="70" x2="125" y2="275" stroke="#6a1b9a" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <text x="120" y="320" text-anchor="middle" font-size="10" fill="#4a148c" font-style="italic">k-means on z gives clusters</text>
+    <text x="120" y="334" text-anchor="middle" font-size="10" fill="#4a148c" font-style="italic">= spectral clustering</text>
+  </g>
+
+</svg>

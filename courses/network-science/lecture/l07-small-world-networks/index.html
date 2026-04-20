@@ -563,6 +563,106 @@ Give them 4 minutes. (1) $r = 2$ (matches the grid dimension $d = 2$). (2a) Shor
 
 **3.** Watts-Strogatz uses **uniform** rewiring ($r = 0$). This gives short paths but not *navigable* short paths. Milgram's participants actually found short paths using local information — that requires $r = d$, a much stronger structural condition. <!-- .element: class="fragment" -->
 
+--
+
+## Beyond the Grid — Where Else Does This Show Up?
+
+Kleinberg's grid is a toy model. But the *principle* — mix **short-range** links (for local refinement) with **long-range** links at every scale (for jumping) — generalises far beyond social networks.
+
+
+<div class="fragment">
+
+The grid gave us a **known, low-dimensional** metric. What happens when the "distance" is something we have to *learn* from data — high-dimensional embeddings of images, documents, or molecules?
+
+</div>
+
+
+
+<div class="fragment c-important">
+
+The same small-world recipe powers **modern vector search**: the index graphs used inside Pinecone, Weaviate, Milvus, FAISS, and every retrieval-augmented LLM pipeline are Kleinberg's grid in disguise.
+
+</div>
+
+
+Notes:
+Bridge slide. The students have just proved that greedy routing works at $r = d$. The same mathematical structure — hierarchy of scales, greedy descent — reappears in a completely different setting: approximate nearest-neighbour (ANN) search in high-dimensional vector spaces. This is a running theme of the course: a structural principle discovered in one domain turns out to be load-bearing in another.
+
+--
+
+<!-- .slide: class="figure-100" -->
+
+## From Kleinberg's Grid to HNSW
+
+![From Kleinberg's grid to HNSW vector search](/courses/network-science/figures/l07-hnsw-bridge.svg)
+
+
+<div class="c-info smaller">
+
+**Left:** Kleinberg's 2-D grid — known coordinates, greedy routing with $r = d = 2$, $O(\log^2 n)$ delivery. **Right:** Hierarchical Navigable Small World (HNSW) — learned vectors, multi-layer graph, greedy descent from sparse top layer to dense bottom layer, $O(\log n)$ query time.
+
+</div>
+
+
+Notes:
+HNSW (Malkov & Yashunin 2016/2018) is the single most widely deployed ANN algorithm today. Its architecture is literally Kleinberg's insight turned into an engineering artefact: the top layer contains a few nodes connected by long-range jumps, each lower layer adds shorter edges, and greedy search descends the hierarchy. The "navigability" proof in Kleinberg becomes an engineering guarantee in HNSW. The mapping is: coordinate grid → learned embedding space; $r = d$ exponent → explicit multi-scale layering; local/long-range split → layered edge structure.
+
+--
+
+## HNSW in Three Ideas
+
+
+<div class="c-definition">
+
+**1. Layers as scales.** Each node is assigned a maximum level $l \sim \text{Geom}(1/\ln M)$. Layer $k$ contains only nodes with level $\geq k$ — so higher layers are exponentially sparser.
+
+**2. Greedy per layer.** Search starts at the top-layer entry point, greedily moves to the neighbour closest to the query, then descends one layer and repeats — refining locally.
+
+**3. Long-range by construction.** Top-layer edges span the whole space (like Kleinberg's $r = d$ links); bottom-layer edges are local. The geometric distribution is *baked into the index*, not drawn from a random process.
+
+</div>
+
+
+
+<div class="fragment c-tip">
+
+**Complexity.** $O(\log n)$ query time in practice; billions of vectors routinely indexed in production.
+
+</div>
+
+
+Notes:
+The geometric level assignment is the key design choice: it gives the index the same multi-scale distribution of links that Kleinberg proved optimal, without requiring knowledge of the "dimension" of the embedding space. Teachers sometimes introduce HNSW as if it were a pure data-structures result; in fact it is a direct algorithmic descendant of Kleinberg 2000. The exponent $r = d$ and the level-assignment geometric distribution play the same role: guaranteeing that each "doubling" of distance has roughly equal link probability.
+
+--
+
+## Why This Matters for RAG and LLM Retrieval
+
+Every retrieval-augmented generation (RAG) pipeline has the same structure:
+
+1. **Embed** each document chunk into $\mathbb{R}^d$ (typically $d = 384$–$4096$).
+2. **Index** the vectors in an HNSW (or IVF, or DiskANN) graph.
+3. At query time, **greedy-search** from the entry point for the top-$k$ nearest neighbours.
+
+
+<div class="fragment">
+
+A 2026-era LLM stack searching 100M+ embeddings in &lt;10 ms is doing *Kleinberg-style decentralized search* — on a learned metric, in a graph someone built to guarantee the $r = d$ property.
+
+</div>
+
+
+
+<div class="fragment c-note">
+
+We will come back to **how** these embeddings are constructed in **Lecture 09** (node and document representations, spectral methods, DeepWalk, node2vec, GNNs). The *geometry* of the embedding space determines whether navigation works — which closes the loop to Kleinberg.
+
+</div>
+
+
+Notes:
+This is the most important forward-looking slide in the lecture. Students should leave understanding that the theoretical result from 2000 is load-bearing for the infrastructure they use daily. The "navigational gap" from L07 becomes a *design principle* for index structures. Forward-reference L09, which introduces the embedding side of the story — how the vectors that live in this index are produced in the first place. The complete picture (embedding + index) requires both lectures.
+
 ---
 
 <!-- .slide: class="module-slide" -->

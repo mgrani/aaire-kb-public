@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" font-family="'Segoe UI', Arial, sans-serif">
+
+  <text x="380" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#263238">
+    From Kleinberg's Grid to Modern Vector Search (HNSW)
+  </text>
+  <text x="380" y="44" text-anchor="middle" font-size="11" fill="#546e7a">
+    Same principle: long-range + short-range links enable greedy routing
+  </text>
+
+  <!-- ============== LEFT PANEL: KLEINBERG GRID ============== -->
+  <g transform="translate(20,70)">
+    <rect x="0" y="0" width="330" height="300" rx="10" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.4"/>
+    <text x="165" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d47a1">Kleinberg 2000 — Geometric Grid</text>
+    <text x="165" y="40" text-anchor="middle" font-size="10" fill="#1565c0">known 2-D coordinates · r = d = 2 · O(log² n)</text>
+
+    <!-- 5x5 grid -->
+    <g stroke="#90caf9" stroke-width="1">
+      <line x1="50" y1="70"  x2="290" y2="70"/>
+      <line x1="50" y1="115" x2="290" y2="115"/>
+      <line x1="50" y1="160" x2="290" y2="160"/>
+      <line x1="50" y1="205" x2="290" y2="205"/>
+      <line x1="50" y1="250" x2="290" y2="250"/>
+      <line x1="50"  y1="70" x2="50"  y2="250"/>
+      <line x1="110" y1="70" x2="110" y2="250"/>
+      <line x1="170" y1="70" x2="170" y2="250"/>
+      <line x1="230" y1="70" x2="230" y2="250"/>
+      <line x1="290" y1="70" x2="290" y2="250"/>
+    </g>
+
+    <!-- long-range links (scale-free) -->
+    <path d="M 110 205 Q 170 120 230 70"  fill="none" stroke="#1565c0" stroke-width="1.6" stroke-dasharray="3,3"/>
+    <path d="M 170 205 Q 230 160 290 115" fill="none" stroke="#1565c0" stroke-width="1.6" stroke-dasharray="3,3"/>
+    <path d="M  50 250 Q 170 160 290  70" fill="none" stroke="#1565c0" stroke-width="1.6" stroke-dasharray="3,3"/>
+
+    <!-- greedy search path (red) -->
+    <path d="M 50 250 L 50 250" stroke="none"/>
+    <circle cx="50"  cy="250" r="6"  fill="#d84315" stroke="#000" stroke-width="1"/>
+    <text x="50" y="272" text-anchor="middle" font-size="9" fill="#bf360c" font-weight="bold">start</text>
+
+    <path d="M 50 250 Q 170 160 290 70" fill="none" stroke="#d84315" stroke-width="2.2"/>
+    <circle cx="290" cy="70"  r="7" fill="#d84315" stroke="#000" stroke-width="1"/>
+    <text x="290" y="62" text-anchor="middle" font-size="9" fill="#bf360c" font-weight="bold">target</text>
+
+    <!-- nodes (small grid points) -->
+    <g fill="#1976d2">
+      <circle cx="50"  cy="70" r="3"/><circle cx="110" cy="70" r="3"/><circle cx="170" cy="70" r="3"/><circle cx="230" cy="70" r="3"/>
+      <circle cx="50"  cy="115" r="3"/><circle cx="110" cy="115" r="3"/><circle cx="170" cy="115" r="3"/><circle cx="230" cy="115" r="3"/><circle cx="290" cy="115" r="3"/>
+      <circle cx="50"  cy="160" r="3"/><circle cx="110" cy="160" r="3"/><circle cx="170" cy="160" r="3"/><circle cx="230" cy="160" r="3"/><circle cx="290" cy="160" r="3"/>
+      <circle cx="50"  cy="205" r="3"/><circle cx="110" cy="205" r="3"/><circle cx="170" cy="205" r="3"/><circle cx="230" cy="205" r="3"/><circle cx="290" cy="205" r="3"/>
+      <circle cx="110" cy="250" r="3"/><circle cx="170" cy="250" r="3"/><circle cx="230" cy="250" r="3"/><circle cx="290" cy="250" r="3"/>
+    </g>
+
+    <text x="165" y="290" text-anchor="middle" font-size="10" fill="#0d47a1" font-style="italic">
+      known metric · distance = |u − v| in the grid
+    </text>
+  </g>
+
+  <!-- ============== ARROW ============== -->
+  <g transform="translate(360,210)">
+    <path d="M 0 0 L 40 0" stroke="#455a64" stroke-width="2.2" marker-end="url(#arrow)"/>
+    <text x="20" y="-18" text-anchor="middle" font-size="10" fill="#455a64">generalise</text>
+    <text x="20" y="-4" text-anchor="middle" font-size="10" fill="#455a64">metric</text>
+    <text x="20" y="14" text-anchor="middle" font-size="10" fill="#455a64">→ high-dim</text>
+    <text x="20" y="28" text-anchor="middle" font-size="10" fill="#455a64">vectors</text>
+  </g>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <!-- ============== RIGHT PANEL: HNSW ============== -->
+  <g transform="translate(410,70)">
+    <rect x="0" y="0" width="330" height="300" rx="10" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.4"/>
+    <text x="165" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#bf360c">HNSW — Hierarchical Navigable Small World</text>
+    <text x="165" y="40" text-anchor="middle" font-size="10" fill="#ef6c00">learned vector space · layered graph · O(log n)</text>
+
+    <!-- Layer 2 (top, sparse) -->
+    <line x1="60" y1="80" x2="180" y2="80" stroke="#ffcc80" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <line x1="180" y1="80" x2="250" y2="80" stroke="#ffcc80" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <circle cx="60"  cy="80" r="5" fill="#bf360c"/>
+    <circle cx="180" cy="80" r="5" fill="#bf360c"/>
+    <circle cx="250" cy="80" r="5" fill="#bf360c"/>
+    <text x="20" y="85" font-size="9" fill="#bf360c" font-weight="bold">L2</text>
+
+    <!-- Layer 1 (middle) -->
+    <line x1="60"  y1="150" x2="120" y2="150" stroke="#ffb74d" stroke-width="1.2"/>
+    <line x1="120" y1="150" x2="180" y2="150" stroke="#ffb74d" stroke-width="1.2"/>
+    <line x1="180" y1="150" x2="250" y2="150" stroke="#ffb74d" stroke-width="1.2"/>
+    <line x1="60"  y1="150" x2="180" y2="150" stroke="#ffb74d" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="120" y1="150" x2="220" y2="150" stroke="#ffb74d" stroke-width="1" stroke-dasharray="3,2"/>
+    <circle cx="60"  cy="150" r="4" fill="#e65100"/>
+    <circle cx="120" cy="150" r="4" fill="#e65100"/>
+    <circle cx="180" cy="150" r="4" fill="#e65100"/>
+    <circle cx="220" cy="150" r="4" fill="#e65100"/>
+    <circle cx="250" cy="150" r="4" fill="#e65100"/>
+    <text x="20" y="155" font-size="9" fill="#bf360c" font-weight="bold">L1</text>
+
+    <!-- Layer 0 (bottom, dense - all nodes) -->
+    <g stroke="#ffb74d" stroke-width="0.8">
+      <line x1="50"  y1="230" x2="90"  y2="230"/>
+      <line x1="90"  y1="230" x2="130" y2="230"/>
+      <line x1="130" y1="230" x2="170" y2="230"/>
+      <line x1="170" y1="230" x2="210" y2="230"/>
+      <line x1="210" y1="230" x2="250" y2="230"/>
+      <line x1="250" y1="230" x2="290" y2="230"/>
+      <line x1="90"  y1="230" x2="170" y2="230"/>
+      <line x1="130" y1="230" x2="250" y2="230"/>
+    </g>
+    <g fill="#ff9800">
+      <circle cx="50"  cy="230" r="3"/><circle cx="90"  cy="230" r="3"/><circle cx="130" cy="230" r="3"/>
+      <circle cx="170" cy="230" r="3"/><circle cx="210" cy="230" r="3"/><circle cx="250" cy="230" r="3"/><circle cx="290" cy="230" r="3"/>
+    </g>
+    <text x="20" y="233" font-size="9" fill="#bf360c" font-weight="bold">L0</text>
+
+    <!-- Vertical links between layers -->
+    <line x1="60"  y1="85"  x2="60"  y2="147" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="180" y1="85"  x2="180" y2="147" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="250" y1="85"  x2="250" y2="147" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="60"  y1="153" x2="50"  y2="227" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="120" y1="153" x2="130" y2="227" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="180" y1="153" x2="170" y2="227" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="220" y1="153" x2="210" y2="227" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="250" y1="153" x2="250" y2="227" stroke="#90a4ae" stroke-width="0.8" stroke-dasharray="2,2"/>
+
+    <!-- Greedy search path (top to bottom) -->
+    <circle cx="60"  cy="80"  r="6" fill="none" stroke="#d32f2f" stroke-width="2"/>
+    <path d="M 60 80 L 180 80 L 180 150 L 220 150 L 210 230 L 250 230" fill="none" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,2"/>
+    <circle cx="250" cy="230" r="7" fill="#d32f2f" stroke="#000" stroke-width="1"/>
+
+    <text x="60"  y="72" text-anchor="middle" font-size="9" fill="#b71c1c" font-weight="bold">entry</text>
+    <text x="250" y="246" text-anchor="middle" font-size="9" fill="#b71c1c" font-weight="bold">target</text>
+
+    <text x="165" y="275" text-anchor="middle" font-size="10" fill="#bf360c" font-style="italic">
+      top layer = long-range jumps
+    </text>
+    <text x="165" y="290" text-anchor="middle" font-size="10" fill="#bf360c" font-style="italic">
+      bottom layer = local refinement
+    </text>
+  </g>
+
+</svg>

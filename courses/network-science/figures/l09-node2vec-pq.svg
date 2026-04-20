@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 440" font-family="'Segoe UI', Arial, sans-serif">
+
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#263238">
+    node2vec — Biased Random Walks with Return (p) and In-Out (q)
+  </text>
+  <text x="410" y="44" text-anchor="middle" font-size="11" fill="#546e7a">
+    tune the walk between BFS-like (structural) and DFS-like (community) exploration
+  </text>
+
+  <!-- ============== LEFT PANEL: TRANSITION PROBS ============== -->
+  <g transform="translate(20,70)">
+    <rect x="0" y="0" width="360" height="340" rx="10" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.4"/>
+    <text x="180" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b5e20">1. Second-order transition</text>
+    <text x="180" y="40" text-anchor="middle" font-size="10" fill="#2e7d32">biased by where we came from (t)</text>
+
+    <!-- Graph: t - v - x neighbors -->
+    <g stroke="#a5d6a7" stroke-width="1.6">
+      <line x1="90"  y1="180" x2="180" y2="180"/>
+      <line x1="180" y1="180" x2="270" y2="110"/>
+      <line x1="180" y1="180" x2="300" y2="180"/>
+      <line x1="180" y1="180" x2="270" y2="250"/>
+      <line x1="90"  y1="180" x2="270" y2="110"/>
+    </g>
+
+    <!-- Labels for edges with probabilities -->
+    <g font-size="11" font-weight="bold" font-family="'SFMono-Regular', Consolas, monospace">
+      <!-- back to t: 1/p -->
+      <text x="135" y="170" text-anchor="middle" fill="#d32f2f">1/p</text>
+      <!-- to x1 (distance 1 from t, shared): 1 -->
+      <text x="228" y="138" text-anchor="middle" fill="#1b5e20">1</text>
+      <!-- to x2 (distance 2 from t): 1/q -->
+      <text x="250" y="175" text-anchor="middle" fill="#1565c0">1/q</text>
+      <!-- to x3 (distance 2 from t): 1/q -->
+      <text x="228" y="230" text-anchor="middle" fill="#1565c0">1/q</text>
+    </g>
+
+    <!-- Nodes -->
+    <g>
+      <!-- t (previous) -->
+      <circle cx="90"  cy="180" r="16" fill="#fff" stroke="#d32f2f" stroke-width="2.5"/>
+      <text x="90"  y="185" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">t</text>
+      <text x="90"  y="215" text-anchor="middle" font-size="9" fill="#6d4c41" font-style="italic">previous</text>
+
+      <!-- v (current) -->
+      <circle cx="180" cy="180" r="18" fill="#1b5e20" stroke="#000" stroke-width="1"/>
+      <text x="180" y="185" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">v</text>
+      <text x="180" y="215" text-anchor="middle" font-size="9" fill="#1b5e20" font-weight="bold">current</text>
+
+      <!-- x1 (neighbor of t, dist 1) -->
+      <circle cx="270" cy="110" r="14" fill="#fff" stroke="#2e7d32" stroke-width="2"/>
+      <text x="270" y="114" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b5e20">x₁</text>
+      <text x="270" y="90"  text-anchor="middle" font-size="9" fill="#6d4c41">d(t,·)=1</text>
+
+      <!-- x2 (dist 2) -->
+      <circle cx="300" cy="180" r="14" fill="#fff" stroke="#2e7d32" stroke-width="2"/>
+      <text x="300" y="184" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b5e20">x₂</text>
+      <text x="334" y="184" text-anchor="start" font-size="9" fill="#6d4c41">d=2</text>
+
+      <!-- x3 (dist 2) -->
+      <circle cx="270" cy="250" r="14" fill="#fff" stroke="#2e7d32" stroke-width="2"/>
+      <text x="270" y="254" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b5e20">x₃</text>
+      <text x="270" y="278" text-anchor="middle" font-size="9" fill="#6d4c41">d=2</text>
+    </g>
+
+    <!-- Legend -->
+    <g transform="translate(20,290)">
+      <text x="0" y="0" font-size="10" font-weight="bold" fill="#1b5e20">α(t → v → ·) based on distance d(t,·):</text>
+      <text x="10" y="18" font-size="10" fill="#4e342e" font-family="'SFMono-Regular', Consolas, monospace">
+        d=0 (back to t): 1/p  ·  d=1: 1  ·  d=2: 1/q
+      </text>
+    </g>
+  </g>
+
+  <!-- ============== RIGHT PANEL: REGIMES ============== -->
+  <g transform="translate(400,70)">
+    <rect x="0" y="0" width="400" height="340" rx="10" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.4"/>
+    <text x="200" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#bf360c">2. Two regimes, two embeddings</text>
+    <text x="200" y="40" text-anchor="middle" font-size="10" fill="#ef6c00">p, q shape what "similar" means</text>
+
+    <!-- BFS-like (small q) -->
+    <g transform="translate(20,60)">
+      <rect x="0" y="0" width="170" height="240" rx="6" fill="#fff" stroke="#bf360c" stroke-width="1.2"/>
+      <text x="85" y="20" text-anchor="middle" font-size="11" font-weight="bold" fill="#bf360c">small q → BFS-like</text>
+      <text x="85" y="36" text-anchor="middle" font-size="9" fill="#ef6c00" font-style="italic">stay local, explore neighbours</text>
+
+      <!-- Tiny graph with tight cluster walk -->
+      <g stroke="#ffb74d" stroke-width="1.2">
+        <line x1="60"  y1="90" x2="100" y2="85"/>
+        <line x1="60"  y1="90" x2="80"  y2="120"/>
+        <line x1="100" y1="85" x2="130" y2="110"/>
+        <line x1="100" y1="85" x2="80"  y2="120"/>
+        <line x1="80"  y1="120" x2="130" y2="110"/>
+        <line x1="130" y1="110" x2="120" y2="150"/>
+        <line x1="80"  y1="120" x2="60"  y2="170"/>
+      </g>
+      <!-- walk highlighted -->
+      <path d="M 80 120 L 100 85 L 130 110 L 80 120 L 60 90" fill="none" stroke="#d32f2f" stroke-width="2"/>
+      <g fill="#ef6c00">
+        <circle cx="60"  cy="90"  r="5"/>
+        <circle cx="100" cy="85"  r="5"/>
+        <circle cx="130" cy="110" r="5"/>
+        <circle cx="80"  cy="120" r="5" stroke="#000" stroke-width="1"/>
+        <circle cx="120" cy="150" r="5"/>
+        <circle cx="60"  cy="170" r="5"/>
+      </g>
+
+      <text x="85" y="195" text-anchor="middle" font-size="10" font-weight="bold" fill="#bf360c">captures <tspan fill="#d32f2f">structural roles</tspan></text>
+      <text x="85" y="212" text-anchor="middle" font-size="9" fill="#4e342e">hubs, bridges → similar z</text>
+      <text x="85" y="228" text-anchor="middle" font-size="9" fill="#6d4c41" font-style="italic">"homophily by role"</text>
+    </g>
+
+    <!-- DFS-like (small p) -->
+    <g transform="translate(210,60)">
+      <rect x="0" y="0" width="170" height="240" rx="6" fill="#fff" stroke="#bf360c" stroke-width="1.2"/>
+      <text x="85" y="20" text-anchor="middle" font-size="11" font-weight="bold" fill="#bf360c">small p → DFS-like</text>
+      <text x="85" y="36" text-anchor="middle" font-size="9" fill="#ef6c00" font-style="italic">wander far, reveal communities</text>
+
+      <!-- Tiny graph with DFS-style walk -->
+      <g stroke="#ffb74d" stroke-width="1.2">
+        <line x1="40"  y1="90"  x2="75"  y2="100"/>
+        <line x1="75"  y1="100" x2="105" y2="130"/>
+        <line x1="105" y1="130" x2="140" y2="150"/>
+        <line x1="140" y1="150" x2="150" y2="185"/>
+        <line x1="75"  y1="100" x2="60"  y2="140"/>
+        <line x1="105" y1="130" x2="80"  y2="165"/>
+      </g>
+      <!-- walk highlighted (long path) -->
+      <path d="M 40 90 L 75 100 L 105 130 L 140 150 L 150 185" fill="none" stroke="#d32f2f" stroke-width="2"/>
+      <g fill="#ef6c00">
+        <circle cx="40"  cy="90"  r="5" stroke="#000" stroke-width="1"/>
+        <circle cx="75"  cy="100" r="5"/>
+        <circle cx="105" cy="130" r="5"/>
+        <circle cx="140" cy="150" r="5"/>
+        <circle cx="150" cy="185" r="5"/>
+        <circle cx="60"  cy="140" r="5"/>
+        <circle cx="80"  cy="165" r="5"/>
+      </g>
+
+      <text x="85" y="210" text-anchor="middle" font-size="10" font-weight="bold" fill="#bf360c">captures <tspan fill="#d32f2f">communities</tspan></text>
+      <text x="85" y="228" text-anchor="middle" font-size="9" fill="#4e342e">same cluster → similar z</text>
+    </g>
+
+    <text x="200" y="325" text-anchor="middle" font-size="10" fill="#bf360c" font-style="italic">
+      Grover &amp; Leskovec 2016 — one knob, two inductive biases
+    </text>
+  </g>
+
+</svg>

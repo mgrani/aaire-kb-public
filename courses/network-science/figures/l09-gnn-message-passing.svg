@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 460" font-family="'Segoe UI', Arial, sans-serif">
+
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#263238">
+    Graph Neural Networks — Message Passing
+  </text>
+  <text x="410" y="44" text-anchor="middle" font-size="11" fill="#546e7a">
+    h<tspan font-size="9" dy="-3">(l+1)</tspan><tspan dy="3">_v</tspan> = UPDATE( h<tspan font-size="9" dy="-3">(l)</tspan><tspan dy="3">_v</tspan>, AGG( { h<tspan font-size="9" dy="-3">(l)</tspan><tspan dy="3">_u</tspan> : u ∈ N(v) } ) )
+  </text>
+
+  <!-- ============== PANEL 1: NEIGHBOURHOOD ============== -->
+  <g transform="translate(20,70)">
+    <rect x="0" y="0" width="260" height="360" rx="10" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.4"/>
+    <text x="130" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d47a1">1. Neighbourhood of v</text>
+    <text x="130" y="40" text-anchor="middle" font-size="10" fill="#1565c0">each node has a feature vector h_v</text>
+
+    <!-- Edges from center to neighbors -->
+    <g stroke="#90caf9" stroke-width="1.6">
+      <line x1="130" y1="190" x2="60"  y2="120"/>
+      <line x1="130" y1="190" x2="200" y2="110"/>
+      <line x1="130" y1="190" x2="50"  y2="230"/>
+      <line x1="130" y1="190" x2="70"  y2="290"/>
+      <line x1="130" y1="190" x2="210" y2="270"/>
+    </g>
+
+    <!-- Arrows from neighbors to center (messages) -->
+    <g stroke="#d32f2f" stroke-width="1.8" fill="none" marker-end="url(#msgarrow)">
+      <path d="M 66 124 L 118 184"/>
+      <path d="M 194 114 L 142 184"/>
+      <path d="M 56 226 L 115 195"/>
+      <path d="M 76 286 L 122 200"/>
+      <path d="M 204 266 L 142 198"/>
+    </g>
+    <defs>
+      <marker id="msgarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#d32f2f"/>
+      </marker>
+    </defs>
+
+    <!-- Neighbor nodes -->
+    <g font-size="9" font-weight="bold">
+      <circle cx="60"  cy="120" r="14" fill="#1976d2" stroke="#fff" stroke-width="1.5"/>
+      <text x="60"  y="108" text-anchor="middle" font-size="8" fill="#0d47a1">h_a</text>
+      <text x="60"  y="124" text-anchor="middle" fill="#fff">a</text>
+
+      <circle cx="200" cy="110" r="14" fill="#1976d2" stroke="#fff" stroke-width="1.5"/>
+      <text x="200" y="98"  text-anchor="middle" font-size="8" fill="#0d47a1">h_b</text>
+      <text x="200" y="114" text-anchor="middle" fill="#fff">b</text>
+
+      <circle cx="50"  cy="230" r="14" fill="#1976d2" stroke="#fff" stroke-width="1.5"/>
+      <text x="24"  y="234" text-anchor="start" font-size="8" fill="#0d47a1">h_c</text>
+      <text x="50"  y="234" text-anchor="middle" fill="#fff">c</text>
+
+      <circle cx="70"  cy="290" r="14" fill="#1976d2" stroke="#fff" stroke-width="1.5"/>
+      <text x="70"  y="314" text-anchor="middle" font-size="8" fill="#0d47a1">h_d</text>
+      <text x="70"  y="294" text-anchor="middle" fill="#fff">d</text>
+
+      <circle cx="210" cy="270" r="14" fill="#1976d2" stroke="#fff" stroke-width="1.5"/>
+      <text x="210" y="294" text-anchor="middle" font-size="8" fill="#0d47a1">h_e</text>
+      <text x="210" y="274" text-anchor="middle" fill="#fff">e</text>
+
+      <!-- Center node v -->
+      <circle cx="130" cy="190" r="18" fill="#d32f2f" stroke="#000" stroke-width="1.5"/>
+      <text x="130" y="195" text-anchor="middle" font-size="13" fill="#fff">v</text>
+    </g>
+
+    <text x="130" y="335" text-anchor="middle" font-size="10" fill="#0d47a1" font-style="italic">messages travel along edges</text>
+    <text x="130" y="350" text-anchor="middle" font-size="9" fill="#1565c0">N(v) = { a, b, c, d, e }</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M 285 250 L 315 250" stroke="#455a64" stroke-width="2" marker-end="url(#arr2)"/>
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <!-- ============== PANEL 2: AGGREGATE + UPDATE ============== -->
+  <g transform="translate(320,70)">
+    <rect x="0" y="0" width="260" height="360" rx="10" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.4"/>
+    <text x="130" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#bf360c">2. Aggregate · Update</text>
+    <text x="130" y="40" text-anchor="middle" font-size="10" fill="#ef6c00">permutation-invariant pooling</text>
+
+    <!-- Incoming messages stacked -->
+    <g font-family="'SFMono-Regular', Consolas, monospace" font-size="9">
+      <rect x="25" y="70" width="80" height="18" fill="#ffe0b2" stroke="#ef6c00"/>
+      <text x="65" y="83" text-anchor="middle" fill="#4e342e">h_a</text>
+      <rect x="25" y="92" width="80" height="18" fill="#ffe0b2" stroke="#ef6c00"/>
+      <text x="65" y="105" text-anchor="middle" fill="#4e342e">h_b</text>
+      <rect x="25" y="114" width="80" height="18" fill="#ffe0b2" stroke="#ef6c00"/>
+      <text x="65" y="127" text-anchor="middle" fill="#4e342e">h_c</text>
+      <rect x="25" y="136" width="80" height="18" fill="#ffe0b2" stroke="#ef6c00"/>
+      <text x="65" y="149" text-anchor="middle" fill="#4e342e">h_d</text>
+      <rect x="25" y="158" width="80" height="18" fill="#ffe0b2" stroke="#ef6c00"/>
+      <text x="65" y="171" text-anchor="middle" fill="#4e342e">h_e</text>
+    </g>
+
+    <!-- AGG box -->
+    <rect x="125" y="100" width="60" height="45" rx="5" fill="#ff8a65" stroke="#bf360c" stroke-width="1.6"/>
+    <text x="155" y="120" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">AGG</text>
+    <text x="155" y="135" text-anchor="middle" font-size="8" fill="#fff">sum/mean/max</text>
+
+    <!-- arrows into AGG -->
+    <g stroke="#bf360c" stroke-width="1" fill="none" marker-end="url(#aggarr)">
+      <path d="M 108 79 L 125 110"/>
+      <path d="M 108 101 L 125 115"/>
+      <path d="M 108 123 L 125 123"/>
+      <path d="M 108 145 L 125 130"/>
+      <path d="M 108 167 L 125 138"/>
+    </g>
+    <defs>
+      <marker id="aggarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#bf360c"/>
+      </marker>
+    </defs>
+
+    <!-- Output m_v -->
+    <rect x="200" y="110" width="45" height="24" rx="4" fill="#fff" stroke="#bf360c" stroke-width="1.4"/>
+    <text x="222" y="126" text-anchor="middle" font-size="10" font-weight="bold" fill="#bf360c" font-family="'SFMono-Regular', Consolas, monospace">m_v</text>
+    <path d="M 185 122 L 198 122" stroke="#bf360c" stroke-width="1.6" marker-end="url(#aggarr)"/>
+
+    <!-- UPDATE row -->
+    <text x="130" y="205" text-anchor="middle" font-size="11" font-weight="bold" fill="#bf360c">then combine with own state</text>
+
+    <!-- h_v old + m_v -->
+    <rect x="30" y="225" width="55" height="30" rx="4" fill="#ffe0b2" stroke="#ef6c00"/>
+    <text x="57"  y="238" text-anchor="middle" font-size="9" fill="#4e342e" font-family="'SFMono-Regular', Consolas, monospace">h_v</text>
+    <text x="57"  y="250" text-anchor="middle" font-size="7" fill="#6d4c41">(l)</text>
+
+    <text x="95" y="245" text-anchor="middle" font-size="14" font-weight="bold" fill="#bf360c">+</text>
+
+    <rect x="105" y="225" width="55" height="30" rx="4" fill="#fff" stroke="#bf360c" stroke-width="1.4"/>
+    <text x="132" y="244" text-anchor="middle" font-size="10" font-weight="bold" fill="#bf360c" font-family="'SFMono-Regular', Consolas, monospace">m_v</text>
+
+    <rect x="175" y="222" width="65" height="38" rx="5" fill="#ff8a65" stroke="#bf360c" stroke-width="1.6"/>
+    <text x="207" y="239" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">UPDATE</text>
+    <text x="207" y="252" text-anchor="middle" font-size="8" fill="#fff">σ(W · [·,·])</text>
+
+    <path d="M 163 240 L 173 240" stroke="#bf360c" stroke-width="1.4" marker-end="url(#aggarr)"/>
+
+    <!-- Output h_v new -->
+    <rect x="80" y="285" width="100" height="30" rx="5" fill="#d32f2f" stroke="#000" stroke-width="1.2"/>
+    <text x="130" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff" font-family="'SFMono-Regular', Consolas, monospace">h_v</text>
+    <text x="130" y="311" text-anchor="middle" font-size="8" fill="#fff">(l+1)</text>
+    <path d="M 207 263 Q 207 285 170 298" fill="none" stroke="#bf360c" stroke-width="1.4" marker-end="url(#aggarr)"/>
+
+    <text x="130" y="340" text-anchor="middle" font-size="10" fill="#bf360c" font-style="italic">one GNN layer = one hop further</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M 585 250 L 615 250" stroke="#455a64" stroke-width="2" marker-end="url(#arr2)"/>
+
+  <!-- ============== PANEL 3: STACKING ============== -->
+  <g transform="translate(620,70)">
+    <rect x="0" y="0" width="180" height="360" rx="10" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1.4"/>
+    <text x="90" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#4a148c">3. Stack L layers</text>
+    <text x="90" y="40" text-anchor="middle" font-size="10" fill="#6a1b9a">receptive field = L hops</text>
+
+    <!-- Layer stack -->
+    <g>
+      <rect x="20" y="65" width="140" height="34" rx="6" fill="#e1bee7" stroke="#6a1b9a"/>
+      <text x="90" y="86" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a148c">Layer 1 · 1-hop</text>
+
+      <rect x="20" y="110" width="140" height="34" rx="6" fill="#ce93d8" stroke="#6a1b9a"/>
+      <text x="90" y="131" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a148c">Layer 2 · 2-hop</text>
+
+      <rect x="20" y="155" width="140" height="34" rx="6" fill="#ba68c8" stroke="#4a148c"/>
+      <text x="90" y="176" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Layer 3 · 3-hop</text>
+    </g>
+
+    <!-- Variants box -->
+    <rect x="15" y="210" width="150" height="85" rx="6" fill="#fff" stroke="#6a1b9a" stroke-dasharray="3,2"/>
+    <text x="90" y="228" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">Common variants</text>
+    <g font-size="9" fill="#4a148c">
+      <text x="25" y="246">• GCN — normalised sum</text>
+      <text x="25" y="260">• GraphSAGE — sampling</text>
+      <text x="25" y="274">• GAT — attention weights</text>
+      <text x="25" y="288">• GIN — sum + MLP</text>
+    </g>
+
+    <text x="90" y="320" text-anchor="middle" font-size="10" fill="#4a148c" font-style="italic">too many layers →</text>
+    <text x="90" y="334" text-anchor="middle" font-size="10" fill="#d32f2f" font-weight="bold">over-smoothing</text>
+    <text x="90" y="348" text-anchor="middle" font-size="9" fill="#6a1b9a">all nodes collapse to same z</text>
+  </g>
+
+</svg>
