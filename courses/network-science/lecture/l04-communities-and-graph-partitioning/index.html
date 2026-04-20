@@ -217,32 +217,123 @@ Centrality is not a single quantity but a family of operationalizations, each fo
 
 --
 
-## Four Theories of Importance — Formally
+## Degree and Closeness Centrality
 
 
-<div class="c-definition smaller">
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
 
 **Degree centrality**
 $$C_D(v) = \frac{\deg(v)}{n-1}$$
-Measures local exposure — how many direct contacts a node has.
+Measures **local exposure** — how many direct contacts a node has. Fast to compute; blind to network position.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**Example:** The most-followed account on a social platform ranks high on degree — but "famous" and "structurally central" are different things.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition">
 
 **Closeness centrality**
 $$C_C(v) = \frac{n-1}{\sum_{u \neq v} d(v, u)}$$
-Measures reach — high when average shortest-path distance to everyone else is small.
+Measures **reach** — high when average shortest-path distance to all other nodes is small. Captures how fast information spreads from this node.
 
-**Betweenness centrality**
-$$C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
-Measures control — fraction of shortest paths that pass through $v$, where $\sigma_{st}$ is the number of shortest $s$–$t$ paths and $\sigma_{st}(v)$ is the subset going through $v$.
+</div>
 
-**Eigenvector centrality**
-$$C_E(v) = \frac{1}{\lambda}\sum_{u} A_{vu}\, C_E(u)$$
-Recursive — a node is important if connected to other important nodes. $A$ is the adjacency matrix and $\lambda$ its leading eigenvalue. **PageRank** is the directed, damped variant used by Google.
+
+
+<div class="c-info smaller">
+
+**Example:** An emergency-dispatch hub close to all districts has high closeness — any location can be reached in minimum average time.
+
+</div>
+
+
+</div>
+
 
 </div>
 
 
 Notes:
-Each formula answers a different question. Degree asks "who has the most direct contacts?"; closeness asks "who can reach everyone fastest?"; betweenness asks "whose removal would cut the most communication paths?"; eigenvector asks "who is connected to the most influential others?". These can rank the same network completely differently — and that disagreement is itself structurally informative.
+Degree and closeness both measure "how well connected is this node" but in different senses. Degree is purely local: it counts immediate neighbors and ignores the rest of the network. Closeness requires knowing the entire graph (run BFS from every node) and measures how well a node is positioned to broadcast or collect information. A node can have high degree but low closeness if it sits in a dense peripheral cluster far from the rest of the graph.
+
+--
+
+## Betweenness and Eigenvector Centrality
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Betweenness centrality**
+$$C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
+Measures **control** — fraction of all shortest paths that pass through $v$. $\sigma_{st}$: number of shortest $s$–$t$ paths; $\sigma_{st}(v)$: those passing through $v$.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**Example:** A router at a continental internet exchange has high betweenness — all intercontinental traffic passes through it.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Eigenvector centrality**
+$$C_E(v) = \frac{1}{\lambda}\sum_{u} A_{vu}\, C_E(u)$$
+Measures **prestige** — recursive, a node is important if connected to other important nodes. $A$: adjacency matrix; $\lambda$: its leading eigenvalue.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**PageRank** (Google, 1998) is the directed, damped variant: prestige flows along directed citation/link edges, with a damping factor to handle dangling nodes.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Betweenness is the most computationally demanding of the four: computing it exactly requires running shortest-path BFS from every node, giving $O(|V| \cdot |E|)$ for unweighted graphs (Brandes, 2001). Eigenvector centrality is defined by a fixed-point equation — the centrality vector is the leading eigenvector of the adjacency matrix, computed by power iteration. Both answer different questions from degree and closeness: betweenness captures *control* over information flow (who can act as gatekeeper?), eigenvector captures *prestige* (whose opinion is amplified by the audience of their audience?).
 
 --
 
@@ -659,12 +750,162 @@ Louvain is currently the default community-detection algorithm in NetworkX, Geph
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Graph Partitioning — Cut-Based Methods
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Min-cut / Max-flow (Ford–Fulkerson)**
+Find the smallest set of edges whose removal disconnects two specified groups. Exact in polynomial time — but minimizes raw cut size, not normalized density.
+
+</div>
+
+
+
+<div class="c-definition">
+
+**Kernighan–Lin (1970)**
+Local search: initialize a balanced 2-partition at random; iteratively swap node pairs to decrease the cut size. Fast in practice; converges to a local optimum.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Spectral partitioning**
+Compute the Laplacian $L = D - A$ of the graph. The **Fiedler vector** (eigenvector of the second-smallest eigenvalue $\lambda_2$) encodes the natural 2-partition: nodes with positive entries go left, negative entries go right.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+$\lambda_2$ is the **algebraic connectivity**: $\lambda_2 = 0$ means the graph is already disconnected. Spectral methods generalize to $k$ communities by using the $k$ smallest eigenvectors — the basis of **spectral clustering**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Cut-based partitioning predates modularity and remains important in chip design, load balancing, and parallel computing — contexts where the exact number of parts is fixed and balance matters more than organic community structure. Min-cut gives the theoretically tight answer for two specific groups but is sensitive to hub nodes (a single high-degree hub connected to both sides will dominate the cut). Kernighan–Lin is the practical engineering heuristic for VLSI layout. Spectral partitioning bridges graph theory and linear algebra: the Fiedler vector carries the global geometry of the graph into a 1D projection that can be thresholded to produce a partition. The connection to graph Laplacians also connects directly to graph neural networks — the spectral view is the foundation of GCNs.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Embedding-Based Community Detection
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Node embeddings + clustering
+
+
+<div class="c-definition">
+
+**node2vec (Grover & Leskovec, 2016)**
+Random-walk–based embedding: simulate biased random walks on the graph, then train Word2Vec–style skip-gram to produce a low-dimensional vector per node. Communities emerge as clusters in embedding space.
+
+</div>
+
+
+**Pipeline:** node2vec → $k$-means / DBSCAN → community labels
+
+
+<div class="c-info smaller">
+
+Hyperparameter $p$ controls return probability (DFS-like, captures communities), $q$ controls exploration (BFS-like, captures roles). Setting $p \gg q$ favors dense cluster detection.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+### Graph Neural Networks
+
+
+<div class="c-definition">
+
+**GNN-based community detection**
+Train a GNN encoder (e.g. GCN, GraphSAGE) to produce embeddings that maximize an unsupervised objective — modularity, contrastive loss, or cluster assignment entropy. The decoder maps embeddings to community memberships.
+
+</div>
+
+
+| Approach | Key idea |
+|---|---|
+| **GRAPH-BERT** | Self-supervised pre-training on subgraphs |
+| **DMGI** | Contrastive multiplex embeddings |
+| **DMoN** | Differentiable modularity as loss |
+
+
+<div class="c-info smaller">
+
+GNNs naturally handle **overlapping communities** (soft cluster assignment) and **attributed graphs** (node features + topology jointly).
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Embedding-based community detection represents the current research frontier. node2vec is now a standard baseline — available in the PyTorch Geometric and NetworkX ecosystems — and runs efficiently on graphs with millions of nodes. The intuition is straightforward: if two nodes co-occur frequently in random walks, they are structurally similar and their embeddings will be nearby; k-means on those embeddings recovers communities. GNN-based methods are more powerful because they can use node and edge features alongside topology, handle soft (overlapping) community membership, and be trained end-to-end with application-specific objectives. The key limitation of all embedding approaches: the embedding dimension and clustering hyperparameters (k, distance threshold) must be chosen before running, adding new modeling decisions that modularity-based methods avoid.
+
+--
+
+## Algorithm Comparison
+
+| Method | Strategy | Complexity | Strength | Limitation |
+|---|---|---|---|---|
+| **Min-cut** | Cut minimization | $O(\|V\|\cdot\|E\|)$ | Exact for 2-partition | Ignores density, favors small cut |
+| **Kernighan–Lin** | Local swap | $O(\|V\|^2 \log\|V\|)$ | Fast for balanced partition | Local optimum, fixed $k$ |
+| **Spectral** | Laplacian eigenvectors | $O(\|V\|^3)$ full / faster approx | Global structure, principled | Slow exact; needs $k$ in advance |
+| **Girvan–Newman** | Edge betweenness | $O(\|V\|\cdot\|E\|^2)$ | Hierarchy, no $k$ needed | Too slow for large graphs |
+| **Louvain / Leiden** | Modularity greedy | $O(\|E\|)$ approx | Fast, scalable, no $k$ needed | Resolution limit, local opt |
+| **node2vec + clustering** | Random-walk embed | $O(\|E\|)$ walks + embed | Scales, uses node features | Needs $k$, walk hyperparams |
+| **GNN-based** | Neural + graph structure | Varies | Soft membership, features | Requires training data or objective design |
+
+Notes:
+This table is the key synthesis slide for the module. Students should be able to match each method to the right use case: Louvain/Leiden for exploratory analysis of large graphs with no prior on k; spectral clustering for medium-sized graphs where you want a principled 2–5 partition; node2vec for graphs with rich structure where embedding locality is meaningful; GNN-based when you have node features or need overlapping communities. The complexity column signals when each method becomes impractical — Girvan–Newman is pedagogically essential but computationally obsolete above ~10k nodes.
+
+--
+
 ## Takeaway
 
 
 <div class="takeaway">
 
-Divisive and agglomerative heuristics approximate the NP-hard modularity optimum in polynomial time. Girvan–Newman is the didactic divisive method; Louvain and Leiden are the scalable agglomerative methods used in practice.
+Divisive and agglomerative heuristics approximate the NP-hard modularity optimum in polynomial time. Girvan–Newman is the didactic divisive method; Louvain and Leiden are the scalable agglomerative methods used in practice. Graph partitioning (min-cut, spectral) targets fixed-$k$ balanced splits; embedding-based methods (node2vec, GNNs) detect communities from representation space and can handle overlapping memberships and node features.
 
 </div>
 

@@ -206,7 +206,7 @@ You **cannot** register the thesis until the exposé has been accepted. A Master
 - **Monday, 14:00–16:00** - presentation slots as defined in Stud.IP Abschlussarbeiten. You should be here to listen.
 - Requires **prior registration through the chair's secretariat** — drop-ins are not possible
 - Bring one concrete question or a short one-pager; unfocused check-ins get deferred
-- For the open OURRS / YOARS theme, align on scope in the Q&A **before** submitting the one-pager
+- For the open OUR²S / YOARS theme, align on scope in the Q&A **before** submitting the one-pager
 
 ### Contact
 
@@ -265,7 +265,7 @@ Each topic comes with a 1–2 week entry task. Completing it well is the conditi
 
 **Pitch:** A URL-only classifier that flags spam, ads, and security-risk URLs in microseconds — lightweight enough to run at web scale, data-driven enough to generalise beyond hand-written domain rules.
 
-**Connects to:** OURRS pipeline — fast URL-level filtering is a practical bottleneck before full document retrieval.
+**Connects to:** OUR²S pipeline — fast URL-level filtering is a practical bottleneck before full document retrieval.
 
 **Full brief:** [/research/thesis-topics/#url-risk-classifier](/research/thesis-topics/#url-risk-classifier)
 
@@ -284,9 +284,9 @@ Notes:
 
 **Scope:** Master's thesis or research prototype
 
-**Pitch:** Expose a small family of named ranking profiles (e.g. "freshness-first", "authority-first", "diversity-first") that clients select at query time. Discover them without explicit preference labels. Deployable as a real OURRS API feature.
+**Pitch:** Expose a small family of named ranking profiles (e.g. "freshness-first", "authority-first", "diversity-first") that clients select at query time. Discover them without explicit preference labels. Deployable as a real OUR²S API feature.
 
-**Connects to:** OURRS search API — directly extends the chair's infrastructure.
+**Connects to:** OUR²S search API — directly extends the chair's infrastructure.
 
 **Full brief:** [/research/thesis-topics/#ourrs-ranking-profiles](/research/thesis-topics/#ourrs-ranking-profiles)
 
@@ -294,7 +294,7 @@ Notes:
 
 
 Notes:
-**Entry task:** Using a provided OURRS query log sample, cluster queries by result-feature distributions and identify two or three clearly distinct ranking biases. Describe each in plain language.
+**Entry task:** Using a provided OUR²S query log sample, cluster queries by result-feature distributions and identify two or three clearly distinct ranking biases. Describe each in plain language.
 
 --
 
@@ -340,37 +340,16 @@ Notes:
 
 --
 
-## Topic 5: API Design for AI Agent Control
+## Topic 5: REST API Design and Control Primitives for AI Agent Systems
 
 
 <div class="c-note">
 
 **Scope:** Master's thesis
 
-**Pitch:** Study which API control primitives (permission scoping, interruption hooks, state-transition constraints, partial-result streaming) most reduce unsafe or unrecoverable agent actions. Thin command APIs vs. richer protocol-style interfaces.
+**Pitch:** Re-evaluate classic REST principles — HATEOAS, modularity, DRY, idempotency, least privilege, self-description — empirically for LLM agents that plan across calls. Extend with agent-control primitives (permission scoping, interruption hooks, state-transition constraints) that reduce unsafe or unrecoverable actions.
 
-**Connects to:** Broad agent-control angle — permissions, interruption, observability, state. Complements Topic 6 (REST-specific counterpart).
-
-**Full brief:** [/research/thesis-topics/#agent-control-apis](/research/thesis-topics/#agent-control-apis)
-
-</div>
-
-
-Notes:
-**Entry task:** For a simple two-step agentic task (search → summarise), implement one thin API and one structured API with an explicit state machine. Run an LLM agent on both and compare error rates and recovery behaviour.
-
---
-
-## Topic 6: REST API Design Principles for Agentic Systems
-
-
-<div class="c-note">
-
-**Scope:** Master's thesis
-
-**Pitch:** Classic REST principles — HATEOAS, modularity, DRY, idempotency, least privilege, self-description — were built for human clients. Re-evaluate them empirically for LLM agents that plan across calls and need to discover actions without hard-coded endpoints.
-
-**Connects to:** Complements Topic 5 — this is the REST-specific angle (HATEOAS, OpenAPI, idempotency) vs. the broader agent-control framing.
+**Connects to:** OUR²S API and agentic search — benchmark spans both REST design and control-primitive angles.
 
 **Full brief:** [/research/thesis-topics/#rest-api-design-for-agents](/research/thesis-topics/#rest-api-design-for-agents)
 
@@ -378,7 +357,28 @@ Notes:
 
 
 Notes:
-**Entry task:** Take a small existing REST API (e.g. a toy todo-list API). Add HATEOAS links to all responses. Run an LLM agent on two tasks: one it has seen before, one it has not. Compare completion rates with and without HATEOAS.
+**Entry task:** Take a small REST API and add HATEOAS links to all responses. Run an LLM agent on two tasks: one it has seen before, one it has not. Compare completion rates and error types with and without HATEOAS. As a second step, add an explicit state machine and compare agent recovery behaviour.
+
+--
+
+## Topic 6: Minimal LLM Agents for API-Specific Tasks
+
+
+<div class="c-note">
+
+**Scope:** Master's thesis
+
+**Pitch:** General-purpose LLMs are expensive and brittle for API-bounded agent tasks. Study whether small fine-tuned models can reliably adhere to a specific API — and how minimal they can be while staying reliable on structured, API-specific workflows.
+
+**Connects to:** Complements Topic 5 — same benchmark APIs, different angle: model optimisation vs. API design.
+
+**Full brief:** [/research/thesis-topics/#minimal-llm-agents-api](/research/thesis-topics/#minimal-llm-agents-api)
+
+</div>
+
+
+Notes:
+**Entry task:** Fine-tune a small instruction-tuned model (1–3B parameters) on a synthetic dataset of correct API calls for one simple REST API. Compare completion rate and hallucinated-endpoint rate against a larger base model without fine-tuning.
 
 ---
 
@@ -397,7 +397,7 @@ Open themes have no fixed specification. You define the research direction withi
 
 --
 
-## Open Theme: Web Search with OURRS / YOARS
+## Open Theme: Web Search with OUR²S / YOARS
 
 
 <div class="grid-2">
@@ -409,7 +409,7 @@ Open themes have no fixed specification. You define the research direction withi
 
 The Chair of Data Science runs its own open-web search infrastructure built on the [Open Web Index](https://openwebindex.eu/). Unlike commercial search engines, the system is fully transparent: retrieval behaviour, ranking, and result provenance can be inspected, compared, and modified.
 
-**OURRS** (Open Universal Retrieval and Ranking System) and **YOARS** (Yet Another Open Retrieval System) provide the infrastructure for experiments on real web-scale data.
+**OUR²S** (Open Web Index Retrieval Research System) and **YOARS** (Your Open Web Index Agentic Retrieval Search System) provide the infrastructure for experiments on real web-scale data.
 
 ### Why this is open
 
@@ -489,9 +489,9 @@ Align on scope with Prof. Granitzer in the Monday Q&A slot **before** writing th
 
 <div class="column">
 
-### Open theme (OURRS / YOARS)
+### Open theme (OUR²S / YOARS)
 
-1. Read the OURRS infrastructure docs at [ourrs.eu](https://ourrs.eu)
+1. Read the OUR²S infrastructure docs at [ourrs.eu](https://ourrs.eu)
 2. Develop a concrete research question 
 3. Submit the one-pager (you have one try)
 4. Selection is based on proposal quality and past performance at lectures at the chair.

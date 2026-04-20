@@ -434,10 +434,29 @@ Tie strength is most precisely modeled as an edge labeling, and Strong Triadic C
 
 ## Quick Check
 
-Consider four nodes $A, B, C, D$ with edges $A$–$B$, $A$–$C$, $A$–$D$, and $B$–$C$. No other edges exist.
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Consider four nodes $A, B, C, D$ with edges $A$–$B$, $A$–$C$, $A$–$D$, and $B$–$C$. No other edges exist (dashed = missing).
 
 1. Find a labeling of this graph that satisfies STC with the maximum number of strong edges.
 2. Is the optimal labeling unique?
+
+</div>
+
+
+<div class="column">
+
+![Graph with nodes A B C D for STC quick check](/courses/network-science/figures/l03-qc-stc.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
 (1) The interesting constraint is at node $A$. If all three of $A$'s ties were Strong, STC would require $B$–$C$, $B$–$D$, and $C$–$D$ — but $B$–$D$ and $C$–$D$ are missing. So at most two of $A$'s ties can be Strong, and they must be the pair whose endpoints are connected: $A$–$B$ and $A$–$C$ (since $B$–$C$ exists). The edge $B$–$C$ itself can be strong (no constraint violated). $A$–$D$ must be weak. Maximum is 3 strong edges. (2) Not unique: $A$–$D$ could be strong if *all* of $A$'s other ties were weak, giving only 1 strong edge — but that's not the maximum. The maximum labeling (3 strong edges: $A$–$B$, $A$–$C$, $B$–$C$; $A$–$D$ weak) is unique in this small graph.
@@ -505,7 +524,13 @@ The clustering coefficient is computable in $O(k^2)$ per node — polynomial and
 ## Neighborhood Overlap
 
 
-<div class="c-definition small">
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
 
 **Neighborhood overlap.** For an edge $(u, v)$:
 
@@ -513,12 +538,27 @@ $$
 O(u, v) = \frac{|N(u) \cap N(v)|}{|N(u) \cup N(v)|}
 $$
 
-where $N(u)$ and $N(v)$ exclude each other. $O = 0$ identifies a pure local bridge; $O = 1$ identifies an edge embedded inside a complete clique.
+where $N(u)$ and $N(v)$ exclude each other.
 
 </div>
 
 
+- $O = 0$ — pure local bridge: no shared neighbors
+- $O = 1$ — edge inside a complete clique
+- Jaccard similarity of the two neighbor sets
+
+</div>
+
+
+<div class="column">
+
 ![Neighborhood overlap as Jaccard similarity of neighbor sets](/courses/network-science/figures/neighborhood-overlap.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
 Neighborhood overlap is the edge-level analogue of the clustering coefficient: it measures how "inside" the edge lies. An edge with many shared neighbors sits deep in a dense region and is a reasonable candidate for a strong label; an edge with no shared neighbors is a local bridge and a reasonable candidate for weak. Like the clustering coefficient, it is computable in polynomial time, and like the clustering coefficient, it confounds structural and sociological strength. Both heuristics are approximations to the intractable exact labeling — but they are approximations we can actually compute at the scale of millions of nodes.
@@ -555,11 +595,30 @@ Clustering coefficient and neighborhood overlap exist because MaxSTC is intracta
 
 ## Quick Check
 
-Node $B$ has 4 neighbors: $A, C, D, E$. Among $B$'s neighbors, exactly 2 edges exist: $(A,C)$ and $(C,D)$.
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Node $B$ has 4 neighbors: $A, C, D, E$. Among $B$'s neighbors, exactly 2 edges exist (green): $(A,C)$ and $(C,D)$.
 
 1. Compute $C_B$.
 2. Under STC, what is the maximum number of strong ties $B$ can have?
 3. What does $C_B$ tell you about $B$'s structural role that STC alone does not?
+
+</div>
+
+
+<div class="column">
+
+![Graph with node B and four neighbours for clustering coefficient quick check](/courses/network-science/figures/l03-qc-clustering.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
 (1) $C_B = 2/6 = 1/3$. (2) For a pair of $B$'s neighbors to both receive strong labels from $B$, they must be connected. The pairs $(A,C)$ and $(C,D)$ are connected. So $B$ can make strong ties to $\{A, C\}$ or to $\{C, D\}$ — three strong ties would require all pairs among the selected triple to exist, which they don't. Max strong ties from $B$ = 2. (3) The clustering coefficient gives a continuous ranking — $B$ sits in a moderately sparse neighborhood — while STC only tells us a hard upper bound on the number of strong ties. The heuristic gives more nuance at the cost of exactness.
@@ -773,10 +832,29 @@ Under STC, local bridges must be weak ties. This is the theoretical prediction t
 
 ## Quick Check
 
-A network has three nodes: $A, B, C$. The edges $A$–$B$ and $A$–$C$ are both labeled Strong. There is no edge between $B$ and $C$.
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+$A$–$B$ and $A$–$C$ are both labeled **Strong**. There is no edge between $B$ and $C$ (dashed = missing).
 
 1. Does this labeling satisfy Strong Triadic Closure?
 2. Is $A$–$B$ a local bridge? Does the Weak-Tie Theorem apply here?
+
+</div>
+
+
+<div class="column">
+
+![Three-node graph with two strong ties and no B–C edge for weak-tie theorem quick check](/courses/network-science/figures/l03-qc-weak-tie.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
 (1) No — $A$ has two strong neighbors $B$ and $C$ but $(B,C) \notin E$. STC is violated. (2) In this graph, $A$ and $B$ have no shared neighbors (only $C$ is a neighbor of $A$, and $C$ is not a neighbor of $B$), so $A$–$B$ is a local bridge. The Weak-Tie Theorem's precondition (STC holds) fails, so the theorem makes no prediction about $A$–$B$'s label.
@@ -808,114 +886,13 @@ Everything in the previous modules was setup for this one. The weak-tie theorem 
 
 --
 
-<!-- .slide: class="figure-60" -->
+<!-- .slide: class="smaller" -->
 
-## Setup: Cell-Phone Networks
-
-
-<div class="grid-2-1">
+## Study 1: Cell-Phone Network (Onnela et al. 2007)
 
 
-<div class="column">
+<div class="slide-citation">Source: Onnela et al. 2007</div>
 
-![Local structure in cell phone network](/courses/network-science/figures/onella_structure_individual_A.png)
-<span class="figure-credit">Source: Onnela et al. 2007</span>
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-info smaller">
-
-**Onnela et al. (2007).** Nationwide cell-phone call logs modeled as an undirected weighted graph. Nodes are phone numbers; edge weight is the cumulative call duration between two numbers — a measurable proxy for tie strength.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The operationalization matters. Call duration is not tie strength in the sociological sense — it captures one dimension (sustained communication) while ignoring others (topic, reciprocity, face-to-face history). But this is exactly the modeling/measurement gap the lecture is about: the true strength is inaccessible, the proxy is computable, and the question is whether the proxy behaves as the theory predicts.
-
---
-
-## Evidence: Overlap vs. Tie Strength
-
-
-<div class="grid-2-1">
-
-
-<div class="column">
-
-![Tie strength versus overlap plot](/courses/network-science/figures/tie-vs-overlapp.png)
-<span class="figure-credit">Source: Onnela et al. 2007</span>
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-info smaller">
-
-X-axis: tie strength percentile (call duration). Y-axis: neighborhood overlap. Weak ties cluster near $O \approx 0$; strong ties accumulate at higher $O$. The systematic monotonic relationship is exactly what the weak-tie theorem predicts.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-This plot is the empirical heart of the lecture. Two independently computable proxies — one for tie strength (call duration) and one for structural embeddedness (overlap) — line up exactly the way the theorem says they should. The fact that the relationship is smooth and monotonic, not just a threshold effect, is evidence that the underlying mechanism scales gracefully from idealized triads to realistic graphs.
-
---
-
-## Evidence: Network Robustness
-
-
-<div class="grid-2-1">
-
-
-<div class="column">
-
-![Giant component shrinking experiment](/courses/network-science/figures/onella_shrinking.png)
-<span class="figure-credit">Source: Onnela et al. 2007</span>
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-info smaller">
-
-Removing edges in **increasing** tie-strength order (weakest first) fragments the giant component far faster than removing strongest ties first. Weak ties carry the structural connectivity of the whole network.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-This is the knockout test. If weak ties were sociologically marginal *and* structurally redundant, removing them would have little effect. The opposite happens. The weak ties are the connective tissue — exactly the role the theorem assigns them. Together with the overlap plot, this gives two independent empirical confirmations of the theoretical prediction.
-
---
-
-## Evidence: Social Media
 
 
 <div class="grid-2">
@@ -923,15 +900,255 @@ This is the knockout test. If weak ties were sociologically marginal *and* struc
 
 <div class="column">
 
-![Facebook maintained-relationship results](/courses/network-science/figures/facebook-results.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+| | |
+|---|---|
+| **Question** | Does tie strength correlate with structural embeddedness in a real large-scale network? |
+| **Data** | Nationwide mobile call logs — 18 months, ~7 M users, one operator |
+| **Graph** | Undirected weighted: nodes = phone numbers, edge weight = cumulative call duration |
+| **Measures** | Tie-strength proxy: call duration (percentile); structural proxy: neighborhood overlap $O(u,v)$; global: giant-component size |
+| **Prediction** | Weak-tie theorem: low-overlap edges are weak, high-overlap edges are strong — monotone relationship |
+
+
+<div class="c-caution smaller">
+
+**Limitations:** Call duration misses topic, reciprocity, and face-to-face contact. Single country and operator limits generalizability. No ground-truth labels to validate the proxy.
+
+</div>
+
+
 
 </div>
 
 
 <div class="column">
 
-![Posts versus followers on Twitter](/courses/network-science/figures/Huberman_twitter_posts_followers.png)
+![Local structure around a single node in the cell-phone network](/courses/network-science/figures/onella_structure_individual_A.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+
+<div class="c-info smaller">
+
+Local ego-network of one subscriber. Dense cluster of high-duration contacts; peripheral nodes are reached only by low-duration, low-overlap ties.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The operationalization matters. Call duration is not tie strength in the sociological sense — it captures one dimension (sustained communication) while ignoring others (topic, reciprocity, face-to-face history). But this is exactly the modeling/measurement gap the lecture is about: the true strength is inaccessible, the proxy is computable, and the question is whether the proxy behaves as the theory predicts. The figure shows that even at the single-node level, the pattern is visible: dense cluster of long-duration contacts, sparse periphery of short-duration contacts.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Study 1 — Result 1: Overlap vs. Tie Strength
+
+
+<div class="slide-citation">Source: Onnela et al. 2007</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+| | |
+|---|---|
+| **Question** | Do low-overlap edges tend to be weak and high-overlap edges strong? |
+| **Procedure** | Bin all edges by call-duration percentile; compute mean $O(u,v)$ per bin |
+| **X-axis** | Tie-strength percentile (weakest left → strongest right) |
+| **Y-axis** | Mean neighborhood overlap per bin |
+
+**Outcome:** Clear, smooth monotone relationship — weakest ties cluster near $O \approx 0$; strongest ties accumulate at high $O$.
+
+**Interpretation:** Two independently computable proxies align exactly as the weak-tie theorem predicts — not a threshold but a continuous gradient.
+
+
+<div class="c-caution smaller">
+
+**Limitations:** Both axes are proxies. Geographic proximity could independently inflate both call duration and overlap, confounding the tie-type interpretation.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+![Tie-strength percentile versus neighborhood overlap](/courses/network-science/figures/tie-vs-overlapp.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+</div>
+
+
+</div>
+
+
+Notes:
+This plot is the empirical heart of the lecture. The fact that the relationship is smooth and monotonic, not just a threshold effect, is evidence that the underlying mechanism scales gracefully from idealized triads to realistic graphs. Crucially, neither axis directly measures what the theory is about — call duration is not "tie strength" and overlap is not "local-bridgeness" — yet the proxies co-vary exactly as predicted. That robustness under proxy substitution is evidence for the generality of the model.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Study 1 — Result 2: Knockout Experiment
+
+
+<div class="slide-citation">Source: Onnela et al. 2007</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+| | |
+|---|---|
+| **Question** | Are weak ties structurally load-bearing or peripheral? |
+| **Procedure** | Remove edges in two orders: weakest-first (low call duration) vs. strongest-first |
+| **Measure** | Giant connected component size after each removal step |
+| **Condition A** | Weakest ties removed first |
+| **Condition B** | Strongest ties removed first (control) |
+
+**Outcome:** Weakest-first removal fragments the giant component far faster than strongest-first — weak ties are the network's connective tissue.
+
+**Interpretation:** Confirms the structural role the theorem assigns: local bridges (weak ties) hold the global network together.
+
+
+<div class="c-caution smaller">
+
+**Limitations:** Removal is a static simulation, not a real intervention. Giant-component size is coarse — betweenness or average path length might show finer differences. Removal order uses call duration as proxy, not true tie labels.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+![Giant component size as edges are removed weakest-first vs strongest-first](/courses/network-science/figures/onella_shrinking.png)
+<span class="figure-credit">Source: Onnela et al. 2007</span>
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the knockout test. If weak ties were sociologically marginal *and* structurally redundant, removing them would have little effect. The opposite happens. The weak ties are the connective tissue — exactly the role the theorem assigns them. Together with the overlap plot, this gives two independent empirical confirmations of the theoretical prediction: one correlational (overlap vs. strength), one causal-by-removal (structural impact of deleting weak ties).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Study 2: Facebook — Maintained vs. Total Friendships
+
+
+<div class="slide-citation">Source: Gon\ccalves et al. 2011</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+| | |
+|---|---|
+| **Question** | Do total online friends and actively maintained ties scale the same way? |
+| **Data** | Facebook friendship and interaction logs across users with varying friend counts |
+| **Measure A** | Total declared friends (any structural link) |
+| **Measure B** | Maintained friends (reciprocal messages / comments / wall posts) |
+
+**Outcome:** Total friends grow without bound. Maintained ties plateau around ~150 — consistent with Dunbar's cognitive limit on strong-tie capacity.
+
+**Interpretation:** Platforms remove the cost of weak ties but leave the cognitive budget for strong ties unchanged. The weak/strong distinction is amplified, not collapsed.
+
+
+<div class="c-caution smaller">
+
+**Limitations:** "Maintained" captures only on-platform interactions; offline contact is invisible. The plateau may partly reflect News Feed ranking rather than purely cognitive limits. Dunbar's ~150 number is itself debated.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+![Facebook: total friends vs. maintained reciprocal ties](/courses/network-science/figures/facebook-results.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+
+
+</div>
+
+
+Notes:
+The Facebook result is sometimes cited as evidence that social media "flattens" social structure — everyone is equally reachable. The maintained-vs-total distinction refutes that reading: the flat part of the curve is weak-tie accumulation, not strong-tie expansion. The plateau around 150 replicates a finding from offline social networks (Dunbar 1992) in a completely different medium and scale, suggesting the cognitive bound is robust across communication technology.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Study 3: Twitter — Followers vs. Interacting Friends
+
+
+<div class="slide-citation">Source: Huberman et al. 2009</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+| | |
+|---|---|
+| **Question** | Does follower count predict active interaction count on an asymmetric platform? |
+| **Data** | Twitter activity logs — Huberman et al. (2008) |
+| **Measure A** | Followers: any account that subscribed (passive, asymmetric) |
+| **Measure B** | Active friends: accounts the user sent ≥ 2 directed messages to |
+
+**Outcome:** Follower count scales freely (power-law). Active interacting friends plateau at a small number, independent of follower count.
+
+**Interpretation:** Same pattern as Study 2, different platform. Following is cheap; active communication is cognitively bounded. Weak ties scale with affordances; strong ties do not.
+
+
+<div class="c-caution smaller">
+
+**Limitations:** Twitter following is often parasocial — it does not map cleanly onto "weak tie." The ≥ 2-message threshold is arbitrary. Algorithmic timelines shape interaction independently of genuine tie strength.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+![Twitter: posts and active friends versus follower count](/courses/network-science/figures/Huberman_twitter_posts_followers.png)
 <span class="figure-credit">Source: Huberman et al. 2009</span>
 
 </div>
@@ -940,16 +1157,8 @@ This is the knockout test. If weak ties were sociologically marginal *and* struc
 </div>
 
 
-
-<div class="c-info smaller">
-
-**Facebook:** total friends grow unboundedly, but *maintained* reciprocal ties plateau around Dunbar's number (~150). **Twitter:** followers scale freely, mutual interacting friends do not. Online platforms remove the cost of weak ties but do not change the cognitive bound on strong ones — amplifying the weak/strong distinction rather than collapsing it.
-
-</div>
-
-
 Notes:
-Social media is sometimes claimed to "collapse" the distinction between weak and strong ties by making everyone reachable. The empirical evidence says the opposite: platforms remove the cost of maintaining weak ties, so the weak-tie periphery expands dramatically, while the strong-tie core remains bounded by the same cognitive limits as before. The structure is stretched, not flattened.
+Social media is sometimes claimed to "collapse" the distinction between weak and strong ties by making everyone reachable. The empirical evidence says the opposite: platforms remove the cost of maintaining weak ties, so the weak-tie periphery expands dramatically, while the strong-tie core remains bounded by the same cognitive limits as before. The structure is stretched, not flattened. Together with the Facebook result, this gives convergent evidence from two independent platforms with different interaction models (undirected friendship vs. directed following).
 
 --
 
@@ -982,10 +1191,29 @@ The theoretical model (typed edges, STC, weak-tie theorem) cannot be inferred ex
 
 ## Quick Check
 
-Two students, X and Y, both use the same online platform. X follows 2000 accounts; Y follows 80 accounts but everyone follows everyone else.
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+X follows 2000 accounts; most are unconnected to each other. Y follows 80 accounts; most follow each other back.
 
 1. Using neighborhood overlap as a proxy, whose connections look more "strong-tie-like"?
 2. What does the weak-tie theorem predict about the diversity of information each student receives?
+
+</div>
+
+
+<div class="column">
+
+![Two ego-networks: X sparse low-overlap vs Y dense high-overlap](/courses/network-science/figures/l03-qc-empirical.svg)
+
+</div>
+
+
+</div>
+
 
 Notes:
 (1) Y has higher average overlap — dense mutual cluster, many shared neighbors. X has low average overlap — algorithmic follows create structural bridges. (2) The theorem predicts X's low-overlap edges behave like weak ties and should carry more non-redundant information. Y's high-overlap clique delivers reinforced, redundant information. The prediction matches everyday observation about echo chambers.
@@ -1033,6 +1261,7 @@ The wrap-up deliberately restates the modeling/measurement loop rather than list
 
 - Burt, Ronald S. (1992). Structural Holes: The Social Structure of Competition. *Harvard University Press*.
 - Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Gon\ccalves, Bruno and Perra, Nicola and Flammini, Alessandro (2011). Modeling Users' Activity on Twitter Networks: Validation of Dunbar's Number. *PLOS ONE*.
 - Huberman, Bernardo A. and Romero, Daniel M. and Wu, Fang (2009). Social networks that matter: Twitter under the microscope. *First Monday*.
 - Onnela, J.-P. and Saram\"aki, J. and Hyv\"onen, J. and Szab\'o, G. and Lazer, D. and Kaski, K. and Kert\'esz, J. and Barab\'asi, A.-L. (2007). Structure and tie strengths in mobile communication networks. *Proceedings of the National Academy of Sciences*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
