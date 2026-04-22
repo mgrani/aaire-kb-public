@@ -17,49 +17,51 @@
 
   <!-- Title -->
   <text x="625" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a3358">DFS on ARPANET — starting from UCLA</text>
-  <text x="625" y="55" text-anchor="middle" font-size="14" fill="#546e7a">Notice the "cross-link" discovery between established branches.</text>
+  <text x="625" y="55" text-anchor="middle" font-size="14" fill="#546e7a">Discovery order assumes neighbors are processed in adjacency-list order.</text>
 
   <!-- ── Nodes & Traversal ── -->
   <!-- 
-    Path sequence:
+    Discovery order:
     0: UCLA
-    1: UCSB (backtrack after)
-    2: Stanford
-    3: SRI
+    1: SRI
+    2: UCSB
+    3: Stanford
     4: UTAH
-    5: SDC (backtrack after)
-    6: MIT
-    7: Lincoln
-    8: CASE
-    9: Carnegie
-    10: Harvard
-    11: BBN
-    12: RAND -> [Cross-link to UCSB] & [Back-edge to UCLA]
+    5: SDC
+    6: RAND
+    7: BBN
+    8: MIT
+    9: Lincoln
+    10: CASE
+    11: Carnegie
+    12: Harvard
   -->
 
   <!-- Background edges -->
   <line x1="80" y1="275" x2="245" y2="230" class="edge-bg"/> <!-- UCLA-SRI -->
-  <path d="M 445 174 Q 390 280 445 386" class="edge-bg" stroke-dasharray="4,2" fill="none"/> <!-- SDC-UTAH (topology fix) -->
-  <line x1="445" y1="280" x2="645" y2="195" class="edge-bg"/> <!-- BBN-MIT -->
+  <line x1="445" y1="280" x2="445" y2="150" class="edge-bg"/> <!-- SDC-UTAH -->
+  <line x1="445" y1="410" x2="645" y2="195" class="edge-bg"/> <!-- BBN-MIT -->
 
   <!-- Non-tree edges (Cross and Back) -->
-  <line x1="80" y1="275" x2="245" y2="430" class="edge-back"/> <!-- RAND-UCLA (Back-edge) -->
-  <line x1="245" y1="430" x2="245" y2="330" class="edge-cross"/> <!-- RAND-UCSB (Cross-link!) -->
-  <line x1="245" y1="230" x2="245" y2="330" class="edge-bg" stroke-dasharray="2,2"/> <!-- SRI-UCSB -->
+  <line x1="80" y1="275" x2="245" y2="330" class="edge-back"/> <!-- UCLA-UCSB -->
+  <line x1="80" y1="275" x2="245" y2="130" class="edge-back"/> <!-- UCLA-Stanford -->
+  <line x1="245" y1="130" x2="245" y2="230" class="edge-back"/> <!-- Stanford-SRI -->
+  <line x1="445" y1="410" x2="645" y2="360" class="edge-cross"/> <!-- BBN-Harvard -->
+  <line x1="645" y1="195" x2="845" y2="215" class="edge-cross"/> <!-- MIT-Lincoln -->
 
   <!-- DFS Tree Edges (Highlit) -->
-  <line x1="80" y1="275" x2="245" y2="330" class="edge-dfs"/> <!-- UCLA-UCSB (1) -->
-  <line x1="80" y1="275" x2="245" y2="130" class="edge-dfs"/> <!-- UCLA-Stanford (2) -->
-  <line x1="245" y1="130" x2="245" y2="230" class="edge-dfs"/> <!-- Stanford-SRI (3) -->
+  <line x1="80" y1="275" x2="245" y2="230" class="edge-dfs"/> <!-- UCLA-SRI (1) -->
+  <line x1="245" y1="230" x2="245" y2="330" class="edge-dfs"/> <!-- SRI-UCSB (2) -->
+  <line x1="245" y1="230" x2="245" y2="130" class="edge-dfs"/> <!-- SRI-Stanford (3) -->
   <line x1="245" y1="230" x2="445" y2="150" class="edge-dfs"/> <!-- SRI-UTAH (4) -->
-  <line x1="445" y1="150" x2="445" y2="410" class="edge-dfs"/> <!-- UTAH-SDC (5) -->
-  <line x1="445" y1="150" x2="645" y2="195" class="edge-dfs"/> <!-- UTAH-MIT (6) -->
-  <line x1="645" y1="195" x2="845" y2="215" class="edge-dfs"/> <!-- MIT-Lincoln (7) -->
-  <line x1="845" y1="215" x2="1060" y2="295" class="edge-dfs"/> <!-- Lincoln-CASE (8) -->
-  <line x1="1060" y1="295" x2="845" y2="380" class="edge-dfs"/> <!-- CASE-Carnegie (9) -->
-  <line x1="845" y1="380" x2="645" y2="360" class="edge-dfs"/> <!-- Carnegie-Harvard (10) -->
-  <line x1="645" y1="360" x2="445" y2="280" class="edge-dfs"/> <!-- Harvard-BBN (11) -->
-  <line x1="445" y1="280" x2="245" y2="430" class="edge-dfs"/> <!-- BBN-RAND (12) -->
+  <line x1="445" y1="150" x2="445" y2="280" class="edge-dfs"/> <!-- UTAH-SDC (5) -->
+  <line x1="445" y1="280" x2="245" y2="430" class="edge-dfs"/> <!-- SDC-RAND (6) -->
+  <line x1="245" y1="430" x2="445" y2="410" class="edge-dfs"/> <!-- RAND-BBN (7) -->
+  <line x1="445" y1="410" x2="645" y2="195" class="edge-dfs"/> <!-- BBN-MIT (8) -->
+  <line x1="645" y1="195" x2="845" y2="215" class="edge-dfs"/> <!-- MIT-Lincoln (9) -->
+  <line x1="845" y1="215" x2="1060" y2="295" class="edge-dfs"/> <!-- Lincoln-CASE (10) -->
+  <line x1="1060" y1="295" x2="845" y2="380" class="edge-dfs"/> <!-- CASE-Carnegie (11) -->
+  <line x1="845" y1="380" x2="645" y2="360" class="edge-dfs"/> <!-- Carnegie-Harvard (12) -->
 
   <!-- Nodes -->
   <!-- UCLA -->
@@ -68,23 +70,23 @@
   <rect x="95" y="245" width="20" height="14" rx="3" class="order-bubble"/>
   <text x="105" y="256" class="order-text">0</text>
 
+  <!-- SRI -->
+  <circle cx="245" cy="230" r="26" class="node-visited"/>
+  <text x="245" y="234" class="lbl-w">SRI</text>
+  <rect x="260" y="200" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="270" y="211" class="order-text">1</text>
+
   <!-- UCSB -->
   <circle cx="245" cy="330" r="26" class="node-visited"/>
   <text x="245" y="334" class="lbl-w">UCSB</text>
   <rect x="260" y="300" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="270" y="311" class="order-text">1</text>
+  <text x="270" y="311" class="order-text">2</text>
 
   <!-- Stanford -->
   <circle cx="245" cy="130" r="26" class="node-visited"/>
   <text x="245" y="134" class="lbl-w">Stanford</text>
   <rect x="260" y="100" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="270" y="111" class="order-text">2</text>
-
-  <!-- SRI -->
-  <circle cx="245" cy="230" r="26" class="node-visited"/>
-  <text x="245" y="234" class="lbl-w">SRI</text>
-  <rect x="260" y="200" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="270" y="211" class="order-text">3</text>
+  <text x="270" y="111" class="order-text">3</text>
 
   <!-- UTAH -->
   <circle cx="445" cy="150" r="24" class="node-visited"/>
@@ -93,52 +95,52 @@
   <text x="470" y="131" class="order-text">4</text>
 
   <!-- SDC -->
+  <circle cx="445" cy="280" r="24" class="node-visited"/>
+  <text x="445" y="284" class="lbl-w">SDC</text>
+  <rect x="460" y="250" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="470" y="261" class="order-text">5</text>
+
+  <!-- RAND -->
+  <circle cx="245" cy="430" r="26" class="node-visited"/>
+  <text x="245" y="434" class="lbl-w">RAND</text>
+  <rect x="260" y="400" width="20" height="14" rx="3" class="order-bubble"/>
+  <text x="270" y="411" class="order-text">6</text>
+
+  <!-- BBN -->
   <circle cx="445" cy="410" r="24" class="node-visited"/>
-  <text x="445" y="414" class="lbl-w">SDC</text>
+  <text x="445" y="414" class="lbl-w">BBN</text>
   <rect x="460" y="380" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="470" y="391" class="order-text">5</text>
+  <text x="470" y="391" class="order-text">7</text>
 
   <!-- MIT -->
   <circle cx="645" cy="195" r="22" class="node-visited"/>
   <text x="645" y="199" class="lbl-w">MIT</text>
   <rect x="660" y="165" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="670" y="176" class="order-text">6</text>
+  <text x="670" y="176" class="order-text">8</text>
 
   <!-- Lincoln -->
   <circle cx="845" cy="215" r="22" class="node-visited"/>
   <text x="845" y="219" class="lbl-w">Lincoln</text>
   <rect x="860" y="185" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="870" y="196" class="order-text">7</text>
+  <text x="870" y="196" class="order-text">9</text>
 
   <!-- CASE -->
   <circle cx="1060" cy="295" r="24" class="node-visited"/>
   <text x="1060" y="299" class="lbl-w">CASE</text>
   <rect x="1075" y="265" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="1085" y="276" class="order-text">8</text>
+  <text x="1085" y="276" class="order-text">10</text>
 
   <!-- Carnegie -->
   <circle cx="845" cy="380" r="22" class="node-visited"/>
   <text x="845" y="384" class="lbl-w">Carnegie</text>
   <rect x="860" y="350" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="870" y="361" class="order-text">9</text>
+  <text x="870" y="361" class="order-text">11</text>
 
   <!-- Harvard -->
-  <circle cx="645" cy="360" r="22" class="node-visited"/>
+  <circle cx="645" cy="360" r="22" class="node-active"/>
   <text x="645" y="364" class="lbl-w">Harvard</text>
   <rect x="660" y="330" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="670" y="341" class="order-text">10</text>
-
-  <!-- BBN -->
-  <circle cx="445" cy="280" r="24" class="node-visited"/>
-  <text x="445" y="284" class="lbl-w">BBN</text>
-  <rect x="460" y="250" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="470" y="261" class="order-text">11</text>
-
-  <!-- RAND -->
-  <circle cx="245" cy="430" r="26" class="node-active"/>
-  <text x="245" y="434" class="lbl-w">RAND</text>
-  <rect x="260" y="400" width="20" height="14" rx="3" class="order-bubble"/>
-  <text x="270" y="411" class="order-text">12</text>
+  <text x="670" y="341" class="order-text">12</text>
 
   <!-- Legend -->
   <g transform="translate(50, 480)">

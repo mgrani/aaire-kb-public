@@ -816,43 +816,6 @@ Jede dieser Komponenten erfüllt eine spezifische Rolle — die folgenden Slides
 
 <!-- .slide: class="smaller" -->
 
-## Schlüsselbegriffe: Schutz & Verteilung
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-| Begriff | Funktion |
-|---|---|
-| **DNS** | Übersetzt `shop.example.com` → IP-Adresse — erster Schritt jedes Requests |
-| **CDN** | Statische Inhalte (JS, CSS, Bilder) vom nächstgelegenen Edge-Server ausliefern → weniger Latenz |
-| **WAF** | Analysiert HTTP-Traffic, blockiert SQL Injection, XSS etc. — bevor sie die App erreichen |
-
-</div>
-
-
-<div class="column">
-
-| Begriff | Funktion |
-|---|---|
-| **Load Balancer** | Verteilt Requests auf mehrere Server-Instanzen → horizontale Skalierung + Ausfallsicherheit |
-| **Cache / Redis** | Zwischenspeicher im RAM — Produktliste aus Cache: µs, aus DB: ms |
-| **Message Queue** | Puffert Aufgaben asynchron; **Background Worker** arbeitet sie ab (E-Mail, PDF, etc.) |
-
-</div>
-
-
-</div>
-
-
-**Merkhilfe:** DNS + CDN + WAF stehen *vor* der Anwendung (Schutz & Beschleunigung). Load Balancer + Cache + Queue stehen *in* der Anwendungsinfrastruktur (Skalierung & Entkopplung).
-
---
-
-<!-- .slide: class="smaller" -->
-
 ## Edge-Komponenten: Vor der Anwendung
 
 Bevor ein Request die eigentliche Anwendung erreicht, durchläuft er mehrere Schutz- und Beschleunigungsschichten:
@@ -878,26 +841,13 @@ Ohne Edge-Schutz ist die Anwendung direkt dem Internet ausgesetzt. In der Praxis
 | **API Gateway** | Zentraler Einstiegspunkt für alle API-Anfragen; Routing, Authentifizierung, Rate Limiting | Kong, AWS API Gateway, Azure API Management |
 | **Reverse Proxy** | Leitet Client-Requests an Backend weiter; kann SSL, Kompression und Caching übernehmen | Nginx, Envoy, Traefik |
 
-### Schlüsselkonzept: Horizontale Skalierung
 
-Load Balancer ermöglichen **horizontale Skalierung** — statt einen Server größer zu machen (vertikal), werden mehrere gleichwertige Instanzen parallel betrieben. Fällt eine Instanz aus, übernehmen die anderen.
 
---
+<div class="c-note">
 
-<!-- .slide: class="smaller" -->
+**Schlüsselkonzept: Horizontale Skalierung:** Load Balancer ermöglichen **horizontale Skalierung** — statt einen Server größer zu machen (vertikal), werden mehrere gleichwertige Instanzen parallel betrieben. Fällt eine Instanz aus, übernehmen die anderen.
 
-## Web Tier: Präsentationsschicht
-
-Die Präsentationsschicht ist die Schnittstelle zum Nutzer. Je nach Architekturentscheidung liegt mehr oder weniger Logik im Browser:
-
-| Modell | Beschreibung | Typische Technologien |
-|---|---|---|
-| **Server-Side Rendering (SSR)** | HTML wird auf dem Server erzeugt und an den Browser gesendet | PHP, Java Servlets/JSP, Django, Rails, Next.js (SSR) |
-| **Single-Page Application (SPA)** | Browser lädt einmalig eine JS-Anwendung, die danach nur noch Daten per API abruft | React, Angular, Vue.js |
-| **Hybrid (SSR + Hydration)** | Server rendert initialen HTML, Browser übernimmt danach die Interaktion | Next.js, Nuxt.js, SvelteKit |
-| **Static Site + API** | Statische HTML-Seiten werden vorab generiert; dynamische Daten kommen per API | Gatsby, Hugo, Astro + REST/GraphQL |
-
-Moderne Frameworks wie `Next.js` und `SvelteKit` verwischen die Grenze zwischen SSR und SPA — sie rendern serverseitig für schnelle Ladezeiten und hydrieren im Browser für Interaktivität.
+</div>
 
 --
 
@@ -1047,12 +997,36 @@ In der Cloud-Praxis wird jeder Tier in einem eigenen Subnetz isoliert:
 
 Die Verteilung von Logik zwischen Client und Server bestimmt den Anwendungstyp:
 
+
+<div class="small">
+
 | Variante | Logik im Client | Logik am Server | Typischer Einsatz |
 |---|---|---|---|
 | **Thin Client** | minimal (nur Rendering) | UI-Erzeugung + Logik + Daten | Formularsysteme, Behörden-Apps |
 | **Rich Client / SPA** | UI, Routing, Zustand | API + Logik + Daten | Interaktive Plattformen, Dashboards |
 | **Mobile Client** | UI, Offline-Fähigkeit, lokaler Speicher | API + Logik + Daten + Sync | Apps mit instabiler Konnektivität |
 | **API-only (Headless)** | beliebig (verschiedene Clients) | nur API + Logik + Daten | Multi-Client-Plattformen |
+
+</div>
+
+
+Verschiedene Technologien je nach dem Grad der Logik im Client:
+
+
+<div class="small">
+
+| Modell | Beschreibung | Typische Technologien |
+|---|---|---|
+| **Server-Side Rendering (SSR)** | HTML wird auf dem Server erzeugt und an den Browser gesendet | PHP, Java Servlets/JSP, Django, Rails, Next.js (SSR) |
+| **Single-Page Application (SPA)** | Browser lädt einmalig eine JS-Anwendung, die danach nur noch Daten per API abruft | React, Angular, Vue.js |
+| **Hybrid (SSR + Hydration)** | Server rendert initialen HTML, Browser übernimmt danach die Interaktion | Next.js, Nuxt.js, SvelteKit |
+| **Static Site + API** | Statische HTML-Seiten werden vorab generiert; dynamische Daten kommen per API | Gatsby, Hugo, Astro + REST/GraphQL |
+
+</div>
+
+
+Moderne Frameworks wie `Next.js` und `SvelteKit` verwischen die Grenze zwischen SSR und SPA — sie rendern serverseitig für schnelle Ladezeiten und hydrieren im Browser für Interaktivität.
+
 
 --
 
