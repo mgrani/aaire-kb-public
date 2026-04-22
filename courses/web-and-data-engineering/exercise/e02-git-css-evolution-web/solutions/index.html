@@ -38,13 +38,96 @@ Für den Zugang auf das FIM Gitlab benötigen Sie einen FIM Account (siehe Blatt
 
 Für die kommende Projektarbeit sollen Sie sich mit dem Versionsverwaltungs-Tool **Git** vertraut machen. Um ein Verständnis für die wichtigsten Befehle zu erhalten, arbeiten Sie das verlinkte [Tutorial](https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud) durch.
 
-Wenn Sie sich keinen Bitbucket-Account anlegen wollen, können Sie auch direkt mit Ihrem FIMGit arbeiten. Erstellen Sie dazu das notwendige Repository in Ihrem FIMGit (unter *Projects*).
+Wenn Sie sich keinen Bitbucket-Account anlegen wollen, können Sie auch direkt mit Ihrem FIMGit anstelle von BitBucket arbeiten. Erstellen Sie dazu das notwendige Repository in Ihrem FIMGit (unter *Projects*). Die folgenden Schritte lassen sich nun analog mit dem in FIMGit angelegten Repository anstelle eines Repositories auf BitBucket durchführen.
 
-**Voraussetzung:**
-Falls Sie auf Ihrem System noch kein **Git** installiert haben, finden Sie unter <https://git-scm.com/> den entsprechenden Download sowie Installationsanleitungen für Ihr System.
+**Voraussetzung**:
+Falls Sie auf Ihrem System noch kein **Git** installiert haben, finden Sie unter <https://git-scm.com/> den entsprechenden Download.
 
-**Weitere interaktive Übungsmöglichkeit:**
-Bei weiterem Übungsbedarf können Sie zusätzlich das verlinkte [interaktive Tutorial](https://learngitbranching.js.org/?locale=de_DE) absolvieren.
+**Weitere interaktive Übungsmöglichkeit**:
+Bei weiterem Übungsbedarf können Sie das [interaktive Tutorial](https://learngitbranching.js.org/?locale=de_DE) absolvieren.
+
+
+--
+
+## Übung 2.2: Einführung Git — Lösung (1/5)
+
+**Repository erstellen & klonen**
+
+- **Erstellen**: Anlegen des neuen Repositories über *Projects > New Project > Create blank project* im FimGit.
+- **Klonen**: Navigieren Sie im Gitlab zu *Clone with HTTPS* und kopieren die URL.
+  ```bash
+  git clone <kopierte URL>
+  ```
+- **Prüfen**: In Ihrem lokalen Order befindet sich nun der vom Server geklonte Repository-Ordner.
+
+--
+
+## Übung 2.2: Einführung Git — Lösung (2/5)
+
+**Daten ändern & einfügen**
+
+- **Hinzufügen**: Legen Sie eine Datei `locations.txt` an.
+- **Prüfen**: Zeigt ungespeicherte / neue Änderungen:
+  ```bash
+  git status
+  ```
+- **Staging**: Fügt Datei zum nächsten Speicherpunkt (Commit) hinzu:
+  ```bash
+  git add locations.txt
+  ```
+
+--
+
+## Übung 2.2: Einführung Git — Lösung (3/5)
+
+**Committen & Synchronisieren**
+
+- **Commit**: Speichert den Arbeitsstand mit einer Nachricht (`-m`):
+  ```bash
+  git commit -m "Erster Commit von locations.txt"
+  ```
+- **Push**: Überträgt Ihre lokalen Commits zum FimGit-Server:
+  ```bash
+  git push origin main
+  ```
+- **Pull**: Neue Änderungen von anderen (oder über die Gitlab UI) ins lokale Repository laden:
+  ```bash
+  git pull
+  ```
+
+--
+
+## Übung 2.2: Einführung Git — Lösung (4/5)
+
+**Branches in Git**
+
+Ein **Branch** ist ein paralleler Entwicklungszweig zur isolierten Entwicklung von Features, ohne den Hauptzweig (`main`) zu stören.
+
+- **Branch anlegen** (`git branch`): Erzeugt einen neuen Branch.
+  ```bash
+  git branch future_plans
+  ```
+  <img src="/courses/web-and-data-engineering/figures/ex02_branch.png" alt="Branch anlegen" style="height:250px; margin-top: 15px;" />
+
+--
+
+## Übung 2.2: Einführung Git — Lösung (5/5)
+
+**Auf Branches arbeiten & mergen**
+
+- **Auschecken**: Auf den Branch wechseln. *(Modern: `git switch`)*
+  ```bash
+  git checkout future_plans
+  ```
+  <img src="/courses/web-and-data-engineering/figures/ex02_checkout.png" alt="Branch auschecken" style="height:120px; margin: 15px 0;" />
+- **Mergen**: Führt Änderungen in den Hauptzweig zurück.
+  Zuerst auschecken (`git checkout main`), dann mergen:
+  ```bash
+  git merge future_plans
+  ```
+- Danach den alten Branch oft löschen (`git branch -d future_plans`) und pushen.
+
+
 
 --
 
@@ -93,21 +176,21 @@ Angenommen Sie arbeiten an einem Feature `user-login` in einem Projekt.
 1. Erstellung des Branches:
    ```bash
    git checkout -b feature/user-login
-   # oder modern:
-   git switch -c feature/user-login
    ```
 
-2. - **`git merge`**: Kombiniert Änderungen aus dem Quell-Branch in den Ziel-Branch. Git erstellt dabei einen speziellen Merge-Commit, der zwei Eltern-Historien miteinander verknüpft.
-   - **`git rebase`**: Nimmt die Commits des Feature-Branches und setzt sie "oben auf" auf die aktuelle Spitze des Ziel-Branches. Es ist so, als hätten die Arbeit gerade erst auf Basis der neuesten Änderungen begonnen.
+2. - **`git merge`**: Kombination aus dem Quell-Branch in den Ziel-Branch. Git erstellt einen speziellen Merge-Commit, der zwei Eltern-Historien miteinander verknüpft.
+   - **`git rebase`**: Nimmt die Commits des Feature-Branches und setzt sie "oben auf" die aktuelle Spitze des Ziel-Branches. Dabei wird die **Historie des Feature-Branches verändert**, da dessen Commits neu geschrieben werden, um eine lineare Abfolge ohne Merge-Commit zu erzeugen. Es ist so, als hätte die Arbeit gerade erst auf Basis der neuesten Änderungen begonnen.
 
 --
 
 ## Übung 2.4: Branching — Lösung (2/2)
 
 3. Feature-Branches isolieren Arbeiten voneinander: 
-   - `main`-Branch bleibt jederzeit deploybar
+   - `main` bleibt jederzeit deploybar
    - Parallele Features stören sich nicht
    - Code-Reviews über Merge Requests sind vor dem Merge möglich
+
+<img src="/courses/web-and-data-engineering/figures/ex02_gitflow.png" alt="GitFlow" style="height:350px; margin-top: 20px;" />
 
 
 
@@ -135,22 +218,35 @@ Füllen Sie die Tabelle aus und erklären Sie welches Web-Paradigma heute in Unt
 
 --
 
-## Übung 2.5: Evolution des Webs — Lösung (1/2)
+## Übung 2.5: Evolution des Webs — Lösung (1/3)
 
-| Merkmal | Web 1.0 | Web 2.0 | Web 3.0 |
-|---|---|---|---|
-| **Inhaltsproduktion** | Nur Betreiber | Nutzer generieren Inhalte (UGC) | Dezentralisiert, maschinenlesbar |
-| **Nutzerinteraktion** | Passiv (Lesen) | Aktiv (Teilen, Kommentieren) | Semantisch, personalisiert, KI-gestützt |
-| **Typische Technologien** | Statisches HTML, FTP | AJAX, RSS, Web-APIs, Blogs | Linked Data, RDF, KI/ML-Integration |
-| **Beispiel-Anwendung** | Unternehmens-Broschüre-Website, persönliche Homepages | Facebook, Wikipedia, YouTube, Instagram | Semantische Suchmaschinen, KI-Assistenten |
+| Merkmal | Web 1.0 | Web 2.0 |
+|---|---|---|
+| **Inhaltsproduktion** | Statisch und zentral; Inhalte werden fast nur von Betreibern erstellt ("Read-Only Web"). | User-Generated Content; Nutzer werden vom Konsumenten zum Produzenten ("Prosumer"). |
+| **Nutzerinteraktion** | Passiver Konsum (Lesen) | Fokus auf Interaktion (Liken, Teilen, Kommentieren) und aktive Kollaboration in Echtzeit. |
+| **Typische Technologien** | Statisches HTML, FTP, einfache Grafik-Formate. | **AJAX** (Asynchrones Laden von Daten ohne Seiten-Neuladen), **JSON** (Leichtgewichtiges Format zum Datenaustausch). |
+| **Beispiel-Anwendung** | Persönliche Homepages, Online-Branchenbücher. | Wikipedia, Instagram, Blogs. |
 
 --
 
-## Übung 2.5: Evolution des Webs — Lösung (2/2)
+## Übung 2.5: Evolution des Webs — Lösung (2/3)
+
+| Merkmal | Web 3.0 |
+|---|---|
+| **Inhaltsproduktion** | Dezentral und KI-gestützt; Inhalte werden oft durch KI-Modelle generiert oder semantisch veredelt. |
+| **Nutzerinteraktion** | Intelligent und autonom; Maschinen verstehen den Kontext der Daten, den Sinn der Interaktion und passen sich automatisch an. Interaktionen erfolgen oft über dezentrale Identitäten statt über zentralisierte Konten, bei denen Nutzer ihre Identität und Daten zur Verwaltung an große Plattform-Betreiber (wie Google oder Meta) abtreten müssen. |
+| **Typische Technologien** | **RDF** (Framework zur Beschreibung von Datenbeziehungen), **Blockchain** (Dezentrale, manipulationssichere Datenspeicherung). |
+| **Beispiel-Anwendung** | Semantische Suche (WolframAlpha), KI-Agenten. |
+
+--
+
+## Übung 2.5: Evolution des Webs — Lösung (3/3)
 
 **Dominierendes Web-Paradigma:**
 
-Heute dominiert das Web-2.0-Paradigma in Unternehmensanwendungen: interaktive Single-Page Applications, REST-APIs, nutzererzeugte Daten. Web-3.0-Elemente (semantische Metadaten, KI-Empfehlungen) werden zunehmend integriert.
+Heute dominiert das Web-2.0-Paradigma (Social Web) in Unternehmensanwendungen: Interaktive Plattformen, Cloud-Kollaboration und Single-Page-Applications. Web-3.0-Ansätze (wie semantische Datenaufbereitung oder KI-Integrationen) werden jedoch zunehmend zur Differenzierung genutzt.
+
+*Web 3.0*: Web 3.0 bezeichnet die nächste Generation des Internets, die auf Dezentralisierung (z.B. durch Blockchain), mehr Nutzerkontrolle über Daten und intelligente Systeme setzt. Es soll ein offeneres, transparenteres und stärker personalisiertes Web ermöglichen, oft unterstützt durch Technologien wie KI.
 
 
 
@@ -171,55 +267,67 @@ Bearbeiten Sie die 32 Level aus dem CSS Dinner <https://flukeout.github.io/>, um
 
 --
 
-## Übung 2.6: Wiederholung CSS — Lösung (1/4)
+## Übung 2.6: Wiederholung CSS — Lösung (1/5)
 
-1. Auswahl nach Typ des Elements (Hier: plate): `plate`
-2. Auswahl nach Typ des Elements (Hier: bento): `bento`
-3. Auswahl eines Elements mit ID (Hier: Element mit ID fancy): `#fancy`
-4. Nachfolger Elemente auswählen - Ein Element innerhalb eines anderen Elements auswählen (Hier: Wählt alle apple-Elemente, die Nachfahren (descendants) eines plate sind.): `plate apple`
-5. Kombination von Nachfolger und ID (Alle pickle innerhalb des Elements mit ID fancy): `#fancy pickle`
-6. Auswahl aller Elemente mit Klasse (Hier: Klasse small): `.small`
-7. Kombination von Klasse und Typ - alle Elemente des Typs, die die Klasse besitzen (Hier: Alle orange mit Klasse small): `orange.small`
-8. Kombination bisheriger Inhalte: Wähle kleine Orangen in Bento-Boxen: `bento orange.small`
-
---
-
-## Übung 2.6: Wiederholung CSS — Lösung (2/4)
-
-9. Liefert alle Elemente der aufgeführten Typen (Hier: plate und bento): `plate, bento`
-10. Wähle alle Elemente: `*`
-11. Wähle alle Elemente auf Tellern: `plate *`
-12. Selektor für benachbarte Geschwisterelemente - Wähle ein Element aus, das direkt auf ein anderes Element folgt (Hier: Wählt ein apple, das direkt auf ein plate folgt (adjacent sibling).): `plate + apple`
-13. Allgemeiner Geschwister-Selektor Wählt Elemente aus, die auf ein anderes Element folgen (Hier: Wählt alle pickle, die Geschwister von bento sind und nach diesem kommen.): `bento ~ pickle`
-14. Wähle direkte Kinder (Hier: Äpfel auf Tellern): `plate > apple`
-15. Erstes Kindelement innerhalb eines anderen Elements (Hier: Wähle Orangen, die erstes Kind sind): `orange:first-child`
-16. Elemente, die einziges Kind eines Elements sind (Hier: Wählt plate, die selbst das einzige Kind ihres Eltern-Elements sind.): `plate:only-child`
+| Konzept | Erklärung | Beispiel |
+|---|---|---|
+| **Basis-Selektoren** | Typ, Klasse, ID oder alle Elemente. | `div`, `.class`, `#id`, `*` |
+| **Kombinatoren** | Beziehungen zwischen Elementen (Nachfahren, direkte Kinder, benachbarte Geschwister, allgemeine Geschwister). | `A B`, `A > B`, `A + B`, `A ~ B` |
+| **Pseudo-Klassen** | Auswahl basierend auf Position, Typ oder Zustand. | `:first-child`, `:nth-of-type(n)`, `:not()` |
+| **Attribut-Selektoren** | Auswahl basierend auf Attributen. | `[attr]`, `[attr="val"]`, `[attr^="val"]` |
+| **Gruppierung** | Mehrere Selektoren gleichzeitig ansprechen. | `A, B` |
 
 --
 
-## Übung 2.6: Wiederholung CSS — Lösung (3/4)
+## Übung 2.6: Wiederholung CSS — Lösung (2/5)
 
-17. Elemente, die das letzte Element innerhalb eines anderen Elements sind (Hier: Wähle kleine Elemente als letztes Kind): `.small:last-child`
-18. Wähle jedes dritte Element innerhalb eines anderen Elements: `:nth-child(3)`
-19. Wähle ein Element anhand seiner Position innerhalb eines anderen Elements aus, wobei von hinten gezählt wird (Hier: Wähle Element vom Typ Bento, die drittletztes Kind sind): `bento:nth-last-child(3)`
-20. Wählt erstes Element eines bestimmten Typs (Hier: Wähle ersten Apfel): `apple:first-of-type`
-21. Wähle gerade Teller: `plate:nth-of-type(even)`
-22. Wählt alle plate, deren Position der Formel 2n+3 entspricht (3., 5., 7., …).d.h. jedes zweite plate, startend beim dritten plate: `plate:nth-of-type(2n+3)`
-23. Wähle Elemente aus, die innerhalb ihres übergeordneten Elements die einzigen ihres Typs sind (Hier: Wähle apple, wenn apple einziges Element seines Typs innerhalb von plate ist): `plate apple:only-of-type`
-24. Wähle letztes Element vom Typ apple und vom Typ orange: `apple:last-of-type,orange:last-of-type`
+1. Auswahl nach Typ des Elements (Hier: `plate`): <br> `plate`
+2. Auswahl nach Typ des Elements (Hier: `bento`): <br> `bento`
+3. Auswahl eines Elements mit ID (Hier: Element mit ID `fancy`): <br> `#fancy`
+4. Nachfolger-Elemente auswählen (Hier: Wählt alle `apple`, die Nachfahren (also innerhalb) eines `plate` sind.): <br> `plate apple`
+5. Kombination von Nachfolger und ID (Hier: Alle `pickle` innerhalb des Elements mit ID `#fancy`): <br> `#fancy pickle`
+6. Auswahl aller Elemente mit Klasse (Hier: Klasse `small`): <br> `.small`
+7. Kombination von Klasse und Typ (Hier: Alle `orange` mit Klasse `small`): <br> `orange.small`
+8. Kombination bisheriger Inhalte: Kleine `orange` in `bento`-Boxen: <br> `bento orange.small`
 
 --
 
-## Übung 2.6: Wiederholung CSS — Lösung (4/4)
+## Übung 2.6: Wiederholung CSS — Lösung (3/5)
 
-25. Wählt Elemente ohne Kindelemente (Hier: bento Elemente ohne Kindelemente): `bento:empty`
-26. Wähle alle Elemente aus, die nicht dem Negationsselektor entsprechen: (Hier: Wähle apple ohne Klasse small): `apple:not(.small)`
-27. Wähle alle Elemente mit Attribut „for“: `*[for]`
-28. Wähle alle plate Elemente mit „for“-Attribut: `plate[for]`
-29. Wähle bento Elemente, deren „for“-Attribut den Wert "Vitaly" besitzt: `bento[for="Vitaly"]`
-30. Wähle Elemente, deren Attributwert des „for“-Attributs mit „Sa“ beginnt: `*[for^="Sa"]`
-31. Wähle alle Elemente, deren Attributwert des „for“-Attributs mit „ato“ endet: `*[for$="ato"]`
-32. Wähle Elemente, deren Attributwert des „for“-Attributs „obb“ enthält: `*[for*="obb"]`
+9. Liefert alle Elemente der aufgeführten Typen (Hier: `plate` und `bento`): <br> `plate, bento`
+10. Wähle alle Elemente:  `*`
+11. Wähle alle Elemente die Nachfolger von `plate` sind: <br> `plate *`
+12. Selektor für direkt benachbarte Geschwister(gleiche Hierarchieebene und direkt aufeinanderfolgend) (Hier: `apple` direkt nach `plate`): <br> `plate + apple`
+13. Allgemeiner Geschwister-Selektor (gleiche Hierarchieebene, irgendwo danach) (Hier: Alle `pickle` nach einem `bento`): <br> `bento ~ pickle`
+14. Wähle direkte Kinder, d.h. direkt innerhalb (Hier: `apple` auf `plate`): <br> `plate > apple`
+15. Erstes Kindelement (Hier: `orange`, die das erste Kind sind): <br> `orange:first-child`
+16. Elemente, die einziges Kind sind (Hier: `plate` als einziges Kind): <br> `plate:only-child`
+
+--
+
+## Übung 2.6: Wiederholung CSS — Lösung (4/5)
+
+17. Letztes Element innerhalb eines anderen (Hier: kleine Elemente als letztes Kind): <br> `.small:last-child`
+18. Wähle jedes dritte Element innerhalb eines anderen Elements: <br> `:nth-child(3)`
+19. Auswahl von hinten gezählt (Hier: `bento`, die drittletztes Kind sind): <br> `bento:nth-last-child(3)`
+20. Wählt erstes Element eines Typs (Hier: Erster `apple`): <br> `apple:first-of-type`
+21. Wähle gerade `plate`: <br> `plate:nth-of-type(even)`
+22. Formelbasierte Auswahl (`2n+3`): Jedes zweite `plate`, startend beim dritten: <br> `plate:nth-of-type(2n+3)`
+23. Einziges Element seines Typs (Hier: `apple` als einziges Element in `plate`): <br> `plate apple:only-of-type`
+24. Letztes Element eines Typs (Hier: jeweils letzter `apple` und `orange`): <br> `apple:last-of-type, orange:last-of-type`
+
+--
+
+## Übung 2.6: Wiederholung CSS — Lösung (5/5)
+
+25. Wählt Elemente ohne Kindelemente (Hier: leere `bento`):  <br> `bento:empty`
+26. Negationsselektor (Hier: `apple` ohne die Klasse `small`): <br> `apple:not(.small)`
+27. Wähle alle Elemente mit Attribut `for`: <br> `*[for]`
+28. Wähle alle `plate` mit `for`-Attribut: <br> `plate[for]`
+29. Attributwert-Selektor (Hier: `bento` mit `for="Vitaly"`): <br> `bento[for="Vitaly"]`
+30. Attribut beginnt mit (Hier: `for`-Attribut beginnt mit `"Sa"`): <br> `*[for^="Sa"]`
+31. Attribut endet mit (Hier: `for`-Attribut endet mit `"ato"`): <br> `*[for$="ato"]`
+32. Attribut enthält (Hier: `for`-Attribut enthält `"obb"`): <br> `*[for*="obb"]`
 
 
 
@@ -287,7 +395,7 @@ h1 {
   transform: rotateZ(10deg) translate(40px, 150px);
 }
 
-li[for*="basic"] {
+li[for^="basic"] {
   text-decoration: line-through;
 }
 ```
