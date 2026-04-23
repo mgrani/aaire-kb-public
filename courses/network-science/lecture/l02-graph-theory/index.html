@@ -1683,40 +1683,6 @@ print(find_components(graph))
 Notes:
 Identifying components is computationally straightforward for undirected graphs using BFS or DFS. However, directed graphs require more sophisticated algorithms to account for asymmetric reachability. This module concludes the structural foundations, providing the tools needed to move from individual paths to global network architecture.
 
----
-
-## Q&A
-
-### Why would we use DFS in practice?
-
-- to test **reachability**: is there any path at all?
-- to detect **cycles**
-- to build **topological orderings** in DAG-like settings
-- to explore one branch deeply before trying alternatives
-
-DFS is not the shortest-path tool. It is the structural exploration tool.
-
---
-
-## Q&A
-
-### Why is DFS useful for connected component detection?
-
-Because one DFS from a start node visits **exactly the nodes reachable from that node**. In an undirected graph, that reachable set is one full connected component. Repeating DFS from each still-unvisited node therefore partitions the graph into components.
-
---
-
-## Q&A
-
-### Why do negative weights break Dijkstra?
-
-Dijkstra assumes that once the currently cheapest node is removed from the priority queue, its distance is final. That is only true when every extra edge can only **increase** total cost.
-
-With a negative edge, a later detour can make an already-settled node cheaper after all:
-
-`A -> B = 2`, `A -> C = 5`, `C -> B = -10`
-
-At first, Dijkstra would settle `B` with cost `2`. But the path `A -> C -> B` has total cost `-5`, so the earlier decision was wrong.
 
 ---
 
@@ -1736,6 +1702,44 @@ Chapter 2 of Easley & Kleinberg (2010) covers graph theory foundations, paths, B
 
 Notes:
 This lecture has established the fundamental vocabulary of network science. By translating intuitive connections into formal graphs, we have moved from "knowing" a network exists to being able to precisely describe its properties, calculate its distances, and analyze its connectivity. These foundations are the prerequisite for every subsequent topic in the course, from social influence to web search.
+
+
+---
+<!-- .slide: class="module-slide" -->
+## Frequently Asked Questions (FAQ)
+
+--
+
+## Why would we use DFS in practice?
+
+- to test **reachability**: is there any path at all from a start node to a target, even if we do not care about the shortest one?
+- to detect **cycles**: if DFS encounters a node that is already on the current recursion stack, we have found a loop
+- to build **topological orderings** in DAG-like settings: finishing times from DFS give an ordering that respects dependencies
+- to explore one branch deeply before trying alternatives
+
+DFS is not the shortest-path tool. It is the structural exploration tool.
+
+--
+
+## Why is DFS useful for connected component detection?
+
+Because one DFS from a start node visits **exactly the nodes reachable from that node**. In an undirected graph, that reachable set is one full connected component. Repeating DFS from each still-unvisited node therefore partitions the graph into components.
+
+DFS is also a common practical choice because the implementation is simple: we only need a visited set plus recursion or an explicit stack. BFS works just as well for component detection, but it is not generally true that DFS always uses less memory; that depends on the graph shape.
+
+--
+
+## Why do negative weights break Dijkstra?
+
+Dijkstra assumes that once the currently cheapest node is removed from the priority queue, its distance is final. That is only true when every extra edge can only **increase** total cost.
+
+With a negative edge, a later detour can make an already-settled node cheaper after all:
+
+`A -> B = 2`, `A -> C = 5`, `C -> B = -10`
+
+![Negative-weight counterexample for Dijkstra](/courses/network-science/figures/dijkstra-negative-edge.svg)
+
+At first, Dijkstra would settle `B` with cost `2`. But the path `A -> C -> B` has total cost `-5`, so the earlier decision was wrong.
 
 ---
 
