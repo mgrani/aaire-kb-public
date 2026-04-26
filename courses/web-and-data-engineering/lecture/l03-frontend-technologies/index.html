@@ -125,7 +125,7 @@
   min-height: 100%;
   width: 100%;
 }
-</style><link rel="stylesheet" href="/_astro/index.BsKCM2XQ.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+</style><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Kapitel 3: Frontend-Technologien — HTML, JavaScript und CSS
@@ -1271,41 +1271,44 @@ JavaScript wird im Browser von einer JavaScript-Engine ausgeführt, etwa V8 in C
 ## Kurzes Beispiel: Verhalten im Browser
 
 ```html
-<button id="buy">In den Warenkorb</button>
-<p id="status">Noch nichts passiert.</p>
-```
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>Warenkorb-Beispiel</title>
+  </head>
+  <body>
+    <button id="buy">In den Warenkorb</button>
+    <p id="status">Noch nichts passiert.</p>
 
-<div class="gap">
+    <script>
+      const button = document.querySelector('#buy');
+      const status = document.querySelector('#status');
 
-
-</div>
-
-
-```javascript
-const button = document.querySelector('#buy');
-const status = document.querySelector('#status');
-
-button.addEventListener('click', () => {
-  status.textContent = 'Produkt hinzugefügt.';
-});
+      button.addEventListener('click', () => {
+        status.textContent = 'Produkt hinzugefügt.';
+      });
+    </script>
+  </body>
+</html>
 ```
 
 
 <div class="c-orange gap">
 
-HTML liefert die Elemente. JavaScript registriert das Verhalten. Erst der Klick löst die Änderung aus.
+HTML liefert die Elemente. Das `<script>` registriert das Verhalten. Erst der Klick löst die DOM-Änderung aus.
 
 </div>
 
 
 Notes:
-Der Code registriert einen Event Listener und wird erst ausgeführt, wenn der Button tatsächlich geklickt wird. Das ist der Kern ereignisgesteuerter Programmierung im Browser: JavaScript läuft nicht permanent, sondern reagiert auf Eingaben, Timer, Netzwerkantworten oder andere Browserereignisse. Die Änderung von `textContent` verändert den DOM-Knoten; der Browser übernimmt anschließend die sichtbare Aktualisierung.
+Das Beispiel ist absichtlich als vollständige HTML-Seite geschrieben, damit Auslieferung und Ausführung sichtbar werden: Der Browser lädt ein HTML-Dokument, baut daraus den DOM auf und führt das eingebettete Script aus. Weil das Script am Ende des `body` steht, existieren Button und Status-Absatz bereits, wenn `querySelector` ausgeführt wird. Alternativ könnte das Script im `head` stehen, müsste dann aber mit `defer` geladen oder erst nach `DOMContentLoaded` ausgeführt werden. Der Event Listener läuft nicht sofort, sondern erst beim Klick; die Änderung von `textContent` verändert den DOM-Knoten, und der Browser aktualisiert anschließend die sichtbare Darstellung.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Alternative Code-Auslieferung im Browser: TypeScript und WebAssembly
+## Alternative Code-Auslieferung im Browser
 
 JavaScript ist die **native Standardsprache** des Browsers. In der Praxis tauchen daneben oft noch **TypeScript** und **WebAssembly (WASM)** auf.
 
@@ -1586,14 +1589,10 @@ document.querySelector('.name').textContent = product.name;
 document.querySelector('.price').textContent = product.price + ' €';
 ```
 
-Notes:
-Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerkbasierter Fehlerquellen ab: (1) **Netzwerk nicht erreichbar** — `fetch` wirft eine Exception, kein Response-Objekt entsteht. (2) **HTTP-Fehler (4xx/5xx)** — `fetch` liefert ein Response-Objekt mit `response.ok === false`; `.json()` parst den Fehler-Body, der häufig HTML statt JSON enthält. (3) **Langsame Verbindung** — UI zeigt veraltete oder keine Daten, kein Feedback für den Nutzer. (4) **Kein JSON im Body** — `.json()` wirft eine SyntaxError-Exception. (5) **Fehlendes DOM-Element** — `querySelector` gibt `null` zurück, Zugriff auf `.textContent` löst TypeError aus. Der Unterschied zwischen Code der nur im Normalfall funktioniert und robustem Produktivcode liegt ausschließlich in der Behandlung dieser Randfälle.
 
---
 
-<!-- .slide: class="smaller" -->
 
-## Probleme und Lösungen
+<div class="fragment small fade-in">
 
 | Problem | Was passiert | Lösung |
 |---|---|---|
@@ -1605,7 +1604,33 @@ Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerk
 
 Robuste Fehlerbehandlung ist keine Kür — sie ist der Unterschied zwischen einem Prototyp und einem Produktivsystem.
 
+</div>
+
+
+```javascript
+button.addEventListener('click', async () => {
+  try {
+    const response = await fetch('/api/products/42');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const product = await response.json();
+    renderProduct(product);
+  } catch (err) {
+    showError('Produkt konnte nicht geladen werden.');
+  }
+});
+```
+
+
+<div class="c-note">
+
+Das ist ereignisgesteuert **und** Promise-basiert: Der Klick startet den Ablauf, `await` wartet auf die asynchrone Fetch-Fortsetzung.
+
+</div>
+
+
 Notes:
+Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerkbasierter Fehlerquellen ab: (1) **Netzwerk nicht erreichbar** — `fetch` wirft eine Exception, kein Response-Objekt entsteht. (2) **HTTP-Fehler (4xx/5xx)** — `fetch` liefert ein Response-Objekt mit `response.ok === false`; `.json()` parst den Fehler-Body, der häufig HTML statt JSON enthält. (3) **Langsame Verbindung** — UI zeigt veraltete oder keine Daten, kein Feedback für den Nutzer. (4) **Kein JSON im Body** — `.json()` wirft eine SyntaxError-Exception. (5) **Fehlendes DOM-Element** — `querySelector` gibt `null` zurück, Zugriff auf `.textContent` löst TypeError aus. Ereignisgesteuert bedeutet hier: Ein Nutzerereignis startet die asynchrone Operation. `async/await` ersetzt nicht das Event-Modell, sondern strukturiert den Promise-basierten Ablauf innerhalb des Event-Handlers.
 Eine subtile Falle bei Fetch: `fetch()` wirft *nur* dann eine Exception, wenn das Netzwerk komplett versagt, etwa bei DNS-Fehlern oder fehlender Verbindung. HTTP-Statuscodes wie 404 oder 500 gelten technisch als erfolgreich übertragene Antworten; `fetch` liefert ein gültiges Response-Objekt, und `response.ok` ist `false`. Ohne Statusprüfung versucht Code häufig, HTML-Fehlerseiten oder leere Bodies als JSON zu parsen. Robuste Patterns prüfen deshalb `response.ok` und den `Content-Type`, bevor `response.json()` aufgerufen wird.
 
 --
@@ -1665,7 +1690,7 @@ CSS ist die anspruchsvollste der drei Frontend-Sprachen, weil sie vollständig d
 
 ## CSS in 60 Sekunden
 
-CSS beschreibt, **wie HTML dargestellt wird**: Farben, Abstände, Schrift, Layout, Zustände und Responsivität.
+CSS steht für Cascading Style Sheets und beschreibt, **wie HTML dargestellt wird**: Farben, Abstände, Schrift, Layout, Zustände und Responsivität.
 
 
 <div class="grid-2 gap-sm">
@@ -1673,8 +1698,6 @@ CSS beschreibt, **wie HTML dargestellt wird**: Farben, Abstände, Schrift, Layou
 
 <div class="column">
 
-
-<div class="c-definition">
 
 ### Regel
 
@@ -1684,8 +1707,6 @@ p.highlight {
   font-weight: 600;
 }
 ```
-
-</div>
 
 
 </div>
@@ -2464,7 +2485,30 @@ Notes:
 **Situation:** Links steht das Produktbild, rechts Beschreibung und Kaufbutton. Auf dem Smartphone soll das Bild oben und der Text darunter erscheinen.
 
 
-<div class="grid-2">
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+### Beispiel-Code
+
+```css
+.product {
+  display: grid;
+  grid-template-areas: "image info";
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2rem;
+}
+
+@media (max-width: 700px) {
+  .product {
+    grid-template-areas: "image" "info";
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+</div>
 
 
 <div class="column">
@@ -2472,28 +2516,31 @@ Notes:
 
 <div class="c-note">
 
-### Mögliche Wahl: Flexbox
+### Warum hier Grid?
 
-- funktioniert für einfache Zeile/Spalte
-- gut bei linearen Anordnungen
-- weniger explizit bei komplexer Umordnung
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-note">
-
-### Mögliche Wahl: Grid
-
-- beschreibt Desktop als `"img text"`
-- beschreibt Mobile als `"img"` / `"text"`
+- Desktop beschreibt Bereiche als `"image info"`
+- Mobile beschreibt Bereiche als `"image"` / `"info"`
 - Layout bleibt als Struktur sichtbar
+
+</div>
+
+
+</div>
+
+
+<div class="column span-all">
+
+![Schematische Produktdetailseite: Desktop mit Bild links und Produktinfo rechts; Mobile mit Bild oben und Produktinfo darunter.](/courses/web-and-data-engineering/figures/product-detail-grid.svg)
+
+</div>
+
+
+<div class="column span-all">
+
+
+<div class="c-note">
+
+Flexbox wäre für eine einfache Zeile ebenfalls möglich. Grid ist hier klarer, weil Desktop- und Mobile-Layout als benannte Bereiche formuliert werden.
 
 </div>
 
@@ -2505,7 +2552,7 @@ Notes:
 
 
 Notes:
-Flexbox eignet sich gut, wenn Bild und Text einfach nebeneinander oder untereinander stehen sollen. Grid wird stärker, sobald das Layout selbst explizit modelliert wird, etwa mit benannten Bereichen, stabilen Relationen oder mehreren Umbrüchen. Die technische Entscheidung hängt also nicht am Alter des Layoutmodells, sondern daran, ob eine lineare Verteilung oder eine zweidimensionale Struktur ausgedrückt werden soll.
+Flexbox eignet sich gut, wenn Bild und Text einfach nebeneinander oder untereinander stehen sollen. Grid wird stärker, sobald das Layout selbst explizit modelliert wird, etwa mit benannten Bereichen, stabilen Relationen oder mehreren Umbrüchen. Im Beispiel ist Grid gut geeignet, weil Desktop und Mobile als zwei Layoutzustände desselben Bereichs lesbar bleiben: `"image info"` auf Desktop, `"image" "info"` auf Mobile. Die technische Entscheidung hängt also nicht am Alter des Layoutmodells, sondern daran, ob eine lineare Verteilung oder eine zweidimensionale Struktur ausgedrückt werden soll.
 
 --
 
@@ -2680,6 +2727,13 @@ Die Unterscheidung ist praktisch relevant: Derselbe JavaScript-Code läuft je na
 
 ## Fetch API im Detail: Request, Response, AbortController
 
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
 ```javascript
 const controller = new AbortController();
 
@@ -2704,12 +2758,24 @@ try {
 }
 ```
 
+</div>
+
+
+<div class="column small">
+
+
 | Konzept | Zweck |
 |---|---|
 | `Request` / `Response` | Objektmodell für HTTP-Nachrichten |
 | `headers` | Metadaten: Content-Type, Accept, Authorization |
 | `AbortController` | Laufende Requests abbrechen (Timeout, Navigation) |
 | `response.ok` | `true` bei Status 200–299 |
+
+</div>
+
+
+</div>
+
 
 
 <div class="c-note">
