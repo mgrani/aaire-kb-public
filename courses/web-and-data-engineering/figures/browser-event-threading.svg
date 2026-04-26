@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Events, Event Queue, Main Thread und DOM im Browser</title>
+  <desc id="desc">Ein Nutzerereignis wird vom Browser in eine Queue gelegt. Der Event Loop gibt wartende Tasks an den JavaScript Main Thread. JavaScript kann DOM und CSS ändern. Asynchrone Browser APIs melden fertige Arbeit zurück an die Queue, bevor JavaScript fortgesetzt wird.</desc>
+
+  <defs>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 z" fill="#1a73e8"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 z" fill="#188038"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 z" fill="#ef6c00"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 z" fill="#d93025"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <g id="background">
+    <rect width="960" height="540" fill="#ffffff"/>
+    <rect x="28" y="28" width="904" height="484" rx="24" fill="#f8fafc" stroke="#d7dee7"/>
+    <text x="480" y="62" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#111827">Event-Verarbeitung im Browser</text>
+  </g>
+
+  <g id="nodes" font-family="Arial, Helvetica, sans-serif">
+    <g id="user-event" filter="url(#shadow)">
+      <rect x="60" y="112" width="170" height="106" rx="18" fill="#e8f0fe" stroke="#1a73e8" stroke-width="3"/>
+      <text x="145" y="148" text-anchor="middle" font-size="18" font-weight="700" fill="#1a73e8">Nutzerereignis</text>
+      <text x="145" y="176" text-anchor="middle" font-size="14" fill="#374151">click, input, keydown</text>
+      <text x="145" y="198" text-anchor="middle" font-size="12" fill="#4b5563">kommt vom Browser</text>
+    </g>
+
+    <g id="event-queue" filter="url(#shadow)">
+      <rect x="295" y="112" width="170" height="106" rx="18" fill="#e6f4ea" stroke="#188038" stroke-width="3"/>
+      <text x="380" y="148" text-anchor="middle" font-size="18" font-weight="700" fill="#188038">Event Queue</text>
+      <text x="380" y="176" text-anchor="middle" font-size="14" fill="#374151">wartende Callback-Tasks</text>
+      <text x="380" y="198" text-anchor="middle" font-size="12" fill="#4b5563">nacheinander verarbeitet</text>
+    </g>
+
+    <g id="main-thread" filter="url(#shadow)">
+      <rect x="540" y="92" width="220" height="146" rx="20" fill="#fff3e0" stroke="#ef6c00" stroke-width="3"/>
+      <text x="650" y="128" text-anchor="middle" font-size="18" font-weight="700" fill="#ef6c00">JavaScript Main Thread</text>
+      <text x="650" y="157" text-anchor="middle" font-size="14" fill="#374151">führt Handler aus</text>
+      <text x="650" y="179" text-anchor="middle" font-size="14" fill="#374151">ändert DOM/CSS</text>
+      <text x="650" y="207" text-anchor="middle" font-size="12" font-weight="700" fill="#b45309">ein aktiver JS-Stack</text>
+    </g>
+
+    <g id="browser-apis" filter="url(#shadow)">
+      <rect x="540" y="314" width="220" height="106" rx="18" fill="#fce8e6" stroke="#d93025" stroke-width="3"/>
+      <text x="650" y="350" text-anchor="middle" font-size="18" font-weight="700" fill="#b3261e">Browser APIs</text>
+      <text x="650" y="378" text-anchor="middle" font-size="14" fill="#374151">fetch, timer, Netzwerk</text>
+      <text x="650" y="400" text-anchor="middle" font-size="12" fill="#4b5563">arbeiten außerhalb des JS-Stacks</text>
+    </g>
+
+    <g id="dom" filter="url(#shadow)">
+      <rect x="790" y="112" width="120" height="106" rx="18" fill="#f3e8fd" stroke="#9334e6" stroke-width="3"/>
+      <text x="850" y="148" text-anchor="middle" font-size="18" font-weight="700" fill="#7627bb">DOM</text>
+      <text x="850" y="176" text-anchor="middle" font-size="14" fill="#374151">sichtbarer</text>
+      <text x="850" y="196" text-anchor="middle" font-size="14" fill="#374151">Zustand</text>
+    </g>
+
+    <g id="rendering" filter="url(#shadow)">
+      <rect x="790" y="314" width="120" height="106" rx="18" fill="#e8f0fe" stroke="#1a73e8" stroke-width="3"/>
+      <text x="850" y="350" text-anchor="middle" font-size="18" font-weight="700" fill="#1a73e8">Rendern</text>
+      <text x="850" y="378" text-anchor="middle" font-size="14" fill="#374151">Layout</text>
+      <text x="850" y="398" text-anchor="middle" font-size="14" fill="#374151">Paint</text>
+    </g>
+  </g>
+
+  <g id="flow-arrows" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path id="event-to-queue" d="M230 165 L295 165" stroke="#1a73e8" stroke-width="2.4" marker-end="url(#arrow-blue)"/>
+    <path id="queue-to-main" d="M465 165 L540 165" stroke="#188038" stroke-width="2.4" marker-end="url(#arrow-green)"/>
+    <path id="main-to-dom" d="M760 165 L790 165" stroke="#ef6c00" stroke-width="2.4" marker-end="url(#arrow-orange)"/>
+    <path id="dom-to-rendering" d="M850 218 L850 314" stroke="#1a73e8" stroke-width="2.4" marker-end="url(#arrow-blue)"/>
+    <path id="main-to-browser-apis" d="M650 238 L650 314" stroke="#d93025" stroke-width="2.4" stroke-dasharray="8 7" marker-end="url(#arrow-red)"/>
+    <path id="browser-apis-to-queue" d="M540 367 C430 367 380 310 380 218" stroke="#188038" stroke-width="2.4" stroke-dasharray="8 7" marker-end="url(#arrow-green)"/>
+  </g>
+
+  <g id="labels" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">
+    <text x="686" y="282" fill="#b3261e">await fetch()</text>
+    <text x="392" y="338" text-anchor="middle" fill="#188038">Promise resolved</text>
+    <text x="503" y="151" text-anchor="middle" fill="#188038">Stack frei?</text>
+  </g>
+
+  <g id="takeaway" font-family="Arial, Helvetica, sans-serif">
+    <text x="480" y="472" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">Kernidee: Events und Promise-Fortsetzungen warten in Queues; JavaScript verarbeitet sie nacheinander.</text>
+  </g>
+</svg>

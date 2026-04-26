@@ -43,12 +43,18 @@
   gap: 0.65rem;
 }
 
-.reveal .layout-demo.flex-demo .demo-item {
-  flex: 0 1 auto;
+.reveal .layout-demo .demo-item {
+  display: block;
+  margin: 0.25rem 0;
   padding: 0.45rem 0.65rem;
   border: 1px solid #9fb2c8;
   border-radius: 0.45rem;
   background: #ffffff;
+}
+
+.reveal .layout-demo.flex-demo .demo-item {
+  flex: 0 1 auto;
+  margin: 0;
   white-space: nowrap;
 }
 
@@ -103,6 +109,22 @@
   background: #ffffff;
   text-align: center;
 }
+
+.reveal :is(.grid-2, .grid-3, .grid-2-1) > .column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.reveal :is(.grid-2, .grid-3, .grid-2-1) > .column > :is(.c-definition, .c-green, .c-note, .c-caution, .c-red, .c-info):only-child {
+  align-self: stretch;
+  box-sizing: border-box;
+  flex: 1;
+  height: 100%;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
 </style><link rel="stylesheet" href="/_astro/index.BsKCM2XQ.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
@@ -125,6 +147,204 @@ Jede Web-Anwendung, die ein Nutzer sieht und bedient, besteht aus drei Technolog
 
 Notes:
 Die drei Frontend-Technologien haben unterschiedliche Stabilitätshorizonte: HTML-Elemente sind seit HTML5 (2014) weitgehend stabil; CSS erhält laufend neue Features (Container Queries, Cascade Layers, :has()), während die Grundprinzipien — Cascade, Box-Modell, Normal Flow — unverändert bleiben; JavaScript-Frameworks wechseln alle fünf bis acht Jahre den Dominant Player (jQuery → Backbone → Angular → React → Server-Components). Das Architekturwissen — DOM-Modell, Event Loop, Rendering-Pipeline — bleibt davon unberührt und transferiert direkt auf das jeweils aktuelle Werkzeug.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# HTML, CSS und JavaScript — Zusammenspiel im Browser
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Welche Aufgabe haben HTML, CSS und JavaScript jeweils im Browser — und wie greifen sie zusammen, bevor wir die drei Technologien einzeln vertiefen?
+
+</div>
+
+
+Notes:
+Der Browser führt HTML, CSS und JavaScript nicht als drei isolierte Dateien aus, sondern als zusammenhängendes Laufzeitsystem. HTML wird zu einem DOM-Baum, CSS wird zu berechneten Styles, und JavaScript kann diese Strukturen zur Laufzeit lesen und verändern. Diese Kopplung erklärt, warum scheinbar kleine Änderungen an Klassen, Attributen oder DOM-Knoten sichtbare Auswirkungen auf Rendering, Performance und Barrierefreiheit haben.
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## Das Technologie-Dreieck des Webs
+
+
+<div class="c-orange">
+
+**Architekturentscheidung:** Inhalt gehört in HTML, Layout in CSS, Interaktion in JavaScript.
+
+</div>
+
+
+![](/courses/web-and-data-engineering/figures/technology-triangle.svg)
+
+Notes:
+Diese Zuordnung ist keine Stilfrage, sondern eine Architekturentscheidung. Wenn Inhalt in CSS „versteckt" wird oder Verhalten nur über visuelle Workarounds entsteht, wird das System schwerer verständlich und wartbar. Die Trennung der Schichten unterstützt Barrierefreiheit, progressive Erweiterung und langfristige Pflege.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Hinter den Standards: W3C, WHATWG und die Standardisierung des Webs
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+Die drei Frontend-Technologien sind keine Produkte einer einzelnen Firma, sondern Ergebnis von Standardisierung. 
+
+- **WHATWG** (*Web Hypertext Application Technology Working Group*) ist eine von Browser-Herstellern geprägte Arbeitsgruppe und pflegt heute den **HTML Living Standard** sowie das **DOM**.
+- **W3C** (*World Wide Web Consortium*) ist das breitere Standardisierungskonsortium des Webs; dort liegen u. a. **CSS** und **ARIA (Accessible Rich Internet Applications )**.
+   (e.g. Screenreader).
+- **ECMA International** standardisiert **JavaScript** unter dem Namen **ECMAScript**.
+
+**Wichtig:** HTML lag früher auch beim W3C. Heute ist die WHATWG die primäre Instanz für HTML, während das W3C für andere zentrale Webstandards weiter wichtig bleibt.
+
+Browser implementieren diese Spezifikationen. Deshalb funktioniert dieselbe Seite grundsätzlich in Chrome, Firefox und Safari.
+
+</div>
+
+
+<div class="column">
+
+![W3C-Standardisierungsökosystem mit HTML, CSS, ARIA, DOM und weiteren Spezifikationen.](/courses/web-and-data-engineering/figures/w3c-overview.png)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Die Standardisierungslandschaft ist seit 2019 neu geordnet: Die WHATWG hat das W3C als primäre HTML-Standardisierungsinstanz abgelöst, nachdem jahrelange Parallelarbeit zu divergierenden Spezifikationen geführt hatte. Die WHATWG ist keine allgemeine Web-Regulierungsbehörde, sondern eine arbeitsnahe Gruppe rund um Browserhersteller und Editorinnen bzw. Editoren, die HTML und DOM als Living Standards kontinuierlich fortschreibt. Das W3C bleibt dennoch zentral, weil dort viele andere Webstandards organisiert werden, insbesondere CSS über die CSS Working Group und ARIA für Accessibility. ECMA International standardisiert ECMAScript (JavaScript) in jährlichen Releases. MDN Web Docs ist die verlässlichste Querschnittsquelle für Browser-Kompatibilität über alle drei Bereiche; `caniuse.com` hilft bei einzelnen Features vor einer Produktionsentscheidung.
+
+--
+
+## Ein Seitenaufruf in drei Schritten
+
+
+1. **HTML:** Der Browser lädt das Dokument und baut daraus das **Document Object Model (DOM)** auf.
+
+2. **CSS:** Stylesheets (Cascading Style Sheets) werden geladen. Der Browser berechnet daraus, wie der Inhalt aussieht.
+
+3. **JavaScript:** Skripte registrieren Verhalten, reagieren auf Events und können DOM und Styles später verändern.
+
+
+
+<div class="c-orange gap">
+
+**Wichtig:** HTML kommt logisch zuerst. CSS und JavaScript bauen auf dieser Struktur auf.
+
+</div>
+
+
+Notes:
+Diese Reihenfolge ist auch technisch relevant: CSS-Selektoren benötigen DOM-Knoten als Ziel, und JavaScript arbeitet im Browser meist über Objekte, die aus HTML und CSS abgeleitet wurden. Ein `<script>` im `<head>` kann deshalb auf DOM-Elemente zugreifen, die noch gar nicht geparst wurden, wenn es ohne `defer` zu früh ausgeführt wird. Moderne Seiten laden Skripte daher häufig mit `defer`, damit HTML-Parsing und Script-Ausführung besser koordiniert sind.
+
+
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## Die Rendering-Pipeline des Browsers
+
+![](/courses/web-and-data-engineering/figures/rendering-pipeline.svg)
+
+Die Pipeline arbeitet auf zwei internen Strukturen: dem **DOM** für HTML und dem **CSSOM** für CSS. Erst daraus erzeugt der Browser den Render Tree und rechnet Layout, Paint und Compositing aus.
+
+Notes:
+Die Rendering-Pipeline ist deterministisch und läuft in sechs Phasen: (1) HTML parsen → DOM, (2) CSS parsen → CSSOM, (3) Render Tree aufbauen (DOM + CSSOM zusammenführen, dabei unsichtbare Elemente ausfiltern), (4) Layout (Berechnung von Position und Größe jedes Elements), (5) Paint (Pixel zeichnen), (6) Composite (Layer zusammenstellen). Bei jeder Änderung am DOM oder CSS fragt der Browser: Wie weit muss ich zurück in die Pipeline? Nur Farbe geändert? → nur Paint + Composite. Position geändert? → Layout + Paint + Composite (Reflow). Nur Transform oder Opacity? → nur Composite (am billigsten). Diese Unterscheidung ist der Schlüssel zu 60-FPS-Animationen.
+
+--
+
+## Was passiert bei einem Klick?
+
+1. HTML enthält z. B. einen Button und einen Warenkorb-Zähler.
+2. CSS definiert, wie Button, Badge und Ladezustand aussehen.
+3. JavaScript reagiert auf den Klick.
+4. JavaScript ändert DOM oder Klassen.
+5. Der Browser rendert die sichtbare Änderung neu.
+6. Optional sendet JavaScript asynchron einen Request an den Server.
+
+
+
+Notes:
+Bei einem Klick entstehen mehrere Zustandswechsel: Der Browser erzeugt ein Event-Objekt, JavaScript verarbeitet dieses Event, der DOM kann verändert werden, und CSS berechnet die Darstellung für den neuen Zustand. Wenn zusätzlich ein Netzwerkrequest ausgelöst wird, laufen UI-Änderung und Serverkommunikation zeitlich auseinander. Dieses Muster ist typisch für moderne Frontends: sofortiges lokales Feedback, danach asynchrone Bestätigung oder Korrektur durch den Server.
+
+--
+
+
+
+## Fahrplan: vom Überblick ins Detail
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Modul 1: HTML
+
+Semantik, Struktur, Formulare, eingebautes Verhalten
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Modul 2: JavaScript
+
+Code im Browser, DOM, Events, Fetch, Alternativen
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Modul 3: CSS
+
+Cascade, Layoutmodelle, Grid, Responsive Design
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-orange gap">
+
+Danach folgt eine **Vertiefung**: Web-APIs und moderne Frontend-Architekturen.
+
+</div>
+
+
+Notes:
+Die drei Technologien haben unterschiedliche Stabilitätshorizonte. HTML-Semantik ist relativ langlebig, CSS entwickelt sich über Layout- und Selektorfeatures weiter, und JavaScript verändert sich stark über Frameworks und Tooling. Architekturentscheidungen unterscheiden deshalb stabile Browserkonzepte wie DOM, Cascade und Event Loop von kurzlebigeren Frameworkkonventionen.
 
 ---
 
@@ -254,68 +474,6 @@ Zwei der vier Perspektiven haben rechtliche Relevanz: In Deutschland schreibt da
 
 --
 
-<!-- .slide: class="smaller code-regular" -->
-
-## Das Technologie-Dreieck des Webs
-
-Jede Web-Anwendung besteht aus drei Schichten mit klarer Verantwortungsteilung:
-
-| Schicht | Technologie | Verantwortung | Leitfrage |
-|---|---|---|---|
-| **Struktur** | HTML | Was existiert auf der Seite? | Welche Elemente, welche Bedeutung? |
-| **Darstellung** | CSS | Wie sieht es aus und wo steht es? | Farbe, Layout, Animation, Responsivität |
-| **Verhalten** | JavaScript | Was passiert bei Interaktion? | DOM-Änderungen, Server-Kommunikation, Zustand |
-
-### Warum drei getrennte Technologien?
-
-Dasselbe HTML kann mit **verschiedenem CSS** völlig anders aussehen — dieselbe Shop-Seite als Desktop-Layout, als Mobilansicht, als Druckversion. JavaScript kann **DOM und CSSOM verändern**, aber HTML und CSS können auch **ohne JavaScript** funktionieren: Links navigieren, Formulare senden, Hover-Effekte reagieren.
-
-**Diese Schichtung ist kein Zufall — sie ist das Architekturprinzip des Webs.**
-
-Notes:
-Moderne Komponenten-Frameworks (React, Vue, Svelte) bündeln HTML, CSS und JavaScript in einer einzigen Komponentendatei — was oberflächlich wie eine Verletzung der Trennung aussieht. Konzeptionell ist es eine andere Art der Trennung: nicht nach Technologie, sondern nach fachlicher Verantwortung. Die Trennung innerhalb der Datei bleibt erhalten: Template (Struktur) → Styles (Darstellung) → Script (Verhalten). Dasselbe Prinzip, andere organisatorische Einheit. Die Konsequenzen der Schichten-Unabhängigkeit bleiben: Ein `<a>` navigiert ohne JavaScript, ein `<form>` sendet ohne JavaScript, `:hover`-Effekte reagieren ohne JavaScript.
-
---
-
-<!-- .slide: class="figure-70" -->
-
-## Hinter den Standards: W3C, WHATWG und die Standardisierung des Webs
-
-
-<div class="grid-2 small">
-
-
-<div class="column">
-
-Die drei Frontend-Technologien sind keine Produkte einer einzelnen Firma, sondern Ergebnis von Standardisierung. 
-
-- **WHATWG** (*Web Hypertext Application Technology Working Group*) ist eine von Browser-Herstellern geprägte Arbeitsgruppe und pflegt heute den **HTML Living Standard** sowie das **DOM**.
-- **W3C** (*World Wide Web Consortium*) ist das breitere Standardisierungskonsortium des Webs; dort liegen u. a. **CSS** und **ARIA**.
-- **ECMA International** standardisiert **JavaScript** unter dem Namen **ECMAScript**.
-
-**Wichtig:** HTML lag frueher auch beim W3C. Heute ist die WHATWG die primaere Instanz fuer HTML, waehrend das W3C fuer andere zentrale Webstandards weiter wichtig bleibt.
-
-Browser implementieren diese Spezifikationen. Deshalb funktioniert dieselbe Seite grundsaetzlich in Chrome, Firefox und Safari.
-
-</div>
-
-
-<div class="column">
-
-![W3C-Standardisierungsökosystem mit HTML, CSS, ARIA, DOM und weiteren Spezifikationen.](/courses/web-and-data-engineering/figures/w3c-overview.png)
-
-</div>
-
-
-</div>
-
-
-Notes:
-Die Standardisierungslandschaft ist seit 2019 neu geordnet: Die WHATWG hat das W3C als primaere HTML-Standardisierungsinstanz abgeloest, nachdem jahrelange Parallelarbeit zu divergierenden Spezifikationen gefuehrt hatte. Die WHATWG ist keine allgemeine Web-Regulierungsbehoerde, sondern eine arbeitsnahe Gruppe rund um Browserhersteller und Editorinnen bzw. Editoren, die HTML und DOM als Living Standards kontinuierlich fortschreibt. Das W3C bleibt dennoch zentral, weil dort viele andere Webstandards organisiert werden, insbesondere CSS ueber die CSS Working Group und ARIA fuer Accessibility. ECMA International standardisiert ECMAScript (JavaScript) in jaehrlichen Releases. MDN Web Docs ist die verlässlichste Querschnittsquelle für Browser-Kompatibilität über alle drei Bereiche; `caniuse.com` hilft bei einzelnen Features vor einer Produktionsentscheidung.
-
---
-
-
 ## Semantische Elemente in HTML5
 
 HTML5 hat generische Container (`<div>`, `<span>`) durch bedeutungstragende Elemente ergänzt:
@@ -430,16 +588,52 @@ Semantik ist nicht binär: `<header>` und `<article>` sind grobe Struktur-Signal
 
 <div class="small">
 
-
 Microformats und Microdata sind nützlich, wenn HTML nicht nur für Menschen lesbar sein soll, sondern auch für Programme, die Inhalte erkennen, zusammenfassen oder weiterverarbeiten.
 
 
-
-
-<div class="grid-2-1">
+<div class="grid-2 gap-sm">
 
 
 <div class="column">
+
+
+<div class="c-note">
+
+### Microformats
+
+- oft für Personen, Kontakte, Termine, Social Links
+- leichtgewichtig und direkt lesbar
+- Beispiel: `h-card`, `h-event`, `p-name`
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Microdata
+
+- häufig für `Person`, `Product`, `Event`
+- enger an Vokabulare wie `schema.org` gebunden
+- Beispiel: `itemscope`, `itemtype`, `itemprop`
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-definition">
 
 ### Typische Nutzung
 
@@ -448,35 +642,33 @@ Microformats und Microdata sind nützlich, wenn HTML nicht nur für Menschen les
 - **Interne Systeme:** strukturierte Daten ohne separates JSON-Format
 - **Semantic Web / schema.org:** zusätzliche Bedeutung direkt im HTML
 
-**Was die Nutzung bringt**
+</div>
 
-- bessere maschinelle Erkennbarkeit von Inhalten
-- mögliche Rich Results / strukturierte Vorschau in Suchmaschinen
-- weniger Parsing-Hacks in externen Tools
-- HTML bleibt die primäre Quelle statt nur ein Container für separate Metadaten
 
 </div>
+
 
 
 <div class="column">
 
 
-**Microformats**
+<div class="c-green">
 
-- oft für Personen, Kontakte, Termine, Social Links
-- leichtgewichtig und direkt lesbar
-- Beispiel: `h-card`, `h-event`, `p-name`
+### Was die Nutzung bringt
 
-**Microdata**
-
-- häufig für strukturierte Entitäten wie `Person`, `Product`, `Event`
-- enger an Vokabulare wie `schema.org` gebunden
-- Beispiel: `itemscope`, `itemtype`, `itemprop`
+- bessere maschinelle Erkennbarkeit von Inhalten
+- mögliche Rich Results in Suchmaschinen
+- weniger Parsing-Hacks in externen Tools
+- HTML bleibt die primäre Quelle
 
 </div>
 
 
 </div>
+
+
+</div>
+
 
 
 <div class="c-orange gap">
@@ -491,6 +683,97 @@ Microformats und Microdata sind nützlich, wenn HTML nicht nur für Menschen les
 
 Notes:
 Konkretes Beispiel: Ein Online-Shop, der Produkte mit `schema.org/Product` auszeichnet, bekommt in Google-Trefferlisten oft Sterne, Preis und Verfügbarkeit direkt eingeblendet — was die Click-Through-Rate messbar erhöht. Aggregator-Dienste wie Indeed scrapen Stellenanzeigen automatisch von Firmenseiten, sofern diese `schema.org/JobPosting`-Markup enthalten. Wer also strukturierte Inhalte hat (Produkte, Personen, Termine, Rezensionen), gewinnt durch Microdata reale Sichtbarkeit ohne zusätzlichen Code.
+
+--
+
+<!-- .slide: class="smaller code-regular" -->
+
+## schema.org: gemeinsames Vokabular für strukturierte Daten
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+### Wofür?
+
+`schema.org` liefert standardisierte Typen und Eigenschaften, damit Suchmaschinen und andere Systeme wissen, ob ein HTML-Abschnitt eine `Person`, ein `Product`, ein `Event` oder eine `JobPosting` beschreibt.
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Wichtige Idee
+
+- **Typ** sagt, was ein Ding ist
+- **Properties** beschreiben Details
+- dieselben Typen können in `Microdata` oder `JSON-LD` genutzt werden
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+### Typenhierarchie
+
+```text
+Thing
++-- Person
++-- Organization
+|   +-- LocalBusiness
++-- CreativeWork
+|   +-- Article
+|   +-- Course
++-- Event
++-- Product
+|   +-- Vehicle
++-- Place
+    +-- LocalBusiness
+```
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Beispiele für Properties
+
+- `Person`: `name`, `jobTitle`, `affiliation`
+- `Product`: `name`, `offers`, `brand`
+- `Event`: `name`, `startDate`, `location`
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+`schema.org` ist kein neues Datenformat, sondern ein gemeinsames Vokabular. Es beantwortet die Frage: Welche Typen von Dingen gibt es, und welche Eigenschaften gehören typischerweise dazu? `Thing` ist der allgemeine Obertyp; fast alles hängt darunter. Praktisch relevant ist nicht die komplette Ontologie, sondern die Idee der Vererbung: Ein `Product` ist ein `Thing` und kann deshalb allgemeine Eigenschaften wie `name` haben, aber auch produktspezifische wie `offers`. In der Praxis sieht man `schema.org` heute meist als JSON-LD im Head oder Body, nicht mehr als Microdata im sichtbaren HTML. Für das Architekturverständnis ist aber beides dasselbe Prinzip: strukturierte Bedeutung explizit machen.
 
 --
 
@@ -536,7 +819,7 @@ HTML-Elemente gehören zu formalen Kategorien. Diese Kategorien sagen nicht nur,
 
 
 Notes:
-Content Categories sind die formale Seite der HTML-Semantik. Sie helfen dabei zu verstehen, welche Elemente nur im Textfluss vorkommen, welche ganze Abschnitte bilden, welche interaktiv sind und welche ausschließlich Metadaten beschreiben. Das Venn-Diagramm zeigt, dass viele Elemente mehreren Kategorien gleichzeitig angehören koennen. Ein `<a>` ist zum Beispiel Phrasing Content und zugleich Interactive Content.
+Content Categories sind die formale Seite der HTML-Semantik. Sie helfen dabei zu verstehen, welche Elemente nur im Textfluss vorkommen, welche ganze Abschnitte bilden, welche interaktiv sind und welche ausschließlich Metadaten beschreiben. Das Venn-Diagramm zeigt, dass viele Elemente mehreren Kategorien gleichzeitig angehören können. Ein `<a>` ist zum Beispiel Phrasing Content und zugleich Interactive Content.
 
 --
 
@@ -550,28 +833,18 @@ Content Categories sind die formale Seite der HTML-Semantik. Sie helfen dabei zu
 
 <div class="column">
 
-
-<div class="c-definition">
-
-### Die wichtigste Regel
+### Wesentliche Regel
 
 **Phrasing Content** darf in laufendem Text stehen.  
 **Flow Content** ist allgemeiner und darf viele Blockelemente enthalten.
 
 Deshalb ist ein `<span>` in einem `<p>` normal, ein `<div>` in einem `<p>` aber **invalides HTML**.
 
-</div>
-
-
-
-<div class="c-note">
 
 ```html
 <p>Gültig: <span>Inline-Inhalt</span></p>
 <p>Ungültig: <div>Block-Inhalt</div></p>
 ```
-
-</div>
 
 
 </div>
@@ -607,7 +880,7 @@ Browser reparieren ungültiges HTML oft stillschweigend. Genau das macht solche 
 
 
 Notes:
-Die wichtigste praktische Regel ist die Unterscheidung zwischen Phrasing Content und Flow Content. Phrasing Content ist alles, was innerhalb eines laufenden Textes sinnvoll ist. Flow Content ist breiter und umfasst auch blockartige Strukturen wie Listen, Abschnitte oder Container. Wenn man ein Flow-Element wie `<div>` in einen Paragraphen setzt, bricht der Browser den Paragraphen implizit ab. Das Ergebnis wirkt oft „fast richtig“, ist aber strukturell falsch und fuehrt zu schwer lesbaren Layout-Bugs.
+Phrasing Content umfasst Inhalte, die innerhalb eines laufenden Textes stehen können. Flow Content ist breiter und umfasst auch blockartige Strukturen wie Listen, Abschnitte oder Container. Wenn ein Flow-Element wie `<div>` in einen Paragraphen gesetzt wird, bricht der Browser den Paragraphen implizit ab. Das Ergebnis wirkt oft „fast richtig“, ist aber strukturell falsch und führt zu schwer lesbaren Layout-Bugs.
 
 --
 
@@ -702,14 +975,15 @@ Der moderne Browser ist eine vollständige Anwendungsplattform — vergleichbar 
 
 ## Responsive Images
 
-Ein Bild sollte nicht auf jedem Gerät gleich ausgeliefert werden. Bei `img` gibt es dafür drei zentrale Attribute:
+Bilder sollten nicht pauschal in der größten Variante ausgeliefert werden. `img` kann dem Browser mehrere passende Ressourcen anbieten:
 
 
-<div class="grid-2-1">
+<div class="grid-2-1 gap-sm small">
 
 
 <div class="column">
 
+### Beispiel
 
 ```html
 <img
@@ -719,41 +993,40 @@ Ein Bild sollte nicht auf jedem Gerät gleich ausgeliefert werden. Bei `img` gib
   alt="Produktfoto eines Kopfhörers">
 ```
 
-
-<div class="c-definition">
-
-**`src`** ist das Fallback-Bild. Wenn der Browser `srcset` oder `sizes` nicht auswertet, lädt er mindestens diese Datei.
-
 </div>
 
-
-
-<div class="c-definition">
-
-**`srcset`** listet Varianten derselben Bildinformation auf, meist in verschiedenen Breiten: `400w`, `800w`, `1600w`.
-
-</div>
-
-
-
-<div class="c-definition">
-
-**`sizes`** beschreibt, wie breit das Bild im Layout ungefähr dargestellt wird. Erst damit kann der Browser aus `srcset` sinnvoll auswählen.
-
-</div>
-
-
-</div>
 
 
 <div class="column">
 
-![Schematische Darstellung von img src, srcset/sizes und picture für responsive images.](/courses/web-and-data-engineering/figures/responsive-images.svg)
+
+<div class="c-definition">
+
+### Semantik
+
+- **`src`** ist der Fallback
+- **`srcset`** beschreibt das Angebot
+- **`sizes`** beschreibt die erwartete Layout-Breite
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
 
 
 <div class="c-note">
 
-**Browser-Logik:** `sizes` sagt, wie viel Platz das Bild im Layout bekommt; `srcset` sagt, welche Dateibreiten verfügbar sind; der Browser kombiniert beides mit der Pixeldichte des Geräts.
+### Entscheidung
+
+Der Browser kombiniert:
+
+- Layout-Breite aus `sizes`
+- verfügbare Dateien aus `srcset`
+- Pixeldichte des Geräts
 
 </div>
 
@@ -761,32 +1034,51 @@ Ein Bild sollte nicht auf jedem Gerät gleich ausgeliefert werden. Bei `img` gib
 </div>
 
 
+
+<div class="column">
+
+
+<div class="c-green">
+
+### Kernidee
+
+Gleiche Bildinformation, andere Auflösung.  
+Das ist **Resolution Switching**, kein Ersatz für CSS-Layout.
+
+</div>
+
+
 </div>
 
 
 
-<div class="small">
+</div>
 
-- `srcset` + `sizes` = **Resolution Switching**
-- Details: [MDN Responsive images](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images)
+
+
+<div class="c-orange gap">
+
+Details: [MDN Responsive images](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images)
 
 </div>
 
 
 Notes:
-`src`, `srcset` und `sizes` lösen zusammen das Problem, dass ein Bild im Markup zwar nur einmal vorkommt, aber in verschiedenen Layouts unterschiedlich groß erscheint. `srcset` mit `w`-Deskriptoren beschreibt reale Quelldateien mit ihren Pixelbreiten. `sizes` beschreibt dagegen nicht die Dateigröße, sondern die erwartete Darstellungsbreite im Layout, zum Beispiel `100vw` auf schmalen Displays und `50vw` auf breiten Displays. Der Browser berechnet daraus die benötigte Ressourcenbreite und berücksichtigt zusätzlich die Device Pixel Ratio, also etwa Retina-Displays mit 2x oder 3x Pixeldichte. Wichtig: `srcset` ist kein CSS-Ersatz. Ohne `sizes` nimmt der Browser bei `w`-Deskriptoren häufig `100vw` an, was leicht zu übergroßen Downloads führt.
+`src`, `srcset` und `sizes` lösen zusammen das Problem, dass ein Bild im Markup zwar nur einmal vorkommt, aber in verschiedenen Layouts unterschiedlich groß erscheint. `src` ist die robuste Baseline: Wenn der Browser die erweiterten Angaben nicht nutzt, gibt es trotzdem ein Bild. `srcset` mit `w`-Deskriptoren beschreibt reale Quelldateien mit ihren Pixelbreiten. `sizes` beschreibt dagegen nicht die Dateigröße, sondern die erwartete Darstellungsbreite im Layout, zum Beispiel `100vw` auf schmalen Displays und `50vw` auf breiten Displays. Der Browser berechnet daraus die benötigte Ressourcenbreite und berücksichtigt zusätzlich die Device Pixel Ratio, also etwa Retina-Displays mit 2x oder 3x Pixeldichte. Ohne `sizes` nimmt der Browser bei `w`-Deskriptoren häufig `100vw` an, was leicht zu übergroßen Downloads führt. Wichtig ist die Abgrenzung zu `<picture>`: `srcset`/`sizes` wählen meist eine andere Auflösung derselben Bildinformation; `<picture>` wird relevant, wenn Ausschnitt, Komposition oder Format wechseln sollen.
 
 --
 
 ## Responsive Images mit `<picture>`
 
-Wenn sich nicht nur die Auflösung, sondern **der Bildausschnitt oder das Format** ändern soll, reicht `img` allein nicht mehr:
+`<picture>` kommt ins Spiel, wenn nicht nur die Auflösung, sondern **Ausschnitt, Komposition oder Format** wechseln sollen:
 
 
-<div class="grid-2">
+<div class="grid-2 gap-sm small">
 
 
 <div class="column">
+
+### Beispiel
 
 ```html
 <picture>
@@ -803,14 +1095,15 @@ Wenn sich nicht nur die Auflösung, sondern **der Bildausschnitt oder das Format
 ```
 
 
-<div class="c-definition">
+<div class="c-info gap-sm">
 
-**`<source media="...">`** wählt je nach Viewport oder anderen Media Queries unterschiedliche Bildvarianten.
+Details: [MDN `<picture>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/picture)
+
+</div>
+
 
 </div>
 
-
-</div>
 
 
 <div class="column">
@@ -818,21 +1111,22 @@ Wenn sich nicht nur die Auflösung, sondern **der Bildausschnitt oder das Format
 
 <div class="c-definition">
 
-**Art Direction** bedeutet: dieselbe Information wird für verschiedene Kontexte anders zugeschnitten oder komponiert, etwa engerer Crop auf Mobile.
+### Semantik
 
-</div>
+`<source>` beschreibt mögliche Varianten.  
+Das innere `<img>` ist das tatsächliche Bild-Element.
 
+### Wann?
 
+- anderer Bildausschnitt auf Mobile
+- anderes Format wie `AVIF` oder `WebP`
 
-<div class="c-definition">
+### Wie
 
-**Formatwahl** bedeutet: der Browser kann moderne Formate wie `AVIF` oder `WebP` bevorzugen, wenn er sie unterstützt.
+`img[srcset][sizes]` wählt eine Auflösung.  
+`<picture>` wählt zuerst die passende Bildvariante.
 
-</div>
-
-
-
-<div class="c-note">
+### Fallback
 
 Das innere `<img>` bleibt Pflicht: Es ist Fallback, liefert das `alt`-Attribut und wird verwendet, wenn keine `source`-Regel greift.
 
@@ -842,21 +1136,14 @@ Das innere `<img>` bleibt Pflicht: Es ist Fallback, liefert das `alt`-Attribut u
 </div>
 
 
-</div>
-
-
-
-<div class="small">
-
-- `<picture>` = **Art Direction** oder Format-Auswahl
-- `img[srcset][sizes]` = **gleiche Bildinformation**, nur andere Auflösung
-- Details: [MDN `<picture>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/picture)
 
 </div>
+
+
 
 
 Notes:
-`<picture>` erweitert `img` um eine Auswahlstufe vor dem eigentlichen Laden des Bildes. Der Browser prüft die `source`-Elemente der Reihe nach und verwendet die erste passende Kombination aus `media`-Bedingung und optionalem `type`. Das ist didaktisch wichtig, weil hier zwei verschiedene Ziele unterschieden werden müssen. Erstens **Art Direction**: Für Mobile wird oft ein anderer Ausschnitt benötigt, weil ein breites Banner auf schmalem Bildschirm inhaltlich unlesbar wird. Zweitens **Formatverhandlung**: Ein Browser, der `AVIF` unterstützt, kann eine kleinere Datei laden; ältere Browser fallen auf JPEG oder PNG zurück. `<picture>` ersetzt `srcset` nicht, sondern ergänzt es: Innerhalb eines `source` kann wiederum `srcset` stehen, um für den gewählten Ausschnitt mehrere Auflösungen anzubieten.
+`<picture>` erweitert `img` um eine Auswahlstufe vor dem eigentlichen Laden des Bildes. Der Browser prüft die `source`-Elemente der Reihe nach und verwendet die erste passende Kombination aus `media`-Bedingung und optionalem `type`. Es gibt zwei Hauptfälle: **Art Direction**, bei der auf kleinen Displays ein anderer Ausschnitt sinnvoll ist, und **Formatverhandlung**, bei der moderne Formate wie `AVIF` oder `WebP` bevorzugt werden können. Das innere `<img>` bleibt semantisch wichtig: Es liefert das eigentliche Bildelement, den Fallback und das `alt`-Attribut. `<picture>` ersetzt `srcset` nicht, sondern ergänzt es. Innerhalb eines `source` kann wiederum `srcset` stehen, um für die gewählte Variante mehrere Auflösungen anzubieten.
 
 --
 
@@ -922,6 +1209,124 @@ JavaScript wurde 1995 von Brendan Eich in zehn Tagen entworfen und hieß ursprü
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## JavaScript in 60 Sekunden
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+### Was ist JavaScript?
+
+- die **native Programmiersprache des Browsers**
+- wird meist über `<script>` oder Bundles ausgeliefert
+- arbeitet ereignisgesteuert und kann auf DOM und Web APIs zugreifen
+
+### Historischer Kontext
+
+- 1995 bei Netscape entstanden
+- entworfen von **Brendan Eich**
+- trotz des Namens **nicht** mit Java verwandt
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+### Welche Art Sprache ist das?
+
+- dynamisch typisiert
+- multiparadigmatisch
+- JIT-kompiliert in modernen Browsern
+- für kurze Interaktionen und lange Anwendungen gleichermaßen nutzbar
+
+### Rolle im Frontend
+
+JavaScript macht statisches HTML zu einer **interaktiven Anwendung**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+JavaScript wird im Browser von einer JavaScript-Engine ausgeführt, etwa V8 in Chrome, SpiderMonkey in Firefox oder JavaScriptCore in Safari. Die Sprache selbst wird als ECMAScript standardisiert; DOM, Fetch, Storage oder Canvas gehören dagegen zu den Web APIs der Browserplattform. Diese Trennung erklärt, warum derselbe JavaScript-Sprachkern auch in Node.js läuft, dort aber andere APIs verfügbar sind als im Browser.
+
+--
+
+<!-- .slide: class="smaller code-regular" -->
+
+## Kurzes Beispiel: Verhalten im Browser
+
+```html
+<button id="buy">In den Warenkorb</button>
+<p id="status">Noch nichts passiert.</p>
+```
+
+<div class="gap">
+
+
+</div>
+
+
+```javascript
+const button = document.querySelector('#buy');
+const status = document.querySelector('#status');
+
+button.addEventListener('click', () => {
+  status.textContent = 'Produkt hinzugefügt.';
+});
+```
+
+
+<div class="c-orange gap">
+
+HTML liefert die Elemente. JavaScript registriert das Verhalten. Erst der Klick löst die Änderung aus.
+
+</div>
+
+
+Notes:
+Der Code registriert einen Event Listener und wird erst ausgeführt, wenn der Button tatsächlich geklickt wird. Das ist der Kern ereignisgesteuerter Programmierung im Browser: JavaScript läuft nicht permanent, sondern reagiert auf Eingaben, Timer, Netzwerkantworten oder andere Browserereignisse. Die Änderung von `textContent` verändert den DOM-Knoten; der Browser übernimmt anschließend die sichtbare Aktualisierung.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Alternative Code-Auslieferung im Browser: TypeScript und WebAssembly
+
+JavaScript ist die **native Standardsprache** des Browsers. In der Praxis tauchen daneben oft noch **TypeScript** und **WebAssembly (WASM)** auf.
+
+| Modell | Typische Herkunft | Stärken | Grenzen |
+|---|---|---|---|
+| **JavaScript** | direkt im Browser ausgeführt | DOM, Events, schnelle UI-Entwicklung, riesiges Ökosystem | dynamische Typisierung kann große Codebasen schwieriger machen |
+| **TypeScript** | Erweiterung von JavaScript mit Typen | bessere Wartbarkeit, Tooling, Fehler früher sichtbar | läuft nicht direkt im Browser, muss zu JavaScript kompiliert werden |
+| **WebAssembly (WASM)** | kompiliert aus Rust, C/C++, Go u. a. | hohe Ausführungsgeschwindigkeit, Portierung bestehender Bibliotheken, numerische/mediale Workloads | kein Ersatz für DOM-APIs, meist JavaScript als Host nötig |
+
+### Einordnung
+
+- **JavaScript bleibt die Orchestrierungsschicht** für UI, Events und Browser-APIs.
+- **TypeScript** ist keine Konkurrenz, sondern eine Entwicklungsvariante von JavaScript.
+- **WASM ergänzt JavaScript** dort, wo Rechenleistung oder bestehender Native-Code wichtiger sind als DOM-Nähe.
+- Typische Beispiele: Bild- und Videobearbeitung, Audio, CAD, Spiele, In-Browser-Datenverarbeitung.
+
+Notes:
+WASM ist keine „neue Frontend-Sprache", sondern ein binäres Ausführungsformat für eine Sandbox im Browser. Es erweitert das Deployment-Spektrum: Statt Logik nur als JavaScript-Bundle auszuliefern, kann man Teile auch kompiliert bereitstellen. DOM-Manipulation, Event-Handling und die meisten Web APIs bleiben in der Praxis meist bei JavaScript; WASM eignet sich vor allem für rechenintensive Hotspots oder zur Wiederverwendung existierender Bibliotheken aus anderen Sprachen. TypeScript verändert dagegen nicht das Laufzeitmodell, sondern ergänzt den Entwicklungsprozess um statische Typprüfung.
+
+--
+
 <!-- .slide: class="smaller code-regular" -->
 
 ## Der DOM: HTML als programmierbare Struktur
@@ -939,9 +1344,12 @@ document
 └─ html
    ├─ head
    └─ body
-      ├─ h2  "Funkkopfhörer"
-      ├─ p   "€ 79,99"
-      └─ button "In den Warenkorb"
+      └─ article.product
+         ├─ h2  "Funkkopfhörer"
+         ├─ p.price  "€ 79,99"
+         └─ button
+            ├─ "In den Warenkorb"
+            └─ span.cart-badge  "0"
 ```
 
 </div>
@@ -991,39 +1399,93 @@ Der DOM ist nicht das HTML-Dokument — er ist der interne Baum, den der Browser
 
 ## JavaScript als Brücke zwischen HTML und CSS
 
-JavaScript ist die **einzige** Frontend-Technologie, die sowohl den DOM (HTML) als auch das CSSOM (CSS) verändern kann. Das macht JS zum **Orchestrator**:
+JavaScript orchestriert Verhalten: Es liest HTML-Zustand, verändert den DOM und kann CSS über Klassen oder Custom Properties auslösen.
 
-**CSSOM** bedeutet *CSS Object Model*: der interne Baum der CSS-Regeln, den der Browser aus Stylesheets und Inline-Styles aufbaut. Wenn JavaScript Klassen, Inline-Styles oder Custom Properties ändert, beeinflusst es damit nicht nur HTML, sondern auch die berechnete Darstellung.
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+### Drei Strukturen
+
+- **HTML → DOM:** Struktur der Seite
+- **CSS → CSSOM:** berechnete Darstellung
+- **JavaScript:** liest und ändert beide zur Laufzeit
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
 
 ```javascript
-// JS → HTML: DOM-Struktur ändern
-const msg = document.createElement('div');
-msg.textContent = 'Hinzugefügt!';
-document.body.appendChild(msg);
+const button = document.querySelector('#buy');
+const badge = document.querySelector('.cart-badge');
 
-// JS → CSS: Klassen steuern Darstellung
-button.classList.add('loading');       // CSS-Transition startet
-button.classList.remove('loading');    // CSS-Transition endet
+button.classList.add('loading');  // CSS reagiert
+badge.textContent = '3';          // DOM ändert sich
 
-// JS → CSS: Custom Properties dynamisch setzen
-document.documentElement.style.setProperty('--cart-count', '3');
+document.documentElement
+  .style.setProperty('--cart-count', '3');
 ```
 
-### Die Richtung der Abhängigkeit
+</div>
 
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Abhängigkeit
+
+```text
+HTML  ← JavaScript → CSS
+DOM      Verhalten    CSSOM
 ```
-HTML  ←——  JavaScript  ——→  CSS
-(DOM)    liest & ändert    (CSSOM)
-```
 
-- **HTML → JS:** HTML existiert ohne JS (Links, Formulare funktionieren). JS **erweitert** HTML.
-- **CSS → JS:** CSS reagiert auf Zustände (`:hover`, `:checked`) ohne JS. JS **triggert** CSS-Übergänge über Klassen.
-- **JS → beide:** Nur JS kann DOM und CSSOM gleichzeitig manipulieren — deshalb ist JS die Verhaltensschicht.
+HTML und CSS funktionieren in vielen Fällen ohne JavaScript. JavaScript erweitert sie, wenn neuer Zustand oder Serverkommunikation nötig wird.
 
-**Konsequenz:** Wann immer ein visueller Effekt auch per CSS lösbar ist (Transition, Animation, Hover), sollte CSS es übernehmen — JS steuert nur den **Auslöser** (Klasse setzen), nicht die **Animation** selbst.
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+### Konsequenz
+
+CSS übernimmt Darstellung und Animation.  
+JavaScript setzt nur den Zustand:
+
+- Klasse hinzufügen
+- Attribut ändern
+- DOM-Knoten erzeugen
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 Notes:
-Diese Aufteilung ist nicht nur Stil — sie ist auch Performance. CSS-Transitions und -Animations laufen im Compositor-Thread des Browsers, also *außerhalb* des JavaScript-Hauptthreads. Eine in CSS animierte Karte bleibt flüssig, auch wenn JavaScript gerade beschäftigt ist. Eine in JavaScript animierte Karte (mit `requestAnimationFrame` und manuellem Setzen von `style.left`) ruckelt, sobald JS andere Arbeit hat. Diese architektonische Trennung „JS triggert, CSS animiert" ist die Grundlage für 60-FPS-Webseiten.
+CSSOM bedeutet *CSS Object Model*: der interne Baum der CSS-Regeln, den der Browser aus Stylesheets und Inline-Styles aufbaut. Wenn JavaScript Klassen, Inline-Styles oder Custom Properties ändert, beeinflusst es nicht nur HTML, sondern auch die berechnete Darstellung. Diese Aufteilung ist nicht nur Stil, sondern auch Performance: CSS-Transitions und -Animations können vom Browser optimiert und teilweise im Compositor ausgeführt werden, während JavaScript auf dem Hauptthread läuft. Die architektonische Regel lautet daher: JavaScript triggert Zustandswechsel, CSS beschreibt die Darstellung dieses Zustands.
 
 --
 
@@ -1033,22 +1495,24 @@ Diese Aufteilung ist nicht nur Stil — sie ist auch Performance. CSS-Transition
 
 JavaScript arbeitet **ereignisgesteuert**: Code wird ausgeführt, wenn etwas passiert. In unserem Online-Shop:
 
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
 ```javascript
 const button = document.querySelector('#add-to-cart');
 
 button.addEventListener('click', async (event) => {
-  // 1. Sofortiges visuelles Feedback
   button.textContent = 'Wird hinzugefügt...';
   button.disabled = true;
 
-  // 2. Server kontaktieren (asynchron)
   const response = await fetch('/api/cart', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ productId: 42, quantity: 1 })
   });
 
-  // 3. UI aktualisieren basierend auf Serverantwort
   if (response.status === 201) {
     button.textContent = '✓ Im Warenkorb';
     updateCartBadge();
@@ -1056,10 +1520,23 @@ button.addEventListener('click', async (event) => {
 });
 ```
 
+</div>
+
+
+<div class="column figure-100">
+
+![Browser-Threading-Modell: Nutzerereignisse landen in der Event Queue, JavaScript verarbeitet Handler auf dem Main Thread, asynchrone Browser APIs melden Ergebnisse zurück und DOM-Änderungen lösen Rendering aus.](/courses/web-and-data-engineering/figures/browser-event-threading.svg)
+
+</div>
+
+
+</div>
+
+
 **Diskussionsfrage:** Der Button wird sofort deaktiviert und der Text geändert, **bevor** die Serverantwort eintrifft. Warum macht man das? Was passiert, wenn die Netzwerkverbindung abbricht?
 
 Notes:
-Das **optimistische UI-Update** ist ein etabliertes Muster für wahrgenommene Performance: Statt auf die Serverantwort zu warten (typisch 100–500ms Netzwerklatenz), aktualisiert der Client sofort seinen lokalen Zustand und zeigt das Feedback. Wenn der Server bestätigt, gibt es nichts zu tun. Wenn der Server fehlschlägt, muss der lokale Zustand zurückgerollt werden — der Button-Text wird zurückgesetzt, eine Fehlermeldung erscheint. Das Rollback ist die schwierigere Hälfte: Der Client muss den vorherigen Zustand zwischengespeichert haben und bei Fehler exakt wiederherstellen. Bibliotheken wie React Query oder SWR stellen dafür explizite `onMutate`/`onError`-Hooks bereit, die das Rollback strukturiert handhaben.
+JavaScript im Browser läuft für UI-Code typischerweise auf dem Main Thread. Das bedeutet nicht, dass der Browser nur einen Thread hat: Netzwerk, Timer, Rendering-Teile und andere Browser-APIs können parallel oder außerhalb des JavaScript-Call-Stacks arbeiten. Der Event Loop sorgt dafür, dass fertige Ereignisse und Promise-Fortsetzungen nacheinander wieder auf den Main Thread gelangen. Genau deshalb blockiert `await fetch(...)` nicht die gesamte Seite: Die Netzwerkarbeit läuft außerhalb des JavaScript-Handlers, und der Handler wird später fortgesetzt. Das **optimistische UI-Update** ist ein etabliertes Muster für wahrgenommene Performance: Statt auf die Serverantwort zu warten, aktualisiert der Client sofort seinen lokalen Zustand und zeigt Feedback. Wenn der Server fehlschlägt, muss dieser Zustand zurückgerollt werden.
 
 --
 
@@ -1094,7 +1571,7 @@ if (result.status === 201) {
 | `response.json()` | Body parsen — die Repräsentation der Ressource |
 
 Notes:
-Die Fetch API ist die moderne Schnittstelle zwischen JavaScript und HTTP — sie hat den älteren `XMLHttpRequest` (XHR) abgelöst. Konzeptionell wichtig: `fetch()` gibt ein **Promise** zurück, das sich auflöst, sobald die *Header* der Antwort eingetroffen sind — nicht der vollständige Body. `response.json()` ist ein zweiter Schritt, der den Body parst und ebenfalls ein Promise zurückgibt. Das mag umständlich wirken, ermöglicht aber Streaming: Bei einer großen Antwort können Sie schon mit den Headern arbeiten (z.B. Status oder Content-Type prüfen), bevor der gesamte Body geladen ist. Diese Tabelle zeigt explizit, wie 1:1 die Fetch-API-Felder auf HTTP-Konzepte abbilden — eine Brücke zur nächsten Vorlesung.
+Die Fetch API ist die moderne Schnittstelle zwischen JavaScript und HTTP und hat den älteren `XMLHttpRequest` (XHR) abgelöst. `fetch()` gibt ein **Promise** zurück, das sich auflöst, sobald die *Header* der Antwort eingetroffen sind, nicht erst nach dem vollständigen Body. `response.json()` ist ein zweiter asynchroner Schritt, der den Body parst. Diese Trennung ermöglicht Streaming und erlaubt es, Status oder `Content-Type` zu prüfen, bevor große Antwortkörper vollständig verarbeitet werden.
 
 --
 
@@ -1129,41 +1606,7 @@ Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerk
 Robuste Fehlerbehandlung ist keine Kür — sie ist der Unterschied zwischen einem Prototyp und einem Produktivsystem.
 
 Notes:
-Eine subtile Falle bei Fetch: `fetch()` wirft *nur* dann eine Exception, wenn das Netzwerk komplett versagt (kein DNS, keine Verbindung). HTTP-Statuscodes wie 404 oder 500 gelten technisch als „erfolgreich übertragen" — `fetch` liefert ein gültiges Response-Objekt, und `response.ok` ist `false`. Wer das nicht prüft, behandelt Fehlerseiten wie gültige Daten und versucht, HTML-Errorpages als JSON zu parsen. Das ist eine der häufigsten Anfänger-Fallen mit der Fetch API. Robuste Patterns prüfen immer `if (!response.ok) throw ...` vor dem `.json()`-Aufruf.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Warum Frameworks existieren: Das Skalierungsproblem
-
-Unser Warenkorb-Button funktioniert mit `querySelector` und `addEventListener`. Was passiert, wenn die Anwendung wächst?
-
-```javascript
-// 5 Zeilen für einen Button — übersichtlich
-button.addEventListener('click', () => { badge.textContent = '3'; });
-
-// Aber: 50 Produkte, Filter, Sortierung, Pagination, Warenkorb-Sidebar...
-// → Hunderte querySelector-Aufrufe, manuelles DOM-Tracking, Zustandschaos
-```
-
-### Das Problem imperativer DOM-Manipulation
-
-| Komplexität | Vanilla JS | Framework (React/Vue) |
-|---|---|---|
-| Ein Button | Einfach, direkt | Overhead — zu viel Abstraktion |
-| 10 interaktive Elemente | Machbar, wird unübersichtlich | Komponenten helfen |
-| Komplexe SPA (Shop, Dashboard) | Zustand und DOM divergieren | **Deklarativ:** UI = f(state) |
-
-### Der konzeptionelle Unterschied
-
-- **Imperativ** (Vanilla JS): „Finde Element X, ändere Property Y, füge Z ein"
-- **Deklarativ** (React/Vue): „So soll die UI aussehen, wenn der Zustand S ist" — Framework berechnet die DOM-Änderungen
-
-Frameworks lösen nicht ein Syntax-Problem, sondern ein **Zustandsmanagement-Problem**: Wie bleibt die UI konsistent, wenn sich Daten ändern?
-
-Notes:
-Die zentrale Erkenntnis: Frameworks wie React sind keine syntaktischen Verschönerungen, sondern eine **konzeptionelle Verschiebung**. Imperatives DOM („greife Element, ändere Property") wird durch deklarative UI ersetzt („so soll es aussehen, wenn der Zustand X ist"). Das Framework berechnet automatisch die minimalen DOM-Änderungen — das sogenannte „Reconciliation" oder „Virtual DOM Diffing" bei React. Für kleine Anwendungen ist das Overkill, weil 50 Zeilen Vanilla JS reichen. Sobald aber Zustand an mehreren Stellen synchron gehalten werden muss (Warenkorb-Badge, Sidebar, Modal, Hauptanzeige), wird imperatives DOM-Tracking unwartbar und der Framework-Overhead lohnt sich.
+Eine subtile Falle bei Fetch: `fetch()` wirft *nur* dann eine Exception, wenn das Netzwerk komplett versagt, etwa bei DNS-Fehlern oder fehlender Verbindung. HTTP-Statuscodes wie 404 oder 500 gelten technisch als erfolgreich übertragene Antworten; `fetch` liefert ein gültiges Response-Objekt, und `response.ok` ist `false`. Ohne Statusprüfung versucht Code häufig, HTML-Fehlerseiten oder leere Bodies als JSON zu parsen. Robuste Patterns prüfen deshalb `response.ok` und den `Content-Type`, bevor `response.json()` aufgerufen wird.
 
 --
 
@@ -1182,7 +1625,7 @@ Die zentrale Erkenntnis: Frameworks wie React sind keine syntaktischen Verschön
 Die Wahl des Frameworks ist eine **Architekturentscheidung** — sie bestimmt, wie Zustand verwaltet, Code organisiert und die Anwendung deployt wird.
 
 Notes:
-Diese Tabelle ist bewusst nicht vollständig — das JavaScript-Ökosystem ist riesig und ändert sich schnell. Wichtig sind die *Kategorien*: Browser-Frameworks (UI), Server-Runtimes (Node.js und Konkurrenz), Full-Stack-Frameworks (Server + Client kombiniert), TypeScript als Typsystem und Build-Tools für die Auslieferung. Wer diese fünf Kategorien kennt, kann jede neue Technologie sofort einordnen. Die Wahl ist nie technisch neutral: Sie bestimmt, wie das Team arbeitet, welche Bibliotheken zur Verfügung stehen, wie deployment funktioniert und wie schwer es ist, neue Entwickler einzuarbeiten.
+Das JavaScript-Ökosystem ist riesig und ändert sich schnell, aber die Hauptkategorien bleiben relativ stabil: Browser-Frameworks für UI, Server-Runtimes wie Node.js, Full-Stack-Frameworks für Server und Client, TypeScript als Typsystem und Build-Tools für die Auslieferung. Die Wahl ist nie technisch neutral: Sie bestimmt, wie Teams arbeiten, welche Bibliotheken verfügbar sind, wie Deployment funktioniert und wie hoch die Einstiegskosten für neue Entwicklerinnen und Entwickler sind.
 
 --
 
@@ -1191,7 +1634,7 @@ Diese Tabelle ist bewusst nicht vollständig — das JavaScript-Ökosystem ist r
 
 <div class="takeaway">
 
-JavaScript ist die **Verhaltensschicht** des Webs und zugleich der Orchestrator: Es ist die einzige Technologie, die sowohl DOM (HTML) als auch CSSOM (CSS) verändern kann. Das Ausführungsmodell — single-threaded mit Event Loop — ermöglicht responsive UIs trotz Netzwerk-Latenz. Die Fetch API verbindet Frontend mit Backend. Für Web Engineering sind drei Konzepte entscheidend: das **Event-Loop-Modell**, die **Abhängigkeitsrichtung** (JS erweitert HTML/CSS, nicht umgekehrt) und die **Grenze zu Frameworks** (ab welcher Komplexität lohnt deklarative UI).
+JavaScript ist die **Verhaltensschicht** des Webs und zugleich der Orchestrator: Es ist die einzige Technologie, die sowohl DOM (HTML) als auch CSSOM (CSS) verändern kann. Das Ausführungsmodell — single-threaded mit Event Loop — ermöglicht responsive UIs trotz Netzwerk-Latenz. Die Fetch API verbindet Frontend mit Backend. Für Web Engineering sind drei Konzepte entscheidend: das **Event-Loop-Modell**, die **Abhängigkeitsrichtung** (JS erweitert HTML/CSS, nicht umgekehrt) und die Trennung zwischen **Sprachkern** und **Browser-APIs**.
 
 </div>
 
@@ -1215,6 +1658,224 @@ Das Event-Loop-Modell ist das einheitliche Erklärungsmodell für scheinbar unzu
 
 Notes:
 CSS ist die anspruchsvollste der drei Frontend-Sprachen, weil sie vollständig deklarativ ist: Die Entwicklerin beschreibt Constraints, der Browser löst sie auf — der konkrete Pixel-Wert ist nie direkt spezifizierbar. Die meisten schwer debugbaren Bugs in Frontend-Code sind keine JavaScript-Fehler, sondern unverstandene CSS-Spezifität, Cascade oder Layout-Wechselwirkungen. Die Kaskade, das Spezifitätssystem und das Box-Modell sind keine Details, sondern die Kernmechanik — wer sie versteht, kann jedes CSS-Framework schnell lesen und anpassen, weil alle Frameworks auf denselben Browser-Grundlagen aufbauen.
+
+--
+
+<!-- .slide: class="smaller code-regular" -->
+
+## CSS in 60 Sekunden
+
+CSS beschreibt, **wie HTML dargestellt wird**: Farben, Abstände, Schrift, Layout, Zustände und Responsivität.
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+### Regel
+
+```css
+p.highlight {
+  color: orange;
+  font-weight: 600;
+}
+```
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Semantik
+
+- **Selektor**: `p.highlight` wählt Elemente aus
+- **Deklaration**: `color: orange` setzt Stil
+- **Regelblock**: alles zwischen `{ ... }`
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Browser entscheidet
+
+- Kaskade: Welche Regel gilt?
+- Spezifität: Welche Regel ist stärker?
+- Vererbung: Was wandert zu Kindern?
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+### Kernidee
+
+CSS ist **deklarativ**: Man beschreibt Regeln und Constraints. Der Browser berechnet daraus konkrete Pixel.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+CSS ist keine Programmiersprache im imperativen Sinn. Es gibt keine Anweisung „zeichne bei x=200, y=300", sondern Regeln, die auf Elemente matchen. Der Browser löst anschließend Konflikte über Kaskade, Spezifität, Ursprung und Reihenfolge auf. Vererbung ist davon getrennt: Eigenschaften wie `color` oder `font-family` wandern von Eltern zu Kindern, Eigenschaften wie `margin`, `padding` oder `border` nicht. Genau dieses Regelmodell macht CSS leistungsfähig, aber auch fehleranfällig, wenn man nicht versteht, warum eine Regel gewinnt.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Warum CSS als eigene Technologie?
+
+Dasselbe HTML soll in verschiedenen Kontexten unterschiedlich aussehen: Desktop, Mobile, Print, Dark Mode, reduzierte Bewegung.
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Ohne CSS
+
+- Darstellung steckt im HTML
+- Redesign betrifft viele Dateien
+- Layout wird mit Struktur vermischt
+- Gerätevarianten werden dupliziert
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+### Mit CSS
+
+- HTML bleibt Struktur und Semantik
+- Stylesheet kann viele Seiten steuern
+- Medien und Zustände sind abbildbar
+- Screenreader lesen die Struktur, nicht das Layout
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+CSS trennt **Bedeutung** von **Darstellung**. Das ist keine Kosmetik, sondern eine Architekturentscheidung.
+
+</div>
+
+
+Notes:
+Vor CSS wurden Webseiten mit `<font>`, `<center>`, Layout-Tabellen und Inline-Attributen wie `bgcolor` gestaltet. Das führte zu schlecht wartbaren Seiten: Jede Darstellungsänderung musste im HTML gesucht und angepasst werden. CSS wurde 1996 spezifiziert, um Darstellung von Struktur zu trennen. Dadurch kann dasselbe HTML auf dem Bildschirm anders aussehen als im Druck, mobil anders als auf Desktop und im Dark Mode anders als im Light Mode. Barrierefreiheit profitiert ebenfalls, weil semantische HTML-Struktur nicht durch rein visuelle Layouttricks ersetzt werden muss.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Was CSS ohne JavaScript kann
+
+CSS reagiert auf viele Zustände selbst. JavaScript ist erst nötig, wenn neuer Zustand erzeugt oder externe Daten verarbeitet werden.
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+### CSS reicht
+
+- Hover: `button:hover`
+- Fokus: `input:focus`
+- Formularstatus: `:valid`, `:invalid`
+- Geräte-/Theme-Kontext: `@media`
+- Übergänge: `transition`, `animation`
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### JavaScript nötig
+
+- Daten vom Server laden
+- DOM-Elemente erzeugen
+- Drag & Drop sortieren
+- Zustand berechnen oder speichern
+- Klassen als Auslöser setzen
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-green">
+
+**Faustregel:** CSS beschreibt Darstellung und Übergänge. JavaScript erzeugt oder verändert Zustand.
+
+</div>
+
+
+Notes:
+CSS kann mehr Interaktion abdecken, als oft angenommen wird: Hover- und Fokuszustände, Formularvalidierung, Media Queries, Container Queries, Dark Mode und einfache Übergänge benötigen kein JavaScript. Auch `<details>`/`<summary>` kann mit CSS gestaltet werden und liefert ein zugängliches Akkordeon ohne eigenen JS-State. JavaScript wird dann nötig, wenn Zustand aus externen Quellen entsteht oder aktiv verändert werden muss: Netzwerkdaten, Warenkorbstatus, dynamisch erzeugte DOM-Knoten, Drag & Drop oder persistente Speicherung.
 
 --
 
@@ -1243,13 +1904,19 @@ p.highlight  { color: orange; }
 **Aufgabe:** Der Paragraph matcht alle vier Selektoren. Welche Farbe wird angezeigt — und warum?
 
 Notes:
-Die häufigste Fehlintuition bei CSS ist, dass die Reihenfolge im Stylesheet entscheidet — Spezifität hat aber Vorrang. Die Reihenfolge im Stylesheet ist nur der Tiebreaker, wenn zwei Regeln identische Spezifität haben. Das Spezifitätssystem ist deterministisch: `(1,0,0)` (ID) schlägt immer `(0,99,99)` (Klassen + Elemente). Diese Fehlintuition ist die Wurzel des häufigsten CSS-Bug-Musters — eine Regel wird hinzugefügt, greift aber nicht, weil eine existierende Regel mit höherer Spezifität gewinnt. Der DevTools-Inspector zeigt überschriebene Eigenschaften mit einem Durchstreichen — das ist das wichtigste CSS-Debug-Werkzeug im Browser.
+Bei CSS entscheidet nicht nur die Reihenfolge im Stylesheet. Spezifität hat Vorrang; die Reihenfolge ist erst der Tiebreaker, wenn zwei Regeln identische Spezifität haben. Das Spezifitätssystem ist deterministisch: `(1,0,0)` (ID) schlägt immer `(0,99,99)` (Klassen + Elemente). Ein typisches Bug-Muster entsteht, wenn eine neue Regel korrekt formuliert ist, aber nicht greift, weil eine existierende Regel mit höherer Spezifität gewinnt. Der DevTools-Inspector zeigt solche überschriebenen Eigenschaften durchgestrichen an.
 
 --
 
 <!-- .slide: class="smaller" -->
 
 ## Auflösung: Spezifität entscheidet
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
 
 | Selektor | Spezifität (ID, Klasse, Element) | Farbe |
 |---|---|---|
@@ -1258,6 +1925,35 @@ Die häufigste Fehlintuition bei CSS ist, dass die Reihenfolge im Stylesheet ent
 | `p.highlight` | (0, 1, 1) | orange |
 | `#info` | (1, 0, 0) | **red** |
 
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Was bedeutet `(0, 1, 1)`?
+
+Die Werte zählen Selektor-Bestandteile:
+
+- erste Zahl: **IDs**
+- zweite Zahl: **Klassen/Pseudo-Klassen**
+- dritte Zahl: **Elemente**
+
+Beispiel: `p.highlight` = 0 IDs, 1 Klasse, 1 Element → `(0, 1, 1)`.
+
+Verglichen wird von links nach rechts.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
 **ID schlägt Klasse schlägt Element.** In großen Projekten führen Spezifitätskonflikte zu unerwartetem Verhalten — deshalb setzen moderne Projekte auf Konventionen (BEM) oder komponentenbezogenes CSS (Scoped Styles).
 
 Notes:
@@ -1265,130 +1961,12 @@ Die Spezifität wird als Tripel (ID, Klasse, Element) berechnet und lexikografis
 
 --
 
-<!-- .slide: class="smaller" -->
-
-## Warum existiert CSS als eigene Technologie?
-
-In den 1990ern wurde Darstellung direkt in HTML geschrieben: `<font color="red" size="5">`. Das führte zu einem fundamentalen Problem:
-
-| Problem | Ohne CSS | Mit CSS |
-|---|---|---|
-| **Redesign** | Jede HTML-Seite einzeln ändern | Ein Stylesheet ändern → alle Seiten betroffen |
-| **Verschiedene Geräte** | Eine Version für alle | Verschiedene Stylesheets: Screen, Print, Mobile |
-| **Barrierefreiheit** | Visuelles Layout = Dokumentstruktur | Screenreader ignoriert CSS, liest Struktur |
-| **Teamarbeit** | Designer ändert HTML | Designer ändert CSS, Entwickler ändert HTML |
-
-### Das Kernkonzept: Ein HTML, viele Darstellungen
-
-Dieselbe Shop-Seite kann mit **verschiedenem CSS** als Desktop-Layout, als mobile Ansicht, als Druckversion oder im Dark Mode erscheinen — ohne das HTML zu ändern. Das ist kein Feature, sondern der **Grund, warum CSS als separate Sprache existiert**.
-
-### Normal Flow zuerst
-
-- HTML-Elemente folgen zunächst dem **normal flow**
-- **Block-Elemente** beginnen auf einer neuen Zeile und nehmen typischerweise die volle verfügbare Breite ein
-- **Inline-Elemente** bleiben in derselben Zeile und nehmen nur so viel Platz ein wie ihr Inhalt braucht
-- Erst danach greifen `display`, `position`, Flexbox oder Grid als bewusste Abweichungen vom Standard
-
-### So sieht das aus
-
-```html
-<p>Absatz <span>Inline-Text</span> nach dem Wort.</p>
-<div>Dieses Block-Element steht in einer eigenen Zeile.</div>
-```
-
-**Im Browser:** Der Absatztext läuft in einer Zeile, das `span` bleibt im Textfluss, und das `div` startet darunter auf einer neuen Zeile.
-
-### CSS ist deklarativ, nicht imperativ
-
-CSS sagt nicht „zeichne ein Rechteck bei Pixel 200,300". CSS sagt „dieses Element soll 80% breit sein, zentriert, mit 1rem Abstand". Der **Browser** berechnet die konkreten Pixel. Das ist fundamental anders als Canvas/JavaScript-Zeichnen und der Grund, warum CSS-Layouts automatisch auf verschiedene Bildschirmgrößen reagieren können.
-
-Notes:
-Der historische Kontext ist wichtig: Vor CSS wurden Webseiten mit `<font>`, `<center>`, `<table>` für Layout und inline-Attributen wie `bgcolor` gestylt. Das hatte drei Probleme: Wartung (jede Seite einzeln ändern), Gerätevielfalt (eine Version für alle) und Barrierefreiheit (Layout-Tabellen verwirren Screenreader). CSS wurde 1996 spezifiziert, um diese Probleme zu lösen — indem Darstellung von Struktur getrennt wurde. Die Trennung ist so fundamental, dass sie bis heute das Grundprinzip des Webs ist — selbst Komponenten-Frameworks, die HTML/CSS/JS bündeln, halten die Schichten konzeptionell getrennt. Der Normal Flow ist die Default-Anordnung: block elements stapeln sich vertikal, inline elements fließen horizontal. Erst `display`, `position`, Flexbox oder Grid verändern das bewusst.
-
---
-
-## CSS in Kurzform
-
-CSS besteht aus **Selektoren** und **Deklarationen**:
-
-```css
-p.highlight {
-  color: orange;
-  font-weight: 600;
-}
-```
-
-- **Selektor**: `p.highlight` sagt, *welche* Elemente gemeint sind
-- **Deklaration**: `color: orange;` sagt, *wie* sie aussehen sollen
-- **Regelblock**: alles zwischen `{ ... }`
-
-### Was CSS auflöst
-
-- **Kaskade**: mehrere Regeln können denselben Stil setzen
-- **Spezifität**: manche Selektoren gewinnen bei Konflikten
-- **Vererbung**: manche Eigenschaften wandern von Eltern zu Kindern
-
-**Merksatz:** CSS beschreibt Stil als Regeln, nicht als Pixelbefehle.
-
-### Pseudo-Klassen
-
-Pseudo-Klassen sind Selektoren für **Zustände** oder **Positionen** eines Elements. Sie beginnen mit `:` und hängen an einen normalen Selektor an.
-
-```css
-a:hover {
-  text-decoration: underline;
-}
-
-input:focus {
-  border-color: #1a5fa8;
-}
-```
-
-- `:hover` trifft ein Element, wenn der Mauszeiger darüber liegt
-- `:focus` trifft ein Element, wenn es per Tastatur oder Klick aktiv ist
-- Pseudo-Klassen beschreiben also nicht *was* ein Element ist, sondern *in welchem Zustand* es gerade ist
-
-**Zwei typische Beispiele:**
-- `button:hover` für Hover-Effekte
-- `input:focus` für fokussierte Formularfelder
-
-Notes:
-Pseudo-Klassen sind der Grund, warum CSS *reaktiv* ohne JavaScript sein kann. `:hover` reagiert auf Maus-Position, `:focus` auf Tastatur-Navigation, `:checked` auf Checkbox-Zustand, `:valid`/`:invalid` auf Formular-Validität. Die Kaskade wird regelmäßig mit dem „Kaskadierungsprinzip" erklärt: Von mehreren gültigen Regeln gewinnt die spezifischste, bei gleicher Spezifität die spätere. Diese Sortierung ist deterministisch — aber das Tripel aus Ursprung, Spezifität und Reihenfolge ist für Anfänger die häufigste Verwirrungsquelle. Die Vererbung ist ein zweites Konzept: manche Eigenschaften (`color`, `font`) wandern von Eltern zu Kindern, andere (`border`, `padding`) nicht.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Was CSS ohne JavaScript kann
-
-Bevor man JavaScript für visuelle Effekte einsetzt, lohnt die Frage: Kann CSS das allein?
-
-| Anforderung | CSS-Lösung | JS nötig? |
-|---|---|---|
-| Hover-Effekt auf Produktkarte | `:hover` Pseudo-Klasse | nein |
-| Warenkorb-Button-Animation | `transition` + `:active` | nein |
-| Dark Mode | `@media (prefers-color-scheme: dark)` | nein |
-| Formularfeld-Validierung visuell | `:valid`, `:invalid`, `:focus` | nein |
-| Akkordeon (auf/zuklappen) | `<details>` + CSS | nein |
-| Smooth Scroll | `scroll-behavior: smooth` | nein |
-| Drag & Drop sortieren | — | **ja** |
-| Daten vom Server nachladen | — | **ja** |
-
-### Die Grenze
-
-CSS reagiert auf **Zustände** (`:hover`, `:checked`, `:focus`, `@media`) und **animiert Übergänge**. Sobald **neuer Zustand erzeugt** werden muss (Daten laden, DOM-Elemente erstellen, Server kontaktieren), braucht man JavaScript. JavaScript sollte den **Auslöser** steuern (Klasse setzen), CSS die **Darstellung** (Transition/Animation).
-
-Notes:
-CSS deckt seit 2020 mehr Interaktionsmuster ab als allgemein angenommen: Akkordeons mit dem nativen `<details>`/`<summary>`-Element, Dropdown-Menüs mit `:focus-within`, Formular-Validierung mit `:valid`/`:invalid`/`:user-invalid`, Themes mit Custom Properties und `@media (prefers-color-scheme: dark)`, Smooth Scroll mit `scroll-behavior: smooth`. CSS-Lösungen sind wartungsärmer (kein State-Management), performanter (keine JavaScript-Evaluation im Render-Pfad) und barrierefreundlicher (Browser-natives Verhalten). JavaScript ist nur notwendig, wenn neue Zustände aus externen Quellen entstehen: Netzwerkdaten, berechnete Werte oder dynamisch erzeugte DOM-Strukturen.
-
---
-
 <!-- .slide: class="figure-70" -->
 
 ## CSS-Layouts: Das Box-Modell
 
-HTML Elemente müssen nun positiniert werden. 
-Dazu wird jedes HTML-Element als eine Box betrachtet: **Content → Padding → Border → Margin**
+Wie werden HTML-Elemente überhaupt als Layout dargestellt?  
+CSS betrachtet jedes Element als Box: **Content → Padding → Border → Margin**.
 
 Die häufigste Fehlerquelle: `width: 200px` bedeutet standardmäßig nur den Content — Padding und Border kommen **obendrauf**. Erst `box-sizing: border-box` macht `width` zum Gesamtmaß.
 
@@ -1478,7 +2056,7 @@ Organisiert Elemente in **Zeilen und Spalten**:
 
 
 Notes:
-Die didaktisch wichtigste Unterscheidung ist: Flow, Flexbox und Grid sind keine drei Varianten desselben Werkzeugs, sondern drei verschiedene Abstraktionen. Normal Flow ist der Ausgangszustand des Dokuments. Flexbox löst Verteilungsprobleme entlang einer Dimension, etwa „wie stehen diese Navigationspunkte nebeneinander und wie verteilen sie freien Platz?“. Grid löst Strukturprobleme in zwei Dimensionen, etwa „welche Bereiche gibt es im Layout und wie liegen sie in Zeilen und Spalten?“. Viele CSS-Probleme werden unnötig kompliziert, weil man mit dem falschen Modell startet.
+Flow, Flexbox und Grid sind drei verschiedene Layoutabstraktionen. Normal Flow ist der Ausgangszustand des Dokuments und folgt der Reihenfolge der Elemente. Flexbox löst Verteilungsprobleme entlang einer Dimension, etwa Navigationsleisten oder Kartenreihen. Grid löst Strukturprobleme in zwei Dimensionen, etwa Seitenlayouts mit Header, Sidebar, Inhalt und Footer. Viele CSS-Probleme entstehen, wenn ein Layoutmodell für eine Aufgabe genutzt wird, für die ein anderes Modell besser passt.
 
 --
 
@@ -1520,7 +2098,6 @@ Bevor wir Flexbox oder Grid einsetzen, sollten wir verstehen, was HTML **ohne be
 
 <div class="column">
 
-
 ```html
 <p>Absatz <span>Inline-Text</span> nach dem Wort.</p>
 <div>Dieses Block-Element steht darunter.</div>
@@ -1539,6 +2116,36 @@ Bevor wir Flexbox oder Grid einsetzen, sollten wir verstehen, was HTML **ohne be
 </div>
 
 
+<div class="column">
+
+```css
+span {
+  display: block;
+}
+
+div {
+  display: inline;
+}
+```
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Wichtig
+
+HTML-Elemente haben Default-Displays. CSS kann diese Darstellung ändern, ohne die Semantik des Elements zu ändern.
+
+</div>
+
+
+</div>
+
+
 </div>
 
 
@@ -1551,7 +2158,7 @@ Flow ist deshalb wichtig, weil Flexbox und Grid immer bewusst vom Normalfall abw
 
 
 Notes:
-Normal Flow ist kein primitives Altverhalten, sondern die Basis des Webs. Dokumente, Artikel, Listen, Formulare und Absätze funktionieren bereits sinnvoll, bevor irgendein Layoutsystem aktiviert wird. Genau deshalb sollte man mit semantischem HTML beginnen und Layout erst danach ergänzen. Historisch waren viele CSS-Probleme eigentlich Missverständnisse des Normal Flow: Wer nicht versteht, warum ein `div` unter einem `p` steht oder warum Inline-Elemente keine eigene Blockhöhe erzeugen, wird auch Flexbox und Grid nur mechanisch anwenden.
+Normal Flow ist kein primitives Altverhalten, sondern die Basis des Webs. Dokumente, Artikel, Listen, Formulare und Absätze funktionieren bereits sinnvoll, bevor irgendein Layoutsystem aktiviert wird. Semantisches HTML erzeugt dadurch eine robuste Grundstruktur, die CSS später gezielt gestalten kann. Viele CSS-Probleme sind eigentlich Missverständnisse des Normal Flow: Ein `div` beginnt als Blockelement unter dem vorherigen Inhalt, während Inline-Elemente im Textfluss bleiben und keine eigene Blockhöhe erzeugen. Wichtig ist die Trennung von Semantik und Darstellung: Ein `span` bleibt semantisch ein Inline-Textcontainer, auch wenn CSS ihn mit `display: block` visuell wie einen Block darstellt.
 
 --
 
@@ -1576,6 +2183,8 @@ Flexbox ist das richtige Werkzeug, wenn Elemente in **einer Zeile oder Spalte** 
 }
 ```
 
+`display: flex` steht auf dem **übergeordneten Element** `.nav`. Die direkten Kinder werden dadurch zu Flex-Items.
+
 </div>
 
 
@@ -1599,7 +2208,9 @@ Typische Fragen:
 
 <div class="column">
 
-<div class="layout-demo flex-demo">
+### Ohne Flex
+
+<div class="layout-demo">
   <div class="demo-item">Logo</div>
   <div class="demo-item">Produkte</div>
   <div class="demo-item">Warenkorb</div>
@@ -1610,16 +2221,23 @@ Typische Fragen:
 
 <div class="column">
 
+### Mit Flex
+
+<div class="layout-demo flex-demo">
+  <div class="demo-item">Logo</div>
+  <div class="demo-item">Produkte</div>
+  <div class="demo-item">Warenkorb</div>
+</div>
+
+</div>
+
+
+<div class="column span-all">
 
 
 <div class="c-note">
 
-Flexbox ist ideal für:
-
-- Navigation
-- Button-Gruppen
-- Kartenreihe
-- Toolbar oder Header-Leiste
+Ohne `display: flex` stapeln sich die Block-Elemente im Normal Flow. Mit `display: flex` verteilt der Container seine direkten Kinder entlang einer Achse.
 
 </div>
 
@@ -1631,7 +2249,7 @@ Flexbox ist ideal für:
 
 
 Notes:
-Flexbox ist ein eindimensionales Layoutmodell. Die Hauptachse wird durch `flex-direction` festgelegt, die Querachse ergibt sich daraus. `justify-content` arbeitet auf der Hauptachse, `align-items` auf der Querachse. Genau diese Achsenlogik macht Flexbox für Menüs, Toolbars und Kartenreihen so stark. Es ist aber das falsche Modell, wenn die Beziehung zwischen Zeilen und Spalten explizit beschrieben werden soll. Dann zwingt man Flexbox in Probleme hinein, die Grid klarer löst.
+Flexbox ist ein eindimensionales Layoutmodell. Die Hauptachse wird durch `flex-direction` festgelegt, die Querachse ergibt sich daraus. `justify-content` arbeitet auf der Hauptachse, `align-items` auf der Querachse. Entscheidend ist, dass `display: flex` am Container steht: Nicht die einzelnen Links „werden flex", sondern der übergeordnete Navigationscontainer verteilt seine direkten Kinder. Genau diese Achsenlogik macht Flexbox für Menüs, Toolbars und Kartenreihen stark. Es ist aber das falsche Modell, wenn die Beziehung zwischen Zeilen und Spalten explizit beschrieben werden soll. Dann zwingt man Flexbox in Probleme hinein, die Grid klarer löst.
 
 --
 
@@ -1719,7 +2337,7 @@ Bei Grid entsteht zuerst das Raster. Danach werden die Elemente in dieses Raster
 
 
 Notes:
-„Explizites 2D-Raster“ sollte hier technisch verstanden werden: Die Autorin beschreibt in CSS zunächst die **Tracks** des Grids, also Spalten und Zeilen. Erst danach werden Elemente auf diese Struktur abgebildet, entweder automatisch oder explizit über `grid-area`, `grid-column` und `grid-row`. Das unterscheidet Grid von Flexbox. Bei Flexbox entsteht die Anordnung aus der Reihenfolge der Items entlang einer Achse; bei Grid wird zuerst die räumliche Struktur definiert und dann belegt. `1fr` ist die zentrale Maßeinheit in Grid und bedeutet „ein Anteil des noch freien Platzes“. In `240px 1fr 220px` sind die äußeren Spalten fest, die mittlere Spalte bekommt den restlichen Raum. Die Zeichenkette `"header header header"` ist keine Wiederholung ohne Bedeutung, sondern markiert drei Zellen derselben Zeile mit demselben Namen. Dadurch spannt sich der Bereich `header` über alle drei Spalten.
+Ein explizites 2D-Raster entsteht, wenn CSS zunächst die **Tracks** des Grids beschreibt, also Spalten und Zeilen. Danach werden Elemente auf diese Struktur abgebildet, entweder automatisch oder explizit über `grid-area`, `grid-column` und `grid-row`. Das unterscheidet Grid von Flexbox: Bei Flexbox entsteht die Anordnung aus der Reihenfolge der Items entlang einer Achse; bei Grid wird zuerst die räumliche Struktur definiert und dann belegt. `1fr` bedeutet „ein Anteil des noch freien Platzes“. In `240px 1fr 220px` sind die äußeren Spalten fest, die mittlere Spalte bekommt den restlichen Raum.
 
 --
 
@@ -1727,13 +2345,32 @@ Notes:
 
 ## Responsives Grid ohne starre Breakpoints
 
-Ein Grid kann responsiv werden, ohne für jedes Gerät ein eigenes Layout zu definieren:
+Responsive Grid ist **weiterhin CSS Grid**. Jedoch ist die Anzahl der Spalten nicht fest vorgegeben:
 
 
-<div class="grid-2">
+<div class="grid-2 small">
 
 
 <div class="column">
+
+### Fixes Grid
+
+```css
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+```
+
+Immer drei Spalten — auch wenn der Platz knapp wird.
+
+</div>
+
+
+<div class="column">
+
+### Responsives Grid
 
 ```css
 .product-grid {
@@ -1743,6 +2380,8 @@ Ein Grid kann responsiv werden, ohne für jedes Gerät ein eigenes Layout zu def
     repeat(auto-fit, minmax(220px, 1fr));
 }
 ```
+
+So viele Spalten wie passen — sonst Umbruch.
 
 </div>
 
@@ -1769,7 +2408,8 @@ Ein Grid kann responsiv werden, ohne für jedes Gerät ein eigenes Layout zu def
 
 <div class="c-definition">
 
-`auto-fit` versucht so viele Spalten wie möglich in die Zeile zu legen.
+`auto-fit` erzeugt so viele Spalten wie möglich.  
+`minmax()` begrenzt jede Spalte zwischen Minimum und flexiblem Wachstum.
 
 </div>
 
@@ -1778,6 +2418,8 @@ Ein Grid kann responsiv werden, ohne für jedes Gerät ein eigenes Layout zu def
 
 
 <div class="column">
+
+### Breiter Container
 
 <div class="layout-demo responsive-grid-demo">
   <div class="demo-card">Produkt A</div>
@@ -1788,24 +2430,32 @@ Ein Grid kann responsiv werden, ohne für jedes Gerät ein eigenes Layout zu def
 </div>
 
 
+<div class="column">
+
+### Schmaler Container
+
+<div class="layout-demo responsive-grid-demo is-narrow">
+  <div class="demo-card">Produkt A</div>
+  <div class="demo-card">Produkt B</div>
+  <div class="demo-card">Produkt C</div>
 </div>
 
-:::
+</div>
+
+
+</div>
+
 
 
 <div class="c-note">
 
-Damit entsteht ein fluides Raster:
-
-- auf schmalen Screens wenige Spalten
-- auf breiten Screens mehr Spalten
-- ohne duplizierte Layouts
+Der Browser berechnet die Spaltenanzahl aus verfügbarem Platz und Mindestbreite. Keine eigene Media Query für „2 Spalten" oder „3 Spalten" nötig.
 
 </div>
 
 
 Notes:
-`auto-fit` und `minmax()` sind das Kernmuster moderner responsiver Kartenraster. Der Browser berechnet selbst, wie viele Spalten bei gegebener Breite sinnvoll sind. Das ist ein gutes Beispiel für die deklarative Stärke von CSS: Man beschreibt Grenzen und Flexibilität, nicht einzelne Pixelkoordinaten. Der Unterschied zu klassischen Breakpoint-Layouts ist didaktisch wichtig: Statt „bei 768px zwei Spalten, bei 1200px vier Spalten“ beschreibt man eine allgemeine Regel, und der Browser löst sie kontinuierlich auf.
+`auto-fit` und `minmax()` sind das Kernmuster moderner responsiver Kartenraster. Es handelt sich nicht um ein anderes Layoutmodell als Grid, sondern um eine andere Art, Tracks zu definieren. Bei `repeat(3, 1fr)` ist die Spaltenanzahl fix. Bei `repeat(auto-fit, minmax(220px, 1fr))` berechnet der Browser selbst, wie viele Tracks bei gegebener Breite sinnvoll sind. Das zeigt die deklarative Stärke von CSS: Man beschreibt Grenzen und Flexibilität, nicht einzelne Pixelkoordinaten. Im Unterschied zu klassischen Breakpoint-Layouts wird nicht festgelegt, dass bei einer bestimmten Breite genau zwei oder vier Spalten entstehen; stattdessen löst der Browser eine allgemeine Regel kontinuierlich auf.
 
 --
 
@@ -1855,7 +2505,7 @@ Notes:
 
 
 Notes:
-Dieses Beispiel ist wichtig, weil es zeigt, dass die Wahl nicht dogmatisch sein darf. Flexbox ist nicht falsch, wenn Bild und Text einfach nebeneinander oder untereinander stehen. Grid wird stärker, sobald das Layout selbst explizit modelliert werden soll, etwa mit benannten Bereichen, stabilen Relationen oder mehreren Umbrüchen. Die fachliche Lektion lautet deshalb nicht „Grid ist moderner“, sondern „wähle das Modell, das die räumliche Struktur am direktesten ausdrückt“.
+Flexbox eignet sich gut, wenn Bild und Text einfach nebeneinander oder untereinander stehen sollen. Grid wird stärker, sobald das Layout selbst explizit modelliert wird, etwa mit benannten Bereichen, stabilen Relationen oder mehreren Umbrüchen. Die technische Entscheidung hängt also nicht am Alter des Layoutmodells, sondern daran, ob eine lineare Verteilung oder eine zweidimensionale Struktur ausgedrückt werden soll.
 
 --
 
@@ -1945,19 +2595,19 @@ Notes:
 
 
 Notes:
-Die JavaScript-Sprache (ECMAScript) ist erstaunlich klein: Variablen, Funktionen, Schleifen, Objekte — keine Datei-, Netzwerk- oder DOM-Operationen. Alles, was JavaScript im Browser *praktisch* tun kann, kommt von **Web APIs** — Schnittstellen, die der Browser bereitstellt. Das ist wichtig für die Architektur, weil derselbe JavaScript-Code in unterschiedlichen Umgebungen unterschiedliche APIs hat: im Browser `window` und `fetch`, in Node.js `process` und `fs`, in einem Service Worker weder noch das eine noch das andere.
+Die JavaScript-Sprache (ECMAScript) ist erstaunlich klein: Variablen, Funktionen, Schleifen, Objekte, aber keine Datei-, Netzwerk- oder DOM-Operationen. Alles, was JavaScript im Browser praktisch tun kann, kommt von **Web APIs**, also Schnittstellen, die der Browser bereitstellt. Derselbe JavaScript-Code hat in unterschiedlichen Umgebungen unterschiedliche APIs: im Browser `window` und `fetch`, in Node.js `process` und `fs`, in einem Service Worker keinen direkten DOM-Zugriff.
 
 --
 
-## Web APIs in einem Satz
+## Web APIs: Definition und Überblick
 
 Web APIs sind Browser-Schnittstellen, die JavaScript zusätzliche Fähigkeiten geben: den DOM verändern, Netzwerke ansprechen, Daten speichern, Gerätefunktionen nutzen oder Medien steuern.
 
 
-<div class="grid-2-1">
+<div class="grid-2">
 
 
-<div class="column small">
+<div class="column">
 
 
 **Typische Browser-APIs**
@@ -1982,16 +2632,16 @@ Web APIs sind Browser-Schnittstellen, die JavaScript zusätzliche Fähigkeiten g
 - Web APIs machen sie im Browser praktisch nutzbar
 - viele Web-Funktionen sind erst durch diese APIs möglich
 
+</div>
+
+
+</div>
+
+
 
 <div class="c-green gap">
 
 **Beispiel:** `fetch()` lädt Daten, `localStorage` speichert Zustand, DOM APIs aktualisieren die Oberfläche.
-
-</div>
-
-
-</div>
-
 
 </div>
 
@@ -2061,8 +2711,16 @@ try {
 | `AbortController` | Laufende Requests abbrechen (Timeout, Navigation) |
 | `response.ok` | `true` bei Status 200–299 |
 
+
+<div class="c-note">
+
+`fetch()` arbeitet **nicht callback-basiert**, sondern gibt ein **Promise** zurück. `async/await` ist nur die lesbarere Schreibweise dafür; ältere APIs wie `XMLHttpRequest` waren stärker callback-orientiert.
+
+</div>
+
+
 Notes:
-Der `AbortController` ist eine unterschätzte API. Ohne ihn läuft ein Fetch-Request weiter, auch wenn der Nutzer inzwischen weggenavigiert ist oder die Komponente unmounted wurde — der Response trifft dann auf DOM-Elemente, die nicht mehr existieren, und löst kryptische Fehler aus. Moderne Frameworks nutzen `AbortController` intern, um Cleanup zu machen. Für eigene Fetch-Logik ist er Pflicht, sobald es um Such-Eingaben, Navigation oder Timeouts geht. Das Pattern „Request starten, Abort-Signal merken, beim Abbruch signal.abort() aufrufen" ist ein Muster, das Sie in jedem produktiven Frontend-Code sehen werden.
+Der `AbortController` ist eine unterschätzte API. Ohne ihn läuft ein Fetch-Request weiter, auch wenn der Nutzer inzwischen weggenavigiert ist oder die Komponente unmounted wurde — der Response trifft dann auf DOM-Elemente, die nicht mehr existieren, und löst kryptische Fehler aus. Moderne Frameworks nutzen `AbortController` intern, um Cleanup zu machen. Für eigene Fetch-Logik ist er Pflicht, sobald es um Such-Eingaben, Navigation oder Timeouts geht. Das Pattern „Request starten, Abort-Signal merken, beim Abbruch signal.abort() aufrufen" ist ein Muster, das Sie in jedem produktiven Frontend-Code sehen werden. Zur Einordnung: Browser-JavaScript ist weiterhin ereignis- und callback-geprägt, etwa bei `addEventListener` oder `setTimeout`. Netzwerkzugriffe mit `fetch` sind dagegen Promise-basiert. `await fetch(...)` blockiert nicht den Main Thread, sondern pausiert nur die async-Funktion; die Fortsetzung wird später über den Event Loop eingeplant.
 
 --
 
@@ -2161,7 +2819,7 @@ self.addEventListener('fetch', (event) => {
 ```
 
 Notes:
-Service Workers sind das Fundament jeder Progressive Web App (PWA). Sie ermöglichen Offline-Betrieb, weil sie Netzwerk-Requests abfangen und aus einem Cache beantworten können — selbst wenn die Verbindung weg ist. Web Workers dagegen lösen ein ganz anderes Problem: Lange Berechnungen (Bildverarbeitung, Parsen großer JSON-Dateien, Kryptographie) blockieren sonst die UI. Im Worker läuft dieser Code in einem echten zweiten OS-Thread, ohne den Hauptthread zu beeinträchtigen. Beide haben *keinen* DOM-Zugriff — sie kommunizieren mit dem Hauptthread über `postMessage`. Das ist wichtig, weil es bedeutet, dass Worker keine UI direkt ändern können; sie liefern nur Daten zurück.
+Service Workers sind das Fundament jeder Progressive Web App (PWA). Sie ermöglichen Offline-Betrieb, weil sie Netzwerk-Requests abfangen und aus einem Cache beantworten können, selbst wenn die Verbindung weg ist. Web Workers lösen ein anderes Problem: Lange Berechnungen wie Bildverarbeitung, Parsen großer JSON-Dateien oder Kryptographie blockieren sonst die UI. Im Worker läuft dieser Code in einem echten zweiten OS-Thread, ohne den Hauptthread zu beeinträchtigen. Beide Worker-Typen haben keinen DOM-Zugriff und kommunizieren mit dem Hauptthread über `postMessage`.
 
 --
 
@@ -2182,12 +2840,12 @@ Die Trennung zwischen ECMAScript (Sprache) und Web APIs (Plattform) hat konkrete
 
 <!-- .slide: class="module-slide" -->
 
-# Das Zusammenspiel im Browser
+# Moderne Web Frontends
 
 
 <div class="guiding-question">
 
-**Leitfrage:** Wie arbeiten HTML, CSS und JavaScript im Browser zusammen — und warum ist das Verständnis dieser Pipeline für Performance und Architektur entscheidend?
+**Leitfrage:** Nachdem HTML, CSS und JavaScript einzeln geklärt sind: Welche Performance- und Architekturfolgen entstehen aus ihrem Zusammenspiel im Browser?
 
 </div>
 
@@ -2197,103 +2855,78 @@ Die gemeinsame Rendering-Pipeline des Browsers besteht aus sechs sequenziellen P
 
 --
 
-## Was passiert, wenn Sie „In den Warenkorb" klicken?
+<!-- .slide: class="smaller" -->
+
+## Warum Frameworks existieren: Das Skalierungsproblem
+
+Unser Warenkorb-Button funktioniert mit `querySelector` und `addEventListener`. Was passiert, wenn die Anwendung wächst?
+
+```javascript
+button.addEventListener('click', () => {
+  badge.textContent = '3';
+});
+```
 
 
-<div class="c-orange">
+<div class="grid-2 gap-sm">
 
-**Aufgabe:** Skizzieren Sie den Ablauf: Welche Technologie (HTML, CSS, JavaScript) ist in welchem Schritt beteiligt? Was passiert sofort, was asynchron? Was sieht der Nutzer wann?
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Imperativ: DOM nachführen
+
+- Elemente suchen
+- Events registrieren
+- DOM manuell aktualisieren
+- Zustand an mehreren Stellen synchron halten
+
+</div>
+
+
+</div>
+
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+### Deklarativ: UI aus Zustand
+
+- Zustand beschreiben
+- Komponenten rendern
+- Framework berechnet DOM-Änderungen
+- UI bleibt konsistent zu `state`
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Frameworks lösen kein Syntax-Problem, sondern ein **Zustandsmanagement-Problem**: Wie bleibt die UI konsistent, wenn sich Daten ändern?
 
 </div>
 
 
 Notes:
-Der Warenkorb-Klick-Szenario veranschaulicht das Zusammenspiel aller drei Frontend-Technologien: HTML definiert Button und Badge, JavaScript registriert den Event-Handler und sendet den Fetch-Request, CSS rendert das visuelle Feedback (Button deaktiviert, Badge-Zähler). Die sechs Schritte auf der Folgefolie illustrieren das optimistische UI-Update-Muster: Schritte 2–3 (DOM-Änderung und CSS-Render) laufen synchron vor dem Netzwerk-Request, weil die wahrgenommene Latenz unter 100ms bleiben muss. Der asynchrone Fetch-Request (Schritt 4) kann in der Praxis 100–500ms dauern — nach dem sofortigen visuellen Feedback für den Nutzer nicht wahrnehmbar.
+Die zentrale Erkenntnis: Frameworks wie React, Vue, Angular oder Svelte sind keine syntaktischen Verschönerungen, sondern eine konzeptionelle Verschiebung. Imperatives DOM („greife Element, ändere Property") wird durch deklarative UI ersetzt („so soll es aussehen, wenn der Zustand X ist"). Das Framework berechnet anschließend die notwendigen DOM-Änderungen. Für kleine Anwendungen ist das Overhead; 50 Zeilen Vanilla JS reichen oft. Sobald aber Zustand an mehreren Stellen synchron gehalten werden muss — Warenkorb-Badge, Sidebar, Modal, Produktliste, Filter — wird imperatives DOM-Tracking unwartbar und der Framework-Overhead lohnt sich.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Ablauf (Skizze)
-
-1. Nutzer klickt den Button → JavaScript reagiert auf das Event.
-2. JavaScript aktualisiert DOM-Zustände (Badge, Button-Text).
-3. CSS/Layout berechnet neues Rendering, der Nutzer sieht sofort Feedback.
-4. JavaScript sendet asynchron `POST /api/cart` an den Server.
-5. Server antwortet, JavaScript aktualisiert DOM erneut.
-6. Browser führt Layout und Paint erneut aus.
-
-**Schlüsselbeobachtung:** Das UI reagiert **sofort** (optimistisches Update), der Server wird **asynchron** kontaktiert. Das ist nur möglich, weil JavaScript non-blocking arbeitet.
-
-Notes:
-Dieser Ablauf zeigt das Zusammenspiel: HTML liefert die Struktur (Button, Badge), JavaScript das Verhalten (Event-Handler, Fetch), CSS die Darstellung (Zustandsübergang, Animation). Die Aufteilung in sofortige und asynchrone Schritte basiert auf der 100ms-Wahrnehmungsschwelle (aus der HCI-Forschung von Nielsen/Miller): Reaktionen unter 100ms werden als direkte Kausalität wahrgenommen, darüber als Systemlatenz. Das optimistische UI-Update (Schritte 2–3 vor Schritt 4) hält das visuelle Feedback unter dieser Schwelle, selbst wenn der Server 300ms antwortet. Die Alternative — auf den Server warten, bevor die UI reagiert — wäre für Nutzer auf mobilen Netzen deutlich spürbar.
-
---
-
-<!-- .slide: class="figure-80" -->
-
-## Die Rendering-Pipeline des Browsers
-
-![](/courses/web-and-data-engineering/figures/rendering-pipeline.svg)
-
-Die Pipeline arbeitet auf zwei internen Strukturen: dem **DOM** für HTML und dem **CSSOM** für CSS. Erst daraus erzeugt der Browser den Render Tree und rechnet Layout, Paint und Compositing aus.
-
-Notes:
-Die Rendering-Pipeline ist deterministisch und läuft in sechs Phasen: (1) HTML parsen → DOM, (2) CSS parsen → CSSOM, (3) Render Tree aufbauen (DOM + CSSOM zusammenführen, dabei unsichtbare Elemente ausfiltern), (4) Layout (Berechnung von Position und Größe jedes Elements), (5) Paint (Pixel zeichnen), (6) Composite (Layer zusammenstellen). Bei jeder Änderung am DOM oder CSS fragt der Browser: Wie weit muss ich zurück in die Pipeline? Nur Farbe geändert? → nur Paint + Composite. Position geändert? → Layout + Paint + Composite (Reflow). Nur Transform oder Opacity? → nur Composite (am billigsten). Diese Unterscheidung ist der Schlüssel zu 60-FPS-Animationen.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Performance: Die häufigsten Fehler
-
-| Problem | Ursache | Lösung |
-|---|---|---|
-| **Render-Blocking CSS** | Browser wartet auf gesamtes CSS, bevor er etwas anzeigt | Critical CSS inline, Rest asynchron laden |
-| **Parser-Blocking JS** | `<script>` stoppt HTML-Parsing | `defer` oder `async` Attribut |
-| **Layout Thrashing** | JavaScript liest und schreibt abwechselnd DOM-Properties | Reads bündeln, dann Writes bündeln |
-| **Große JS-Bundles** | Zu viel JavaScript auf einmal geladen | Code Splitting, Lazy Loading |
-| **Unoptimierte Bilder** | 5 MB Produktbilder ohne Kompression | WebP/AVIF, responsive `srcset`, Lazy Loading |
-
-### Kernprinzip
-
-Performance-Probleme im Web entstehen fast immer an der **Schnittstelle** von HTML, CSS und JavaScript — nicht innerhalb einer einzelnen Technologie. Deshalb muss man die Pipeline verstehen.
-
-Notes:
-Layout Thrashing ist die am häufigsten übersehene Falle: Wenn JavaScript abwechselnd eine DOM-Property liest (`element.offsetHeight`) und eine schreibt (`element.style.height = ...`), muss der Browser *bei jedem Lesen* Layout neu berechnen, weil er nicht weiß, ob die vorherige Schreiboperation ihn invalidiert hat. Das Ergebnis: Aus einer 10-ms-Schleife wird eine 500-ms-Schleife. Lösung: Alle Reads zuerst, dann alle Writes. Die `requestAnimationFrame`-API ist der richtige Ort für DOM-Updates, weil der Browser dort weiß, dass danach ein Frame gerendert wird und er Batching betreiben kann.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Core Web Vitals: Wie Google Performance misst
-
-Google misst Performance anhand dreier Nutzer-zentrierter Metriken, die auch ins Suchranking einfließen:
-
-| Metrik | Was es misst | Ziel |
-|---|---|---|
-| **LCP** — Largest Contentful Paint | Zeit, bis das größte sichtbare Element gerendert ist | < 2,5 s |
-| **INP** — Interaction to Next Paint | Verzögerung zwischen Klick/Tap und sichtbarer Reaktion | < 200 ms |
-| **CLS** — Cumulative Layout Shift | Wie stark sich das Layout nach Laden verschiebt | < 0,1 |
-
-### Typische Verursacher
-
-- **Schlechter LCP:** große, unoptimierte Hero-Bilder; render-blocking CSS; langsamer Server
-- **Schlechter INP:** lange Haupt-Thread-Blockaden durch JavaScript
-- **Schlechter CLS:** Bilder ohne `width`/`height`; nachgeladene Werbung oder Fonts verschieben Inhalt
-
-### Warum das architektonisch wichtig ist
-
-Core Web Vitals sind keine Laborwerte — sie werden am **echten Nutzer** gemessen (Real User Monitoring über Chrome UX Report). Eine Seite kann im Labor schnell wirken und in der Praxis trotzdem schlechte Werte haben, wenn sie auf langsamen Geräten oder Netzwerken läuft.
-
-Notes:
-Core Web Vitals sind seit 2021 ein Ranking-Faktor bei Google — schlechte Werte können also direkte wirtschaftliche Konsequenzen haben. Die drei Metriken sind bewusst so gewählt, dass sie die drei wichtigsten Nutzerwahrnehmungen abbilden: „Ist die Seite schon da?" (LCP), „Reagiert sie, wenn ich klicke?" (INP), „Springt der Inhalt unter meinen Fingern weg?" (CLS). Alle drei hängen direkt mit der Rendering-Pipeline zusammen: LCP ist ein Pipeline-Durchlauf, INP ist Hauptthread-Verfügbarkeit, CLS ist Reflow nach initialem Layout. Wer die Pipeline verstanden hat, weiß automatisch, wie man diese Metriken verbessert.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Wie hat sich das Zusammenspiel verändert?
+## Wie hat sich das Zusammenspiel zwischen HTML/CSS/JS verändert?
 
 | Ära | Muster | Zusammenspiel |
 |---|---|---|
@@ -2302,50 +2935,478 @@ Core Web Vitals sind seit 2021 ein Ranking-Faktor bei Google — schlechte Werte
 | **Komponentenbasiert (ab 2013)** | React/Vue/Angular: HTML + CSS + JS pro Komponente | Trennung nach **Verantwortung**, nicht nach Technologie |
 | **Server-First (ab 2020)** | Next.js/SvelteKit: Server rendert, Client hydriert | Erst HTML vom Server, dann JavaScript macht es interaktiv |
 
-### Was bedeutet „Client hydriert“?
 
-Der Server liefert bereits fertiges HTML an den Browser. Danach lädt JavaScript nach und **bindet Verhalten an dieses vorhandene HTML**:
 
-- Event-Listener werden registriert
-- Komponenten bekommen ihren interaktiven Zustand
-- die Seite wird nutzbar, ohne dass der Browser alles neu rendern muss
 
-**Kurz:** Hydration bedeutet, dass der Client das serverseitig gerenderte HTML „zum Leben erweckt".
+<div class="small">
 
-### Diskussionsfrage
+**Client-hydriert** bedeutet: Der Server liefert bereits fertiges HTML an den Browser. Danach lädt JavaScript nach und **bindet Verhalten an dieses vorhandene HTML** (Event-Listener werden registriert, Komponenten bekommen ihren interaktiven Zustand, die Seite wird nutzbar, ohne dass der Browser alles neu rendern muss).
 
-Die klassische Web-Lehre sagt: „Trenne HTML, CSS und JavaScript in separate Dateien." React bündelt alle drei **pro Komponente**. Ist das ein Widerspruch zum Prinzip der Separation of Concerns — oder eine bessere Umsetzung davon?
+</div>
+
+
+
+<div class="c-note">
+
+Welche Architekturen gibt es nun zur Auftrennung von Darstellung (View), Daten (Model) und Kontrolllogik (Control).
+
+</div>
+
 
 Notes:
 Die vier Ären des Web-Frontends repräsentieren unterschiedliche Antworten auf dieselbe architektonische Frage: Wo gehört die Rendering-Logik hin? In den 2000ern blieb sie auf dem Server (HTML-Ausgabe). In der jQuery-Ära wanderte sie schrittweise in den Client, ohne formales Zustandsmodell. Mit React/Vue (ab 2013) entstand ein formales Client-Modell mit deklarativem Zustandsmanagement. Server-First-Frameworks (Next.js, SvelteKit, ab 2020) kehren zum Server zurück, aber mit Client-Hydration als Erweiterung. Die React-Komponentenidee hebt Separation of Concerns nicht auf — sie verschiebt sie von der Technologieachse (HTML/CSS/JS-Dateien) auf die Fachlichkeitsachse (Komponente: Produktkarte, Warenkorb, Navigation). Beide Interpretationen sind gültig und spiegeln unterschiedliche Systemkomplexitäten wider.
 
 --
 
-## Einordnung
-
-**Beides stimmt:** Die Trennung bleibt — aber auf einer anderen Ebene. Statt nach Technologie (HTML/CSS/JS) wird nach **fachlicher Verantwortung** getrennt (Produktkarte, Warenkorb, Navigation). Jede Komponente kapselt ihr Markup, ihren Stil und ihr Verhalten.
-
-Notes:
-Separation of Concerns ist ein Prinzip, kein Mechanismus — es definiert das Ziel (verwandte Logik zusammen, unverwandte getrennt), nicht den Weg dahin. Was „zusammengehörig" bedeutet, hängt von der Systemkomplexität ab. In dokumentartig aufgebauten Webseiten ist die Technologie die natürliche Trennlinie (HTML für Struktur, CSS für Darstellung, JS für Verhalten). Bei komplexen UI-Anwendungen wird die fachliche Verantwortung (Produktkarte, Warenkorb-Sidebar, Navigation) zur sinnvolleren Trennlinie — eine Komponente enthält HTML, CSS und JS, weil sie gemeinsam eine Fachlichkeit implementieren. Flexbox trennt CSS-Layoutlogik von HTML-Struktur auf Technologieebene, während Komponenten HTML+CSS+JS auf Fachebene zusammenfassen. Beide Ebenen koexistieren in modernen Frontends.
-
---
-
 <!-- .slide: class="figure-80" -->
 
-## Das Technologie-Dreieck: Zusammenfassung
+## MVC: Model - View - Controller
 
-![](/courses/web-and-data-engineering/figures/technology-triangle.svg)
+![](/courses/web-and-data-engineering/figures/frontend-mvc.svg)
 
 
 <div class="takeaway">
 
-HTML, CSS und JavaScript sind ein eng verzahntes System. Der Browser verarbeitet sie in einer festen Pipeline, die JavaScript jederzeit beeinflussen kann — mit Konsequenzen für Performance und Architektur. Moderne Frameworks organisieren das Zusammenspiel in Komponenten statt in Dateien. Das grundlegende Modell von DOM, Events und Rendering bleibt dasselbe.
+MVC trennt Darstellung, Zustand und Eingabeverarbeitung. Die View zeigt Daten, der Controller verarbeitet Aktionen, das Model hält fachlichen Zustand.
 
 </div>
 
 
 Notes:
-Die Drei-Schichten-Architektur von HTML (Struktur), CSS (Darstellung) und JavaScript (Verhalten) ist stabiler als jedes konkrete Framework. React, Vue, Angular und Svelte haben alle dieselbe Grundstruktur: Sie erzeugen DOM (HTML), manipulieren Styles (CSS) und reagieren auf Events (JavaScript). Der Abstraktionsgrad ändert sich mit jeder Framework-Generation, das zugrunde liegende Browser-Modell (DOM, CSSOM, Event Loop, Rendering-Pipeline) ist seit über einem Jahrzehnt stabil. Ein Verständnis dieser Pipeline erklärt, warum bestimmte Framework-Optimierungen notwendig sind — Virtual DOM Diffing minimiert Reflows, CSS-in-JS scoped Styles auf Komponenten, Server-Side Rendering löst das SEO-Problem clientseitiger Apps.
+MVC stammt ursprünglich aus Smalltalk und wurde später für Web-Frameworks angepasst. Im klassischen Web liegt MVC oft serverseitig: Ein Controller nimmt HTTP-Requests entgegen, lädt oder verändert Model-Daten und wählt anschließend eine View, die HTML rendert. Im Frontend ist MVC weniger eindeutig, weil Browser-Views, DOM-Events und clientseitiger Zustand enger gekoppelt sind.
+
+--
+
+<!-- .slide: class="smaller code-regular" -->
+
+## MVC am Mini-Beispiel
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+### View
+
+```html
+<input id="name">
+<button id="save">Speichern</button>
+<p id="output"></p>
+```
+
+### Model
+
+```javascript
+const model = { name: '' };
+```
+
+</div>
+
+
+<div class="column">
+
+### Controller
+
+```javascript
+document.querySelector('#save')
+  .addEventListener('click', () => {
+    model.name = document.querySelector('#name').value;
+    render();
+  });
+
+function render() {
+  document.querySelector('#output').textContent =
+    `Hallo ${model.name}`;
+}
+```
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+**Vorteil:** Sehr direkt: Event → Controller → Model → View.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-caution">
+
+**Nachteil:** Schwerer isoliert testbar: Controller kennen DOM-Details, und View-Code kann eigene Logik enthalten.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+MVC: Der Controller reagiert auf die Eingabe, ändert das Model und stößt das Rendering der View an.
+
+</div>
+
+
+Notes:
+In diesem Beispiel ist die View der sichtbare DOM-Ausschnitt, das Model ist ein einfaches Zustandsobjekt, und der Controller ist der Event-Handler am Button. Die Kopplung ist bewusst direkt gehalten: Der Controller kennt sowohl das Eingabeelement als auch das Model und ruft anschließend `render()` auf. In größeren MVC-Systemen würde diese Rolle auf eigene Controller-Klassen oder Router-Handler verteilt.
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## MVP: Model - View - Presenter
+
+![](/courses/web-and-data-engineering/figures/frontend-mvp.svg)
+
+
+<div class="takeaway">
+
+MVP macht die View passiv. Der Presenter enthält die UI-Logik und spricht die View über ein Interface an.
+
+</div>
+
+
+Notes:
+MVP wurde populär, weil es UI-Logik testbarer macht. Die View enthält möglichst wenig Entscheidungscode und delegiert Interaktionen an den Presenter. Der Presenter kann dadurch häufig ohne echte UI getestet werden, indem das View-Interface durch einen Mock ersetzt wird. Der Preis ist zusätzlicher Boilerplate-Code zwischen View und Presenter.
+
+--
+
+<!-- .slide: class="smaller code-regular" -->
+
+## MVP am Mini-Beispiel
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+### View: Oberfläche + Interface
+
+```html
+<input id="name">
+<button id="save">Speichern</button>
+<p id="output"></p>
+```
+
+```javascript
+const view = {
+  getName: () =>
+    document.querySelector('#name').value,
+  showGreeting: (text) =>
+    document.querySelector('#output').textContent = text
+};
+```
+
+</div>
+
+
+<div class="column">
+
+### Model + Presenter
+
+```javascript
+const model = { name: '' };
+
+const presenter = {
+  save() {
+    model.name = view.getName();
+    view.showGreeting(`Hallo ${model.name}`);
+  }
+};
+
+document.querySelector('#save')
+  .addEventListener('click', () => presenter.save());
+```
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+**Vorteil:** UI-Logik ist gut testbar, weil der Presenter ohne echte View geprüft werden kann.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-caution">
+
+**Nachteil:** Mehr Boilerplate: View-Interfaces, Presenter und Weiterleitungen müssen gepflegt werden.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+MVP: Die View bleibt passiv. Der Presenter liest aus der View, ändert das Model und sagt der View, was sie anzeigen soll.
+
+</div>
+
+
+Notes:
+Die View besteht hier aus dem sichtbaren HTML und einem dünnen Interface (`getName`, `showGreeting`). Dieses Interface enthält keine fachliche Entscheidung, sondern nur Zugriff auf die Oberfläche. Die Entscheidung, wann der Name gespeichert und welcher Text angezeigt wird, liegt im Presenter. Genau dadurch lässt sich der Presenter isoliert testen, indem `view.getName()` und `view.showGreeting()` durch Test-Doubles ersetzt werden.
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## MVVM: Model - View - ViewModel
+
+![](/courses/web-and-data-engineering/figures/frontend-mvvm.svg)
+
+
+<div class="takeaway">
+
+MVVM verbindet die View deklarativ mit einem ViewModel. Änderungen am Zustand führen über Bindings automatisch zu UI-Aktualisierungen.
+
+</div>
+
+
+Notes:
+MVVM ist eng mit deklarativen Bindings und reaktivem Zustand verbunden. Das ViewModel enthält Zustand, der direkt für die Darstellung vorbereitet ist, zum Beispiel formatierte Werte, abgeleitete Eigenschaften oder Commands. Frameworks wie Knockout haben MVVM sehr direkt umgesetzt; Vue und Angular enthalten viele MVVM-Ideen, auch wenn moderne Komponentenmodelle zusätzlich eigene Konzepte einführen.
+
+--
+
+<!-- .slide: class="smaller code-regular" -->
+
+## MVVM am Mini-Beispiel
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+### View
+
+```html
+<input data-bind="name">
+<button data-action="save">Speichern</button>
+<p data-bind="greeting"></p>
+```
+
+### Model
+
+```javascript
+const model = { name: '' };
+```
+
+</div>
+
+
+<div class="column">
+
+### ViewModel
+
+```javascript
+const viewModel = {
+  name: '',
+  get greeting() {
+    return `Hallo ${this.name}`;
+  },
+  save() {
+    model.name = this.name;
+  }
+};
+```
+
+`data-bind` steht hier für Framework-Bindings wie in Knockout, Vue oder Angular.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-green">
+
+**Vorteil:** Deklarative Bindings reduzieren manuelle DOM-Aktualisierung.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-caution">
+
+**Nachteil:** Implizite Bindings können Debugging erschweren: Änderungen passieren automatisch und nicht immer sichtbar im Codepfad.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+MVVM: Die View bindet deklarativ an das ViewModel. Der sichtbare Text ergibt sich aus Zustand und abgeleiteten Werten.
+
+</div>
+
+
+Notes:
+MVVM verschiebt viel UI-Logik in präsentationsnahen Zustand. Die View muss nicht explizit wissen, wie `greeting` berechnet wird; sie bindet nur an einen Namen. Reaktive Frameworks aktualisieren die Anzeige automatisch, sobald sich abhängiger Zustand ändert. Das Model bleibt davon getrennt und enthält den fachlichen Zustand oder die serverseitig gespeicherten Daten.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Architekturfamilien moderner Frontends
+
+| Familie | Kernidee | Typische Verantwortung | Beispiele |
+|---|---|---|---|
+| **MVC** | Eingaben steuern einen Controller, der Model und View koppelt | View rendert, Controller verarbeitet Aktionen | Backbone, ältere AngularJS-Apps, serverseitige MVC-Frameworks |
+| **MVP** | Presenter vermittelt explizit zwischen passiver View und Model | Presenter enthält fast die gesamte UI-Logik | GWT, viele testorientierte UI-Architekturen, Android historisch |
+| **MVVM** | View bindet deklarativ an ein ViewModel | ViewModel hält präsentationsnahen Zustand | Vue, Knockout, Angular mit deutlichen MVVM-Elementen |
+
+
+<div class="grid-3 gap-sm">
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### MVC
+
+- gut für klare Rollentrennung
+- Controller wird in großen UIs schnell überladen
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### MVP
+
+- stark testbar, weil die View passiv bleibt
+- oft mehr Boilerplate durch Presenter-Schnittstellen
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### MVVM
+
+- passt gut zu deklarativen Bindings
+- heute das prägendste Denkmodell vieler Browser-Frameworks
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Diese drei Architekturfamilien sind keine starren Schubladen, sondern Denkmodelle für Zuständigkeiten. Moderne Browser-Frameworks sind oft Hybridformen. React ist nicht sauber MVC, MVP oder MVVM, sondern eher komponentenbasiert mit unidirektionalem Datenfluss. Vue liegt gedanklich oft nah an MVVM, weil Templates direkt an reaktiven Zustand gebunden werden. Alle drei Familien behandeln dasselbe Grundproblem: UI, Zustand und Benutzereingaben müssen so getrennt werden, dass große Frontends wartbar bleiben.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Moderne Frameworks: Familien als Bezugspunkt
+
+
+### Einordnung von gängigen Frameworks
+
+- **Backbone**: nah an MVC
+- **Knockout**: klassisches MVVM
+- **Vue**: oft MVVM-artig mit Komponenten
+- **Angular**: komponentenbasiert, mit MVVM-Elementen
+- **React**: Komponentenmodell mit unidirektionalem Datenfluss
+
+
+<div class="c-green">
+
+### Was daraus folgt
+
+- Frameworks sind selten „reines MVC“ oder „reines MVVM“
+- sie übernehmen Ideen aus mehreren Familien
+- entscheidend ist der Datenfluss: Wer hält Zustand, wer rendert, wer reagiert?
+- Komponenten kapseln heute oft View + Verhalten + lokalen Zustand
+
+</div>
+
+
+
+Notes:
+Ein Framework legt fest, wie Datenfluss, Komponentenstruktur, Rendering und Testbarkeit gedacht werden. React bevorzugt expliziten Datenfluss und lokale Komponentenlogik, Angular bringt stärkere Konventionen und Dependency Injection mit, Vue kombiniert reaktive Datenbindung mit Single-File Components. MVC, MVP und MVVM sind deshalb Bezugspunkte, keine exakten Etiketten für jedes moderne Framework.
 
 ---
 
