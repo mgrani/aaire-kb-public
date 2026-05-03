@@ -151,6 +151,30 @@ The homophily index $r$ is a variant of Newman's assortativity coefficient for c
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Homophily Baseline Trap
+
+The same observed within-group share can mean very different things depending on the population composition.
+
+| Population shares | Random baseline $H_{\text{base}}$ | If $H_{\text{obs}} = 0.85$ | Interpretation |
+|---|---:|---:|---|
+| 50% / 50% | $0.5^2 + 0.5^2 = 0.50$ | $r = 0.70$ | Strong excess homophily |
+| 90% / 10% | $0.9^2 + 0.1^2 = 0.82$ | $r = 0.17$ | Only mild excess homophily |
+
+
+<div class="c-caution small">
+
+Never interpret "85% of ties are within-group" without asking: **85% compared to what baseline?**
+
+</div>
+
+
+Notes:
+This is a useful didactic pause because students often read a high within-group percentage as direct evidence of strong preference. In imbalanced populations, high within-group rates happen mechanically. The baseline is the counterfactual random-mixing rate, not 50%.
+
+--
+
 <!-- .slide: class="figure-70" -->
 
 ## Visual Intuition
@@ -326,6 +350,31 @@ All three mechanisms are consistent with a high homophily index. A cross-section
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Same Snapshot, Three Stories
+
+Suppose we observe: **STEM students mostly befriend STEM students.**
+
+| Mechanism | Concrete story | What data would help? |
+|---|---|---|
+| **Selection** | Students first choose STEM, then choose friends from the same track. | Friendships observed *after* track choice |
+| **Socialization** | Friends influence each other to choose the same elective or track. | Track changes observed *after* friendships |
+| **Contextual correlation** | STEM students share labs, schedules, and buildings, so they meet more often. | Timetables, room assignments, shared courses |
+
+
+<div class="c-info small">
+
+The graph snapshot is identical in all three stories. The difference is the **time order** and the **unobserved context**.
+
+</div>
+
+
+Notes:
+Use this slide to make the causal distinction tangible before showing the causal diagrams. The point is not that the mechanisms are mutually exclusive; in real schools all three can operate. The task is to ask which data would let us estimate their relative contribution.
+
+--
+
 <!-- .slide: class="figure-70" -->
 
 ## Causal Diagrams
@@ -482,7 +531,7 @@ This connects back to Lecture 02's bipartite graphs. The bipartite structure is 
 
 <!-- .slide: class="figure-70" -->
 
-## Example
+## Example — Corporate Board Interlocks
 
 ![Board affiliation network](/courses/network-science/figures/affiliation-board.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
@@ -494,6 +543,30 @@ Corporate board interlocks: directors (bottom) sit on company boards (top). Two 
 
 </div>
 
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Reading the Board Network
+
+An affiliation network can be projected in two different ways.
+
+| Projection | Nodes | Edge means | Example question |
+|---|---|---|---|
+| **Director network** | People | Two directors sit on the same board | Who can exchange career information or governance norms? |
+| **Company network** | Firms | Two firms share at least one director | Where can strategy, norms, or practices diffuse? |
+
+
+<div class="fragment">
+
+**Important:** an edge in the projection is not automatically a friendship or causal influence. It is an **opportunity for exposure** created by shared context.
+
+</div>
+
+
+Notes:
+This extends the board example beyond the picture. Board interlocks are a classic affiliation-network case because the same bipartite data can answer person-level questions and organization-level questions. The caution is important: projection edges should be interpreted as exposure channels, not direct proof that information flowed.
 
 --
 
@@ -518,6 +591,29 @@ Corporate board interlocks: directors (bottom) sit on company boards (top). Two 
 
 Notes:
 All three are mechanisms that turn structure into *more* structure. Triadic closure was L03's core concept; focal and membership closure are L05's additions. In the classroom figure, within-track friendships could arise through focal closure (shared labs and lectures bring STEM students together), and if an Arts student (A1) befriends a STEM student (S4) and later joins a STEM elective, that is membership closure. The distinction matters because focal and membership closure produce homophily-like patterns *without* any personal preference for similarity.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Closure Processes — Classroom Examples
+
+| Closure type | Open path | What closes? | Classroom example |
+|---|---|---|---|
+| **Triadic** | student → friend → student | A new friendship | "My lab partner introduces me to their friend." |
+| **Focal** | student → elective → student | A new friendship | "We sit in the same statistics elective and start talking." |
+| **Membership** | student → friend → club | A new membership | "My friend invites me to join the robotics club." |
+
+
+<div class="c-info small">
+
+Only triadic closure needs a shared friend. Focal closure can create ties among strangers through repeated exposure in the same setting.
+
+</div>
+
+
+Notes:
+This table gives students a concrete classification handle before the quick check. Emphasize that focal closure is often enough to create observed homophily: people in the same track share many foci, so within-track ties become more likely even without an explicit preference for same-track friends.
 
 --
 
@@ -585,6 +681,8 @@ The empirical curve shows that having 1 shared friend already raises the closure
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## A Toy Model for the Shape
 
 If each shared contact independently offers an introduction opportunity with probability $q$, then the probability of closure given $k$ shared contacts is:
@@ -592,6 +690,20 @@ If each shared contact independently offers an introduction opportunity with pro
 $$P(\text{new tie} \mid k \text{ shared}) = 1 - (1 - q)^k$$
 
 This *saturating* curve rises steeply at first and flattens as $k$ grows — matching the empirical shape qualitatively. But real curves often flatten *faster* than this model predicts, suggesting that shared contacts are not fully independent.
+
+
+<div class="fragment small">
+
+Example with $q = 0.20$:
+
+| Shared contacts $k$ | $1$ | $2$ | $3$ | $5$ |
+|---:|---:|---:|---:|---:|
+| $P(\text{new tie} \mid k)$ | $0.20$ | $0.36$ | $0.49$ | $0.67$ |
+
+The first shared contact adds the most. Later shared contacts add less because many opportunities are redundant.
+
+</div>
+
 
 Notes:
 The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model that produces saturation. The fact that real data flattens faster than the independent model is itself informative — it suggests redundancy among shared contacts, consistent with the embeddedness idea from L04.
@@ -717,6 +829,31 @@ The formal model is simple enough to simulate in a few lines of code, yet its ou
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Schelling — A Local Rule
+
+Let $\tau = 1/3$. An agent compares its local neighborhood to that threshold.
+
+| Same-type neighbors | Total neighbors | Same-type fraction | Status |
+|---:|---:|---:|---|
+| 2 | 8 | $0.25$ | Unsatisfied: move or rewire |
+| 3 | 8 | $0.375$ | Satisfied: stay |
+| 4 | 8 | $0.50$ | Satisfied: stay |
+
+
+<div class="c-info small">
+
+The rule is mild: the agent does **not** require a majority of similar neighbors. Strong segregation emerges because many mild local moves are repeated.
+
+</div>
+
+
+Notes:
+This numerical slide makes the threshold rule operational. Students should see that the model does not assume extremist preferences. With a threshold of one third, an agent with 3 of 8 same-type neighbors stays. The global segregation is an emergent outcome of iteration, not a direct expression of each agent's desired final map.
+
+--
+
 <!-- .slide: class="figure-85" -->
 
 ## One Step of the Model
@@ -839,7 +976,7 @@ The three-gap table closes the L03–L05 arc. The computational gap and the caus
 ## Image Credits & References
 
 - Cinelli, Matteo and De Francisci Morales, Gianmarco and Galeazzi, Alessandro and Quattrociocchi, Walter and Starnini, Michele (2021). The echo chamber effect on social media. *Proceedings of the National Academy of Sciences*.
-- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning about a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
 - Nyhan, Brendan and Settle, Jaime and Thorson, Emily and Wojcieszak, Magdalena and Barber\'a, Pablo and Chen, Annie Y. and Allcott, Hunt and Brown, Taylor and Crespo-Tenorio, Adriana and Dimmery, Drew and Freelon, Deen and Gentzkow, Matthew and Gonz\'alez-Bail\'on, Sandra and Guess, Andrew M. and Kennedy, Edward and Kim, Young Mie and Lazer, David and Malhotra, Neil and Moehler, Devra and Pan, Jennifer and Thomas, Daniel Robert and Tromble, Rebekah and Velasco Rivera, Carlos and Wilkins, Arjun and Xiong, Beixian and Kiewiet de Jonge, Chad and Franco, Annie and Mason, Winter and Stroud, Natalie Jomini and Tucker, Joshua A. (2023). Like-minded sources on Facebook are prevalent but not polarizing. *Nature*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

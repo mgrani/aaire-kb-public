@@ -43,6 +43,8 @@ Edges: $A$–$B$, $A$–$C$, $A$–$D$, $B$–$C$, $D$–$E$, $E$–$F$, $D$–$
 **4. Node G:** $G$, $A$, and $D$ form a closed triad immediately (since $A$–$D$ exists). $G$ will likely next close triads with neighbors of $A$ ($B, C$) or $D$ ($E, F$).
 
 
+TODO: check
+
 
 --
 
@@ -69,6 +71,9 @@ For the graph: $A$–$B$, $A$–$C$, $A$–$D$, $B$–$C$, $D$–$E$, $E$–$F$,
 **2. Average:** $\bar{C} = (1 + 1 + 1 + 1 + 1/3 + 1/3)/6 = 14/18 = 7/9 \approx 0.78$.
 
 **3. Interpretation:** $\bar{C} \approx 0.78$ is high, indicating a "cliquey" social structure where friends of friends are likely to be friends.
+
+
+TODO: check
 
 
 
@@ -98,6 +103,9 @@ Three cliques: $\{1,2,3\}$, $\{4,5,6\}$, and $\{7,8,9\}$. Bridges: $3$–$4$ and
 - **2. Local Bridge:** Yes. Nodes 3 and 4 have no common neighbours besides each other.
 - **3. Structural Hole:** Clique 1 and Clique 3 have no direct connection. Node 5 (via 4 and 6) can broker information between these disjoint worlds, gaining an information advantage.
 - **4. Edge 3–7:** The structural hole closes. Edge $6$–$7$ is no longer a bridge because an alternative path (via 3–7) now exists.
+
+
+TODO: check
 
 
 
@@ -258,6 +266,133 @@ print(f"Avg Overlap Across: {np.mean(across):.3f}")
 
 - **Cross-faction weakness:** Cross-faction edges have significantly lower overlap, confirming they behave as structural bridges between communities.
 - **Glue vs redundancy:** Within-faction edges have high overlap, providing structural redundancy. Low-overlap edges are the "glue" holding separate social worlds together.
+
+
+
+--
+
+## Exercise 3.D.3: Practical Lab — Weak Ties in the Karate Club
+
+Use `nx.karate_club_graph()` to connect the lecture concepts to measurable graph quantities.
+
+1. Compute the **local clustering coefficient** $C_v$ for every node.
+2. Compute the **neighbourhood overlap** $O(u,v)$ for every edge.
+3. Classify edges as:
+   - **weak / bridge-like** if $O(u,v) < 0.10$
+   - **medium** if $0.10 \le O(u,v) < 0.30$
+   - **strong / embedded** if $O(u,v) \ge 0.30$
+4. Visualise the graph:
+   - node colour = clustering coefficient
+   - edge colour and width = overlap-based tie strength
+5. List the five lowest-overlap edges. Are they mostly within one faction or between factions?
+
+
+--
+
+**Solution:**
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.karate_club_graph()
+
+def neighbourhood_overlap(G, u, v):
+    nu = set(G.neighbors(u)) - {v}
+    nv = set(G.neighbors(v)) - {u}
+    union = nu | nv
+    if not union:
+        return 0.0
+    return len(nu & nv) / len(union)
+
+# 1. Node-level embeddedness
+clustering = nx.clustering(G)
+
+# 2. Edge-level embeddedness
+overlap = {
+    (u, v): neighbourhood_overlap(G, u, v)
+    for u, v in G.edges()
+}
+
+# 3. Simple tie-strength proxy from overlap
+def strength_label(o):
+    if o < 0.10:
+        return "weak / bridge-like"
+    if o < 0.30:
+        return "medium"
+    return "strong / embedded"
+
+edge_strength = {edge: strength_label(o) for edge, o in overlap.items()}
+
+# Print useful summaries
+print(f"Average clustering: {nx.average_clustering(G):.3f}")
+
+for edge, o in sorted(overlap.items(), key=lambda item: item[1])[:5]:
+    u, v = edge
+    same_faction = G.nodes[u]["club"] == G.nodes[v]["club"]
+    print(
+        f"{edge}: overlap={o:.3f}, "
+        f"{edge_strength[edge]}, "
+        f"{'within' if same_faction else 'between'} factions"
+    )
+```
+
+--
+
+**Visualisation:**
+
+```python
+pos = nx.spring_layout(G, seed=7)
+
+edge_colours = []
+edge_widths = []
+for edge in G.edges():
+    o = overlap[edge]
+    if o < 0.10:
+        edge_colours.append("#d95f02")   # weak / bridge-like
+        edge_widths.append(1.0)
+    elif o < 0.30:
+        edge_colours.append("#7570b3")   # medium
+        edge_widths.append(2.0)
+    else:
+        edge_colours.append("#1b9e77")   # strong / embedded
+        edge_widths.append(4.0)
+
+node_colours = [clustering[n] for n in G.nodes()]
+
+plt.figure(figsize=(9, 7))
+ax = plt.gca()
+nodes = nx.draw_networkx_nodes(
+    G,
+    pos,
+    node_color=node_colours,
+    cmap="YlGnBu",
+    vmin=0,
+    vmax=1,
+    node_size=420,
+    ax=ax,
+)
+nx.draw_networkx_edges(
+    G,
+    pos,
+    edge_color=edge_colours,
+    width=edge_widths,
+    alpha=0.85,
+    ax=ax,
+)
+nx.draw_networkx_labels(G, pos, font_size=9, ax=ax)
+
+plt.colorbar(nodes, ax=ax, label="local clustering coefficient")
+plt.title("Karate club: node clustering and overlap-based tie strength")
+plt.axis("off")
+plt.show()
+```
+
+**Interpretation:**
+
+- **Low-overlap edges** are the best structural candidates for weak ties. They have few or no shared neighbours, so they connect otherwise separate local neighbourhoods.
+- **High-overlap edges** sit inside dense parts of the graph. They are structurally redundant and are reasonable candidates for strong, embedded ties.
+- **Faction-crossing edges** usually have lower overlap than within-faction edges, but overlap is a structural proxy, not ground-truth psychology. Some within-faction ties can also be bridge-like if they connect two sparse neighbourhoods.
 
 
 

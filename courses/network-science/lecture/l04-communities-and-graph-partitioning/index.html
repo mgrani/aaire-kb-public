@@ -136,8 +136,16 @@ The point of this module is to dismantle the intuitive notion that "important no
 </div>
 
 
+
+<div class="c-info smaller">
+
+They are related but not identical: **the hole is the missing connection between groups; the broker is the actor positioned across that missing connection.**
+
+</div>
+
+
 Notes:
-Embeddedness is a property of a node, brokerage is a relational role, and a structural hole is the absence of edges that makes brokerage possible. In the workplace figure, Ana is embedded (her neighbors Ben and Cai are directly connected), Dia is a broker (the single cross-team tie runs through her), and the absence of direct Eli–Fin, Cai–Gia, Ben–Hal edges forms the structural hole between the teams.
+Embeddedness is a property of a node, brokerage is a relational role, and a structural hole is the absence of edges that makes brokerage possible. This distinction is the likely confusion point: brokerage and structural holes are not synonyms. A structural hole is the gap; brokerage is the position or action of spanning the gap. In the workplace figure, Ana is embedded (her neighbors Ben and Cai are directly connected), Dia is a broker (the single cross-team tie runs through her), and the absence of direct Eli–Fin, Cai–Gia, Ben–Hal edges forms the structural hole between the teams.
 
 --
 
@@ -186,6 +194,8 @@ A node that acts as the sole short link between otherwise separated groups spans
 - **Information advantage:** the broker receives early, non-redundant signals from independent groups.
 - **Control advantage:** the broker mediates flows between groups that cannot communicate directly.
 
+**Not the same thing:** remove the missing gap and the structural hole disappears; remove the spanning actor and the brokerage position disappears.
+
 </div>
 
 
@@ -214,24 +224,41 @@ This is the social-capital interpretation of the formal structural-hole definiti
 
 ## Quick Check
 
-Look again at the workplace figure (Ana, Ben, Cai, Dia, Eli on the left; Fin, Gia, Hal, Ivo on the right).
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Look again at the workplace figure.
 
 1. Which of these nine people is the clearest *broker*, and what structural feature makes them one?
 2. Which is the most clearly *embedded*?
 3. What would change structurally if Dia left the company tomorrow?
 
+
+<div class="c-info fade-in gap">
+
+**Solution:** Dia is the broker because the cross-team edge runs through her. Ana, Ben, and Cai are embedded in the left triangle; Ben is strongest because his neighbors are mutually connected. If Dia leaves, the Dia–Fin edge disappears and the two teams become disconnected components.
+
+</div>
+
+
+</div>
+
+
+<div class="column top">
+
+![The workplace network from Lecture 03](/courses/network-science/figures/l03-scenario.svg)
+
+</div>
+
+
+</div>
+
+
 Notes:
 Dia is the only broker: she is the only endpoint of the single cross-team edge. Ana, Ben, and Cai are all embedded inside the left triangle — each of them has directly connected neighbors. If Dia leaves, the only cross-team tie vanishes and the two teams become disconnected components — an extreme form of the structural-hole intuition. This quick check directly reuses the L03 scenario to make the new vocabulary concrete.
-
---
-
-## Quick Check — Solution
-
-**1. Broker:** Dia — she is the only endpoint of the cross-team edge. Every shortest path between the two teams passes through her.
-
-**2. Embedded:** Ana, Ben, and Cai are all embedded (they sit inside the same closed triangle). Ben is perhaps the most embedded, with all three neighbors (Ana, Cai, Dia) mutually connected.
-
-**3. If Dia leaves:** the Dia–Fin edge disappears with her, and the two teams become *disconnected components*. The structural hole becomes absolute — no shortest path exists between Ana and Hal at all.
 
 ---
 
@@ -257,20 +284,69 @@ Centrality is not a single quantity but a family of operationalizations, each fo
 
 --
 
-## Degree and Closeness Centrality
+<!-- .slide: class="smaller" -->
+
+## Degree Centrality — Local Exposure
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="column c-definition">
 
-
-<div class="c-definition">
-
-**Degree centrality**
 $$C_D(v) = \frac{\deg(v)}{n-1}$$
-Measures **local exposure** — how many direct contacts a node has. Fast to compute; blind to network position.
+
+</div>
+
+
+<div class="column c-definition">
+
+**Raw form.** $C_D^{raw}(v)=\deg(v)$
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-note">
+
+**Meaning.** How many direct contacts does $v$ have?
+
+</div>
+
+
+<div class="column c-algorithm">
+
+**Theory.** Direct exposure: importance comes from immediate contacts.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-green">
+
+**Range.** Raw: $0$ to $n-1$; normalized: $0$ to $1$.
+
+</div>
+
+
+<div class="column c-orange">
+
+**Complexity.** All scores: $O(n+m)$ including initialization; sorted ranking adds $O(n\log n)$.
+
+</div>
+
 
 </div>
 
@@ -278,46 +354,221 @@ Measures **local exposure** — how many direct contacts a node has. Fast to com
 
 <div class="c-info smaller">
 
-**Example:** The most-followed account on a social platform ranks high on degree — but "famous" and "structurally central" are different things.
+**Example.** In a village gossip network, high-degree people hear from many neighbors directly.
 
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-definition">
-
-**Closeness centrality**
-$$C_C(v) = \frac{n-1}{\sum_{u \neq v} d(v, u)}$$
-Measures **reach** — high when average shortest-path distance to all other nodes is small. Captures how fast information spreads from this node.
-
-</div>
-
-
-
-<div class="c-info smaller">
-
-**Example:** An emergency-dispatch hub close to all districts has high closeness — any location can be reached in minimum average time.
-
-</div>
-
-
-</div>
-
+**Network diagnostic.** The **degree distribution** is a quick property check: equal-sized degrees suggest homogeneous structure; a heavy-tailed / power-law-like distribution suggests hubs and inequality (Barab\'asi & Albert 1999).
 
 </div>
 
 
 Notes:
-Degree and closeness both measure "how well connected is this node" but in different senses. Degree is purely local: it counts immediate neighbors and ignores the rest of the network. Closeness requires knowing the entire graph (run BFS from every node) and measures how well a node is positioned to broadcast or collect information. A node can have high degree but low closeness if it sits in a dense peripheral cluster far from the rest of the graph.
+Degree is the simplest centrality and the easiest to compute. It is also the easiest to over-interpret. It measures direct exposure, not global position. Use it when direct contacts are the mechanism: gossip, local recruitment, direct infection exposure. The degree distribution is often the first descriptive statistic of a network: if almost all nodes have similar degree, degree centrality will not strongly differentiate roles; if the distribution is heavy-tailed, hubs dominate many processes.
 
 --
 
-## Betweenness and Eigenvector Centrality
+<!-- .slide: class="figure-85 small" -->
+
+## Use of Degree Centrality — Degree Distribution
+
+Show the degree distribution either as (i) histogram (below) or (ii) sorted by degree count to highlight distributional properties.
+
+![Two degree distributions: narrow versus heavy-tailed](/courses/network-science/figures/degree-distribution-compare.svg)
+
+
+<div class="c-orange">
+
+Make a guess: **what could a network with this degree distribution look like?**
+
+</div>
+
+
+Notes:
+This is the right advanced use for degree because degree centrality is local but the distribution of all degrees is a global network fingerprint. A narrow distribution suggests equality of local opportunity and no obvious hub class. A heavy-tailed distribution suggests hub inequality, vulnerability to targeted hub removal, and strong differences between average and typical nodes.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## Degree Distribution — Possible Graphs
+
+![Graph sketches for homogeneous and hub-dominated degree distributions](/courses/network-science/figures/degree-distribution-graph-sketches.svg)
+
+
+<div class="c-info smaller">
+
+These are not unique reconstructions. Many graphs can share the same degree distribution, but the distribution gives a useful first guess about whether the network is homogeneous or hub-dominated.
+
+</div>
+
+
+Notes:
+This slide resolves the guessing activity without pretending that a degree distribution uniquely determines the network. The pedagogic point is modest: distributions are structural fingerprints, not full graph descriptions.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Closeness Centrality — Short-Path Access
+
+
+<div class="grid-2">
+
+
+<div class="column c-definition">
+
+$$C_C(v) = \frac{n-1}{\sum_{u \neq v} d(v,u)}$$
+
+</div>
+
+
+<div class="column c-definition">
+
+**Distance input.** Shortest-path distances $d(v,u)$ from $v$ to all other nodes.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-note">
+
+**Meaning.** How near is $v$ to all other nodes on average?
+
+</div>
+
+
+<div class="column c-algorithm">
+
+**Theory.** Accessibility: importance comes from short paths to everyone.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-green">
+
+**Range.** Normalized: $0$ to $1$; $1$ only if $v$ is adjacent to everyone.
+
+</div>
+
+
+<div class="column c-orange">
+
+**Complexity.** One node: $O(n+m)$ BFS; all nodes: $O(n(n+m))$ unweighted.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**Example.** An emergency-response hub with low average travel distance to all districts has high closeness.
+
+**Use.** Closeness appears in accessibility studies: which hospital, station, or facility minimizes network distance to a population center
+
+</div>
+
+
+Notes:
+Closeness is a global measure based on the shortest-path metric. Its theoretical construct is accessibility: a node is central if it can reach the entire graph with few steps. This is appropriate for diffusion or service placement when every target matters. It can be misleading in disconnected graphs unless harmonic closeness is used, because unreachable nodes make the distance sum ill-defined.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Harmonic Centrality — Robust Reachability
+
+
+<div class="grid-2">
+
+
+<div class="column c-definition">
+
+$$H(v)=\sum_{u \neq v}\frac{1}{d(v,u)} \quad \text{with } \frac{1}{\infty}=0$$
+
+</div>
+
+
+<div class="column c-definition">
+
+**Reciprocal-distance idea.** Replace distances by $1/d(v,u)$ before summing.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-note">
+
+**Meaning.** Many reachable nodes through short paths.
+
+</div>
+
+
+<div class="column c-algorithm">
+
+**Theory.** Robust accessibility: unreachable nodes contribute $0$, not $\infty$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-green">
+
+**Range.** $0$ to $n-1$; $n-1$ means direct access to everyone.
+
+</div>
+
+
+<div class="column c-orange">
+
+**Complexity.** One node: $O(n+m)$ BFS; all nodes: $O(n(n+m))$ unweighted.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+Harmonic centrality is the disconnected-graph extension of closeness: unreachable nodes contribute $0$ instead of making the distance sum ill-defined.
+
+</div>
+
+
+Notes:
+Harmonic centrality belongs directly after closeness because it fixes the main practical problem of ordinary closeness. It preserves the accessibility intuition, but replaces the arithmetic treatment of distances with reciprocal distances. This makes it robust when a network has disconnected components, while keeping the same shortest-path computational burden.
+
+--
+
+## Use of Closeness Centrality — Accessibility
 
 
 <div class="grid-2">
@@ -325,12 +576,23 @@ Degree and closeness both measure "how well connected is this node" but in diffe
 
 <div class="column">
 
+![Accessibility example for closeness centrality](/courses/network-science/figures/closeness-accessibility-example.svg)
 
-<div class="c-definition">
+</div>
 
-**Betweenness centrality**
-$$C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
-Measures **control** — fraction of all shortest paths that pass through $v$. $\sigma_{st}$: number of shortest $s$–$t$ paths; $\sigma_{st}(v)$: those passing through $v$.
+
+<div class="column">
+
+**Question.** Where should we place a service hub so it can reach everyone quickly?
+
+**Workflow.**
+
+1. Model roads, rail, or communication links as weighted edges.
+2. Compute closeness or harmonic closeness.
+3. Compare candidate locations against demand or population.
+
+</div>
+
 
 </div>
 
@@ -338,10 +600,288 @@ Measures **control** — fraction of all shortest paths that pass through $v$. $
 
 <div class="c-info smaller">
 
-**Example:** A router at a continental internet exchange has high betweenness — all intercontinental traffic passes through it.
+**Class prompt:** ask which node is the best emergency hub, then ask what changes if one district becomes disconnected.
 
 </div>
 
+
+Notes:
+This is the advanced closeness use case I recommend: accessibility and facility location. It prepares the need for harmonic centrality later: ordinary closeness is fragile when the graph is disconnected.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Betweenness Centrality — Brokerage and Control
+
+
+<div class="grid-2">
+
+
+<div class="column c-definition">
+
+$$C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
+
+</div>
+
+
+<div class="column c-definition">
+
+
+$\sigma_{st}$ is the number of shortest $s$-$t$ paths; $\sigma_{st}(v)$ counts those passing through $v$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-note">
+
+**Meaning.** How often does $v$ sit between other nodes?
+
+</div>
+
+
+<div class="column c-algorithm">
+
+**Theory.** Brokerage: importance comes from sitting on paths between others.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-green">
+
+**Range.** Normalized: $0$ to $1$; $1$ means all shortest paths between others use $v$.
+
+</div>
+
+
+<div class="column c-orange">
+
+**Complexity.** Exact Brandes: $O(n(n+m))$ unweighted; weighted graphs are slower.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**Difference from closeness.** Closeness asks: "How near is $v$ to everyone?" Betweenness asks: "How many shortest paths between *other* nodes depend on $v$?"
+
+</div>
+
+
+
+<div class="c-orange smaller">
+
+Exact betweenness for one focal node is not just one BFS: it still needs shortest-path dependency information across many source-target pairs. Brandes computes all nodes for essentially the same asymptotic cost.
+
+</div>
+
+
+Notes:
+Betweenness formalizes brokerage as shortest-path control. It is the centrality measure most directly connected to the structural-hole idea: if groups communicate mainly through shortest paths, a high-betweenness node can mediate or block flows. The weakness is the assumption that traffic follows shortest paths. In many real systems, flows are random, strategic, or capacity-limited, so betweenness is a model of control rather than a universal truth.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Computing Closeness, Harmonic, and Betweenness
+
+Toy network: $A$ is connected to $B,C,D$; $D$ is connected to $E$. Here $n=5$ and normalized betweenness divides by $\binom{4}{2}=6$ possible pairs among the other nodes.
+
+
+<div class="grid-2-1">
+
+
+<div class="column small">
+
+| Node | Distances | Closeness | Harmonic $H(v)=\sum 1/d$ | Harmonic mean distance |
+|---|---|---:|---:|---:|
+| $A$ | $1,1,1,2$ | $4/5 = 0.80$ | $3.50$ | $4/3.50 = 1.14$ |
+| $D$ | $1,1,2,2$ | $4/6 = 0.67$ | $3.00$ | $4/3.00 = 1.33$ |
+| $E$ | $1,2,3,3$ | $4/9 = 0.44$ | $2.17$ | $4/2.17 = 1.85$ |
+
+| Node | Shortest paths between others that pass through node | Betweenness |
+|---|---:|---:|
+| $A$ | $5$ of $6$ | $5/6 = 0.83$ |
+| $D$ | $3$ of $6$ | $3/6 = 0.50$ |
+| $E$ | $0$ of $6$ | $0$ |
+
+</div>
+
+
+<div class="column top">
+
+![Toy graph for closeness, harmonic centrality, and betweenness](/courses/network-science/figures/closeness-harmonic-betweenness-toy.svg)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+$A$ has the highest closeness and harmonic centrality because it minimizes distance. $D$ is less close but still has brokerage value because paths from $B$ or $C$ to $E$ must pass through it.
+
+</div>
+
+
+Notes:
+Compute the same toy graph three ways. For closeness, focus on the sum of distances from the focal node to everyone else. For harmonic centrality, sum reciprocal distances; the harmonic mean distance is the inverse-style average $(n-1)/H(v)$. For betweenness, ignore paths that start or end at the focal node and count only shortest paths between other pairs. This makes the distinction concrete: closeness and harmonic centrality measure accessibility; betweenness measures dependency or brokerage.
+
+--
+
+## Use of Betweenness Centrality — Vulnerability
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![Vulnerability example for betweenness centrality](/courses/network-science/figures/betweenness-vulnerability-example.svg)
+
+</div>
+
+
+<div class="column">
+
+**Proposal.** Use betweenness as a stress-test tool.
+
+1. Compute node or edge betweenness.
+2. Remove the top-ranked nodes/edges.
+3. Track largest connected component size.
+4. Compare against random removal.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+If targeted removal fragments the graph much faster than random removal, the network depends on a small set of brokers or bridges. For large graphs, approximate by sampling source nodes.
+
+</div>
+
+
+Notes:
+This is the cleanest advanced betweenness activity because it connects the formula to an observable consequence: fragmentation. It works for transport, supply chains, communication networks, and organizations. It also gives a reason to discuss computational cost: exact betweenness is expensive, so large graphs often use sampled or approximate betweenness.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Eigenvector Centrality — Recursive Prestige
+
+
+<div class="grid-2">
+
+
+<div class="column c-definition">
+
+**Node equation.**
+$$C_E(v) = \frac{1}{\lambda}\sum_u A_{vu} C_E(u)$$
+
+</div>
+
+
+<div class="column c-definition">
+
+**Vector equation.**
+$$Ax = \lambda x$$
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-note">
+
+**Meaning.** Important nodes are connected to important nodes.
+
+</div>
+
+
+<div class="column c-algorithm">
+
+**Theory.** $x$ is the leading eigenvector of $A$; this is recursive prestige (Bonacich 1987).
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-green">
+
+**Range.** Scores depend on normalization, often $0$ to $1$.
+
+</div>
+
+
+<div class="column c-orange">
+
+**Complexity.** Power iteration costs $O(k(n+m))$ for $k$ iterations, often written $O(km)$ on connected sparse graphs:
+$$x^{(t+1)}=\frac{Ax^{(t)}}{\lVert Ax^{(t)}\rVert}$$
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+The two equations are the same idea: the score of each node equals the weighted prestige of its neighbors; in vector form this is the eigenvector equation.
+
+</div>
+
+
+Notes:
+Eigenvector centrality moves from counting contacts to weighting contacts by their own importance. That is why it captures prestige and status more naturally than degree. The node equation and the vector equation are the same claim written at different levels. The theoretical construct is a fixed point: centrality equals a weighted sum of neighbors' centralities. Power iteration approximates that fixed point by repeated sparse matrix-vector multiplication. PageRank adds direction, damping, and random jumps to make this stable on the Web's directed graph.
+
+--
+
+## Use of Eigenvector Centrality — PageRank
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![PageRank random surfer example](/courses/network-science/figures/pagerank-random-surfer-example.svg)
 
 </div>
 
@@ -349,11 +889,21 @@ Measures **control** — fraction of all shortest paths that pass through $v$. $
 <div class="column">
 
 
-<div class="c-definition">
+<div class="c-definition small">
 
-**Eigenvector centrality**
-$$C_E(v) = \frac{1}{\lambda}\sum_{u} A_{vu}\, C_E(u)$$
-Measures **prestige** — recursive, a node is important if connected to other important nodes. $A$: adjacency matrix; $\lambda$: its leading eigenvalue.
+$$PR(v)=\frac{1-\alpha}{n}+\alpha\sum_{u\to v}\frac{PR(u)}{\operatorname{outdeg}(u)}$$
+
+**Random surfer.** With probability $\alpha$, follow a link. With probability $1-\alpha$, jump to a random page.
+
+**Range.** PageRank scores are probabilities: each score is in $[0,1]$ and all scores sum to $1$.
+
+**Power iteration.** Repeatedly update all scores until they converge. Each iteration is sparse: $O(n+m)$, often written $O(m)$ on connected graphs.
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -361,27 +911,66 @@ Measures **prestige** — recursive, a node is important if connected to other i
 
 <div class="c-info smaller">
 
-**PageRank** (Google, 1998) is the directed, damped variant: prestige flows along directed citation/link edges, with a damping factor to handle dangling nodes.
-
-</div>
-
-
-</div>
-
+PageRank scales well by power iteration, but it is cheatable: link farms manufacture endorsements. Harmonic centrality is harder to game that way, but exact computation is more expensive.
 
 </div>
 
 
 Notes:
-Betweenness is the most computationally demanding of the four: computing it exactly requires running shortest-path BFS from every node, giving $O(|V| \cdot |E|)$ for unweighted graphs (Brandes, 2001). Eigenvector centrality is defined by a fixed-point equation — the centrality vector is the leading eigenvector of the adjacency matrix, computed by power iteration. Both answer different questions from degree and closeness: betweenness captures *control* over information flow (who can act as gatekeeper?), eigenvector captures *prestige* (whose opinion is amplified by the audience of their audience?).
+This slide connects eigenvector centrality to PageRank concretely. The random surfer model is intuitive and the power-iteration implementation is computationally attractive: a few sparse matrix-vector updates scale better than all-pairs shortest paths. But PageRank is a prestige-through-links model, and link farms exploit exactly that assumption. This is a good moment to contrast endorsement-based centrality with distance-based measures such as harmonic centrality: they answer different questions and have different computational profiles.
 
 --
 
-<!-- .slide: class="figure-100" -->
+<!-- .slide: class="figure-110 small" -->
 
 ## Same Graph, Four Views of Importance
 
-![Four centrality measures applied to the same small graph](/courses/network-science/figures/centrality-quartet.svg)
+
+<div class="grid-4 gap-sm">
+
+
+<div class="column">
+
+![Degree centrality on a small graph](/courses/network-science/figures/centrality_degree.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+**Degree**
+
+</div>
+
+
+<div class="column">
+
+![Closeness centrality on a small graph](/courses/network-science/figures/centrality_closeness.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+**Closeness**
+
+</div>
+
+
+<div class="column">
+
+![Betweenness centrality on a small graph](/courses/network-science/figures/centrality_betweenness.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+**Betweenness**
+
+</div>
+
+
+<div class="column">
+
+![Eigenvector centrality on a small graph](/courses/network-science/figures/centrality_eigenvector.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+**Eigenvector**
+
+</div>
+
+
+</div>
+
 
 
 <div class="c-info smaller">
@@ -396,7 +985,54 @@ This visualization makes the central conceptual point of the module concrete: th
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Centrality Summary
+
+
+<div class="c-info smaller">
+
+Notation: $n = |V|$ nodes, $m = |E|$ edges, $k =$ power-iteration steps. "One node" means scoring one focal node; "all nodes" means computing all scores. Sorting a complete ranking adds $O(n\log n)$.
+
+</div>
+
+
+| Measure | Theory | One node | All nodes |
+|---|---|---|---|
+| **Degree** | direct exposure | $O(\deg v)$, often $O(1)$ if stored | $O(n+m)$ |
+| **Closeness** | short-path access | $O(n+m)$ BFS | $O(n(n+m))$ |
+| **Harmonic** | reachable proximity | $O(n+m)$ BFS | $O(n(n+m))$ |
+| **Betweenness** | path brokerage | $O(n(n+m))$ exact | $O(n(n+m))$ with Brandes |
+| **Eigenvector / PageRank** | recursive prestige | computed as whole vector | $O(k(n+m))$ |
+
+
+<div class="c-info smaller">
+
+For closeness and harmonic centrality, moving from one focal node to all nodes multiplies the shortest-path computation by about $n$. For exact betweenness, however, even one focal node already requires all-source shortest-path dependency information, so Brandes computes all nodes for essentially the same asymptotic cost.
+
+</div>
+
+
+
+<div class="c-orange smaller">
+
+With positive weighted edges, replace BFS by Dijkstra: one source is roughly $O(m+n\log n)$ and all sources $O(nm+n^2\log n)$. Weighted Brandes is commonly stated with the same $O(nm+n^2\log n)$ distance-search term.
+
+</div>
+
+
+Notes:
+This slide should prevent the common misunderstanding that a centrality formula has one universal cost. Use the general unweighted graph bounds: BFS is $O(n+m)$, not just $O(m)$, because disconnected or sparse graphs still require node bookkeeping. For closeness and harmonic centrality, one focal node is one shortest-path search, while all nodes require one search per source. Exact betweenness is global: Brandes computes all scores in $O(n(n+m))$ for unweighted graphs, and computing one exact focal score does not usually give the same simple savings as closeness. Eigenvector and PageRank are naturally vector computations.
+
+--
+
 ## Back to the Workplace
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
 
 In the workplace figure, each measure picks a different winner:
 
@@ -405,43 +1041,21 @@ In the workplace figure, each measure picks a different winner:
 - **Betweenness** → Dia *and* Fin: every shortest path between the teams passes through both
 - **Eigenvector** → Ana or Ben: connected to densely-connected others, which amplifies recursively
 
+</div>
+
+
+<div class="column top">
+
+![The workplace network from Lecture 03](/courses/network-science/figures/l03-scenario.svg)
+
+</div>
+
+
+</div>
+
+
 Notes:
 Running through the four centralities on the same small concrete graph makes the pluralism tangible. The crucial insight: the "most important" answer depends on which theory of importance you adopt. Dia wins on betweenness because she is the only broker, but she loses on eigenvector because team B's neighbors are less densely connected than team A's. In the workplace figure there is no single "most important" node — there is only a most important node *for a given question*.
-
---
-
-## Real-World Examples
-
-
-<div class="grid-2-1">
-
-
-<div class="column">
-
-![Degree centrality examples](/courses/network-science/figures/centrality_degree.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
-</div>
-
-
-<div class="column">
-
-![Eigenvector centrality examples](/courses/network-science/figures/centrality_eigenvector.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
-</div>
-
-
-</div>
-
-
-
-<div class="c-info smaller">
-
-**Left:** Degree highlights raw connection counts. **Right:** Eigenvector centrality refines this — a node is important if it links to other important nodes. Google's PageRank is the directed variant of eigenvector centrality applied to the Web.
-
-</div>
-
 
 --
 
@@ -466,17 +1080,21 @@ For each scenario, decide which centrality measure is most appropriate and justi
 3. You want to detect which router, if attacked, would slow internet traffic between continents most.
 4. You want to find the most prestigious researcher in a citation network.
 
+
+<div class="c-info fade-in">
+
+**Solution:**
+
+1. **Degree** — direct contacts matter. 
+2. **Closeness** — minimum average distance to districts. 
+3. **Betweenness** — router lies on intercontinental paths. 
+4. **Eigenvector / PageRank** — prestige flows from being cited by prestigious others.
+
+</div>
+
+
 Notes:
 The four scenarios are deliberately matched one-to-one with the four measures. Students who answer "degree" or "betweenness" to all four miss the conceptual point: each scenario embeds a different theory of what "important" means, and the right measure is the one that matches the theory.
-
---
-
-## Quick Check — Solution
-
-1. **Degree centrality** — gossip is local, direct contacts matter.
-2. **Closeness centrality** — minimizing average distance to all districts.
-3. **Betweenness centrality** — the router's role is to lie on paths between continents.
-4. **Eigenvector centrality / PageRank** — prestige flows from being cited by others who are themselves prestigious.
 
 ---
 
@@ -500,6 +1118,12 @@ Communities are intuitively obvious in a drawing but surprisingly hard to define
 ## Working Definition
 
 
+<div class="grid-2-1">
+
+
+<div class="column">
+
+
 <div class="c-definition">
 
 **Community (informal).** A subset of nodes $S \subseteq V$ with
@@ -511,12 +1135,36 @@ Communities are intuitively obvious in a drawing but surprisingly hard to define
 </div>
 
 
+</div>
+
+
+<div class="column">
+
+
+
+![The workplace network from Lecture 03](/courses/network-science/figures/l03-scenario.svg)
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
 Different formal definitions instantiate this intuition differently. The most influential is **modularity**, which compares observed internal density against a random null model.
+
+</div>
+
 
 Notes:
 The informal definition is intentional: it gives the structural criterion without committing to a specific objective function. Modularity, conductance, and density-based definitions all satisfy the informal criterion but operationalize it differently. The pluralism is a feature — different applications need different sharpnesses of community boundary — but for the rest of the lecture we focus on modularity because it is the single most widely used objective.
 
 --
+
+<!-- .slide: class="smaller" -->
 
 ## Modularity — The Canonical Objective
 
@@ -525,11 +1173,36 @@ The informal definition is intentional: it gives the structural criterion withou
 
 **Modularity** $Q$ of a partition $\{C_1, \dots, C_k\}$ of a graph with $m$ edges and adjacency matrix $A$:
 
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Pairwise form**
+
 $$
 Q = \frac{1}{2m} \sum_{i,j} \left( A_{ij} - \frac{k_i k_j}{2m} \right) \delta(c_i, c_j)
 $$
 
-where $k_i$ is the degree of node $i$ and $\delta(c_i, c_j) = 1$ if $i$ and $j$ are in the same community, else $0$.
+</div>
+
+
+<div class="column">
+
+**Equivalent grouped form**
+
+$$
+Q = \sum_c \left(\frac{l_c}{m} - \left(\frac{d_c}{2m}\right)^2\right)
+$$
+
+</div>
+
+
+</div>
+
+
+where $k_i$ is node degree, $\delta(c_i, c_j)=1$ for same-community pairs, $l_c$ is the number of internal edges in community $c$, and $d_c$ is the sum of degrees in $c$.
 
 </div>
 
@@ -546,6 +1219,150 @@ $Q$ ranges roughly in $[-\tfrac{1}{2}, 1]$. Values in $[0.3, 0.7]$ typically ind
 
 Notes:
 Modularity is the single most important concept in this lecture. It converts the vague notion of "community" into a number we can optimize. The configuration-model null is what makes it statistical rather than arbitrary: instead of asking "are there many edges inside this group?" it asks "are there *more* edges inside this group than we would expect if we kept each node's degree but rewired everything at random?". That reframing is precisely why modularity can distinguish real communities from high-degree hubs whose connections merely happen to concentrate.
+
+--
+
+## Modularity — Worked Example
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![Two triangle communities connected by one bridge](/courses/network-science/figures/modularity-worked-example.svg)
+
+
+<div class="c-note smaller">
+
+Partition: left triangle vs. right triangle.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+The bridge is the only between-community edge.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+For each triangle:
+
+- internal edges: $l_c = 3$
+- total degree: $d_c = 2+2+3=7$
+- total graph edges: $m=7$
+
+
+<div class="c-green smaller">
+
+$$
+Q = 2\left(\frac{3}{7} - \left(\frac{7}{14}\right)^2\right)
+  = 2(0.429 - 0.25)
+  \approx 0.36
+$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+Interpretation: the partition has more within-community edges than expected under degree-preserving random rewiring, so $Q$ is positive.
+
+</div>
+
+
+Notes:
+This is the smallest useful modularity example: two dense triangles and one bridge. The grouped formula is just the double-sum modularity formula collected by community; introduce it explicitly so "community form" is not a new unexplained concept. The arithmetic is correct: each triangle has three internal edges, and the bridge gives one node in each triangle degree three, so the total degree per triangle is seven. The positive Q value says this two-community partition captures real excess internal density.
+
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## Example Case — Belgian Phone Calls
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+![Belgium phone communities](/courses/network-science/figures/communities-in-belgium-mobile-phone-users.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+Nodes are phone users or regions; edges are call relationships. Community detection recovers dense calling regions, and the strongest split aligns with Belgium's Flemish-Walloon linguistic divide — a social boundary inferred from communication structure, not supplied as a label.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Use this as the social-network example. The important point is not that the algorithm knows language. It only sees calls. The linguistic boundary appears because people communicate more within language communities than across them.
+
+--
+
+<!-- .slide: class="figure-80" -->
+
+## Example Case — Metabolic Networks
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+![Metabolic network communities](/courses/network-science/figures/metabolic-community.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-info smaller">
+
+Nodes are metabolites or reactions; edges represent biochemical transformations. Communities correspond to functional modules: groups of reactions that interact densely because they participate in the same pathway or cellular process.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Use this as the biological-network example. The same structural definition of community now means functional organization rather than social identity. This helps students see why modularity is useful across domains: dense internal connectivity can signal linguistic groups, biological pathways, or technical subsystems depending on what the nodes and edges mean.
+
 
 --
 
@@ -583,24 +1400,52 @@ This is the slide where the L03–L04 narrative arc closes. In L03, we had a cle
 
 --
 
-## Example Cases
+<!-- .slide: class="figure-90 small" -->
+
+## Study — International Trade Communities
 
 
-<div class="grid-2">
+<div class="grid-2-1">
+
 
 
 <div class="column">
 
-![Belgium phone communities](/courses/network-science/figures/communities-in-belgium-mobile-phone-users.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+<div class="c-info">
+
+Cho, Lee & Kim (2023) model international trade as a network of countries connected by trade relationships and detect **trade communities at multiple resolutions** (Cho et al. 2023).
+
+</div>
+
+
+**Network formation.** Nodes are countries; weighted edges encode trade relationships. Strong edges form when countries exchange large volumes or are tightly embedded in the same trade system.
+
+**Question.** Does world trade split into one stable map of blocs, or into nested communities that depend on resolution?
+
+**Finding.** A single community scale can hide structure: large blocs contain smaller regional or sectoral sub-blocs. Economic communities are not only geographic; they also reflect trade intensity, specialization, agreements, and supply-chain structure.
+
+
+<div class="c-info smaller">
+
+**Panels**
+
+$\Phi^*$ is the **cooccurrence threshold**: countries are grouped only if they appear together in the same community in at least that share of multiresolution runs. Higher $\Phi^*$ keeps only more stable links.
+
+- **a** $\Phi^*=0$: one large trade component
+- **b** $\Phi^*=0.41$: four broad blocs
+- **c** $\Phi^*=0.96$: 16 stable country groups
+
+</div>
+
 
 </div>
 
 
 <div class="column">
 
-![Metabolic network communities](/courses/network-science/figures/metabolic-community.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+![Trade communities at three cooccurrence thresholds](/courses/network-science/figures/cho2023-trade-communities-fig4.png)
+<span class="figure-credit">Source: Cho et al. 2023 — CC BY 4.0</span>
 
 </div>
 
@@ -611,13 +1456,67 @@ This is the slide where the L03–L04 narrative arc closes. In L03, we had a cle
 
 <div class="c-info smaller">
 
-Three different domains, the same structural pattern: dense internal connectivity and sparse cross-group connectivity. The Belgium phone graph reveals the linguistic divide between Flemish and Walloon speakers — an external label the algorithm was never told. Metabolic communities reflect functional pathway groupings.
+Figure: selected country configurations at cooccurrence thresholds $\Phi^*=0$, $0.41$, and $0.96$; reproduced from Fig. 4 in Cho, Lee & Kim (2023), CC BY 4.0.
 
 </div>
 
 
 Notes:
-The cross-domain examples make the universality argument: the same modularity-based tools recover meaningful groups in social, biological, and technical networks. The Belgium example is particularly striking because the linguistic boundary was never an explicit feature of the data — it was discovered from call patterns alone by a Louvain-style modularity maximizer.
+Use this slide to change domain from social and biological examples to economic networks. We did not previously have a Cho et al. figure in the local figures directory; this adds Figure 4 from the open-access Scientific Reports article under CC BY 4.0. The key point is methodological: the resolution parameter matters. Trade has nested structure, so one modularity scale is too coarse. Community detection here is not just descriptive; it asks whether the global economy is organized into stable blocs at multiple scales.
+
+--
+
+## Study — Product Space and Development
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-info">
+
+Hidalgo, Klinger, Barabasi & Hausmann (2007) build a **product-space network**: nodes are exported products, and edges connect products that require similar capabilities (Hidalgo et al. 2007).
+
+</div>
+
+
+**Network formation.** Nodes are SITC-4 product classes. A country is linked to a product when it exports it with **revealed comparative advantage** ($RCA>1$). Two products are similar if countries that export one competitively also tend to export the other competitively:
+
+$$
+\phi_{ij}=\min\{P(RCA_i>1\mid RCA_j>1),P(RCA_j>1\mid RCA_i>1)\}.
+$$
+
+Edges therefore do **not** mean product-to-product trade. They reveal shared capabilities, knowledge, institutions, inputs, or infrastructure.
+
+**Question.** Why can some countries diversify into sophisticated products while others remain stuck in low-complexity export baskets?
+
+**Finding.** Sophisticated products sit in a dense core; less sophisticated products often lie in sparse peripheral regions. Countries diversify by moving to nearby products, so peripheral position limits feasible development paths.
+
+</div>
+
+
+<div class="column">
+
+![Schematic product-space network](/courses/network-science/figures/product-space-development-schematic.svg)
+
+
+<div class="c-info smaller">
+
+Redrawn teaching schematic after Fig. 1 in Hidalgo et al. (2007), DOI: 10.1126/science.1144581.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is not just another social-community example. The network is an economic opportunity map. The community/core-periphery structure tells us which products are close enough for a country to plausibly enter next. It also shows why network position can constrain growth.
 
 --
 
@@ -641,18 +1540,20 @@ A graph has two dense clusters of 50 nodes each connected by a single edge, plus
 2. Will modularity maximization find all of them?
 3. If you asked a balanced 2-partition algorithm to split it into two equal halves, what might go wrong?
 
+
+<div class="c-info fade-in">
+
+**Solution:** 
+
+1. **Three** natural communities: two dense clusters plus the triangle. 
+2. On this small graph, likely yes; at larger scale, modularity's **resolution limit** can hide small groups. 
+3. Balanced 2-partition may cut through a dense cluster or merge the triangle with the wrong side.
+
+</div>
+
+
 Notes:
 The graph has three natural communities, and modularity maximization should find them on a graph this size — but there is a subtle trap. Modularity has a well-known *resolution limit* (Fortunato & Barthélemy 2007): in large graphs, modularity cannot detect communities smaller than roughly $\sqrt{2m}$ edges. On the small example above the triangle is easy to find, but if the two big clusters grew to 5000 nodes each, the triangle would disappear below the resolution threshold. The balanced partition question is a separate trap: enforcing equal sizes forces the algorithm to either cut through a real community or merge the triangle with the wrong neighbor. Either way, a structural constraint hides real structure.
-
---
-
-## Quick Check — Solution
-
-**1. Three natural communities** — the two dense clusters and the small triangle.
-
-**2. Modularity will find them on this small graph**, but in large graphs modularity has a **resolution limit**: it systematically fails to detect communities smaller than roughly $\sqrt{2m}$ edges. Scale the two clusters up to 5000 nodes each and the triangle vanishes from view.
-
-**3. Balanced 2-partition** is forced to produce equal-sized groups. It will either cut through one of the dense clusters or merge the triangle with the wrong cluster. The constraint distorts the answer.
 
 ---
 
@@ -692,7 +1593,7 @@ Divisive methods target the inter-community edges directly, which aligns with th
 
 --
 
-<!-- .slide: class="figure-95" -->
+<!-- .slide: class="figure-90" -->
 
 ## The Dendrogram as Output
 
@@ -744,14 +1645,17 @@ The recompute step in line 3 is what makes Girvan–Newman conceptually clean bu
 
 <!-- .slide: class="figure-95" -->
 
-## Worked Example
+## Girvan–Newman — Worked Example
 
 ![Girvan–Newman peeling a small graph in three steps](/courses/network-science/figures/girvan-newman-steps.svg)
 
 
 <div class="c-info smaller">
 
-**Step 0:** the bridge edge has the highest betweenness because every path between the two clusters must cross it. **Step 1:** removing it reveals two main clusters but the small triangle remains weakly attached. **Step 2:** the next-highest-betweenness edge is the link to the triangle — removing it isolates the third community. Final partition: three communities.
+- **Step 0:** the bridge edge has highest betweenness because every path between the two main clusters must cross it.
+- **Step 1:** removing that bridge reveals two main clusters; the small triangle remains weakly attached to the left cluster.
+- **Step 2:** the next high-betweenness edge is the link to the triangle; removing it isolates the third community.
+- **Final partition:** three communities.
 
 </div>
 
@@ -761,32 +1665,102 @@ The worked example shows the algorithm's two characteristic moves: detaching a m
 
 --
 
-## Louvain and Leiden — Modern Practice
+## Louvain — Greedy Modularity in Two Phases
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![Louvain workflow](/courses/network-science/figures/louvain-example.svg)
+
+</div>
+
+
+<div class="column">
 
 
 <div class="c-definition smaller">
 
-**Louvain (Blondel et al., 2008).** Agglomerative modularity maximizer.
-
-*Phase 1:* For each node, try moving it to each neighbor's community; keep the move that most increases $Q$. Repeat until no move improves $Q$.
-
-*Phase 2:* Contract each community into a super-node and repeat Phase 1 on the new graph. Iterate until $Q$ converges.
+**Louvain (Blondel et al., 2008)** is a fast greedy heuristic for high-modularity partitions.
 
 </div>
 
 
 
-<div class="c-definition smaller">
+<div class="c-info smaller">
 
-**Leiden (Traag et al., 2019).** Fixes a subtle Louvain flaw (disconnected communities) and guarantees well-connected output at each level.
+- **Local moving:** start with each node in its own community; move node $v$ to a neighboring community if this increases $Q$.
+- **Candidate communities:** for $v$, test only the current communities represented among $v$'s neighbors, plus staying where it is. This is local, not all possible partitions.
+- **Aggregation:** collapse each detected community into a super-node.
+- **Repeat:** run local moving again on the smaller graph until modularity no longer improves.
+- **No fixed $k$:** the number of communities is not pre-given; it emerges from the greedy moves and aggregation levels.
 
 </div>
 
 
-**Why these dominate practice.** Near-linear time in $|E|$; handle millions of nodes; directly optimize $Q$; no edge-betweenness recomputation.
+</div>
+
+
+</div>
+
 
 Notes:
-Louvain is currently the default community-detection algorithm in NetworkX, Gephi, and most network-analysis packages — it scales to graphs orders of magnitude larger than Girvan–Newman. Leiden is the 2019 improvement that fixed a structural bug in Louvain (it could return communities that were internally disconnected) and is now the recommended default in research. Both directly optimize modularity greedily without touching edge betweenness.
+Louvain is currently a default community-detection algorithm in Gephi and many network-analysis packages because it avoids all edge-betweenness recomputation. The key intuition is compression: local moves find provisional communities, then aggregation turns those communities into a smaller graph, so the same operation can be repeated at a coarser scale. The "k" question is important: Louvain does not test a pre-given number of communities. At the start k=n, because every node is alone. During local moving, a node only considers the communities of its neighbors; during aggregation, the current k becomes the number of super-nodes in the next level. The final k is therefore an output of the heuristic, not an input.
+
+--
+
+## Leiden — Louvain with Refinement
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![Leiden workflow](/courses/network-science/figures/leiden-example.svg)
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition smaller">
+
+**Leiden (Traag et al., 2019)** keeps Louvain's speed idea but adds a refinement phase before aggregation.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+- **Local moving:** first improve $Q$ with Louvain-style node moves.
+- **Refinement:** split provisional communities into better-connected subcommunities before aggregation.
+- **Aggregation:** collapse only the refined communities and repeat on the smaller graph.
+- **No fixed $k$:** Leiden also lets $k$ emerge, but it prevents weak provisional groups from being locked in too early.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+Both are heuristic modularity optimizers: they do not guarantee the global maximum, but they scale to graphs where Girvan-Newman is infeasible. Leiden is usually preferred in research pipelines because it preserves Louvain's scalability while avoiding structurally broken communities.
+
+</div>
+
+
+Notes:
+Leiden is best taught as "Louvain plus a quality-control step." The flaw is not merely theoretical: after greedy local moves and aggregation, Louvain may label a set of nodes as one community even though parts of that set are not internally connected in a meaningful way. Leiden inserts a refinement phase that checks and splits such communities before aggregation. It is still a heuristic, but it returns communities with stronger internal connectivity guarantees.
 
 --
 
@@ -922,21 +1896,22 @@ Notes:
 Embedding-based community detection represents the current research frontier. node2vec is now a standard baseline — available in the PyTorch Geometric and NetworkX ecosystems — and runs efficiently on graphs with millions of nodes. The intuition is straightforward: if two nodes co-occur frequently in random walks, they are structurally similar and their embeddings will be nearby; k-means on those embeddings recovers communities. GNN-based methods are more powerful because they can use node and edge features alongside topology, handle soft (overlapping) community membership, and be trained end-to-end with application-specific objectives. The key limitation of all embedding approaches: the embedding dimension and clustering hyperparameters (k, distance threshold) must be chosen before running, adding new modeling decisions that modularity-based methods avoid.
 
 --
+<!-- .slide: class="smaller" -->
 
 ## Algorithm Comparison
 
 | Method | Strategy | Complexity | Strength | Limitation |
 |---|---|---|---|---|
-| **Min-cut** | Cut minimization | $O(\|V\|\cdot\|E\|)$ | Exact for 2-partition | Ignores density, favors small cut |
-| **Kernighan–Lin** | Local swap | $O(\|V\|^2 \log\|V\|)$ | Fast for balanced partition | Local optimum, fixed $k$ |
-| **Spectral** | Laplacian eigenvectors | $O(\|V\|^3)$ full / faster approx | Global structure, principled | Slow exact; needs $k$ in advance |
-| **Girvan–Newman** | Edge betweenness | $O(\|V\|\cdot\|E\|^2)$ | Hierarchy, no $k$ needed | Too slow for large graphs |
-| **Louvain / Leiden** | Modularity greedy | $O(\|E\|)$ approx | Fast, scalable, no $k$ needed | Resolution limit, local opt |
-| **node2vec + clustering** | Random-walk embed | $O(\|E\|)$ walks + embed | Scales, uses node features | Needs $k$, walk hyperparams |
-| **GNN-based** | Neural + graph structure | Varies | Soft membership, features | Requires training data or objective design |
+| **Min-cut** | Cut minimization | e.g. $O(nm)$ for basic max-flow variants | Exact for 2-partition | Ignores density, favors small cut |
+| **Kernighan–Lin** | Local swap | $O(n^2)$ per pass | Fast for balanced partition | Local optimum, fixed $k$ |
+| **Spectral** | Laplacian eigenvectors | $O(n^3)$ full / faster sparse approx | Global structure, principled | Slow exact; needs $k$ in advance |
+| **Girvan–Newman** | Edge betweenness | $O(nm^2)$ worst case | Hierarchy, no $k$ needed | Too slow for large graphs |
+| **Louvain / Leiden** | Modularity greedy | near-linear in $m$ empirically | Fast, scalable, no $k$ needed | Resolution limit, local opt |
+| **node2vec + clustering** | Random-walk embed | walks $O(rnl)$ + training/clustering | Scales, flexible | Needs $k$, walk hyperparams |
+| **GNN-based** | Neural message passing | often $O(TLmd)$-like | Soft membership, features | Requires training objective |
 
 Notes:
-This table is the key synthesis slide for the module. Students should be able to match each method to the right use case: Louvain/Leiden for exploratory analysis of large graphs with no prior on k; spectral clustering for medium-sized graphs where you want a principled 2–5 partition; node2vec for graphs with rich structure where embedding locality is meaningful; GNN-based when you have node features or need overlapping communities. The complexity column signals when each method becomes impractical — Girvan–Newman is pedagogically essential but computationally obsolete above ~10k nodes.
+This table is the key synthesis slide for the module. Use n for nodes, m for edges, r for walks per node, l for walk length, T for epochs/iterations, L for message-passing layers, and d for hidden dimension. Students should be able to match each method to the right use case: Louvain/Leiden for exploratory analysis of large graphs with no prior on k; spectral clustering for medium-sized graphs where you want a principled 2–5 partition; node2vec for graphs with rich structure where embedding locality is meaningful; GNN-based when you have node features or need overlapping communities. The complexity column signals when each method becomes impractical — Girvan–Newman is pedagogically essential but computationally obsolete above ~10k nodes.
 
 --
 
@@ -959,23 +1934,16 @@ You run Girvan–Newman on a small graph and get a dendrogram with a maximum $Q$
 1. Which answer is "correct"?
 2. What could explain the discrepancy?
 
+
+<div class="c-info fade-in">
+
+**Solution:** Neither is absolutely correct. Both are heuristics approximating an NP-hard objective. Louvain may get stuck in a local optimum; Girvan–Newman may expose finer but noisy structure; modularity has a resolution limit; the graph may have multiple near-optimal partitions.
+
+</div>
+
+
 Notes:
 Neither is correct in an absolute sense — both are heuristics approximating an NP-hard optimum. Girvan–Newman's divisive peeling can find finer structure because it tests every possible cut, but its higher $Q$ might be fragile to noise. Louvain's greedy merges can get stuck in local optima and miss small communities. The honest answer: both are reasonable, and the discrepancy itself is evidence that the solution is not unique — the student should report both and discuss the tradeoff.
-
---
-
-## Quick Check — Solution
-
-**1. Neither is absolutely correct** — both are heuristics approximating the NP-hard modularity optimum. The higher $Q$ value is weak evidence, not proof, and the difference may be within noise.
-
-**2. Possible explanations:**
-
-- Louvain is greedy and can get stuck in local optima that miss small communities.
-- Girvan–Newman explores more cuts but is sensitive to the order of edge removals.
-- Modularity itself has a resolution limit; both methods share this blind spot.
-- The graph may genuinely admit multiple near-optimal partitions — real structure can be ambiguous.
-
-The honest practice is to run multiple algorithms, report agreement, and treat disagreement as a signal about the graph itself.
 
 ---
 
@@ -1000,14 +1968,37 @@ Zachary's karate club is the canonical validation dataset for community detectio
 
 ## The Story
 
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
 ![Zachary's karate club — schematic of the 34-member network with its two factions](/courses/network-science/figures/karate-club.svg)
+
+</div>
+
+
+<div class="column">
 
 
 <div class="c-info smaller">
 
-**Zachary (1977),** *An Information Flow Model for Conflict and Fission in Small Groups*, [**J. Anthropological Research 33, 452–473**](https://www.jstor.org/stable/3629752).
+**Reference.** Zachary (1977), *An Information Flow Model for Conflict and Fission in Small Groups*, [**J. Anthropological Research 33, 452–473**](https://www.jstor.org/stable/3629752).
+
+</div>
+
+
+
+<div class="c-info smaller">
 
 Wayne Zachary observed a university karate club for two years. A conflict arose between the instructor (**Mr. Hi**) and the chief administrator (**Officer**), and the club eventually **split in two** — with each member following one or the other.
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -1095,8 +2086,12 @@ The closing table is the summary of the L03–L04 arc: two levels of structural 
 
 ## Image Credits & References
 
+- Barab\'asi, Albert-L\'aszl\'o and Albert, R\'eka (1999). Emergence of Scaling in Random Networks. *Science*.
+- Bonacich, Phillip (1987). Power and Centrality: A Family of Measures. *American Journal of Sociology*.
 - Burt, Ronald S. (1992). Structural Holes: The Social Structure of Competition. *Harvard University Press*.
-- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning About a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Cho, Wonguk and Lee, Daekyung and Kim, Beom Jun (2023). A Multiresolution Framework for the Analysis of Community Structure in International Trade Networks. *Scientific Reports*.
+- Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning about a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- Hidalgo, C\'esar A. and Klinger, Bailey and Barab\'asi, Albert-L\'aszl\'o and Hausmann, Ricardo (2007). The Product Space Conditions the Development of Nations. *Science*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
