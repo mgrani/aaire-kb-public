@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Übungsblatt 4 — JavaScript, Verteilte Architekturen, Accessibility, Barrierefreiheit</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Übungsblatt 4
+## JavaScript, Verteilte Architekturen, Accessibility, Barrierefreiheit
+
+5430UE Web and Data Engineering
+
+6. Mai 2026
+
+Prof. Dr. Michael Granitzer, Tobias Fuchs
+
+---
+
+## Lernziele
+
+- Implementierung und dynamische Einbindung von Validierungslogik in HTML-Formulare mittels JavaScript
+- Analyse von Herausforderungen verteilter Systeme 
+- Anwendung von Prinzipien des semantischen HTML
+- Kennen grundlegende Problemfelder im Kontext Barrierefreiheit
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# HTML und Javascript: Luhn-Algorithmus zur Kreditkarten-Validierung
+
+--
+
+## Übung 4.1: HTML und Javascript: Luhn-Algorithmus
+
+Der Luhn-Algorithmus prüft, ob eine Kreditkartennummer formal korrekt ist (Tipp-Fehler-Erkennung).  
+Algorithmus:
+1. Beginnend bei der vorletzten Ziffer wird jede zweite Ziffer (nach links gehend) mit 2 multipliziert
+2. Ist das Ergebnis dieser Multiplikation größer als 9, bildet man die Quersumme (z.B. 16 ergibt 1 + 6 = 7). Alternativ kann man auch 9 vom Ergebnis abziehen (16 - 9 = 7)
+3. Addiere nun alle Ziffern (die unveränderten und die neu berechneten)
+4. Die Nummer ist gültig, wenn die Gesamtsumme ohne Rest durch 10 teilbar ist.
+
+*Beispiele*: 4532015112830366 ist gültig, 1234567890123456 ist nicht gültig.
+
+--
+
+## Übung 4.1: HTML und Javascript: Luhn-Algorithmus (Fortsetzung)
+
+1. Implementieren Sie eine JavaScript-Funktion `isValidLuhn(number)`, die eine Kreditkartennummer als String entgegennimmt und `true` zurückgibt wenn die Nummer den Luhn-Check besteht, sonst `false`.
+
+2. Implementieren Sie ein HTML-Dokument, das ein Eingabefeld für Nummern bietet. Bei jeder Eingabe soll die Funktion aus Teilaufgabe a) zur Prüfung aufgerufen werden. Nutzen Sie hierfür das oninput-Event, um auf jede Änderung des Feldinhalts (Eingabe, Löschen oder Einfügen) sofort zu reagieren. Je nach Auswertung der Prüfung soll unterhalb des Eingabefelds eine passende Ausgabe (*Gültig!*, *Ungültig!* oder *Fehlerhafte Eingabe!*) angezeigt werden.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Herausforderungen verteilter Systeme
+
+--
+
+## Übung 4.2: Herausforderungen verteilter Systeme
+
+Wir betrachten folgendes Szenario:  
+*Ein Unternehmen migriert seinen Monolith auf 4 Server-Instanzen hinter einem Load Balancer.*
+
+Ordnen Sie folgende Vorfälle den Herausforderungen verteilter Systeme zu (*Netzwerk-Latenz* / *Partielle Ausfälle* / *Konsistenz* / *Koordination von Prozessen*):
+
+| Vorfall | Herausforderung |
+|---|---|
+| Server 2 fällt aus; 25 % der Requests schlagen fehl | ? |
+| Nutzer sieht nach dem Kauf kurz den alten Kontostand | ? |
+| Zwei Server verarbeiten gleichzeitig dieselbe Bestellung | ? |
+| API-Calls zwischen Services dauern 50 ms statt 0,1 ms | ? |
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Web-Technologien kategorisieren
+
+--
+
+## Übung 4.3: Web-Technologien kategorisieren
+
+Ordnen Sie die folgenden Technologien/Standards in die richtige Kategorie ein:  
+`JSF, XML, HTTP, URI, HTML, CSS, SOAP, JSON, REST, Thymeleaf, JDBC, SQL`
+
+| Kategorie | Technologie |
+|---|---|
+| Protokoll | ? |
+| Adressierung | ? |
+| Markup-/Datenformat | ? |
+| Framework/Template-Engine | ? |
+| Datenbankzugriff | ? |
+| Architekturstil | ? |
+
+*Hinweis:* Manche Technologien können mehreren Kategorien zugeordnet werden — wählen Sie die primäre Kategorie aus.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Semantisches HTML
+
+--
+
+## Übung 4.4: Semantisches HTML (1/2)
+
+Gegeben ist folgendes unsemantisches HTML:
+
+```html
+<div class="header">
+  <div class="nav">
+    <div class="nav-item"><a href="/">Home</a></div>
+    <div class="nav-item"><a href="/products">Produkte</a></div>
+  </div>
+  </div>
+  <div class="main">
+    <div class="article">
+    <div class="title">Produktname</div>
+    <div class="text">Beschreibung...</div>
+  </div>
+</div>
+<div class="footer">Copyright 2026</div>
+```
+
+--
+
+## Übung 4.4: Semantisches HTML (2/2)
+
+1. Schreiben Sie die Struktur mit semantischen HTML5-Elementen um.
+
+2. Warum ist semantisches HTML für Suchmaschinen und Screenreader wichtig?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Formulare und Accessibility
+
+--
+
+## Übung 4.5: Formulare und Accessibility
+
+1. Erstellen Sie ein barrierefreies HTML-Formular für eine Produktsuche mit:
+    - Texteingabe für den Suchbegriff (Pflichtfeld)
+    - Dropdown für Kategorie (Elektronik, Kleidung, Bücher)
+    - Checkbox „Nur verfügbare Produkte”
+    - Submit-Button
+
+    Sie können als Grundlage die zur Verfügung gestellte Vorlage `formular_accessibility_vorlage.html` nutzen.
+
+2. Welche drei HTML-Attribute sind für Barrierefreiheit unverzichtbar?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Barrierefreiheit
+
+--
+
+## Übung 4.6: Barrierefreiheit
+
+Barrierefreiheit ist nach EU Richtlinien ein wichtiger Aspekt in der Web-Entwicklung. Recherchieren und beantworten Sie folgende Fragen zum Thema Barrierefreiheit in Webanwendungen.
+
+1. Barrieren können in Wahrnehmungs-, Verständnis- und Zugriffsprobleme klassifiziert werden. Ein typisches Wahrnehmungsproblem in Webapplikationen bilden fehlende Textalternativen für Medien. Nicht alle Videos haben beispielsweise Untertitel. Nennen und erklären Sie pro Problemkategorie 2 andere Beispiele. Welche Problemkategorie ist hauptsächlich technischer Natur?
+
+2. Was verbirgt sich hinter dem Selbstbestimmungsprinzip, dem Zwei-Sinne Prinzip und dem Universelles Design Prinzip.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Materialien
+
+--
+
+## Materialien zum Übungsblatt
+
+- HTML-Vorlage zu Aufgabe *Formulare und Accessibility*: [formular_accessibility_vorlage.html](./materials/formular_accessibility_vorlage.html)
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>

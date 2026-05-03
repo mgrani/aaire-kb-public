@@ -1,0 +1,514 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Übungsblatt 4 — JavaScript, Verteilte Architekturen, Accessibility, Barrierefreiheit — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Übungsblatt 4
+## JavaScript, Verteilte Architekturen, Accessibility, Barrierefreiheit
+
+5430UE Web and Data Engineering
+
+6. Mai 2026
+
+Prof. Dr. Michael Granitzer, Tobias Fuchs
+
+---
+
+## Lernziele
+
+- Implementierung und dynamische Einbindung von Validierungslogik in HTML-Formulare mittels JavaScript
+- Analyse von Herausforderungen verteilter Systeme 
+- Anwendung von Prinzipien des semantischen HTML
+- Kennen grundlegende Problemfelder im Kontext Barrierefreiheit
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# HTML und Javascript: Luhn-Algorithmus zur Kreditkarten-Validierung
+
+--
+
+## Übung 4.1: HTML und Javascript: Luhn-Algorithmus
+
+Der Luhn-Algorithmus prüft, ob eine Kreditkartennummer formal korrekt ist (Tipp-Fehler-Erkennung).  
+Algorithmus:
+1. Beginnend bei der vorletzten Ziffer wird jede zweite Ziffer (nach links gehend) mit 2 multipliziert
+2. Ist das Ergebnis dieser Multiplikation größer als 9, bildet man die Quersumme (z.B. 16 ergibt 1 + 6 = 7). Alternativ kann man auch 9 vom Ergebnis abziehen (16 - 9 = 7)
+3. Addiere nun alle Ziffern (die unveränderten und die neu berechneten)
+4. Die Nummer ist gültig, wenn die Gesamtsumme ohne Rest durch 10 teilbar ist.
+
+*Beispiele*: 4532015112830366 ist gültig, 1234567890123456 ist nicht gültig.
+
+--
+
+## Übung 4.1: HTML und Javascript: Luhn-Algorithmus (Fortsetzung)
+
+1. Implementieren Sie eine JavaScript-Funktion `isValidLuhn(number)`, die eine Kreditkartennummer als String entgegennimmt und `true` zurückgibt wenn die Nummer den Luhn-Check besteht, sonst `false`.
+
+2. Implementieren Sie ein HTML-Dokument, das ein Eingabefeld für Nummern bietet. Bei jeder Eingabe soll die Funktion aus Teilaufgabe a) zur Prüfung aufgerufen werden. Nutzen Sie hierfür das oninput-Event, um auf jede Änderung des Feldinhalts (Eingabe, Löschen oder Einfügen) sofort zu reagieren. Je nach Auswertung der Prüfung soll unterhalb des Eingabefelds eine passende Ausgabe (*Gültig!*, *Ungültig!* oder *Fehlerhafte Eingabe!*) angezeigt werden.
+
+
+--
+
+## Übung 4.1: Luhn-Algorithmus — Lösung
+
+**Zu 1) und 2):**
+
+Siehe Code.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Herausforderungen verteilter Systeme
+
+--
+
+## Übung 4.2: Herausforderungen verteilter Systeme
+
+Wir betrachten folgendes Szenario:  
+*Ein Unternehmen migriert seinen Monolith auf 4 Server-Instanzen hinter einem Load Balancer.*
+
+Ordnen Sie folgende Vorfälle den Herausforderungen verteilter Systeme zu (*Netzwerk-Latenz* / *Partielle Ausfälle* / *Konsistenz* / *Koordination von Prozessen*):
+
+| Vorfall | Herausforderung |
+|---|---|
+| Server 2 fällt aus; 25 % der Requests schlagen fehl | ? |
+| Nutzer sieht nach dem Kauf kurz den alten Kontostand | ? |
+| Zwei Server verarbeiten gleichzeitig dieselbe Bestellung | ? |
+| API-Calls zwischen Services dauern 50 ms statt 0,1 ms | ? |
+
+
+--
+
+## Übung 4.2: Herausforderungen verteilter Systeme — Lösung (1/2)
+
+| Vorfall | Herausforderung |
+|---|---|
+| Server 2 fällt aus; 25 % der Requests schlagen fehl | <span class="fragment">**Partielle Ausfälle** — einzelne Knoten können unabhängig versagen</span> |
+| Nutzer sieht nach dem Kauf kurz den alten Kontostand | <span class="fragment">**Konsistenz** — Replika noch nicht synchronisiert (eventual consistency)</span> |
+| Zwei Server verarbeiten gleichzeitig dieselbe Bestellung | <span class="fragment">**Koordination** — ohne Locking/Idempotenz bearbeiten mehrere Instanzen denselben Job</span> |
+| API-Calls zwischen Services dauern 50 ms statt 0,1 ms | <span class="fragment">**Netzwerk-Latenz** — Netzwerkaufrufe sind Größenordnungen langsamer als lokale Operationen</span> |
+
+
+--
+
+## Übung 4.2: Herausforderungen verteilter Systeme — Lösung (2/2)
+
+**Zusatz - Begründungen:**
+
+1. Im Gegensatz zum Monolithen (Ganz-oder-gar-nicht) können in verteilten Systemen einzelne Komponenten unabhängig versagen. Die Software muss lernen, mit diesem „Teil-Defekt“ umzugehen und Anfragen stabil auf die verbleibenden Instanzen umzuleiten.  
+2. Datenänderungen benötigen Zeit, um auf alle Server-Instanzen repliziert zu werden. Greift ein Nutzer nach einem Schreibvorgang auf einen noch nicht aktualisierten Server zu, entstehen kurzzeitig widersprüchliche Datenstände.
+<!-- .element: class="fragment" -->
+3. In einem Monolithen kann man einen Prozess einfach über den gemeinsamen Arbeitsspeicher sperren (Locking). Bei verteilten Instanzen wissen die Server ohne explizite Kommunikation nichts voneinander. Wenn der Load Balancer zwei schnell aufeinanderfolgende Klicks desselben Nutzers an zwei verschiedene Server schickt, greifen beide auf die Datenbank zu. Ohne eine zentrale Koordination (z. B. ein verteiltes Schloss/Distributed Lock oder Idempotenz-Token) führen beide Server die Transaktion aus.
+<!-- .element: class="fragment" -->
+4. Netzwerkaufrufe sind physikalisch bedingt um Größenordnungen langsamer als lokale Funktionsaufrufe im RAM. Diese Verzögerungen summieren sich bei vielen Service-Interaktionen schnell zu spürbaren Wartezeiten für den Endnutzer.
+<!-- .element: class="fragment" -->
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Web-Technologien kategorisieren
+
+--
+
+## Übung 4.3: Web-Technologien kategorisieren
+
+Ordnen Sie die folgenden Technologien/Standards in die richtige Kategorie ein:  
+`JSF, XML, HTTP, URI, HTML, CSS, SOAP, JSON, REST, Thymeleaf, JDBC, SQL`
+
+| Kategorie | Technologie |
+|---|---|
+| Protokoll | ? |
+| Adressierung | ? |
+| Markup-/Datenformat | ? |
+| Framework/Template-Engine | ? |
+| Datenbankzugriff | ? |
+| Architekturstil | ? |
+
+*Hinweis:* Manche Technologien können mehreren Kategorien zugeordnet werden — wählen Sie die primäre Kategorie aus.
+
+
+--
+
+## Übung 4.3: Web-Technologien kategorisieren — Lösung (1/3)
+
+| Kategorie | Technologie |
+|---|---|
+| Protokoll | <span class="fragment">HTTP,</span><span class="fragment"> SOAP (baut auf HTTP auf),</span><span class="fragment"> JDBC (Datenbankprotokoll)</span> |
+| Adressierung | <span class="fragment">URI</span> |
+| Markup-/Datenformat | <span class="fragment">HTML,</span><span class="fragment"> XML,</span><span class="fragment"> JSON,</span><span class="fragment"> CSS</span> |
+| Framework/Template-Engine | <span class="fragment">JSF (Java Server Faces),</span><span class="fragment"> Thymeleaf</span> |
+| Datenbankzugriff | <span class="fragment">JDBC,</span><span class="fragment"> SQL</span> |
+| Architekturstil | <span class="fragment">REST</span> |
+
+--
+
+## Übung 4.3: Web-Technologien kategorisieren — Lösung (2/3)
+
+*Anmerkung*:
+- **SOAP** ist technisch ein Protokoll (XML-basiertes Messaging), baut aber typischerweise auf HTTP auf.
+- **REST** ist kein Protokoll, sondern ein Architekturstil.
+- **XML** ist sowohl Datenformat als auch Basis für SOAP/WSDL-Beschreibungen.
+
+--
+
+## Übung 4.3: Web-Technologien kategorisieren — Lösung (3/3)
+
+**Zusatz - Kurzerklärungen:**
+- **JSF**: Ein serverseitiges Java-Webframework zur Erstellung komponentenbasierter Benutzeroberflächen.
+- **XML**: Eine Auszeichnungssprache zur strukturierten Darstellung und Speicherung von Daten.
+- **HTTP**: Ein Protokoll zur Übertragung von Daten im Web zwischen Client und Server.
+- **URI**: Ein Identifikator zur eindeutigen Benennung von Ressourcen im Internet.
+- **HTML**: Die Standardsprache zur Strukturierung von Inhalten im Webbrowser.
+- **CSS**: Eine Stylesheet-Sprache zur Gestaltung des Aussehens von HTML-Dokumenten.
+- **SOAP**: Ein Protokoll zum Austausch strukturierter Informationen in Webservices, basierend auf XML.
+- **JSON**: Ein leichtgewichtiges Datenformat zum Austausch von strukturierten Daten.
+- **REST**: Ein Architekturstil für Webservices, der auf HTTP und zustandslosen Operationen basiert.
+- **Thymeleaf**: Eine serverseitige Java-Template-Engine zur Generierung von HTML-Dokumenten.
+- **JDBC**: Eine API zur Verbindung und Interaktion von Java-Anwendungen mit relationalen Datenbanken.
+- **SQL**: Eine Sprache zur Definition, Abfrage und Manipulation von Daten in relationalen Datenbanken.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Semantisches HTML
+
+--
+
+## Übung 4.4: Semantisches HTML (1/2)
+
+Gegeben ist folgendes unsemantisches HTML:
+
+```html
+<div class="header">
+  <div class="nav">
+    <div class="nav-item"><a href="/">Home</a></div>
+    <div class="nav-item"><a href="/products">Produkte</a></div>
+  </div>
+  </div>
+  <div class="main">
+    <div class="article">
+    <div class="title">Produktname</div>
+    <div class="text">Beschreibung...</div>
+  </div>
+</div>
+<div class="footer">Copyright 2026</div>
+```
+
+--
+
+## Übung 4.4: Semantisches HTML (2/2)
+
+1. Schreiben Sie die Struktur mit semantischen HTML5-Elementen um.
+
+2. Warum ist semantisches HTML für Suchmaschinen und Screenreader wichtig?
+
+
+--
+
+## Übung 4.4: Semantisches HTML — Lösung 1
+
+**1. Formulierung mit semantischen Elementen:**
+
+<div style="display: flex; gap: 20px;">
+
+<div style="flex: 1.25;">
+
+**Unsemantisch (Vorher):**
+```html
+<div class="header">
+  <div class="nav">
+    <div class="nav-item"><a href="/">Home</a></div>
+    <div class="nav-item"><a href="/products">Produkte</a></div>
+  </div>
+</div>
+<div class="main">
+  <div class="article">
+    <div class="title">Produktname</div>
+    <div class="text">Beschreibung...</div>
+  </div>
+</div>
+<div class="footer">Copyright 2026</div>
+```
+
+</div>
+<div style="flex: 1;">
+
+**Semantisch (Nachher):**
+```html
+<header>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/products">Produkte</a>
+  </nav>
+</header>
+<main>
+  <article>
+    <h1>Produktname</h1>
+    <p>Beschreibung...</p>
+  </article>
+</main>
+<footer>Copyright 2026</footer>
+```
+
+</div>
+
+</div>
+
+--
+
+## Übung 4.4: Semantisches HTML — Lösung 2
+
+**2. Warum semantisch?**
+
+- **Suchmaschinen**: Crawler verstehen die Bedeutung der Inhalte — `<h1>` signalisiert Hauptüberschrift, `<nav>` Navigationsbereiche. Das verbessert SEO (Search Engine Optimization).
+<!-- .element: class="fragment" -->
+- **Screenreader**: Blinde Nutzer navigieren per Tastatur durch Landmarks (`header`, `main`, `nav`). Ohne Semantik ist jedes `<div>` gleichwertig — Navigation wird unmöglich.
+<!-- .element: class="fragment" -->
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Formulare und Accessibility
+
+--
+
+## Übung 4.5: Formulare und Accessibility
+
+1. Erstellen Sie ein barrierefreies HTML-Formular für eine Produktsuche mit:
+    - Texteingabe für den Suchbegriff (Pflichtfeld)
+    - Dropdown für Kategorie (Elektronik, Kleidung, Bücher)
+    - Checkbox „Nur verfügbare Produkte”
+    - Submit-Button
+
+    Sie können als Grundlage die zur Verfügung gestellte Vorlage `formular_accessibility_vorlage.html` nutzen.
+
+2. Welche drei HTML-Attribute sind für Barrierefreiheit unverzichtbar?
+
+
+--
+
+## Übung 4.5: Formulare und Accessibility — Lösung 1)
+
+**1) HTML-Formular:**
+
+```html
+<form action="/search" method="GET">
+  <label for="query">Suchbegriff</label>
+  <input id="query" name="query" type="text" required placeholder="z.B. Laptop" />
+  
+  <label for="category">Kategorie</label>
+  <select id="category" name="category">
+    <option value="">Alle</option>
+    <option value="electronics">Elektronik</option>
+    <option value="clothing">Kleidung</option>
+    <option value="books">Bücher</option>
+  </select>
+
+  <input type="checkbox" id="available" name="available" value="true"/>
+  <label for="available">Nur verfügbare Produkte</label>
+
+  <button type="submit">Suchen</button>
+</form>
+```
+
+--
+
+## Übung 4.5: Formulare und Accessibility — Lösung 2)
+
+**2) Unverzichtbare Attribute:**
+
+1. `for / id` - **Verknüpfung**: Verbindet Label mit Input — Klick auf Label fokussiert das Feld. 
+2. `required`: Zeigt Pflichtfelder an und verhindert leere Submits (Browser- Validierung). 
+3. `type` (auf `<input>`): Bestimmt Eingabemodus und Tastaturlayout auf Mobilgeräten.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Barrierefreiheit
+
+--
+
+## Übung 4.6: Barrierefreiheit
+
+Barrierefreiheit ist nach EU Richtlinien ein wichtiger Aspekt in der Web-Entwicklung. Recherchieren und beantworten Sie folgende Fragen zum Thema Barrierefreiheit in Webanwendungen.
+
+1. Barrieren können in Wahrnehmungs-, Verständnis- und Zugriffsprobleme klassifiziert werden. Ein typisches Wahrnehmungsproblem in Webapplikationen bilden fehlende Textalternativen für Medien. Nicht alle Videos haben beispielsweise Untertitel. Nennen und erklären Sie pro Problemkategorie 2 andere Beispiele. Welche Problemkategorie ist hauptsächlich technischer Natur?
+
+2. Was verbirgt sich hinter dem Selbstbestimmungsprinzip, dem Zwei-Sinne Prinzip und dem Universelles Design Prinzip.
+
+
+--
+
+## Übung 4.6: Barrierefreiheit — Lösung 1
+
+**Problemkategorien:**
+
+- **Wahrnehmungsprobleme**:
+  - *Ungenügende Farbkontraste*. Beispiel: Rotgrünblindheit (gleiche Sättigung), Gelbe Schrift auf weißem Hintergrund.
+  - *Mangelnde Skalierbarkeit*. Beispiel: kleine statische Texte. Bilder mit fester niedriger Auflösung.
+<!-- .element: class="fragment" -->
+
+- **Verständnisprobleme**:
+  - *Ungenügende Semantik*. Beispiel: Überschriften werden nur durch Schriftart hervorgehoben. Führt dazu, dass Screenreader Text nicht als Kapitelüberschrift erkennt.
+  - *Komplexere Inhalte*. Beispiel: Informationsüberfluss auf einzelnen Seiten. Inhalte nicht an mögliche Nutzergruppen angepasst. Keine Unterscheidung für Inhalte leichter und komplexer Sprache.
+ <!-- .element: class="fragment" -->
+--
+
+## Übung 4.6: Barrierefreiheit — Lösung 1
+
+- **Zugriffsprobleme**:
+  - *Zu knappe Timeouts*. Beispiel: Session läuft ab, bevor langes Formular abgeschickt ist. Seite läuft in Timeout, bevor sie vollständig gerendert ist.
+  - *Eingabegeräteabhängigkeit*. Beispiel: Flash-Seite ist ausschließlich durch Maus bedienbar. Tastatureingaben nicht für Navigation nutzbar, etc.
+
+  Zugriffsprobleme sind meist auf Probleme technischer Natur zurückzuführen. Diesen könnte mit universellem Zugriff auf Hardware und Bandbreite zu großen Teilen Abhilfe geschaffen werden.
+
+--
+
+## Übung 4.6: Barrierefreiheit — Lösung 2
+
+**Prinzipien:**
+
+- **Selbstbestimmungsprinzip**:   
+  Website sollte Flexibilität in Darstellung bieten. Hoch-Kontrast Farbschema und Schriftgrößendynamik sollte gegeben sein. Nutzer bauen sich ihre Seite so zusammen wie sie sie brauchen.
+<!-- .element: class="fragment" -->
+- **Zwei-Sinne Prinzip**:  
+  Alle Informationen sollten möglichst über zwei oder mehr unterschiedliche Sinne angeboten werden. Seiten müssen z.B. Screenreaderfähig sein.
+<!-- .element: class="fragment" -->
+- **Universelles Design Prinzip**:   
+  Keine separaten Zugänge für Behinderte sollten geschaffen werden. Alles sollte über ein Universelles System ausgeliefert werden im Sinne der Wartbarkeit und Übersicht.
+<!-- .element: class="fragment" -->
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Materialien
+
+--
+
+## Materialien zum Übungsblatt
+
+- HTML-Vorlage zu Aufgabe *Formulare und Accessibility*: [formular_accessibility_vorlage.html](./materials/formular_accessibility_vorlage.html)
+
+**Lösungen:**
+- Aufgabe *Luhn-Algorithmus*: [Luhn.zip](./materials/Luhn.zip)
+
+- Aufgabe *Formulare und Accessibility*: : [formular_accessibility_loesung.html](./materials/formular_accessibility_loesung.html)
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>
