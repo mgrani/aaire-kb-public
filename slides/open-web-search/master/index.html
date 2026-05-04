@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>OpenWebSearch.eu — Master Deck</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css">
-<link rel="stylesheet" href="/_astro/_slug_.D5h1Iwsl.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<link rel="stylesheet" href="/_astro/_slug_.DoEad_AM.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 ## OpenWebSearch.eu — An Open Scalable Infrastructure for Web Search & AI
 
@@ -1200,7 +1200,7 @@ All intermediate data stored on **HPC scratch** between steps — restartable on
 
 
 
-<div class="figure-90">
+<div class="figure-70">
 
 ![](../../_assets/ows/crawling-animation.gif)
 
@@ -1211,11 +1211,8 @@ All intermediate data stored on **HPC scratch** between steps — restartable on
 </div>
 
 
-<div class="column-1">
+<div class="column-1 c-info small">
 
-
-
-<div class="c-info small">
 
 **OWLer — Open Web Crawler**
 
@@ -1223,12 +1220,13 @@ All intermediate data stored on **HPC scratch** between steps — restartable on
 - Central URL Frontier at **CERN** — 2 B+ URLs in crawl space
 - **1.25 PiB** collected · **1,927 machine-days** · ~39.6 B fetches
 - European language and domain bias
+- Only HTML; No headless browsing
+
 
 </div>
 
 
-
-<div class="c-warning small">
+<div class="column-2 c-warning">
 
 **Constraints**
 - Downstream processing caps: **1–2 TB/day per DC**
@@ -1238,17 +1236,20 @@ All intermediate data stored on **HPC scratch** between steps — restartable on
 </div>
 
 
+<div class="column-1">
+
+
+
 
 </div>
 
 
+<div class="column-12">
+
+
+
 </div>
 
-
-
-<div class="figure-80">
-
-![](../../_assets/ows/dashboard-overview.png)
 
 </div>
 
@@ -1632,14 +1633,6 @@ Incident log: Bank of America (robots.txt ambiguity), ACM Digital Library (licen
 
 </div>
 
-
-
-<div class="figure-80">
-
-![](../../_assets/ows/resilipipe-repo.png)
-
-</div>
-
 --
 
 <!-- .slide: class="interlude-slide" -->
@@ -1905,9 +1898,124 @@ WARC (crawl)
 
 <!-- .slide: class="module-slide" -->
 
-## Step 3: Building & Distributing the Index
+## Step 3: Building the Index
 
-TODO
+
+--
+
+
+### Index Format: CIFF + Parquet
+
+
+<div class="grid-2">
+
+
+<div class="column c-info">
+
+
+**CIFF — Common Index File Format**
+
+A Protobuf schema for sparse inverted files — the OWI standard interchange format:
+
+- **Header** — collection stats: document count, unique terms, avg. document length
+- **Postings lists** — per term: document frequency + collection frequency + (docid, tf) pairs
+- **Document records** — internal numeric ID ↔ external URL + document length
+
+Designed so any existing search engine can import the data and start ranking immediately.
+
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="c-positive">
+
+**Parquet Metadata Files**
+
+Distributed alongside each CIFF shard — aligned partitions containing:
+
+- URL, title, language, crawl date
+- Quality / importance scores from Resilipipe
+- Topic / entity enrichments (WP 2)
+- Enables SQL-style analytics without downloading the full index
+
+</div>
+
+
+
+<div class="c-muted">
+
+**Dense Embeddings (GPU slice)**
+
+- High-quality / high-importance doc subset
+- Jina V3 embeddings, 884 GB in public datasets
+- Enables semantic search and RAG on OWI content
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+--
+
+### Dataset Structure & Versioning
+
+
+<div class="grid-2-1">
+
+
+
+<div class="column">
+
+
+Each **daily shard** follows a consistent folder hierarchy:
+
+```
+OWI Dataset
+ └─ year=YYYY
+     └─ month=MM
+         └─ day=DD
+             ├─ language=eng
+             │   ├─ index.ciff.gz
+             │   └─ metadata_*.parquet
+             ├─ language=deu
+             │   └─ ...
+             └─ changelog.json
+```
+
+- One dataset per data center per day
+- Collections: `main`, `curlie_full`, `gpu` (embeddings), and domain-specific slices
+- `changelog.json` tracks document additions and deletions (take-down compliance)
+- Git-like versioning via **owilix**: `pull`, `push`, `build`
+
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="figure-90">
+
+![](../../_assets/ows/owi-dataset-example.png)
+
+</div>
+
+
+
+</div>
+
+
+</div>
 
 <!-- Accessing OWI vertical -->
 
@@ -1959,8 +2067,7 @@ TODO
 - **OWI Datasets** — browse, filter and download index shards (by DC, date, format, language)
 - **OWI Corpora** — curated collections prepared for distribution with licensing metadata
 - **OWI AI Models** — registry of web search language models (browser-runnable via WASM)
-- **Search** — demo content search (OUR Search) + SERCI integration
-- **Deep Research** — experimental AI-powered research assistant
+- **Search** — demo content search (OUR²S Search) + SERCI integration
 
 
 </div>
@@ -2147,7 +2254,19 @@ Authentication via B2ACCESS / Keycloak (LEXIS SSO)
 <div class="column small">
 
 
+
+<div class="grid-2">
+
+
+<div class="column-2">
+
 ![OUR²S Start Page](../../_assets/ows/ourrs-start-page.png)
+
+</div>
+
+
+<div class="column-2">
+
 
 Traditional Search UI plus REST API for online search directly over OWI content:
 
@@ -2161,6 +2280,12 @@ Traditional Search UI plus REST API for online search directly over OWI content:
 <div class="c-info">
 
 → Try it out at [ourrs.eu](https://ourrs.eu)!
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -2220,24 +2345,11 @@ Published as an open, continuously updated online resource — aligned with deli
 
 | Tool | Mode | Best for |
 |------|------|----------|
-| Dashboard | Browser | Explore, monitor |
-| owilix | CLI | Download, slice, build |
+| [Dashboard](https://openwebindex.eu) | Browser | Explore, monitor |
+| [owilix](https://opencode.it4i.eu/openwebsearcheu-public/owi-cli) | CLI | Download, slice, build |
 | Remote index | DuckDB/SQL | Query + download |
-| OUR²S | REST API | Online search |
-| MosaicRAG | Conversational | RAG & chat over OWI |
-
-
-<div class="small">
-
-**Key links**
-
-- Dashboard: [openwebindex.eu](https://openwebindex.eu)
-- Book: [openwebindex.eu/book](https://openwebindex.eu/book)
-- owilix CLI: [opencode.it4i.eu/…/owi-cli](https://opencode.it4i.eu/openwebsearcheu-public/owi-cli)
-- MosaicRAG: [mosaicrag.ows.eu](https://mosaicrag.ows.eu)
-- Community: [openwebsearch.eu](https://openwebsearch.eu)
-
-</div>
+| [OUR²S](https://ourrs.eu) | REST API | Online search |
+| [MosaicRAG](https://mosaicrag.ows.eu) | Conversational | RAG & chat over OWI |
 
 
 </div>
@@ -4627,6 +4739,7 @@ OpenWebSearch.eu proves that a European open web index is technically feasible, 
 |---|---|
 | **Website** | [openwebsearch.eu](https://openwebsearch.eu) |
 | **Dashboard** | [openwebindex.eu](https://openwebindex.eu) |
+| **Code Repository** | [https://opencode.it4i.eu/openwebsearcheu-public/](https://opencode.it4i.eu/openwebsearcheu-public/) |
 | **Community** | [openwebsearch.eu/community](https://openwebsearch.eu/community/ows-eu-community-on-mattermost/) |
 | **Join** | [join@openwebsearch.org](mailto:join@openwebsearch.org) |
 | **General** | [community@openwebsearch.eu](mailto:community@openwebsearch.eu) |
