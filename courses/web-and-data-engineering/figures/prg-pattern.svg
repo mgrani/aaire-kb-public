@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="ab" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#1f4e79"/>
+    </marker>
+    <marker id="ar" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#9f3129"/>
+    </marker>
+    <marker id="ag" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#1b5e20"/>
+    </marker>
+  </defs>
+
+  <!-- Browser & Server headers -->
+  <rect x="30" y="15" width="140" height="32" rx="6" fill="#eaf2ff" stroke="#4a89dc" stroke-width="2"/>
+  <text x="100" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#1f4e79">Browser</text>
+
+  <rect x="590" y="15" width="140" height="32" rx="6" fill="#fdecea" stroke="#e06a5f" stroke-width="2"/>
+  <text x="660" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#9f3129">Server</text>
+
+  <!-- Lifelines -->
+  <line x1="100" y1="47" x2="100" y2="345" stroke="#9bb6d1" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="660" y1="47" x2="660" y2="345" stroke="#e6a39b" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- Phase header: P -->
+  <text x="50" y="68" font-size="11" font-weight="700" fill="#1f4e79">P</text>
+
+  <!-- 1. POST -->
+  <text x="380" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79">POST /checkout</text>
+  <line x1="100" y1="76" x2="656" y2="76" stroke="#1f4e79" stroke-width="2" marker-end="url(#ab)"/>
+  <rect x="106" y="84" width="548" height="20" rx="4" fill="#f0f6ff" stroke="#9bb6d1" stroke-width="1"/>
+  <text x="115" y="98" font-size="11" font-family="Menlo, Consolas, monospace" fill="#555">{ produkt: 42, anzahl: 1 } — schreibend, NICHT idempotent</text>
+
+  <!-- Server activation 1 -->
+  <rect x="656" y="76" width="8" height="40" fill="#fdecea" stroke="#9f3129" stroke-width="1"/>
+
+  <!-- Phase header: R -->
+  <text x="50" y="124" font-size="11" font-weight="700" fill="#9f3129">R</text>
+
+  <!-- 2. 303 -->
+  <text x="380" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="#9f3129">303 See Other  ·  Location: /orders/789</text>
+  <line x1="656" y1="132" x2="104" y2="132" stroke="#9f3129" stroke-width="2" marker-end="url(#ar)"/>
+
+  <!-- Phase header: G -->
+  <text x="50" y="162" font-size="11" font-weight="700" fill="#1b5e20">G</text>
+
+  <!-- 3. GET (auto-follow) -->
+  <text x="380" y="162" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79">GET /orders/789  ·  Browser folgt automatisch</text>
+  <line x1="100" y1="170" x2="656" y2="170" stroke="#1f4e79" stroke-width="2" marker-end="url(#ab)"/>
+
+  <!-- Server activation 2 -->
+  <rect x="656" y="170" width="8" height="32" fill="#fdecea" stroke="#9f3129" stroke-width="1"/>
+
+  <!-- 4. 200 OK -->
+  <text x="380" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#1b5e20">200 OK  ·  Bestellbestätigung</text>
+  <line x1="656" y1="204" x2="104" y2="204" stroke="#1b5e20" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- Reload annotation -->
+  <rect x="105" y="222" width="200" height="28" rx="6" fill="#fff7e0" stroke="#d6ae47" stroke-width="1.5"/>
+  <text x="205" y="240" text-anchor="middle" font-size="11" font-weight="700" fill="#7a5b00">⟳ User drückt Reload</text>
+
+  <!-- Highlighted region: reload only repeats GET -->
+  <rect x="20" y="260" width="720" height="78" rx="8" fill="#e6f4ea" fill-opacity="0.4" stroke="#34a853" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="35" y="276" font-size="10" font-weight="700" fill="#1b5e20">Wiederholung: nur der GET, NIE der POST</text>
+
+  <!-- 5. GET repeated (after reload) -->
+  <text x="380" y="294" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79">GET /orders/789  (erneut, durch Reload)</text>
+  <line x1="100" y1="302" x2="656" y2="302" stroke="#1f4e79" stroke-width="2" marker-end="url(#ab)"/>
+
+  <!-- Server activation 3 -->
+  <rect x="656" y="302" width="8" height="22" fill="#fdecea" stroke="#9f3129" stroke-width="1"/>
+
+  <!-- 6. 200 OK again -->
+  <text x="380" y="320" text-anchor="middle" font-size="12" font-weight="700" fill="#1b5e20">200 OK  ·  dieselbe Bestellung — kein Duplikat</text>
+  <line x1="656" y1="328" x2="104" y2="328" stroke="#1b5e20" stroke-width="2" marker-end="url(#ag)"/>
+</svg>

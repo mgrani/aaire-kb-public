@@ -1,15 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 280" font-family="Arial, Helvetica, sans-serif">
-  <defs><marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#1f4e79"/></marker></defs>
-  <rect x="30" y="18" width="160" height="38" rx="8" fill="#eaf2ff" stroke="#4a89dc" stroke-width="2"/><text x="110" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#1f4e79">Browser</text>
-  <rect x="570" y="18" width="160" height="38" rx="8" fill="#fdecea" stroke="#e06a5f" stroke-width="2"/><text x="650" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#9f3129">Server</text>
-  <line x1="190" y1="88" x2="560" y2="88" stroke="#1f4e79" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="375" y="76" text-anchor="middle" font-size="13" fill="#1f4e79">1. GET /products/42</text>
-  <line x1="560" y1="118" x2="190" y2="118" stroke="#9f3129" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="375" y="110" text-anchor="middle" font-size="13" fill="#9f3129">200 OK, ETag: "p42-v1", Cache-Control: no-cache</text>
-  <line x1="190" y1="172" x2="560" y2="172" stroke="#1f4e79" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="375" y="160" text-anchor="middle" font-size="13" fill="#1f4e79">2. GET /products/42, If-None-Match: "p42-v1"</text>
-  <line x1="560" y1="202" x2="190" y2="202" stroke="#9f3129" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="375" y="194" text-anchor="middle" font-size="13" fill="#9f3129">304 Not Modified</text>
-  <rect x="150" y="226" width="460" height="34" rx="8" fill="#eef8ee" stroke="#6ea66e"/>
-  <text x="380" y="247" text-anchor="middle" font-size="12" fill="#2f6b2f">Der Browser verwendet den bereits gespeicherten Body weiter.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 290" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="ab" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#1f4e79"/>
+    </marker>
+    <marker id="ar" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#9f3129"/>
+    </marker>
+  </defs>
+
+  <!-- Browser & Server headers -->
+  <rect x="30" y="15" width="140" height="32" rx="6" fill="#eaf2ff" stroke="#4a89dc" stroke-width="2"/>
+  <text x="100" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#1f4e79">Browser</text>
+
+  <rect x="590" y="15" width="140" height="32" rx="6" fill="#fdecea" stroke="#e06a5f" stroke-width="2"/>
+  <text x="660" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#9f3129">Server</text>
+
+  <!-- Lifelines -->
+  <line x1="100" y1="47" x2="100" y2="270" stroke="#9bb6d1" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="660" y1="47" x2="660" y2="270" stroke="#e6a39b" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- ===== Step 1: First GET ===== -->
+  <text x="380" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79">1. GET /products/42</text>
+  <line x1="100" y1="76" x2="656" y2="76" stroke="#1f4e79" stroke-width="2" marker-end="url(#ab)"/>
+
+  <!-- Server activation 1 -->
+  <rect x="656" y="76" width="8" height="32" fill="#fdecea" stroke="#9f3129" stroke-width="1"/>
+
+  <!-- 200 response -->
+  <text x="380" y="102" text-anchor="middle" font-size="12" font-weight="700" fill="#9f3129">200 OK</text>
+  <line x1="656" y1="110" x2="104" y2="110" stroke="#9f3129" stroke-width="2" marker-end="url(#ar)"/>
+
+  <!-- Response detail box -->
+  <rect x="106" y="118" width="548" height="34" rx="4" fill="#fff8f7" stroke="#e6a39b" stroke-width="1"/>
+  <text x="115" y="134" font-size="11" font-family="Menlo, Consolas, monospace" fill="#333">ETag: "p42-v1"   ·   Cache-Control: no-cache</text>
+  <text x="115" y="147" font-size="11" font-family="Menlo, Consolas, monospace" fill="#888">{...Produktdaten, Preis: 79.99...}</text>
+
+  <!-- Note between phases -->
+  <text x="100" y="172" text-anchor="middle" font-size="9" fill="#6b7280" font-style="italic">cached, aber „no-cache" erzwingt Validierung</text>
+
+  <!-- ===== Step 2: Conditional GET ===== -->
+  <text x="380" y="194" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79">2. GET /products/42  (conditional)</text>
+  <line x1="100" y1="202" x2="656" y2="202" stroke="#1f4e79" stroke-width="2" marker-end="url(#ab)"/>
+
+  <!-- Conditional request detail -->
+  <rect x="106" y="210" width="548" height="20" rx="4" fill="#f0f6ff" stroke="#9bb6d1" stroke-width="1"/>
+  <text x="115" y="224" font-size="11" font-family="Menlo, Consolas, monospace" fill="#555">If-None-Match: "p42-v1"</text>
+
+  <!-- Server activation 2 -->
+  <rect x="656" y="202" width="8" height="40" fill="#fdecea" stroke="#9f3129" stroke-width="1"/>
+
+  <!-- 304 response -->
+  <text x="380" y="246" text-anchor="middle" font-size="12" font-weight="700" fill="#1b5e20">304 Not Modified  ·  kein Body</text>
+  <line x1="656" y1="254" x2="104" y2="254" stroke="#1b5e20" stroke-width="2" marker-end="url(#ar)"/>
+
+  <!-- Bottom note -->
+  <rect x="100" y="266" width="560" height="22" rx="5" fill="#eef8ee" stroke="#6ea66e"/>
+  <text x="380" y="281" text-anchor="middle" font-size="11" fill="#2f6b2f">Browser verwendet den bereits gespeicherten Body weiter — kein Bandbreitenverbrauch.</text>
 </svg>

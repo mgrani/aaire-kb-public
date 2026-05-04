@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">XMLHttpRequest: ereignisgesteuerter Ablauf in vier Schritten</title>
+  <desc id="desc">Vier Schnappschüsse zeigen den ereignisgesteuerten Ablauf eines Button-Klicks. T1: Klick-Handler läuft mit xhr.send auf dem Stack. T2: Während der XHR-Request unterwegs ist, läuft auf dem Main Thread bereits ein Hover-Handler. T3: Die XHR-Antwort ist eingetroffen, der Browser hat den readystatechange-Callback in die Event Queue gelegt — er muss aber warten, weil ein Scroll-Handler aus der Queue gerade auf dem Stack läuft. T4: Stack ist frei, der Event Loop holt den XHR-Callback und der parst die Antwort und aktualisiert das DOM.</desc>
+
+  <defs>
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 z" fill="#188038"/>
+    </marker>
+  </defs>
+
+  <g id="background">
+    <rect width="960" height="540" fill="#ffffff"/>
+    <rect x="15" y="15" width="930" height="510" rx="20" fill="#f8fafc" stroke="#d7dee7"/>
+    <text x="480" y="46" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#111827">XMLHttpRequest: ereignisgesteuerter Ablauf eines Button-Klicks</text>
+  </g>
+
+  <!-- Time arrows between panels -->
+  <line x1="247" y1="240" x2="256" y2="240" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+  <line x1="477" y1="240" x2="486" y2="240" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+  <line x1="707" y1="240" x2="716" y2="240" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+
+  <!-- =========================================================== -->
+  <!-- PANEL 1: T1 — Klick, Handler läuft (x=25..245) -->
+  <!-- =========================================================== -->
+  <g id="panel1">
+    <rect x="25" y="65" width="220" height="425" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+    <rect x="25" y="65" width="220" height="28" rx="12" fill="#e8f0fe"/>
+    <rect x="25" y="79" width="220" height="14" fill="#e8f0fe"/>
+    <text x="135" y="84" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1a73e8">T1 — Klick: Handler läuft</text>
+
+    <!-- Button (pressed) -->
+    <rect x="60" y="106" width="150" height="32" rx="5" fill="#1a73e8" stroke="#0d47a1" stroke-width="2"/>
+    <text x="135" y="127" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#ffffff">Produkt laden</text>
+    <text x="135" y="156" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#4b5563" font-style="italic">User klickt → click-Event</text>
+
+    <!-- Call Stack -->
+    <text x="40" y="178" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Call Stack</text>
+    <rect x="35" y="184" width="200" height="76" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+    <rect x="42" y="192" width="186" height="26" rx="3" fill="#ef6c00"/>
+    <text x="135" y="209" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">xhr.send()</text>
+    <rect x="42" y="222" width="186" height="26" rx="3" fill="#fb923c"/>
+    <text x="135" y="239" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">click handler</text>
+
+    <!-- Event Queue -->
+    <text x="40" y="278" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Event Queue</text>
+    <rect x="35" y="284" width="200" height="28" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="4 3"/>
+    <text x="135" y="302" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#9ca3af" font-style="italic">leer</text>
+
+    <!-- Network -->
+    <text x="40" y="328" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Netzwerk (Browser-API)</text>
+    <rect x="35" y="334" width="200" height="28" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="4 3"/>
+    <text x="135" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#9ca3af" font-style="italic">noch nichts</text>
+
+    <!-- Description -->
+    <text x="40" y="385" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Klick triggert den Handler. Er ruft</text>
+    <text x="40" y="400" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151"><tspan font-family="Menlo, Consolas, monospace" font-weight="700">xhr.open(...)</tspan> und <tspan font-family="Menlo, Consolas, monospace" font-weight="700">xhr.send()</tspan>.</text>
+    <text x="40" y="415" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151"><tspan font-family="Menlo, Consolas, monospace" font-weight="700">xhr.send()</tspan> übergibt den Request</text>
+    <text x="40" y="430" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">an die Browser-API und kehrt</text>
+    <text x="40" y="445" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">sofort zurück — kein Blockieren.</text>
+  </g>
+
+  <!-- =========================================================== -->
+  <!-- PANEL 2: T2 — Warten, Hover-Code läuft (x=255..475) -->
+  <!-- =========================================================== -->
+  <g id="panel2">
+    <rect x="255" y="65" width="220" height="425" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+    <rect x="255" y="65" width="220" height="28" rx="12" fill="#fff3e0"/>
+    <rect x="255" y="79" width="220" height="14" fill="#fff3e0"/>
+    <text x="365" y="84" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#ef6c00">T2 — Hover-Code läuft</text>
+
+    <!-- Menu (hover target) -->
+    <rect x="290" y="106" width="150" height="32" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="2"/>
+    <text x="365" y="127" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#b45309">▾ Menü</text>
+    <text x="365" y="156" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#4b5563" font-style="italic">User hovert das Menü</text>
+
+    <!-- Call Stack: hover handler running -->
+    <text x="270" y="178" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Call Stack</text>
+    <rect x="265" y="184" width="200" height="76" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+    <rect x="272" y="192" width="186" height="26" rx="3" fill="#ef6c00"/>
+    <text x="365" y="209" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">showDropdown()</text>
+    <rect x="272" y="222" width="186" height="26" rx="3" fill="#fb923c"/>
+    <text x="365" y="239" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">mouseover handler</text>
+
+    <!-- Event Queue: scroll waiting -->
+    <text x="270" y="278" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Event Queue</text>
+    <rect x="265" y="284" width="200" height="28" rx="5" fill="#f3f4f6" stroke="#9ca3af"/>
+    <rect x="271" y="290" width="80" height="16" rx="3" fill="#9ca3af"/>
+    <text x="311" y="302" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="9" font-weight="700" fill="#ffffff">scroll</text>
+    <text x="412" y="302" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6b7280" font-style="italic">…wartet</text>
+
+    <!-- Network: in flight -->
+    <text x="270" y="328" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Netzwerk (Browser-API)</text>
+    <rect x="265" y="334" width="200" height="28" rx="5" fill="#1a73e8"/>
+    <text x="365" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#ffffff">XHR-Request unterwegs →</text>
+
+    <!-- Description -->
+    <text x="270" y="385" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Click-Handler ist längst zurück.</text>
+    <text x="270" y="400" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Der Loop hat ein <tspan font-weight="700">mouseover</tspan>-</text>
+    <text x="270" y="415" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Event geholt — ein <tspan font-style="italic">unabhängiger</tspan></text>
+    <text x="270" y="430" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Code-Pfad läuft, während der</text>
+    <text x="270" y="445" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">XHR-Request noch unterwegs ist.</text>
+  </g>
+
+  <!-- =========================================================== -->
+  <!-- PANEL 3 (NEW): T3 — Antwort da, wartet in der Queue (x=485..705) -->
+  <!-- =========================================================== -->
+  <g id="panel3">
+    <rect x="485" y="65" width="220" height="425" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+    <rect x="485" y="65" width="220" height="28" rx="12" fill="#fef3c7"/>
+    <rect x="485" y="79" width="220" height="14" fill="#fef3c7"/>
+    <text x="595" y="84" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#b45309">T3 — Antwort da, wartet</text>
+
+    <!-- Scroll indicator (scrollbar) -->
+    <rect x="520" y="106" width="150" height="32" rx="5" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+    <rect x="535" y="113" width="120" height="6" rx="3" fill="#fde68a"/>
+    <rect x="555" y="111" width="40" height="10" rx="3" fill="#b45309"/>
+    <text x="595" y="134" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#b45309">↕ Scroll</text>
+    <text x="595" y="156" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#4b5563" font-style="italic">User scrollt — Scroll-Code läuft</text>
+
+    <!-- Call Stack: scroll handler running -->
+    <text x="500" y="178" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Call Stack</text>
+    <rect x="495" y="184" width="200" height="76" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+    <rect x="502" y="192" width="186" height="26" rx="3" fill="#ef6c00"/>
+    <text x="595" y="209" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">updatePosition()</text>
+    <rect x="502" y="222" width="186" height="26" rx="3" fill="#fb923c"/>
+    <text x="595" y="239" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">scroll handler</text>
+
+    <!-- Event Queue: readystatechange waiting (highlighted!) -->
+    <text x="500" y="278" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Event Queue</text>
+    <rect x="495" y="284" width="200" height="28" rx="5" fill="#f3f4f6" stroke="#1a73e8" stroke-width="2"/>
+    <rect x="501" y="290" width="148" height="16" rx="3" fill="#1a73e8"/>
+    <text x="575" y="302" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="9" font-weight="700" fill="#ffffff">readystatechange</text>
+    <text x="673" y="302" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1a73e8" font-style="italic" font-weight="700">neu</text>
+
+    <!-- Arrow from Network to Queue showing event was just enqueued -->
+    <path d="M595 334 C 595 322 595 318 595 312" stroke="#188038" stroke-width="1.5" stroke-dasharray="3 3" fill="none" marker-end="url(#arrow-green)"/>
+
+    <!-- Network: response delivered -->
+    <text x="500" y="328" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Netzwerk (Browser-API)</text>
+    <rect x="495" y="334" width="200" height="28" rx="5" fill="#e6f4ea" stroke="#188038" stroke-width="1.5"/>
+    <text x="595" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#188038">Antwort eingetroffen ✓</text>
+
+    <!-- Description -->
+    <text x="500" y="385" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">XHR-Antwort ist da. Der Browser</text>
+    <text x="500" y="400" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">legt das <tspan font-weight="700">readystatechange</tspan>-</text>
+    <text x="500" y="415" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Event in die Queue. Aber der</text>
+    <text x="500" y="430" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Stack ist <tspan font-weight="700">nicht frei</tspan>: Scroll-Handler</text>
+    <text x="500" y="445" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">läuft → XHR-Callback wartet.</text>
+  </g>
+
+  <!-- =========================================================== -->
+  <!-- PANEL 4 (was 3): T4 — Callback wird verarbeitet (x=715..935) -->
+  <!-- =========================================================== -->
+  <g id="panel4">
+    <rect x="715" y="65" width="220" height="425" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+    <rect x="715" y="65" width="220" height="28" rx="12" fill="#e6f4ea"/>
+    <rect x="715" y="79" width="220" height="14" fill="#e6f4ea"/>
+    <text x="825" y="84" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#188038">T4 — XHR-Callback läuft</text>
+
+    <!-- Updated UI element (shows DOM update) -->
+    <rect x="750" y="106" width="150" height="32" rx="5" fill="#e6f4ea" stroke="#188038" stroke-width="2"/>
+    <text x="825" y="127" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#188038">Funkkopfhörer  €79</text>
+    <text x="825" y="156" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#4b5563" font-style="italic">DOM wird mit Antwort aktualisiert</text>
+
+    <!-- Call Stack: callback running -->
+    <text x="730" y="178" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Call Stack</text>
+    <rect x="725" y="184" width="200" height="76" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+    <rect x="732" y="218" width="186" height="32" rx="3" fill="#ef6c00"/>
+    <text x="825" y="239" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#ffffff">onreadystatechange</text>
+
+    <!-- Event Queue (just dequeued) -->
+    <text x="730" y="278" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Event Queue</text>
+    <rect x="725" y="284" width="200" height="28" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="4 3"/>
+    <text x="825" y="302" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#9ca3af" font-style="italic">leer (gerade abgearbeitet)</text>
+
+    <!-- Arrow showing queue→stack transition -->
+    <path d="M825 284 C 825 274 825 266 825 260" stroke="#188038" stroke-width="1.5" stroke-dasharray="3 3" fill="none" marker-end="url(#arrow-green)"/>
+
+    <!-- Network: still done -->
+    <text x="730" y="328" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#374151">Netzwerk (Browser-API)</text>
+    <rect x="725" y="334" width="200" height="28" rx="5" fill="#e6f4ea" stroke="#188038" stroke-width="1.5"/>
+    <text x="825" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#188038">Antwort eingetroffen ✓</text>
+
+    <!-- Description -->
+    <text x="730" y="385" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Scroll-Handler ist fertig, Stack</text>
+    <text x="730" y="400" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">leer. Jetzt holt der Event Loop</text>
+    <text x="730" y="415" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">den XHR-Callback aus der Queue.</text>
+    <text x="730" y="430" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">Er parst die Antwort und</text>
+    <text x="730" y="445" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#374151">aktualisiert das DOM.</text>
+  </g>
+
+  <!-- Takeaway -->
+  <text x="480" y="510" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#111827">Kernidee: Die XHR-Antwort wartet als Event in der Queue, bis der Stack frei ist und sie an der Reihe ist (FIFO).</text>
+</svg>

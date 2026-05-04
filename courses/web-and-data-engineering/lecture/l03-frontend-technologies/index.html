@@ -125,7 +125,7 @@
   min-height: 100%;
   width: 100%;
 }
-</style><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+</style><link rel="stylesheet" href="/_astro/index.OGHTRDy8.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Kapitel 3: Frontend-Technologien — HTML, JavaScript und CSS
@@ -256,15 +256,21 @@ Diese Reihenfolge ist auch technisch relevant: CSS-Selektoren benötigen DOM-Kno
 
 ![](/courses/web-and-data-engineering/figures/rendering-pipeline.svg)
 
+
+
+<div class="grid-2 small">
+
+
+<div class="column c-green">
+
 Die Pipeline arbeitet auf zwei internen Strukturen: dem **DOM** für HTML und dem **CSSOM** für CSS. Erst daraus erzeugt der Browser den Render Tree und rechnet Layout, Paint und Compositing aus.
 
-Notes:
-Die Rendering-Pipeline ist deterministisch und läuft in sechs Phasen: (1) HTML parsen → DOM, (2) CSS parsen → CSSOM, (3) Render Tree aufbauen (DOM + CSSOM zusammenführen, dabei unsichtbare Elemente ausfiltern), (4) Layout (Berechnung von Position und Größe jedes Elements), (5) Paint (Pixel zeichnen), (6) Composite (Layer zusammenstellen). Bei jeder Änderung am DOM oder CSS fragt der Browser: Wie weit muss ich zurück in die Pipeline? Nur Farbe geändert? → nur Paint + Composite. Position geändert? → Layout + Paint + Composite (Reflow). Nur Transform oder Opacity? → nur Composite (am billigsten). Diese Unterscheidung ist der Schlüssel zu 60-FPS-Animationen.
+</div>
 
---
 
-## Was passiert bei einem Klick?
+<div class="column c-note small">
 
+**Was passiert bei einem Klick?**
 1. HTML enthält z. B. einen Button und einen Warenkorb-Zähler.
 2. CSS definiert, wie Button, Badge und Ladezustand aussehen.
 3. JavaScript reagiert auf den Klick.
@@ -272,9 +278,14 @@ Die Rendering-Pipeline ist deterministisch und läuft in sechs Phasen: (1) HTML 
 5. Der Browser rendert die sichtbare Änderung neu.
 6. Optional sendet JavaScript asynchron einen Request an den Server.
 
+</div>
+
+
+</div>
 
 
 Notes:
+Die Rendering-Pipeline ist deterministisch und läuft in sechs Phasen: (1) HTML parsen → DOM, (2) CSS parsen → CSSOM, (3) Render Tree aufbauen (DOM + CSSOM zusammenführen, dabei unsichtbare Elemente ausfiltern), (4) Layout (Berechnung von Position und Größe jedes Elements), (5) Paint (Pixel zeichnen), (6) Composite (Layer zusammenstellen). Bei jeder Änderung am DOM oder CSS fragt der Browser: Wie weit muss ich zurück in die Pipeline? Nur Farbe geändert? → nur Paint + Composite. Position geändert? → Layout + Paint + Composite (Reflow). Nur Transform oder Opacity? → nur Composite (am billigsten). Diese Unterscheidung ist der Schlüssel zu 60-FPS-Animationen.
 Bei einem Klick entstehen mehrere Zustandswechsel: Der Browser erzeugt ein Event-Objekt, JavaScript verarbeitet dieses Event, der DOM kann verändert werden, und CSS berechnet die Darstellung für den neuen Zustand. Wenn zusätzlich ein Netzwerkrequest ausgelöst wird, laufen UI-Änderung und Serverkommunikation zeitlich auseinander. Dieses Muster ist typisch für moderne Frontends: sofortiges lokales Feedback, danach asynchrone Bestätigung oder Korrektur durch den Server.
 
 --
@@ -385,13 +396,13 @@ HTML wurde 1991 von Tim Berners-Lee am CERN für den Austausch wissenschaftliche
     <div><a href="/products">Produkte</a></div>
   </div>
 </div>
-<div class="middle">
-  <div class="left">
-    <div class="title">Funkkopfhörer</div>
+<div class="m">
+  <div class="l">
+    <div class="t">Funkkopfhörer</div>
     <div>Kabelloser Kopfhörer mit...</div>
     <div class="price">€ 79,99</div>
   </div>
-  <div class="right">
+  <div class="r">
     <div>Auch interessant: ...</div>
   </div>
 </div>
@@ -1270,6 +1281,12 @@ JavaScript wird im Browser von einer JavaScript-Engine ausgeführt, etwa V8 in C
 
 ## Kurzes Beispiel: Verhalten im Browser
 
+
+<div class="grid-2">
+
+
+<div class="column">
+
 ```html
 <!doctype html>
 <html lang="de">
@@ -1293,6 +1310,26 @@ JavaScript wird im Browser von einer JavaScript-Engine ausgeführt, etwa V8 in C
 </html>
 ```
 
+</div>
+
+
+<div class="column small">
+
+**Wann läuft das Skript?** Beim Parsen des HTML stoppt der Browser an `<script>`, führt den Inhalt **synchron** aus und parst danach weiter. Weil der Tag *am Ende des `<body>`* steht, existieren `#buy` und `#status` bereits — `querySelector` findet sie. `addEventListener` registriert nur den Callback; der Handler-Code läuft erst, wenn der Browser später ein `click`-Event dispatcht.
+
+| Position / Attribut | Wann läuft das Skript? | Risiko |
+|---|---|---|
+| `<script>` am Ende von `<body>` *(hier)* | nach Parsen aller Elemente davor | — |
+| `<script>` im `<head>`, ohne Attribut | sofort, **vor** Body-Aufbau | DOM-Elemente noch nicht da → `querySelector` liefert `null` |
+| `<script defer src=…>` im `<head>` | nach Fertigparsen, vor `DOMContentLoaded` | empfohlen für externe Skripte |
+| `<script async src=…>` im `<head>` | sobald geladen — Reihenfolge nicht garantiert | nur für unabhängige Skripte (Analytics o. ä.) |
+
+</div>
+
+
+</div>
+
+
 
 <div class="c-orange gap">
 
@@ -1301,8 +1338,10 @@ HTML liefert die Elemente. Das `<script>` registriert das Verhalten. Erst der Kl
 </div>
 
 
+
+
 Notes:
-Das Beispiel ist absichtlich als vollständige HTML-Seite geschrieben, damit Auslieferung und Ausführung sichtbar werden: Der Browser lädt ein HTML-Dokument, baut daraus den DOM auf und führt das eingebettete Script aus. Weil das Script am Ende des `body` steht, existieren Button und Status-Absatz bereits, wenn `querySelector` ausgeführt wird. Alternativ könnte das Script im `head` stehen, müsste dann aber mit `defer` geladen oder erst nach `DOMContentLoaded` ausgeführt werden. Der Event Listener läuft nicht sofort, sondern erst beim Klick; die Änderung von `textContent` verändert den DOM-Knoten, und der Browser aktualisiert anschließend die sichtbare Darstellung.
+Das Beispiel ist absichtlich als vollständige HTML-Seite geschrieben, damit Auslieferung und Ausführung sichtbar werden: Der Browser lädt ein HTML-Dokument, baut daraus den DOM auf und führt das eingebettete Script aus. Wichtig zu betonen: Inline-Skripte sind **blockierend** — der Parser hält an, führt das Skript synchron aus und macht erst danach weiter. Externe Skripte (`<script src="…">`) sind ebenfalls blockierend, sofern man nicht `defer` oder `async` setzt; ohne diese Attribute kann ein langsamer Skript-Download die ganze Seite verzögern. `defer` ist die übliche Wahl für Anwendungs-Code: Der Download läuft parallel zum HTML-Parsing, die Ausführung folgt erst nach Fertigparsen — in der Reihenfolge, in der die Tags im Dokument stehen. `async` ist nur für völlig unabhängige Skripte sinnvoll, bei denen die Ausführungsreihenfolge keine Rolle spielt (z. B. Analytics). Eine Alternative zum Skript am Body-Ende ist das `DOMContentLoaded`-Event: `document.addEventListener('DOMContentLoaded', () => { ... })` läuft genau dann, wenn der DOM aufgebaut ist, aber bevor Bilder und Stylesheets vollständig geladen sind. Der Event Listener im Beispiel läuft nicht sofort, sondern erst beim Klick; die Änderung von `textContent` verändert den DOM-Knoten, und der Browser aktualisiert anschließend die sichtbare Darstellung.
 
 --
 
@@ -1337,10 +1376,12 @@ WASM ist keine „neue Frontend-Sprache", sondern ein binäres Ausführungsforma
 Der Browser parst HTML und erzeugt den **Document Object Model (DOM)** — einen Baum, den JavaScript lesen und verändern kann:
 
 
-<div class="grid-2">
+<div class="grid-2 small">
 
 
 <div class="column">
+
+**DOM nach HTML-Parsing**
 
 ```text
 document
@@ -1355,15 +1396,33 @@ document
             └─ span.cart-badge  "0"
 ```
 
+<div class="fragment fade-in">
+
+**DOM nach Skript-Ausführung**
+
+```text
+document
+└─ html
+   ├─ head
+   └─ body
+      ├─ article.product
+      │  ├─ h2  "Funkkopfhörer"
+      │  ├─ p.price  "€ 79,99"
+      │  └─ button
+      │     ├─ "In den Warenkorb"
+      │     └─ span.cart-badge  "3"   ← geändert
+      └─ p  "Hinzugefügt!"             ← neu
+```
+
+</div>
+
+
 </div>
 
 
 <div class="column">
 
-
-<div class="small">
-
-### Produktseite unseres Online-Shops
+**JavaScript verändert den Baum**
 
 ```javascript
 // Preis aus dem DOM lesen
@@ -1382,15 +1441,16 @@ msg.textContent = 'Hinzugefügt!';
 document.body.appendChild(msg);
 ```
 
-### Kernidee
-
-Der DOM ist die **Brücke zwischen HTML und JavaScript**. Jede Änderung am DOM wird sofort im Browser sichtbar.
-
 </div>
 
 
 </div>
 
+
+
+<div class="c-orange gap">
+
+**Kernidee:** Der DOM ist die **Brücke zwischen HTML und JavaScript**. Jede Änderung am DOM wird sofort im Browser sichtbar.
 
 </div>
 
@@ -1545,93 +1605,66 @@ JavaScript im Browser läuft für UI-Code typischerweise auf dem Main Thread. Da
 
 <!-- .slide: class="smaller" -->
 
-## Fetch API: Die Client-Seite von HTTP
+## XMLHttpRequest: Der Vorgänger
 
-Die Fetch API ist die Brücke zwischen Frontend (Vorlesung 03) und Protokoll (Vorlesung 04):
+Vor der Fetch API war `XMLHttpRequest` (XHR) die einzige Möglichkeit, Daten asynchron vom Server nachzuladen — die technische Grundlage für **AJAX** (Asynchronous JavaScript and XML) ab ca. 2005.
+
+
+<div class="grid-2">
+
+
+<div class="column">
 
 ```javascript
-// GET: Produktliste laden
-const response = await fetch('/api/products?category=electronics&sort=-price');
-const products = await response.json();
-
-// POST: Bestellung aufgeben
-const result = await fetch('/api/orders', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ productId: 42, quantity: 1 })
-});
-if (result.status === 201) {
-  const order = await result.json();
-  window.location.href = `/orders/${order.id}`;  // Weiterleitung
-}
+// GET-Request mit XMLHttpRequest
+const xhr = new XMLHttpRequest();
+xhr.open('GET', '/api/products/42');
+xhr.onreadystatechange = function () {
+  if (xhr.readyState === 4) {              // 4 = DONE
+    if (xhr.status === 200) {
+      const product = JSON.parse(xhr.responseText);
+      renderProduct(product);
+    } else {
+      showError('Fehler: ' + xhr.status);
+    }
+  }
+};
+xhr.onerror = function () { showError('Netzwerkfehler'); };
+xhr.send();
 ```
 
-| Fetch-Konzept | HTTP-Gegenstück |
+</div>
+
+
+<div class="column small">
+
+
+| Schwäche von XHR | Konsequenz |
 |---|---|
-| `method: 'POST'` | HTTP-Methode — definiert die Absicht |
-| `headers` | HTTP Request Headers — Metadaten |
-| `response.status` | HTTP-Statuscode — Ergebnis der Operation |
-| `response.json()` | Body parsen — die Repräsentation der Ressource |
+| Callback-basiert, kein Promise | Verschachtelung bei mehreren Requests („Callback Hell") |
+| Komplexe State-Maschine (`readyState` 0–4) | Boilerplate, fehleranfällig |
+| Konfiguration verteilt auf Properties + Methoden | Kein flüssiger, deklarativer Aufruf |
+| JSON manuell mit `JSON.parse` parsen | Mehr Schritte, mehr Fehlerquellen |
+
+</div>
+
+
+</div>
+
 
 Notes:
-Die Fetch API ist die moderne Schnittstelle zwischen JavaScript und HTTP und hat den älteren `XMLHttpRequest` (XHR) abgelöst. `fetch()` gibt ein **Promise** zurück, das sich auflöst, sobald die *Header* der Antwort eingetroffen sind, nicht erst nach dem vollständigen Body. `response.json()` ist ein zweiter asynchroner Schritt, der den Body parst. Diese Trennung ermöglicht Streaming und erlaubt es, Status oder `Content-Type` zu prüfen, bevor große Antwortkörper vollständig verarbeitet werden.
+`XMLHttpRequest` wurde ursprünglich von Microsoft für Outlook Web Access (1999) als ActiveX-Komponente entwickelt und später von allen Browsern übernommen. Trotz des Namens hat das XML-Format nie eine zentrale Rolle gespielt — JSON setzte sich schnell als Datenformat durch. AJAX als Konzept (Jesse James Garrett, 2005) markierte den Übergang von klassischen Multi-Page-Anwendungen zu interaktiven Single-Page-Anwendungen wie Google Maps oder Gmail. Die API ist immer noch in jedem Browser verfügbar und wird von älteren Bibliotheken (jQuery `$.ajax`) intern verwendet, gilt aber für neuen Code als überholt. Konzeptionell wichtig bleibt: `readyState 4` plus `status 200` bedeutet erfolgreich — diese Trennung zwischen *Übertragung abgeschlossen* und *Server hat OK geliefert* findet sich auch in der Fetch API wieder (`response.ok` vs. Netzwerk-Exception).
 
 --
 
-## Was kann schiefgehen?
+<!-- .slide: class="smaller" -->
 
-**Aufgabe:** Dieser Code funktioniert im Normalfall. Welche Probleme können auftreten — und wie sollte man sie behandeln?
+## XHR im Ablauf: Antwort kommt erst beim Event — dazwischen läuft anderer Code
 
-```javascript
-const response = await fetch('/api/products/42');
-const product = await response.json();
-document.querySelector('.name').textContent = product.name;
-document.querySelector('.price').textContent = product.price + ' €';
-```
-
-
-
-
-<div class="fragment small fade-in">
-
-| Problem | Was passiert | Lösung |
-|---|---|---|
-| **Server nicht erreichbar** | `fetch` wirft Exception | `try/catch` + Fehlermeldung anzeigen |
-| **404 Not Found** | `response.ok` ist `false`, `.json()` liefert Fehler-Body | Status prüfen vor `.json()` |
-| **Langsame Verbindung** | UI zeigt alte/keine Daten | Loading-Indicator anzeigen |
-| **Response ist kein JSON** | `.json()` wirft Exception | `Content-Type` prüfen |
-| **DOM-Element existiert nicht** | `querySelector` liefert `null` → Fehler | Null-Check oder optionale Verkettung (`?.`) |
-
-Robuste Fehlerbehandlung ist keine Kür — sie ist der Unterschied zwischen einem Prototyp und einem Produktivsystem.
-
-</div>
-
-
-```javascript
-button.addEventListener('click', async () => {
-  try {
-    const response = await fetch('/api/products/42');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const product = await response.json();
-    renderProduct(product);
-  } catch (err) {
-    showError('Produkt konnte nicht geladen werden.');
-  }
-});
-```
-
-
-<div class="c-note">
-
-Das ist ereignisgesteuert **und** Promise-basiert: Der Klick startet den Ablauf, `await` wartet auf die asynchrone Fetch-Fortsetzung.
-
-</div>
-
+![Vier Schnappschüsse zeigen, was nach einem Klick auf "Produkt laden" passiert. T1: Click-Handler liegt mit xhr.send auf dem Stack, der Request wird angekickt. T2: Klick-Handler ist längst zurück, der XHR-Request läuft noch — währenddessen verarbeitet der Main Thread bereits ein anderes Event (Hover über das Menü), dessen Handler aktiv auf dem Stack liegt. T3: Die XHR-Antwort ist eingetroffen und der Browser hat den readystatechange-Callback in die Event Queue gelegt — er muss aber warten, weil ein Scroll-Handler aus der Queue gerade auf dem Stack läuft. T4: Stack ist frei, der Event Loop holt jetzt den XHR-Callback auf den Stack, der Code parst die Antwort und aktualisiert das DOM.](/courses/web-and-data-engineering/figures/xhr-event-flow.svg)
 
 Notes:
-Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerkbasierter Fehlerquellen ab: (1) **Netzwerk nicht erreichbar** — `fetch` wirft eine Exception, kein Response-Objekt entsteht. (2) **HTTP-Fehler (4xx/5xx)** — `fetch` liefert ein Response-Objekt mit `response.ok === false`; `.json()` parst den Fehler-Body, der häufig HTML statt JSON enthält. (3) **Langsame Verbindung** — UI zeigt veraltete oder keine Daten, kein Feedback für den Nutzer. (4) **Kein JSON im Body** — `.json()` wirft eine SyntaxError-Exception. (5) **Fehlendes DOM-Element** — `querySelector` gibt `null` zurück, Zugriff auf `.textContent` löst TypeError aus. Ereignisgesteuert bedeutet hier: Ein Nutzerereignis startet die asynchrone Operation. `async/await` ersetzt nicht das Event-Modell, sondern strukturiert den Promise-basierten Ablauf innerhalb des Event-Handlers.
-Eine subtile Falle bei Fetch: `fetch()` wirft *nur* dann eine Exception, wenn das Netzwerk komplett versagt, etwa bei DNS-Fehlern oder fehlender Verbindung. HTTP-Statuscodes wie 404 oder 500 gelten technisch als erfolgreich übertragene Antworten; `fetch` liefert ein gültiges Response-Objekt, und `response.ok` ist `false`. Ohne Statusprüfung versucht Code häufig, HTML-Fehlerseiten oder leere Bodies als JSON zu parsen. Robuste Patterns prüfen deshalb `response.ok` und den `Content-Type`, bevor `response.json()` aufgerufen wird.
+Die Skizze macht drei Punkte am XHR-Beispiel sichtbar. **Erstens:** Das Ergebnis der HTTP-Anfrage wird *erst beim Event* (`readystatechange` mit `readyState === 4`) verarbeitet — nicht synchron in der Zeile mit `xhr.send()`. Letzteres kehrt sofort zurück und tut nichts mehr; der Browser merkt sich nur, dass `xhr.onreadystatechange` registriert ist, und ruft die Funktion später auf. **Zweitens — das ist der Kern des ereignisgesteuerten Modells:** *Zwischen* dem Absenden und dem Eintreffen der Antwort läuft der Main Thread normal weiter. T2 zeigt das mit einem Hover-Event über das Menü: Während der XHR-Request unterwegs ist, dispatcht der Browser das mouseover-Event, der Event Loop holt den Hover-Handler auf den Stack, eine Dropdown-Funktion läuft. **Drittens — das ist neu in T3:** Selbst *wenn* die XHR-Antwort eintrifft, läuft sie nicht sofort. Der Browser legt das `readystatechange`-Event in die Event Queue. Wenn dort schon ein anderes Event auf seine Verarbeitung wartet (im Beispiel: ein `scroll`-Event, das während der Wartezeit aufgelaufen ist und gerade vom Loop aktiv abgearbeitet wird), muss der XHR-Callback hinten anstehen — die Queue ist FIFO. Erst in T4, nachdem der Scroll-Handler vom Stack zurückgekehrt ist und der Stack frei ist, wird der XHR-Callback auf den Stack gelegt und ausgeführt. Genau dieses Muster — kurzer JS-Block kickt etwas an → Browser arbeitet → das Ergebnis wird als Event in die Queue gestellt → der Loop arbeitet es ab, *wenn* es an der Reihe ist — ist die Grundlage *jeder* asynchronen API im Browser, von `setTimeout` über `addEventListener` bis hin zu `fetch` (nur dass dort statt eines Callbacks ein Promise verwendet wird).
 
 --
 
@@ -1888,7 +1921,7 @@ CSS reagiert auf viele Zustände selbst. JavaScript ist erst nötig, wenn neuer 
 
 
 
-<div class="c-green">
+<div class="c-orange">
 
 **Faustregel:** CSS beschreibt Darstellung und Übergänge. JavaScript erzeugt oder verändert Zustand.
 
@@ -2009,10 +2042,7 @@ Nicht jedes CSS-Layoutproblem ist dasselbe. Die wichtigsten Modelle beantworten 
 <div class="grid-2">
 
 
-<div class="column">
-
-
-<div class="c-definition">
+<div class="column c-navy">
 
 ### Normal Flow
 
@@ -2025,8 +2055,8 @@ Default-Verhalten von HTML:
 </div>
 
 
+<div class="column c-definition">
 
-<div class="c-definition">
 
 ### Flexbox
 
@@ -2039,13 +2069,7 @@ Verteilt Elemente entlang **einer Achse**:
 </div>
 
 
-</div>
-
-
-<div class="column">
-
-
-<div class="c-definition">
+<div class="column c-note">
 
 ### Grid
 
@@ -2059,16 +2083,13 @@ Organisiert Elemente in **Zeilen und Spalten**:
 
 
 
-<div class="c-note">
+<div class="column c-orange">
 
 ### Faustregel
 
 - **Flow**: Was passiert ohne Layoutanweisung?
 - **Flexbox**: Wie verteilen wir Inhalt entlang einer Achse?
 - **Grid**: Wie definieren wir ein Raster?
-
-</div>
-
 
 </div>
 
@@ -2204,7 +2225,12 @@ Flexbox ist das richtige Werkzeug, wenn Elemente in **einer Zeile oder Spalte** 
 }
 ```
 
+<div class="small">
+
 `display: flex` steht auf dem **übergeordneten Element** `.nav`. Die direkten Kinder werden dadurch zu Flex-Items.
+
+</div>
+
 
 </div>
 
@@ -2482,10 +2508,10 @@ Notes:
 
 ## Beispiel: Produktdetailseite mit Bild und Text
 
-**Situation:** Links steht das Produktbild, rechts Beschreibung und Kaufbutton. Auf dem Smartphone soll das Bild oben und der Text darunter erscheinen.
 
 
-<div class="grid-2 gap-sm">
+
+<div class="grid-3-1 gap-sm small">
 
 
 <div class="column">
@@ -2508,12 +2534,6 @@ Notes:
 }
 ```
 
-</div>
-
-
-<div class="column">
-
-
 <div class="c-note">
 
 ### Warum hier Grid?
@@ -2521,26 +2541,37 @@ Notes:
 - Desktop beschreibt Bereiche als `"image info"`
 - Mobile beschreibt Bereiche als `"image"` / `"info"`
 - Layout bleibt als Struktur sichtbar
+- Abfragbar mittesl CSS Media Queries 
 
 </div>
 
 
-</div>
 
-
-<div class="column span-all">
-
-![Schematische Produktdetailseite: Desktop mit Bild links und Produktinfo rechts; Mobile mit Bild oben und Produktinfo darunter.](/courses/web-and-data-engineering/figures/product-detail-grid.svg)
-
-</div>
-
-
-<div class="column span-all">
-
-
-<div class="c-note">
+<div class="c-orange">
 
 Flexbox wäre für eine einfache Zeile ebenfalls möglich. Grid ist hier klarer, weil Desktop- und Mobile-Layout als benannte Bereiche formuliert werden.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+**Situation:** Links steht das Produktbild, rechts Beschreibung und Kaufbutton. Auf dem Smartphone soll das Bild oben und der Text darunter erscheinen.
+
+<div class="figure-80">
+
+![Desktop-Layout: Produktbild links, Produktinformation mit Titel, Preis und Kaufbutton rechts. CSS Grid mit grid-template-areas: "image info".](/courses/web-and-data-engineering/figures/product-detail-desktop.svg)
+
+</div>
+
+
+<div class="figure-80">
+
+![Mobile-Layout: Produktbild oben, Produktinformation darunter. Dieselbe HTML-Struktur, andere grid-template-areas: "image" / "info".](/courses/web-and-data-engineering/figures/product-detail-mobile.svg)
 
 </div>
 
@@ -2570,7 +2601,7 @@ Flexbox eignet sich gut, wenn Bild und Text einfach nebeneinander oder untereina
 <div class="c-definition">
 
 ### Flexbox passt, wenn
-
+ 
 - nur eine Hauptachse wichtig ist
 - die Elemente einfach verteilt werden
 - Reihenfolge und Struktur weitgehend linear bleiben
@@ -2584,7 +2615,7 @@ Flexbox eignet sich gut, wenn Bild und Text einfach nebeneinander oder untereina
 <div class="column">
 
 
-<div class="c-definition">
+<div class="c-note">
 
 ### Grid passt, wenn
 
@@ -2602,7 +2633,7 @@ Flexbox eignet sich gut, wenn Bild und Text einfach nebeneinander oder untereina
 
 
 
-<div class="c-green">
+<div class="c-orange">
 
 **Faustregel:** Flexbox, wenn der Inhalt verteilt wird. Grid, wenn das Layout als Raster vorgegeben wird.
 
@@ -2670,7 +2701,7 @@ Web APIs sind Browser-Schnittstellen, die JavaScript zusätzliche Fähigkeiten g
 </div>
 
 
-<div class="column small">
+<div class="column">
 
 
 **Warum das wichtig ist**
@@ -2725,51 +2756,47 @@ Die Unterscheidung ist praktisch relevant: Derselbe JavaScript-Code läuft je na
 
 <!-- .slide: class="smaller" -->
 
-## Fetch API im Detail: Request, Response, AbortController
 
 
+## Fetch API: Die Client-Seite von HTTP
 
-<div class="grid-2-1">
+Die Fetch API ist die Brücke zwischen Frontend (Vorlesung 03) und Protokoll (Vorlesung 04):
+
+
+<div class="grid-2 small">
 
 
 <div class="column">
 
 ```javascript
-const controller = new AbortController();
+// GET: Produktliste laden
+const response = await fetch('/api/products?category=electronics&sort=-price');
+const products = await response.json();
 
-// Request mit Timeout nach 5 Sekunden abbrechen
-const timeout = setTimeout(() => controller.abort(), 5000);
-
-try {
-  const response = await fetch('/api/products', {
-    method: 'GET',
-    headers: { 'Accept': 'application/json' },
-    signal: controller.signal,
-  });
-
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-  const products = await response.json();
-} catch (err) {
-  if (err.name === 'AbortError') console.log('Request abgebrochen');
-  else console.error('Netzwerkfehler', err);
-} finally {
-  clearTimeout(timeout);
+// POST: Bestellung aufgeben
+const result = await fetch('/api/orders', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ productId: 42, quantity: 1 })
+});
+if (result.status === 201) {
+  const order = await result.json();
+  window.location.href = `/orders/${order.id}`;  // Weiterleitung
 }
 ```
 
 </div>
 
 
-<div class="column small">
+<div class="column">
 
 
-| Konzept | Zweck |
+| Fetch-Konzept | HTTP-Gegenstück |
 |---|---|
-| `Request` / `Response` | Objektmodell für HTTP-Nachrichten |
-| `headers` | Metadaten: Content-Type, Accept, Authorization |
-| `AbortController` | Laufende Requests abbrechen (Timeout, Navigation) |
-| `response.ok` | `true` bei Status 200–299 |
+| `method: 'POST'` | HTTP-Methode — definiert die Absicht |
+| `headers` | HTTP Request Headers — Metadaten |
+| `response.status` | HTTP-Statuscode — Ergebnis der Operation |
+| `response.json()` | Body parsen — die Repräsentation der Ressource |
 
 </div>
 
@@ -2780,13 +2807,283 @@ try {
 
 <div class="c-note">
 
-`fetch()` arbeitet **nicht callback-basiert**, sondern gibt ein **Promise** zurück. `async/await` ist nur die lesbarere Schreibweise dafür; ältere APIs wie `XMLHttpRequest` waren stärker callback-orientiert.
+`fetch()` ist die JavaScript-Abstraktion, aber die Konzepte darunter sind HTTP: Methode, Header, Statuscode und Body.
 
 </div>
 
 
 Notes:
-Der `AbortController` ist eine unterschätzte API. Ohne ihn läuft ein Fetch-Request weiter, auch wenn der Nutzer inzwischen weggenavigiert ist oder die Komponente unmounted wurde — der Response trifft dann auf DOM-Elemente, die nicht mehr existieren, und löst kryptische Fehler aus. Moderne Frameworks nutzen `AbortController` intern, um Cleanup zu machen. Für eigene Fetch-Logik ist er Pflicht, sobald es um Such-Eingaben, Navigation oder Timeouts geht. Das Pattern „Request starten, Abort-Signal merken, beim Abbruch signal.abort() aufrufen" ist ein Muster, das Sie in jedem produktiven Frontend-Code sehen werden. Zur Einordnung: Browser-JavaScript ist weiterhin ereignis- und callback-geprägt, etwa bei `addEventListener` oder `setTimeout`. Netzwerkzugriffe mit `fetch` sind dagegen Promise-basiert. `await fetch(...)` blockiert nicht den Main Thread, sondern pausiert nur die async-Funktion; die Fortsetzung wird später über den Event Loop eingeplant.
+Die Fetch API ist die moderne Schnittstelle zwischen JavaScript und HTTP und hat den älteren `XMLHttpRequest` (XHR) abgelöst. `fetch()` gibt ein **Promise** zurück, das sich auflöst, sobald die *Header* der Antwort eingetroffen sind, nicht erst nach dem vollständigen Body. `response.json()` ist ein zweiter asynchroner Schritt, der den Body parst. Diese Trennung ermöglicht Streaming und erlaubt es, Status oder `Content-Type` zu prüfen, bevor große Antwortkörper vollständig verarbeitet werden.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Was kann beim Fetch schiefgehen?
+
+**Aufgabe:** Dieser Code funktioniert im Normalfall. Welche Probleme können auftreten — und wie sollte man sie behandeln?
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+```javascript
+const response = await fetch('/api/products/42');
+const product = await response.json();
+document.querySelector('.name').textContent = product.name;
+document.querySelector('.price').textContent = product.price + ' €';
+```
+
+</div>
+
+
+<div class="column">
+
+```javascript
+button.addEventListener('click', async () => {
+  try {
+    const response = await fetch('/api/products/42');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const product = await response.json();
+    renderProduct(product);
+  } catch (err) {
+    showError('Produkt konnte nicht geladen werden.');
+  }
+});
+```
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="fragment small fade-in">
+
+| Problem | Was passiert | Lösung |
+|---|---|---|
+| **Server nicht erreichbar** | `fetch` wirft Exception | `try/catch` + Fehlermeldung anzeigen |
+| **404 Not Found** | `response.ok` ist `false`, `.json()` liefert Fehler-Body | Status prüfen vor `.json()` |
+| **Langsame Verbindung** | UI zeigt alte/keine Daten | Loading-Indicator anzeigen |
+| **Response ist kein JSON** | `.json()` wirft Exception | `Content-Type` prüfen |
+| **DOM-Element existiert nicht** | `querySelector` liefert `null` → Fehler | Null-Check oder optionale Verkettung (`?.`) |
+
+Robuste Fehlerbehandlung ist keine Kür — sie ist der Unterschied zwischen einem Prototyp und einem Produktivsystem.
+
+</div>
+
+
+
+
+<div class="c-note">
+
+Das ist ereignisgesteuert **und** Promise-basiert: Der Klick startet den Ablauf, `await` wartet auf die asynchrone Fetch-Fortsetzung.
+
+</div>
+
+
+Notes:
+Die fünf Fehlerfälle dieses Code-Snippets decken das gesamte Spektrum netzwerkbasierter Fehlerquellen ab: (1) **Netzwerk nicht erreichbar** — `fetch` wirft eine Exception, kein Response-Objekt entsteht. (2) **HTTP-Fehler (4xx/5xx)** — `fetch` liefert ein Response-Objekt mit `response.ok === false`; `.json()` parst den Fehler-Body, der häufig HTML statt JSON enthält. (3) **Langsame Verbindung** — UI zeigt veraltete oder keine Daten, kein Feedback für den Nutzer. (4) **Kein JSON im Body** — `.json()` wirft eine SyntaxError-Exception. (5) **Fehlendes DOM-Element** — `querySelector` gibt `null` zurück, Zugriff auf `.textContent` löst TypeError aus. Ereignisgesteuert bedeutet hier: Ein Nutzerereignis startet die asynchrone Operation. `async/await` ersetzt nicht das Event-Modell, sondern strukturiert den Promise-basierten Ablauf innerhalb des Event-Handlers.
+Eine subtile Falle bei Fetch: `fetch()` wirft *nur* dann eine Exception, wenn das Netzwerk komplett versagt, etwa bei DNS-Fehlern oder fehlender Verbindung. HTTP-Statuscodes wie 404 oder 500 gelten technisch als erfolgreich übertragene Antworten; `fetch` liefert ein gültiges Response-Objekt, und `response.ok` ist `false`. Ohne Statusprüfung versucht Code häufig, HTML-Fehlerseiten oder leere Bodies als JSON zu parsen. Robuste Patterns prüfen deshalb `response.ok` und den `Content-Type`, bevor `response.json()` aufgerufen wird.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Promises und asynchrone Verarbeitung
+
+Ein **Promise** repräsentiert das *zukünftige Ergebnis* einer asynchronen Operation. Es kennt drei Zustände: `pending` → `fulfilled` oder `rejected`.
+ 
+**Klassischer Promise-Stil mit Callback-Verkettung**
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+```javascript
+fetch('/api/products/42')                  // gibt Promise zurück
+  .then(response => {                      // läuft, wenn Header da sind
+    if (!response.ok) throw new Error(response.status);
+    return response.json();                // gibt wieder ein Promise zurück
+  })
+  .then(product => renderProduct(product)) // läuft, wenn JSON geparst ist
+  .catch(err => showError(err.message));   // fängt Fehler aus jeder Stufe
+```
+
+</div>
+
+
+<div class="column c-note">
+
+Auf jedem Promise lassen sich Callbacks registrieren: `.then(callback)` läuft, **wenn** das Promise erfolgreich erfüllt wird (`fulfilled`); `.catch(callback)` läuft, **wenn** es scheitert (`rejected`). Mehrere `.then(...)` lassen sich verketten — das Ergebnis des einen Callbacks wird zum Eingang des nächsten.
+
+</div>
+
+
+</div>
+
+
+**`async / await` — derselbe Ablauf, linearer Code**
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+```javascript
+async function loadProduct() {
+  try {
+    const response = await fetch('/api/products/42');
+    if (!response.ok) throw new Error(response.status);
+    const product = await response.json();
+    renderProduct(product);
+  } catch (err) {
+    showError(err.message);
+  }
+}
+```
+
+</div>
+
+
+<div class="column small">
+
+
+| Konzept | Bedeutung |
+|---|---|
+| `await` | Pausiert die `async`-Funktion, bis das Promise *settled* ist — blockiert **nicht** den Main Thread |
+| `Promise.all([p1, p2])` | Wartet parallel auf mehrere Promises; scheitert, sobald *eines* rejected |
+| `Promise.allSettled([...])` | Wartet auf alle, gibt Erfolg *und* Fehler zurück |
+| `try / catch` um `await` | Fängt sowohl Netzwerk- als auch Logikfehler — ersetzt `.catch()` |
+
+
+<div class="c-note">
+
+`async / await` ist **syntaktischer Zucker** über Promises — keine echte Parallelität, sondern lesbarer Kontrollfluss über die Event Queue. Echte Parallelität bieten Web Worker.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Promises wurden mit ES2015 (ES6) standardisiert und lösten das Callback-Hell-Problem von XHR und Node.js-Style-Callbacks. Ein Promise ist ein Objekt, das eine Operation kapselt, deren Ergebnis noch nicht vorliegt. Der entscheidende Vorteil gegenüber Callbacks: Promises sind *komponierbar* (`.then` verkettet, `Promise.all` parallelisiert) und haben einheitliche Fehlerbehandlung (`.catch` fängt Fehler aus jeder Stelle der Kette). `async / await` (ES2017) ist rein syntaktisch — der Compiler übersetzt es in eine Promise-Kette mit Generatoren. Wichtig für das mentale Modell: `await` blockiert *nur* die umgebende `async`-Funktion, der Event Loop läuft weiter und kann andere Events bearbeiten. Genau deshalb friert die UI nicht ein, obwohl Code wie sequentielle Synchron-Logik aussieht. Ein häufiger Fehler: zwei unabhängige `await`-Aufrufe sequenziell statt parallel mit `Promise.all` ausführen — das verschwendet wartbare Zeit (zwei Netzwerk-Roundtrips nacheinander statt gleichzeitig).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## await im Zeitverlauf: zwei Fetch-Requests
+
+![Zwei Timelines vergleichen sequenzielle awaits mit Promise.all. In beiden Fällen verarbeitet der Main Thread während der Wartezeit andere Browser-Events wie Klicks und Rendering — er ist nie blockiert. Sequenziell entstehen zwei Wartephasen nacheinander, parallel nur eine.](/courses/web-and-data-engineering/figures/async-await-two-fetches.svg)
+
+Notes:
+Wichtigster Punkt der Skizze: Die grünen Blöcke auf dem Main Thread zeigen, dass während `await` *andere* Browser-Events ungehindert laufen — Klicks, Rendering, Animationen. Genau das ist der Vorteil von `async/await` gegenüber synchronem I/O: Bei einem hypothetischen synchronen Fetch wäre der Main Thread während der gesamten Netzwerkdauer blockiert, die Seite würde einfrieren („page frozen"). `await` gibt den Main Thread während des Wartens frei, sodass die Event Queue weiter abgearbeitet werden kann. Die *eigene* `async`-Funktion pausiert (orange Blöcke nur am Anfang/Ende), aber der Main Thread tut es nicht. Der zweite Vorteil — sichtbar im unteren Block — ist *Parallelität auf der Netzwerk-Ebene*: `Promise.all([fetch(A), fetch(B)])` übergibt beide Requests gleichzeitig an die Browser-API, sodass nur eine einzige Wartephase entsteht statt zwei. Faustregel: Zwei aufeinanderfolgende `await`s sind nur dann korrekt, wenn der zweite Request vom Ergebnis des ersten *abhängt*; ansonsten gehört das Aufrufpaar in ein `Promise.all`.
+
+--
+
+
+<!-- .slide: class="smaller" -->
+
+## Cookies: kleine Schlüssel-Werte, automatisch zum Server
+
+Cookies sind kleine, vom Browser gespeicherte Schlüssel-Wert-Paare. Im Unterschied zu allen anderen Storage-APIs werden sie bei **jedem** HTTP-Request an die zugehörige Domain *automatisch* mitgeschickt — das macht sie zur klassischen Wahl für Sessions und Authentifizierung.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+**Setzen — Server (üblich)**
+
+```http
+HTTP/1.1 200 OK
+Set-Cookie: session=abc123; Max-Age=3600;
+            HttpOnly; Secure; SameSite=Strict
+```
+
+
+<div class="gap">
+
+
+</div>
+
+
+**Setzen — Client (selten)**
+
+```javascript
+document.cookie = 'theme=dark; max-age=31536000; SameSite=Lax';
+```
+
+<div class="gap">
+
+
+</div>
+
+
+
+**Lesen — Client**
+
+```javascript
+// alle (nicht-HttpOnly) Cookies als ein String
+const all = document.cookie;
+// → "theme=dark; locale=de-AT"
+```
+
+</div>
+
+
+<div class="column small">
+
+
+**Wichtige Attribute**
+
+| Attribut | Wirkung |
+|---|---|
+| `HttpOnly` | Für JavaScript **unsichtbar** — schützt vor XSS-Diebstahl |
+| `Secure` | Nur über HTTPS übertragen |
+| `SameSite=Strict\|Lax\|None` | Sendet Cookie nicht (oder nur Top-Level) bei Cross-Site-Requests — schützt vor CSRF |
+| `Max-Age` / `Expires` | Lebensdauer; ohne beides → Session-Cookie |
+| `Domain` / `Path` | Auf welche Hosts/URLs der Cookie geht |
+
+**Typische Anwendungen**
+
+- Session-ID für angemeldete Nutzer
+- CSRF-Token, Sprache, Theme
+- Tracking / Analytics (Drittanbieter-Cookies)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-orange gap">
+
+**Faustregel:** Auth-Tokens gehören in einen Cookie mit `HttpOnly + Secure + SameSite=Strict`. UI-State (Warenkorb, Preferences) gehört in `localStorage`.
+
+</div>
+
+
+Notes:
+Cookies sind die älteste clientseitige Speichertechnologie des Webs (Netscape, 1994) und der Grund, warum HTTP überhaupt zustandsbehaftete Sessions ermöglichen kann — das Protokoll selbst ist zustandslos. Die wichtigste Eigenschaft, die Cookies von `localStorage` unterscheidet: Sie werden vom Browser bei jedem passenden Request *automatisch* in den `Cookie`-Header gepackt und mitgeschickt. Der Server muss sie also nicht aktiv anfragen — sie sind einfach da. Das ist Segen und Fluch zugleich: praktisch für Sessions, gefährlich bei Cross-Site-Angriffen (CSRF). Genau deshalb ist `SameSite` heute essenziell — moderne Browser setzen `SameSite=Lax` als Default. `HttpOnly` schließt JavaScript komplett vom Lesen aus; das bedeutet, ein erfolgreicher XSS-Angriff kann das Auth-Cookie *nicht* exfiltrieren. Der Tradeoff: HttpOnly-Cookies können nicht von SPA-Code gelesen werden — Single-Page-Apps verwenden deshalb oft eine Kombination aus HttpOnly-Refresh-Cookie und kurzlebigem Access-Token im Memory. Drittanbieter-Cookies (Cookies, die zu einer fremden Domain gehören und in iframes oder beim Laden von Drittanbieter-Skripten gesetzt werden) sind die Grundlage für Cross-Site-Tracking und werden von allen modernen Browsern stark eingeschränkt oder ganz blockiert (Safari ITP, Firefox ETP, Chrome Privacy Sandbox).
 
 --
 
@@ -2794,12 +3091,26 @@ Der `AbortController` ist eine unterschätzte API. Ohne ihn läuft ein Fetch-Req
 
 ## Web Storage: localStorage, sessionStorage, Cookies
 
+Browser-Speicher unterscheidet sich vor allem danach, **wie lange** Daten leben und **wer** sie lesen oder automatisch mitsenden kann.
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 | API | Lebensdauer | Größe | Zugriff |
 |---|---|---|---|
 | **`localStorage`** | Persistent (bis manuell gelöscht) | ~5–10 MB | Nur Client (JS) |
 | **`sessionStorage`** | Nur aktuelle Browser-Session | ~5–10 MB | Nur Client (JS) |
 | **`Cookies`** | Konfigurierbar (Session oder Ablaufdatum) | ~4 KB | Client + **automatisch an Server** |
 | **`IndexedDB`** | Persistent | Gigabyte-Bereich | Client (asynchron) |
+
+</div>
+
+
+<div class="column">
+
 
 ```javascript
 // localStorage: einfache Key-Value-Speicherung
@@ -2813,12 +3124,36 @@ sessionStorage.setItem('wizard-step', '3');
 document.cookie = 'theme=dark; max-age=31536000; SameSite=Strict';
 ```
 
+</div>
+
+
+</div>
+
+
 ### Wann was?
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
 
 - **Cookies** für alles, was der **Server wissen muss** (Session-ID, Authentifizierung)
 - **localStorage** für Client-State, der **über Sessions** erhalten bleiben soll (Warenkorb, UI-Einstellungen)
+
+</div>
+
+
+<div class="column">
+
 - **sessionStorage** für temporären State, der **nur im aktuellen Tab** gilt (Wizard-Fortschritt)
 - **IndexedDB** für große Datenmengen oder Offline-Anwendungen
+
+</div>
+
+
+</div>
+
 
 Notes:
 Ein häufiger Fehler: Authentifizierungs-Tokens in `localStorage` zu speichern. Das ist verlockend, weil es einfach ist, aber gefährlich: Jeder JavaScript-Code auf der Seite (inklusive eingebettete Drittanbieter-Skripte und XSS-Angriffe) kann `localStorage` lesen. Cookies mit `HttpOnly` und `SameSite=Strict` sind sicherer, weil sie JavaScript verborgen bleiben und nur vom Server gelesen werden können. Das ist eine der Architektur-Entscheidungen, die Vorlesung 7 (Sicherheit) vertieft. Für Warenkorb und UI-State ist `localStorage` dagegen völlig in Ordnung — kein Angreifer gewinnt etwas durch Kenntnis des Warenkorbinhalts.
@@ -2830,6 +3165,12 @@ Ein häufiger Fehler: Authentifizierungs-Tokens in `localStorage` zu speichern. 
 ## History API: Navigation ohne Seiten-Reload
 
 Single-Page Applications navigieren ohne vollständigen Seiten-Reload. Der Browser-Zurück-Button muss trotzdem funktionieren. Die **History API** macht das möglich:
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
 
 ```javascript
 // URL ändern, ohne neu zu laden
@@ -2845,11 +3186,31 @@ window.addEventListener('popstate', (event) => {
 });
 ```
 
+</div>
+
+
+<div class="column">
+
+
 | Methode / Event | Zweck |
 |---|---|
 | `history.pushState(state, '', url)` | URL ändern, Eintrag zum Verlauf hinzufügen |
 | `history.replaceState(...)` | URL ändern, **ohne** neuen Eintrag |
 | `popstate` Event | Browser-Zurück-/Vorwärts-Button |
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Client-side Routing muss immer zwei Wege behandeln: aktive Navigation per `pushState` und passive Navigation über den Zurück-/Vorwärts-Button.
+
+</div>
+
 
 Notes:
 Die History API ist der technische Kern jedes Client-Side-Routers — React Router, Vue Router und SvelteKit nutzen sie unter der Haube. Das Problem, das sie löst: Ohne History API würde jede Navigation in einer SPA die URL unverändert lassen, und der Browser-Zurück-Button würde die SPA verlassen. Mit `pushState` bleibt die URL konsistent mit dem UI-Zustand, und der Zurück-Button funktioniert wie erwartet. Wichtige Feinheit: `pushState` löst *kein* `popstate`-Event aus — das Event feuert nur beim Zurück-Navigieren. Eigene Navigationslogik muss also zwei Pfade unterstützen: aktives Navigieren (UI ruft `pushState` + Render auf) und passives Zurück-Navigieren (popstate-Event triggert Render).
@@ -2862,6 +3223,12 @@ Die History API ist der technische Kern jedes Client-Side-Routers — React Rout
 
 Beide laufen in einem **separaten Thread** außerhalb des Haupt-Event-Loops — aber mit unterschiedlichen Zwecken.
 
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 | Aspekt | **Web Worker** | **Service Worker** |
 |---|---|---|
 | **Zweck** | CPU-intensive Berechnungen auslagern | Netzwerk-Proxy, Offline-Support, Push |
@@ -2869,6 +3236,12 @@ Beide laufen in einem **separaten Thread** außerhalb des Haupt-Event-Loops — 
 | **DOM-Zugriff** | Nein | Nein |
 | **Fetch-Interception** | Nein | Ja — fängt alle Netzwerk-Requests ab |
 | **Typischer Einsatz** | Bildverarbeitung, Datenanalyse, Kryptographie | Progressive Web Apps, Caching, Push-Benachrichtigungen |
+
+</div>
+
+
+<div class="column">
+
 
 ```javascript
 // Web Worker: teure Berechnung auslagern
@@ -2883,6 +3256,20 @@ self.addEventListener('fetch', (event) => {
   );
 });
 ```
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Web Worker entlasten die UI bei Rechenarbeit. Service Worker sitzen zwischen Anwendung und Netzwerk und machen Offline-/Cache-Strategien möglich.
+
+</div>
+
 
 Notes:
 Service Workers sind das Fundament jeder Progressive Web App (PWA). Sie ermöglichen Offline-Betrieb, weil sie Netzwerk-Requests abfangen und aus einem Cache beantworten können, selbst wenn die Verbindung weg ist. Web Workers lösen ein anderes Problem: Lange Berechnungen wie Bildverarbeitung, Parsen großer JSON-Dateien oder Kryptographie blockieren sonst die UI. Im Worker läuft dieser Code in einem echten zweiten OS-Thread, ohne den Hauptthread zu beeinträchtigen. Beide Worker-Typen haben keinen DOM-Zugriff und kommunizieren mit dem Hauptthread über `postMessage`.

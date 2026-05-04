@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.OGHTRDy8.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Lecture 04: HTTP und RESTful APIs
@@ -184,6 +184,12 @@ HTTP arbeitet nach einem einfachen Muster: Der Client sendet einen Request an ei
 
 In Vorlesung 03 haben wir die **Client-Seite** gesehen:
 
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 ```javascript
 const response = await fetch('/api/products/42', {
   headers: { 'Accept': 'application/json' }
@@ -191,6 +197,12 @@ const response = await fetch('/api/products/42', {
 ```
 
 Jetzt schauen wir auf die **Protokollseite**:
+
+</div>
+
+
+<div class="column">
+
 
 | Fetch API | HTTP-Protokoll |
 |---|---|
@@ -200,7 +212,19 @@ Jetzt schauen wir auf die **Protokollseite**:
 | `response.status` | Statuscode — standardisiertes Ergebnis |
 | `response.json()` | Response Body parsen — Repräsentation der Ressource |
 
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
 Die Fetch API ist eine **JavaScript-Abstraktion über HTTP**. Wer HTTP versteht, versteht auch, warum `fetch` so funktioniert wie es funktioniert — und kann Netzwerkprobleme im DevTools-Netzwerk-Tab diagnostizieren.
+
+</div>
+
 
 Notes:
 Die Fetch API ist eine Programmierschnittstelle im Browser, die HTTP-Nachrichten erzeugt und Responses kapselt. `method`, `headers` und Body in JavaScript entsprechen direkt Bestandteilen einer HTTP-Nachricht. Wer HTTP versteht, kann Netzwerkverhalten unabhaengig vom verwendeten Framework analysieren.
@@ -376,8 +400,6 @@ Statuscodes sind maschinenlesbare Standardantworten. 2xx steht fuer Erfolg, 3xx 
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## HTTP-Versionen im Vergleich
@@ -389,9 +411,7 @@ Statuscodes sind maschinenlesbare Standardantworten. 2xx steht fuer Erfolg, 3xx 
 | **HTTP/2** | 2015 | Multiplexing, Header-Kompression, binär |
 | **HTTP/3** | 2022 | QUIC (UDP-basiert), schnellerer Aufbau |
 
-![HTTP-Versionen im Vergleich.](/courses/web-and-data-engineering/figures/http-versions.svg)
 
-**Frage:** Eine Produktseite lädt 60 Ressourcen (JS, CSS, Bilder). Warum dauert das mit HTTP/1.1 deutlich länger als mit HTTP/2 — obwohl die Bandbreite dieselbe ist?
 
 
 <div class="takeaway">
@@ -405,6 +425,17 @@ HTTP ist nicht nur Datentransport — es ist das **Interaktionsmodell** des Webs
 
 Notes:
 HTTP/1.0 oeffnete typischerweise pro Request eine neue TCP-Verbindung. HTTP/1.1 fuehrte persistent connections ein. HTTP/2 multiplexiert mehrere Requests ueber eine Verbindung und komprimiert Header. HTTP/3 basiert auf QUIC (Quick UDP Internet Connections) ueber UDP (User Datagram Protocol) und reduziert Verbindungsaufbau und Transportlatenz.
+
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## HTTP-Versionen im Vergleich
+
+![HTTP-Versionen im Vergleich.](/courses/web-and-data-engineering/figures/http-versions.svg)
+
+**Frage:** Eine Produktseite lädt 60 Ressourcen (JS, CSS, Bilder). Warum dauert das mit HTTP/1.1 deutlich länger als mit HTTP/2 — obwohl die Bandbreite dieselbe ist?
 
 ---
 
@@ -707,14 +738,32 @@ Serverseitig gerendertes HTML bedeutet, dass der Server die sichtbare Seite zusa
 
 **JSON** steht fuer **JavaScript Object Notation**. Es ist ein leichtgewichtiges Textformat fuer strukturierte Daten.
 
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 ```json
 {
   "id": 42,
   "name": "Funkkopfhörer",
   "price": 79.99,
-  "in_stock": true
+  "in_stock": true,
+  "tags": ["audio", "wireless"],
+  "manufacturer": {
+    "name": "Acme",
+    "country": "DE"
+  },
+  "discount": null
 }
 ```
+
+</div>
+
+
+<div class="column">
+
 
 | JSON-Element | Beispiel |
 |---|---|
@@ -724,6 +773,13 @@ Serverseitig gerendertes HTML bedeutet, dass der Server die sichtbare Seite zusa
 | Zahl | `79.99` |
 | Boolean | `true`, `false` |
 | Null | `null` |
+
+
+</div>
+
+
+</div>
+
 
 Notes:
 JSON ist im Web so verbreitet, weil es kompakt, textbasiert und in fast allen Programmiersprachen leicht verarbeitbar ist. Fuer REST ist aber wichtig: JSON ist nur eine moegliche Repräsentation, nicht die Definition von REST.
@@ -845,20 +901,10 @@ Die Trennung von Ressource und Repräsentation ist das Kernkonzept hinter dem R 
 ## Warum das für HTTP-Verständnis wichtig ist
 
 
-<div class="grid-2">
-
-
-<div class="column">
-
 - `Content-Type` und `Accept` machen Repräsentationen explizit
 - Caches muessen wissen, **welche Variante** einer Ressource gespeichert wurde
 - Infrastruktur kann nur korrekt arbeiten, wenn Header die Nachricht eindeutig beschreiben
 - Dieselbe fachliche Ressource kann fuer unterschiedliche Clients unterschiedlich dargestellt werden
-
-</div>
-
-
-<div class="column">
 
 
 <div class="takeaway">
@@ -867,11 +913,6 @@ Header sind nicht Beiwerk, sondern Teil der HTTP-Semantik. Sie beschreiben Forma
 
 </div>
 
-
-</div>
-
-
-</div>
 
 
 Notes:
@@ -905,28 +946,13 @@ Nachdem Header, Medienformate und Repräsentationen eingefuehrt wurden, lassen s
 ## Szenario: Der veraltete Preis
 
 
-<div class="grid-2">
-
-
-<div class="column">
-
 Ein Nutzer besucht die Produktseite des Funkkopfhörers. Der Preis wird von **€ 79,99 auf € 69,99 gesenkt**. Der Nutzer lädt die Seite erneut und sieht trotzdem weiter den alten Preis.
 
 
-<div class="c-important">
-
 **Aufgabe:** Was ist passiert? Welche HTTP-Mechanismen sind beteiligt?
 
-</div>
 
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-note">
+<div class="c-note fade-in">
 
 Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300` Header sagte: "Diese Daten sind 5 Minuten gueltig." Innerhalb dieser Frist fragt der Browser **gar nicht** beim Server nach.
 
@@ -934,15 +960,9 @@ Der Browser hat die vorherige Response gecacht. Der `Cache-Control: max-age=300`
 
 
 
-<div class="c-caution">
+<div class="c-caution fade-in">
 
 **Architekturentscheidung:** Wie lange sollen Produktdaten gecacht werden? Zu lang -> veraltete Preise. Zu kurz -> jeder Seitenaufruf belastet den Server.
-
-</div>
-
-
-</div>
-
 
 </div>
 
@@ -1098,12 +1118,7 @@ Die richtige Cache-Strategie haengt vom Datentyp ab. Versionierte statische Date
 
 <div class="column">
 
-```text
-Browser ── POST /api/orders ──► Server
-Server  ── 303 See Other ─────► Browser
-Browser  ── GET /orders/789 ──► Server
-Server  ── 200 OK (Bestellbestätigung) ─► Browser
-```
+![PRG-Pattern: Nach POST schickt der Server 303 See Other mit Location-Header. Der Browser folgt automatisch per GET zur Bestätigungs-Seite. Drückt der Nutzer Reload, wiederholt der Browser nur den GET — der POST wird nie wiederholt, also keine Doppelbestellung.](/courses/web-and-data-engineering/figures/prg-pattern.svg)
 
 </div>
 
@@ -1148,7 +1163,96 @@ Der Redirect-Workflow macht sichtbar, dass nicht jeder Redirect dasselbe Verhalt
 
 --
 
+<!-- .slide: class="smaller" -->
 
+## Lang laufende Tasks: `202 Accepted` und Polling
+
+Was tut der Server, wenn die Bearbeitung Sekunden oder Minuten dauert (CSV-Export, Video-Transcoding, LLM-Batch-Job)? Die Verbindung offen halten ist teuer und unzuverlässig. Das Standard-Muster ist ein **asynchroner Job mit Status-Polling** — eine Verkettung der bekannten Redirect-Bausteine.
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+```http
+# 1) Client startet den Task
+POST /api/exports HTTP/1.1
+Content-Type: application/json
+
+{ "format": "csv", "range": "2026-Q1" }
+
+# 2) Server quittiert SOFORT, ohne zu warten
+HTTP/1.1 202 Accepted
+Location: /api/jobs/abc123
+Retry-After: 5
+
+# 3) Client pollt den Job-Status (alle ~5 s)
+GET /api/jobs/abc123 HTTP/1.1
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{ "status": "processing", "progress": 0.42 }
+
+# … weitere Polls …
+
+# 4) Fertig → Server schickt 303 zum Ergebnis
+HTTP/1.1 303 See Other
+Location: /api/exports/abc123.csv
+
+# 5) Client folgt automatisch (PRG-Mechanik)
+GET /api/exports/abc123.csv HTTP/1.1
+
+HTTP/1.1 200 OK
+Content-Type: text/csv
+…
+```
+
+</div>
+
+
+<div class="column">
+
+
+| Baustein | Funktion |
+|---|---|
+| `202 Accepted` | „Auftrag angenommen, Bearbeitung läuft" |
+| `Location` | URL der **Job-Ressource** (nicht des Ergebnisses!) |
+| `Retry-After` | Empfohlenes Poll-Intervall in Sekunden |
+| Job: `200` + `status` | Zwischenstand: `queued`/`processing`/`done`/`failed` |
+| Job: `303 See Other` | Endzustand → `Location` zeigt auf das fertige Artefakt |
+
+**Wann nutzt man das?**
+
+- Server-seitig teure Berechnungen (Reports, ML-Inference, Renderings)
+- Asynchrone Pipelines, die ohnehin in einem Worker laufen
+- LLM-Batch-APIs (Anthropic, OpenAI) — gleiche Mechanik
+
+**Verwandte Muster**
+
+- *Long Polling*: Server hält die Anfrage offen, bis sich etwas ändert
+- *WebSocket / SSE*: persistente Verbindung, Server pusht Events
+- *Webhook*: Client gibt Callback-URL an, Server ruft zurück
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-orange gap">
+
+**Faustregel:** Sobald die Bearbeitung länger als ein Browser-Timeout (≈ 30 s) dauern kann, in Job-Ressource auslagern und per Polling beobachten.
+
+</div>
+
+
+Notes:
+Das Muster ist alt und bewährt — es trennt die Frage „Auftrag angekommen?" (sofortige Antwort) von „Auftrag fertig?" (kann lange dauern) sauber. Der entscheidende Punkt: Die `Location` aus dem `202 Accepted` zeigt *nicht* auf die fertige Ressource, sondern auf eine *Job-Ressource*, die ihrerseits einen eigenen Lebenszyklus hat (queued → processing → done/failed). Das ist konzeptionell wichtig, weil die Job-Ressource cachebar, abbruchbar (`DELETE /api/jobs/abc123`) und mit eigenen Statuscodes adressierbar ist. Der `303 See Other` am Ende ist dieselbe PRG-Mechanik wie bei einem normalen Form-Submit — der Client folgt mit GET zur fertigen Repräsentation. Vorsicht beim Polling-Intervall: Zu kurz erzeugt unnötige Last (jeder Poll ist ein voller Round-Trip mit Auth-Overhead), zu lang verzögert die wahrgenommene Antwortzeit. Server geben deshalb über `Retry-After` einen Hinweis. Echtes *Long Polling* ist eine Variante, bei der der Server die GET-Anfrage *offen hält*, bis sich der Job-Status ändert (oder ein Timeout greift); spart Round-Trips, blockiert aber Server-Verbindungen — heute meist durch SSE oder WebSockets ersetzt. **Beispiele aus der Praxis:** Anthropics Message Batches API, OpenAIs Batch API, GitHub Actions Job-Status, AWS S3 Multipart Uploads, Stripes asynchrone Webhooks — alle folgen einer Variante dieses Musters.
+
+--
 
 <!-- .slide: class="smaller" -->
 
@@ -1302,7 +1406,7 @@ REST (Representational State Transfer) wurde 2000 von Roy Fielding in seiner Dis
 
 <!-- .slide: class="smaller" -->
 
-## Eine typische AI-Antwort auf diese Frage
+## Eine typische Antwort auf die Frage: "Was ist REST?"
 
 > „REST ist ein Architekturstil für APIs, bei dem man JSON über HTTP verschickt. Man benutzt GET zum Lesen, POST zum Erstellen, PUT zum Aktualisieren und DELETE zum Löschen. Die URLs sollten Ressourcen beschreiben, z.B. /users/42."
 
@@ -1310,16 +1414,42 @@ REST (Representational State Transfer) wurde 2000 von Roy Fielding in seiner Dis
 
 ### Analyse
 
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 | Aussage | Bewertung |
 |---|---|
 | „JSON über HTTP" | **Irreführend** — REST ist formatunabhängig. JSON ist verbreitet, aber nicht Voraussetzung. |
 | „GET zum Lesen, POST zum Erstellen..." | **Teilweise korrekt** — beschreibt CRUD-Mapping, aber nicht die eigentlichen REST-Constraints |
 | „URLs sollten Ressourcen beschreiben" | **Korrekt** — aber nur ein Aspekt der Uniform Interface |
+
+</div>
+
+
+<div class="column">
+
+| Fehlt | Bewertung |
+|---|---|
 | Fehlt: Statelessness | **Kritisch** — Zustandslosigkeit ist der Grund, warum REST skaliert |
 | Fehlt: Cacheability | **Kritisch** — ein Hauptvorteil gegenüber RPC-Ansätzen |
 | Fehlt: Layered System | **Wichtig** — ermöglicht CDN, Load Balancer, API Gateway transparent einfügbar |
 
+</div>
+
+
+</div>
+
+
+
+<div class="c-orange gap">
+
 Die AI-Antwort beschreibt die **Syntax** von REST, aber nicht die **Architektur**. Das ist der häufigste Fehler.
+
+</div>
+
 
 Notes:
 Die Antwort beschreibt verbreitete Konventionen wie JSON (JavaScript Object Notation) und CRUD-Mapping, aber nicht die eigentlichen REST-Constraints. CRUD steht fuer Create, Read, Update, Delete. REST ist nicht auf JSON festgelegt und wird nicht allein dadurch erreicht, dass man GET, POST, PUT und DELETE verwendet.
@@ -1332,18 +1462,46 @@ Die Antwort beschreibt verbreitete Konventionen wie JSON (JavaScript Object Nota
 
 ## REST: Ein Architekturstil, kein Protokoll
 
+REST ist kein einzelnes Protokoll, sondern ein Satz von Constraints für verteilte Systeme.
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 | Constraint | Bedeutung | Konsequenz |
 |---|---|---|
 | **Client-Server** | Klare Rollentrennung | Client und Server entwickeln sich unabhängig |
 | **Stateless** | Jeder Request enthält alle nötigen Informationen | Server skaliert horizontal, kein Session-Zustand |
 | **Cacheable** | Responses deklarieren ihre Cachebarkeit | Infrastruktur kann Caching transparent umsetzen |
+
+</div>
+
+
+<div class="column">
+
+| Constraint | Bedeutung | Konsequenz |
+|---|---|---|
 | **Uniform Interface** | Einheitliche Schnittstelle für alle Ressourcen | Generische Werkzeuge (Browser, curl, Proxies) funktionieren |
 | **Layered System** | Client weiß nicht, ob er direkt mit dem Server spricht | Load Balancer, CDN, API Gateway transparent einfügbar |
 | **Code on Demand** (optional) | Server kann ausführbaren Code liefern | JavaScript im Browser |
 
+</div>
+
+
+</div>
+
+
 ### Kernidee
 
+
+<div class="c-note">
+
 REST nutzt die **vorhandene Web-Infrastruktur** (HTTP, URIs, Caching, Proxies) als Anwendungsplattform — statt ein eigenes RPC-Protokoll darüber zu bauen.
+
+</div>
+
 
 Notes:
 Die zentralen REST-Constraints sind Client-Server, Statelessness, Cacheability, Uniform Interface und Layered System; Code on Demand ist optional. Diese Constraints sollen Skalierbarkeit, Entkopplung und Wiederverwendbarkeit von Infrastruktur verbessern.
@@ -1624,17 +1782,43 @@ Hinweis: Denken Sie an Kurse, Vorlesungen, Studierende, Einschreibungen, Noten.
 
 ### Eine mögliche Lösung
 
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 | Fachliches Konzept | URI | Methoden |
 |---|---|---|
 | Alle Kurse | `/courses` | GET, POST |
 | Ein Kurs | `/courses/web-eng` | GET, PUT, DELETE |
 | Vorlesungen eines Kurses | `/courses/web-eng/lectures` | GET, POST |
 | Einschreibungen | `/courses/web-eng/enrollments` | GET, POST |
+
+</div>
+
+
+<div class="column">
+
+| Fachliches Konzept | URI | Methoden |
+|---|---|---|
 | Eine Einschreibung | `/courses/web-eng/enrollments/42` | GET, DELETE |
 | Noten eines Studierenden | `/students/42/grades` | GET |
 | Note in einem Kurs | `/students/42/grades/web-eng` | GET, PUT |
 
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
 **Diskussion:** Sollte die Note unter `/students/42/grades/web-eng` oder unter `/courses/web-eng/grades/42` liegen? Beide sind valide — die Wahl hängt davon ab, **wer der primäre Nutzer der API** ist.
+
+</div>
+
 
 Notes:
 Beim Ressourcenentwurf werden fachliche Entitaeten, Beziehungen und typische Operationen identifiziert. Mehrere URI-Strukturen koennen valide sein, solange sie aus Sicht der API-Nutzung konsistent und verstaendlich sind.
@@ -1727,6 +1911,14 @@ Das ist der typische Conditional-PUT-Workflow. Der Client sendet die neue Reprä
 
 ## Pagination, Filter und Sortierung
 
+Query-Parameter beschreiben Auswahl, Reihenfolge und Ausschnitt einer Collection — nicht die Identität der Ressource selbst.
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
 ```text
 GET /products?page=2&per_page=20&sort=-price&category=electronics&q=kopfhörer
 ```
@@ -1738,6 +1930,12 @@ GET /products?page=2&per_page=20&sort=-price&category=electronics&q=kopfhörer
 | `sort` | Sortierung (`-` = absteigend) | `?sort=-created_at,name` |
 | `filter` | Filterung | `?status=active&min_price=10` |
 | `q` | Volltextsuche | `?q=kopfhörer` |
+
+</div>
+
+
+<div class="column">
+
 
 ### Pagination in der Response
 
@@ -1752,7 +1950,19 @@ GET /products?page=2&per_page=20&sort=-price&category=electronics&q=kopfhörer
 }
 ```
 
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
 **Links machen die API navigierbar** — der Client muss keine URIs konstruieren.
+
+</div>
+
 
 
 <div class="takeaway">

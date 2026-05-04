@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 05: Programmierung von Web-Systemen in Java</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.CdgJRN1W.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 05: Programmierung von Web-Systemen in Java</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.OGHTRDy8.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Lecture 05: Programmierung von Web-Systemen in Java
@@ -98,6 +98,72 @@ Er übernimmt:
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Vorgriff: So sieht der Java-Code aus
+
+Damit das `???` nicht abstrakt bleibt — ein vollständiges, minimal lauffähiges Servlet:
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+```java
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+
+@WebServlet("/hello")
+public class HelloServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req,
+                         HttpServletResponse res)
+            throws IOException {
+        String name = req.getParameter("name");
+        res.setContentType("text/html;charset=UTF-8");
+        res.getWriter().println(
+            "<h1>Hallo, " + name + "!</h1>");
+    }
+}
+```
+
+</div>
+
+
+<div class="column">
+
+
+**Was passiert hier?**
+
+- `@WebServlet("/hello")` registriert die Klasse beim Container für die URL `/hello`
+- Bei `GET /hello?name=Alice` instanziiert der Container die Klasse und ruft `doGet(req, res)` auf
+- `req` enthält Parameter, Header, Body; `res` ist der noch leere Antwort-Stream
+- Wir schreiben HTML in `res.getWriter()` — der Container überträgt das als HTTP-Response zurück
+
+
+<div class="c-note">
+
+**Genau das ist das `???`** aus der vorherigen Folie: Der **Servlet-Container** (z. B. Tomcat) macht aus rohem TCP eine Methodenaufruf-Kette in Ihren Java-Objekten.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Diese Folie soll vorab den „aha"-Moment liefern, bevor die Jakarta-EE-Standards und Container-Theorie kommen. Wichtige Punkte für den Vortrag: (1) `jakarta.servlet.*` ist der moderne Namespace — der alte `javax.servlet.*` aus Java EE ≤ 8 ist seit Jakarta EE 9 obsolet. (2) Der Container instanziiert pro Servlet-Klasse genau **eine** Instanz und ruft `doGet/doPost` aus mehreren Threads parallel auf — Felder müssen daher thread-sicher sein. (3) `getParameter("name")` liefert `null`, falls der Parameter fehlt — keine Exception. (4) Sicherheitsfalle im Beispiel: das direkte Einsetzen von `name` in HTML ist eine **XSS-Lücke**; in einer realen Anwendung würde man `name` HTML-kodieren oder eine Template-Engine wie Thymeleaf nutzen. Dieses Beispiel ist bewusst minimal; alle weiteren Folien in diesem Modul vertiefen einzelne Aspekte (Lifecycle, Request/Response-API, Konfiguration, Fehlerbehandlung).
+
+--
+
 ## Jakarta EE — der Enterprise-Java-Standard
 
 
@@ -151,26 +217,25 @@ Seit dem Wechsel zur Eclipse Foundation heißt das Paket `jakarta.*` statt `java
 
 ## Die zentralen Jakarta-EE-Standards
 
-| Standard | Aufgabe |
-|---|---|
-| **Java Servlets** | HTTP-Request-Verarbeitung in Java-Klassen |
-| **JSP (JavaServer Pages)** | Template-basierte HTML-Erzeugung |
-| **EJB (Enterprise JavaBeans)** | Transaktionsgesteuerte Business-Logik |
-| **JMS (Java Message Service)** | Asynchrone Nachrichtenwarteschlangen |
-| **JNDI** | Lookup von Ressourcen und Services |
-| **JDBC** | Relationale Datenbanken ansprechen |
-| **JPA** | ORM — Objekte auf Tabellen mappen |
-| **JavaMail** | E-Mails senden und empfangen |
-| **JTS/JTA** | Verteilte Transaktionen |
-| **JCA** | Anbindung von Legacy-Systemen |
+Vier Bausteine genügen, um eine moderne Web-Anwendung zu verstehen:
+
+| Standard | Aufgabe | Wo in dieser Vorlesung? |
+|---|---|---|
+| **Java Servlets** | HTTP-Request-Verarbeitung in Java-Klassen | Modul 2 |
+| **JSP (JavaServer Pages)** | Template-basierte HTML-Erzeugung | Modul 3 |
+| **JDBC** | Relationale Datenbanken ansprechen | hier nur erwähnt |
+| **JPA** | ORM — Objekte auf Tabellen mappen | Modul 4 (Spring Data) |
 
 
-<div class="callout-warning">
+<div class="c-note small">
 
-Nicht jede Anwendung braucht alle Standards. Ein modernes Spring-Boot-Projekt nutzt Servlets, JPA und oft JMS — EJB und JCA sind heute selten.
+**Weitere Jakarta-EE-Standards** (nicht in dieser Vorlesung): EJB (transaktionsgesteuerte Business-Logik), JMS (Messaging), JNDI (Resource-Lookup), JTA (verteilte Transaktionen), JAX-RS (REST-Endpoints), JavaMail, JCA. Ein modernes Spring-Boot-Projekt nutzt Servlets, JPA und gelegentlich JMS — EJB und JCA sind heute selten und gehören in Vertiefungen zu Enterprise-Integration.
 
 </div>
 
+
+Notes:
+Die Reduktion auf vier Standards ist bewusst pädagogisch — die ursprüngliche Liste mit zehn Standards überfordert in einer 90-Minuten-Vorlesung. Hintergrund zu den ausgelassenen: **EJB** war in den 2000ern das zentrale Modell für transaktionale Business-Logik, ist aber durch Spring weitgehend abgelöst. **JMS** steht für asynchrone Messaging-Systeme (ActiveMQ, RabbitMQ) und ist relevant, sobald man Microservices entkoppelt — Thema in einer Architektur-Vorlesung. **JNDI** ist der Resource-Lookup-Mechanismus für DataSources, der heute meist von Spring Boot abstrahiert wird. **JAX-RS** wäre der RESTful-Pendant zu Servlets — in Spring übernimmt das `@RestController`. Wer Jakarta EE „pur" lernen will, sollte sich JAX-RS ansehen, weil es das Standard-Pendant zu Spring REST ist. Die Auslassung von EJB ist auch eine Aussage: Modern werden Transaktionen über Spring `@Transactional` verwaltet, das unter der Haube JPA + JTA orchestriert, ohne dass Studis das EJB-Container-Modell verstehen müssen.
 
 --
 
@@ -640,7 +705,8 @@ protected void doGet(HttpServletRequest req,
 )
 public class ProductServlet extends HttpServlet {
     @Override
-    public void init(ServletConfig cfg) {
+    public void init(ServletConfig cfg) throws ServletException {
+        super.init(cfg);              // wichtig: Eltern-init aufrufen
         String max = cfg.getInitParameter("maxResults");
     }
 }
@@ -858,6 +924,14 @@ Request 3:  POST /cart   → ??? Welcher Warenkorb?
 <div class="callout-warning">
 
 **URL-Rewriting** mit `jsessionid` im Query-String ist unsicher: Die Session-ID erscheint in Server-Logs, Browser-History und Referrer-Headers. Moderne Anwendungen vermeiden dies.
+
+</div>
+
+
+
+<div class="c-orange gap small">
+
+**Stateless-Alternative für moderne SPAs/APIs:** Statt einer Server-Session-ID schicken Clients einen **signierten Token** (typisch **JWT — JSON Web Token**) im `Authorization: Bearer …`-Header mit. Der Server hält *keinen* Zustand — er verifiziert nur die Signatur und liest Identität/Claims direkt aus dem Token. Vorteil: skalierbar und Microservice-freundlich; Nachteil: Token-Widerruf vor Ablauf ist schwierig. Diese Vorlesung zeigt klassische Server-Sessions; JWT/OAuth 2.0 wird in der Sicherheits-Vertiefung (L07) behandelt.
 
 </div>
 
