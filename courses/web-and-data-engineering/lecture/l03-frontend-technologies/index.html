@@ -2898,9 +2898,14 @@ Eine subtile Falle bei Fetch: `fetch()` wirft *nur* dann eine Exception, wenn da
 
 ## Promises und asynchrone Verarbeitung
 
+<div class="small">
+
 Ein **Promise** repräsentiert das *zukünftige Ergebnis* einer asynchronen Operation. Es kennt drei Zustände: `pending` → `fulfilled` oder `rejected`.
  
 **Klassischer Promise-Stil mit Callback-Verkettung**
+
+</div>
+
 
 <div class="grid-2 small">
 
@@ -2920,9 +2925,15 @@ fetch('/api/products/42')                  // gibt Promise zurück
 </div>
 
 
-<div class="column c-note">
+<div class="column small">
 
-Auf jedem Promise lassen sich Callbacks registrieren: `.then(callback)` läuft, **wenn** das Promise erfolgreich erfüllt wird (`fulfilled`); `.catch(callback)` läuft, **wenn** es scheitert (`rejected`). Mehrere `.then(...)` lassen sich verketten — das Ergebnis des einen Callbacks wird zum Eingang des nächsten.
+
+| Konzept | Bedeutung |
+|---|---|
+| `await` | Pausiert die `async`-Funktion, bis das Promise *settled* ist — blockiert **nicht** den Main Thread |
+| `Promise.all([p1, p2])` | Wartet parallel auf mehrere Promises; scheitert, sobald *eines* rejected |
+| `Promise.allSettled([...])` | Wartet auf alle, gibt Erfolg *und* Fehler zurück |
+| `try / catch` um `await` | Fängt sowohl Netzwerk- als auch Logikfehler — ersetzt `.catch()` |
 
 </div>
 
@@ -2940,23 +2951,10 @@ Auf jedem Promise lassen sich Callbacks registrieren: `.then(callback)` läuft, 
 
 
 ```javascript
-async function fetchProduct(id) {
-  // entspricht: fetch(...).then(response => ...)
-  const responsePromise = fetch(`/api/products/${id}`);
-  const response = await responsePromise;
-
-  if (!response.ok) throw new Error(response.status);
-
-  // entspricht: response.json().then(product => ...)
-  const productPromise = response.json();
-  const product = await productPromise;
-
-  return product;
-}
 
 async function loadProduct() {
   try {
-    const product = await fetchProduct(42);
+    const product = await productApi.fetch(42);
     renderProduct(product);
   } catch (err) {
     showError(err.message);
@@ -2964,26 +2962,40 @@ async function loadProduct() {
 }
 ```
 
-</div>
-
-
-<div class="column small">
-
-
-| Konzept | Bedeutung |
-|---|---|
-| `await` | Pausiert die `async`-Funktion, bis das Promise *settled* ist — blockiert **nicht** den Main Thread |
-| `Promise.all([p1, p2])` | Wartet parallel auf mehrere Promises; scheitert, sobald *eines* rejected |
-| `Promise.allSettled([...])` | Wartet auf alle, gibt Erfolg *und* Fehler zurück |
-| `try / catch` um `await` | Fängt sowohl Netzwerk- als auch Logikfehler — ersetzt `.catch()` |
-
-
 <div class="c-note">
 
-`fetchProduct()` implementiert dieselbe Datenlade-Funktion wie die `.then(...)`-Kette: erst `fetch`, dann `response.json()`, dann `return product`. Der UI-Code ruft diese Funktion nur noch mit `await` auf.
+
+`productApi.fetch(...)` implementiert dieselbe Datenlade-Methode wie die `.then(...)`-Kette: erst `fetch`, dann `response.json()`, dann `return product`. Der UI-Code ruft diese Methode nur noch mit `await` auf.
+
 
 </div>
 
+
+
+</div>
+
+
+<div class="column">
+
+
+
+```javascript
+const productApi = {
+  async fetch(id) {
+    // entspricht: fetch(...).then(response => ...)
+    const responsePromise = fetch(`/api/products/${id}`);
+    const response = await responsePromise;
+
+    if (!response.ok) throw new Error(response.status);
+
+    // entspricht: response.json().then(product => ...)
+    const productPromise = response.json();
+    const product = await productPromise;
+
+    return product;
+  }
+};
+```
 
 
 </div>
