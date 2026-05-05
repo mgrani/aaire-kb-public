@@ -1355,6 +1355,62 @@ HTTP selbst ist zustandslos. Cookies führen dennoch wiedererkennbare Clients ei
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Wie Cookie-Tracking funktioniert
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+```http
+GET https://news.example/article
+
+<!-- Seite lädt zusätzlich: -->
+GET https://tracker.ad.net/pixel
+
+HTTP/1.1 200 OK
+Set-Cookie: tid=u42; SameSite=None; Secure
+```
+
+Bei späteren Seitenbesuchen:
+
+```http
+GET https://tracker.ad.net/pixel
+Cookie: tid=u42
+```
+
+</div>
+
+
+<div class="column small">
+
+1. Eine Website bindet eine Ressource von einer Tracking-Domain ein, z. B. Bild, Skript oder Werbe-Pixel.
+2. Die Tracking-Domain setzt ein Cookie für **ihre eigene Domain**.
+3. Besucht der Nutzer eine andere Website mit derselben Tracking-Ressource, sendet der Browser dieses Cookie wieder an die Tracking-Domain.
+4. Der Tracker erkennt: derselbe Browser war auf mehreren Websites.
+
+
+<div class="c-info">
+
+Tracking nutzt dieselbe Cookie-Mechanik wie Sessions. Der Unterschied ist der Kontext: Session-Cookies stabilisieren eine Anwendung; Tracking-Cookies verknüpfen Besuche über Websites hinweg.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Der zentrale Punkt ist die Domain-Grenze. Eine Website kann nicht einfach Cookies einer anderen Domain lesen. Sie kann aber Ressourcen von einer Dritt-Domain einbinden. Wenn viele Websites dieselbe Dritt-Domain einbinden, sieht diese Dritt-Domain viele Request-Kontexte und erhält jeweils ihr eigenes Cookie zurück. Moderne Browser beschränken Third-Party-Cookies zunehmend; trotzdem bleibt das Prinzip wichtig, weil es erklärt, warum Cookie-Attribute, SameSite, Einwilligungsbanner und Tracking-Schutz überhaupt relevant sind.
+
+--
+
 
 
 <!-- .slide: class="smaller" -->
