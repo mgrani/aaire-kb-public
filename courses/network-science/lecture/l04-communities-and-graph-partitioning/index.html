@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.OGHTRDy8.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.Dzic1Z-i.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 04: Communities and Graph Partitioning
@@ -1222,10 +1222,20 @@ Modularity is the single most important concept in this lecture. It converts the
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Modularity — Worked Example
 
 
-<div class="grid-2">
+<div class="c-info smaller">
+
+Modularity is calculated for the **full graph** together with a **given partition**. Here all six nodes are assigned to two communities; then $Q$ asks whether this complete partition has more internal edges than expected by chance.
+
+</div>
+
+
+
+<div class="grid-2-3 gap-sm">
 
 
 <div class="column">
@@ -1235,15 +1245,7 @@ Modularity is the single most important concept in this lecture. It converts the
 
 <div class="c-note smaller">
 
-Partition: left triangle vs. right triangle.
-
-</div>
-
-
-
-<div class="c-info smaller">
-
-The bridge is the only between-community edge.
+Given partition: $C_1=\{A,B,C\}$ and $C_2=\{D,E,F\}$. The bridge is the only between-community edge.
 
 </div>
 
@@ -1253,11 +1255,11 @@ The bridge is the only between-community edge.
 
 <div class="column">
 
-For each triangle:
+For each community:
 
 - internal edges: $l_c = 3$
 - total degree: $d_c = 2+2+3=7$
-- total graph edges: $m=7$
+- full graph edges: $m=7$
 
 
 <div class="c-green smaller">
@@ -1271,16 +1273,17 @@ $$
 </div>
 
 
-</div>
-
-
-</div>
-
-
 
 <div class="c-info smaller">
 
 Interpretation: the partition has more within-community edges than expected under degree-preserving random rewiring, so $Q$ is positive.
+
+</div>
+
+
+
+</div>
+
 
 </div>
 
@@ -1430,11 +1433,11 @@ Cho, Lee & Kim (2023) model international trade as a network of countries connec
 
 **Panels**
 
-$\Phi^*$ is the **cooccurrence threshold**: countries are grouped only if they appear together in the same community in at least that share of multiresolution runs. Higher $\Phi^*$ keeps only more stable links.
+$\Phi^{*}$ is the **cooccurrence threshold**: countries are grouped only if they appear together in the same community in at least that share of multiresolution runs. Higher $\Phi^{*}$ keeps only more stable links.
 
-- **a** $\Phi^*=0$: one large trade component
-- **b** $\Phi^*=0.41$: four broad blocs
-- **c** $\Phi^*=0.96$: 16 stable country groups
+- **a** $\Phi^{*}=0$: one large trade component
+- **b** $\Phi^{*}=0.41$: four broad blocs
+- **c** $\Phi^{*}=0.96$: 16 stable country groups
 
 </div>
 
@@ -1456,7 +1459,7 @@ $\Phi^*$ is the **cooccurrence threshold**: countries are grouped only if they a
 
 <div class="c-info smaller">
 
-Figure: selected country configurations at cooccurrence thresholds $\Phi^*=0$, $0.41$, and $0.96$; reproduced from Fig. 4 in Cho, Lee & Kim (2023), CC BY 4.0.
+Figure: selected country configurations at cooccurrence thresholds $\Phi^{*}=0$, $0.41$, and $0.96$; reproduced from Fig. 4 in Cho, Lee & Kim (2023), CC BY 4.0.
 
 </div>
 
@@ -1464,59 +1467,6 @@ Figure: selected country configurations at cooccurrence thresholds $\Phi^*=0$, $
 Notes:
 Use this slide to change domain from social and biological examples to economic networks. We did not previously have a Cho et al. figure in the local figures directory; this adds Figure 4 from the open-access Scientific Reports article under CC BY 4.0. The key point is methodological: the resolution parameter matters. Trade has nested structure, so one modularity scale is too coarse. Community detection here is not just descriptive; it asks whether the global economy is organized into stable blocs at multiple scales.
 
---
-
-## Study — Product Space and Development
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="c-info">
-
-Hidalgo, Klinger, Barabasi & Hausmann (2007) build a **product-space network**: nodes are exported products, and edges connect products that require similar capabilities (Hidalgo et al. 2007).
-
-</div>
-
-
-**Network formation.** Nodes are SITC-4 product classes. A country is linked to a product when it exports it with **revealed comparative advantage** ($RCA>1$). Two products are similar if countries that export one competitively also tend to export the other competitively:
-
-$$
-\phi_{ij}=\min\{P(RCA_i>1\mid RCA_j>1),P(RCA_j>1\mid RCA_i>1)\}.
-$$
-
-Edges therefore do **not** mean product-to-product trade. They reveal shared capabilities, knowledge, institutions, inputs, or infrastructure.
-
-**Question.** Why can some countries diversify into sophisticated products while others remain stuck in low-complexity export baskets?
-
-**Finding.** Sophisticated products sit in a dense core; less sophisticated products often lie in sparse peripheral regions. Countries diversify by moving to nearby products, so peripheral position limits feasible development paths.
-
-</div>
-
-
-<div class="column">
-
-![Schematic product-space network](/courses/network-science/figures/product-space-development-schematic.svg)
-
-
-<div class="c-info smaller">
-
-Redrawn teaching schematic after Fig. 1 in Hidalgo et al. (2007), DOI: 10.1126/science.1144581.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-This is not just another social-community example. The network is an economic opportunity map. The community/core-periphery structure tells us which products are close enough for a country to plausibly enter next. It also shows why network position can constrain growth.
 
 --
 
@@ -1668,14 +1618,7 @@ The worked example shows the algorithm's two characteristic moves: detaching a m
 ## Louvain — Greedy Modularity in Two Phases
 
 
-<div class="grid-2">
-
-
-<div class="column">
-
-![Louvain workflow](/courses/network-science/figures/louvain-example.svg)
-
-</div>
+<div class="grid-2-1">
 
 
 <div class="column">
@@ -1688,11 +1631,22 @@ The worked example shows the algorithm's two characteristic moves: detaching a m
 </div>
 
 
+![Louvain workflow](/courses/network-science/figures/louvain-example.svg)
+
+</div>
+
+
+<div class="column small">
+
+
+### Algorithm Sketch
+
 
 <div class="c-info smaller">
 
-- **Local moving:** start with each node in its own community; move node $v$ to a neighboring community if this increases $Q$.
-- **Candidate communities:** for $v$, test only the current communities represented among $v$'s neighbors, plus staying where it is. This is local, not all possible partitions.
+- **Initialization:** start with $k=n$ communities: every node is its own community.
+- **Local moving:** visit node $v$ and move it to another community only if this increases $Q$.
+- **Candidate communities:** for $v$, test the current communities of $v$'s neighbors, plus staying where it is. At the first pass these candidates are just neighboring single-node communities.
 - **Aggregation:** collapse each detected community into a super-node.
 - **Repeat:** run local moving again on the smaller graph until modularity no longer improves.
 - **No fixed $k$:** the number of communities is not pre-given; it emerges from the greedy moves and aggregation levels.
@@ -1706,6 +1660,14 @@ The worked example shows the algorithm's two characteristic moves: detaching a m
 </div>
 
 
+
+<div class="c-orange">
+
+**Drawbacks:** Louvain is greedy, so results can depend on node order and local optima. It inherits modularity's resolution limit and can produce internally weak or disconnected communities because it aggregates provisional groups without a refinement check.
+
+</div>
+
+
 Notes:
 Louvain is currently a default community-detection algorithm in Gephi and many network-analysis packages because it avoids all edge-betweenness recomputation. The key intuition is compression: local moves find provisional communities, then aggregation turns those communities into a smaller graph, so the same operation can be repeated at a coarser scale. The "k" question is important: Louvain does not test a pre-given number of communities. At the start k=n, because every node is alone. During local moving, a node only considers the communities of its neighbors; during aggregation, the current k becomes the number of super-nodes in the next level. The final k is therefore an output of the heuristic, not an input.
 
@@ -1714,14 +1676,9 @@ Louvain is currently a default community-detection algorithm in Gephi and many n
 ## Leiden — Louvain with Refinement
 
 
+
+
 <div class="grid-2">
-
-
-<div class="column">
-
-![Leiden workflow](/courses/network-science/figures/leiden-example.svg)
-
-</div>
 
 
 <div class="column">
@@ -1733,12 +1690,22 @@ Louvain is currently a default community-detection algorithm in Gephi and many n
 
 </div>
 
+![Leiden workflow](/courses/network-science/figures/leiden-example.svg)
+
+</div>
+
+
+<div class="column small">
+
+
+**Algorithm Sketch**
 
 
 <div class="c-info smaller">
 
 - **Local moving:** first improve $Q$ with Louvain-style node moves.
-- **Refinement:** split provisional communities into better-connected subcommunities before aggregation.
+- **Refinement:** inspect each provisional community before aggregation. Start again with its nodes as small subcommunities, then merge/move only if the subcommunity remains well connected and improves the quality function.
+- **Split effect:** if a Louvain community is held together only by a weak bridge, Leiden can keep its parts separate instead of collapsing them into one super-node.
 - **Aggregation:** collapse only the refined communities and repeat on the smaller graph.
 - **No fixed $k$:** Leiden also lets $k$ emerge, but it prevents weak provisional groups from being locked in too early.
 
@@ -1752,9 +1719,9 @@ Louvain is currently a default community-detection algorithm in Gephi and many n
 
 
 
-<div class="c-info smaller">
+<div class="c-orange">
 
-Both are heuristic modularity optimizers: they do not guarantee the global maximum, but they scale to graphs where Girvan-Newman is infeasible. Leiden is usually preferred in research pipelines because it preserves Louvain's scalability while avoiding structurally broken communities.
+Both, Louvain and Leiden, are heuristic modularity optimizers: they do not guarantee the global maximum, but they scale to graphs where Girvan-Newman is infeasible. Leiden is usually preferred in research pipelines because it preserves Louvain's scalability while avoiding structurally broken communities.
 
 </div>
 
@@ -1912,6 +1879,67 @@ Embedding-based community detection represents the current research frontier. no
 
 Notes:
 This table is the key synthesis slide for the module. Use n for nodes, m for edges, r for walks per node, l for walk length, T for epochs/iterations, L for message-passing layers, and d for hidden dimension. Students should be able to match each method to the right use case: Louvain/Leiden for exploratory analysis of large graphs with no prior on k; spectral clustering for medium-sized graphs where you want a principled 2–5 partition; node2vec for graphs with rich structure where embedding locality is meaningful; GNN-based when you have node features or need overlapping communities. The complexity column signals when each method becomes impractical — Girvan–Newman is pedagogically essential but computationally obsolete above ~10k nodes.
+
+--
+
+## Study — Product Space and Development
+
+
+<div class="grid-2">
+
+
+<div class="column small">
+
+
+<div class="c-info">
+
+Hidalgo, Klinger, Barabasi & Hausmann (2007) build a **product-space network**: nodes are exported products, and edges connect products that require similar capabilities (Hidalgo et al. 2007).
+
+</div>
+
+
+**Network formation.** Nodes are SITC-4 product classes. A country is linked to a product when it exports it with **revealed comparative advantage** ($RCA>1$). Two products are similar if countries that export one competitively also tend to export the other competitively:
+
+
+<div class="smaller">
+
+$$
+\phi_{ij}=\min\{P(RCA_i>1\mid RCA_j>1),P(RCA_j>1\mid RCA_i>1)\}.
+$$
+
+</div>
+
+
+Edges therefore do **not** mean product-to-product trade. They reveal shared capabilities, knowledge, institutions, inputs, or infrastructure.
+
+**Question.** Why can some countries diversify into sophisticated products while others remain stuck in low-complexity export baskets?
+
+**Finding.** Sophisticated products sit in a dense core; less sophisticated products often lie in sparse peripheral regions. Countries diversify by moving to nearby products, so peripheral position limits feasible development paths.
+
+</div>
+
+
+<div class="column">
+
+![Schematic product-space network](/courses/network-science/figures/product-space-development-schematic.svg)
+
+
+<div class="c-info smaller">
+
+Redrawn teaching schematic after Fig. 1 in Hidalgo et al. (2007), DOI: 10.1126/science.1144581.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is not just another social-community example. The network is an economic opportunity map. The community/core-periphery structure tells us which products are close enough for a country to plausibly enter next. It also shows why network position can constrain growth.
+
 
 --
 
