@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.Dzic1Z-i.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 04: Communities and Graph Partitioning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UF7pn_qk.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 04: Communities and Graph Partitioning
@@ -87,6 +87,17 @@ The gap we opened in Lecture 03 does not close in Lecture 04. Every concept toda
 
 Notes:
 This table is L04's version of the L03 roadmap. The first row is slightly different from the others because centrality is not a single construct with a tractable/intractable split — it is a *family* of competing operationalizations, and the "measurement" column already reflects the theoretical pluralism. The second and third rows show the classical modeling/measurement split from L03, now applied to groups instead of edges.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## L04 Argument Map
+
+![Argument map for Lecture 04: from node importance to community detection](/courses/network-science/figures/l04-argument-map.svg)
+
+Notes:
+This is the L04 analogue of the L03 synthesis diagram. The lecture begins by showing that node importance is plural: degree, closeness, harmonic, betweenness, eigenvector, and PageRank encode different theories of importance. It then moves from nodes to groups: modularity turns "community" into a degree-corrected objective, but exact maximization is NP-hard, so the lecture introduces divisive and agglomerative heuristics. The final row reminds students that partitions are not self-validating; we compare them to empirical anchors such as Zachary's karate club, international trade communities, and the product space.
 
 --
 
@@ -719,8 +730,8 @@ Toy network: $A$ is connected to $B,C,D$; $D$ is connected to $E$. Here $n=5$ an
 
 | Node | Shortest paths between others that pass through node | Betweenness |
 |---|---:|---:|
-| $A$ | $5$ of $6$ | $5/6 = 0.83$ |
-| $D$ | $3$ of $6$ | $3/6 = 0.50$ |
+| $A$ | $5$ of $6$; all except $D-E$ | $5/6 = 0.83$ |
+| $D$ | $3$ of $6$; $A-E,B-E,C-E$ | $3/6 = 0.50$ |
 | $E$ | $0$ of $6$ | $0$ |
 
 </div>
@@ -739,7 +750,7 @@ Toy network: $A$ is connected to $B,C,D$; $D$ is connected to $E$. Here $n=5$ an
 
 <div class="c-info smaller">
 
-$A$ has the highest closeness and harmonic centrality because it minimizes distance. $D$ is less close but still has brokerage value because paths from $B$ or $C$ to $E$ must pass through it.
+Betweenness for $A$ does **not** count paths starting from $A$. It counts shortest paths between the other nodes $\{B,C,D,E\}$ that pass through $A$: $B-C$, $B-D$, $B-E$, $C-D$, and $C-E$ do; $D-E$ does not.
 
 </div>
 
@@ -1207,12 +1218,31 @@ where $k_i$ is node degree, $\delta(c_i, c_j)=1$ for same-community pairs, $l_c$
 </div>
 
 
+
+<div class="grid-2 gap-sm">
+
+
+<div class="column">
+
 **Interpretation.** For every within-community pair, compare the *observed* edge $A_{ij}$ to the *expected* edge density $k_i k_j / 2m$ under a random rewiring that preserves degrees (the **configuration model**). $Q$ is the total surplus of within-community edges over chance.
 
 
 <div class="c-info smaller">
 
 $Q$ ranges roughly in $[-\tfrac{1}{2}, 1]$. Values in $[0.3, 0.7]$ typically indicate significant community structure; $Q \approx 0$ means no more internal density than expected by chance.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+![Observed versus expected internal density for modularity](/courses/network-science/figures/modularity-observed-expected.svg)
+
+</div>
+
 
 </div>
 

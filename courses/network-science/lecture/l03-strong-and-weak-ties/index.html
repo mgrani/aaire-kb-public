@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 03: Strong and Weak Ties</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.Dzic1Z-i.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Network Science — Lecture 03: Strong and Weak Ties</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UF7pn_qk.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 03: Strong and Weak Ties
@@ -77,6 +77,17 @@ Every question below has a **theoretical** form and a **measurement** form. The 
 
 Notes:
 This table is the lecture's roadmap in one slide. The left column is what we would *like* to test; the right column is what we can *actually compute* on real data. The lecture's job is to justify each row: why is the proxy a reasonable substitute for the construct, and what does the substitution cost us?
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## One Argument, Many Measures
+
+![Argument map for Lecture 03: from tie formation to weak ties](/courses/network-science/figures/l03-argument-map.svg)
+
+Notes:
+This synthesis figure is the "map" of the lecture. The upper row is the theory of tie formation and tie types: triadic closure says ties tend to close, STC sharpens this into a strong/weak labeling constraint, and MaxSTC shows why exact recovery is not generally computable. The middle row gives the polynomial-time proxies: clustering coefficient at the node level and neighborhood overlap at the edge level. The bottom row connects those proxies to information flow: local bridges carry non-redundant information, the weak-tie theorem predicts such bridges are weak, and empirical studies test whether tie strength and overlap move together.
 
 --
 
@@ -515,10 +526,18 @@ Now the clustering coefficient finally has a reason to exist. It is not an arbit
 
 --
 
+<!-- .slide: class="figure-90" -->
+
 ## Clustering Coefficient
 
 
-<div class="c-definition">
+<div class="grid-1-2">
+
+
+<div class="column">
+
+
+<div class="c-definition small">
 
 **Local clustering coefficient.** For a node $i$ with degree $k_i$:
 
@@ -526,15 +545,31 @@ $$
 C_i = \frac{\text{edges among } i\text{'s neighbors}}{\binom{k_i}{2}}
 $$
 
-$C_i \in [0, 1]$. $C_i = 1$ means $i$'s neighborhood is a complete clique; $C_i = 0$ means none of $i$'s neighbors are linked.
+$C_i \in [0, 1]$.
+
+- $C_i = 1$: all possible neighbor-neighbor ties exist
+- $C_i = 0$: no neighbor-neighbor ties exist
 
 </div>
 
 
 
-<div class="c-info smaller">
+<div class="c-info small">
 
-**Why this works as a heuristic.** Under STC, if $v$ has many strong ties, those ties' endpoints must all be mutually connected — i.e. $v$'s neighborhood is dense. Conversely, a high $C_v$ indicates a neighborhood that *could* be labeled mostly Strong without violating STC. $C_v$ is thus a lower-bound signal for "how strong-embedded is $v$".
+**Heuristic link to STC.** If $v$ has many strong ties, those endpoints must be mutually connected. A high $C_v$ therefore signals a neighborhood that *could* be labeled mostly strong.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+![Clustering coefficient as existing friend relations out of all possible relations](/courses/network-science/figures/clustering-coefficient-binomial.svg)
+
+</div>
+
 
 </div>
 

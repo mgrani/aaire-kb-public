@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.Dzic1Z-i.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UF7pn_qk.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Lecture 04: HTTP und RESTful APIs
@@ -260,7 +260,7 @@ Die Fetch API ist eine Programmierschnittstelle im Browser, die HTTP-Nachrichten
 </div>
 
 
-<div class="column">
+<div class="column small">
 
 ### URI (Uniform Resource Identifier)
 
@@ -319,6 +319,14 @@ HTTP ist ressourcenorientiert, zustandslos und durch Header erweiterbar. Zustand
 
 </div>
 
+
+</div>
+
+
+
+<div class="c-orange">
+
+**Achtung**: Die Unterscheidung ist eine **Konvention**, keine technische Durchsetzung. Jeder Server kann jede Methode für jede semantische Bedeutung nutzen. Die Tabelle beschreibt die **übliche** Interpretation.
 
 </div>
 
@@ -1172,7 +1180,17 @@ Die richtige Cache-Strategie hängt vom Datentyp ab. Versionierte statische Date
 ## Redirects und das Post/Redirect/Get-(PRG)-Pattern
 
 
-<div class="grid-2-1">
+<div class="c-info small">
+
+**Ziel:** Nach `POST /orders` zeigt der Browser die Bestätigungsseite. Drückt der Nutzer **Reload**, fragt der Browser: *"Formular erneut senden?"* — und sendet bei Bestätigung den POST **noch einmal**. Ergebnis: doppelte Bestellung. Auch *Zurück → Vor* oder das Speichern als Lesezeichen löst dieses Verhalten aus.
+
+**Wir wollen:** den POST genau einmal ausführen und danach eine harmlose, reload-feste GET-Seite anzeigen.
+
+</div>
+
+
+
+<div class="grid-2-1 fade-in">
 
 
 <div class="column">
@@ -1209,25 +1227,21 @@ Redirects verweisen Clients auf eine andere URI. `303 See Other` ist besonders w
 ## Workflow: Redirects in der Praxis
 
 
-
-<div class="grid-3-1">
+<div class="grid-2-">
 
 
 <div class="column">
 
-![Redirect-Workflow mit 303 und Location.](/courses/web-and-data-engineering/figures/redirect-workflow.svg)
+![Vier konkrete Redirect-Fälle als 2×2-Matrix: permanent vs. temporär × Methode darf wechseln vs. Methode/Body bleiben — plus 303 als Sonderfall für PRG.](/courses/web-and-data-engineering/figures/redirect-types-matrix.svg)
 
 </div>
 
 
-<div class="column small">
+<div class="column c-info small">
 
-| Status | Typischer Effekt |
-|---|---|
-| `301` | Dauerhaft verschoben |
-| `302` | Temporär verschoben, historisch uneinheitlich |
-| `303` | Nach POST per GET weiter |
-| `307/308` | Methode und Body bleiben erhalten |
+**Ziel:** Eine Ressource ist nicht (mehr) unter der angefragten URL erreichbar — etwa nach Domain-Umzug, URL-Bereinigung, A/B-Test, Sprach-/Geo-Weiterleitung oder als Antwort auf einen schreibenden POST. Der Client soll **automatisch zur richtigen URL geleitet** werden, ohne dass der Nutzer eingreifen muss; Suchmaschinen und Caches sollen die Verschiebung korrekt interpretieren.
+
+**Wir wollen:** mit dem passenden Statuscode steuern, ob die Weiterleitung dauerhaft oder temporär ist und ob Methode und Body erhalten bleiben.
 
 </div>
 
@@ -1236,7 +1250,7 @@ Redirects verweisen Clients auf eine andere URI. `303 See Other` ist besonders w
 
 
 Notes:
-Der Redirect-Workflow macht sichtbar, dass nicht jeder Redirect dasselbe Verhalten auslöst. `303 See Other` ist für PRG besonders wichtig, weil der Folge-Request als GET ausgeführt wird. `307` und `308` erhalten dagegen Methode und Body. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Redirections
+Die Matrix macht zwei voneinander unabhängige Dimensionen sichtbar: **Permanenz** (cachebar, von Suchmaschinen übernommen) versus **Methodensemantik** (darf der Client bei der Weiterleitung von POST auf GET wechseln, oder muss Methode und Body erhalten bleiben). 301 ist der Klassiker für HTTP→HTTPS und Domain-Umzüge; Browser folgen mit GET und Crawler aktualisieren ihren Index. 302 ist die typische temporäre Weiterleitung, etwa zur Login-Wand oder für Sprach-/Geo-Routing — historisch uneinheitlich, weil viele Implementierungen POST→GET wechselten, obwohl die RFC das nicht vorschreibt. 307 und 308 wurden eingeführt, weil diese Inkonsistenz für APIs nicht akzeptabel ist: Beide garantieren, dass Methode und Body unverändert weitergereicht werden — 307 temporär, 308 permanent. 303 ist der Sonderfall, der das PRG-Muster der vorigen Folie erst möglich macht: Anders als 301/302 schreibt 303 explizit vor, dass der nächste Request ein GET sein muss — der Server signalisiert damit „dein POST war erfolgreich, hol die Antwort hier per GET". MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Redirections
 
 --
 
@@ -1337,27 +1351,130 @@ Das Muster ist alt und bewährt — es trennt die Frage „Auftrag angekommen?" 
 
 HTTP ist zustandslos — aber der Online-Shop braucht Login und Warenkorb. **Cookies** lösen diesen Widerspruch:
 
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
 ![Cookies und Session-Tracking.](/courses/web-and-data-engineering/figures/sessions-cookies.svg)
 
-### Welche Cookie-Konfiguration ist sicher?
+</div>
 
-| Konfiguration | XSS-sicher? | CSRF-sicher? | HTTPS-only? |
-|---|---|---|---|
-| `session=abc123` | nein | nein | nein |
-| `session=abc123; HttpOnly` | **ja** | nein | nein |
-| `session=abc123; HttpOnly; Secure` | **ja** | nein | **ja** |
-| `session=abc123; HttpOnly; Secure; SameSite=Strict` | **ja** | **ja** | **ja** |
 
-Nur die letzte Variante schützt gegen die drei häufigsten Angriffsvektoren.
+<div class="column small">
+
+
+### Ablauf
+
+1. **`POST /login`** mit Credentials → Server prüft.
+2. Server antwortet mit **`Set-Cookie: session=abc123`** und legt die Session (Warenkorb, User-ID, …) serverseitig ab.
+3. Browser speichert das Cookie für die Domain und sendet bei jedem weiteren Request automatisch **`Cookie: session=abc123`** mit.
+4. Server liest die ID, schlägt die Session nach und kennt damit Identität und Zustand des Clients.
+
+
+<div class="c-info">
+
+Das Cookie enthält meist nur eine **opake ID** — der eigentliche Zustand liegt im Server (DB oder Redis).
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note small">
+
+**Fundament: Same-Origin Policy** — eine *Origin* ist die Kombination aus **Schema + Host + Port** (z.B. `https://shop.example:443`). Cookies gehören zu genau einer Origin:
+
+- Der Browser sendet ein Cookie **nur zurück an die Domain, die es gesetzt hat** — nie an andere Domains.
+- JavaScript auf `evil.example` kann das Cookie von `shop.example` **nicht lesen** (`document.cookie` ist origin-isoliert).
+- Aber: bindet `news.example` ein Bild von `tracker.ad.net` ein, sendet der Browser dabei das Cookie von `tracker.ad.net` mit — ohne dass `news.example` es jemals sieht. Genau diese Regel ermöglicht Third-Party-Tracking (s. spätere Folien) und ist gleichzeitig die Basis, auf der die Angriffe der nächsten Folie (XSS, CSRF) ansetzen.
+
+</div>
+
 
 Notes:
-HTTP selbst ist zustandslos. Cookies führen dennoch wiedererkennbare Clients ein, indem der Browser kleine Wertepaar-Informationen speichert und bei späteren Requests mitsendet. Bei serverseitigen Sessions enthält das Cookie meist nur eine Session-ID; der eigentliche Zustand liegt auf dem Server.
+HTTP selbst ist zustandslos. Cookies führen dennoch wiedererkennbare Clients ein, indem der Browser kleine Wertepaar-Informationen speichert und bei späteren Requests mitsendet. Bei serverseitigen Sessions enthält das Cookie meist nur eine Session-ID; der eigentliche Zustand liegt auf dem Server. Das hat zwei Konsequenzen: Erstens ist die ID das einzige, was ein Angreifer braucht, um sich als der Nutzer auszugeben — ihr Schutz ist sicherheitskritisch. Zweitens muss der Server den Session-Store irgendwo halten; in horizontal skalierten Setups führt das zu Sticky Sessions oder einem geteilten Backend wie Redis.
+
+Die **Same-Origin Policy** ist eine der wichtigsten Sicherheitsregeln des Browsers überhaupt. Sie isoliert Origins voneinander: Skripte einer Origin dürfen weder DOM noch Cookies einer anderen Origin lesen. Cookies sind dabei *domain-gebunden* (nicht origin-gebunden im strengen Sinne — Cookies kennen Schema/Port nicht so feingranular wie der Rest der Policy, deshalb gibt es zusätzlich das `Secure`-Attribut). Wichtig ist die Asymmetrie zwischen *Lesen* und *Senden*: Lesen ist strikt origin-isoliert, aber das automatische *Mitsenden* von Cookies bei eingebetteten Ressourcen oder Cross-Site-Requests passiert auch jenseits der eigenen Origin — und genau das ist die Lücke, die CSRF und Third-Party-Tracking ausnutzen. Die nachfolgenden Schutzmechanismen `SameSite`, `HttpOnly` und `Secure` schließen diese Lücke an unterschiedlichen Stellen.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Wie Cookie-Tracking funktioniert
+## Angriffsvektoren auf Session-Cookies — und Schutz
+
+
+<div class="c-warning small">
+
+**Das Cookie ist die Identität.** Wer die Session-ID besitzt, ist für den Server der Nutzer — kein Passwort nötig. Drei Wege, an die ID zu kommen, drei Schutzmechanismen am Cookie-Attribut.
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+### Drei Angriffe
+
+| Angriff | Wie? | Schutz-Attribut |
+|---|---|---|
+| **XSS** (Cross-Site Scripting) | Eingeschleustes JS liest `document.cookie` und exfiltriert die Session-ID an einen fremden Server. | `HttpOnly` — Cookie ist für JS unsichtbar |
+| **CSRF** (Cross-Site Request Forgery) | Bösartige Site löst im Hintergrund einen Request an die Bank/Shop-API aus; Browser sendet Cookie automatisch mit. | `SameSite=Strict` / `Lax` — Cookie wird bei Cross-Site-Requests nicht gesendet |
+| **MITM / Sniffing** | Cookie wird im Klartext über HTTP übertragen; im offenen WLAN abgreifbar. | `Secure` — Cookie wird nur über HTTPS gesendet |
+
+
+</div>
+
+
+<div class="column">
+
+
+### Sichere Konfiguration
+
+| Konfiguration | XSS | CSRF | Sniffing |
+|---|:-:|:-:|:-:|
+| `session=abc123` | ✗ | ✗ | ✗ |
+| `…; HttpOnly` | ✓ | ✗ | ✗ |
+| `…; HttpOnly; Secure` | ✓ | ✗ | ✓ |
+| `…; HttpOnly; Secure; SameSite=Strict` | ✓ | ✓ | ✓ |
+
+```http
+Set-Cookie: session=abc123;
+  HttpOnly; Secure; SameSite=Strict;
+  Path=/; Max-Age=3600
+```
+
+
+<div class="c-note">
+
+**Zusätzlich:** Session-ID nach Login **rotieren** (gegen Session-Fixation) · Session serverseitig **invalidieren** bei Logout · kurze **Max-Age** + Sliding-Renewal.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Session-Cookies sind ein klassisches Beispiel, bei dem Sicherheit nicht im Anwendungscode entsteht, sondern in der korrekten Konfiguration eines Protokoll-Mechanismus. Die drei Angriffsvektoren adressieren drei unterschiedliche Bedrohungsmodelle: **XSS** unterstellt, dass ein Angreifer Code im Browser des Opfers ausführt — z.B. über einen unsicheren Forum-Beitrag oder ein unsicheres Eingabefeld; `HttpOnly` macht das Cookie für JavaScript unsichtbar und schließt den direkten Diebstahl aus. **CSRF** unterstellt, dass der Nutzer auf einer fremden Site landet, die einen Request an die geschützte Anwendung auslöst — der Browser sendet das Session-Cookie automatisch mit, weil es zur Zieldomain gehört; `SameSite=Lax` oder `Strict` verhindert genau das. **Sniffing** unterstellt einen passiven Angreifer im Netzwerk; `Secure` zwingt den Browser, das Cookie nur über TLS zu senden. Wichtig ist, dass diese drei Attribute orthogonal sind — jedes blockiert genau einen Vektor, und nur die Kombination aller drei plus serverseitige Hygiene (ID-Rotation nach Login, Logout-Invalidierung, kurze Laufzeiten) ergibt eine belastbare Session-Implementierung. Wer Single-Page-Apps mit Cross-Site-API-Calls baut, muss zusätzlich CSRF-Token oder ein Double-Submit-Pattern einsetzen, weil `SameSite=Strict` dort zu restriktiv wäre.
+
+--
+ 
+
+## Cookie-Tracking I — Third-Party-Cookies
 
 
 <div class="grid-2">
@@ -1365,37 +1482,22 @@ HTTP selbst ist zustandslos. Cookies führen dennoch wiedererkennbare Clients ei
 
 <div class="column">
 
-```http
-GET https://news.example/article
-
-<!-- Seite lädt zusätzlich: -->
-GET https://tracker.ad.net/pixel
-
-HTTP/1.1 200 OK
-Set-Cookie: tid=u42; SameSite=None; Secure
-```
-
-Bei späteren Seitenbesuchen:
-
-```http
-GET https://tracker.ad.net/pixel
-Cookie: tid=u42
-```
+![Eine Tracking-Domain wird auf vielen Sites eingebunden — der Browser sendet das Cookie automatisch zurück.](/courses/web-and-data-engineering/figures/cookie-tracking-thirdparty.svg)
 
 </div>
 
 
 <div class="column small">
 
-1. Eine Website bindet eine Ressource von einer Tracking-Domain ein, z. B. Bild, Skript oder Werbe-Pixel.
-2. Die Tracking-Domain setzt ein Cookie für **ihre eigene Domain**.
-3. Besucht der Nutzer eine andere Website mit derselben Tracking-Ressource, sendet der Browser dieses Cookie wieder an die Tracking-Domain.
-4. Der Tracker erkennt: derselbe Browser war auf mehreren Websites.
+1. Mehrere Websites binden eine Ressource derselben Tracking-Domain ein (Bild, Skript, Werbe-Pixel, Social-Plugin).
+2. Beim ersten Kontakt setzt der Tracker ein Cookie für **seine eigene Domain** — z.B. `tracker.ad.net`.
+3. Bei jedem weiteren Besuch einer Site, die dieselbe Tracker-Ressource einbindet, sendet der Browser das Cookie automatisch mit.
+4. Der Tracker erkennt: derselbe Browser war auf news.example **und** shop.example.
 
 
 <div class="c-info">
 
-Tracking nutzt dieselbe Cookie-Mechanik wie Sessions. Der Unterschied ist der Kontext: Session-Cookies stabilisieren eine Anwendung; Tracking-Cookies verknüpfen Besuche über Websites hinweg.
+Same-Origin bleibt gewahrt: Jede Domain liest nur ihre eigenen Cookies. Tracking funktioniert dadurch, dass viele Sites **dieselbe** Tracker-Domain einbinden — nicht weil Cookies geteilt werden.
 
 </div>
 
@@ -1407,7 +1509,52 @@ Tracking nutzt dieselbe Cookie-Mechanik wie Sessions. Der Unterschied ist der Ko
 
 
 Notes:
-Der zentrale Punkt ist die Domain-Grenze. Eine Website kann nicht einfach Cookies einer anderen Domain lesen. Sie kann aber Ressourcen von einer Dritt-Domain einbinden. Wenn viele Websites dieselbe Dritt-Domain einbinden, sieht diese Dritt-Domain viele Request-Kontexte und erhält jeweils ihr eigenes Cookie zurück. Moderne Browser beschränken Third-Party-Cookies zunehmend; trotzdem bleibt das Prinzip wichtig, weil es erklärt, warum Cookie-Attribute, SameSite, Einwilligungsbanner und Tracking-Schutz überhaupt relevant sind.
+Third-Party-Cookies sind die einfachste Form von Cross-Site-Tracking. Der Trick ist nicht, dass Cookies geteilt werden — der Browser sendet Cookies nur an genau die Domain, die sie gesetzt hat. Der Trick ist, dass viele unabhängige Websites Ressourcen von derselben Tracker-Domain einbinden (Werbenetz, Analytics, Social-Buttons). Aus Sicht des Trackers entsteht so ein zusammenhängendes Profil über Sites hinweg, obwohl die Sites selbst nichts voneinander wissen. Moderne Browser (Safari ITP, Firefox ETP, Chrome Privacy Sandbox) beschränken Third-Party-Cookies inzwischen aggressiv — wer trotzdem trackt, weicht auf Mechanismen wie Cookie-Syncing oder First-Party-Bounce-Tracking aus.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Cookie-Tracking II — ID-Sync über Redirects
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![Zwei Tracker tauschen ihre IDs über eine Redirect-Kette mit URL-Parameter aus.](/courses/web-and-data-engineering/figures/cookie-syncing-redirect.svg)
+
+</div>
+
+
+<div class="column small">
+
+**Problem:** Tracker A und B haben jeweils ihre eigene ID für denselben Nutzer (`a_id=A123`, `b_id=B456`) — kennen aber die ID des anderen nicht. Same-Origin verbietet das direkte Lesen.
+
+**Lösung — Cookie-Syncing:**
+
+1. Sync-Pixel von Tracker A wird geladen; A liest sein Cookie.
+2. A antwortet mit `302 Redirect` zu Tracker B — A's eigene ID steckt **im URL-Parameter** (`?partner_id=A123`).
+3. Browser folgt zum Redirect-Ziel B und sendet dabei **B's eigenes Cookie** mit; in der URL liegt A's ID.
+4. B speichert die Zuordnung `A123 ↔ B456` in seiner Mapping-Tabelle.
+
+
+<div class="c-warning">
+
+Beide Tracker können nun Daten zum selben Nutzer austauschen, **ohne dass je eine Domain das Cookie der anderen las**. Voraussetzung: der Browser akzeptiert Third-Party-Cookies — was moderne Browser zunehmend blockieren.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Cookie-Syncing (auch *Cookie-Matching* oder *ID-Matching*) ist der Mechanismus hinter Real-Time-Bidding und Werbenetzen. Er löst genau das Problem, dass eine Site die Cookie-ID einer Tracker-Domain nicht kennt: Statt das Cookie direkt zu teilen, wird die ID als URL-Parameter über eine Redirect-Kette zur Partner-Domain weitergereicht. Der Browser folgt jedem Redirect automatisch und sendet dabei zur jeweiligen Zieldomain deren eigenes Cookie. So bekommt der Empfänger zwei Informationen gleichzeitig: die fremde ID aus dem URL-Parameter und seine eigene aus dem mitgeschickten Cookie — und kann beide in einer Mapping-Tabelle verknüpfen. Same-Origin wird formal eingehalten; die Identitätsverknüpfung ist aber faktisch erfolgt. Dieser Mechanismus erklärt auch, warum Privacy-Maßnahmen wie Third-Party-Cookie-Blockaden, SameSite-Defaults und Bounce-Tracking-Erkennung in den letzten Jahren verschärft wurden.
 
 --
 
@@ -1446,6 +1593,62 @@ _(Hinweis: TLS schützt den Transport, nicht den Endpunkt.)_
 </div>
 
 
+Notes:
+HTTPS bedeutet HTTP über TLS (Transport Layer Security). TLS schützt Vertraulichkeit durch Verschluesselung, Integrität durch Manipulationsschutz und Authentizität durch Zertifikate. Es schützt die Transportstrecke, aber nicht automatisch den Browser selbst oder unsichere Anwendungslogik.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Zusammenfassung — HTTP in der Praxis
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**Semantik statt Syntax**
+
+- **Methoden** kommunizieren Absicht — `GET` liest, `POST` schreibt nicht-idempotent, `PUT`/`DELETE` sind idempotent.
+- **Statuscodes** sind die maschinenlesbare Antwort — `2xx` Erfolg, `3xx` Weiterleitung, `4xx` Client-Fehler, `5xx` Server-Fehler.
+- **Header** steuern Format, Aushandlung, Caching, Auth und Sessions — kein Beiwerk.
+
+**Performance: Caching mit Trade-off**
+
+- `Cache-Control: max-age` reduziert Last und Latenz — Preis: zeitweise veraltete Daten.
+- `ETag` + `If-None-Match` ermöglichen Validierung ohne erneute Übertragung (`304 Not Modified`).
+- Cache-Ebenen wirken kumulativ: Browser, CDN/Proxy, Application-Cache.
+
+
+</div>
+
+
+<div class="column">
+
+
+**Navigation und Schreiboperationen**
+
+- **PRG** (`POST → 303 → GET`) verhindert doppelte Verarbeitung bei Reload.
+- **301/308** dauerhaft, **302/307** temporär; **307/308** erhalten Methode und Body — Pflicht für APIs.
+
+**Zustand trotz Zustandslosigkeit**
+
+- **Cookies** stabilisieren Sessions und werden domain-gebunden mitgesendet (Same-Origin).
+- Sicherheits-Attribute orthogonal: `HttpOnly` (XSS), `SameSite` (CSRF), `Secure` (Sniffing).
+- Dieselbe Mechanik ermöglicht Tracking — direkt über Third-Party-Cookies oder per ID-Sync via Redirect.
+
+**Transport: HTTPS / TLS**
+
+- Vertraulichkeit, Integrität, Authentizität — aber nur für die Leitung, nicht für die Anwendungslogik.
+
+</div>
+
+
+</div>
+
+
 
 <div class="takeaway">
 
@@ -1457,12 +1660,352 @@ HTTP bleibt simpel auf Protokollebene, wird aber durch Header und Statuscodes zu
 
 
 Notes:
-HTTPS bedeutet HTTP über TLS (Transport Layer Security). TLS schützt Vertraulichkeit durch Verschluesselung, Integrität durch Manipulationsschutz und Authentizität durch Zertifikate. Es schützt die Transportstrecke, aber nicht automatisch den Browser selbst oder unsichere Anwendungslogik.
+Diese Folie fasst das HTTP-Kapitel zusammen, bevor wir HTTP-Semantik gezielt auf API-Design anwenden und anschließend REST als systematisierende Architekturidee betrachten. Die wichtigste Botschaft: HTTP ist nicht nur Transport, sondern ein semantisches Protokoll. Methoden, Statuscodes und Header bilden gemeinsam ein Vokabular, das Infrastruktur (Browser, Caches, CDNs, Load Balancer, Monitoring) ohne Anwendungswissen verstehen kann. Wer dieses Vokabular korrekt verwendet, gewinnt Cachebarkeit, Wiederholbarkeit, Skalierbarkeit, Sicherheit und Beobachtbarkeit fast geschenkt; wer es ignoriert (z.B. immer `200 OK` mit Fehler-JSON, alles über `POST`), verliert genau diese Vorteile. Die nächsten Kapitel zeigen erst, wie diese Bausteine in API-Designs konkret eingesetzt werden, und dann, wie REST sie zu Architekturprinzipien systematisiert.
 
 ---
 
 
 
+<!-- .slide: class="module-slide" -->
+
+# HTTP-Semantik für APIs
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wie helfen Methoden, Statuscodes und Header dabei, API-Verhalten ohne Zusatzprotokolle klar und maschinenlesbar zu machen?
+
+</div>
+
+
+Notes:
+Eine gute API nutzt HTTP-Semantik vollständig aus. Methoden, Statuscodes und Header bilden zusammen den Vertrag zwischen Client und Server. Je klarer dieser Vertrag ist, desto weniger Sonderwissen braucht ein Client.
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Was ist an dieser API-Antwort falsch?
+
+Ein Client sendet eine Bestellung an den Online-Shop:
+
+```http
+POST /api/orders HTTP/1.1
+Content-Type: application/json
+
+{"product_id": 42, "quantity": 2}
+```
+
+Der Server antwortet:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id": 789, "status": "created"}
+```
+
+**Aufgabe:** Die Bestellung wurde erfolgreich erstellt. Trotzdem hat die Response mindestens drei Probleme. Welche?
+
+| Problem | Warum | Besser |
+|---|---|---|
+| `200 OK` statt `201 Created` | `200` sagt „gelesen", nicht „erzeugt" | `201 Created` |
+| Kein `Location`-Header | Client weiß nicht, wo die neue Ressource liegt | `Location: /api/orders/789` |
+| Kein `Cache-Control` | Bestellungen dürfen nicht gecacht werden | `Cache-Control: no-store` |
+
+### Korrigierte Version
+
+```http
+HTTP/1.1 201 Created
+Location: /api/orders/789
+Content-Type: application/json
+Cache-Control: no-store
+
+{"id": 789, "status": "pending", "total": 159.98}
+```
+
+Notes:
+Beim erfolgreichen Erzeugen einer Ressource ist `201 Created` der passende Statuscode. Ein `Location`-Header verweist auf die neue Ressource. Zusätzlich sollte klar sein, ob eine solche Response gespeichert werden darf; für Bestellungen ist `no-store` oft sinnvoll.
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Der vollständige Request-Response-Zyklus
+
+![Anatomie eines HTTP Request und Response.](/courses/web-and-data-engineering/figures/http-request-anatomy.svg)
+
+Notes:
+Der Zyklus umfasst Startzeilen, Header und optionale Bodies auf beiden Seiten. Requests enthalten typischerweise Ziel, Semantik und Metadaten; Responses enthalten Ergebnis, Beschreibungsdaten und die eigentliche Repräsentation.
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Statuscodes richtig einsetzen
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+| Situation | Richtiger Code | Häufiger Fehler |
+|---|---|---|
+| Ressource erfolgreich gelesen | `200 OK` | — |
+| Ressource erfolgreich angelegt | `201 Created` + Location | `200` ohne Location |
+| Erfolgreich, aber kein Body | `204 No Content` | `200` mit leerem Body |
+| Ungültige Eingabedaten | `400 Bad Request` | `500` (ist kein Server-Fehler!) |
+| Nicht authentifiziert | `401 Unauthorized` | `403` |
+| Authentifiziert, aber nicht berechtigt | `403 Forbidden` | `401` |
+| Ressource nicht gefunden | `404 Not Found` | `200` mit Fehlermeldung im Body |
+| Konflikt (z.B. doppelter Username) | `409 Conflict` | `400` |
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+**Faustregel:**  
+Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum** und **was zu tun ist**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Die Semantik der 4xx-Codes ist präziser als oft angenommen: `401 Unauthorized` bedeutet, dass die Identität fehlt oder ungültig ist — der Client soll sich neu authentifizieren. `403 Forbidden` bedeutet, dass die Identität bekannt, aber die Berechtigung nicht vorhanden ist — erneutes Einloggen hilft nicht. `400 Bad Request` beschreibt syntaktisch oder strukturell ungültige Eingaben, `422 Unprocessable Entity` fachlich ungültige (aber korrekt formatierte) Eingaben, `409 Conflict` fachliche Konflikte (z.B. Duplikat). `204 No Content` signalisiert Erfolg ohne Rückgabe-Body — für `DELETE` und `PUT` gebräuchlich. Der Statuscode ist der maschinenlesbare Kern der Antwort: Caches, Load Balancer und Monitoring-Systeme reagieren auf Codes, nicht auf Body-Inhalte. Falsch gewählte Codes (z.B. `200` mit Fehlerbeschreibung im Body) machen die API für automatisierte Verarbeitung unbrauchbar.
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Fehlermodelle: Konsistenz ist alles
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "Die Eingabedaten sind ungültig.",
+    "details": [
+      { "field": "email", "code": "invalid_format",
+        "message": "Keine gültige E-Mail-Adresse" },
+      { "field": "quantity", "code": "out_of_range",
+        "message": "Muss zwischen 1 und 100 liegen" }
+    ]
+  }
+}
+```
+
+| Prinzip | Umsetzung |
+|---|---|
+| **Konsistente Struktur** | Immer dasselbe JSON-Format für Fehler |
+| **Maschinenlesbar** | `type` und `code` für automatische Verarbeitung |
+| **Menschenlesbar** | `message` für Entwickler und Endnutzer |
+| **Spezifisch** | `details` pro Feld bei Validierungsfehlern |
+| **Kein Stacktrace** | Interne Details nie an den Client |
+
+Notes:
+Ein konsistentes Fehlerformat macht APIs leichter nutzbar. Maschinenlesbare Felder wie `type` oder `code` helfen bei automatischer Verarbeitung; menschenlesbare Nachrichten helfen beim Debugging. Interne Details wie Stacktraces gehören nicht in externe Fehlermeldungen.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Fehler sauber kommunizieren
+
+![Fehler-Workflow mit Statuscode und JSON-Fehlerkörper.](/courses/web-and-data-engineering/figures/error-workflow.svg)
+
+| Situation | Typischer Code |
+|---|---|
+| Ungültige Eingabe | `400 Bad Request` oder `422 Unprocessable Content` |
+| Nicht gefunden | `404 Not Found` |
+| Konflikt | `409 Conflict` |
+| Interner Fehler | `500 Internal Server Error` |
+
+Notes:
+Ein Fehler-Workflow besteht nicht nur aus einem Statuscode, sondern aus Statuscode plus konsistentem Fehler-Body. Der Code liefert die maschinenlesbare Klasse des Problems, der JSON-Body die Details. So können Clients sowohl automatisiert reagieren als auch sinnvolle Fehlermeldungen anzeigen. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/409
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Authentifizierung: Wer darf was?
+
+| Mechanismus | Funktionsweise | Typischer Einsatz |
+|---|---|---|
+| **API Key** | Statischer Schlüssel im Header | Einfache M2M-Kommunikation |
+| **Bearer Token (JWT)** | Signierter Token im `Authorization`-Header | SPAs, Mobile Apps |
+| **OAuth 2.0** | Delegierte Autorisierung über Authorization Server | „Login mit Google" |
+| **Session Cookie** | Cookie mit Session-ID | Klassische server-gerenderte Apps |
+
+### JWT (JSON Web Token)
+
+```text
+Header.Payload.Signature
+eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.abc123signature
+```
+
+| Teil | Inhalt |
+|---|---|
+| **Header** | Algorithmus und Token-Typ |
+| **Payload** | Claims: user_id, Rollen, Ablaufzeit |
+| **Signature** | Kryptografische Signatur → Manipulation erkennbar |
+
+**Diskussionsfrage:** JWT ist stateless — der Server muss keine Session speichern. Aber: Wie widerruft man einen JWT, bevor er abläuft?
+
+Notes:
+Authentifizierung beantwortet die Frage, wer ein Client ist; Autorisierung beantwortet, was dieser Client tun darf. API Keys, Session Cookies, Bearer Tokens und OAuth 2.0 adressieren unterschiedliche Einsatzszenarien und Sicherheitsanforderungen. OAuth steht für Open Authorization und beschreibt ein Verfahren für delegierte Zugriffsfreigaben.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Authentifizierung mit 401 und 403
+
+![Authentifizierungs-Workflow mit 401 und 403.](/courses/web-and-data-engineering/figures/auth-401-403.svg)
+
+| Status | Bedeutung |
+|---|---|
+| `401 Unauthorized` | Keine gültigen Anmeldedaten vorhanden |
+| `403 Forbidden` | Identität bekannt, aber Zugriff nicht erlaubt |
+
+Notes:
+Der Unterschied zwischen `401` und `403` ist didaktisch zentral. `401 Unauthorized` fordert zunächst gültige Authentifizierung an und geht oft mit `WWW-Authenticate` einher. `403 Forbidden` bedeutet dagegen, dass die Identität akzeptiert wurde, aber für diese Operation keine Berechtigung besteht. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403
+
+--
+
+
+
+<!-- .slide: class="smaller" -->
+
+## Rate Limiting und Idempotenz
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+### Idempotenz
+
+| Methode | Idempotent? | Warum |
+|---|---|---|
+| `GET` | ja | Liest nur |
+| `PUT` | ja | Ergebnis ist immer derselbe Zustand |
+| `DELETE` | ja | Zweites Löschen hat keinen Effekt |
+| `POST` | **nein** | Jeder Aufruf kann neue Ressource erzeugen |
+
+
+<div class="c-note">
+
+**Szenario:** Ein Nutzer klickt "Jetzt bestellen", die Verbindung bricht ab. Der Client weiß nicht, ob der Server die Bestellung schon verarbeitet hat.
+
+</div>
+
+
+
+<div class="c-definition">
+
+**Lösung:** `Idempotency-Key` - der Server erkennt den Retry und liefert das Ergebnis des ersten Requests zurück.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+### Rate Limiting
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 0
+```
+
+
+<div class="c-important">
+
+APIs begrenzen Requests pro Zeitfenster. Die Header sagen dem Client **wann** er es erneut versuchen darf.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+
+HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizieren Ergebnisse, Header steuern Caching und Authentifizierung, konsistente Fehlermodelle machen APIs nutzbar. Idempotenz-Mechanismen schützen gegen doppelte Verarbeitung. Je klarer die HTTP-Semantik genutzt wird, desto weniger Sonderlogik brauchen Clients.
+
+
+</div>
+
+
+Notes:
+Rate Limiting begrenzt die Anzahl von Requests innerhalb eines Zeitfensters und schützt Systeme vor Überlastung oder Missbrauch. Idempotency Keys lösen ein anderes Problem: Sie verhindern doppelte fachliche Wirkung bei wiederholten nicht-idempotenten Requests. Beides wird oft verwechselt, gehört aber auf unterschiedliche Ebenen: Rate Limiting schützt die Infrastruktur, Idempotenz schützt die fachliche Korrektheit bei Retries.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Rate Limit und Retry-After
+
+![Rate-Limit-Workflow mit 429 und Retry-After.](/courses/web-and-data-engineering/figures/rate-limit-workflow.svg)
+
+| Header / Code | Bedeutung |
+|---|---|
+| `429 Too Many Requests` | Limit für dieses Zeitfenster erreicht |
+| `Retry-After: 30` | Neuer Versuch erst nach 30 Sekunden |
+| `X-RateLimit-*` | Optionale Zusatzinfos zu Limit und Restbudget |
+
+Notes:
+Beim Rate-Limit-Workflow kommuniziert der Server nicht nur Ablehnung, sondern auch Wiederanlaufbedingungen. Gute Clients respektieren `Retry-After`, reduzieren ihre Frequenz und kombinieren dies oft mit Backoff-Strategien. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Asynchrone Verarbeitung mit 202 Accepted
+
+![Asynchroner Workflow mit 202 Accepted und Job-Ressource.](/courses/web-and-data-engineering/figures/async-202-workflow.svg)
+
+| Phase | Bedeutung |
+|---|---|
+| `202 Accepted` | Auftrag angenommen, aber noch nicht abgeschlossen |
+| Job-Ressource | Fortschritt oder Status abfragbar |
+| `303 See Other` | Ergebnis liegt nun unter eigener Ressource |
+
+Notes:
+Der asynchrone Workflow ist für längere Prozesse wichtig, etwa Exporte, Videoverarbeitung oder Batch-Jobs. `202 Accepted` ist nicht gleich Erfolg des eigentlichen Jobs, sondern nur Annahme zur Verarbeitung. Eine Status-Ressource entkoppelt Start und spaeteres Ergebnis sauber. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/202 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303
+
+---
 <!-- .slide: class="module-slide" -->
 
 # REST als Architekturidee
@@ -1532,60 +2075,6 @@ REST entstand nicht als Framework oder Produkt, sondern als Beschreibung dafuer,
 
 Notes:
 REST (Representational State Transfer) wurde 2000 von Roy Fielding in seiner Dissertation „Architectural Styles and the Design of Network-based Software Architectures” beschrieben — nicht als neue Erfindung, sondern als Formalisierung der Prinzipien, die das Web von Anfang an skalierbar gemacht haben. Fielding war maßgeblich an der Spezifikation von HTTP/1.1 beteiligt und analysierte im Rückblick, welche Architekturentscheidungen den Erfolg des Webs erklären. Der Name betont den Kern: Übertragen wird nicht die Ressource selbst (die ist ein abstraktes Konzept auf dem Server), sondern eine Repräsentation ihres aktuellen Zustands — identifiziert über eine URI. REST ist damit primär ein Beschreibungsmodell für HTTP-Nutzung, kein eigenständiges Protokoll.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Eine typische Antwort auf die Frage: "Was ist REST?"
-
-> „REST ist ein Architekturstil für APIs, bei dem man JSON über HTTP verschickt. Man benutzt GET zum Lesen, POST zum Erstellen, PUT zum Aktualisieren und DELETE zum Löschen. Die URLs sollten Ressourcen beschreiben, z.B. /users/42."
-
-**Aufgabe:** Was ist an dieser Antwort korrekt? Was fehlt? Was ist irreführend?
-
-### Analyse
-
-
-<div class="grid-2 small">
-
-
-<div class="column">
-
-| Aussage | Bewertung |
-|---|---|
-| „JSON über HTTP" | **Irreführend** — REST ist formatunabhängig. JSON ist verbreitet, aber nicht Voraussetzung. |
-| „GET zum Lesen, POST zum Erstellen..." | **Teilweise korrekt** — beschreibt CRUD-Mapping, aber nicht die eigentlichen REST-Constraints |
-| „URLs sollten Ressourcen beschreiben" | **Korrekt** — aber nur ein Aspekt der Uniform Interface |
-
-</div>
-
-
-<div class="column">
-
-| Fehlt | Bewertung |
-|---|---|
-| Fehlt: Statelessness | **Kritisch** — Zustandslosigkeit ist der Grund, warum REST skaliert |
-| Fehlt: Cacheability | **Kritisch** — ein Hauptvorteil gegenüber RPC-Ansätzen |
-| Fehlt: Layered System | **Wichtig** — ermöglicht CDN, Load Balancer, API Gateway transparent einfügbar |
-
-</div>
-
-
-</div>
-
-
-
-<div class="c-orange gap">
-
-Die AI-Antwort beschreibt die **Syntax** von REST, aber nicht die **Architektur**. Das ist der häufigste Fehler.
-
-</div>
-
-
-Notes:
-Die Antwort beschreibt verbreitete Konventionen wie JSON (JavaScript Object Notation) und CRUD-Mapping, aber nicht die eigentlichen REST-Constraints. CRUD steht für Create, Read, Update, Delete. REST ist nicht auf JSON festgelegt und wird nicht allein dadurch erreicht, dass man GET, POST, PUT und DELETE verwendet.
 
 --
 
@@ -1671,42 +2160,18 @@ Sticky Sessions verletzen das Ideal der Statelessness, fehlende Cache-Deklaratio
 ## REST vs. RPC im Vergleich
 
 
-<div class="grid-2">
+<div class="grid-1-2">
 
 
 <div class="column">
 
 ### RPC-Stil (aktionsorientiert)
 
-```text
-POST /createUser
-POST /getUser
-POST /updateUser
-POST /deleteUser
-POST /getUserOrders
-POST /sendPasswordReset
-```
-
 - Jeder Endpunkt ist eine **Funktion**
 - HTTP-Methode immer POST
 - Infrastruktur kann nichts cachen
 - Client muss Doku lesen
-
-</div>
-
-
-<div class="column">
-
 ### REST-Stil (ressourcenorientiert)
-
-```text
-POST   /users           → anlegen
-GET    /users/42        → lesen
-PUT    /users/42        → ersetzen
-DELETE /users/42        → löschen
-GET    /users/42/orders → Bestellungen
-POST   /password-resets → anstoßen
-```
 
 - Jeder Endpunkt ist eine **Ressource**
 - HTTP-Methoden drücken Absicht aus
@@ -1716,10 +2181,17 @@ POST   /password-resets → anstoßen
 </div>
 
 
+<div class="column">
+
+![RPC vs. REST Vergleich.](/courses/web-and-data-engineering/figures/rest-vs-rpc.svg)
+
 </div>
 
 
-![RPC vs. REST Vergleich.](/courses/web-and-data-engineering/figures/rest-vs-rpc.svg)
+</div>
+
+
+
 
 ### Warum das für Infrastruktur relevant ist
 
@@ -2114,346 +2586,6 @@ Collection-Ressourcen brauchen oft zusätzliche Abfrageparameter. Pagination beg
 
 
 
-<!-- .slide: class="module-slide" -->
-
-# HTTP-Semantik für APIs
-
-
-<div class="guiding-question">
-
-**Leitfrage:** Wie helfen Methoden, Statuscodes und Header dabei, API-Verhalten ohne Zusatzprotokolle klar und maschinenlesbar zu machen?
-
-</div>
-
-
-Notes:
-Eine gute API nutzt HTTP-Semantik vollständig aus. Methoden, Statuscodes und Header bilden zusammen den Vertrag zwischen Client und Server. Je klarer dieser Vertrag ist, desto weniger Sonderwissen braucht ein Client.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Was ist an dieser API-Antwort falsch?
-
-Ein Client sendet eine Bestellung an den Online-Shop:
-
-```http
-POST /api/orders HTTP/1.1
-Content-Type: application/json
-
-{"product_id": 42, "quantity": 2}
-```
-
-Der Server antwortet:
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"id": 789, "status": "created"}
-```
-
-**Aufgabe:** Die Bestellung wurde erfolgreich erstellt. Trotzdem hat die Response mindestens drei Probleme. Welche?
-
-| Problem | Warum | Besser |
-|---|---|---|
-| `200 OK` statt `201 Created` | `200` sagt „gelesen", nicht „erzeugt" | `201 Created` |
-| Kein `Location`-Header | Client weiß nicht, wo die neue Ressource liegt | `Location: /api/orders/789` |
-| Kein `Cache-Control` | Bestellungen dürfen nicht gecacht werden | `Cache-Control: no-store` |
-
-### Korrigierte Version
-
-```http
-HTTP/1.1 201 Created
-Location: /api/orders/789
-Content-Type: application/json
-Cache-Control: no-store
-
-{"id": 789, "status": "pending", "total": 159.98}
-```
-
-Notes:
-Beim erfolgreichen Erzeugen einer Ressource ist `201 Created` der passende Statuscode. Ein `Location`-Header verweist auf die neue Ressource. Zusätzlich sollte klar sein, ob eine solche Response gespeichert werden darf; für Bestellungen ist `no-store` oft sinnvoll.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Der vollständige Request-Response-Zyklus
-
-![Anatomie eines HTTP Request und Response.](/courses/web-and-data-engineering/figures/http-request-anatomy.svg)
-
-Notes:
-Der Zyklus umfasst Startzeilen, Header und optionale Bodies auf beiden Seiten. Requests enthalten typischerweise Ziel, Semantik und Metadaten; Responses enthalten Ergebnis, Beschreibungsdaten und die eigentliche Repräsentation.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Statuscodes richtig einsetzen
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-| Situation | Richtiger Code | Häufiger Fehler |
-|---|---|---|
-| Ressource erfolgreich gelesen | `200 OK` | — |
-| Ressource erfolgreich angelegt | `201 Created` + Location | `200` ohne Location |
-| Erfolgreich, aber kein Body | `204 No Content` | `200` mit leerem Body |
-| Ungültige Eingabedaten | `400 Bad Request` | `500` (ist kein Server-Fehler!) |
-| Nicht authentifiziert | `401 Unauthorized` | `403` |
-| Authentifiziert, aber nicht berechtigt | `403 Forbidden` | `401` |
-| Ressource nicht gefunden | `404 Not Found` | `200` mit Fehlermeldung im Body |
-| Konflikt (z.B. doppelter Username) | `409 Conflict` | `400` |
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-important">
-
-**Faustregel:**  
-Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum** und **was zu tun ist**.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Die Semantik der 4xx-Codes ist präziser als oft angenommen: `401 Unauthorized` bedeutet, dass die Identität fehlt oder ungültig ist — der Client soll sich neu authentifizieren. `403 Forbidden` bedeutet, dass die Identität bekannt, aber die Berechtigung nicht vorhanden ist — erneutes Einloggen hilft nicht. `400 Bad Request` beschreibt syntaktisch oder strukturell ungültige Eingaben, `422 Unprocessable Entity` fachlich ungültige (aber korrekt formatierte) Eingaben, `409 Conflict` fachliche Konflikte (z.B. Duplikat). `204 No Content` signalisiert Erfolg ohne Rückgabe-Body — für `DELETE` und `PUT` gebräuchlich. Der Statuscode ist der maschinenlesbare Kern der Antwort: Caches, Load Balancer und Monitoring-Systeme reagieren auf Codes, nicht auf Body-Inhalte. Falsch gewählte Codes (z.B. `200` mit Fehlerbeschreibung im Body) machen die API für automatisierte Verarbeitung unbrauchbar.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Fehlermodelle: Konsistenz ist alles
-
-```json
-{
-  "error": {
-    "type": "validation_error",
-    "message": "Die Eingabedaten sind ungültig.",
-    "details": [
-      { "field": "email", "code": "invalid_format",
-        "message": "Keine gültige E-Mail-Adresse" },
-      { "field": "quantity", "code": "out_of_range",
-        "message": "Muss zwischen 1 und 100 liegen" }
-    ]
-  }
-}
-```
-
-| Prinzip | Umsetzung |
-|---|---|
-| **Konsistente Struktur** | Immer dasselbe JSON-Format für Fehler |
-| **Maschinenlesbar** | `type` und `code` für automatische Verarbeitung |
-| **Menschenlesbar** | `message` für Entwickler und Endnutzer |
-| **Spezifisch** | `details` pro Feld bei Validierungsfehlern |
-| **Kein Stacktrace** | Interne Details nie an den Client |
-
-Notes:
-Ein konsistentes Fehlerformat macht APIs leichter nutzbar. Maschinenlesbare Felder wie `type` oder `code` helfen bei automatischer Verarbeitung; menschenlesbare Nachrichten helfen beim Debugging. Interne Details wie Stacktraces gehören nicht in externe Fehlermeldungen.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Fehler sauber kommunizieren
-
-![Fehler-Workflow mit Statuscode und JSON-Fehlerkörper.](/courses/web-and-data-engineering/figures/error-workflow.svg)
-
-| Situation | Typischer Code |
-|---|---|
-| Ungültige Eingabe | `400 Bad Request` oder `422 Unprocessable Content` |
-| Nicht gefunden | `404 Not Found` |
-| Konflikt | `409 Conflict` |
-| Interner Fehler | `500 Internal Server Error` |
-
-Notes:
-Ein Fehler-Workflow besteht nicht nur aus einem Statuscode, sondern aus Statuscode plus konsistentem Fehler-Body. Der Code liefert die maschinenlesbare Klasse des Problems, der JSON-Body die Details. So können Clients sowohl automatisiert reagieren als auch sinnvolle Fehlermeldungen anzeigen. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/409
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Authentifizierung: Wer darf was?
-
-| Mechanismus | Funktionsweise | Typischer Einsatz |
-|---|---|---|
-| **API Key** | Statischer Schlüssel im Header | Einfache M2M-Kommunikation |
-| **Bearer Token (JWT)** | Signierter Token im `Authorization`-Header | SPAs, Mobile Apps |
-| **OAuth 2.0** | Delegierte Autorisierung über Authorization Server | „Login mit Google" |
-| **Session Cookie** | Cookie mit Session-ID | Klassische server-gerenderte Apps |
-
-### JWT (JSON Web Token)
-
-```text
-Header.Payload.Signature
-eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.abc123signature
-```
-
-| Teil | Inhalt |
-|---|---|
-| **Header** | Algorithmus und Token-Typ |
-| **Payload** | Claims: user_id, Rollen, Ablaufzeit |
-| **Signature** | Kryptografische Signatur → Manipulation erkennbar |
-
-**Diskussionsfrage:** JWT ist stateless — der Server muss keine Session speichern. Aber: Wie widerruft man einen JWT, bevor er abläuft?
-
-Notes:
-Authentifizierung beantwortet die Frage, wer ein Client ist; Autorisierung beantwortet, was dieser Client tun darf. API Keys, Session Cookies, Bearer Tokens und OAuth 2.0 adressieren unterschiedliche Einsatzszenarien und Sicherheitsanforderungen. OAuth steht für Open Authorization und beschreibt ein Verfahren für delegierte Zugriffsfreigaben.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Authentifizierung mit 401 und 403
-
-![Authentifizierungs-Workflow mit 401 und 403.](/courses/web-and-data-engineering/figures/auth-401-403.svg)
-
-| Status | Bedeutung |
-|---|---|
-| `401 Unauthorized` | Keine gültigen Anmeldedaten vorhanden |
-| `403 Forbidden` | Identität bekannt, aber Zugriff nicht erlaubt |
-
-Notes:
-Der Unterschied zwischen `401` und `403` ist didaktisch zentral. `401 Unauthorized` fordert zunächst gültige Authentifizierung an und geht oft mit `WWW-Authenticate` einher. `403 Forbidden` bedeutet dagegen, dass die Identität akzeptiert wurde, aber für diese Operation keine Berechtigung besteht. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Rate Limiting und Idempotenz
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-### Idempotenz
-
-| Methode | Idempotent? | Warum |
-|---|---|---|
-| `GET` | ja | Liest nur |
-| `PUT` | ja | Ergebnis ist immer derselbe Zustand |
-| `DELETE` | ja | Zweites Löschen hat keinen Effekt |
-| `POST` | **nein** | Jeder Aufruf kann neue Ressource erzeugen |
-
-
-<div class="c-note">
-
-**Szenario:** Ein Nutzer klickt "Jetzt bestellen", die Verbindung bricht ab. Der Client weiß nicht, ob der Server die Bestellung schon verarbeitet hat.
-
-</div>
-
-
-
-<div class="c-definition">
-
-**Lösung:** `Idempotency-Key` - der Server erkennt den Retry und liefert das Ergebnis des ersten Requests zurück.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-### Rate Limiting
-
-```http
-HTTP/1.1 429 Too Many Requests
-Retry-After: 30
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 0
-```
-
-
-<div class="c-important">
-
-APIs begrenzen Requests pro Zeitfenster. Die Header sagen dem Client **wann** er es erneut versuchen darf.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="takeaway">
-
-
-HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizieren Ergebnisse, Header steuern Caching und Authentifizierung, konsistente Fehlermodelle machen APIs nutzbar. Idempotenz-Mechanismen schützen gegen doppelte Verarbeitung. Je klarer die HTTP-Semantik genutzt wird, desto weniger Sonderlogik brauchen Clients.
-
-
-</div>
-
-
-Notes:
-Rate Limiting begrenzt die Anzahl von Requests innerhalb eines Zeitfensters und schützt Systeme vor Überlastung oder Missbrauch. Idempotency Keys lösen ein anderes Problem: Sie verhindern doppelte fachliche Wirkung bei wiederholten nicht-idempotenten Requests. Beides wird oft verwechselt, gehört aber auf unterschiedliche Ebenen: Rate Limiting schützt die Infrastruktur, Idempotenz schützt die fachliche Korrektheit bei Retries.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Rate Limit und Retry-After
-
-![Rate-Limit-Workflow mit 429 und Retry-After.](/courses/web-and-data-engineering/figures/rate-limit-workflow.svg)
-
-| Header / Code | Bedeutung |
-|---|---|
-| `429 Too Many Requests` | Limit für dieses Zeitfenster erreicht |
-| `Retry-After: 30` | Neuer Versuch erst nach 30 Sekunden |
-| `X-RateLimit-*` | Optionale Zusatzinfos zu Limit und Restbudget |
-
-Notes:
-Beim Rate-Limit-Workflow kommuniziert der Server nicht nur Ablehnung, sondern auch Wiederanlaufbedingungen. Gute Clients respektieren `Retry-After`, reduzieren ihre Frequenz und kombinieren dies oft mit Backoff-Strategien. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Asynchrone Verarbeitung mit 202 Accepted
-
-![Asynchroner Workflow mit 202 Accepted und Job-Ressource.](/courses/web-and-data-engineering/figures/async-202-workflow.svg)
-
-| Phase | Bedeutung |
-|---|---|
-| `202 Accepted` | Auftrag angenommen, aber noch nicht abgeschlossen |
-| Job-Ressource | Fortschritt oder Status abfragbar |
-| `303 See Other` | Ergebnis liegt nun unter eigener Ressource |
-
-Notes:
-Der asynchrone Workflow ist für längere Prozesse wichtig, etwa Exporte, Videoverarbeitung oder Batch-Jobs. `202 Accepted` ist nicht gleich Erfolg des eigentlichen Jobs, sondern nur Annahme zur Verarbeitung. Eine Status-Ressource entkoppelt Start und spaeteres Ergebnis sauber. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/202 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303
-
----
 
 
 

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 460" font-family="Source Sans Pro, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#1565c0"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#1b5e20"/></marker>
+    <marker id="ap" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#7b1fa2"/></marker>
+  </defs>
+
+  <!-- Header note -->
+  <rect x="10" y="8" width="360" height="22" rx="4" fill="#f0f6ff" stroke="#9bb6d1"/>
+  <text x="190" y="23" text-anchor="middle" font-size="10" fill="#1565c0" font-weight="700">Browser auf publisher.example · Sync-Pixel verlinkt zu tracker-a.com</text>
+
+  <!-- Actors -->
+  <rect x="10" y="40" width="90" height="26" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="55" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#1565c0">Browser</text>
+  <rect x="135" y="40" width="110" height="26" rx="5" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="190" y="54" text-anchor="middle" font-size="10" font-weight="700" fill="#4a148c">tracker-a.com</text>
+  <text x="190" y="63" text-anchor="middle" font-size="7" fill="#4a148c">(SSP)</text>
+  <rect x="280" y="40" width="90" height="26" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="325" y="54" text-anchor="middle" font-size="10" font-weight="700" fill="#b71c1c">tracker-b.com</text>
+  <text x="325" y="63" text-anchor="middle" font-size="7" fill="#b71c1c">(DSP)</text>
+
+  <!-- Lifelines -->
+  <line x1="55" y1="66" x2="55" y2="450" stroke="#9bb6d1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="190" y1="66" x2="190" y2="450" stroke="#c9a8d4" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="325" y1="66" x2="325" y2="450" stroke="#e6a39b" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+  <!-- Step 1: Browser → tracker-a -->
+  <text x="14" y="84" font-size="10" font-weight="700" fill="#333">①</text>
+  <text x="122" y="84" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="700">GET /sync</text>
+  <line x1="55" y1="92" x2="186" y2="92" stroke="#1565c0" stroke-width="1.8" marker-end="url(#ab)"/>
+  <rect x="12" y="100" width="220" height="20" rx="3" fill="#f0f6ff" stroke="#9bb6d1"/>
+  <text x="18" y="113" font-size="9" font-family="Menlo, Consolas, monospace" fill="#1565c0">Cookie: a_id=A123</text>
+
+  <!-- Step 2: tracker-a redirect -->
+  <text x="14" y="138" font-size="10" font-weight="700" fill="#333">②</text>
+  <text x="122" y="138" text-anchor="middle" font-size="9" fill="#7b1fa2" font-weight="700">302 Found</text>
+  <line x1="186" y1="146" x2="59" y2="146" stroke="#7b1fa2" stroke-width="1.8" marker-end="url(#ap)"/>
+  <rect x="12" y="154" width="356" height="36" rx="3" fill="#faf2fc" stroke="#c9a8d4"/>
+  <text x="18" y="167" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#4a148c">Location: https://tracker-b.com/sync</text>
+  <text x="18" y="180" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#4a148c">  ?partner=A&amp;partner_id=A123</text>
+
+  <!-- Step 3: Browser follows redirect to tracker-b -->
+  <text x="14" y="208" font-size="10" font-weight="700" fill="#333">③</text>
+  <text x="190" y="208" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="700">GET /sync?partner=A&amp;partner_id=A123</text>
+  <line x1="55" y1="216" x2="321" y2="216" stroke="#1565c0" stroke-width="1.8" marker-end="url(#ab)"/>
+  <rect x="12" y="224" width="356" height="20" rx="3" fill="#f0f6ff" stroke="#9bb6d1"/>
+  <text x="18" y="237" font-size="9" font-family="Menlo, Consolas, monospace" fill="#1565c0">Cookie: b_id=B456  ← Browser sendet B's eigenes Cookie</text>
+
+  <!-- Step 4: tracker-b stores mapping -->
+  <text x="14" y="262" font-size="10" font-weight="700" fill="#333">④</text>
+  <rect x="240" y="252" width="130" height="58" rx="4" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="305" y="265" text-anchor="middle" font-size="9" font-weight="700" fill="#b71c1c">Mapping-Tabelle</text>
+  <line x1="248" y1="270" x2="362" y2="270" stroke="#ea4335" stroke-width="0.5"/>
+  <text x="248" y="282" font-size="8" font-family="Menlo, Consolas, monospace" fill="#b71c1c">a_id=A123</text>
+  <text x="248" y="293" font-size="9" font-weight="700" fill="#b71c1c" font-family="Menlo, Consolas, monospace">  ↕</text>
+  <text x="248" y="304" font-size="8" font-family="Menlo, Consolas, monospace" fill="#b71c1c">b_id=B456</text>
+
+  <text x="55" y="280" text-anchor="middle" font-size="9" fill="#555" font-style="italic">Tracker B kennt</text>
+  <text x="55" y="292" text-anchor="middle" font-size="9" fill="#555" font-style="italic">jetzt beide IDs</text>
+
+  <!-- Step 5: Response -->
+  <text x="14" y="332" font-size="10" font-weight="700" fill="#333">⑤</text>
+  <text x="190" y="332" text-anchor="middle" font-size="9" fill="#1b5e20" font-weight="700">200 OK · 1×1-Pixel</text>
+  <line x1="321" y1="340" x2="59" y2="340" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <!-- Result note -->
+  <rect x="10" y="360" width="360" height="50" rx="4" fill="#fff3cd" stroke="#f9ab00"/>
+  <text x="190" y="376" text-anchor="middle" font-size="10" font-weight="700" fill="#b06000">🔗 Beide Tracker können Daten zum selben Nutzer austauschen</text>
+  <text x="190" y="390" text-anchor="middle" font-size="9" fill="#b06000">— ohne dass je eine Domain das Cookie der anderen lesen musste.</text>
+  <text x="190" y="403" text-anchor="middle" font-size="9" fill="#b06000" font-style="italic">Der Browser hat nur Redirects gefolgt; jeder bekam sein eigenes Cookie.</text>
+
+  <!-- Browser-side caveat -->
+  <rect x="10" y="418" width="360" height="32" rx="4" fill="#f0f6ff" stroke="#9bb6d1"/>
+  <text x="190" y="431" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="700">Voraussetzung: Browser akzeptiert Third-Party-Cookies</text>
+  <text x="190" y="443" text-anchor="middle" font-size="8" fill="#1565c0">(SameSite=None; Secure) — moderne Browser blockieren dies zunehmend.</text>
+</svg>

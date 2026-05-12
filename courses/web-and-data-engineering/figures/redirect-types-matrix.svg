@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" font-family="Source Sans Pro, Helvetica, Arial, sans-serif">
+
+  <!-- Column headers -->
+  <text x="260" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#333">Methode darf wechseln</text>
+  <text x="260" y="33" text-anchor="middle" font-size="9" fill="#888" font-style="italic">POST→GET in der Praxis historisch üblich</text>
+  <text x="590" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#333">Methode &amp; Body bleiben</text>
+  <text x="590" y="33" text-anchor="middle" font-size="9" fill="#888" font-style="italic">strikt nach RFC — wichtig für APIs</text>
+
+  <!-- Row labels -->
+  <rect x="10" y="50" width="85" height="165" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="52" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#b71c1c">Permanent</text>
+  <text x="52" y="142" text-anchor="middle" font-size="9" fill="#b71c1c" font-style="italic">Caches und</text>
+  <text x="52" y="154" text-anchor="middle" font-size="9" fill="#b71c1c" font-style="italic">Crawler sollen</text>
+  <text x="52" y="166" text-anchor="middle" font-size="9" fill="#b71c1c" font-style="italic">URL ersetzen</text>
+
+  <rect x="10" y="225" width="85" height="165" rx="5" fill="#fff3cd" stroke="#f9ab00" stroke-width="1.5"/>
+  <text x="52" y="295" text-anchor="middle" font-size="13" font-weight="700" fill="#b06000">Temporär</text>
+  <text x="52" y="317" text-anchor="middle" font-size="9" fill="#b06000" font-style="italic">URL nur jetzt</text>
+  <text x="52" y="329" text-anchor="middle" font-size="9" fill="#b06000" font-style="italic">anders, später</text>
+  <text x="52" y="341" text-anchor="middle" font-size="9" fill="#b06000" font-style="italic">wieder Original</text>
+
+  <!-- ===== Cell: 301 — Form-Endpoint dauerhaft umgezogen ===== -->
+  <rect x="100" y="50" width="320" height="165" rx="6" fill="#f6fbf6" stroke="#a5d6a7" stroke-width="1.5"/>
+  <rect x="100" y="50" width="320" height="26" rx="6" fill="#1b5e20"/>
+  <text x="108" y="68" font-size="13" font-weight="700" fill="#fff">301 Moved Permanently</text>
+  <text x="412" y="68" text-anchor="end" font-size="10" fill="#c8e6c9">Form-URL dauerhaft umgezogen</text>
+
+  <rect x="108" y="84" width="304" height="92" rx="3" fill="#fff" stroke="#a5d6a7" stroke-width="0.5"/>
+  <text x="115" y="98" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1565c0">→ POST /kontaktformular</text>
+  <text x="115" y="111" font-size="10" font-family="Menlo, Consolas, monospace" fill="#555">  { name, email, nachricht }</text>
+  <text x="115" y="126" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">← 301 Moved Permanently</text>
+  <text x="115" y="139" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">  Location: /v2/kontakt</text>
+  <text x="115" y="156" font-size="10" font-family="Menlo, Consolas, monospace" fill="#b06000">→ GET /v2/kontakt   ⚠ POST→GET!</text>
+  <text x="115" y="170" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1b5e20">← 200 OK  (Body verloren)</text>
+
+  <text x="115" y="194" font-size="9" fill="#b71c1c" font-weight="700">→ Browser wechselt POST→GET — Form-Daten weg!</text>
+  <text x="115" y="207" font-size="9" fill="#666" font-style="italic">Bei reinem GET (z.B. HTTP→HTTPS) bleibt GET. Für POST-APIs: 308.</text>
+
+  <!-- ===== Cell: 308 — API-Migration v1 → v2 ===== -->
+  <rect x="430" y="50" width="320" height="165" rx="6" fill="#fdecea" stroke="#e6a39b" stroke-width="1.5"/>
+  <rect x="430" y="50" width="320" height="26" rx="6" fill="#b71c1c"/>
+  <text x="438" y="68" font-size="13" font-weight="700" fill="#fff">308 Permanent Redirect</text>
+  <text x="742" y="68" text-anchor="end" font-size="10" fill="#fdd5d2">API-Migration v1 → v2</text>
+
+  <rect x="438" y="84" width="304" height="92" rx="3" fill="#fff" stroke="#e6a39b" stroke-width="0.5"/>
+  <text x="445" y="98" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1565c0">→ POST /api/v1/orders</text>
+  <text x="445" y="111" font-size="10" font-family="Menlo, Consolas, monospace" fill="#555">  { produkt: 42, anzahl: 1 }</text>
+  <text x="445" y="126" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">← 308 Permanent Redirect</text>
+  <text x="445" y="139" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">  Location: /api/v2/orders</text>
+  <text x="445" y="156" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1565c0">→ POST /api/v2/orders  { produkt: 42 }</text>
+  <text x="445" y="170" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1b5e20">← 201 Created</text>
+
+  <text x="445" y="194" font-size="9" fill="#b71c1c" font-weight="700">→ Methode UND Body bleiben — POST bleibt POST.</text>
+  <text x="445" y="207" font-size="9" fill="#666" font-style="italic">Clients sollten neue URL persistent übernehmen.</text>
+
+  <!-- ===== Cell: 302 — POST trifft Login-Wand ===== -->
+  <rect x="100" y="225" width="320" height="165" rx="6" fill="#e8f0fe" stroke="#9bb6d1" stroke-width="1.5"/>
+  <rect x="100" y="225" width="320" height="26" rx="6" fill="#1565c0"/>
+  <text x="108" y="243" font-size="13" font-weight="700" fill="#fff">302 Found</text>
+  <text x="412" y="243" text-anchor="end" font-size="10" fill="#cfe2ff">POST bei abgelaufener Session</text>
+
+  <rect x="108" y="259" width="304" height="92" rx="3" fill="#fff" stroke="#9bb6d1" stroke-width="0.5"/>
+  <text x="115" y="273" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1565c0">→ POST /api/order   (Session weg)</text>
+  <text x="115" y="286" font-size="10" font-family="Menlo, Consolas, monospace" fill="#555">  { produkt: 42, anzahl: 1 }</text>
+  <text x="115" y="301" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">← 302 Found</text>
+  <text x="115" y="314" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">  Location: /login</text>
+  <text x="115" y="331" font-size="10" font-family="Menlo, Consolas, monospace" fill="#b06000">→ GET /login   ⚠ POST→GET!</text>
+  <text x="115" y="345" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1b5e20">← 200 OK · Login-Formular</text>
+
+  <text x="115" y="369" font-size="9" fill="#b71c1c" font-weight="700">→ POST-Daten weg — Bestellung muss nach Login neu eingegeben werden.</text>
+  <text x="115" y="382" font-size="9" fill="#666" font-style="italic">Für temporäre Verlegung von Schreib-Endpoints daher 307.</text>
+
+  <!-- ===== Cell: 307 — Maintenance / Failover ===== -->
+  <rect x="430" y="225" width="320" height="165" rx="6" fill="#fff3cd" stroke="#f9ab00" stroke-width="1.5"/>
+  <rect x="430" y="225" width="320" height="26" rx="6" fill="#b06000"/>
+  <text x="438" y="243" font-size="13" font-weight="700" fill="#fff">307 Temporary Redirect</text>
+  <text x="742" y="243" text-anchor="end" font-size="10" fill="#ffeaa7">Wartung · Failover</text>
+
+  <rect x="438" y="259" width="304" height="92" rx="3" fill="#fff" stroke="#f9ab00" stroke-width="0.5"/>
+  <text x="445" y="273" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1565c0">→ POST /api/orders</text>
+  <text x="445" y="286" font-size="10" font-family="Menlo, Consolas, monospace" fill="#555">  { produkt: 42 }</text>
+  <text x="445" y="301" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">← 307 Temporary Redirect</text>
+  <text x="445" y="314" font-size="10" font-family="Menlo, Consolas, monospace" fill="#9f3129">  Location: https://b.api.example/orders</text>
+  <text x="445" y="331" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1565c0">→ POST b.api.example/orders  { produkt: 42 }</text>
+  <text x="445" y="345" font-size="10" font-family="Menlo, Consolas, monospace" fill="#1b5e20">← 201 Created</text>
+
+  <text x="445" y="369" font-size="9" fill="#b06000" font-weight="700">→ Methode &amp; Body bleiben — Originaladresse merken.</text>
+  <text x="445" y="382" font-size="9" fill="#666" font-style="italic">Ideal für Wartungsfenster, Failover, A/B auf POST.</text>
+
+  <!-- ===== Special: 303 ===== -->
+  <rect x="10" y="402" width="740" height="50" rx="6" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="20" y="420" font-size="11" font-weight="700" fill="#4a148c">Sonderfall 303 See Other</text>
+  <text x="170" y="420" font-size="10" fill="#4a148c">— erzwingt nach POST einen GET zur Bestätigungsseite (Post/Redirect/Get).</text>
+  <text x="20" y="436" font-size="9" fill="#7b1fa2" font-style="italic">„Dein POST war erfolgreich, hol die Antwort hier per GET" — macht Reload unschädlich (siehe vorige Folie).</text>
+  <text x="20" y="448" font-size="9" fill="#7b1fa2" font-style="italic">Anders als 307/308 wechselt die Methode hier bewusst auf GET — auch wenn das Original ein POST war.</text>
+</svg>
