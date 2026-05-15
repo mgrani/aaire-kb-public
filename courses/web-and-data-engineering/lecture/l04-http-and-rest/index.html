@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.UF7pn_qk.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web and Data Engineering — Lecture 04: HTTP und RESTful APIs</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><link rel="stylesheet" href="/_astro/index.Kt0jKsNQ.css"></head> <body> <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Web and Data Engineering
 ## Lecture 04: HTTP und RESTful APIs
@@ -55,8 +55,6 @@ HTTP definiert, wie Clients und Server Nachrichten austauschen. REST nutzt diese
 
 ---
 
-
-
 <!-- .slide: class="module-slide" -->
 
 # HTTP Grundlagen
@@ -73,8 +71,6 @@ Notes:
 HTTP ist ein standardisiertes Request-Response-Protokoll. Es trennt klar zwischen Client und Server und bildet die Grundlage für Web-Seiten, Web-APIs, Caching-Infrastruktur und viele Sicherheitsmechanismen.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -167,8 +163,6 @@ Ein HTTP-Austausch besteht aus Startzeile, Headern und optionalem Body. Im Reque
 
 --
 
-
-
 ## HTTP: Das Request-Response-Protokoll
 
 ![HTTP-Client-Server-Modell mit Request und Response.](/courses/web-and-data-engineering/figures/http-client-server.svg)
@@ -177,8 +171,6 @@ Notes:
 HTTP arbeitet nach einem einfachen Muster: Der Client sendet einen Request an eine Adresse, der Server verarbeitet ihn und liefert einen Response. Diese Struktur ermöglicht eine lose Kopplung zwischen Browsern, Servern, Proxies, Caches und Gateways.
 
 --
-
-
 
 ## Von der Fetch API zum Protokoll
 
@@ -231,10 +223,6 @@ Die Fetch API ist eine Programmierschnittstelle im Browser, die HTTP-Nachrichten
 
 --
 
-
-
-<!-- .slide: class="smaller" -->
-
 ## HTTP-Designprinzipien
 
 | Prinzip | Bedeutung | Konsequenz |
@@ -245,26 +233,30 @@ Die Fetch API ist eine Programmierschnittstelle im Browser, die HTTP-Nachrichten
 | **Erweiterbar** | Header erlauben beliebige Metadaten | Caching, Auth, Content-Negotiation ohne Protokolländerung |
 | **Textbasiert** | Nachrichten sind menschenlesbar (HTTP/1.1) | Einfach zu debuggen |
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
 ### Warum das skaliert
 
 - Zustandslosigkeit erlaubt Load Balancing über beliebig viele Server
 - Proxies und Caches können HTTP-Nachrichten ohne Anwendungswissen verarbeiten
 - Klare Trennung von Transport und Anwendungslogik
 
-</div>
+
+Notes:
+HTTP ist ressourcenorientiert, zustandslos und durch Header erweiterbar. Zustandslosigkeit bedeutet, dass jeder Request für sich interpretierbar sein muss. Dadurch werden Lastverteilung, Zwischenspeicherung und horizontale Skalierung erleichtert. URIs (Uniform Resource Identifiers) geben Ressourcen stabile Adressen.
+
+--
+
+## URI (Uniform Resource Identifier)
+
+**Schema**
+
+`scheme://host:port/path?query#fragment`
 
 
-<div class="column small">
 
-### URI (Uniform Resource Identifier)
+**Example**
 
 `https://shop.example.com:443/api/products/42?lang=de#details`
+
 
 | Teil | Beispiel | Bedeutung |
 |---|---|---|
@@ -275,18 +267,7 @@ Die Fetch API ist eine Programmierschnittstelle im Browser, die HTTP-Nachrichten
 | **Query** | `?lang=de` | Parameter für Auswahl, Filter, Darstellung |
 | **Fragment** | `#details` | clientseitiger Sprunganker; wird nicht an den Server gesendet |
 
-</div>
-
-
-</div>
-
-
-Notes:
-HTTP ist ressourcenorientiert, zustandslos und durch Header erweiterbar. Zustandslosigkeit bedeutet, dass jeder Request für sich interpretierbar sein muss. Dadurch werden Lastverteilung, Zwischenspeicherung und horizontale Skalierung erleichtert. URIs (Uniform Resource Identifiers) geben Ressourcen stabile Adressen.
-
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -336,8 +317,6 @@ HTTP-Methoden kodieren Absichten. `GET` liest, `POST` erzeugt oder stößt Verar
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## HTTP-Methoden: Safe und Idempotent in der Praxis
@@ -355,8 +334,6 @@ Notes:
 Die Unterscheidung zwischen safe und idempotent hat direkte Auswirkungen auf Betrieb und Fehlertoleranz. Idempotente Requests können bei Netzwerkproblemen sicher wiederholt werden. Nicht-idempotente POST-Requests brauchen zusätzliche Schutzmechanismen, damit Wiederholungen keine doppelten Effekte erzeugen.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -449,7 +426,6 @@ HTTP ist nicht nur Datentransport — es ist das **Interaktionsmodell** des Webs
 Notes:
 HTTP/1.0 öffnete typischerweise pro Request eine neue TCP-Verbindung. HTTP/1.1 führte persistent connections ein. HTTP/2 multiplexiert mehrere Requests über eine Verbindung und komprimiert Header. HTTP/3 basiert auf QUIC (Quick UDP Internet Connections) über UDP (User Datagram Protocol) und reduziert Verbindungsaufbau und Transportlatenz.
 
-
 --
 
 <!-- .slide: class="figure-90" -->
@@ -462,20 +438,21 @@ HTTP/1.0 öffnete typischerweise pro Request eine neue TCP-Verbindung. HTTP/1.1 
 
 ---
 
+
 <!-- .slide: class="module-slide" -->
 
-# HTTP Header und Repräsentationen
+# HTTP Headers and Status Codes
 
 
 <div class="guiding-question">
 
-**Leitfrage:** Wie beschreiben HTTP-Header, welches Format gesendet wird, wie es interpretiert werden soll und welche Varianten einer Ressource ausgehandelt werden?
+**Leitfrage:** Wie strukturieren Header und Statuscodes HTTP-Nachrichten, sodass Browser, Caches und Anwendungen ohne fachliches Vorwissen entscheiden können, was zu tun ist?
 
 </div>
 
 
 Notes:
-HTTP trennt nicht nur zwischen Request und Response, sondern auch zwischen fachlicher Ressource und ihrer konkreten Darstellung. Header-Felder liefern die dazugehörigen Metadaten, etwa Medienformat, Sprache, Kompression oder Cache-Regeln.
+Header und Statuscodes sind die zwei semantischen Achsen einer HTTP-Nachricht. Header tragen Metadaten — was wird übertragen, in welchem Format, mit welcher Berechtigung, in welchem Caching-Verhalten. Statuscodes kommunizieren das Ergebnis — Erfolg, Weiterleitung, Client- oder Server-Fehler. Beide sind maschinenlesbar und Infrastruktur (Browser, Caches, Load Balancer, Monitoring) reagiert ausschließlich auf sie, nicht auf Body-Inhalte. Wer diese Semantik korrekt nutzt, gewinnt Cachebarkeit, Beobachtbarkeit und Wiederverwendbarkeit fast geschenkt.
 
 --
 
@@ -612,6 +589,189 @@ Ein Teil der Header beschreibt den **Body**, ein anderer Teil steuert **Verhalte
 
 Notes:
 `Content-Length` und `Content-Encoding` beschreiben Eigenschaften der übertragenen Repräsentation, die im Alltag leicht übersehen werden. `Content-Security-Policy` und `Strict-Transport-Security` sind typische Sicherheits-Header für Web-Anwendungen; letzterer wird oft als HSTS für HTTP Strict Transport Security abgekuerzt.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Was ist an dieser API-Antwort falsch?
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Ein Client sendet eine Bestellung an den Online-Shop:
+
+```http
+POST /api/orders HTTP/1.1
+Content-Type: application/json
+
+{"product_id": 42, "quantity": 2}
+```
+
+</div>
+
+
+<div class="column">
+
+Der Server antwortet:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id": 789, "status": "created"}
+```
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important">
+
+**Aufgabe:** Die Bestellung wurde erfolgreich erstellt. Trotzdem hat die Response mindestens drei Probleme. Welche?
+
+</div>
+
+
+
+<div class="fragment fade-in">
+
+| Problem | Warum | Besser |
+|---|---|---|
+| `200 OK` statt `201 Created` | `200` sagt „gelesen", nicht „erzeugt" | `201 Created` |
+| Kein `Location`-Header | Client weiß nicht, wo die neue Ressource liegt | `Location: /api/orders/789` |
+| Kein `Cache-Control` | Bestellungen dürfen nicht gecacht werden | `Cache-Control: no-store` |
+
+### Korrigierte Version
+
+```http
+HTTP/1.1 201 Created
+Location: /api/orders/789
+Content-Type: application/json
+Cache-Control: no-store
+
+{"id": 789, "status": "pending", "total": 159.98}
+```
+
+</div>
+
+
+Notes:
+Beim erfolgreichen Erzeugen einer Ressource ist `201 Created` der passende Statuscode. Ein `Location`-Header verweist auf die neue Ressource. Zusätzlich sollte klar sein, ob eine solche Response gespeichert werden darf; für Bestellungen ist `no-store` oft sinnvoll.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Der vollständige Request-Response-Zyklus
+
+![Anatomie eines HTTP Request und Response.](/courses/web-and-data-engineering/figures/http-request-anatomy.svg)
+
+Notes:
+Der Zyklus umfasst Startzeilen, Header und optionale Bodies auf beiden Seiten. Requests enthalten typischerweise Ziel, Semantik und Metadaten; Responses enthalten Ergebnis, Beschreibungsdaten und die eigentliche Repräsentation.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Statuscodes richtig einsetzen
+
+
+<div class="grid-2-1">
+
+
+<div class="column small">
+
+| Situation | Richtiger Code | Häufiger Fehler |
+|---|---|---|
+| Ressource erfolgreich gelesen | `200 OK` | — |
+| Ressource erfolgreich angelegt | `201 Created` + Location | `200` ohne Location |
+| Erfolgreich, aber kein Body | `204 No Content` | `200` mit leerem Body |
+| Ungültige Eingabedaten | `400 Bad Request` | `500` (ist kein Server-Fehler!) |
+| Nicht authentifiziert | `401 Unauthorized` | `403` |
+| Authentifiziert, aber nicht berechtigt | `403 Forbidden` | `401` |
+| Ressource nicht gefunden | `404 Not Found` | `200` mit Fehlermeldung im Body |
+| Konflikt (z.B. doppelter Username) | `409 Conflict` | `400` |
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+**Faustregel:**  
+Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum** und **was zu tun ist**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Die Semantik der 4xx-Codes ist präziser als oft angenommen: `401 Unauthorized` bedeutet, dass die Identität fehlt oder ungültig ist — der Client soll sich neu authentifizieren. `403 Forbidden` bedeutet, dass die Identität bekannt, aber die Berechtigung nicht vorhanden ist — erneutes Einloggen hilft nicht. `400 Bad Request` beschreibt syntaktisch oder strukturell ungültige Eingaben, `422 Unprocessable Entity` fachlich ungültige (aber korrekt formatierte) Eingaben, `409 Conflict` fachliche Konflikte (z.B. Duplikat). `204 No Content` signalisiert Erfolg ohne Rückgabe-Body — für `DELETE` und `PUT` gebräuchlich. Der Statuscode ist der maschinenlesbare Kern der Antwort: Caches, Load Balancer und Monitoring-Systeme reagieren auf Codes, nicht auf Body-Inhalte. Falsch gewählte Codes (z.B. `200` mit Fehlerbeschreibung im Body) machen die API für automatisierte Verarbeitung unbrauchbar.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Fehlermodelle: Konsistenz ist alles
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "Die Eingabedaten sind ungültig.",
+    "details": [
+      { "field": "email", "code": "invalid_format",
+        "message": "Keine gültige E-Mail-Adresse" },
+      { "field": "quantity", "code": "out_of_range",
+        "message": "Muss zwischen 1 und 100 liegen" }
+    ]
+  }
+}
+```
+
+| Prinzip | Umsetzung |
+|---|---|
+| **Konsistente Struktur** | Immer dasselbe JSON-Format für Fehler |
+| **Maschinenlesbar** | `type` und `code` für automatische Verarbeitung |
+| **Menschenlesbar** | `message` für Entwickler und Endnutzer |
+| **Spezifisch** | `details` pro Feld bei Validierungsfehlern |
+| **Kein Stacktrace** | Interne Details nie an den Client |
+
+Notes:
+Ein konsistentes Fehlerformat macht APIs leichter nutzbar. Maschinenlesbare Felder wie `type` oder `code` helfen bei automatischer Verarbeitung; menschenlesbare Nachrichten helfen beim Debugging. Interne Details wie Stacktraces gehören nicht in externe Fehlermeldungen.
+
+---
+
+
+<!-- .slide: class="module-slide" -->
+
+# Representations and Caching
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wie liefert HTTP dieselbe Ressource in verschiedenen Formaten aus, und wie vermeidet man dabei unnötiges Übertragen?
+
+</div>
+
+
+Notes:
+Eine Ressource und ihre Repräsentation sind unterschiedliche Konzepte: die Ressource ist die abstrakte fachliche Entität, die Repräsentation ist die konkrete Auslieferung in HTML, JSON, XML oder einem anderen Format. Content Negotiation lässt Client und Server aushandeln, welche Variante übertragen wird. Caching auf mehreren Ebenen (Browser, CDN, Anwendungscache) und Conditional Requests mit ETag/If-None-Match machen wiederholte Auslieferung effizient. Redirects und asynchrone Workflows mit `202 Accepted` runden das Bild ab: HTTP ist ein Protokoll, das Flusssteuerung über Statuscodes und Header erlaubt — nicht über proprietäre Konventionen.
 
 --
 
@@ -957,28 +1117,7 @@ Header sind nicht Beiwerk, sondern Teil der HTTP-Semantik. Sie beschreiben Forma
 Notes:
 Dieses Modul schafft die Brücke zwischen Grundsyntax und späteren Spezialfällen. Caching, Sessions, Sicherheit und später auch API-Design bauen darauf auf, dass Nachrichten und Repräsentationen durch Header praezise beschrieben werden. Besonders wichtig ist dabei die Unterscheidung zwischen fachlicher Ressource und uebertragener Variante: Ein Cache muss nicht nur wissen, dass `/products/42` gespeichert wurde, sondern auch ob dies die HTML-, JSON- oder komprimierte Variante war.
 
----
-
-
-
-<!-- .slide: class="module-slide" -->
-
-# HTTP Kontrolle, Caching und Sicherheit
-
-
-<div class="guiding-question">
-
-**Leitfrage:** Wie bleibt HTTP trotz Zustandslosigkeit effizient und steuerbar, wenn Inhalte umgeleitet, zwischengespeichert oder erneut validiert werden müssen?
-
-</div>
-
-
-Notes:
-Nachdem Header, Medienformate und Repräsentationen eingefuehrt wurden, lassen sich nun ihre wichtigsten Anwendungen behandeln: Caching, Redirects, Cookies und TLS. Diese Themen sind Spezialfälle derselben HTTP-Semantik.
-
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -1010,8 +1149,6 @@ Notes:
 Caching speichert Responses zwischen, um Last und Latenz zu reduzieren. `Cache-Control: max-age=300` erlaubt dem Browser, die Ressource für 300 Sekunden ohne Rückfrage wiederzuverwenden — der Request erreicht den Server in diesem Zeitfenster gar nicht. Dadurch kann der Nutzer kurzzeitig veraltete Daten sehen. Das ist kein Browser-Fehler, sondern exakt das beabsichtigte Verhalten auf Basis der vom Server gesetzten Direktive. Der Trade-off ist architektonisch explizit: Zu hohe `max-age`-Werte liefern veraltete Preise oder Lagerbestände; zu niedrige Werte erhöhen die Serverlast unnötig. `ETag`/`Last-Modified` mit Conditional Requests (`If-None-Match`, `If-Modified-Since`) bieten eine feinere Alternative: Der Cache wird validiert, ohne die vollständige Ressource erneut zu übertragen.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -1056,8 +1193,6 @@ Notes:
 Caches existieren auf mehreren Ebenen. Browser-Caches vermeiden Netzverkehr, CDN- oder Proxy-Caches entlasten den Ursprungsserver, serverseitige Application-Caches vermeiden teure Berechnungen oder Datenbankzugriffe. Alle drei Ebenen verbessern Performance, aber mit unterschiedlichen Trade-offs.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -1117,8 +1252,6 @@ Notes:
 
 
 
-
-
 <div class="column small">
 
 | Schritt | Bedeutung |
@@ -1133,12 +1266,28 @@ Notes:
 </div>
 
 
+
+<div class="c-info small">
+
+**Was ist ein ETag?** Ein **Entity Tag** ist ein vom Server vergebener, **opaker Versions-Fingerprint** einer konkreten Repräsentation. Format: in Anführungszeichen, z.B. `ETag: "a1b2c3d4"`. Der Client interpretiert ihn nie — er vergleicht nur.
+
+**Wie wird er berechnet?** Die Wahl liegt beim Server; er muss nur garantieren, dass *gleicher Inhalt → gleicher ETag* und *geänderter Inhalt → anderer ETag*. Übliche Strategien:
+
+| Strategie | Beispiel | Wann sinnvoll |
+|---|---|---|
+| **Inhalts-Hash** | `MD5`/`SHA-1`/`xxHash` über den Response-Body | Statische Dateien, deterministisch generierte JSON-Responses |
+| **Metadaten-Kombination** | `mtime + size + inode` (z.B. Apache, nginx) | Dateisystem-basierte Auslieferung — billig, kein Lesen nötig |
+| **Datenbank-Version** | `updated_at`-Timestamp oder `rev`-Spalte | API-Ressourcen aus DB — sehr effizient, kein Hashing |
+
+**Stark vs. schwach:** `"a1b2c3d4"` (strong) = byte-identisch; `W/"a1b2c3d4"` (weak, mit `W/`-Prefix) = semantisch äquivalent (z.B. Whitespace-Unterschiede irrelevant). Strong-ETags sind Pflicht für Range-Requests, weak reichen für Cache-Validierung.
+
+</div>
+
+
 Notes:
-Dieser Workflow zeigt die typische Cache-Validierung für veränderliche Ressourcen. Der Client speichert eine Repräsentation mit `ETag` und fragt später bedingt erneut an. Wenn die Version unverändert ist, spart `304 Not Modified` Bandbreite, weil kein neuer Body gesendet werden muss. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/304
+Dieser Workflow zeigt die typische Cache-Validierung für veränderliche Ressourcen. Der Client speichert eine Repräsentation mit `ETag` und fragt später bedingt erneut an. Wenn die Version unverändert ist, spart `304 Not Modified` Bandbreite, weil kein neuer Body gesendet werden muss. Der `ETag` selbst ist eine Server-interne Designentscheidung: Ein Hash über den Body ist semantisch am sauberstem, kostet aber CPU; eine Metadaten-Kombination wie `mtime+size` ist billig, kann aber bei identischem Inhalt unterschiedliche ETags erzeugen (Cache-Miss); eine DB-`updated_at`-Spalte oder ein monoton steigender Revisions-Counter ist für API-Ressourcen meist die beste Wahl, weil ohnehin verfügbar. Wichtig ist die Unterscheidung zwischen **strong** und **weak** ETags: Strong garantiert byte-für-byte-Gleichheit der Repräsentation und ist Voraussetzung für Range-Requests (partielles Nachladen eines Downloads); weak (`W/"…"`) erlaubt geringe Variationen wie unterschiedliche JSON-Whitespaces oder Komprimierung und reicht für die typische Cache-Validierung vollkommen aus. Der Client bleibt davon unberührt — er behandelt ETags als undurchsichtige Zeichenkette und vergleicht sie nur mittels `If-None-Match`. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/304
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -1172,8 +1321,6 @@ Notes:
 Die richtige Cache-Strategie hängt vom Datentyp ab. Versionierte statische Dateien sind nahezu ideal für lange Cache-Zeiten. Personalisierte oder sensible Daten sollten nicht im gemeinsamen Cache landen. Veränderliche Daten profitieren oft von Validierung statt unbedingter Frische.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -1227,10 +1374,10 @@ Redirects verweisen Clients auf eine andere URI. `303 See Other` ist besonders w
 ## Workflow: Redirects in der Praxis
 
 
-<div class="grid-2-">
+<div class="grid-2-1">
 
 
-<div class="column">
+<div class="column figure-100">
 
 ![Vier konkrete Redirect-Fälle als 2×2-Matrix: permanent vs. temporär × Methode darf wechseln vs. Methode/Body bleiben — plus 303 als Sonderfall für PRG.](/courses/web-and-data-engineering/figures/redirect-types-matrix.svg)
 
@@ -1342,6 +1489,24 @@ Content-Type: text/csv
 
 Notes:
 Das Muster ist alt und bewährt — es trennt die Frage „Auftrag angekommen?" (sofortige Antwort) von „Auftrag fertig?" (kann lange dauern) sauber. Der entscheidende Punkt: Die `Location` aus dem `202 Accepted` zeigt *nicht* auf die fertige Ressource, sondern auf eine *Job-Ressource*, die ihrerseits einen eigenen Lebenszyklus hat (queued → processing → done/failed). Das ist konzeptionell wichtig, weil die Job-Ressource cachebar, abbruchbar (`DELETE /api/jobs/abc123`) und mit eigenen Statuscodes adressierbar ist. Der `303 See Other` am Ende ist dieselbe PRG-Mechanik wie bei einem normalen Form-Submit — der Client folgt mit GET zur fertigen Repräsentation. Vorsicht beim Polling-Intervall: Zu kurz erzeugt unnötige Last (jeder Poll ist ein voller Round-Trip mit Auth-Overhead), zu lang verzögert die wahrgenommene Antwortzeit. Server geben deshalb über `Retry-After` einen Hinweis. Echtes *Long Polling* ist eine Variante, bei der der Server die GET-Anfrage *offen hält*, bis sich der Job-Status ändert (oder ein Timeout greift); spart Round-Trips, blockiert aber Server-Verbindungen — heute meist durch SSE oder WebSockets ersetzt. **Beispiele aus der Praxis:** Anthropics Message Batches API, OpenAIs Batch API, GitHub Actions Job-Status, AWS S3 Multipart Uploads, Stripes asynchrone Webhooks — alle folgen einer Variante dieses Musters.
+
+---
+
+
+<!-- .slide: class="module-slide" -->
+
+# HTTP Sessions and CORS
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wie ermöglicht ein zustandsloses Protokoll persistente Sitzungen — und wie kontrolliert der Browser Cross-Origin-Zugriffe zwischen verschiedenen Domains?
+
+</div>
+
+
+Notes:
+HTTP ist zustandslos, aber Cookies geben Clients eine wiedererkennbare Identität, an die Server Sessions hängen. Same-Origin isoliert Origins voneinander und ist die Sicherheitsbasis sowohl für Cookies (jede Domain liest nur ihre eigenen) als auch für JavaScript (kein Zugriff auf DOM und Daten anderer Origins). CORS lockert diese Isolation kontrolliert für berechtigte Cross-Origin-Anwendungsfälle — moderne SPAs gegen separate API-Domains funktionieren nur dank CORS. Beide Mechanismen sind grundlegend für die meisten heutigen Web-Architekturen.
 
 --
 
@@ -1455,15 +1620,16 @@ Set-Cookie: session=abc123;
 ```
 
 
+
+</div>
+
+
+</div>
+
+
 <div class="c-note">
 
 **Zusätzlich:** Session-ID nach Login **rotieren** (gegen Session-Fixation) · Session serverseitig **invalidieren** bei Logout · kurze **Max-Age** + Sliding-Renewal.
-
-</div>
-
-
-</div>
-
 
 </div>
 
@@ -1472,15 +1638,14 @@ Notes:
 Session-Cookies sind ein klassisches Beispiel, bei dem Sicherheit nicht im Anwendungscode entsteht, sondern in der korrekten Konfiguration eines Protokoll-Mechanismus. Die drei Angriffsvektoren adressieren drei unterschiedliche Bedrohungsmodelle: **XSS** unterstellt, dass ein Angreifer Code im Browser des Opfers ausführt — z.B. über einen unsicheren Forum-Beitrag oder ein unsicheres Eingabefeld; `HttpOnly` macht das Cookie für JavaScript unsichtbar und schließt den direkten Diebstahl aus. **CSRF** unterstellt, dass der Nutzer auf einer fremden Site landet, die einen Request an die geschützte Anwendung auslöst — der Browser sendet das Session-Cookie automatisch mit, weil es zur Zieldomain gehört; `SameSite=Lax` oder `Strict` verhindert genau das. **Sniffing** unterstellt einen passiven Angreifer im Netzwerk; `Secure` zwingt den Browser, das Cookie nur über TLS zu senden. Wichtig ist, dass diese drei Attribute orthogonal sind — jedes blockiert genau einen Vektor, und nur die Kombination aller drei plus serverseitige Hygiene (ID-Rotation nach Login, Logout-Invalidierung, kurze Laufzeiten) ergibt eine belastbare Session-Implementierung. Wer Single-Page-Apps mit Cross-Site-API-Calls baut, muss zusätzlich CSRF-Token oder ein Double-Submit-Pattern einsetzen, weil `SameSite=Strict` dort zu restriktiv wäre.
 
 --
- 
 
-## Cookie-Tracking I — Third-Party-Cookies
+## Cookie-Tracking I — Third-Party-Cookies 
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="column figure-80">
 
 ![Eine Tracking-Domain wird auf vielen Sites eingebunden — der Browser sendet das Cookie automatisch zurück.](/courses/web-and-data-engineering/figures/cookie-tracking-thirdparty.svg)
 
@@ -1513,15 +1678,13 @@ Third-Party-Cookies sind die einfachste Form von Cross-Site-Tracking. Der Trick 
 
 --
 
-<!-- .slide: class="smaller" -->
-
 ## Cookie-Tracking II — ID-Sync über Redirects
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="column figure-90">
 
 ![Zwei Tracker tauschen ihre IDs über eine Redirect-Kette mit URL-Parameter aus.](/courses/web-and-data-engineering/figures/cookie-syncing-redirect.svg)
 
@@ -1530,21 +1693,20 @@ Third-Party-Cookies sind die einfachste Form von Cross-Site-Tracking. Der Trick 
 
 <div class="column small">
 
-**Problem:** Tracker A und B haben jeweils ihre eigene ID für denselben Nutzer (`a_id=A123`, `b_id=B456`) — kennen aber die ID des anderen nicht. Same-Origin verbietet das direkte Lesen.
+
+**Akteure:** Im Online-Werbemarkt vermitteln zwei Arten von Plattformen zwischen Publisher und Werbetreibendem:
+
+- **SSP (Supply-Side Platform)** — auf der Verkäuferseite. Vermarktet die Werbeflächen eines Publishers (z.B. einer Nachrichtensite) und versteigert sie in Echtzeit an den höchstbietenden Käufer.
+- **DSP (Demand-Side Platform)** — auf der Käuferseite. Kauft im Auftrag von Werbetreibenden gezielt Werbeflächen, um deren Zielgruppen anzusprechen.
+
+Beide haben jeweils eigene Nutzer-IDs in eigenen Cookies — kennen aber die ID des Partners nicht. Same-Origin verbietet das direkte Lesen.
 
 **Lösung — Cookie-Syncing:**
 
-1. Sync-Pixel von Tracker A wird geladen; A liest sein Cookie.
-2. A antwortet mit `302 Redirect` zu Tracker B — A's eigene ID steckt **im URL-Parameter** (`?partner_id=A123`).
-3. Browser folgt zum Redirect-Ziel B und sendet dabei **B's eigenes Cookie** mit; in der URL liegt A's ID.
-4. B speichert die Zuordnung `A123 ↔ B456` in seiner Mapping-Tabelle.
-
-
-<div class="c-warning">
-
-Beide Tracker können nun Daten zum selben Nutzer austauschen, **ohne dass je eine Domain das Cookie der anderen las**. Voraussetzung: der Browser akzeptiert Third-Party-Cookies — was moderne Browser zunehmend blockieren.
-
-</div>
+1. Sync-Pixel der SSP wird geladen; SSP liest ihr Cookie (`a_id=A123`).
+2. SSP antwortet mit `302 Redirect` zur DSP — die eigene ID steckt **im URL-Parameter** (`?partner_id=A123`).
+3. Browser folgt zur DSP und sendet dabei **deren eigenes Cookie** (`b_id=B456`) mit; in der URL liegt A's ID.
+4. DSP speichert die Zuordnung `A123 ↔ B456` in ihrer Mapping-Tabelle und kann den Nutzer fortan beim Bidding wiedererkennen.
 
 
 </div>
@@ -1558,7 +1720,272 @@ Cookie-Syncing (auch *Cookie-Matching* oder *ID-Matching*) ist der Mechanismus h
 
 --
 
+<!-- .slide: class="smaller" -->
 
+## CORS — Same-Origin kontrolliert lockern
+
+
+<div class="c-info small">
+
+**Warum es Same-Origin überhaupt gibt:** Der Browser sendet Cookies *automatisch* an die Domain, die sie gesetzt hat. Ohne weitere Schutzregel könnte eine beliebige bösartige Site `evil.example` einfach `fetch("https://meinebank.example/konto")` aufrufen. Same-Origin Policy verhindert das: Skripte einer Origin dürfen Responses anderer Origins **nicht lesen**. Das ist die Sicherheitsbasis, auf der Cookies, Logins und sensible APIs im Browser überhaupt funktionieren können.
+
+</div>
+
+
+
+<div class="c-warning small">
+
+**Problem:** Genau dieselbe Regel blockiert auch legitime Anwendungsfälle. Eine SPA auf `https://app.example` will per `fetch()` mit `https://api.example` sprechen — beide gehören demselben Anbieter, sind aber unterschiedliche Origins. Ohne Ausnahme würde der Browser jeden Request blockieren.
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**CORS** (*Cross-Origin Resource Sharing*) ist die kontrollierte Lockerung: Der **Server** entscheidet per Response-Header, welche fremden Origins lesend zugreifen dürfen. Der Browser erzwingt die Regel — das Skript bekommt das Response-Objekt nur dann zu sehen, wenn der Server zustimmt.
+
+**Zwei Arten von Cross-Origin-Requests:**
+
+| Typ | Auslöser | Verhalten |
+|---|---|---|
+| **Simple** | `GET`/`HEAD`/`POST` mit nur Standard-Headern und Standard-Content-Types (`text/plain`, `multipart/form-data`, `application/x-www-form-urlencoded`) | Browser schickt den Request direkt; bei fehlendem `Access-Control-Allow-Origin` *verwirft* er die Antwort vor dem Skript. |
+| **Preflight-pflichtig** | `PUT`/`DELETE`/`PATCH`, `Content-Type: application/json`, eigene Header wie `Authorization` | Browser schickt erst einen `OPTIONS`-Preflight (siehe nächste Folie) und nur bei Zustimmung den eigentlichen Request. |
+
+
+</div>
+
+
+<div class="column">
+
+
+**Server-Antwort (vereinfacht):**
+
+```http
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: https://app.example
+Content-Type: application/json
+
+{ "user": "anna", ... }
+```
+
+Ohne `Access-Control-Allow-Origin` blockiert der Browser den Zugriff aus JavaScript (sichtbar als CORS-Fehler in der Konsole) — der Server kann dabei trotzdem schon einen Treffer protokolliert haben, weil der Request selbst ankam. CORS schützt also den *Client* vor unbeabsichtigtem Datenabfluss an fremde Origins, nicht den Server vor Anfragen.
+
+
+<div class="c-note">
+
+**Wichtig:** CORS gilt nur für **Browser-JS** (`fetch`/`XHR`). Server-zu-Server-Requests, `curl`, oder Native-Apps sind nicht betroffen — die haben keine Same-Origin Policy.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Die Same-Origin Policy ist die fundamentale Browser-Sicherheitsregel: Skripte einer Origin dürfen weder DOM noch Daten anderer Origins lesen. CORS ist die Ausnahmeregel, mit der Server explizit Zugriff erlauben — ohne sie würden moderne SPA-Architekturen (Frontend auf Vercel, API auf eigener Domain) nicht funktionieren. Die Asymmetrie ist wichtig: CORS schützt den Client (genauer: den User, dessen Browser eine Drittsite besucht) davor, dass JavaScript dieser Drittsite unkontrolliert mit fremden Origins reden und deren Daten an die Drittsite zurückgeben kann. Den *Server* schützt CORS nicht — wer einen Endpunkt vor unautorisierten Zugriffen schützen will, braucht Authentifizierung. Die Unterscheidung simple vs. preflight ist historisch: simple Requests entsprechen dem, was schon HTML-Formulare per `POST` konnten, also vor CORS-Zeiten ohnehin möglich war. Alles, was darüber hinausgeht (eigene Methoden, JSON-Bodies, Auth-Header), erfordert vorherige Erlaubnis per Preflight.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## CORS: Preflight mit `OPTIONS`
+
+
+<div class="c-warning small">
+
+**Ziel:** Bevor der Browser einen Request schickt, der *mehr kann als ein klassisches HTML-Formular* (`PUT`/`DELETE`, JSON-Body, eigene Header wie `Authorization`), fragt er den Server erst per `OPTIONS`, ob die Operation überhaupt erlaubt ist. **Warum:** Simple Requests waren schon vor CORS möglich (HTML-Formular kann jede URL anfragen) — die kann der Browser nicht mehr zurückhalten. Alles darüber hinaus ist *neue* Fähigkeit, die XHR/`fetch` erst geschaffen hat — der Server muss sie deshalb explizit freigeben, bevor der Browser sie an eine fremde Origin schickt. So vermeidet man, dass eine bösartige Site neue Cross-Origin-Operationen am Server auslöst.
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**① Browser fragt nach:**
+
+```http
+OPTIONS /v1/orders HTTP/1.1
+Host: api.example
+Origin: https://app.example
+Access-Control-Request-Method: PUT
+Access-Control-Request-Headers:
+  Authorization, Content-Type
+```
+
+**② Server antwortet:**
+
+```http
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.example
+Access-Control-Allow-Methods: PUT, DELETE
+Access-Control-Allow-Headers:
+  Authorization, Content-Type
+Access-Control-Max-Age: 86400
+```
+
+**③** Nur bei passender Antwort schickt der Browser anschließend den eigentlichen `PUT /v1/orders` los — sonst wird er ohne Netzwerkversuch direkt im JS abgebrochen.
+
+
+</div>
+
+
+<div class="column">
+
+
+**Was der Browser konkret prüft:**
+
+| Antwort-Header | Prüfung |
+|---|---|
+| `Allow-Origin` | matched die aufrufende Origin? |
+| `Allow-Methods` | enthält die geplante Methode (`PUT`)? |
+| `Allow-Headers` | enthält alle nicht-Standard-Header (`Authorization`, eigene)? |
+
+
+<div class="c-note">
+
+**`Max-Age: 86400`** — der Browser cacht die Preflight-Antwort 24 h und spart sich `OPTIONS` für Folgeaufrufe. Policy-Änderungen greifen erst nach Cache-Ablauf.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Der Preflight-Mechanismus ist der Hauptgrund für CORS-Probleme in der Praxis: Entwickler vergessen oft, dass jeder JSON-`POST` oder authentifizierte Request eine vorausgehende `OPTIONS`-Anfrage auslöst, die der Server auch beantworten muss. Wer einen API-Endpunkt schreibt, muss neben dem eigentlichen Handler auch einen `OPTIONS`-Handler bereitstellen oder ein Framework verwenden, das CORS automatisch handhabt (Express `cors`, Spring `@CrossOrigin`, FastAPI `CORSMiddleware`, …). Bei der Auswahl der `Allow-Origin`-Werte gilt: lieber explizite Liste der erlaubten Origins als ein pauschales `*`, weil `*` keine Cookies erlaubt (siehe nächste Folie) und außerdem ein zu weites Vertrauensfenster aufmacht. In großen Setups mit vielen Frontend-Domains wird `Origin` request-spezifisch geprüft und der Header dann mit genau dem zurückgegeben, was angefragt wurde — `Vary: Origin` muss dabei gesetzt sein, damit Caches die Antworten nicht über Origins hinweg vermischen.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## CORS und Credentials
+
+
+<div class="c-warning small">
+
+**Default:** Cross-Origin-`fetch` sendet **keine Cookies** und keine `Authorization`-Header — auch wenn der Browser sie für die Zieldomain gespeichert hätte. Das schützt vor unbeabsichtigtem Mitsenden von Anmeldedaten an fremde Origins.
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**Damit Cookies/Auth mitgehen — drei Bedingungen müssen alle erfüllt sein:**
+
+**1. Client signalisiert Absicht:**
+
+```javascript
+fetch("https://api.example/me", {
+  credentials: "include"   // statt default "same-origin"
+})
+```
+
+**2. Server erlaubt explizit:**
+
+```http
+Access-Control-Allow-Origin: https://app.example
+Access-Control-Allow-Credentials: true
+```
+
+
+<div class="c-warning">
+
+**Wildcard verboten:** `Access-Control-Allow-Origin: *` ist mit `Allow-Credentials: true` **nicht** kombinierbar. Die Origin muss explizit genannt werden, sonst lehnt der Browser ab.
+
+</div>
+
+
+**3. Cookie selbst muss cross-site-fähig sein:**
+
+```http
+Set-Cookie: session=abc123;
+  HttpOnly; Secure;
+  SameSite=None     ← Pflicht für Cross-Origin
+```
+
+
+</div>
+
+
+<div class="column">
+
+
+**Das Zusammenspiel mit `SameSite`:**
+
+| `SameSite` | Verhalten bei Cross-Origin |
+|---|---|
+| `Strict` | Cookie wird **nie** an fremde Origin gesendet — auch bei expliziter CORS-Freigabe nicht |
+| `Lax` (default) | Cookie geht nur bei *Top-Level-Navigation* mit, nicht bei `fetch`/XHR |
+| `None` + `Secure` | Cookie wird bei Cross-Origin gesendet, sofern CORS zustimmt |
+
+
+<div class="c-info">
+
+**Typisches Setup für SPA + getrennte API-Domain:**
+
+- Frontend `app.example`, API `api.example`
+- Session-Cookie: `SameSite=None; Secure; HttpOnly`
+- CORS auf API: `Allow-Origin: https://app.example` + `Allow-Credentials: true`
+- Frontend-`fetch` mit `credentials: "include"`
+
+Alternativ — wenn man `SameSite=Strict` halten will: Frontend und API auf derselben Site (z.B. `app.example` + `app.example/api/*`) hosten oder ein BFF-Pattern verwenden.
+
+</div>
+
+
+**Warum so streng?** Ohne diese Einschränkungen könnte eine bösartige Seite per `fetch` Login-Cookies des Nutzers an authentifizierte APIs mitschicken — das alte CSRF-Problem in CORS-Form. Die Dreifach-Zustimmung (Client + Server + Cookie) macht das praktisch unmöglich.
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Cookies und CORS-Credentials sind der am häufigsten missverstandene Bereich von CORS. Die Regel `Allow-Origin: *` kombiniert mit `Allow-Credentials: true` wäre eine ernsthafte Sicherheitslücke — jede beliebige Origin könnte authentifizierte Requests im Namen des Nutzers stellen — und der Browser lehnt diese Kombination deshalb hart ab. Wer `Allow-Credentials: true` braucht, muss die erlaubte Origin per Request bestimmen und mit `Vary: Origin` korrekt cachen lassen. Das Zusammenspiel mit `SameSite` ist die zweite Falle: viele Entwickler setzen `SameSite=None; Secure`, um Cross-Origin-Zugriffe zu ermöglichen, und merken erst spät, dass damit auch der gesamte CSRF-Schutz auf der Cookie-Ebene wegfällt. Wer mit Cookies arbeitet, sollte daher in modernen SPA-Setups das BFF-Pattern bevorzugen: das Frontend spricht mit einem eigenen Backend auf derselben Site, das wiederum nach hinten mit der eigentlichen API-Domain kommuniziert. Damit bleiben Cookies First-Party und SameSite kann strikt bleiben. Die OAuth-/JWT-Welt umgeht das Cookie-Problem teilweise durch Bearer Token im `Authorization`-Header — die unterliegen ebenfalls CORS, aber ohne das `SameSite`-Detail.
+
+---
+
+
+<!-- .slide: class="module-slide" -->
+
+# HTTP Authentifizierung und Sicherheit
+
+
+<div class="guiding-question">
+
+**Leitfrage:** Wie schützt HTTP Identität, Vertraulichkeit und Integrität auf der Leitung — und welche Mechanismen autorisieren API-Zugriff in unterschiedlichen Szenarien?
+
+</div>
+
+
+Notes:
+TLS sichert den Transport gegen Mitlesen und Manipulation; Authentifizierungsmechanismen identifizieren den Client gegenüber dem Server. Beides zusammen ergibt die Sicherheitsschicht über reinem HTTP. Vier dominante Authentifizierungs-Mechanismen — API Key, Session Cookie, OAuth 2.0, JWT — adressieren unterschiedliche Bedrohungsmodelle und Skalierungsanforderungen. Welcher passt, hängt vom Szenario ab: Maschine-zu-Maschine, Browser-Session, delegierte Drittapp-Zugriffe, stateless Microservices.
+
+--
 
 <!-- .slide: class="smaller" -->
 
@@ -1568,7 +1995,7 @@ Cookie-Syncing (auch *Cookie-Matching* oder *ID-Matching*) ist der Mechanismus h
 <div class="grid-2">
 
 
-<div class="column small">
+<div class="column">
 
 | Eigenschaft | HTTP | HTTPS |
 |---|---|---|
@@ -1576,9 +2003,9 @@ Cookie-Syncing (auch *Cookie-Matching* oder *ID-Matching*) ist der Mechanismus h
 | **Integrität** | Manipulierbar | Manipulation erkannt |
 | **Authentizität** | Keine Garantie | Zertifikat bestätigt |
 
-**Diskussionsfrage:** Ein Angreifer im selben WLAN liest den Netzwerkverkehr mit. Welche der drei TLS-Eigenschaften schützt hier — und welche nicht?
+**Diskussionsfrage:** Ein Angreifer im selben WLAN liest den Netzwerkverkehr mit. Wie schützt TLS hier und was schützt es nicht?
 
-_(Hinweis: TLS schützt den Transport, nicht den Endpunkt.)_
+
 
 </div>
 
@@ -1593,10 +2020,412 @@ _(Hinweis: TLS schützt den Transport, nicht den Endpunkt.)_
 </div>
 
 
+<div class="c-note fade-in small">
+
+**Lösung:** 
+
+- **Vertraulichkeit** schützt — das WLAN-Sniffing sieht nur verschlüsselten Datenverkehr. 
+- **Integrität** schützt — manipulierte Pakete würden auffallen. 
+- **Authentizität** schützt im engeren Sinne nicht vor *passivem Mitlesen*, ist aber Voraussetzung dafür, dass der Schutz überhaupt greift: ohne Zertifikatsprüfung könnte ein aktiver Angreifer einen eigenen TLS-Endpunkt vorspielen (MITM) und die Verbindung im Klartext mitlesen. 
+
+Was TLS *nicht* schützt: DNS-Anfragen und Traffic-Muster sind weiter sichtbar — der Angreifer sieht *welche* Site besucht wird, nur nicht *was* übertragen wird.
+
+</div>
+
+
+
+
 Notes:
-HTTPS bedeutet HTTP über TLS (Transport Layer Security). TLS schützt Vertraulichkeit durch Verschluesselung, Integrität durch Manipulationsschutz und Authentizität durch Zertifikate. Es schützt die Transportstrecke, aber nicht automatisch den Browser selbst oder unsichere Anwendungslogik.
+HTTPS bedeutet HTTP über TLS (Transport Layer Security). TLS schützt Vertraulichkeit durch Verschluesselung, Integrität durch Manipulationsschutz und Authentizität durch Zertifikate. Es schützt die Transportstrecke, aber nicht automatisch den Browser selbst oder unsichere Anwendungslogik. Die Diskussionsfrage zielt darauf, dass Studierende den Unterschied zwischen passiven (Sniffing) und aktiven (MITM) Angriffen verstehen — und erkennen, dass Authentizität die *Voraussetzung* für Vertraulichkeit ist, nicht etwas Eigenständiges. Wer dem TLS-Endpunkt nicht vertraut, hat auch die Verschlüsselung verloren.
+**Wie TLS die drei Eigenschaften herstellt:** Der TLS-Handshake (links visualisiert) verläuft in drei Phasen. Erst tauschen Client und Server ihre Cipher-Suites und ephemeren Schlüsselanteile aus (ECDHE — Elliptic-Curve Diffie-Hellman) und einigen sich auf einen gemeinsamen *Session Key*, ohne dass dieser je über die Leitung geht. Parallel präsentiert der Server sein **X.509-Zertifikat**, das eine Zertifizierungsstelle (CA) signiert hat; der Client prüft die Signaturkette gegen sein im Betriebssystem hinterlegtes Root-Store — das erzeugt **Authentizität**. Ab Phase drei verschlüsselt jede Seite den Anwendungstraffic mit dem Session Key symmetrisch (AES-GCM/ChaCha20-Poly1305) — das erzeugt **Vertraulichkeit**. Das gleiche AEAD-Verfahren hängt an jedes Paket einen Authentication Tag, der bei Manipulation auffällt — das erzeugt **Integrität**. Wichtig: TLS schützt *die Leitung*, nicht den Endpunkt. Ein kompromittierter Browser, eine XSS-Lücke oder ein unsicherer Cookie sind durch TLS nicht abgedeckt. Ebenso wenig Metadaten wie DNS-Lookup oder SNI — diese verraten weiter, *welche* Domain besucht wird (DoH/DoT und Encrypted Client Hello adressieren das, sind aber nicht universell verbreitet).
 
 --
+
+## Authentifizierung vs. Autorisierung — Überblick
+
+
+<div class="c-info small">
+
+**Authentifizierung (AuthN):** *Wer bist du?* — Identitätsnachweis.  
+**Autorisierung (AuthZ):** *Was darfst du?* — Berechtigung für eine konkrete Operation oder Ressource.
+
+</div>
+
+
+| Mechanismus | Funktionsweise | State | Typischer Einsatz |
+|---|---|---|---|
+| **API Key** | Statischer Schlüssel im Header | Server-Lookup | M2M-APIs, CLI-Tools, Webhooks |
+| **Session Cookie** | Opake Session-ID im Cookie + Server-Store | stateful | Klassische Web-Apps |
+| **Bearer Token (JWT)** | Signierter Token mit Claims | stateless | SPAs, Mobile, Microservices |
+| **OAuth 2.0** | Delegierter Token vom Authorization Server | je nach Flow | „Login mit Google", Third-Party-Integrationen |
+
+Die vier Mechanismen sind keine Alternativen für dasselbe Problem, sondern adressieren unterschiedliche Szenarien. Auf den folgenden Folien jeweils einer im Detail.
+
+Notes:
+Authentifizierung beantwortet die Frage, *wer* ein Client ist; Autorisierung beantwortet, *was* dieser Client tun darf. Beide Konzepte werden im Alltag häufig verwechselt — der Statuscode `401` adressiert AuthN, `403` adressiert AuthZ. Die hier gezeigten vier Mechanismen unterscheiden sich nicht nur technisch, sondern auch im Bedrohungsmodell: API Keys sichern Maschine-zu-Maschine-Verbindungen ohne Nutzerkonzept; Session Cookies stabilisieren browserbasierte Sitzungen mit serverseitigem Widerruf; JWTs übertragen identitätstragende Behauptungen ohne Server-State; OAuth delegiert Zugriff auf fremde Ressourcen, ohne dass Passwörter geteilt werden. Die folgenden Folien gehen auf jeden Mechanismus einzeln ein.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Workflow: Authentifizierung mit 401 und 403
+
+![Authentifizierungs-Workflow mit 401 und 403.](/courses/web-and-data-engineering/figures/auth-401-403.svg)
+ 
+| Status | Bedeutung |
+|---|---|
+| `401 Unauthorized` | Keine gültigen Anmeldedaten vorhanden |
+| `403 Forbidden` | Identität bekannt, aber Zugriff nicht erlaubt |
+
+Notes:
+Der Unterschied zwischen `401` und `403` ist didaktisch zentral. `401 Unauthorized` fordert zunächst gültige Authentifizierung an und geht oft mit `WWW-Authenticate` einher. `403 Forbidden` bedeutet dagegen, dass die Identität akzeptiert wurde, aber für diese Operation keine Berechtigung besteht. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Mechanismus 1 — API Key
+
+
+<div class="grid-2-1 small">
+
+
+<div class="column">
+
+
+```http
+GET /v1/charges HTTP/1.1
+Host: api.stripe.com
+Authorization: Bearer sk_live_4eC39HqLyjWDarjtT1zdp7dc
+```
+
+Alternativ über eigenen Header:
+
+```http
+GET /v1/charges HTTP/1.1
+X-API-Key: sk_live_4eC39HqLyjWDarjtT1zdp7dc
+```
+
+**Funktionsweise:**
+
+1. Provider stellt den Schlüssel einmal aus; Konsument speichert ihn sicher (Env-Variable, Secret-Manager).
+2. Bei jedem Request schickt der Client den Schlüssel im Header mit.
+3. Server schlägt den Schlüssel in einer DB nach, ermittelt das zugehörige Account und prüft Quotas und Scopes.
+
+</div>
+
+
+<div class="column">
+
+
+| ✓ Vorteil | ✗ Nachteil |
+|---|---|
+| Trivial zu implementieren | Schlüssel = Vollzugriff |
+| Funktioniert ohne Browser | Kein automatischer Ablauf |
+| Cachebar, loggbar | Selten an Nutzer gebunden |
+
+
+<div class="c-note">
+
+**Praxis:** Stripe, GitHub PATs, OpenAI-API, Slack-Bots — überall dort, wo *Server* mit *Server* spricht und kein interaktiver Nutzer dahinter steht.
+
+</div>
+
+
+
+<div class="c-warning">
+
+Schlüssel nie ins Repo, nie in URLs, nie in Logs. Bei Leak: sofort rotieren.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Der API Key ist die einfachste Form von Authentifizierung — und genau deshalb für Maschine-zu-Maschine-Szenarien beliebt. Die Sicherheit hängt vollständig daran, dass der Schlüssel geheim bleibt: er sollte nie im Quellcode, in Versionskontrolle oder in URLs auftauchen, sondern in Umgebungsvariablen oder Secret-Stores (HashiCorp Vault, AWS Secrets Manager, …) liegen. Da es keinen automatischen Ablauf gibt, ist regelmäßige Rotation entscheidend; Provider wie Stripe bieten dafür Multi-Key-Mechanismen, damit ein neuer Schlüssel parallel zum alten existieren kann, bis alle Clients umgestellt sind.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Mechanismus 2 — Session Cookie
+
+
+<div class="grid-2-1 small">
+
+
+<div class="column">
+
+
+```http
+# 1) Login
+POST /login HTTP/1.1
+{ "username": "anna", "password": "..." }
+
+# 2) Server-Response
+HTTP/1.1 200 OK
+Set-Cookie: session=abc123;
+  HttpOnly; Secure; SameSite=Strict; Path=/
+
+# 3) Folge-Request — Browser sendet automatisch
+GET /dashboard HTTP/1.1
+Cookie: session=abc123
+```
+
+**Funktionsweise:**
+
+1. Login: Server prüft Credentials, legt Session-Eintrag in DB/Redis ab, schickt Session-ID im Cookie.
+2. Browser speichert Cookie domain-gebunden und sendet es bei jedem weiteren Request mit.
+3. Server schlägt ID im Session-Store nach → kennt Identität und Zustand.
+
+
+</div>
+
+
+<div class="column">
+
+
+| ✓ Vorteil | ✗ Nachteil |
+|---|---|
+| Browser handhabt Cookie automatisch | Server muss Session-Store skalieren |
+| Logout = sofortige serverseitige Invalidierung | Stateful — Sticky Sessions oder geteilter Cache |
+| Mit `HttpOnly`/`Secure`/`SameSite` robust | Schlecht für Cross-Domain-APIs |
+
+
+<div class="c-note">
+
+**Praxis:** Server-gerenderte Apps (Rails, Django, Laravel, Spring MVC) und moderne **BFF**-Architekturen ("Backend for Frontend"), bei denen das SPA-Frontend über einen eigenen Backend-Proxy gegen die API spricht.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Session Cookies sind die klassische Form der Browser-basierten Authentifizierung. Ihr entscheidender operativer Vorteil gegenüber JWTs ist die volle Server-Kontrolle: Logout, Zwangsabmeldung, Berechtigungswechsel wirken sofort beim nächsten Request, weil dieser den aktuellen Session-Eintrag liest. Der Preis ist Statefulness — bei horizontaler Skalierung müssen alle App-Server denselben Session-Store sehen, üblicherweise via Redis oder Memcached. Die Sicherheits-Attribute (`HttpOnly`, `Secure`, `SameSite`) wurden auf der Cookie-Sicherheits-Folie behandelt; sie sind hier nicht optional, sondern zwingend.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Mechanismus 3 — OAuth 2.0 (Überblick)
+
+
+<div class="grid-1-2 small">
+
+
+<div class="column">
+
+
+**Problem:** Eine App will im Auftrag des Nutzers auf eine *fremde* Ressource zugreifen (Kalender, Mails, Drive) — der Nutzer soll *nicht* sein Passwort weitergeben.
+
+**Vier Akteure:**
+
+| Akteur | Rolle | Beispiel |
+|---|---|---|
+| **Resource Owner** | Der Nutzer | Anna |
+| **Client** | App, die zugreifen will | Drittapp |
+| **Authorization Server** | Vergibt Tokens | Google Login |
+| **Resource Server** | Hält die Daten | Google Drive API |
+
+
+<div class="c-info">
+
+**Wichtig:** OAuth 2.0 ist *Autorisierung* (Delegation), nicht primär *Authentifizierung*. Für „Login mit Google" wird **OIDC** verwendet, das auf OAuth aufsetzt und einen JWT als ID-Token zurückgibt. Details sind eigenes Thema.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+
+![Beispielflow: Drittapp greift mit OAuth 2.0 + PKCE auf Annas Google Drive zu — Phase 0 (Vorbedingung) plus drei Phasen Front-/Back-Channel und API-Zugriff.](/courses/web-and-data-engineering/figures/oauth2-authorization-code-flow.svg)
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+**Konzept im Großen.** OAuth 2.0 löst ein anderes Problem als die ersten beiden Mechanismen: nicht „Wie authentifiziert sich Client X bei Server Y?", sondern „Wie kann App A im Auftrag des Nutzers auf eine Ressource bei Server B zugreifen, ohne dass A die Credentials sieht?". Das Konzept der **delegierten Autorisierung** über einen separaten Authorization Server ist heute die Grundlage jeder Federated-Login-Erfahrung (Login mit Google/GitHub/Microsoft) und jeder API-Integration zwischen großen Plattformen. Der **Authorization Code Flow mit PKCE** ist der aktuelle Standard-Flow; ältere Flows wie *Implicit* oder *Resource Owner Password Credentials* gelten als deprecated. **OpenID Connect (OIDC)** ergänzt OAuth um eine echte Identity-Aussage (`id_token` als JWT) — was technisch erklärt, warum „Login mit Google" überhaupt funktioniert: OAuth allein liefert nur einen Access Token, *wer* der Nutzer ist, sagt es nicht.
+
+**Was ist PKCE — und was sind `code_verifier` und `code_challenge`?** PKCE (*Proof Key for Code Exchange*, gesprochen „pixy", RFC 7636) ist ein Schutzmechanismus gegen Code-Interception. Die Drittapp erzeugt zu Beginn jedes Login-Flows ein zufälliges Geheimnis — den **`code_verifier`** (ein langer Zufallsstring, 43–128 Zeichen Base64-URL). Davon berechnet sie einen Hash: **`code_challenge = SHA256(code_verifier)`**, Base64-URL-codiert. Die Challenge wird in Phase 1 *öffentlich* an den Auth-Server geschickt (sie reist im URL-Parameter über den Browser), der Verifier bleibt im Drittapp-Server *geheim*. In Phase 2 schickt die Drittapp den Verifier dann *direkt* (Back-Channel) an den Auth-Server, der `SHA256(verifier) == challenge` prüft. Ein Angreifer, der den Code aus Phase 1 abfängt, hat nur die Challenge gesehen — den dazugehörigen Verifier kann er nicht rekonstruieren (One-way-Hash), kann den Code also nicht einlösen.
+
+**Was passiert in der Grafik (Schritt für Schritt):**
+
+- **Phase 0 — Client-Registrierung (oben als Banner; einmalig vor dem Flow):** Lange vor Annas Klick hat der Entwickler die Drittapp in der **Google Cloud Console** registriert. Google vergibt eine **`client_id`** (öffentlich, identifiziert die App), ein **`client_secret`** (nur dem Drittapp-Server bekannt), eine **Whitelist erlaubter `redirect_uri`-Werte** und die anfragbaren Scopes. Diese Registrierung ist der Grund, warum Google die Drittapp in Phase 1 überhaupt wiedererkennt — die `client_id` in jeder Anfrage referenziert genau diesen Eintrag, und die `redirect_uri` darf nur auf eine der hinterlegten URLs zeigen. Damit kann ein Angreifer keinen abgefangenen Code an eine eigene Domain umleiten lassen.
+
+- **Phase 1 — Front-Channel (① – ④, über Annas Browser):** Anna klickt „Login mit Google". Die Drittapp erzeugt das PKCE-Paar (Verifier + Challenge) und schickt Anna mit einem `302 Redirect` zu Google — die URL enthält `client_id`, `scope=drive.readonly`, `code_challenge` und ein `state` (CSRF-Schutz). Annas Browser landet bei Googles `/authorize`-Endpunkt, sie meldet sich an und sieht den **Consent-Dialog** („Drittapp will Zugriff auf `drive.readonly` — Erlauben?"). Nach Zustimmung antwortet Google mit `302` zurück zu `drittapp.com/callback?code=ABC&state=…` — der **Authorization Code** ist kurzlebig (~30 s), one-time, und reist *über den Browser*.
+
+- **Phase 2 — Back-Channel (⑤ – ⑥, server-zu-server, ohne Browser):** Die Drittapp ruft Googles `/token`-Endpunkt **direkt** auf — mit `code`, `code_verifier` (jetzt im Klartext) und `client_secret`. Google prüft: stimmt der `state`, ist die `redirect_uri` in der Whitelist, ist `SHA256(verifier) == challenge`? Wenn ja, kommt `{ access_token, refresh_token, id_token? }` zurück.
+
+- **Phase 3 — Ressourcen-Zugriff (⑦ – ⑧):** Die Drittapp ruft die Drive-API mit `Authorization: Bearer <access_token>` und erhält die Dateiliste.
+
+**Warum der Umweg über zwei Kanäle?** Der Browser sieht nur den `code` und die Challenge — nie den Verifier, nie das Access Token, nie das Client Secret. Selbst wenn ein Angreifer den Redirect-Parameter aus Phase 1 abfängt, kann er den Code ohne Verifier und Secret nicht einlösen. Das eigentliche Token entsteht in einer Server-zu-Server-Kommunikation, die nie über das Gerät des Nutzers läuft. Auf den folgenden zwei Folien klären wir, was so ein Access Token überhaupt ist — am Beispiel von JWTs.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Mechanismus 4 — Bearer Token (JWT)
+
+
+<div class="c-info small">
+
+**Warum brauchen wir JWTs?** OAuth (vorige Folie) liefert dem Client einen *Access Token* — aber was steckt eigentlich drin? In verteilten Architekturen (Microservices, Edge-Deployments, Multi-Region) muss jeder Service einen Aufrufer authentifizieren können, **ohne mit einer zentralen Session-DB zu sprechen**. JWTs lösen genau das: ein vom Auth-Server signiertes, selbstbeschreibendes Token, das alle Identitätsdaten selbst trägt — *Server-zu-Server-Authentifizierung* wird zur reinen lokalen Signaturprüfung, ohne Roundtrip zum Auth-Server.
+
+</div>
+
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**JWT** = *JSON Web Token* (RFC 7519). Drei Base64-URL-codierte Teile, durch Punkte getrennt — `Header.Payload.Signature`.
+
+| Teil | Inhalt |
+|---|---|
+| **Header** | Algorithmus (`alg`) und Token-Typ (`typ`) |
+| **Payload** | *Claims*: `sub` (User-ID), `exp` (Ablauf), `iat`, `iss`, Rollen, Tenant — beliebige JSON-Felder |
+| **Signature** | Kryptografische Signatur über `Header.Payload` mit Server-Secret (HMAC) oder Private Key (RSA/ECDSA) |
+
+**Warum drei Teile, warum diese Codierung?**
+
+- **Base64-URL** statt Plain-JSON: macht den Token URL-/Header-sicher.
+- **Signatur trennbar**: Server prüft nur den hinteren Teil; *was* signiert wurde, bleibt für Debugging lesbar.
+- **Header trägt `alg`**: Der Verifier weiß *bevor* er den Inhalt parst, mit welchem Verfahren er prüfen muss.
+
+
+</div>
+
+
+<div class="column">
+
+
+**Wie funktioniert die Verifikation — und warum reicht das?**
+
+1. Server berechnet aus `Header.Payload` + bekanntem Secret/Public-Key erneut die Signatur.
+2. Vergleicht mit der mitgesendeten Signatur (timing-safe). Stimmt sie nicht → 401.
+3. Liest Claims aus der Payload. Prüft `exp` (nicht abgelaufen?), `iss`/`aud` (vom richtigen Aussteller, für mich bestimmt?).
+4. **Kein DB-Lookup nötig** — alle Identitätsdaten stecken im Token selbst.
+
+
+<div class="c-note">
+
+Bei asymmetrischer Signatur (RSA/ECDSA) holt der prüfende Service den Public Key des Auth-Servers einmalig über **JWKS** (JSON Web Key Set, meist `/.well-known/jwks.json`) und cacht ihn. Er muss kein Geheimnis hüten.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Diese Folie führt das Konzept ein. JWTs sind populär geworden, weil sie ein hartnäckiges Skalierungsproblem lösen: bei klassischen Session-Cookies muss jeder API-Server Zugriff auf denselben Session-Store haben, was in verteilten Architekturen operativ teuer wird. Ein JWT ist dagegen *self-contained* — die Identitätsbehauptungen reisen im Token selbst, jeder Service prüft die Signatur lokal und kennt sofort den Nutzer, ohne mit Redis oder einer User-DB sprechen zu müssen. Besonders mächtig wird das mit asymmetrischer Signatur: der Authorization Server hat den Private Key und ist die einzige Stelle, die Tokens erzeugen kann; alle Resource Server bekommen über JWKS den Public Key und können prüfen, *ohne dass sie irgendein Geheimnis hüten*. Genau dieses Trust-Modell macht JWTs zur Standardwährung in OAuth/OIDC-Flows. Die Detail-Trade-offs (Widerruf, Sicherheitsfallen) auf der nächsten Folie.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## JWT — Beispiel, Nutzen und Trade-offs
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**Beispiel-Request:**
+
+```http
+GET /api/me HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.
+  eyJzdWIiOiI0MiIsImV4cCI6MTcxNTAwMDAwMCwicm9sZSI6ImFkbWluIn0.
+  Mz5e_kJ4qP…SIG
+```
+
+Decodiert (Base64-URL):
+
+```json
+{"alg":"RS256","typ":"JWT"}                   // Header
+{"sub":"42","exp":1715000000,"role":"admin"}  // Payload
+```
+
+**Warum nützlich:** horizontale Skalierung ohne Session-Store; weiterreichbar zwischen Microservices; asymmetrische Signatur → Public-Key-Verifikation überall, keine geteilten Geheimnisse.
+
+
+</div>
+
+
+<div class="column">
+
+
+**Preis — Widerruf vor Ablauf ist schwer.** Drei Muster:
+
+| Muster | Kerngedanke |
+|---|---|
+| **Kurze `exp` + Refresh-Token** | Access-Token 5–15 min; serverseitig invalidierbares Refresh-Token verlängert |
+| **Server-Blocklist** | `jti` widerrufener Tokens in Redis prüfen — sofortige Wirkung, dafür wieder stateful |
+| **Key-Rotation** | Signing Key tauschen — invalidiert *alle* Tokens, Notbremse |
+
+
+<div class="c-info small">
+
+**Faustregel:** Wer sofortigen, selektiven Widerruf braucht (Compliance, Finanzaufsicht, Healthcare), nimmt eher Session Cookies. JWTs sind für „eventually consistent" Identitätsaussagen gemacht, nicht für Echtzeit-Zugriffskontrolle.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+**Beispiel und Nutzen.** Das `Authorization: Bearer …`-Header-Beispiel zeigt einen typischen RS256-signierten Token (Header gibt `alg: RS256` an, Payload trägt Standard-Claims `sub`/`exp` plus Custom `role`). Der Server liest `alg`, holt den Public Key des Auth-Servers (gecached über JWKS) und verifiziert die Signatur über `Header.Payload` — keine DB-Anfrage, kein Roundtrip. Daraus die drei großen Vorteile: (1) **Horizontale Skalierung** — jeder API-Server prüft lokal, ohne mit einem zentralen Session-Store zu reden, was in verteilten Architekturen (Edge, Multi-Region) operativ entscheidend ist. (2) **Microservice-Tauglich** — der Token kann zwischen internen Services weitergereicht werden, jeder Service prüft selbständig die Signatur und liest die Claims; kein zentraler Engpass. (3) **Asymmetrische Signatur (RSA/ECDSA)** — nur der Auth-Server hat den Private Key zum Ausstellen, alle anderen Services brauchen nur den Public Key zum Prüfen. Damit gibt es kein geteiltes Geheimnis, das gehütet werden müsste — der Public Key darf öffentlich liegen.
+
+**Der Preis: Widerruf vor Ablauf.** Ein ausgestellter Token gilt bis `exp` — der Auth-Server kann ihn *nicht* zurückrufen, weil kein Resource Server mehr beim Auth-Server nachfragt. Stateless heißt im Kern: *kein Rückkanal*. Trotzdem braucht jedes ernsthafte System eine Möglichkeit, einen Token vor Ablauf zu entwerten — bei Logout, Passwort-Reset, Kompromittierung oder Rollenwechsel. Drei etablierte Muster:
+
+(1) **Kurze `exp` + Refresh-Token (Standardlösung).** Der Access Token gilt 5–15 Minuten; ein langlebiges, *serverseitig invalidierbares* Refresh-Token erneuert ihn. Logout heißt dann: Refresh Token in der Auth-Server-DB löschen — der Access Token läuft binnen Minuten aus. Hybrid aus Stateless-Access (skaliert) und Stateful-Refresh (kontrollierbar).
+
+(2) **Server-Blocklist (Denylist).** Jeder Resource Server prüft die `jti` (Token-ID) gegen eine Liste widerrufener Tokens — meist Redis mit TTL bis zur ursprünglichen `exp`. Sofortige Wirkung, aber wieder stateful und ein Roundtrip pro Request. In der Praxis als Hybrid eingesetzt: Blocklist nur für kritische Tokens (Admin-Sessions, Healthcare-Zugriffe), nicht für jedes JWT.
+
+(3) **Key-Rotation als Notbremse.** Bei Major-Incident (Datenleck, Private-Key-Diebstahl) rotiert der Auth-Server seinen Signing Key. Alle bisher ausgestellten Tokens werden ungültig, weil ihre Signaturen mit dem neuen Key nicht mehr verifizieren. Nuklear-Option, nicht selektiv.
+
+**Sicherheits-Fallen** (regelmäßig in CTFs und Bug Bounties): `alg: none` erlaubt unsignierte Tokens, manche Libraries akzeptieren das aus historischen Gründen — die Algorithmen-Erwartung muss explizit gesetzt sein. `alg`-Confusion-Attacks tauschen RSA gegen HMAC und nutzen den Public Key als HMAC-Secret. Der Payload ist nur signiert, *nicht verschlüsselt* — wer PII oder Passwort-Hashes hineinschreibt, hat sie effektiv im Klartext über Caches und Logs laufen lassen. Wer Vertraulichkeit braucht, sucht JWE.
+
+--
+
+
 
 <!-- .slide: class="smaller" -->
 
@@ -1665,347 +2494,6 @@ Diese Folie fasst das HTTP-Kapitel zusammen, bevor wir HTTP-Semantik gezielt auf
 ---
 
 
-
-<!-- .slide: class="module-slide" -->
-
-# HTTP-Semantik für APIs
-
-
-<div class="guiding-question">
-
-**Leitfrage:** Wie helfen Methoden, Statuscodes und Header dabei, API-Verhalten ohne Zusatzprotokolle klar und maschinenlesbar zu machen?
-
-</div>
-
-
-Notes:
-Eine gute API nutzt HTTP-Semantik vollständig aus. Methoden, Statuscodes und Header bilden zusammen den Vertrag zwischen Client und Server. Je klarer dieser Vertrag ist, desto weniger Sonderwissen braucht ein Client.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Was ist an dieser API-Antwort falsch?
-
-Ein Client sendet eine Bestellung an den Online-Shop:
-
-```http
-POST /api/orders HTTP/1.1
-Content-Type: application/json
-
-{"product_id": 42, "quantity": 2}
-```
-
-Der Server antwortet:
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"id": 789, "status": "created"}
-```
-
-**Aufgabe:** Die Bestellung wurde erfolgreich erstellt. Trotzdem hat die Response mindestens drei Probleme. Welche?
-
-| Problem | Warum | Besser |
-|---|---|---|
-| `200 OK` statt `201 Created` | `200` sagt „gelesen", nicht „erzeugt" | `201 Created` |
-| Kein `Location`-Header | Client weiß nicht, wo die neue Ressource liegt | `Location: /api/orders/789` |
-| Kein `Cache-Control` | Bestellungen dürfen nicht gecacht werden | `Cache-Control: no-store` |
-
-### Korrigierte Version
-
-```http
-HTTP/1.1 201 Created
-Location: /api/orders/789
-Content-Type: application/json
-Cache-Control: no-store
-
-{"id": 789, "status": "pending", "total": 159.98}
-```
-
-Notes:
-Beim erfolgreichen Erzeugen einer Ressource ist `201 Created` der passende Statuscode. Ein `Location`-Header verweist auf die neue Ressource. Zusätzlich sollte klar sein, ob eine solche Response gespeichert werden darf; für Bestellungen ist `no-store` oft sinnvoll.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Der vollständige Request-Response-Zyklus
-
-![Anatomie eines HTTP Request und Response.](/courses/web-and-data-engineering/figures/http-request-anatomy.svg)
-
-Notes:
-Der Zyklus umfasst Startzeilen, Header und optionale Bodies auf beiden Seiten. Requests enthalten typischerweise Ziel, Semantik und Metadaten; Responses enthalten Ergebnis, Beschreibungsdaten und die eigentliche Repräsentation.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Statuscodes richtig einsetzen
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-| Situation | Richtiger Code | Häufiger Fehler |
-|---|---|---|
-| Ressource erfolgreich gelesen | `200 OK` | — |
-| Ressource erfolgreich angelegt | `201 Created` + Location | `200` ohne Location |
-| Erfolgreich, aber kein Body | `204 No Content` | `200` mit leerem Body |
-| Ungültige Eingabedaten | `400 Bad Request` | `500` (ist kein Server-Fehler!) |
-| Nicht authentifiziert | `401 Unauthorized` | `403` |
-| Authentifiziert, aber nicht berechtigt | `403 Forbidden` | `401` |
-| Ressource nicht gefunden | `404 Not Found` | `200` mit Fehlermeldung im Body |
-| Konflikt (z.B. doppelter Username) | `409 Conflict` | `400` |
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-important">
-
-**Faustregel:**  
-Der Statuscode sagt dem Client, **was passiert ist**. Der Body erklärt **warum** und **was zu tun ist**.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Die Semantik der 4xx-Codes ist präziser als oft angenommen: `401 Unauthorized` bedeutet, dass die Identität fehlt oder ungültig ist — der Client soll sich neu authentifizieren. `403 Forbidden` bedeutet, dass die Identität bekannt, aber die Berechtigung nicht vorhanden ist — erneutes Einloggen hilft nicht. `400 Bad Request` beschreibt syntaktisch oder strukturell ungültige Eingaben, `422 Unprocessable Entity` fachlich ungültige (aber korrekt formatierte) Eingaben, `409 Conflict` fachliche Konflikte (z.B. Duplikat). `204 No Content` signalisiert Erfolg ohne Rückgabe-Body — für `DELETE` und `PUT` gebräuchlich. Der Statuscode ist der maschinenlesbare Kern der Antwort: Caches, Load Balancer und Monitoring-Systeme reagieren auf Codes, nicht auf Body-Inhalte. Falsch gewählte Codes (z.B. `200` mit Fehlerbeschreibung im Body) machen die API für automatisierte Verarbeitung unbrauchbar.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Fehlermodelle: Konsistenz ist alles
-
-```json
-{
-  "error": {
-    "type": "validation_error",
-    "message": "Die Eingabedaten sind ungültig.",
-    "details": [
-      { "field": "email", "code": "invalid_format",
-        "message": "Keine gültige E-Mail-Adresse" },
-      { "field": "quantity", "code": "out_of_range",
-        "message": "Muss zwischen 1 und 100 liegen" }
-    ]
-  }
-}
-```
-
-| Prinzip | Umsetzung |
-|---|---|
-| **Konsistente Struktur** | Immer dasselbe JSON-Format für Fehler |
-| **Maschinenlesbar** | `type` und `code` für automatische Verarbeitung |
-| **Menschenlesbar** | `message` für Entwickler und Endnutzer |
-| **Spezifisch** | `details` pro Feld bei Validierungsfehlern |
-| **Kein Stacktrace** | Interne Details nie an den Client |
-
-Notes:
-Ein konsistentes Fehlerformat macht APIs leichter nutzbar. Maschinenlesbare Felder wie `type` oder `code` helfen bei automatischer Verarbeitung; menschenlesbare Nachrichten helfen beim Debugging. Interne Details wie Stacktraces gehören nicht in externe Fehlermeldungen.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Fehler sauber kommunizieren
-
-![Fehler-Workflow mit Statuscode und JSON-Fehlerkörper.](/courses/web-and-data-engineering/figures/error-workflow.svg)
-
-| Situation | Typischer Code |
-|---|---|
-| Ungültige Eingabe | `400 Bad Request` oder `422 Unprocessable Content` |
-| Nicht gefunden | `404 Not Found` |
-| Konflikt | `409 Conflict` |
-| Interner Fehler | `500 Internal Server Error` |
-
-Notes:
-Ein Fehler-Workflow besteht nicht nur aus einem Statuscode, sondern aus Statuscode plus konsistentem Fehler-Body. Der Code liefert die maschinenlesbare Klasse des Problems, der JSON-Body die Details. So können Clients sowohl automatisiert reagieren als auch sinnvolle Fehlermeldungen anzeigen. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/409
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Authentifizierung: Wer darf was?
-
-| Mechanismus | Funktionsweise | Typischer Einsatz |
-|---|---|---|
-| **API Key** | Statischer Schlüssel im Header | Einfache M2M-Kommunikation |
-| **Bearer Token (JWT)** | Signierter Token im `Authorization`-Header | SPAs, Mobile Apps |
-| **OAuth 2.0** | Delegierte Autorisierung über Authorization Server | „Login mit Google" |
-| **Session Cookie** | Cookie mit Session-ID | Klassische server-gerenderte Apps |
-
-### JWT (JSON Web Token)
-
-```text
-Header.Payload.Signature
-eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.abc123signature
-```
-
-| Teil | Inhalt |
-|---|---|
-| **Header** | Algorithmus und Token-Typ |
-| **Payload** | Claims: user_id, Rollen, Ablaufzeit |
-| **Signature** | Kryptografische Signatur → Manipulation erkennbar |
-
-**Diskussionsfrage:** JWT ist stateless — der Server muss keine Session speichern. Aber: Wie widerruft man einen JWT, bevor er abläuft?
-
-Notes:
-Authentifizierung beantwortet die Frage, wer ein Client ist; Autorisierung beantwortet, was dieser Client tun darf. API Keys, Session Cookies, Bearer Tokens und OAuth 2.0 adressieren unterschiedliche Einsatzszenarien und Sicherheitsanforderungen. OAuth steht für Open Authorization und beschreibt ein Verfahren für delegierte Zugriffsfreigaben.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Authentifizierung mit 401 und 403
-
-![Authentifizierungs-Workflow mit 401 und 403.](/courses/web-and-data-engineering/figures/auth-401-403.svg)
-
-| Status | Bedeutung |
-|---|---|
-| `401 Unauthorized` | Keine gültigen Anmeldedaten vorhanden |
-| `403 Forbidden` | Identität bekannt, aber Zugriff nicht erlaubt |
-
-Notes:
-Der Unterschied zwischen `401` und `403` ist didaktisch zentral. `401 Unauthorized` fordert zunächst gültige Authentifizierung an und geht oft mit `WWW-Authenticate` einher. `403 Forbidden` bedeutet dagegen, dass die Identität akzeptiert wurde, aber für diese Operation keine Berechtigung besteht. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Rate Limiting und Idempotenz
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-### Idempotenz
-
-| Methode | Idempotent? | Warum |
-|---|---|---|
-| `GET` | ja | Liest nur |
-| `PUT` | ja | Ergebnis ist immer derselbe Zustand |
-| `DELETE` | ja | Zweites Löschen hat keinen Effekt |
-| `POST` | **nein** | Jeder Aufruf kann neue Ressource erzeugen |
-
-
-<div class="c-note">
-
-**Szenario:** Ein Nutzer klickt "Jetzt bestellen", die Verbindung bricht ab. Der Client weiß nicht, ob der Server die Bestellung schon verarbeitet hat.
-
-</div>
-
-
-
-<div class="c-definition">
-
-**Lösung:** `Idempotency-Key` - der Server erkennt den Retry und liefert das Ergebnis des ersten Requests zurück.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-### Rate Limiting
-
-```http
-HTTP/1.1 429 Too Many Requests
-Retry-After: 30
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 0
-```
-
-
-<div class="c-important">
-
-APIs begrenzen Requests pro Zeitfenster. Die Header sagen dem Client **wann** er es erneut versuchen darf.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="takeaway">
-
-
-HTTP-Semantik ist der Vertrag zwischen Client und Server. Statuscodes kommunizieren Ergebnisse, Header steuern Caching und Authentifizierung, konsistente Fehlermodelle machen APIs nutzbar. Idempotenz-Mechanismen schützen gegen doppelte Verarbeitung. Je klarer die HTTP-Semantik genutzt wird, desto weniger Sonderlogik brauchen Clients.
-
-
-</div>
-
-
-Notes:
-Rate Limiting begrenzt die Anzahl von Requests innerhalb eines Zeitfensters und schützt Systeme vor Überlastung oder Missbrauch. Idempotency Keys lösen ein anderes Problem: Sie verhindern doppelte fachliche Wirkung bei wiederholten nicht-idempotenten Requests. Beides wird oft verwechselt, gehört aber auf unterschiedliche Ebenen: Rate Limiting schützt die Infrastruktur, Idempotenz schützt die fachliche Korrektheit bei Retries.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Rate Limit und Retry-After
-
-![Rate-Limit-Workflow mit 429 und Retry-After.](/courses/web-and-data-engineering/figures/rate-limit-workflow.svg)
-
-| Header / Code | Bedeutung |
-|---|---|
-| `429 Too Many Requests` | Limit für dieses Zeitfenster erreicht |
-| `Retry-After: 30` | Neuer Versuch erst nach 30 Sekunden |
-| `X-RateLimit-*` | Optionale Zusatzinfos zu Limit und Restbudget |
-
-Notes:
-Beim Rate-Limit-Workflow kommuniziert der Server nicht nur Ablehnung, sondern auch Wiederanlaufbedingungen. Gute Clients respektieren `Retry-After`, reduzieren ihre Frequenz und kombinieren dies oft mit Backoff-Strategien. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Workflow: Asynchrone Verarbeitung mit 202 Accepted
-
-![Asynchroner Workflow mit 202 Accepted und Job-Ressource.](/courses/web-and-data-engineering/figures/async-202-workflow.svg)
-
-| Phase | Bedeutung |
-|---|---|
-| `202 Accepted` | Auftrag angenommen, aber noch nicht abgeschlossen |
-| Job-Ressource | Fortschritt oder Status abfragbar |
-| `303 See Other` | Ergebnis liegt nun unter eigener Ressource |
-
-Notes:
-Der asynchrone Workflow ist für längere Prozesse wichtig, etwa Exporte, Videoverarbeitung oder Batch-Jobs. `202 Accepted` ist nicht gleich Erfolg des eigentlichen Jobs, sondern nur Annahme zur Verarbeitung. Eine Status-Ressource entkoppelt Start und spaeteres Ergebnis sauber. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/202 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/303
-
----
 <!-- .slide: class="module-slide" -->
 
 # REST als Architekturidee
@@ -2078,8 +2566,6 @@ REST (Representational State Transfer) wurde 2000 von Roy Fielding in seiner Dis
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## REST: Ein Architekturstil, kein Protokoll
@@ -2130,8 +2616,6 @@ Die zentralen REST-Constraints sind Client-Server, Statelessness, Cacheability, 
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## Welchen Constraint verletzt dieses Design?
@@ -2152,8 +2636,6 @@ Notes:
 Sticky Sessions verletzen das Ideal der Statelessness, fehlende Cache-Deklaration verhindert Cacheability und ein direkter Bezug auf interne Datenstrukturen verletzt das Uniform Interface. REST bewertet APIs also nicht nur nach URI-Form, sondern nach ihrem Verhalten als verteiltes System.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -2201,8 +2683,6 @@ Notes:
 RPC modelliert Endpunkte oft als Funktionen oder Aktionen. REST modelliert fachliche Ressourcen und nutzt HTTP-Methoden für die Operationen auf ihnen. Dadurch kann Infrastruktur HTTP-Semantik besser auswerten, etwa für Caching, Logging, Security oder Monitoring.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -2255,8 +2735,6 @@ Eine Ressource ist das fachliche Objekt im System, etwa ein Produkt oder eine Be
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## Wann stößt REST an Grenzen?
@@ -2288,7 +2766,6 @@ REST passt gut für viele Web-APIs, aber nicht für alle Probleme. GraphQL eigne
 ---
 
 
-
 <!-- .slide: class="module-slide" -->
 
 # Ressourcen und URI-Design
@@ -2306,8 +2783,6 @@ Gute URI-Designs machen Ressourcen, Zugehörigkeit und Filter logisch sichtbar. 
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## Ressourcenorientiertes Design: Online-Shop
@@ -2320,8 +2795,6 @@ Notes:
 Typische Ressourcen eines Online-Shops sind Produkte, Kategorien, Warenkoerbe, Bestellungen und Bewertungen. Zwischen Ressourcen können Hierarchien oder Beziehungen bestehen, die sich in Collections und Unterressourcen ausdruecken lassen.
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -2375,8 +2848,6 @@ URIs sollten konsistent, lesbar und fachlich begruendet sein. Collections stehen
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## Übung: API-Design für eine Domäne
@@ -2384,6 +2855,9 @@ URIs sollten konsistent, lesbar und fachlich begruendet sein. Collections stehen
 **Aufgabe:** Entwerfen Sie die REST-Ressourcen für ein **Universitäts-Kursverwaltungssystem**. Welche Ressourcen gibt es? Welche URIs? Welche Hierarchien?
 
 Hinweis: Denken Sie an Kurse, Vorlesungen, Studierende, Einschreibungen, Noten.
+
+
+<div class="fragment fade-in">
 
 ### Eine mögliche Lösung
 
@@ -2418,9 +2892,13 @@ Hinweis: Denken Sie an Kurse, Vorlesungen, Studierende, Einschreibungen, Noten.
 
 
 
+
 <div class="c-note">
 
 **Diskussion:** Sollte die Note unter `/students/42/grades/web-eng` oder unter `/courses/web-eng/grades/42` liegen? Beide sind valide — die Wahl hängt davon ab, **wer der primäre Nutzer der API** ist.
+
+</div>
+
 
 </div>
 
@@ -2430,17 +2908,10 @@ Beim Ressourcenentwurf werden fachliche Entitäten, Beziehungen und typische Ope
 
 --
 
-
-
 <!-- .slide: class="smaller" -->
 
 ## CRUD-Mapping auf HTTP
 
-
-<div class="grid-2">
-
-
-<div class="column">
 
 | Operation | HTTP | URI | Body | Response |
 |---|---|---|---|---|
@@ -2451,10 +2922,6 @@ Beim Ressourcenentwurf werden fachliche Entitäten, Beziehungen und typische Ope
 | **Teilweise ändern** | `PATCH` | `/products/42` | Nur Änderungen | `200` / `204` |
 | **Löschen** | `DELETE` | `/products/42` | — | `204` |
 
-</div>
-
-
-<div class="column">
 
 ### Jenseits von CRUD
 
@@ -2469,11 +2936,6 @@ Nicht alles passt in CRUD. Für **Aktionen** gibt es zwei Muster:
 </div>
 
 
-</div>
-
-
-</div>
-
 
 Notes:
 CRUD (Create, Read, Update, Delete) deckt den häufigsten Fall — datenzentrierte Ressourcen — gut ab, stößt aber bei aktionsorientierten Operationen an Grenzen. Eine Bestellung stornieren ist keine `DELETE`-Operation auf der Bestellung selbst (die Bestellung bleibt erhalten, ihr Status ändert sich). Zwei etablierte Muster für solche Fälle: **Sub-Ressource** (`POST /orders/42/cancellations` — die Stornierung ist eine eigenständige Ressource, die durch `POST` entsteht) und **Controller-Ressource** (`POST /password-resets` — eine Ressource, die eine Aktion kapselt). Beide Muster bleiben HTTP-konform und vermeiden RPC-artige Verb-URLs wie `/cancelOrder?id=42`.
@@ -2484,13 +2946,25 @@ CRUD (Create, Read, Update, Delete) deckt den häufigsten Fall — datenzentrier
 
 ## Workflow: Create / Update / Delete korrekt abbilden
 
+
+<div class="figure-80">
+
+
 ![CRUD-Operationen mit typischen Statuscodes.](/courses/web-and-data-engineering/figures/crud-status-workflow.svg)
+
+</div>
+
+
+
+<div class="small">
 
 | Operation | Gute Response | Warum? |
 |---|---|---|
 | Anlegen | `201 Created` + `Location` | Neue Ressource ist entstanden |
 | Aktualisieren | `200` oder `204` | Ressource existierte bereits |
 | Löschen | `204 No Content` | Erfolgreich, aber kein Body nötig |
+
+</div>
 
 Notes:
 Dieser Workflow zeigt das typische Grundmuster für zustandsaendernde Ressourcenoperationen. Wichtig ist die Unterscheidung zwischen Erzeugen (`201 Created`) und Veraendern oder Löschen (`200` oder `204`). Die `Location`-Header-Angabe ist besonders bei neu erstellten Ressourcen wertvoll. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/201 und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/204
@@ -2501,16 +2975,15 @@ Dieser Workflow zeigt das typische Grundmuster für zustandsaendernde Ressourcen
 
 ## Workflow: Conditional PUT mit ETag und If-Match
 
+**Ziel:** Verhindern von konfligierenden Updates. Das `PUT` wird nur ausgeführt, wenn die Ressource noch die erwartete Version hat.
+
 ![Conditional PUT mit If-Match und 412 Precondition Failed.](/courses/web-and-data-engineering/figures/optimistic-concurrency.svg)
 
-**Ziel:** Das `PUT` wird nur ausgeführt, wenn die Ressource noch die erwartete Version hat.
 
 Notes:
 Das ist der typische Conditional-PUT-Workflow. Der Client sendet die neue Repräsentation nur unter der Bedingung, dass der aktuelle `ETag` noch zum zuletzt gelesenen Zustand passt. So wird verhindert, dass eine inzwischen veraltete Clientkopie neuere Änderungen überschreibt. `If-Match` formuliert diese Vorbedingung; bei Konflikt ist `412 Precondition Failed` passend. MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match und https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/412
 
 --
-
-
 
 <!-- .slide: class="smaller" -->
 
@@ -2582,121 +3055,83 @@ Gute REST-APIs beginnen mit sauber geschnittenen Ressourcen. URI-Design ist eine
 Notes:
 Collection-Ressourcen brauchen oft zusätzliche Abfrageparameter. Pagination begrenzt die Menge der Daten, Sortierung ordnet sie, Filter schraenken sie fachlich ein. Response-Metadaten und Links helfen Clients, weitere Seiten oder Suchergebnisse systematisch zu navigieren.
 
----
+--
+
+<!-- .slide: class="smaller" -->
+
+## Die API als zentrales Design-Artefakt
 
 
+<div class="grid-2 small">
 
 
+<div class="column">
 
 
-<!-- .slide: class="module-slide" -->
+**Idee:** Die API-Spezifikation ist nicht Beiwerk zur Implementierung, sondern das **zentrale Design-Artefakt**. Aus ihr werden alle anderen Bausteine synchronisiert.
 
-# Evolution, Fehler und API-Qualität
+```text
+              ┌──────────────────┐
+              │    API-Spec      │
+              │   (OpenAPI YAML) │
+              └────────┬─────────┘
+                       │
+       ┌──────────┬────┴────┬───────────┐
+       ▼          ▼         ▼           ▼
+   Server-    Client-     Doku       Mock-
+   Stub       SDKs       (Swagger    Server
+  (Codegen)  (TS/Py/…)   UI/Redoc)   (Prism)
+```
+
+**Vorteil:** Eine Quelle hält alles synchron. Spec-Änderung → Doku-Update, SDK-Update, neue Mock-Antworten, aktualisierte Test-Erwartungen.
 
 
-<div class="guiding-question">
+</div>
 
-**Leitfrage:** Wie entwickelt man APIs weiter, ohne bestehende Clients bei jeder Änderung zu brechen — und wie misst man die Qualität einer API?
+
+<div class="column">
+
+
+**API-First als Strategie — das Bezos-Mandat (Amazon, 2002):**
+
+> „All teams will henceforth expose their data and functionality through service interfaces. […] There will be no other form of interprocess communication allowed: no direct linking, no direct reads of another team's data store, no shared-memory model, no back-doors whatsoever. […] All service interfaces, without exception, must be designed from the ground up to be **externalizable**."
+
+— Bezos-Memo, ~2002, öffentlich rekonstruiert durch [Steve Yegges Plattform-Rant (2011)](https://gist.github.com/kislayverma/d48b84db1ac5d737715e8319bd4dd368).
+
+
+<div class="c-info">
+
+**Konsequenz:** Jedes Amazon-Team musste sich behandeln, als wäre es ein externer Anbieter. Diese Disziplin machte aus internen Diensten später **AWS** — die Infrastruktur war API-strukturiert und damit nach außen verkaufbar.
+
+</div>
+
+
+API-Design ist also nicht nur eine technische, sondern eine **organisatorische** Entscheidung. Spec-first zwingt Teams, Schnittstellen explizit zu klären, bevor Code entsteht.
+
+
+</div>
+
 
 </div>
 
 
 Notes:
-API-Qualität zeigt sich nicht nur im ersten Design, sondern auch in Wartbarkeit, Beobachtbarkeit und kontrollierter Weiterentwicklung. Additive Änderungen sind meist kompatibler als entfernende oder umbenennende Änderungen.
+Die Idee der Spec als zentrales Design-Artefakt ist der entscheidende Mindset-Shift gegenüber „Doku am Ende": Wenn alle Konsumenten der API (Frontend-Team, Mobile-Team, externe Partner, interne andere Microservices) gegen denselben generierten Mock entwickeln und denselben generierten Client benutzen, kann die API nicht mehr unbemerkt auseinanderdriften. Spec-Änderung in einem PR → Pipeline regeneriert Clients, lintet, vergleicht mit der letzten released Version, baut neue Doku — Konsumenten sehen Änderungen vor ihrem Inkrafttreten und können reagieren. Das Bezos-Mandat von 2002 ist die historisch wichtigste Anekdote dazu: Amazon erzwang per Dekret, dass alle internen Systeme strikt nur über Service-Interfaces kommunizieren dürfen, und dass diese Interfaces von Anfang an *externalizable* gestaltet werden müssen. Genau diese Disziplin — jede interne Funktionalität als API mit klarem Vertrag — schuf die Voraussetzung dafür, dass Amazon Web Services überhaupt entstehen konnte: ein Großteil dessen, was später als EC2, S3, SQS, RDS verkauft wurde, waren intern bereits saubere APIs, deren Externalisierung primär ein Frage von Billing und Auth war, nicht von Architektur. Die heute übliche Bezeichnung „API-First" beschreibt dieselbe Idee mit dem Werkzeug-Vorteil moderner Spec-Formate (OpenAPI, AsyncAPI, gRPC) und der Tool-Chain drumherum.
 
 --
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Welche dieser Änderungen brechen Clients?
-
-Der Online-Shop plant ein API-Update. Bewerten Sie jede Änderung:
-
-| Geplante Änderung | Kompatibel? |
-|---|---|
-| Neues Feld `"created_at"` in Produkt-Response | |
-| Feld `"discount"` aus Produkt-Response entfernen | |
-| Neuer optionaler Query-Parameter `?include=reviews` | |
-| Feld `"userName"` umbenennen in `"user_name"` | |
-| Neuer Endpunkt `GET /products/{id}/recommendations` | |
-| Pflichtfeld `"phone"` in Registrierung hinzufügen | |
-
-| Änderung | Kompatibel? | Begründung |
-|---|---|---|
-| Neues Feld in Response | **ja** | Clients ignorieren unbekannte Felder |
-| Feld aus Response entfernen | **nein** | Client erwartet `"discount"`, Feld fehlt → Fehler |
-| Neuer optionaler Parameter | **ja** | Bestehende Requests funktionieren weiter |
-| Feld umbenennen | **nein** | Client liest `"userName"`, findet es nicht |
-| Neuer Endpunkt | **ja** | Bestehende Endpunkte unverändert |
-| Pflichtfeld hinzufügen | **nein** | Bestehende Clients senden `"phone"` nicht → `400` |
-
-### Prinzip: Additive Evolution
-
-Neue Felder, Endpunkte, optionale Parameter → kompatibel. Entfernen, Umbenennen, Required machen → Breaking Change.
-
-Notes:
-Rückwärtskompatibilität bedeutet, dass bestehende Clients weiter funktionieren. Neue optionale Felder oder Endpunkte sind oft unkritisch. Entfernte Felder, geänderte Namen oder neue Pflichtangaben brechen dagegen häufig vorhandene Integrationen.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## API-Lebenszyklus
-
-| Phase | Herausforderung |
-|---|---|
-| **Design** | Ressourcen richtig schneiden, ohne zu viel vorwegzunehmen |
-| **Implement** | Server + Client SDK konsistent halten |
-| **Test** | Nicht nur „funktioniert es?", sondern „hält der Vertrag?" |
-| **Release** | Dokumentation und Versionierung synchron halten |
-| **Operate** | Fehler erkennen, bevor Clients sie melden |
-| **Evolve** | Neue Anforderungen einbauen, ohne Bestehendes zu brechen |
-
-### Robustheitsprinzip (Postel's Law)
-
-> „Be liberal in what you accept, conservative in what you send."
-
-**Diskussionsfrage:** Wenn der Server „liberal" ungültige Eingaben akzeptiert, entsteht ein impliziter Vertrag. Ist das wirklich eine gute Idee?
-
-Notes:
-Der Lebenszyklus einer API umfasst Entwurf, Implementierung, Test, Release, Betrieb und Weiterentwicklung. In jeder Phase ist der API-Vertrag zentral: Er muss technisch korrekt, dokumentiert, beobachtbar und langfristig handhabbar bleiben.
-
---
-
-
-
-<!-- .slide: class="smaller" -->
-
-## Deprecation-Strategie
-
-Wenn Breaking Changes unvermeidbar sind, müssen sie **angekündigt** und **schrittweise** eingeführt werden:
-
-```http
-Deprecation: true
-Sunset: Sat, 01 Nov 2026 00:00:00 GMT
-Link: </docs/migration-v3>; rel="deprecation"
-```
-
-| Header | Funktion |
-|---|---|
-| `Deprecation: true` | Endpunkt als veraltet markiert |
-| `Sunset` | Ab diesem Datum wird entfernt |
-| `Link` | Verweis auf Migrationsdokumentation |
-
-Notes:
-Wenn Breaking Changes unvermeidbar sind, sollten sie früh erkennbar und planbar sein. Deprecation- und Sunset-Hinweise markieren veraltete Endpunkte und geben Clients Zeit für Migration, bevor ein Endpunkt entfernt wird.
-
---
-
-
 
 <!-- .slide: class="smaller" -->
 
 ## API-Dokumentation mit OpenAPI
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**Beispiel — OpenAPI 3 Spec für `GET /products/{id}`:**
 
 ```yaml
 openapi: 3.0.3
@@ -2724,99 +3159,167 @@ paths:
           description: Produkt nicht gefunden
 ```
 
+
+</div>
+
+
+<div class="column">
+
+
+**Was die Spec definiert:**
+
+- **Endpunkte und Methoden** — `paths` listet alle URIs mit den jeweils erlaubten HTTP-Verben.
+- **Parameter** — Pfad-, Query-, Header- und Cookie-Parameter mit Typ und ob `required`.
+- **Request-/Response-Schemata** — Body-Strukturen via JSON Schema (`$ref` referenziert wiederverwendbare Komponenten unter `components/schemas`).
+- **Statuscodes** — pro Antwort: welche Codes treten auf, mit welchem Body-Schema.
+
+**Was OpenAPI dadurch ermöglicht:**
+
 | Vorteil | Erklärung |
 |---|---|
-| **Maschinenlesbar** | Automatische Code-Generierung |
-| **Interaktive Docs** | Swagger UI — Entwickler können direkt testen |
-| **Contract Testing** | Schema als Grundlage für automatisierte Tests |
-| **Single Source of Truth** | Dokumentation und Implementierung synchron |
-
-Notes:
-OpenAPI beschreibt Endpunkte, Parameter, Request- und Response-Schemata maschinenlesbar. Daraus lassen sich interaktive Dokumentation, Client-Code, Validierung und Contract Tests ableiten.
-
---
+| **Maschinenlesbar** | Codegen für Client-SDKs und Server-Stubs |
+| **Interaktive Docs** | Swagger UI / Redoc rendert direkt aus YAML, mit „Try it out" |
+| **Contract Testing** | Spec als Soll-Vorgabe für Property-/Konformitätstests |
+| **Single Source of Truth** | Doku und Implementierung können nicht mehr auseinanderlaufen |
 
 
+<div class="c-note">
 
-<!-- .slide: class="smaller" -->
+**OpenAPI ≠ Swagger.** Swagger ist die ursprüngliche Toolchain (heute Quasi-Synonym für die UI); der offene Standard heißt seit 2016 **OpenAPI Specification (OAS)** und wird von der Linux Foundation gepflegt.
 
-## Observability: APIs im Betrieb
-
-### Die vier goldenen Signale
-
-| Signal | Frage | Online-Shop-Beispiel |
-|---|---|---|
-| **Latency** | Wie lange dauern Requests? | p95 für `GET /products` < 200ms |
-| **Traffic** | Wie viel Last hat das System? | 5.000 Requests/s zur Cyber-Monday-Spitze |
-| **Errors** | Wie hoch ist die Fehlerrate? | 0,1% 5xx ist akzeptabel |
-| **Saturation** | Wie nah an der Kapazitätsgrenze? | DB-Connection-Pool bei 85% |
-
-| Säule | Was wird gemessen? | Werkzeuge |
-|---|---|---|
-| **Logging** | Einzelne Requests: Wer, Was, Wann, Ergebnis | ELK Stack, Loki |
-| **Metriken** | Aggregiert: Requests/s, Latenz, Fehlerrate | Prometheus, Grafana |
-| **Tracing** | Ein Request über alle Services hinweg | Jaeger, OpenTelemetry |
-
-Notes:
-Observability umfasst Logging, Metriken und Tracing. Die vier goldenen Signale sind Latenz, Traffic, Errors und Saturation. Zusammen helfen sie, Engpässe, Fehlerraten und Verhaltensaenderungen im Betrieb zu erkennen.
-
---
+</div>
 
 
 
-<!-- .slide: class="smaller" -->
-
-## Bewerten Sie diese API
-
-**Aufgabe:** Prüfen Sie die API des Online-Shops gegen diese Checkliste. Was fehlt?
-
-```text
-GET  /products          → 200, kein Cache-Control
-POST /products          → 200 statt 201, kein Location
-GET  /products/999      → 200 mit {"error": "not found"}
-POST /orders            → 500 bei ungültiger Eingabe
-DELETE /products/42     → 200 mit Body
-Fehler-Format: mal {"error": "..."}, mal {"message": "..."}
-```
-
-| Problem | Verstoß | Korrektur |
-|---|---|---|
-| Kein Cache-Control | Caching unkontrolliert | `Cache-Control: no-cache` + ETag |
-| `200` statt `201` bei POST | Falscher Statuscode | `201 Created` + `Location` |
-| `200` bei nicht gefunden | Statuscode lügt | `404 Not Found` |
-| `500` bei ungültiger Eingabe | Server-Fehler ≠ Client-Fehler | `400` oder `422` |
-| Body bei DELETE | Unnötig | `204 No Content` |
-| Inkonsistentes Fehlerformat | Client kann Fehler nicht parsen | Einheitliches Error-Schema |
-
-
-<div class="takeaway">
-
-
-API-Design endet nicht beim ersten Release. Die eigentliche Qualität zeigt sich in **Evolution** (additive Changes, Deprecation-Strategie, Postel's Law), **Fehlerkultur** (konsistente Fehlermodelle, spezifische Statuscodes) und **Betriebsfähigkeit** (Observability mit den vier goldenen Signalen). Eine gute API ist vorhersagbar, dokumentiert, beobachtbar und entwickelt sich weiter, ohne bestehende Clients zu brechen.
+</div>
 
 
 </div>
 
 
 Notes:
-Die Checkliste macht typische API-Schwächen sichtbar: unpassende Statuscodes, fehlende Cache-Regeln, inkonsistente Fehlerdarstellung und unklare Semantik. Gute APIs sind nicht nur funktional, sondern auch vorhersagbar und systematisch interpretierbar.
+OpenAPI ist heute der De-facto-Standard für die Spezifikation von HTTP-APIs. Die YAML-Datei beschreibt Endpunkte, Parameter, Request- und Response-Schemata vollständig maschinenlesbar — Schemata folgen JSON Schema, was sie mit anderen Toolchains kompatibel macht. Eine vollständige Spec für eine mittelgroße API kann mehrere tausend Zeilen YAML haben; sie wird daher meist modular gepflegt (`$ref` auf separate Dateien) und im Repo versioniert. Die im Beispiel gezeigte Struktur ist der absolute Kern — produktive Specs ergänzen `security`-Schemen (Bearer, API Key, OAuth-Flows), `examples` für Doku und Tests, `headers` für Response-Metadaten, `tags` für Gruppierung in der Doku und `servers` für Umgebungen (dev/staging/prod). Die strikte Trennung von OpenAPI-Spec (offener Standard) und Swagger (Toolchain) ist begrifflich wichtig: die Spec gehört keinem Anbieter, die Tools sind austauschbar.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OpenAPI-Tooling im Überblick
+
+
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+### Die wichtigsten Werkzeuge
+
+| Werkzeug | Zweck |
+|---|---|
+| **Swagger UI** / **Redoc** / **Stoplight Elements** | Interaktive HTML-Doku aus der Spec; „Try it out"-Funktion ruft echte Endpunkte auf |
+| **openapi-generator** / **Kiota** (Microsoft) | Code-Generierung: Client-SDKs (TypeScript, Python, Java, …) und Server-Stubs aus der Spec |
+| **Spectral** | Linter — prüft Spec gegen Style-Regeln (Naming, Pflicht-Statuscodes, Beschreibungen, Versionspräfix, …) |
+| **Postman** / **Bruno** / **Hurl** | API-Tests aus der Spec, sowohl manuell als auch in CI |
+| **Prism** (Stoplight) | Mock-Server, der die Spec direkt als laufende Fake-API ausführt — Frontend kann gegen die Spec entwickeln, bevor das Backend existiert |
+| **schemathesis** | Property-based Fuzz-Tests: generiert Requests aus der Spec und prüft Konformität der Responses |
+
+
+</div>
+
+
+<div class="column">
+
+
+### Best Practices für den Spec-Workflow
+
+- **Contract-first** statt Code-first: Spec wird zuerst geschrieben und im Team reviewt, dann Code dazu. Vermeidet, dass interne Implementierungsdetails in die öffentliche API durchschlagen.
+- **Spec lebt im Repo**, versioniert mit dem Code. Nicht in einem separaten Doku-Tool, das auseinanderlaufen kann.
+- **Lint in CI**: Spectral als Pflicht-Check vor jedem Merge. Naming-Konsistenz, fehlende Beschreibungen, Pflicht-Statuscodes (`400`, `401`, `404`, `500`) erkennt der Linter automatisch.
+- **Breaking-Change-Detection** in CI (z.B. `oasdiff`, `openapi-diff`): jeder PR wird gegen die letzte released Version verglichen; Breaking Changes erfordern Major-Versionssprung.
+- **Mock-Server für Parallel-Entwicklung**: Frontend-Team kann mit Prism gegen die Spec entwickeln, während das Backend-Team implementiert.
+- **Spec-driven Tests**: schemathesis o.ä. prüft im CI, dass die laufende API den Versprechen der Spec entspricht.
+
+
+<div class="c-info">
+
+Die Spec ist nicht *Doku der API*, sondern *Vertrag zur API*. Wer sie als generierten Output behandelt, verschenkt 80 % des Nutzens.
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Das Spec-zentrierte Tooling rund um OpenAPI hat sich in den letzten Jahren stark professionalisiert. Der entscheidende Mindset-Shift ist *contract-first*: Die OpenAPI-Spec wird zuerst geschrieben — handgepflegt im Repo, geprüft im Code-Review — und alles andere (Server-Stubs, Client-SDKs, Doku, Mocks, Tests) wird daraus generiert. Code-first-Workflows, bei denen Annotations im Code die Spec erzeugen, sind beliebt für interne Tools, machen aber öffentliche APIs schwerer evolvierbar, weil Implementierungsdetails ungewollt durchschlagen. Spectral als Linter ist heute Quasi-Standard und enthält Rule-Sets für gängige Anforderungen (alle Endpoints brauchen `description`, `operationId`, `responses` für mindestens `200` und `400`/`401`/`404`, …). Breaking-Change-Detection mit Tools wie `oasdiff` automatisiert die schwierige Frage, ob ein PR die API für Bestands-Clients bricht — ohne das müsste das jeder Reviewer manuell prüfen. Wer eine wirklich öffentliche API betreibt (externe Entwickler, SDKs in mehreren Sprachen), kommt um dieses Tooling kaum herum; für interne APIs ist es Overkill — dort genügt oft eine handgepflegte README plus ein Test-Setup.
 
 ---
 
-
+<!-- .slide: class="smaller" -->
 
 ## Wrap-Up
 
-- **HTTP** ist das Interaktionsmodell des Webs: Methoden drücken Absichten aus, Statuscodes kommunizieren Ergebnisse, Header steuern Caching, Sessions und Sicherheit.
-- **HTTP-Repräsentationen** machen sichtbar, in welchem Format eine Ressource übertragen wird und wie Clients und Server dieses Format aushandeln.
-- **REST** nutzt diese HTTP-Mechanismen konsequent für APIs — Ressourcen statt Funktionsaufrufe, einheitliche Schnittstelle statt proprietärer Protokolle.
-- **Gutes API-Design** beginnt bei sauber geschnittenen Ressourcen, nutzt HTTP-Semantik vollständig und plant Evolution von Anfang an mit.
-- **Betrieb** erfordert Observability, Rate Limiting und konsistente Fehlermodelle.
 
-Die nächste Vorlesung zeigt, wie diese APIs **serverseitig implementiert** werden — am Beispiel des Java-Web-Stacks.
+<div class="grid-2 small">
+
+
+<div class="column">
+
+
+**HTTP ist ein semantisches Protokoll**, kein Datentransport. Methoden drücken Absicht aus, Statuscodes kommunizieren Ergebnisse, Header steuern Caching, Sessions und Sicherheit. Infrastruktur — Browser, Caches, CDNs, Load Balancer, Monitoring — reagiert auf diese Semantik ohne Anwendungswissen.
+
+**Was wir durchgegangen sind:**
+
+- **Headers + Status Codes:** Vokabular für Metadaten und Ergebnisse — `Content-Type`, `Authorization`, `2xx`/`3xx`/`4xx`/`5xx`.
+- **Representations + Caching:** Eine Ressource, viele Repräsentationen; Content Negotiation; mehrstufiges Caching mit `Cache-Control` und `ETag`; Redirects und asynchrone Workflows.
+- **Sessions + CORS:** Zustand trotz Zustandslosigkeit via Cookies; Same-Origin als Isolation; CORS als kontrollierte Lockerung für moderne SPAs.
+- **Authentifizierung + Sicherheit:** TLS für den Transport; API Key / Session Cookie / OAuth 2.0 / JWT für unterschiedliche Auth-Szenarien.
+- **REST:** Constraints (Statelessness, Cacheability, Uniform Interface) als Architekturidee, nicht als Marketing-Begriff.
+- **Ressourcen + URI-Design + OpenAPI:** fachlich stabile Ressourcen, konsistentes Verb-Mapping, Spec-zentriertes Tooling.
+
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="c-info">
+
+**Die wichtigste Botschaft:** Wer HTTP-Semantik korrekt nutzt, gewinnt Cachebarkeit, Skalierbarkeit, Sicherheit und Beobachtbarkeit fast geschenkt. Wer alles in `POST` mit `200 OK` und „Fehler-JSON im Body" packt, verliert genau diese Vorteile — und merkt es erst, wenn die Infrastruktur nicht mehr mitspielt.
+
+</div>
+
+
+
+<div class="takeaway">
+
+
+HTTP ist das **Interaktionsmodell des Webs**. REST nutzt dieses Modell konsequent für API-Design — Ressourcen statt Funktionsaufrufe, einheitliche Schnittstelle statt proprietärer Protokolle, Evolvierbarkeit durch Spec und Versionierung statt durch Hoffnung.
+
+
+</div>
+
+
+**Wie es weitergeht:** Die nächste Vorlesung zeigt, wie diese APIs **serverseitig in Java implementiert** werden — vom HTTP-Handler bis zur Spring-Boot-Anwendung mit Persistenz und Authentifizierung.
+
+
+</div>
+
+
+</div>
+
 
 Notes:
-HTTP liefert die grundlegende Semantik für Kommunikation im Web: Methoden, Statuscodes, Header und Repräsentationen. REST nutzt genau diese Semantik für Ressourcen und ihre Darstellungen. Gute APIs kombinieren korrekt gewählte Methoden, Statuscodes, Header, konsistente Fehlermodelle und einen planbaren Evolutionspfad.
+Diese Vorlesung hat HTTP als semantisches Protokoll und REST als darauf aufbauenden Architekturstil systematisch durchgenommen. Der rote Faden war durchgehend: HTTP ist mehr als Datentransport — es ist ein gemeinsames Vokabular, auf das sich Infrastruktur und Anwendungen verlassen können, sofern es korrekt genutzt wird. Die nächste Vorlesung wechselt die Perspektive von der Protokoll- zur Implementierungsebene und zeigt, wie diese Konzepte in Java mit Spring Boot konkret umgesetzt werden: HTTP-Handler, Routing, Serialisierung, Persistenz mit JPA, Authentifizierung mit Spring Security. Wer diese Vorlesung verstanden hat, wird dort weniger über das *Was* nachdenken müssen und sich auf das *Wie* konzentrieren können.
+
+
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

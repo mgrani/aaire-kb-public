@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" font-family="Source Sans Pro, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#1565c0"/></marker>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#b71c1c"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#1b5e20"/></marker>
+    <marker id="ap" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#7b1fa2"/></marker>
+    <marker id="aw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#b06000"/></marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="380" y="16" text-anchor="middle" font-size="13" font-weight="700" fill="#333">OAuth 2.0 Authorization Code Flow + PKCE — Drittapp greift auf Annas Google Drive zu</text>
+
+  <!-- Phase 0: Client registration prerequisite -->
+  <rect x="10" y="24" width="740" height="36" rx="6" fill="#eceff1" stroke="#90a4ae" stroke-width="1.2"/>
+  <text x="15" y="38" font-size="9" font-weight="700" fill="#37474f">PHASE 0 — VORBEDINGUNG (einmalig, vor dem Flow)</text>
+  <text x="15" y="52" font-size="9" fill="#37474f">Drittapp ist beim Auth-Server registriert → besitzt <tspan font-family="Menlo, Consolas, monospace" fill="#4a148c">client_id</tspan> (öffentlich), <tspan font-family="Menlo, Consolas, monospace" fill="#4a148c">client_secret</tspan> (geheim), <tspan font-family="Menlo, Consolas, monospace" fill="#4a148c">redirect_uri</tspan>-Whitelist, Scope-Liste.</text>
+
+  <!-- Actors -->
+  <rect x="20" y="68" width="140" height="34" rx="5" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="90" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#1565c0">Anna</text>
+  <text x="90" y="96" text-anchor="middle" font-size="9" fill="#1565c0">(Browser)</text>
+
+  <rect x="200" y="68" width="140" height="34" rx="5" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="270" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#4a148c">Drittapp</text>
+  <text x="270" y="96" text-anchor="middle" font-size="9" fill="#4a148c">(Client)</text>
+
+  <rect x="380" y="68" width="140" height="34" rx="5" fill="#fff3cd" stroke="#f9ab00" stroke-width="2"/>
+  <text x="450" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#b06000">Google Login</text>
+  <text x="450" y="96" text-anchor="middle" font-size="9" fill="#b06000">(Authorization Server)</text>
+
+  <rect x="580" y="68" width="140" height="34" rx="5" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="650" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#b71c1c">Google Drive</text>
+  <text x="650" y="96" text-anchor="middle" font-size="9" fill="#b71c1c">(Resource Server)</text>
+
+  <!-- Lifelines -->
+  <line x1="90" y1="102" x2="90" y2="510" stroke="#9bb6d1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="270" y1="102" x2="270" y2="510" stroke="#c9a8d4" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="450" y1="102" x2="450" y2="510" stroke="#e6c07b" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="650" y1="102" x2="650" y2="510" stroke="#e6a39b" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+  <!-- ===== Phase 1: Front Channel ===== -->
+  <rect x="10" y="108" width="740" height="186" rx="6" fill="#e8f0fe" fill-opacity="0.25"/>
+  <text x="15" y="122" font-size="9" font-weight="700" fill="#1565c0">PHASE 1 — FRONT CHANNEL (Browser-Redirects)</text>
+
+  <!-- ① Click Login -->
+  <text x="20" y="140" font-size="10" font-weight="700" fill="#333">①</text>
+  <text x="180" y="140" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="700">Klick „Login mit Google"</text>
+  <line x1="90" y1="147" x2="266" y2="147" stroke="#1565c0" stroke-width="1.8" marker-end="url(#ab)"/>
+
+  <!-- PKCE generation annotation -->
+  <rect x="205" y="153" width="180" height="26" rx="3" fill="#faf2fc" stroke="#c9a8d4" stroke-width="0.7"/>
+  <text x="211" y="164" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#4a148c">code_verifier ← random_string()</text>
+  <text x="211" y="175" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#4a148c">code_challenge ← SHA256(verifier)</text>
+
+  <!-- ② Redirect to Auth Server -->
+  <text x="20" y="196" font-size="10" font-weight="700" fill="#333">②</text>
+  <text x="180" y="196" text-anchor="middle" font-size="9" fill="#7b1fa2" font-weight="700">302 Redirect</text>
+  <line x1="266" y1="203" x2="94" y2="203" stroke="#7b1fa2" stroke-width="1.8" marker-end="url(#ap)"/>
+  <rect x="15" y="209" width="290" height="20" rx="3" fill="#faf2fc" stroke="#c9a8d4" stroke-width="0.5"/>
+  <text x="20" y="222" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#4a148c">/authorize?scope=drive.readonly&amp;code_challenge=…&amp;state=xyz</text>
+
+  <!-- ③ Browser follows → /authorize, Login + Consent -->
+  <text x="20" y="246" font-size="10" font-weight="700" fill="#333">③</text>
+  <text x="270" y="246" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="700">GET /authorize — Anna meldet sich an &amp; stimmt Zugriff zu</text>
+  <line x1="94" y1="253" x2="446" y2="253" stroke="#1565c0" stroke-width="1.8" marker-end="url(#ab)"/>
+
+  <!-- ④ Auth Server returns code via redirect -->
+  <text x="20" y="272" font-size="10" font-weight="700" fill="#333">④</text>
+  <text x="270" y="272" text-anchor="middle" font-size="9" fill="#b06000" font-weight="700">302 → drittapp.com/callback?code=ABC&amp;state=xyz</text>
+  <line x1="446" y1="279" x2="94" y2="279" stroke="#b06000" stroke-width="1.8" marker-end="url(#aw)"/>
+
+  <!-- Browser delivers code to Drittapp (implicit step, indicated via short arrow) -->
+  <line x1="90" y1="287" x2="266" y2="287" stroke="#1565c0" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#ab)"/>
+  <text x="180" y="285" text-anchor="middle" font-size="8" fill="#666" font-style="italic">Browser folgt mit code → Drittapp</text>
+
+  <!-- ===== Phase 2: Back Channel ===== -->
+  <rect x="10" y="300" width="740" height="92" rx="6" fill="#fff3cd" fill-opacity="0.35"/>
+  <text x="15" y="314" font-size="9" font-weight="700" fill="#b06000">PHASE 2 — BACK CHANNEL (server-zu-server, kein Browser)</text>
+
+  <!-- ⑤ POST /token -->
+  <text x="20" y="332" font-size="10" font-weight="700" fill="#333">⑤</text>
+  <text x="360" y="332" text-anchor="middle" font-size="9" fill="#7b1fa2" font-weight="700">POST /token</text>
+  <line x1="274" y1="339" x2="446" y2="339" stroke="#7b1fa2" stroke-width="1.8" marker-end="url(#ap)"/>
+  <rect x="200" y="345" width="240" height="20" rx="3" fill="#faf2fc" stroke="#c9a8d4" stroke-width="0.5"/>
+  <text x="205" y="358" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#4a148c">code=ABC, code_verifier, client_secret</text>
+
+  <!-- Auth Server validation note -->
+  <text x="445" y="358" font-size="8" fill="#b06000" font-style="italic">prüft: SHA256(verifier)=challenge?</text>
+
+  <!-- ⑥ Tokens back -->
+  <text x="20" y="380" font-size="10" font-weight="700" fill="#333">⑥</text>
+  <text x="360" y="380" text-anchor="middle" font-size="9" fill="#1b5e20" font-weight="700">{ access_token, refresh_token, id_token? }</text>
+  <line x1="446" y1="387" x2="274" y2="387" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <!-- ===== Phase 3: API Access ===== -->
+  <rect x="10" y="398" width="740" height="92" rx="6" fill="#fce8e6" fill-opacity="0.35"/>
+  <text x="15" y="412" font-size="9" font-weight="700" fill="#b71c1c">PHASE 3 — RESSOURCEN-ZUGRIFF (mit Bearer Token)</text>
+
+  <!-- ⑦ GET /drive/files -->
+  <text x="20" y="430" font-size="10" font-weight="700" fill="#333">⑦</text>
+  <text x="460" y="430" text-anchor="middle" font-size="9" fill="#1565c0" font-weight="700">GET /drive/files</text>
+  <line x1="274" y1="437" x2="646" y2="437" stroke="#1565c0" stroke-width="1.8" marker-end="url(#ab)"/>
+  <rect x="200" y="443" width="350" height="20" rx="3" fill="#f0f6ff" stroke="#9bb6d1" stroke-width="0.5"/>
+  <text x="205" y="456" font-size="8.5" font-family="Menlo, Consolas, monospace" fill="#1565c0">Authorization: Bearer eyJhbGciOiJSUzI1Ni…</text>
+
+  <!-- ⑧ Files response -->
+  <text x="20" y="478" font-size="10" font-weight="700" fill="#333">⑧</text>
+  <text x="460" y="478" text-anchor="middle" font-size="9" fill="#1b5e20" font-weight="700">200 OK · JSON-Liste der Dateien</text>
+  <line x1="646" y1="485" x2="274" y2="485" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <!-- Bottom note: why PKCE matters -->
+  <rect x="10" y="495" width="740" height="20" rx="4" fill="#f0f6ff" stroke="#9bb6d1" stroke-width="0.7"/>
+  <text x="380" y="508" text-anchor="middle" font-size="9" fill="#1565c0" font-style="italic">PKCE schützt davor, dass ein Angreifer den abgefangenen Code in Schritt ④ einlöst — ohne `code_verifier` schlägt Schritt ⑤ fehl.</text>
+</svg>
