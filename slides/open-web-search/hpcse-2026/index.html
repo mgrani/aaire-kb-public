@@ -141,10 +141,10 @@ Being able to navigate the Web is as fundamental as GPS or the power grid
 
 
 
-<div class="grid-3">
+<div class="grid-4">
 
 
-<div class="column-2">
+<div class="column-2 c-violet">
 
 - High infrastructure costs
 - Broad range of technical skills required
@@ -156,15 +156,10 @@ Being able to navigate the Web is as fundamental as GPS or the power grid
 </div>
 
 
-<div class="column-1 fade-in">
+<div class="column-2 fade-in c-info">
 
-
-<div class="c-info">
 
 High upfront costs to tap the Web as resources — especially small innovators and researchers are left behind
-
-</div>
-
 
 </div>
 
@@ -273,18 +268,18 @@ Granitzer, Michael, et al. "Impact and development of an Open Web Index for open
 
 <!-- .slide: class="module-slide" -->
 
-## What is the Open Web Index?
+## The Open Web Index
 
 
 --
 
 
-### What is the Open Web Index?
+### The Open Web Index
 
 
 <div class="c-orange small tight">
 
-A **Web Index** = data structure for fast, ranked retrieval of web documents — the core of every search engine. The OWI provides such an index plus the associated metadata/text as open data.
+**The Open Web Index** — a federated, daily-published web index built across European HPC sites and consumed as composable shards.
 
 </div>
 
@@ -311,11 +306,22 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 
 <div class="c-info small">
 
-**The OWI provides:**
+**Federated production**
 
-- **Pull** — download daily pre-built  index shards (by date, language, topic)
-- **Build** — create a local index from your own data
-- **Push** — contribute custom indices back to the OWI
+- each HPC site runs the same pipeline independently
+- daily shards by date, language, topic
+
+</div>
+
+
+
+<div class="c-info small">
+
+**Three access verbs**
+
+- `owi pull` — download pre-built shards
+- `owi build` — index your own data
+- `owi push` — contribute shards back
 
 </div>
 
@@ -329,10 +335,10 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 
 <div class="c-green small tight fade-in">
 
-**Three output types per daily run:**
+**Three output types per daily run — the building blocks of a shard:**
 - `index.ciff.gz` — sparse inverted index (CIFF format; pre-configured tokenizer)
 - `metadata_*.parquet` — document metadata & enrichments (topics, microdata, locations, language, etc.; extensible)
-- Dense embeddings (GPU-enriched slice, Jina V3) for AI-based Search and Classification (on selected subsets)
+- Dense embeddings (GPU-enriched slice, Jina V3) for AI-based search and classification (on selected subsets)
 
 </div>
 
@@ -387,17 +393,19 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 
 **Top languages:** English (38.9%), German (7.2%), Spanish (6.4%), French (5.7%), Russian (5.2%)
 
+**Multimedia Objects:** Roughly 2-3 quality images and 0.5 Videos per Web-Document 
+
 **Comparison:** To meet commercial index size, OWI would need to scale by a factor of 20× — factor 10–50× for multimedia
 
 </div>
 
-<!-- Building the Open Web Index -->
+<!-- Building the Open Web Index on HPC Infrastructure -->
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-## Building the Open Web Index
+## Building the Open Web Index on HPC Infrastructure
 
 
 --
@@ -418,12 +426,6 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 ### Daily Workflow Pipeline
 
 
-<div class="grid-4">
-
-
-<div class="column column-3">
-
-
 
 <div class="figure-90">
 
@@ -432,11 +434,11 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 </div>
 
 
+<div class="grid-4">
 
-</div>
 
 
-<div class="c-info small column-1">
+<div class="c-info small column-2">
 
 **Infrastructure (2026)**
 
@@ -445,15 +447,10 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 - **~1.1 PB** raw data · **~50 TB** index · **810+ public datasets**
 - Federated storage: iRODS + S3, orchestrated via LEXIS
 
-
 </div>
 
 
-</div>
-
-
-
-<div class="c-important small">
+<div class="c-important small column-2">
 
 **Limitations as of 2026**
 
@@ -461,16 +458,10 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 - No 24/7 Operations
 - Limited funding - minimum engineering / improvement
 
-
 </div>
 
-<!-- HPC and LEXIS in the OWI pipeline -->
 
----
-
-<!-- .slide: class="module-slide" -->
-
-## OWI on HPC Infrastructure
+</div>
 
 
 --
@@ -479,69 +470,88 @@ A **Web Index** = data structure for fast, ranked retrieval of web documents —
 ### Why the OWI is an HPC Workload
 
 
+<div class="c-info center small">
+
+A heterogeneous, recurring, web-scale workflow: each stage shifts the bottleneck, and the whole pipeline runs daily across federated sites. That combination only fits HPC.
+
+</div>
+
+
+
 <div class="grid-2">
 
 
-<div class="column">
+<div class="column small">
 
 
-**Web-scale data path**
-
-- crawl and archive web pages as WARC data
-- preprocess text, language, metadata, links, quality signals
-- build sparse index shards in CIFF
-- publish aligned Parquet metadata for analytics
-- enrich selected slices with dense embeddings
-
-
-</div>
-
-
-<div class="column">
-
-
-**The bottlenecks shift by stage**
-
-| Stage | Dominant pressure |
-|---|---|
-| Crawling | network, scheduling, politeness |
-| WARC processing | I/O, parsing, decompression |
-| Indexing | memory, sorting, parsing, CPU |
-| Metadata analytics | columnar scans |
-| Embeddings | GPU throughput, vector storage |
+| Stage | Dominant pressure | Trend |
+|---|---|---|
+| Crawling | network, scheduling, politeness | stable |
+| WARC processing | I/O, parsing, decompression | stable |
+| Indexing | memory, sorting, CPU | stable |
+| Embeddings | GPU throughput | ↑ rising |
+| Vector index | GPU memory, ANN compression | ↑ rising |
 
 
 </div>
 
 
+<div class="column small">
+
+
+**Why HPC, not commodity cloud**
+
+- network capacity for crawling at scale
+- memory & CPU for daily index builds
+- GPUs for semantic enrichment
+- PB-class federated storage
+- batch scheduling already in place at scientific centers
+
+**What is shifting**
+
+- GPU pressure rises as semantic enrichment becomes default
+- vector indices must be scheduled next to classical indexing
+- the HPC question is no longer only "can we index the web?" but "can we semantically enrich it often enough for AI search?"
+
+
+</div>
+
+
 </div>
 
 
 
-<div class="c-info small">
+<div class="c-orange small">
 
-The Open Web Index is not just a search demo. It is a recurring, data-intensive production workflow that turns web-scale raw data into reusable search and AI datasets.
+No single commodity cluster covers all stages. HPC centers do — and turn the OWI into reusable public infrastructure rather than a private product.
 
 </div>
 
 
 --
 
-### How We Use LEXIS for the Open Web Index
+### LEXIS: Orchestrating the Federation
 
 
-<div class="grid-2">
+<div class="grid-1-2">
 
 
-<div class="column">
+<div class="column small">
 
 
-**LEXIS Worfklows to build the OWI**
+**The federation problem**
 
-- coordinates OWI workflows across participating HPC/data centers
-- connects compute jobs with federated storage locations
-- helps stage input data and publish daily OWI outputs
-- supports the operational bridge between crawling, processing, indexing, and distribution
+- multiple HPC sites, each with its own scheduler, storage, identity
+- the OWI must produce *aligned* daily output across all of them
+- compute and data must meet — wherever the cycles happen to be
+
+**What LEXIS does**
+
+- coordinates OWI workflows across participating HPC / data centers
+- stages input data and publishes daily OWI outputs
+- bridges federated storage and compute jobs
+- makes the build process repeatable
+
 
 </div>
 
@@ -575,56 +585,7 @@ Workflow orchestration via LEXIS
 
 <div class="c-green small">
 
-LEXIS is the core component for how OpenWebSearch.eu turns distributed HPC resources into a repeatable Open Web Index build process.
-
-</div>
-
-
-
-
-
---
-
-### From Indexing to Embedding at Scale
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-**Classical OWI output**
-
-- sparse inverted files for lexical retrieval
-- metadata partitions for filtering and analytics
-- compact daily shards by date, language, data center, and collection
-
-
-</div>
-
-
-<div class="column">
-
-
-**New AI-oriented output**
-
-- dense document embeddings for semantic retrieval
-- topic/domain/language slices for RAG systems
-- compression and pruning to make vector indices affordable
-- GPU workloads that must be scheduled next to classic indexing jobs
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="c-orange small">
-
-The HPC question is no longer only: "Can we crawl and index the web?" It is also: "Can we semantically enrich web-scale collections often enough to support AI search?"
+LEXIS turns distributed HPC resources into a repeatable, federated Open Web Index build process — including data distribution across centers.
 
 </div>
 
@@ -1154,56 +1115,6 @@ The OWI is not just for search — it is a data infrastructure for the web-scale
 
 </div>
 
-
---
-
-
-### OWI Corpora — Curated Data for AI
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-
-<div class="figure-90">
-
-![](../../_assets/ows/dashboard-main.png)
-
-</div>
-
-
-
-</div>
-
-
-<div class="column">
-
-
-**From raw index shards to reusable AI datasets**
-
-- curated collections prepared for reuse and distribution
-- licensing metadata: creator, terms, full licence text
-- domain-specific and project-specific corpora
-- suitable for training, fine-tuning, evaluation, and RAG ingestion
-- access control and storage handled through the OWI/LEXIS infrastructure
-
-
-<div class="c-info small">
-
-The corpora page is where the OWI becomes a catalog of usable AI data products, not only a list of daily technical shards.
-
-</div>
-
-
-
-</div>
-
-
-</div>
-
 <!-- Search to AI-based search -->
 
 ---
@@ -1623,11 +1534,22 @@ Text similarity experiment from PersonaRAG, [arXiv:2407.09394](https://arxiv.org
 
 
 
+<div class="c-green small">
+
+**Conclusion for agentic search:** personalization improves answers, but it also makes context management a first-class retrieval problem — what to keep, update, forget, explain, and expose to the agent.
+
+</div>
+
+
+
 </div>
 
 
 <div class="column small">
 
+
+
+<div class="c-info">
 
 **How it was tested**
 
@@ -1637,9 +1559,16 @@ Text similarity experiment from PersonaRAG, [arXiv:2407.09394](https://arxiv.org
 - accuracy for answer correctness
 - BLEU-2 for response adaptation/similarity analysis
 
+
+</div>
+
+
+<div class="c-orange">
+
+
 **What changed**
 
-- more than 5% basline improvement and 10% over vanilla RAG on WebQuestions
+- more than 5% baseline improvement and 10% over vanilla RAG on WebQuestions
 - robust with both top-3 and top-5 passages
 - outputs better reflect user-centric interaction signals
 
@@ -1647,14 +1576,88 @@ Text similarity experiment from PersonaRAG, [arXiv:2407.09394](https://arxiv.org
 </div>
 
 
+
+</div>
+
+
+</div>
+
+
+
+--
+
+### Conceptual Agent Memory Components
+
+
+<div class="small">
+
+Agentic search turns retrieval into an ongoing process: the agent must remember task state, user context, retrieved evidence, tool results, and unresolved questions. Due to attention degradation, managing becomes key for agent performance
+
+</div>
+
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+
+
+<div class="figure-90">
+
+![](../../_assets/ows/agent-memory-components.svg)
+
 </div>
 
 
 <div class="c-green small">
 
-Remaining challenge: personalization improves answers, but provenance, privacy, and controllability of user models become central retrieval questions.
+The memory layer becomes the boundary between raw retrieval and reliable agent behavior.
 
 </div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+
+<div class="c-info">
+
+**What memory stores**
+
+- session goals and constraints
+- user preferences and feedback
+- retrieved documents and snippets
+- extracted facts and claims
+- intermediate decisions and plans
+
+</div>
+
+
+
+<div class="c-violet">
+
+**What memory must control**
+
+- relevance: what should enter context?
+- lifecycle: what changes or expires?
+- provenance: where did a fact come from?
+- privacy: what may be reused?
+- compression: how much can fit?
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
 
 
 --
@@ -1692,6 +1695,13 @@ Architecture figure from NuggetIndex, [arXiv:2604.27306](https://arxiv.org/abs/2
 </div>
 
 
+<div class="c-green small">
+
+The index becomes agent memory: small facts, governed over time, linked back to evidence.
+
+</div>
+
+
 
 </div>
 
@@ -1699,9 +1709,18 @@ Architecture figure from NuggetIndex, [arXiv:2604.27306](https://arxiv.org/abs/2
 <div class="column small">
 
 
+
+<div class="c-info">
+
 **Design tension**
 
 Agents should not repeatedly retrieve long passages when the useful unit is an atomic fact with validity, evidence, and lifecycle state.
+
+</div>
+
+
+<div class="c-orange">
+
 
 **Mechanism**
 
@@ -1717,12 +1736,9 @@ Agents should not repeatedly retrieve long passages when the useful unit is an a
 </div>
 
 
-
-<div class="c-orange">
-
-The index becomes agent memory: small facts, governed over time, linked back to evidence.
-
 </div>
+
+
 
 
 
@@ -1760,12 +1776,22 @@ Efficiency figure from NuggetIndex, [arXiv:2604.27306](https://arxiv.org/abs/260
 <div class="column small">
 
 
+
+<div class="c-info">
+
 **How it was tested**
 
 - RAVine / nuggetized MS MARCO for static coverage
 - TimeQA and SituatedQA for temporal correctness
 - MuSiQue and HotpotQA for multi-hop QA
 - latency, input length, recall, conflicts, governance score
+
+
+</div>
+
+
+
+<div class="c-orange">
 
 **What changed**
 
@@ -1774,6 +1800,8 @@ Efficiency figure from NuggetIndex, [arXiv:2604.27306](https://arxiv.org/abs/260
 - conflict rate drops by 55%
 - median generator input drops from 887 to 320 tokens
 - sparse nugget retrieval reaches sub-millisecond latency
+
+</div>
 
 
 </div>

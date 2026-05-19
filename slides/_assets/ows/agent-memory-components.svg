@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 480" role="img" aria-labelledby="title desc">
+  <title id="title">Agent memory architecture</title>
+  <desc id="desc">A bounded agent context sits on top of a memory manager that applies five control problems — relevance, lifecycle, provenance, privacy, and compression — to deliver content from transient signals and persistent stores into context, with dashed return paths for write-back and forgetting.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+      <path d="M1,1 L6,3.5 L1,6 Z" fill="#0083A1"/>
+    </marker>
+    <marker id="arrow-navy" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+      <path d="M1,1 L6,3.5 L1,6 Z" fill="#164374"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+      <path d="M1,1 L6,3.5 L1,6 Z" fill="#2B6054"/>
+    </marker>
+    <style>
+      .label { font-family: Arial, Helvetica, sans-serif; fill: #333333; }
+      .head { font-size: 22px; font-weight: 700; }
+      .sub { font-size: 14px; font-style: italic; }
+      .small { font-size: 14px; }
+      .tiny { font-size: 13px; }
+      .chip { font-size: 14px; font-weight: 600; }
+      .arrow-label { font-size: 12px; font-weight: 600; }
+      .blue { fill: #0083A1; }
+      .navy { fill: #164374; }
+      .green { fill: #2B6054; }
+      .orange { fill: #D4782A; }
+      .muted { fill: #555555; }
+    </style>
+  </defs>
+
+  <rect width="880" height="480" fill="#ffffff"/>
+
+  <!-- Agent Context (top) -->
+  <rect x="80" y="20" width="720" height="70" rx="14" fill="#FFF6EF" stroke="#D4782A" stroke-width="3"/>
+  <text x="440" y="50" text-anchor="middle" class="label head orange">Agent Context</text>
+  <text x="440" y="74" text-anchor="middle" class="label sub muted">bounded working set: goals · evidence · facts · tool outputs · plans</text>
+
+  <!-- Memory Manager (centerpiece) -->
+  <rect x="140" y="130" width="600" height="200" rx="14" fill="#F2FAFC" stroke="#0083A1" stroke-width="3"/>
+  <text x="440" y="160" text-anchor="middle" class="label head blue">Memory Manager</text>
+  <text x="440" y="182" text-anchor="middle" class="label sub muted">five control problems for what reaches context</text>
+
+  <!-- Five control chips -->
+  <rect x="146" y="198" width="108" height="40" rx="20" fill="#ffffff" stroke="#0083A1" stroke-width="2"/>
+  <text x="200" y="223" text-anchor="middle" class="label chip blue">relevance</text>
+
+  <rect x="266" y="198" width="108" height="40" rx="20" fill="#ffffff" stroke="#0083A1" stroke-width="2"/>
+  <text x="320" y="223" text-anchor="middle" class="label chip blue">lifecycle</text>
+
+  <rect x="386" y="198" width="108" height="40" rx="20" fill="#ffffff" stroke="#0083A1" stroke-width="2"/>
+  <text x="440" y="223" text-anchor="middle" class="label chip blue">provenance</text>
+
+  <rect x="506" y="198" width="108" height="40" rx="20" fill="#ffffff" stroke="#0083A1" stroke-width="2"/>
+  <text x="560" y="223" text-anchor="middle" class="label chip blue">privacy</text>
+
+  <rect x="626" y="198" width="108" height="40" rx="20" fill="#ffffff" stroke="#0083A1" stroke-width="2"/>
+  <text x="680" y="223" text-anchor="middle" class="label chip blue">compression</text>
+
+  <!-- Manager operations -->
+  <text x="440" y="272" text-anchor="middle" class="label small muted">select · compress · rank · update · forget</text>
+  <text x="440" y="298" text-anchor="middle" class="label tiny muted">decides what enters context, what changes, what expires</text>
+
+  <!-- Signals (bottom-left) -->
+  <rect x="70" y="370" width="340" height="100" rx="12" fill="#F0F3F8" stroke="#164374" stroke-width="2"/>
+  <text x="240" y="398" text-anchor="middle" class="label head navy">Signals</text>
+  <text x="240" y="422" text-anchor="middle" class="label tiny muted">task state · user feedback</text>
+  <text x="240" y="442" text-anchor="middle" class="label tiny muted">tool outputs · new evidence</text>
+  <text x="240" y="462" text-anchor="middle" class="label tiny muted">transient, in-flight</text>
+
+  <!-- Stores (bottom-right) -->
+  <rect x="470" y="370" width="340" height="100" rx="12" fill="#F4F8F5" stroke="#2B6054" stroke-width="2"/>
+  <text x="640" y="398" text-anchor="middle" class="label head green">Memory Stores</text>
+  <text x="640" y="422" text-anchor="middle" class="label tiny muted">goals · preferences · facts</text>
+  <text x="640" y="442" text-anchor="middle" class="label tiny muted">decisions · plans · traces</text>
+  <text x="640" y="462" text-anchor="middle" class="label tiny muted">persistent, governed</text>
+
+  <!-- Arrows: Manager → Context (load) + dashed write-back -->
+  <path d="M 422 130 L 422 93" fill="none" stroke="#0083A1" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <text x="416" y="115" text-anchor="end" class="label arrow-label blue">load</text>
+
+  <path d="M 458 90 L 458 127" fill="none" stroke="#0083A1" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow-blue)"/>
+  <text x="464" y="115" text-anchor="start" class="label arrow-label blue">write-back</text>
+
+  <!-- Signals → Manager (ingest) -->
+  <path d="M 240 370 L 240 333" fill="none" stroke="#164374" stroke-width="3" marker-end="url(#arrow-navy)"/>
+  <text x="252" y="358" text-anchor="start" class="label arrow-label navy">ingest</text>
+
+  <!-- Stores → Manager (retrieve) + dashed persist/forget -->
+  <path d="M 612 370 L 612 333" fill="none" stroke="#2B6054" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <text x="604" y="358" text-anchor="end" class="label arrow-label green">retrieve</text>
+
+  <path d="M 668 330 L 668 367" fill="none" stroke="#2B6054" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow-green)"/>
+  <text x="676" y="358" text-anchor="start" class="label arrow-label green">persist · forget</text>
+
+</svg>
