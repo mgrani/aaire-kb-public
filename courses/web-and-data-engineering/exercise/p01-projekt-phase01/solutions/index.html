@@ -1,0 +1,338 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Projekt: Phase 01 — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/index.Kt0jKsNQ.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Projekt - Phase 01
+## Plattform zum Teilen und Bewerten von Filminformationen
+
+5430UE Web and Data Engineering
+
+20. Mai 2026
+
+Prof. Dr. Michael Granitzer, Tobias Fuchs
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Aufgabenstellung
+
+--
+
+## Aufgabenstellung
+
+Das Ziel des Projekts ist die Entwicklung einer webbasierten Plattform zur Darstellung, Suche und Bewertung von Filminformationen.
+
+**Funktionale Anforderungen (1/3)**
+- **Filme anlegen:** Nutzer sollen über ein Formular neue Filme anlegen können. Ein Eintrag muss dabei Informationen wie Titel, Erscheinungsjahr, Beschreibung/Kurzinhalt, Dauer, Genre, Altersfreigabe, eine Liste von Schauspielern sowie ein Filmbild enthalten.
+- **Übersichtsseite:** Die Startseite zeigt die zuletzt hinzugefügten Einträge an (z.B. die letzten 20). Jeder Eintrag wird hierbei mit Titel, Genre und Erstellungsdatum dargestellt. Je nach Gestaltung kann auch das Filmbild angezeigt werden (z.B. als Kacheldarstellung).
+- **Bewertungsfunktion:** Nutzer können Filme mit 1 bis 5 Sternen bewerten. Dabei soll die durchschnittliche Bewertung pro Film (z.B. 3,5 von 5 Sternen) angezeigt werden. Zudem soll sichergestellt werden, dass Benutzer einen Film nur einmal bewerten können (z.B. via Cookie oder IP-Adresse; Inhalt von Phase 02).
+
+--
+
+## Aufgabenstellung
+
+**Funktionale Anforderungen (2/3)**
+- **Top-Bewertungen:** Auf der Startseite sollen die aktuell am besten bewerteten Filme (Top 3 oder Top 5) hervorgehoben angezeigt werden.
+- **Suche und Filterung:** Die Filme sollen nach Schlüsselworten, etwa via Titel oder Schauspieler, durchsucht werden können, und das Suchergebnis wird angezeigt. Zudem können Benutzer die angezeigten Filme nach Genre, Altersfreigabe und Bewertung filtern.
+- **Detailseite:** Von jedem angezeigten Film auf der Übersichtsseite soll jederzeit eine separate Detailseite aufgerufen werden können. Diese zeigt die vollständigen erfassten Informationen zum Film, wie die Kurzbeschreibung, die Liste der Schauspieler etc.
+
+--
+
+## Aufgabenstellung
+
+**Funktionale Anforderungen (3/3)**
+- **Kommentarfunktion:** Benutzer können zu Filmen Kommentare hinterlassen, die mit Autor, ggf. Titel und Inhalt angezeigt werden. (Optional: Nachträgliche Bearbeitung durch den Autor ermöglichen).
+- **Validierung:** Eine Validierung der Eingaben erfolgt bereits clientseitig mittels JavaScript.
+- **Authentifizierung:** Es ist kein Authentifizierungssystem zu implementieren.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Phasenübersicht
+
+--
+
+## Phasenübersicht
+
+Zur Orientierung finden Sie hier eine kurze Übersicht über die zentralen Inhalte beider Phasen:
+
+| **Phase 01: Modellierung & Frontend** | **Phase 02: Backend & Integration** |
+|---|---|
+| - Gestaltung des Frontends via HTML, CSS und JavaScript<br>- Design einer intuitiven Benutzeroberfläche, responsive Design, Barrierefreiheit (u.a. semantisches HTML)<br>- Einsatz von JavaScript für Frontend-Logik<br>- Mocken der Daten, um bereits ausprobieren zu können<br>- Entwurf des Datenmodells (ER-Diagramm) | - Fortsetzung der Implementierung des Frontends<br>- Entwicklung eines Backends mit REST-API<br>- Implementierung spezifischer technischer Anforderungen<br>- Genauere Informationen bei Veröffentlichung zu Phase 02 |
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Allgemeine Vorgaben
+
+--
+
+## Allgemeine Vorgaben
+
+**Feature-basierte Implementierung:** Die Umsetzung des Projekts hat zwingend feature-basiert zu erfolgen. Das bedeutet, dass eine Funktionalität (wie z. B. die Suche oder das Bewertungssystem) als logische Einheit betrachtet wird und sowohl im Frontend als auch im Backend im Zusammenhang von der gleichen Person implementiert wird.
+
+--
+
+## Allgemeine Vorgaben
+
+**a) FimGit und GitLab Issues**
+- Für Ihr Team wurde ein FimGit-Repo erstellt, in dem Sie auch bereits Mitglied sind (Anmeldung mit Ihrem FIM-Nutzername). Nutzen Sie ausschließlich dieses Repository.
+- Nutzen Sie auch das Feature GitLab Issues zur Aufgabenplanung, Zuweisung und um einen steten Überblick zu haben, was noch zu tun ist. Die Nutzung geht in die Bewertung mit ein. Nutzen Sie ggf. ein für Sie sinnvolles Git-Branching-Modell, z.B. GitFlow.
+- Hinweis: Zugang zum FIM Gitlab erfordert einen FIM-Account. Weitere Informationen zum Account-Management des FIM-Accounts finden Sie auf der FIM-Webseite. Bei Bedarf können Sie EduVPN nutzen, um sich von außerhalb in das Universitätsnetzwerk einzuloggen.
+
+--
+
+## Allgemeine Vorgaben
+
+**b) Projektstruktur und Technologien**
+
+**Phase 01:** HTML, CSS (empfohlen: Framework Bootstrap), Javascript (nur Vanilla Javascript, keine Frameworks).
+
+**Grundlegende Projektstruktur Phase 01:**
+```text
+projekt/
+	|--	html/        (für Unterseiten)
+	|--	css/         (falls nötig)
+	|--	assets/      (ggf. Logo.png, etc.)
+	|--	js/          (JavaScript-Dateien)
+	|--	data/        (u.a. mock-Daten im JSON-Format)
+	|--	index.html   (Hauptdatei der Startseite)
+```
+
+--
+
+## Allgemeine Vorgaben
+
+**Vorgabe zum Daten-Mocking (1/2)**
+
+Um das Frontend bereits in Phase 01 ohne Backend lauffähig zu testen, werden die Filmdaten asynchron aus einer lokalen JSON-Datei geladen. In Phase 02 müssen Sie dann lediglich den Pfad der `API_URL` auf Ihren Spring Boot Backend-Endpunkt umstellen.
+
+*Beispiel für die Mock-Datei `data/movies.json`:*
+```json
+[
+{
+	"id": 1,
+	"title": "Inception",
+	"genre": "Sci-Fi",
+	"releaseYear": 2010,
+	"rating": 4.5
+}
+]
+```
+
+--
+
+## Allgemeine Vorgaben
+
+**Vorgabe zum Daten-Mocking (2/2)**
+
+*Beispiel für die JavaScript-Einbindung `js/api.js`:*
+```js
+// In Phase 01 zeigt die URL auf die lokale JSON-Datei.
+// In Phase 02 wird hier einfach die URL des REST-Endpunkts eingetragen (z.B. "/api/movies").
+const API_URL = "./data/movies.json";
+
+async function fetchMovies() {
+	try {
+		const response = await fetch(API_URL);
+		const data = await response.json();
+		console.log("Daten erfolgreich geladen:", data);
+		// Hier folgt u.a. der Aufruf Ihrer Funktionen zum Rendern des HTMLs,...
+	} catch (error) {
+		console.error("Fehler beim Laden der Filmdaten:", error);
+	}
+}
+
+// Beispielaufruf beim Laden der Seite
+document.addEventListener("DOMContentLoaded", fetchMovies);
+```
+
+--
+
+## Allgemeine Vorgaben
+
+**Phase 02 (Vorschau):** Spring Boot, Spring MVC, JPA, Relationale Datenbank (H2 oder Postgres).
+
+--
+
+## Allgemeine Vorgaben
+
+
+**c) Dokumentation**
+
+**Abgabedokument:**
+- Kurze Übersicht der Aufgaben und der jeweils allein zuständigen Person (in Einzelfällen, wie z.B. beim ER-Diagramm, können es auch mehrere Personen sein).
+- Anleitung, wie die Anwendung zu starten ist, ggf. welche Vorbereitungen noch gemacht werden müssen (Testsystem des Korrektors: Windows mit IntelliJ-IDE, Node.js ist installiert, Internetverbindung vorhanden, ggf. eine lokale PostgresDB vorhanden).
+- Optional: Implementierte Besonderheiten, ungelöste Probleme, speziell in Phase 01: Fragen, die in der Besprechung geklärt werden sollen.
+
+--
+
+## Allgemeine Vorgaben
+
+**Code:**
+- Dokumentieren Sie Ihren Code sinnvoll und knapp, aber ausreichend (Keine Romane!, kein LLM-BlaBla).
+- Verpflichtend: Verwendung des @author-Tags bei CSS, JS und Java, HTML ggf. via Kommentar oder als meta-Info im Header.
+- Projektplanung und Aufgabenverteilung sowie Tracking des Arbeitsstands via GitLab Issues.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Abgaben und Vorstellung
+
+--
+
+## Abgaben und Vorstellung
+
+**Abgabe:**
+- Eine verbindliche Abgabe in beiden Phasen.
+- Abgabe für Phase 01 bis zum **29.05.2026 um 23:59 Uhr**.
+- Einsendung per E-Mail mit dem Betreff „WDE [GruppenNr] [Gruppenname]“, inklusive Namen und Matrikelnummern der Teilnehmenden, einem Link zum FIMGit-Repository und dem Hash des Commits der Abgabe.
+- Bestandteile der Abgabe:
+  1. Abgabedokument via PDF
+  2. Projekt als ZIP-Datei
+  3. ER-Diagramm
+  4. README.md im Git-Repository (reicht auch für finale Abgabe)
+
+--
+
+## Abgaben und Vorstellung
+
+**Präsentation Phase 01:**
+- 5-minütige Präsentation Ihres Entwurfs in der Woche vom 01.06. bis 05.06.2026.; Termine sind buchbar via Stud.IP (hauptsächlich am 03.06.).
+- Ziel ist es, gemeinsam Ihren Entwurf zu besprechen und Feedback zu geben. Zeigen Sie Ihren Entwurf im Browser und erläutern Sie Ihre Überlegungen dazu.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Weiteres
+
+--
+
+## Weiteres
+
+- Nutzung einer Plagiatssoftware zur Sicherstellung der Originalität des Codes. Keine Verwendung von Code aus früheren Projekten oder Online-Quellen.
+- Generative Modelle wie ChatGPT dürfen zur Unterstützung des Projekts verwendet werden, eine Dokumentation in welcher Form ist jedoch notwendig. Die inhaltliche Verantwortung verbleibt vollständig bei den Teammitgliedern.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Materialien
+
+--
+
+
+## Demoprojekt zu Projektstruktur
+
+Projekt zur Demonstration der Projektstruktur. Dieses soll lediglich die Ordnerstruktur und die Einbindung von Bootstrap, sowie den Zugriff auf lokale .json-Dateien zeigen:   
+[demo.zip](./materials/demo.zip)
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>
