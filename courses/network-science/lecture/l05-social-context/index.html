@@ -128,6 +128,52 @@ The key point is that homophily is a *statistical* pattern requiring a counterfa
 
 --
 
+<!-- .slide: class="figure-70" -->
+
+## What Does Homophily Look Like?
+
+![Homophily as similarity-biased tie formation](/courses/network-science/figures/homophily-similarity-bias.svg)
+
+
+<div class="c-info smaller">
+
+**Homophily** = tie formation is biased toward similarity. Within-group edges (colored) dominate; cross-group edges (gray) are rare. The pattern looks clear-cut — but a strong within-group share could also arise mechanically when one class is much larger than the other. The next slide makes that worry precise.
+
+</div>
+
+
+Notes:
+This is the visual hook for the whole homophily module. Students see the pattern first — clustered, segregated, easy to spot — then in the next slide they discover that "easy to spot" is not the same as "more than chance." Use this slide to land the everyday meaning of homophily ("birds of a feather flock together") before any formula appears.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Homophily — What Counts as "More Than Chance"?
+
+
+<div class="c-info smaller">
+
+Before calling that pattern *homophily*, we have to ask: **how many same-class ties would we see if people paired up purely at random?** Only the *excess* over that chance rate is evidence of a preference for similarity.
+
+</div>
+
+
+![If we ignored preferences and paired nodes at random, how often would the two endpoints share a class?](/courses/network-science/figures/homophily-baseline-intuition.svg)
+
+
+<div class="c-info smaller">
+
+Each cell's area is the chance of that ordered pair; the **colored diagonal cells** are the same-class outcomes. In the skewed population (right), 82% of random pairs already match — so an observed 85% within-group rate is almost noise. *Next slide:* we name this chance rate $H_{\text{base}}$.
+
+</div>
+
+
+Notes:
+This slide opens with the *question* — what would chance alone produce? — not with a formula. The probability-square visualisation lets students *see* the answer: each cell is an ordered pair of endpoints, its area is the joint probability of that pair, and the diagonal cells are the same-class outcomes. The skewed 90/10 panel is the punchline: chance alone explains 82% within-group ties, so any honest claim of homophily must beat that rate. Only on the next slide do we attach the name $H_{\text{base}}$ and the formula $\sum p_i^2$ — by that point students already understand what the formula is doing geometrically: summing the areas of the diagonal cells.
+
+--
+
 ## Homophily — Formal Definition
 
 
@@ -135,7 +181,7 @@ The key point is that homophily is a *statistical* pattern requiring a counterfa
 
 **Homophily.** Edge formation is biased toward similarity in a node attribute $x$. Formally, for a categorical attribute with class shares $p_1, \dots, p_k$:
 
-- **Random-mixing baseline:** the probability that a random tie connects same-class nodes is
+- **Random-mixing baseline** (area of the diagonal cells in the probability square):
 
 $$H_{\text{base}} = \sum_{i=1}^{k} p_i^2$$
 
@@ -151,7 +197,32 @@ $r = 0$: random mixing. $r = 1$: perfect segregation. $r < 0$: heterophily (pref
 
 
 Notes:
-The homophily index $r$ is a variant of Newman's assortativity coefficient for categorical attributes (Newman, 2003). It is the standard way to quantify homophily in empirical network studies. The normalization by $(1 - H_{\text{base}})$ matters: in a population that is 90% one type, even random mixing produces 82% within-group ties; reporting 85% same-group without the baseline would overstate the evidence for homophily.
+With the probability-square intuition from the previous slide, the formula $H_{\text{base}} = \sum p_i^2$ is just the area of the diagonal cells. The homophily index $r$ is a variant of Newman's assortativity coefficient for categorical attributes (Newman, 2003); it is the standard way to quantify homophily in empirical network studies. The normalization by $(1 - H_{\text{base}})$ matters precisely because of the 90/10 case shown in the previous figure: reporting "85% same-group" without the baseline would overstate the evidence for homophily.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Homophily — Three Numbers, One Story
+
+| Measure | What it tells you | Depends on |
+|---|---|---|
+| $H_{\text{base}}$ | **The chance rate.** What random pairing alone would produce. Large when one class dominates the population. | Class shares only |
+| $H_{\text{obs}}$ | **What the data actually shows.** Count the within-class edges and divide by the total. | Observed edges only |
+| $r$ | **How far the network has moved from chance toward perfect segregation**, on a 0–1 scale. $r=0$: chance. $r=1$: perfect segregation. $r<0$: cross-class preference (heterophily). | Both |
+
+![The homophily index r as a fractional position on the scale from chance to perfect segregation](/courses/network-science/figures/homophily-index-scale.svg)
+
+
+<div class="c-info smaller">
+
+The classroom example: $H_{\text{base}} = 0.50$, $H_{\text{obs}} = 0.89$. The observed rate has covered **78% of the available room** above chance — that is the homophily index $r$.
+
+</div>
+
+
+Notes:
+This slide gives each of the three measures a one-sentence plain-English meaning and shows $r$ as a *fractional position* on the line between chance and perfect segregation. The visual is meant to dispel a common confusion: $r$ is **not** $H_{\text{obs}} - H_{\text{base}}$ (the raw excess), but the *fraction of available room* the network has used. The "available room" is whatever lies above the chance baseline; in a balanced population the room is large (0.50), in a skewed 90/10 population the room is small (0.18). That denominator is what makes $r$ comparable across populations with different class shares.
 
 --
 
@@ -159,60 +230,63 @@ The homophily index $r$ is a variant of Newman's assortativity coefficient for c
 
 ## Homophily Baseline Trap
 
-The same observed within-group share can mean very different things depending on the population composition.
+The **same observed within-group share** can mean very different things depending on the population composition. The table below holds $H_{\text{obs}} = 0.85$ fixed and varies the class shares:
 
-| Population shares | Random baseline $H_{\text{base}}$ | If $H_{\text{obs}} = 0.85$ | Interpretation |
-|---|---:|---:|---|
-| 50% / 50% | $0.5^2 + 0.5^2 = 0.50$ | $r = 0.70$ | Strong excess homophily |
-| 90% / 10% | $0.9^2 + 0.1^2 = 0.82$ | $r = 0.17$ | Only mild excess homophily |
+| Population shares | $H_{\text{base}}$ | Room above chance | $r$ | What you can honestly say |
+|---|---:|---:|---:|---|
+| 50% / 50% | $0.50$ | $0.50$ | $0.70$ | Strong excess — 70% of the way to perfect segregation |
+| 70% / 30% | $0.58$ | $0.42$ | $0.64$ | Substantial — 64% of available room used |
+| 90% / 10% | $0.82$ | $0.18$ | $0.17$ | Barely above chance — almost nothing to explain |
+| 99% / 1%  | $0.98$ | $0.02$ | $<0$ | *Below* chance — actually heterophilic! |
+
+**Why this trap is so common.** Journalists and researchers often report "X% of friendships are within-group" *without the baseline*. In a setting that is 80% one type and 20% another, $H_{\text{base}}$ is already $0.68$ — so an "82% within-group" headline is barely homophily. The trap appears whenever group sizes are imbalanced: school ethnicity studies, workplace gender networks, online platform demographics. The "Birds of a Feather" review (McPherson, Smith-Lovin & Cook 2001) insists on reporting effect sizes *relative to* a population-specific baseline for exactly this reason.
 
 
 <div class="c-caution small">
 
-Never interpret "85% of ties are within-group" without asking: **85% compared to what baseline?**
+Never interpret "X% of ties are within-group" without asking: **X% compared to what baseline?** The baseline depends on the population, not on what feels intuitively high.
 
 </div>
 
 
 Notes:
-This is a useful didactic pause because students often read a high within-group percentage as direct evidence of strong preference. In imbalanced populations, high within-group rates happen mechanically. The baseline is the counterfactual random-mixing rate, not 50%.
+This is a useful didactic pause because students often read a high within-group percentage as direct evidence of strong preference. The expanded table shows that the same 0.85 within-group rate maps to $r = 0.70$ in a balanced population but to $r = 0.17$ — or even *heterophily* — in skewed populations. A concrete teaching example: a school that is 80% one ethnic group and 20% another will *mechanically* produce ~68% same-ethnicity friendships even under fully random mixing, before any preference. Reporting "82% same-group" out of context would overstate the evidence by a wide margin. This is precisely why the McPherson, Smith-Lovin & Cook (2001) review of homophily research demands a baseline.
 
 --
 
-<!-- .slide: class="figure-70" -->
-
-## Visual Intuition
-
-![Homophily as similarity-biased tie formation](/courses/network-science/figures/homophily-similarity-bias.svg)
-
-
-<div class="c-info smaller">
-
-Within-group edges (colored) are far more frequent than cross-group edges (gray). But frequency alone is insufficient — we need the random-mixing baseline to decide whether this exceeds chance.
-
-</div>
-
-
---
+<!-- .slide: class="grid-2-1" -->
 
 ## Back to the Classroom
 
-In the scenario, both tracks have 6 students ($p_{\text{STEM}} = p_{\text{Arts}} = 0.5$).
+
+<div class="column">
+
+Both tracks have 6 students, so $p_{\text{STEM}} = p_{\text{Arts}} = 0.5$.
 
 - $H_{\text{base}} = 0.5^2 + 0.5^2 = 0.50$
-- The figure has 17 within-track edges out of 19 total: $H_{\text{obs}} = 17/19 \approx 0.89$
+- 17 within-track edges of 19 total: $H_{\text{obs}} = 17/19 \approx 0.89$
 - $r = (0.89 - 0.50)/(1 - 0.50) = 0.78$
 
 
 <div class="fragment">
 
-The homophily index $r = 0.78$ is strong — far above random mixing. But it does not tell us *why*. Is it selection, socialization, or shared context?
+$r = 0.78$ is strong — far above random mixing. But it does not tell us *why*. Is it selection, socialization, or shared context?
+
+</div>
+
+
+</div>
+
+
+<div class="column top">
+
+![Classroom friendship network](/courses/network-science/figures/l05-scenario.svg)
 
 </div>
 
 
 Notes:
-Walk through the arithmetic on the slide. The punchline — "strong homophily, but the mechanism is unknown" — is the bridge to Module 2. The same $r = 0.78$ would arise under pure selection, pure socialization, or pure focal closure. Distinguishing them requires more than a cross-sectional snapshot.
+Walk through the arithmetic side-by-side with the figure: point at the within-track clusters as you read off $H_{\text{obs}}$, then point at the two dashed cross-track ties as the remainder. The punchline — "strong homophily, but the mechanism is unknown" — is the bridge to Module 2. The same $r = 0.78$ would arise under pure selection, pure socialization, or pure focal closure. Distinguishing them requires more than a cross-sectional snapshot.
 
 --
 
@@ -224,21 +298,36 @@ In a school of 200 students, 60% are in track A and 40% in track B. Of all frien
 2. Compute the homophily index $r$.
 3. Is $r$ strong evidence of homophily? What could make it misleading?
 
+
+<div class="fragment">
+
+**1.** $H_{\text{base}} = 0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$
+
+</div>
+
+
+
+<div class="fragment">
+
+**2.** $r = \dfrac{0.78 - 0.52}{1 - 0.52} = \dfrac{0.26}{0.48} \approx 0.54$ — moderate-to-strong.
+
+</div>
+
+
+
+<div class="fragment">
+
+**3.** $r = 0.54$ is moderate-to-strong evidence of homophily. It could be misleading if:
+
+- the two tracks occupy different buildings (shared context, not personal preference);
+- students were *assigned* to tracks based on pre-existing friend groups (reverse causation);
+- a third factor (e.g. family background) causes both track choice and friendship patterns (confounding).
+
+</div>
+
+
 Notes:
-Give them 4 minutes. (1) $H_{\text{base}} = 0.6^2 + 0.4^2 = 0.52$. (2) $r = (0.78 - 0.52)/(1 - 0.52) = 0.26/0.48 \approx 0.54$. (3) $r = 0.54$ is moderate-to-strong, but it can be misleading if the tracks share different physical spaces (focal closure), if students were assigned to tracks based on pre-existing friend groups (reverse causation), or if family background causes both track choice and friendship patterns (confounding).
-
---
-
-## Quick Check — Solution
-
-**1.** $H_{\text{base}} = 0.6^2 + 0.4^2 = 0.36 + 0.16 = 0.52$ <!-- .element: class="fragment" -->
-
-**2.** $r = \frac{0.78 - 0.52}{1 - 0.52} = \frac{0.26}{0.48} \approx 0.54$ <!-- .element: class="fragment" -->
-
-**3.** $r = 0.54$ is moderate-to-strong evidence of homophily. It could be misleading if: <!-- .element: class="fragment" -->
-- the two tracks occupy different buildings (shared context, not personal preference) <!-- .element: class="fragment" -->
-- students were *assigned* to tracks based on pre-existing friend groups (reverse causation) <!-- .element: class="fragment" -->
-- a third factor (e.g. family background) causes both track choice and friendship patterns (confounding) <!-- .element: class="fragment" -->
+Give them 4 minutes before revealing the fragments. (1) $H_{\text{base}} = 0.6^2 + 0.4^2 = 0.52$. (2) $r = (0.78 - 0.52)/(1 - 0.52) = 0.26/0.48 \approx 0.54$. (3) $r = 0.54$ is moderate-to-strong, but it can be misleading if the tracks share different physical spaces (focal closure), if students were assigned to tracks based on pre-existing friend groups (reverse causation), or if family background causes both track choice and friendship patterns (confounding). Reveal the three answer fragments one at a time as students suggest theirs.
 
 --
 
@@ -256,10 +345,10 @@ Homophily is not just a visual pattern — it is a statistical claim that tie fo
 
 <!-- .slide: class="smaller" -->
 
-## Study: Echo Chambers as Homophily
+## Echo Chambers — The Hypothesis
 
 
-<div class="slide-citation">Source: Cinelli et al. 2021; Nyhan et al. 2023</div>
+<div class="slide-citation">Source: Cinelli et al. 2021</div>
 
 
 
@@ -271,12 +360,11 @@ Homophily is not just a visual pattern — it is a statistical claim that tie fo
 
 | | |
 |---|---|
-| **Question** | Do social platforms expose users mostly to like-minded peers and sources? |
-| **Evidence A** | PNAS cross-platform study: Facebook, Twitter, Reddit, Gab; >100M pieces of content |
-| **Network signal** | Homophily: users interact with peers holding similar topical or political leanings |
-| **Diffusion signal** | Information tends to circulate toward like-minded users rather than crossing groups |
+| **Claim** | Online platforms expose users mostly to like-minded peers and sources. |
+| **Network signal** | High homophily in the *interaction* network (likes, retweets, replies, comments) when nodes are coloured by political leaning. |
+| **Diffusion signal** | Information circulates *within* groups rather than crossing them. |
 
-**Outcome:** Echo chambers are visible as dense, homophilic interaction regions. Facebook and Twitter show strong clustering by user leaning; Reddit is less segregated in direct comparison.
+**Why it's a homophily story.** An echo chamber is not just "people who disagree online" — it is a region of the interaction graph where within-group ties dominate so heavily that the same content recirculates without leaving the cluster.
 
 
 </div>
@@ -285,31 +373,74 @@ Homophily is not just a visual pattern — it is a statistical claim that tie fo
 <div class="column">
 
 
-| | |
-|---|---|
-| **Evidence B** | Nature field experiment on Facebook during the 2020 U.S. election |
-| **Scale** | 23,377 consenting users; exposure to like-minded sources reduced by about one-third |
-| **Result** | Cross-cutting exposure increased, but attitudes and false-belief measures did not measurably change |
+**The empirical test (Cinelli et al. 2021, PNAS).**
 
-**Interpretation:** Echo chambers are a real structural exposure pattern, but exposure alone is not a simple causal switch for polarization.
+- Four platforms: **Facebook, Twitter, Reddit, Gab**.
+- Over **100 million** interactions, hundreds of news outlets coded by political leaning.
+- For each user, compute the *leaning gap* between the user and the people / outlets they interact with.
+- A small leaning gap = the user lives in an echo chamber.
 
-
-</div>
+Different platform architectures (algorithmic feed, friend graph, subreddit topic, alt-tech) let us see whether echo chambers are universal or **architecture-dependent**.
 
 
 </div>
 
-
-
-<div class="c-caution small">
-
-**Caution:** The network concept is clearer than the causal claim. Dense homophily can reinforce information, but changing feed exposure for a few weeks may be too weak, too late, or too indirect to change stable political attitudes.
 
 </div>
 
 
 Notes:
-This example turns the homophily definition into a contemporary platform-scale case. In network terms, an echo chamber is not just "people disagree online"; it is a region of high within-group exposure, high homophily, and relatively fewer cross-cutting information paths. Cinelli et al. operationalize this with user leaning, interaction networks, and diffusion bias across multiple platforms. Nyhan et al. add a causal test: reducing like-minded source exposure on Facebook changed what people saw but did not measurably change polarization or false-belief outcomes. The lesson is methodological: structural position and causal effect are different claims. We can observe clustered exposure without assuming it is the only cause of polarization.
+This opening slide gives the *network* framing for the echo chamber concept: it is a regional, homophily-based pattern in the interaction graph. The Cinelli et al. study is the largest cross-platform test of that claim. They operationalize echo-chamber intensity as how closely a user's interaction neighbourhood mirrors the user's own leaning. The four-platform design is what makes the study informative beyond Facebook — it lets the analyst distinguish "echo chambers exist online" from "echo chambers depend on how the platform is built."
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Echo Chambers — Same Idea, Four Platforms
+
+![Echo-chamber intensity across four platforms (schematic of Cinelli et al. 2021 PNAS)](/courses/network-science/figures/echo-chambers-platforms.svg)
+
+
+<div class="c-info smaller">
+
+**Architecture matters.** Facebook and Twitter (friend / follow graphs amplified by ranking) show strong homophilic clustering by political leaning. **Gab** — small, unmoderated, single-sided audience — is even more extreme. **Reddit** is much less segregated: topic-centered subreddits force users to interact across leanings within the same subforum. The same homophily concept produces dramatically different intensities across designs.
+
+</div>
+
+
+Notes:
+The qualitative ranking (Gab > Facebook ≈ Twitter ≫ Reddit) is the central empirical result. Use the figure to make two pedagogical points: (i) "echo chamber" is not a binary — it is a measurable intensity along the homophily continuum from $r = 0$ to $r = 1$; (ii) the intensity is a *property of the platform's architecture*, not a fixed feature of human behaviour. Friend-graph platforms with ranking-based feeds make echo chambers stronger; topic-graph platforms make them weaker. This connects directly to the affiliation-network module that follows: subreddits are explicit foci, friend feeds are not.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Echo Chambers — Does Exposure Cause Polarization?
+
+
+<div class="slide-citation">Source: Nyhan et al. 2023</div>
+
+
+![Nyhan et al. (2023, Nature) field experiment: exposure changed, attitudes did not](/courses/network-science/figures/echo-chambers-nyhan-experiment.svg)
+
+
+<div class="c-info smaller">
+
+**Cinelli (2021)** shows echo chambers *exist* as a structural pattern. **Nyhan et al. (2023, Nature)** ask whether that exposure *causes* polarization. In a pre-registered randomized field experiment around the 2020 U.S. election (n ≈ 23,377 consenting Facebook users), they reduced exposure to like-minded sources by about one-third for ~3 months. Cross-cutting exposure rose substantially — but **affective polarization, issue polarization, false beliefs, and political knowledge did not measurably change** (estimates tight around zero).
+
+</div>
+
+
+
+<div class="c-caution smaller">
+
+**Structure ≠ causation.** Dense homophily can *reinforce* information, but a few weeks of changed feed exposure may be too weak, too late, or too indirect to move stable political attitudes. The network concept ("echo chamber as homophilic region") is clearer than any causal claim about its effects.
+
+</div>
+
+
+Notes:
+This is the closing slide for the homophily module's empirical case study, and it is also the moment to introduce the *structure vs. causation* distinction that the next module (selection vs. socialization) will generalize. The Nyhan study is methodologically the gold-standard test: it is randomized, pre-registered, well-powered, and uses the platform's own logs to verify that the treatment actually moved exposure. The null finding on attitudes is *not* evidence that echo chambers don't matter — it is evidence that the simple causal story "more cross-cutting exposure → less polarization" is too coarse. Possible reasons: pre-existing attitudes are stable on a multi-week scale; cross-cutting content may be ignored or counter-reasoned; the relevant causal channel may be selection into platforms, not feed composition. The point for the lecture: a clean *structural* claim (homophily exists) and a clean *causal* claim (homophily causes polarization) are different statements, and they require different evidence.
 
 ---
 
@@ -442,20 +573,35 @@ You observe that smokers tend to befriend other smokers in a college dorm.
 2. Sketch one observation pattern that would favor *selection* and one that would favor *socialization*.
 3. Even with longitudinal data, what kind of confound would remain hard to rule out?
 
+
+<div class="fragment">
+
+**1.** Longitudinal observations — friendships and smoking status at multiple time points, with newly formed ties and newly adopted behavior visible.
+
+</div>
+
+
+
+<div class="fragment">
+
+**2.**
+
+- *Selection:* new friendships disproportionately form between people who **already** share smoking status.
+- *Socialization:* people who befriend smokers become more likely to **start** smoking in the next observation period.
+
+</div>
+
+
+
+<div class="fragment">
+
+**3.** Shared *environment* — e.g. dorm floor placement causing both friendship and smoking exposure simultaneously. Even with temporal data, confounders that evolve over time alongside both the network and the attribute are hard to rule out without randomization.
+
+</div>
+
+
 Notes:
-Give them 4 minutes. (1) Longitudinal data: friendships and smoking status at multiple time points. (2) Selection: new ties form between people who already both smoke. Socialization: non-smokers start smoking after befriending smokers. (3) Shared environment: dorm floor placement may independently cause both friendship formation and smoking uptake (e.g. shared common rooms where smoking happens).
-
---
-
-## Quick Check — Solution
-
-**1.** Longitudinal observations — friendships and smoking status at multiple time points, with newly formed ties and newly adopted behavior visible. <!-- .element: class="fragment" -->
-
-**2.** <!-- .element: class="fragment" -->
-- *Selection*: New friendships disproportionately form between people who already share smoking status. <!-- .element: class="fragment" -->
-- *Socialization*: People who befriend smokers become more likely to start smoking in the next observation period. <!-- .element: class="fragment" -->
-
-**3.** Shared *environment* — e.g. dorm floor placement causing both friendship and smoking exposure simultaneously. Even with temporal data, confounders that evolve over time alongside both the network and the attribute are hard to rule out without randomization. <!-- .element: class="fragment" -->
+Give them 4 minutes before revealing the fragments. (1) Longitudinal data: friendships and smoking status at multiple time points. (2) Selection: new ties form between people who already both smoke. Socialization: non-smokers start smoking after befriending smokers. (3) Shared environment: dorm floor placement may independently cause both friendship formation and smoking uptake (e.g. shared common rooms where smoking happens).
 
 --
 
@@ -554,23 +700,53 @@ Corporate board interlocks: directors (bottom) sit on company boards (top). Two 
 
 ## Reading the Board Network
 
-An affiliation network can be projected in two different ways.
+An affiliation network is bipartite, but we usually want to ask one-sided questions about *people* or *firms*. The trick is to **project** the bipartite graph onto one side of the partition. There are two such projections, each answering a different question.
 
-| Projection | Nodes | Edge means | Example question |
-|---|---|---|---|
-| **Director network** | People | Two directors sit on the same board | Who can exchange career information or governance norms? |
-| **Company network** | Firms | Two firms share at least one director | Where can strategy, norms, or practices diffuse? |
+| Projection | Nodes | Edge | Edge weight | Question it answers |
+|---|---|---|---|---|
+| **Director network** *(person side)* | People | Two directors sit on $\geq 1$ shared board | Number of shared boards | Who can exchange career info / governance norms? Who is structurally similar? |
+| **Company network** *(focus side)* | Firms | Two firms share $\geq 1$ director | Number of shared directors | Where can strategy or practices diffuse? Which firms are strategically interlocked? |
 
 
-<div class="fragment">
+<div class="grid-2 small">
 
-**Important:** an edge in the projection is not automatically a friendship or causal influence. It is an **opportunity for exposure** created by shared context.
+
+<div class="column">
+
+**Toy example.** Three directors $\{d_1, d_2, d_3\}$ on two boards $\{b_1, b_2\}$; $d_1, d_2 \in b_1$ and $d_2, d_3 \in b_2$.
+
+- *Director projection:* $d_1 \!-\! d_2$, $d_2 \!-\! d_3$ — $d_2$ is a bridge.
+- *Company projection:* $b_1 \!-\! b_2$ — one edge, via the shared director $d_2$.
+
+The projection **destroys information**: once projected, a $d_1\!-\!d_2$ edge no longer tells you *which* board mediated it. You cannot recover the bipartite graph from either one-mode projection alone.
+
+</div>
+
+
+<div class="column">
+
+**Three rules of thumb.**
+
+1. **A projection edge = opportunity for exposure**, not a friendship and not a confirmed information channel. A quarterly board meeting is a weak channel.
+2. **Density rises sharply.** A board of size $s$ contributes $\binom{s}{2}$ projected edges from a single focus — a 12-person board adds 66 director-director edges. Projections look denser than the underlying network.
+3. **Use weights, not just edges.** Two directors sharing 5 boards is a much stronger signal than sharing 1 — but the unweighted projection makes them look identical.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-caution small">
+
+**Reading rule.** A projection edge means *"shared context exists"* — nothing more. Friendship, influence, and information flow all need additional evidence on top of the projection.
 
 </div>
 
 
 Notes:
-This extends the board example beyond the picture. Board interlocks are a classic affiliation-network case because the same bipartite data can answer person-level questions and organization-level questions. The caution is important: projection edges should be interpreted as exposure channels, not direct proof that information flowed.
+The bipartite-to-one-mode projection is the key operational move when working with affiliation data. The choice of projection is *not* neutral: it foregrounds either person-level questions (career networks, peer exchange) or organization-level questions (strategic interlocks, diffusion across firms). Use the toy example on the slide to walk through the construction: pen and paper, three directors and two boards, then mechanically derive both projections. Emphasize the information-loss point: the director-director projection forgets *which* board mediated each tie. Practical consequences: (i) interpreting clustering coefficients in projections is tricky because boards create complete subgraphs (cliques) on their members; (ii) edge weights are almost always informative and should be reported. The "exposure not friendship" caveat is the same point as in the diffusion/contagion literature — co-membership is a *channel*, not yet a *cause*.
 
 --
 
@@ -629,16 +805,32 @@ For each scenario, identify whether triadic, focal, or membership closure is at 
 2. A new graduate student joins the same lab as her advisor's other student, who introduces her.
 3. A friend invites you to their book club, and you join.
 
+
+<div class="fragment">
+
+**1. Focal closure** — the elective is the shared focus that brings them into contact.
+
+</div>
+
+
+
+<div class="fragment">
+
+**2. Triadic closure** — the advisor is the shared friend that closes the triangle.
+
+</div>
+
+
+
+<div class="fragment">
+
+**3. Membership closure** — your friend brings you into a focus you did not previously belong to.
+
+</div>
+
+
 Notes:
-Give them 3 minutes. (1) Focal closure — the elective is the shared focus. (2) Triadic closure — the new friendship forms via a shared friend (the advisor). (3) Membership closure — your friend introduces you to a focus you did not previously belong to.
-
---
-
-## Quick Check — Solution
-
-1. **Focal closure** — the elective is the shared focus that brings them into contact. <!-- .element: class="fragment" -->
-2. **Triadic closure** — the advisor is the shared friend that closes the triangle. <!-- .element: class="fragment" -->
-3. **Membership closure** — your friend brings you into a focus you did not previously belong to. <!-- .element: class="fragment" -->
+Give them 3 minutes before revealing the fragments. (1) Focal closure — the elective is the shared focus. (2) Triadic closure — the new friendship forms via a shared friend (the advisor). (3) Membership closure — your friend introduces you to a focus you did not previously belong to.
 
 --
 
@@ -671,17 +863,92 @@ Online platforms make link formation a measurable process at scale. Every new ed
 
 --
 
-## Triadic Closure at Scale
+<!-- .slide: class="smaller" -->
 
-<!-- .slide: class="figure-70" -->
+## The Setting — Kossinets & Watts (2006)
 
-![Triadic closure in email communication](/courses/network-science/figures/triadic-closure-experiment.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
-The probability of a new edge rises with the number of shared contacts — but with **diminishing returns**.
+<div class="grid-2 small">
+
+
+<div class="column">
+
+**Data.** A large U.S. research university's internal email logs, ~1 year, **~43,000 students/faculty/staff**, **~14 million** messages — plus full course-enrollment records and organizational-affiliation rosters.
+
+**Why it matters.** For the first time, all three closure types could be observed *with timestamps* on a single population: who emails whom, who shares which classes, who joins which clubs.
+
+</div>
+
+
+<div class="column">
+
+**What was measured.** At every time step, for each pair $(u, v)$ *not yet connected*, count the number $k$ of "closing paths": shared friends (triadic), shared foci (focal), or friend-mediated foci (membership). Then look at the probability that the pair connects in the next interval.
+
+The output is a curve: $P(\text{new tie}) \;\;\text{vs.}\;\; k$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-info small">
+
+This is the dataset behind the three closure-curve figures in Easley & Kleinberg Ch. 4. The timestamped data finally separates *"what existed at $t$"* from *"what formed by $t+1$"* — the missing ingredient in homophily snapshots.
+
+</div>
+
 
 Notes:
-The empirical curve shows that having 1 shared friend already raises the closure probability significantly above baseline, and additional shared friends amplify the effect. But the curve flattens — the 10th shared friend adds far less than the 1st. This rules out a purely additive model.
+Three reasons to flag the setting before showing curves: (i) the population is large enough that very rare patterns (e.g., new ties between strangers sharing many foci) appear in statistically usable numbers; (ii) the timestamps make the analysis *forward-looking* — we look only at pairs not yet connected and ask whether they connect next; (iii) the same study generates all three curves on one platform, so the *shapes* can be compared directly. Students often forget that "online data" here means email logs from 2003–2004, not social-media data.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Triadic Closure at Scale
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+
+![Triadic closure curve: probability of a new email tie versus number of mutual friends](/courses/network-science/figures/triadic-closure-experiment.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column">
+
+
+**Setup.** Two people who have **never emailed each other** but share $k$ mutual email contacts. What is the probability they exchange email within the next interval?
+
+| $k$ shared friends | $P(\text{new tie})$ |
+|---:|---|
+| 0 | very low (baseline) |
+| 1 | sharply higher |
+| 2 | higher still |
+| 5+ | curve flattens — saturation |
+
+**Two readings.**
+
+1. **Mechanism.** Mutual friends create *opportunities*: introductions, shared interests, social pressure to know each other.
+2. **Diminishing returns.** The 1st shared friend matters far more than the 10th — mutual friends are *not* independent channels; they often belong to the same group.
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The empirical curve is the central evidence for triadic closure at scale. Walk students through three landmarks: (i) the baseline rate at $k = 0$ — essentially how often two random strangers in the population start emailing — is very small; (ii) the *first* shared friend produces the biggest jump; (iii) the curve saturates. The saturation is itself the finding: it rules out a "simple counting" model and points to redundancy among mutual friends. This redundancy connects directly to L04's embeddedness idea.
 
 --
 
@@ -710,11 +977,13 @@ The first shared contact adds the most. Later shared contacts add less because m
 
 
 Notes:
-The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model that produces saturation. The fact that real data flattens faster than the independent model is itself informative — it suggests redundancy among shared contacts, consistent with the embeddedness idea from L04.
+The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model that produces saturation. The fact that real data flattens *faster* than the independent model is itself informative — it suggests redundancy among shared contacts, consistent with the embeddedness idea from L04. Students who have seen survival analysis will recognize this as a "complement of a geometric-tail" form.
 
 --
 
-## Focal and Membership Closure at Scale
+<!-- .slide: class="smaller" -->
+
+## Focal Closure at Scale
 
 
 <div class="grid-2-1">
@@ -723,7 +992,7 @@ The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model 
 <div class="column">
 
 
-![Focal closure curve](/courses/network-science/figures/focal-closure.png)
+![Focal closure curve: probability of new email tie versus number of shared classes](/courses/network-science/figures/focal-closure.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 
@@ -733,23 +1002,68 @@ The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model 
 <div class="column">
 
 
-![Membership closure curve](/courses/network-science/figures/membership-closure-experiment.png)
+**Setup.** Two people who have **never emailed each other** but co-enroll in $k$ classes during the same semester. What is the probability they exchange email within the term?
+
+**Result.** Same qualitative shape as triadic closure: sharp rise from $k = 0$, then saturation. Sharing one class is already informative; 3+ classes produces a much higher closure rate.
+
+**Why this matters.**
+
+- Focal closure runs **without any shared friend**. Strangers in the same context form ties through repeated exposure alone.
+- This is the mechanism that turns "people share classes" into "people share friendships" — and it produces homophily-like patterns even when there is **no preference for similarity at all**.
+- It is L05's main answer to *Question 3* from the opening slide ("could shared context explain the clustering?"). Often, yes.
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Focal closure is L05's distinctive concept (triadic was L03's). The empirical signature is the same saturating curve, but the mechanism is different: instead of introductions through mutual friends, the focus itself provides repeated exposure. The teaching link to homophily is direct: if STEM students share many classes, focal closure alone can generate a homophily-rich within-STEM friendship network without any selection effect. This is exactly the "third explanation" (context) that Module 2 introduced — and the affiliation network model from Module 3 is the formal representation.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Membership Closure at Scale
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+
+![Membership closure curve: probability of joining a focus versus number of friends already in it](/courses/network-science/figures/membership-closure-experiment.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 
 </div>
 
 
+<div class="column">
+
+
+**Setup.** A person is **not yet a member** of a focus (course, club, group). How does the probability of joining depend on the number of existing members who are already their friends?
+
+**Result.** Same saturating shape. One friend already in the focus is a strong predictor of joining; additional friends compound — but with diminishing returns.
+
+**The flipped direction.**
+
+- Triadic and focal closure close *person–person* ties.
+- Membership closure closes a *person–focus* tie — your friends pull you **into** the contexts they already inhabit.
+- This is how **social networks shape affiliations**, not just the other way around. Friendships and foci co-evolve through both directions of closure.
+
+
 </div>
 
 
-
-<div class="c-info smaller">
-
-Shared foci (left) and friend-mediated memberships (right) both raise the probability of new ties — again with diminishing returns. The shapes are qualitatively similar to triadic closure, reinforcing that all three closure mechanisms share a common structural logic.
-
 </div>
 
+
+Notes:
+Membership closure flips the bipartite arrow: instead of foci producing person–person ties (focal closure), person–person ties produce focus-memberships. This is the third closure mechanism and the one most often missed in introductory treatments. In the classroom example, if an Arts student A1 has multiple STEM friends, A1 is more likely to *take* a STEM elective. This is how friendships drive affiliations, completing the co-evolution loop between the network and the foci.
 
 --
 
@@ -761,18 +1075,32 @@ A study finds that the probability of two coworkers becoming Facebook friends ri
 2. Fit the independent-opportunity model: what value of $q$ gives $P = 0.20$ at $k = 1$?
 3. Does the model predict the observed $P = 0.30$ at $k = 2$? What does the mismatch tell you?
 
+
+<div class="fragment">
+
+**1.** Steep initial rise from 1% to 20%, then much smaller gains (30%, 33%) — a **saturating** curve.
+
+</div>
+
+
+
+<div class="fragment">
+
+**2.** At $k = 1$: $1 - (1-q) = q$, so $q \approx 0.20$.
+
+</div>
+
+
+
+<div class="fragment">
+
+**3.** The model predicts $1 - (1-0.20)^2 = 0.36$ but we observe **0.30** — a shortfall. Shared friends are *correlated* (typically embedded in the same group), so they provide less independent opportunity than the model assumes. Diminishing returns are *steeper* than independence predicts.
+
+</div>
+
+
 Notes:
-Give them 4 minutes. (1) Steep initial rise, then flattening. (2) At $k = 1$: $1-(1-q)^1 = q$, so $q = 0.20$. But the baseline is 1%, not 0%, so more carefully $P = 0.01 + (1-0.01)(1-(1-q))$ which still gives $q \approx 0.19$. (3) At $k = 2$: the model predicts $1 - (1-0.20)^2 = 0.36$, but we observe only 0.30. The observed curve is *flatter* than the independent model, suggesting shared friends are correlated (redundant), not independent.
-
---
-
-## Quick Check — Solution
-
-**1. Shape:** Steep initial rise from 1% to 20%, then much smaller gains (30%, 33%). <!-- .element: class="fragment" -->
-
-**2. Estimating $q$:** At $k=1$, $P \approx 0.20 \Rightarrow q \approx 0.20$. <!-- .element: class="fragment" -->
-
-**3. At $k=2$ the independent model predicts** $1 - (1-0.20)^2 = 0.36$, **but we observe 0.30** — a shortfall. The shared friends are *correlated* (typically embedded in the same group), so they provide less independent opportunity than the model assumes. The diminishing returns are steeper than independence predicts. <!-- .element: class="fragment" -->
+Give them 4 minutes before revealing the fragments. (1) Steep initial rise, then flattening. (2) $q \approx 0.20$ at $k = 1$. (3) The model overpredicts at $k = 2$; the redundancy among shared friends explains the gap. Connect this back to L04's embeddedness idea: shared friends are often embedded in the same dense cluster, so each additional shared friend gives less *new* opportunity.
 
 --
 
@@ -923,18 +1251,32 @@ Translate Schelling's spatial model into a network setting.
 2. What plays the role of "moving"?
 3. A social media platform recommends friends similar to your existing friends. In Schelling terms, what is the platform doing — and would you expect it to amplify or weaken homophily?
 
+
+<div class="fragment">
+
+**1. Network neighbor:** a graph-adjacent node — your immediate contacts.
+
+</div>
+
+
+
+<div class="fragment">
+
+**2. Moving:** rewiring — dropping ties to dissimilar contacts and forming new ones with similar contacts.
+
+</div>
+
+
+
+<div class="fragment">
+
+**3. The platform is an automated Schelling rewirer.** It surfaces similar people — equivalent to offering each agent a move toward a higher same-type fraction. This *amplifies* homophily: the local rule ("recommend similar") is mild, but at machine speed it produces sharp global outcomes (filter bubbles, echo chambers).
+
+</div>
+
+
 Notes:
-Give them 4 minutes. (1) Network neighbors are graph-adjacent nodes. (2) "Moving" becomes rewiring — dropping ties to dissimilar contacts and adding ties to similar ones. (3) The platform acts as a Schelling updater: it identifies "unsatisfied" tie configurations (low similarity) and offers replacements (higher similarity). It amplifies homophily by accelerating the rewiring process.
-
---
-
-## Quick Check — Solution
-
-**1. Network neighbor:** A graph-adjacent node — your immediate contacts. <!-- .element: class="fragment" -->
-
-**2. Moving:** Rewiring — dropping ties to dissimilar contacts and forming new ones with similar contacts. <!-- .element: class="fragment" -->
-
-**3. The platform is an automated Schelling rewirer.** It surfaces similar people, which is equivalent to offering each agent a move toward a higher same-type fraction. This *amplifies* homophily — the local rule ("recommend similar") is mild, but at machine speed it produces sharp global outcomes (filter bubbles, echo chambers). <!-- .element: class="fragment" -->
+Give them 4 minutes before revealing the fragments. (1) Network neighbors are graph-adjacent nodes. (2) "Moving" becomes rewiring — dropping ties to dissimilar contacts and adding ties to similar ones. (3) The platform acts as a Schelling updater: it identifies "unsatisfied" tie configurations (low similarity) and offers replacements (higher similarity). It amplifies homophily by accelerating the rewiring process.
 
 --
 
