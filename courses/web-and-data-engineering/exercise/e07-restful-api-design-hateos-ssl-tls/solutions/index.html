@@ -1,0 +1,543 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Übungsblatt 7 — RESTful API Design, HATEOAS und SSL/TLS — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/index.Kt0jKsNQ.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Übungsblatt 7
+## RESTful API-Design, HATEOAS & SSL/TLS
+
+5430UE Web and Data Engineering
+
+27. Mai 2026
+
+Prof. Dr. Michael Granitzer, Tobias Fuchs
+
+---
+
+## Lernziele
+
+- Grundlegendes Verständnis der HTTP-Semantik zur Nutzung von Methoden und Status-Codes.
+- Einblick in ressourcenorientiertes URL-Design und die Konzepte von HATEOAS.
+- Kenntnis der wesentlichen Unterschiede zwischen REST- und SOAP-Architekturen.
+- Basiswissen zur Transport-Sicherheit mittels TLS und dem Ablauf des Handshakes.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# HTTP-Methoden und Status-Codes
+
+--
+
+## HTTP-Methoden und Status-Codes
+
+In dieser Aufgabe betrachten wir die HTTP-Methoden POST, GET, PUT, PATCH, DELETE, HEAD, OPTIONS.
+1. Beschreiben Sie den Zweck jeder der Methoden in einem Satz. Geben Sie jeweils an, ob die Methode sicher und/oder idempotent ist.
+2. Ordnen Sie jeder Situation die korrekte HTTP-Methode und passenden Status-Code zu:
+
+| Situation | Methode | Status-Code |
+|---|---|---|
+| Produktliste abrufen | ? | ? |
+| Neues Produkt anlegen | ? | ? |
+| Produktname aktualisieren (nur ein Feld) | ? | ? |
+| Produkt vollständig ersetzen | ? | ? |
+| Produkt löschen | ? | ? |
+| Ressource nicht gefunden | - | ? |
+| Validierungsfehler im Request-Body | - | ? |
+| Server-interner Fehler | - | ? |
+
+
+--
+
+## HTTP-Methoden und Status-Codes — Lösung (1/4)
+
+1. HTTP-Methoden:
+- **POST**: Schickt strukturierte Daten zur Verarbeitung an den Server, typischerweise zum Erzeugen einer neuen Ressource.<br> *Sicher: nein, idempotent: nein*
+ <!-- .element: class="fragment" -->
+- **GET**: Dient zum Anfordern und Auslesen einer Ressource vom Webserver in verschiedenen Formaten wie JSON, ohne dabei Daten zu verändern.<br> *Sicher: ja, idempotent: ja*
+ <!-- .element: class="fragment" -->
+- **PUT**: Lädt eine Ressource auf den Webserver hoch, um eine Ressource zu ersetzen oder sie legt unter einer bekannten URI neu anzulegen.<br> *Sicher: nein, idempotent: ja*
+ <!-- .element: class="fragment" -->
+- **PATCH**: Führt eine partielle Änderung (Teil-Update) an einer bestehenden Ressource durch, wobei oft spezielle Änderungsanweisungen statt des gesamten Objekts gesendet werden.<br> *Sicher: nein, idempotent: abhängig von der Implementierung, meist nein*
+ <!-- .element: class="fragment" -->
+--
+
+## HTTP-Methoden und Status-Codes — Lösung (2/4)
+
+- **DELETE**: Dient zum gezielten Löschen von spezifischen Ressourcen auf dem Server.<br> *Sicher: nein, idempotent: ja*
+ <!-- .element: class="fragment" -->
+- **HEAD**: Entspricht GET, liefert jedoch nur die Header-Informationen ohne Response-Body zurück.<br> *Sicher: ja, idempotent: ja*
+ <!-- .element: class="fragment" -->
+- **OPTIONS**: Erlaubt die Anfrage, welche HTTP-Methoden oder Kommunikationsoptionen für eine Ressource unterstützt werden.<br> *Sicher: ja, idempotent: ja*
+ <!-- .element: class="fragment" -->
+
+**Zusatz:**
+*Sicher (Safe):* Methode verändert keine Ressource — kann ohne Nebenwirkungen wiederholt werden. CDNs cachen nur safe Methoden.  
+*Idempotent:* Mehrfache Ausführung hat denselben Effekt wie einmal — wichtig für Retry-Logik in Load Balancern und API-Gateways.
+<!-- .element: class="fragment" -->
+--
+
+## HTTP-Methoden und Status-Codes — Lösung (3/4)
+
+2. Zuordnungen:
+
+| Situation | Methode | Status-Code |
+|---|---|---|
+| Produktliste abrufen | <span class="fragment">GET</span>| <span class="fragment">200 OK</span> |
+| Neues Produkt anlegen | <span class="fragment">POST</span>| <span class="fragment">201 Created</span> |
+| Produktname aktualisieren (nur ein Feld) | <span class="fragment">PATCH</span>| <span class="fragment">200 OK</span> |
+| Produkt vollständig ersetzen | <span class="fragment">PUT</span>| <span class="fragment">200 OK</span> |
+| Produkt löschen | <span class="fragment">DELETE</span>| <span class="fragment">204 No Content</span> |
+| Ressource nicht gefunden | <span class="fragment">-</span>| <span class="fragment">404 Not Found</span> |
+| Validierungsfehler im Request-Body | <span class="fragment">-</span>| <span class="fragment">400 Bad Request</span> |
+| Server-interner Fehler | <span class="fragment">-</span>| <span class="fragment">500 Internal Server Error</span> |   
+
+--
+
+## HTTP-Methoden und Status-Codes — Lösung (4/4)
+
+**Zusatz: Statuscode-Bereiche**
+- **1xx**: Informationelle Antworten
+- **2xx**: Erfolgreiche Requests
+- **3xx**: Weiterleitungen (Redirects)
+- **4xx**: Client-Fehler
+- **5xx**: Server-Fehler
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Caching-Strategien
+
+--
+
+## Caching-Strategien
+
+Ein Online-Shop liefert verschiedene Ressourcen. Bestimmen Sie für jede die geeignete Caching-Strategie:
+
+| Ressource | Strategie (kein Cache / kurz / lang / ewig) | HTTP-Header |
+|---|---|---|
+| Produktbild logo.png (unveränderlich, mit Hash im Dateinamen) | ? | ? |
+| Produktliste (aktualisiert sich stündlich) | ? | ? |
+| Warenkorb-Inhalt (nutzerspezifisch) | ? | ? |
+| JavaScript-Bundle `app.abc123.js` (Hash im Namen) | ? | ? |
+
+
+--
+
+## Caching-Strategien — Lösung (1/2)
+
+| Ressource | Strategie | HTTP-Header |
+|---|---|---|
+| Produktbild logo.png (unveränderlich, mit Hash im Dateinamen) | <span class="fragment">Ewig</span> | <span class="fragment">`Cache-Control: public, max-age=31536000, immutable`</span> |
+| Produktliste (aktualisiert sich stündlich) | <span class="fragment">Kurz</span> | <span class="fragment">`Cache-Control: public, max-age=3600`</span> |
+| Warenkorb-Inhalt (nutzerspezifisch) | <span class="fragment">Kein Cache</span> | <span class="fragment">`Cache-Control: private, no-store`</span> |
+| JavaScript-Bundle `app.abc123.js` (Hash im Namen) | <span class="fragment">Ewig</span> | <span class="fragment">`Cache-Control: public, max-age=31536000, immutable`</span> |
+
+**Anmerkungen**:  
+Dateien mit Content-Hash im Namen können unbegrenzt gecacht werden &rarr; Änderung = neuer Hash = neue URL.  
+Nutzerspezifische Daten nie öffentlich cachen (private).
+<!-- .element: class="fragment" -->
+--
+
+## Caching-Strategien — Lösung (2/2)
+
+**Zusatz: Wichtige Cache-Header und Attribute**
+
+| Header / Attribut | Erklärung |
+|---|---|
+| `Cache-Control` | Zentraler Header zur Steuerung des HTTP-Cachings; definiert Regeln für Browser, CDNs und Proxies. |
+| `public` | Ressource darf von gemeinsamen Caches (CDN, Proxy) gespeichert werden. |
+| `private` | Ressource darf nur im Browser-Cache des Nutzers gespeichert werden, nicht in Shared Caches. |
+| `no-store` | Ressource darf überhaupt nicht gespeichert werden (weder Browser noch Proxy/CDN). |
+| `no-cache` | Cache darf speichern, muss die Ressource aber vor Wiederverwendung beim Server validieren. |
+| `max-age=<Sekunden>` | Gibt die maximale Lebensdauer im Cache an, z.B. `max-age=3600` für eine Stunde. |
+| `immutable` | Signalisiert, dass sich die Ressource nicht verändert; sinnvoll bei Dateien mit Content-Hash im Dateinamen. |
+| `ETag` | Eindeutiger Versionsbezeichner einer Ressource; ermöglicht effiziente Cache-Validierung. |
+| `Last-Modified` | Zeitpunkt der letzten Änderung einer Ressource. |
+| `Age` | Zeigt an, wie lange sich eine Response bereits in einem Cache befindet. |
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# RESTful URL-Design
+
+--
+
+## RESTful URL-Design (1/2)
+
+Gefordert ist der Entwurf eines RESTful WebService zur Verwaltung von Trainingsplänen eines Fitnesscenters.
+Nehmen Sie dazu folgendes (vereinfachtes) Datenschema an:
+
+  <img src="/courses/web-and-data-engineering/figures/ex07_Diagramm_REST.png" alt="Diagramm REST" style="height:250px; margin-top: 15px;" />
+
+Ein Trainingsplan beinhaltet mehrere Übungen, und mehrere Personen können denselben Trainingsplan ausüben. Ein Backend soll folgende Operationen unterstützen:
+
+1. Alle Trainingspläne eines Nutzers abrufen
+2. Einen spezifischen Kurs aus dem Trainingsplan einer Person abrufen
+3. Alle Personen anzeigen, die einen gewissen Namen haben
+4. Alle abgeschlossen Kurse eines Nutzers an einen spezifischen Tag filtern
+5. Einen neuen Trainingsplan für einen Nutzer erstellen
+6. Einen Kurs in einem Trainingsplan aktualisieren
+7. Einen Kurs mit gegebener Id löschen
+
+--
+
+## RESTful URL-Design (2/2)
+
+1. Entwerfen Sie ein URL Mapping für einen RESTful WebService für die oben genannten 7 Funktionen. Bestimmen Sie jeweils die HTTP Methode und URL, die ein Client aufzurufen hat, um die Funktion auszuführen. Halten Sie sich für das URL Design sowie die Wahl der HTTP Methoden an die Konventionen aus der Vorlesung. Kennzeichnen Sie dynamische Pfadelemente mit geschweiften Klammern (`{}`). Die Angabe von Protokoll und Domain können Sie mit "fitness.de" abkürzen. Sollten für eine Anfrage etwaige Parameter mit übertragen werden müssen, geben Sie nur Parameter in der URL an (der Inhalt des Request Body muss nicht mit angegeben werden).
+2. Welche der URL-Muster sind dabei problematisch:
+   - `/getTrainings`
+   - `/user/deleteById?id=5`
+
+
+--
+
+## RESTful URL-Design — Lösung (1/4)
+
+1. URL-Mappings:
+   1. Alle Trainingspläne eines Nutzers abrufen:  
+    <!-- .element: class="fragment" -->
+   `GET fitness.de/users/{userId}/plans`
+   <!-- .element: class="fragment" -->
+   2. Einen spezifischen Kurs aus dem Trainingsplan einer Person abrufen:  
+   <!-- .element: class="fragment" -->
+   `GET fitness.de/users/{userId}/plans/{planId}/courses/{courseId}`
+   <!-- .element: class="fragment" -->
+   3. Alle Personen anzeigen, die einen gewissen Namen haben:  
+   <!-- .element: class="fragment" -->
+   `GET fitness.de/users?name=x`
+   <!-- .element: class="fragment" -->
+   4. Alle abgeschlossen Kurse eines Nutzers an einen spezifischen Tag filtern:  
+   <!-- .element: class="fragment" -->
+   `GET fitness.de/users/{userId}/plans/{planId}/courses?date=x&completed=true`
+   <!-- .element: class="fragment" -->
+   5. Einen neuen Trainingsplan für einen Nutzer erstellen:  
+   <!-- .element: class="fragment" -->
+   `POST fitness.de/users/{userId}/plans`
+   <!-- .element: class="fragment" -->
+--
+
+ ## RESTful URL-Design — Lösung (2/4)
+   6. Einen Kurs in einem Trainingsplan aktualisieren:  
+   <!-- .element: class="fragment" --> 
+   `PUT fitness.de/users/{userId}/plans/{planId}/courses/{courseId}`
+   <!-- .element: class="fragment" -->
+
+   7. Einen Kurs mit gegebener Id löschen:    
+   <!-- .element: class="fragment" -->
+   `DELETE fitness.de/courses/{courseId}`  
+   <!-- .element: class="fragment" -->
+
+
+--
+
+## RESTful URL-Design — Lösung (3/4)
+
+2. Problematische Muster:
+   - `/getTrainings`:  
+
+     Verb in der URL verletzt REST: HTTP-Methoden (GET, POST, …) sind die Verben, URLs sind Substantive (Ressourcen).
+     <!-- .element: class="fragment" -->
+   - `/user/deleteById?id=5`:
+      <!-- .element: class="fragment" -->
+      Operation im Pfad und Query-Parameter für ID; korrekt: `DELETE /users/5`.
+      <!-- .element: class="fragment" -->
+
+--
+
+## RESTful URL-Design — Lösung (4/4)
+
+**Zusatz: RESTful URI-Design-Regeln**
+
+| Regel | Erklärung / Beispiel |
+|---|---|
+| **Plural für Collections** | Ressourcen-Sammlungen werden im Plural benannt, da sie mehrere Elemente enthalten.<br>Beispiel: `/users`, `/products`, `/orders`. |
+| **Kleinschreibung und Bindestriche** | URLs verwenden üblicherweise Kleinbuchstaben und Bindestriche für bessere Lesbarkeit und Konsistenz.<br>Beispiel: `/order-items`. |
+| **Keine Verben im Pfad** | Die HTTP-Methode beschreibt die Aktion (GET, POST, PUT, DELETE); die URL beschreibt nur die Ressource.<br>Beispiel: `POST /orders` statt `/createOrder`. |
+| **Hierarchie drückt Zugehörigkeit aus** | Verschachtelte Pfade modellieren Beziehungen zwischen Ressourcen.<br>Beispiel: `/users/{userId}/orders`. |
+| **Pfad = Identität, Query = Parameter** | Der Pfad identifiziert Ressourcen, Query-Parameter dienen zum Filtern, Suchen, Sortieren oder für optionale Angaben.<br>Beispiele: `/users/{id}`, `/products?sort=price`, `/users?name=Max`. |
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# HATEOAS und API-Versionierung
+
+--
+
+## HATEOAS und API-Versionierung
+
+1. **HATEOAS**:
+   - Was bedeutet HATEOAS?
+   - Welchen praktischen Vorteil bietet es gegenüber einer reinen Daten-API?
+   - Zeigen Sie ein JSON-Beispiel für eine Produktressource mit HATEOAS-Links.
+2. Nennen Sie zwei Strategien für **API-Versionierung** und diskutieren Sie je einen Vorteil und Nachteil.
+
+
+--
+
+## HATEOAS und API-Versionierung — Lösung (1/3)
+
+1. **HATEOAS**:
+   - HATEOAS (Hypermedia as the Engine of Application State) ist eine Anforderung an eine REST-API. Es besagt, dass ein Client nicht vorab wissen muss, welche URLs für welche Aktionen existieren. Stattdessen liefert der Server mit jeder Antwort die aktuell erlaubten Navigationsmöglichkeiten in Form von Hyperlinks mit.
+   - Die Struktur der API-Adressen (URLs) kann auf dem Server jederzeit verändert oder verschoben werden, ohne dass die Client-Anwendung ihre Funktionsfähigkeit verliert. Da der Client nur den Namen der Aktion kennt und dem jeweils aktuell mitgelieferten Link folgt, findet er die Ressource auch unter einer neuen Adresse automatisch wieder.
+
+--
+
+## HATEOAS und API-Versionierung — Lösung (2/3)
+
+- Beispiel:
+
+```json
+{
+ "id": 42,
+ "name": "Laptop Pro",
+ "price": 999.00,
+ "_links": {
+   "self": { "href": "/products/42" },
+   "reviews": { "href": "/products/42/reviews" },
+   "order": { "href": "/orders" }
+ }
+}
+```
+
+--
+
+## HATEOAS und API-Versionierung — Lösung (3/3)
+
+2. API-Versionierung:
+
+| Strategie | Vorteil | Nachteil |
+|---|---|---|
+| <span class="fragment"> URL-Versionierung (Versionsnummer direkt in der Adresse)<br> `/api/v1/products` </span> | <span class="fragment"> Explizit, einfach zu verstehen und zu testen </span> | <span class="fragment"> Dupliziert Routen; Clients müssen URL-Änderung mitmachen </span> |
+| <span class="fragment"> Header-Versionierung (URL bleibt unverändert, z.B. `https://api.shop.de/products`. Die gewünschte API-Version wird über den HTTP-`Accept`-Header übertragen.)<br> `Accept: application/vnd.shop.v2+json` </span> | <span class="fragment"> URL bleibt stabil; Versionierung ist von der Ressourcenadresse getrennt und nutzt HTTP-Content-Negotiation. </span> | <span class="fragment"> Weniger sichtbar und schwerer direkt zu testen, da die Version nicht in der URL, sondern im Header steckt. Debugging, Logging, Routing und Caching werden komplexer. </span> |
+
+**Anmerkung**:
+<!-- .element: class="fragment" -->
+- **Bisherige Gefahr (Statische Kopplung):** Der Client sucht starr nach einer fest einprogrammierten Adresse. Wenn der Server diese Struktur ändert, läuft die Anfrage ins Leere.
+ <!-- .element: class="fragment" -->
+- **Lösung durch HATEOAS (Dynamische Navigation):** Der Client orientiert sich nur am Namen einer Aktion. Der Server liefert die aktuell gültige URL bei jeder Antwort mit. Der Client folgt einfach dem aktuell bereitgestellten „Wegweiser“.
+<!-- .element: class="fragment" -->
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# SOAP vs REST
+
+--
+
+## SOAP vs REST
+
+1. Erklären Sie REST und SOAP kurz in jeweils 1-2 Sätzen.
+2. Entscheiden Sie für jedes Szenario, ob REST oder SOAP besser geeignet ist, und begründen Sie:
+
+| Szenario | REST oder SOAP | Begründung |
+|---|---|---|
+| Mobile App ruft Produktdaten ab | ? | ? |
+| Banktransfer zwischen zwei Finanzsystemen (ACID, Transaktionen) | ? | ? |
+| IoT-Sensoren senden Messwerte (geringe Bandbreite) | ? | ? |
+| Legacy-Enterprise-Integration mit strenger Vertragsbindung | ? | ? |
+
+
+--
+
+## SOAP vs REST — Lösung (1/2)
+
+1. **REST**: REST ist ein ressourcenorientierter Architekturstil, der die vorhandenen Mechanismen des HTTP-Protokolls (wie GET oder POST) nutzt, um Ressourcen effizient zu verwalten. Er ist der moderne Standard für Web- und Mobile-Apps, da er durch das JSON-Format sehr schnell, einfach zu implementieren und hochgradig skalierbar ist.
+
+
+   **SOAP (Simple Object Access Protocol)**: SOAP ist ein XML-basiertes Nachrichtenprotokoll, das auf festen Standards und formalen Verträgen (WSDL) beruht. Es wird vor allem in hochsicheren Enterprise-Umgebungen eingesetzt, da es komplexe Transaktionen und eine starke Typisierung garantiert.
+
+   **Entscheidung**: REST wird bevorzugt, wenn eine performante, leichtgewichtige und flexibel konsumierbare API benötigt wird. SOAP eignet sich besonders für Enterprise- und Integrationsszenarien, in denen formale Schnittstellenverträge (WSDL), starke Standardisierung, Sicherheit oder Transaktionsunterstützung erforderlich sind.
+
+
+--
+
+## SOAP vs REST — Lösung (2/2)
+
+2. REST vs. SOAP:
+
+| Szenario | REST/SOAP | Begründung |
+|---|---|---|
+| Mobile App ruft Produktdaten ab | <span class="fragment">REST</span> | <span class="fragment">Leichtgewichtig, JSON, HTTP-Caching, geringe Latenz</span> |
+| Banktransfer zwischen zwei Finanzsystemen (ACID, Transaktionen) | <span class="fragment">SOAP</span> | <span class="fragment">Bei Finanztransaktionen steht nicht die Geschwindigkeit, sondern die absolute Datensicherheit und Korrektheit (ACID-Eigenschaften) im Vordergrund, SOAP unterstützt über WS-*-Standards sichere, transaktionale Enterprise-Kommunikation.</span> |
+| IoT-Sensoren senden Messwerte (geringe Bandbreite) | <span class="fragment">REST</span> | <span class="fragment">Minimaler Overhead, JSON oder binäre Formate; SOAP-XML zu schwer</span> |
+| Legacy-Enterprise-Integration mit strenger Vertragsbindung | <span class="fragment">SOAP</span> | <span class="fragment">In großen, gewachsenen Unternehmensstrukturen müssen oft Systeme verschiedener Hersteller miteinander kommunizieren, die über Jahrzehnte stabil bleiben sollen; bestehende SOAP-Infrastruktur verwenden</span> |
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# TLS/SSL - Transport-Sicherheit
+
+--
+
+## TLS/SSL - Transport-Sicherheit
+
+1. Was war das zentrale Sicherheitsproblem von `SSL 2.0`, das zur Entwicklung von TLS führte?
+2. Ist TLS heute für Web-Anwendungen verpflichtend oder optional? Begründen Sie aus technischer und regulatorischer Sicht.
+3. Erklären Sie den TLS-Handshake in 4 Schritten: Was wird ausgetauscht und welches Ziel hat jeder Schritt?
+4. Was bedeutet Certificate Pinning und für welche Art von Anwendung ist es besonders relevant?
+
+
+--
+
+## TLS/SSL - Transport-Sicherheit — Lösung (1/4)
+
+1. Schwachstellen von `SSL 2.0`:
+   - SSL 2.0 verwendet veraltete kryptographische Verfahren (u.a. MD5) sowie schwache Cipher Suites, wodurch Integrität und Sicherheit der Kommunikation beeinträchtigt werden können.
+   - Teile des Handshakes und die Aushandlung der Sicherheitsparameter sind unzureichend geschützt, sodass Angreifer Client und Server zu einer schwächeren Cipher Suite zwingen können (Downgrade-Angriff).
+   - Verschlüsselung und Integritätsschutz sind kryptographisch nicht sauber getrennt; zusätzlich weist das Schlüsselmanagement konzeptionelle Schwächen auf.
+   - Sitzungen können durch unzureichend geschützte Kontrollnachrichten beendet oder beeinflusst werden.
+
+--
+
+## TLS/SSL - Transport-Sicherheit — Lösung (2/4)
+
+2. Heute TLS:
+   - **Technisch:** Moderne Webstandards und Browser setzen zunehmend auf HTTPS, indem unsichere HTTP-Seiten als „nicht sicher“ gekennzeichnet und bestimmte Funktionen nur noch über TLS unterstützt werden. &rarr; TLS faktisch notwendig für zuverlässige/vertrauenswürdige Bereitstellung.
+   - **Regulatorisch:** Datenschutzvorgaben wie die DSGVO verlangen angemessene technische Maßnahmen zum Schutz personenbezogener Daten, wozu auch Verschlüsselung gehört. Zusätzlich schreiben Standards wie PCI-DSS den Einsatz von TLS bei sensiblen Daten verbindlich vor.
+
+--
+
+## TLS/SSL - Transport-Sicherheit — Lösung (3/4)
+
+3. TLS-Handshake in 4 Schritten:
+   1. **ClientHello:** Client sendet unterstützte TLS-Versionen und Cipher Suites an den Server.<br> *Ziel:* Aushandlung kompatibler Sicherheitsparameter.
+   <!-- .element: class="fragment" -->
+   2. **ServerHello + Certificate:** Server wählt eine Cipher Suite aus und sendet sein X.509-Zertifikat.<br> *Ziel:* Festlegung der Verschlüsselung und Authentifizierung des Servers.
+   <!-- .element: class="fragment" -->
+   3. **Key Exchange:** Beide Seiten führen einen Schlüsselaustausch durch und berechnen einen gemeinsamen Sitzungsschlüssel, ohne ihn direkt zu übertragen.<br> *Ziel:* Sicherer Aufbau eines gemeinsamen geheimen Schlüssels.
+   <!-- .element: class="fragment" -->
+   4. **Finished:** Beide Seiten bestätigen den erfolgreichen und unveränderten Ablauf des Handshakes.<br> *Ziel:* Sicherstellen der Integrität und Start der verschlüsselten Kommunikation.
+   <!-- .element: class="fragment" -->
+
+--
+
+## TLS/SSL - Transport-Sicherheit — Lösung (4/4)
+
+4. **Certificate Pinning:** Dabei akzeptiert eine Anwendung nur ein zuvor festgelegtes Zertifikat oder einen bestimmten Public Key, anstatt allen durch Zertifizierungsstellen signierten Zertifikaten zu vertrauen.<br>
+
+   *Ziel:* Schutz vor Man-in-the-Middle-Angriffen, selbst wenn eine Zertifizierungsstelle kompromittiert ist.<br>
+
+   *Relevanz:* Besonders wichtig ist Certificate Pinning in Mobile Apps (z.B. Android oder iOS), da diese häufig in unsicheren Netzwerken genutzt werden.
+
+**Zusatz:**
+SSL (Secure Sockets Layer) und TLS (Transport Layer Security) sind kryptographische Protokolle zur Absicherung der Datenübertragung im Internet. Sie verschlüsseln die Kommunikation und gewährleisten Vertraulichkeit, Integrität und Authentizität, wobei TLS der moderne und sichere Nachfolger von SSL ist.
+<!-- .element: class="fragment" -->
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>
