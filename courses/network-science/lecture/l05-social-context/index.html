@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/index.Kt0jKsNQ.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/index.CBOk6nSS.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 05: Social Context and Link Formation
@@ -96,6 +96,17 @@ This slide is the L05 analogue of L03's "theory vs. measurement" and L04's roadm
 
 --
 
+<!-- .slide: class="figure-90" -->
+
+## Argument Map
+
+![Argument map for Lecture 05: from homophily measurement to causal explanation](/courses/network-science/figures/l05-argument-map.svg)
+
+Notes:
+This is the L05 analogue of the L04 synthesis diagram. The lecture starts from an observed pattern: same-track clustering in a friendship graph. It first asks whether the pattern exceeds a random-mixing baseline, then asks which mechanism could have produced it: selection, socialization, shared foci, closure over time, or local preferences amplified by Schelling dynamics. The bottom row is the central lesson: a graph snapshot is evidence, not an explanation; causal interpretation requires baselines, temporal data, social context, and generative models.
+
+--
+
 ## Takeaway
 
 
@@ -177,7 +188,7 @@ This slide opens with the *question* — what would chance alone produce? — no
 ## Homophily — Formal Definition
 
 
-<div class="c-definition">
+<div class="c-definition small">
 
 **Homophily.** Edge formation is biased toward similarity in a node attribute $x$. Formally, for a categorical attribute with class shares $p_1, \dots, p_k$:
 
@@ -214,12 +225,6 @@ With the probability-square intuition from the previous slide, the formula $H_{\
 ![The homophily index r as a fractional position on the scale from chance to perfect segregation](/courses/network-science/figures/homophily-index-scale.svg)
 
 
-<div class="c-info smaller">
-
-The classroom example: $H_{\text{base}} = 0.50$, $H_{\text{obs}} = 0.89$. The observed rate has covered **78% of the available room** above chance — that is the homophily index $r$.
-
-</div>
-
 
 Notes:
 This slide gives each of the three measures a one-sentence plain-English meaning and shows $r$ as a *fractional position* on the line between chance and perfect segregation. The visual is meant to dispel a common confusion: $r$ is **not** $H_{\text{obs}} - H_{\text{base}}$ (the raw excess), but the *fraction of available room* the network has used. The "available room" is whatever lies above the chance baseline; in a balanced population the room is large (0.50), in a skewed 90/10 population the room is small (0.18). That denominator is what makes $r$ comparable across populations with different class shares.
@@ -239,7 +244,7 @@ The **same observed within-group share** can mean very different things dependin
 | 90% / 10% | $0.82$ | $0.18$ | $0.17$ | Barely above chance — almost nothing to explain |
 | 99% / 1%  | $0.98$ | $0.02$ | $<0$ | *Below* chance — actually heterophilic! |
 
-**Why this trap is so common.** Journalists and researchers often report "X% of friendships are within-group" *without the baseline*. In a setting that is 80% one type and 20% another, $H_{\text{base}}$ is already $0.68$ — so an "82% within-group" headline is barely homophily. The trap appears whenever group sizes are imbalanced: school ethnicity studies, workplace gender networks, online platform demographics. The "Birds of a Feather" review (McPherson, Smith-Lovin & Cook 2001) insists on reporting effect sizes *relative to* a population-specific baseline for exactly this reason.
+**Literature example.** McPherson, Smith-Lovin & Cook distinguish **baseline homophily** from **inbreeding homophily** (McPherson et al. 2001). A school can show many same-age friendships simply because classes, lunch periods, and activities are age-graded; a workplace can show many same-occupation ties because people in the same job category share meetings and tasks. The real homophily question is not "are many ties same-type?", but "are there **more** same-type ties than the opportunity structure already predicts?"
 
 
 <div class="c-caution small">
@@ -257,6 +262,9 @@ This is a useful didactic pause because students often read a high within-group 
 <!-- .slide: class="grid-2-1" -->
 
 ## Back to the Classroom
+
+
+<div class="grid-2">
 
 
 <div class="column">
@@ -281,6 +289,9 @@ $r = 0.78$ is strong — far above random mixing. But it does not tell us *why*.
 <div class="column top">
 
 ![Classroom friendship network](/courses/network-science/figures/l05-scenario.svg)
+
+</div>
+
 
 </div>
 
@@ -331,19 +342,6 @@ Give them 4 minutes before revealing the fragments. (1) $H_{\text{base}} = 0.6^2
 
 --
 
-## Takeaway
-
-
-<div class="takeaway">
-
-Homophily is not just a visual pattern — it is a statistical claim that tie formation is biased toward similarity *relative to a random-mixing baseline*. The homophily index $r$ quantifies the excess, but it cannot identify the mechanism.
-
-</div>
-
-
---
-
-<!-- .slide: class="smaller" -->
 
 ## Echo Chambers — The Hypothesis
 
@@ -377,8 +375,11 @@ Homophily is not just a visual pattern — it is a statistical claim that tie fo
 
 - Four platforms: **Facebook, Twitter, Reddit, Gab**.
 - Over **100 million** interactions, hundreds of news outlets coded by political leaning.
-- For each user, compute the *leaning gap* between the user and the people / outlets they interact with.
-- A small leaning gap = the user lives in an echo chamber.
+- For each user $i$, infer a leaning score $x_i$ as the **average leaning of the scored posts, links, pages, or sources** they produce or endorse; then compute the average leaning of their interaction neighborhood:
+  $x_i^N = \frac{1}{k_i^{out}}\sum_j A_{ij}x_j$.
+- If $x_i \approx x_i^N$, the user mostly interacts with like-minded peers.
+
+So $x_i$ is a behavioral estimate: it summarizes the political leaning of the content a user chooses to post, like, share, or link to.
 
 Different platform architectures (algorithmic feed, friend graph, subreddit topic, alt-tech) let us see whether echo chambers are universal or **architecture-dependent**.
 
@@ -413,34 +414,16 @@ The qualitative ranking (Gab > Facebook ≈ Twitter ≫ Reddit) is the central e
 
 --
 
-<!-- .slide: class="figure-70" -->
-
-## Echo Chambers — Does Exposure Cause Polarization?
+## Takeaway
 
 
-<div class="slide-citation">Source: Nyhan et al. 2023</div>
+<div class="takeaway">
 
-
-![Nyhan et al. (2023, Nature) field experiment: exposure changed, attitudes did not](/courses/network-science/figures/echo-chambers-nyhan-experiment.svg)
-
-
-<div class="c-info smaller">
-
-**Cinelli (2021)** shows echo chambers *exist* as a structural pattern. **Nyhan et al. (2023, Nature)** ask whether that exposure *causes* polarization. In a pre-registered randomized field experiment around the 2020 U.S. election (n ≈ 23,377 consenting Facebook users), they reduced exposure to like-minded sources by about one-third for ~3 months. Cross-cutting exposure rose substantially — but **affective polarization, issue polarization, false beliefs, and political knowledge did not measurably change** (estimates tight around zero).
+Homophily is not just a visual pattern — it is a statistical claim that tie formation is biased toward similarity *relative to a random-mixing baseline*. The homophily index $r$ quantifies the excess, but it cannot identify the mechanism.
 
 </div>
 
 
-
-<div class="c-caution smaller">
-
-**Structure ≠ causation.** Dense homophily can *reinforce* information, but a few weeks of changed feed exposure may be too weak, too late, or too indirect to move stable political attitudes. The network concept ("echo chamber as homophilic region") is clearer than any causal claim about its effects.
-
-</div>
-
-
-Notes:
-This is the closing slide for the homophily module's empirical case study, and it is also the moment to introduce the *structure vs. causation* distinction that the next module (selection vs. socialization) will generalize. The Nyhan study is methodologically the gold-standard test: it is randomized, pre-registered, well-powered, and uses the platform's own logs to verify that the treatment actually moved exposure. The null finding on attitudes is *not* evidence that echo chambers don't matter — it is evidence that the simple causal story "more cross-cutting exposure → less polarization" is too coarse. Possible reasons: pre-existing attitudes are stable on a multi-week scale; cross-cutting content may be ignored or counter-reasoned; the relevant causal channel may be selection into platforms, not feed composition. The point for the lecture: a clean *structural* claim (homophily exists) and a clean *causal* claim (homophily causes polarization) are different statements, and they require different evidence.
 
 ---
 
@@ -510,7 +493,7 @@ Use this slide to make the causal distinction tangible before showing the causal
 
 --
 
-<!-- .slide: class="figure-70" -->
+<!-- .slide: class="figure-100" -->
 
 ## Causal Diagrams
 
@@ -518,6 +501,72 @@ Use this slide to make the causal distinction tangible before showing the causal
 
 Notes:
 Walk through the three causal diagrams: selection (similarity → tie), socialization (tie → similarity), context (third factor → both). Without temporal data, all three explain the same cross-sectional correlation. The point is not that one is always right; in real networks, all three usually operate simultaneously. The analyst's job is to measure their relative contributions.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Empirical Test: Does Exposure Cause Polarization?
+
+
+<div class="slide-citation">Source: Nyhan et al. 2023</div>
+
+
+
+<div class="grid-3-1">
+
+
+
+<div class="column">
+
+
+![Nyhan et al. (2023, Nature) field experiment: exposure changed, attitudes did not](/courses/network-science/figures/echo-chambers-nyhan-experiment.svg)
+
+
+</div>
+
+
+<div class="column">
+
+
+
+<div class="c-info smaller">
+
+**Selection question:** do already-polarized users choose like-minded friends, pages, and platforms?
+
+**Socialization question:** does repeated exposure to like-minded content make users more polarized?
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div class="small">
+
+**Nyhan et al. (2023, Nature)** isolate the second pathway. In a pre-registered Facebook field experiment during the 2020 U.S. election, **23,377 consenting users** were randomly assigned to a feed intervention that reduced politically like-minded source exposure by about one-third. The treatment increased cross-cutting exposure, but had **no measurable effect** on eight pre-registered attitude outcomes, including affective polarization, ideological extremity, candidate evaluations, and belief in false claims.
+
+
+<div class="c-caution smaller">
+
+**Interpretation.** The experiment weakens one short-run **socialization** story: changing feed exposure for three months did not measurably change attitudes. It does **not** test **selection** into like-minded networks or platforms, because users' existing friends, follows, and platform choices were not randomly assigned.
+
+</div>
+
+
+</div>
+
+Notes:
+This belongs in the selection/socialization module because it cleanly separates two mechanisms. Selection means politically polarized users may actively choose like-minded friends, pages, groups, and platforms. Socialization means exposure itself changes attitudes after the tie or feed relation exists. Nyhan et al. randomize exposure, so the study directly tests the socialization path from feed content to attitudes. It does not randomize the user's underlying network or platform choice, so it cannot rule out selection-based echo-chamber formation. The null result is therefore informative but bounded: cross-cutting exposure increased, yet the measured attitude outcomes did not move detectably.
 
 --
 
@@ -553,7 +602,7 @@ The Framingham study is the canonical longitudinal analysis of selection vs. soc
 
 **1. Confounders.** Cohen-Cole & Fletcher (2008) and Lyons (2011) showed that the same statistical method would "detect" social contagion of **height** and **acne** — traits that clearly do not spread through social influence. The method may confuse *shared environment* with *social influence* when the confounders evolve over time.
 
-**2. Homophily in tie formation.** The study adjusted for *existing* attribute similarity but could not fully exclude the possibility that people selectively *formed* or *maintained* ties with others on similar weight trajectories — a dynamic form of selection invisible to static controls.
+**2. Dynamic selection.** The study controlled for whether two friends were already similar in weight. But people may also **choose new friends**, or keep reporting old friends, because their lives and weight trajectories are becoming similar. Then "my friend became obese before me" may partly reflect changing friendship selection, not only social influence.
 
 **3. Missing network.** The Framingham data records nominated friends, not the full social network. Influence may flow through unobserved ties (coworkers, family, neighbors) that correlate with both friendship nominations and weight change.
 
@@ -578,22 +627,10 @@ You observe that smokers tend to befriend other smokers in a college dorm.
 
 **1.** Longitudinal observations — friendships and smoking status at multiple time points, with newly formed ties and newly adopted behavior visible.
 
-</div>
-
-
-
-<div class="fragment">
-
 **2.**
 
 - *Selection:* new friendships disproportionately form between people who **already** share smoking status.
 - *Socialization:* people who befriend smokers become more likely to **start** smoking in the next observation period.
-
-</div>
-
-
-
-<div class="fragment">
 
 **3.** Shared *environment* — e.g. dorm floor placement causing both friendship and smoking exposure simultaneously. Even with temporal data, confounders that evolve over time alongside both the network and the attribute are hard to rule out without randomization.
 
@@ -640,15 +677,6 @@ Affiliation networks make the "shared context" mechanism from Module 2 explicit 
 <div class="grid-2-1">
 
 
-<div class="column">
-
-
-![Affiliation network example](/courses/network-science/figures/affiliation-example.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
-
-
-</div>
-
 
 <div class="column">
 
@@ -665,34 +693,90 @@ An **affiliation network** is a bipartite graph $G = (P \cup F, E)$:
 </div>
 
 
-Two persons sharing a focus creates a *potential* for a person–person tie.
 
+
+
+</div>
+
+
+<div class="column">
+
+
+![Affiliation network example](/courses/network-science/figures/affiliation-example.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
 
 </div>
 
+
+
+<div class="c-info">
+
+The focus nodes are the **social context**: they encode where people meet, what they jointly attend, and which settings create repeated exposure. This lets us separate "people are similar" from "people share the same places."
+
+</div>
+
+
+Shared foci do not prove a tie. They create opportunities for contact, information, and influence.
 
 Notes:
 This connects back to Lecture 02's bipartite graphs. The bipartite structure is a modeling decision: we choose to represent contexts as a separate node type rather than as edge attributes. The payoff is that closure processes become explicit and testable. The classroom scenario can be modeled this way: the two tracks are foci, and within-track friendships arise partly through shared-focus exposure.
 
 --
 
-<!-- .slide: class="figure-70" -->
+<!-- .slide: class="smaller" -->
 
-## Example — Corporate Board Interlocks
+## From Affiliations to Co-Occurrence Graphs
 
-![Board affiliation network](/courses/network-science/figures/affiliation-board.png)
-<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+The bipartite graph is the source of truth. To use standard network tools, we often project it into a one-mode **co-occurrence graph**.
 
 
-<div class="c-info smaller">
+<div class="grid-2">
 
-Corporate board interlocks: directors (bottom) sit on company boards (top). Two directors sharing a board gain exposure and may form a professional tie. Two boards sharing a director gain an information channel.
+
+<div class="column">
+
+Let $B$ be the person-by-focus membership matrix:
+
+$$B_{pf}=1 \quad \text{if person } p \text{ participates in focus } f.$$
+
+Then:
+
+- **Person co-occurrence:** $BB^\top$
+- **Focus co-occurrence:** $B^\top B$
+
+An edge weight counts **how many contexts are shared**.
 
 </div>
 
+
+<div class="column">
+
+| Projection | Nodes | Edge weight means | Then analyze with |
+|---|---|---|---|
+| $BB^\top$ | People | shared classes, clubs, boards, workplaces | centrality, communities, clustering |
+| $B^\top B$ | Foci | overlapping participants | similarity, clusters, diffusion channels |
+
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-caution">
+
+Co-occurrence is **context**, not a confirmed relationship. It says two units had an opportunity to interact.
+
+</div>
+
+
+Notes:
+This slide is the missing bridge between the affiliation model and ordinary graph analysis. The bipartite graph records membership directly; the projected co-occurrence graph turns shared contexts into weighted edges so that familiar tools such as centrality, clustering, and community detection can be used. Stress the warning: projection is useful, but it changes the object of analysis. A person-person edge in $BB^\top$ means shared context, not necessarily friendship.
 
 --
 
@@ -700,53 +784,43 @@ Corporate board interlocks: directors (bottom) sit on company boards (top). Two 
 
 ## Reading the Board Network
 
-An affiliation network is bipartite, but we usually want to ask one-sided questions about *people* or *firms*. The trick is to **project** the bipartite graph onto one side of the partition. There are two such projections, each answering a different question.
-
-| Projection | Nodes | Edge | Edge weight | Question it answers |
-|---|---|---|---|---|
-| **Director network** *(person side)* | People | Two directors sit on $\geq 1$ shared board | Number of shared boards | Who can exchange career info / governance norms? Who is structurally similar? |
-| **Company network** *(focus side)* | Firms | Two firms share $\geq 1$ director | Number of shared directors | Where can strategy or practices diffuse? Which firms are strategically interlocked? |
+Corporate boards are an affiliation network: board members connect to company boards. The co-occurrence projection decides what counts as a node and what the shared context means.
 
 
-<div class="grid-2 small">
+<div class="grid-2-1">
 
 
 <div class="column">
 
-**Toy example.** Three directors $\{d_1, d_2, d_3\}$ on two boards $\{b_1, b_2\}$; $d_1, d_2 \in b_1$ and $d_2, d_3 \in b_2$.
+| Co-occurrence graph | Edge means | Use it for |
+|---|---|---|
+| **Board-member graph** | Two board members share $\geq 1$ company board | Peer exposure, governance norms |
+| **Company graph** | Two firms share $\geq 1$ board member | Strategic interlocks, diffusion across firms |
 
-- *Director projection:* $d_1 \!-\! d_2$, $d_2 \!-\! d_3$ — $d_2$ is a bridge.
-- *Company projection:* $b_1 \!-\! b_2$ — one edge, via the shared director $d_2$.
+**Reading rules.**
 
-The projection **destroys information**: once projected, a $d_1\!-\!d_2$ edge no longer tells you *which* board mediated it. You cannot recover the bipartite graph from either one-mode projection alone.
+1. A projected edge means **shared context**, not friendship or influence.
+2. Projection creates dense cliques: a board with $s$ members adds $\binom{s}{2}$ member-member edges.
+3. Keep weights: sharing five boards is stronger evidence than sharing one.
 
 </div>
 
 
 <div class="column">
 
-**Three rules of thumb.**
+Example — Corporate Board Interlocks
 
-1. **A projection edge = opportunity for exposure**, not a friendship and not a confirmed information channel. A quarterly board meeting is a weak channel.
-2. **Density rises sharply.** A board of size $s$ contributes $\binom{s}{2}$ projected edges from a single focus — a 12-person board adds 66 director-director edges. Projections look denser than the underlying network.
-3. **Use weights, not just edges.** Two directors sharing 5 boards is a much stronger signal than sharing 1 — but the unweighted projection makes them look identical.
-
-</div>
-
+![Board affiliation network](/courses/network-science/figures/affiliation-board.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
 </div>
 
-
-
-<div class="fragment c-caution small">
-
-**Reading rule.** A projection edge means *"shared context exists"* — nothing more. Friendship, influence, and information flow all need additional evidence on top of the projection.
 
 </div>
 
 
 Notes:
-The bipartite-to-one-mode projection is the key operational move when working with affiliation data. The choice of projection is *not* neutral: it foregrounds either person-level questions (career networks, peer exchange) or organization-level questions (strategic interlocks, diffusion across firms). Use the toy example on the slide to walk through the construction: pen and paper, three directors and two boards, then mechanically derive both projections. Emphasize the information-loss point: the director-director projection forgets *which* board mediated each tie. Practical consequences: (i) interpreting clustering coefficients in projections is tricky because boards create complete subgraphs (cliques) on their members; (ii) edge weights are almost always informative and should be reported. The "exposure not friendship" caveat is the same point as in the diffusion/contagion literature — co-membership is a *channel*, not yet a *cause*.
+This slide applies the previous co-occurrence idea to corporate boards. The choice of projection is not neutral: it foregrounds either board-member exposure or firm-level interlocks. Emphasize the information-loss point: after projection, an edge no longer tells you which board mediated the tie unless the weight or original bipartite data is kept. Practical consequences: projections create dense cliques, and edge weights are usually informative. The exposure-not-friendship caveat is the same point as in diffusion and contagion: co-membership is a channel, not yet a cause.
 
 --
 
@@ -754,17 +828,37 @@ The bipartite-to-one-mode projection is the key operational move when working wi
 
 <!-- .slide: class="figure-70" -->
 
+
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
 ![Triadic, focal, and membership closure](/courses/network-science/figures/social-affiliation-closure.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
+</div>
 
-<div class="c-definition smaller">
+
+<div class="column">
+
+
+<div class="c-definition small">
 
 **Triadic closure.** Friend-of-friend becomes friend — a person–person–person path closes into a triangle. *(Same mechanism as Lecture 03.)*
 
 **Focal closure.** Two persons sharing a focus become friends — a person–focus–person path closes into a person–person tie. *(New — the focus mediates the introduction.)*
 
 **Membership closure.** A friend introduces you to a focus you did not belong to — a person–person–focus path closes into a person–focus tie. *(New — the friend mediates membership.)*
+
+</div>
+
+
+</div>
+
+
 
 </div>
 
@@ -810,19 +904,7 @@ For each scenario, identify whether triadic, focal, or membership closure is at 
 
 **1. Focal closure** — the elective is the shared focus that brings them into contact.
 
-</div>
-
-
-
-<div class="fragment">
-
 **2. Triadic closure** — the advisor is the shared friend that closes the triangle.
-
-</div>
-
-
-
-<div class="fragment">
 
 **3. Membership closure** — your friend brings you into a focus you did not previously belong to.
 
@@ -863,28 +945,30 @@ Online platforms make link formation a measurable process at scale. Every new ed
 
 --
 
-<!-- .slide: class="smaller" -->
 
 ## The Setting — Kossinets & Watts (2006)
 
 
-<div class="grid-2 small">
+<div class="grid-2">
 
 
 <div class="column">
 
-**Data.** A large U.S. research university's internal email logs, ~1 year, **~43,000 students/faculty/staff**, **~14 million** messages — plus full course-enrollment records and organizational-affiliation rosters.
+**Data.** A large U.S. research university's internal email logs, ca. 1 year, **~43,000 students/faculty/staff**, **~14 million** messages — plus full course-enrollment records and organizational-affiliation rosters.
 
-**Why it matters.** For the first time, all three closure types could be observed *with timestamps* on a single population: who emails whom, who shares which classes, who joins which clubs.
+**Why it matters.** The timestamps make the analysis forward-looking: we can observe what existed at time $t$, then ask which new email ties form at $t+1$.
 
 </div>
 
 
 <div class="column">
 
-**What was measured.** At every time step, for each pair $(u, v)$ *not yet connected*, count the number $k$ of "closing paths": shared friends (triadic), shared foci (focal), or friend-mediated foci (membership). Then look at the probability that the pair connects in the next interval.
+**Used here for two experiments.**
 
-The output is a curve: $P(\text{new tie}) \;\;\text{vs.}\;\; k$.
+- **Triadic closure:** shared email contacts.
+- **Focal closure:** shared classes / institutional foci.
+
+The membership-closure plots that follow are separate Easley-Kleinberg examples from LiveJournal and Wikipedia, not the same Kossinets-Watts university dataset.
 
 </div>
 
@@ -893,15 +977,75 @@ The output is a curve: $P(\text{new tie}) \;\;\text{vs.}\;\; k$.
 
 
 
-<div class="fragment c-info small">
+<div class="fragment c-info">
 
-This is the dataset behind the three closure-curve figures in Easley & Kleinberg Ch. 4. The timestamped data finally separates *"what existed at $t$"* from *"what formed by $t+1$"* — the missing ingredient in homophily snapshots.
+The timestamped data separates *"what existed at $t$"* from *"what formed by $t+1$"* — the missing ingredient in homophily snapshots.
 
 </div>
 
 
 Notes:
-Three reasons to flag the setting before showing curves: (i) the population is large enough that very rare patterns (e.g., new ties between strangers sharing many foci) appear in statistically usable numbers; (ii) the timestamps make the analysis *forward-looking* — we look only at pairs not yet connected and ask whether they connect next; (iii) the same study generates all three curves on one platform, so the *shapes* can be compared directly. Students often forget that "online data" here means email logs from 2003–2004, not social-media data.
+Flag the setting before showing the triadic and focal closure curves. The Kossinets-Watts university data gives email timestamps plus course and organizational affiliation data, so it can support both shared-friend and shared-focus analyses. Do not imply that the later membership-closure figures use this same dataset; those are separate Easley-Kleinberg examples from LiveJournal and Wikipedia.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Revisit Triadic Closure first: Independent-Opportunity Baseline
+
+Before reading the empirical curve, we should think of a baseline. What could that be?
+
+
+<div class="fragment">
+
+Assume each mutual friend independently creates an opportunity for a new tie with probability $q$.
+
+
+</div>
+
+
+<div class="fragment">
+
+
+$$P(\text{new tie} \mid k \text{ shared friends}) = 1 - (1 - q)^k$$
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+| Shared friends $k$ | $1$ | $2$ | $3$ | $5$ |
+|---:|---:|---:|---:|---:|
+| $P$ if $q = 0.20$ | $0.20$ | $0.36$ | $0.49$ | $0.67$ |
+
+</div>
+
+
+<div class="column">
+
+**Why this form?**
+
+- $q$: probability, one mutual friend creates an opportunity.
+- $1-q$: that mutual friend does **not** create one.
+- $(1-q)^k$: none of the $k$ mutual friends creates one.
+- $1-(1-q)^k$: at least one opportunity appears.
+
+The model gives us a **comparison curve**, not a claim that friends really act independently. Departures from the baseline point to redundancy, clustering, or rare high-$k$ cases.
+
+In the empirical figure, the second dotted curve is the same baseline shifted one step right: it asks what the curve would look like if the first mutual friend had a smaller effect.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Introduce this before the Kossinets-Watts triadic closure plot because the red dotted lines in the figure are independent-opportunity baselines. The formula is a complement rule: closure happens if at least one of the $k$ mutual friends creates an opportunity. If one mutual friend fails to create an opportunity with probability $1-q$, and the $k$ opportunities are treated as independent, then all $k$ fail with probability $(1-q)^k$. Subtracting from 1 gives the probability that at least one opportunity succeeds. Easley and Kleinberg plot this curve plus a one-step-shifted version, roughly $1-(1-q)^{k-1}$ for $k \geq 1$, because the first common friend has a small absolute effect in the data. This is intentionally simple. It provides a reference shape against which the empirical black curve can be read.
 
 --
 
@@ -910,14 +1054,18 @@ Three reasons to flag the setting before showing curves: (i) the population is l
 ## Triadic Closure at Scale
 
 
-<div class="grid-2-1">
+<div class="grid-2-1 small">
 
 
 <div class="column">
 
 
+Black curve: observed probability $T(k)$. Red dotted curves: independent-opportunity baselines from the previous slide. (Upper/Lower: $1-(1-q)^k$; $1-(1-q)^{k-1}$; $q \approx 4 \times 10^{-4}$)
+
 ![Triadic closure curve: probability of a new email tie versus number of mutual friends](/courses/network-science/figures/triadic-closure-experiment.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
 
 
 </div>
@@ -926,58 +1074,43 @@ Three reasons to flag the setting before showing curves: (i) the population is l
 <div class="column">
 
 
-**Setup.** Two people who have **never emailed each other** but share $k$ mutual email contacts. What is the probability they exchange email within the next interval?
+**What was measured.** At each time step, take every pair $(u,v)$ that has **not yet emailed**. Count $k$: how many mutual email contacts they already share. Then ask whether $(u,v)$ exchanges email in the next interval.
+
+The output is a curve: $P(\text{new tie})$ vs. $k$.
+
+
+<div class="small">
 
 | $k$ shared friends | $P(\text{new tie})$ |
 |---:|---|
 | 0 | very low (baseline) |
 | 1 | sharply higher |
 | 2 | higher still |
-| 5+ | curve flattens — saturation |
+| 5--8 | roughly follows the independent-friend baseline |
+| 9+ | rises steeply again, but with fewer observations |
 
-**Two readings.**
+</div>
+
+
+</div>
+
+
+</div>
+
 
 1. **Mechanism.** Mutual friends create *opportunities*: introductions, shared interests, social pressure to know each other.
-2. **Diminishing returns.** The 1st shared friend matters far more than the 10th — mutual friends are *not* independent channels; they often belong to the same group.
+2. **Shape.** The curve is not just "more friends, linearly more probability." It is close to the independent baseline in the middle, but bends upward at high $k$; those high-$k$ points should be read cautiously because there are fewer pairs with many mutual friends.
 
 
-</div>
+<div class="c-caution small">
 
-
-</div>
-
-
-Notes:
-The empirical curve is the central evidence for triadic closure at scale. Walk students through three landmarks: (i) the baseline rate at $k = 0$ — essentially how often two random strangers in the population start emailing — is very small; (ii) the *first* shared friend produces the biggest jump; (iii) the curve saturates. The saturation is itself the finding: it rules out a "simple counting" model and points to redundancy among mutual friends. This redundancy connects directly to L04's embeddedness idea.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## A Toy Model for the Shape
-
-If each shared contact independently offers an introduction opportunity with probability $q$, then the probability of closure given $k$ shared contacts is:
-
-$$P(\text{new tie} \mid k \text{ shared}) = 1 - (1 - q)^k$$
-
-This *saturating* curve rises steeply at first and flattens as $k$ grows — matching the empirical shape qualitatively. But real curves often flatten *faster* than this model predicts, suggesting that shared contacts are not fully independent.
-
-
-<div class="fragment small">
-
-Example with $q = 0.20$:
-
-| Shared contacts $k$ | $1$ | $2$ | $3$ | $5$ |
-|---:|---:|---:|---:|---:|
-| $P(\text{new tie} \mid k)$ | $0.20$ | $0.36$ | $0.49$ | $0.67$ |
-
-The first shared contact adds the most. Later shared contacts add less because many opportunities are redundant.
+Do not read the red-dotted lines as confidence intervals. They are toy-model baselines, not two fitted values of $q$. The value of $q$ only puts the comparison curve on the observed scale; it is not a causal estimate of one mutual friend's effect. Also be cautious at high $k$: pairs with many mutual friends are rare, so the curve can be noisier there.
 
 </div>
 
 
 Notes:
-The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model that produces saturation. The fact that real data flattens *faster* than the independent model is itself informative — it suggests redundancy among shared contacts, consistent with the embeddedness idea from L04. Students who have seen survival analysis will recognize this as a "complement of a geometric-tail" form.
+The empirical curve is the central evidence for triadic closure at scale. Walk students through three landmarks: (i) the baseline rate at $k = 0$ — essentially how often two people with no mutual contacts start emailing — is very small; (ii) the probability rises strongly once mutual friends exist; (iii) the red dotted curves are independent-opportunity baselines, not confidence intervals. Easley and Kleinberg do not use two different q settings here; they plot the simple baseline and a one-friend shifted version. From the y-axis scale, q is roughly $4 \times 10^{-4}$ per shared friend per day. The black curve is close to this baseline through the middle range but bends upward for very high $k$. Avoid describing this slide as simple saturation; the high-$k$ rise is visible, although it is also based on rarer pairs.
 
 --
 
@@ -986,14 +1119,18 @@ The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model 
 ## Focal Closure at Scale
 
 
-<div class="grid-2-1">
+<div class="grid-2-1 small">
 
 
 <div class="column">
 
 
+Black curve: observed probability. Red dotted curve: independent-focus baseline,
+$T_{\text{base}}(k)=1-(1-p)^k$, with $p$ calibrated from the effect of one shared class.
+
 ![Focal closure curve: probability of new email tie versus number of shared classes](/courses/network-science/figures/focal-closure.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
 
 
 </div>
@@ -1004,23 +1141,31 @@ The $(1 - (1-q)^k)$ model is a useful baseline because it is the simplest model 
 
 **Setup.** Two people who have **never emailed each other** but co-enroll in $k$ classes during the same semester. What is the probability they exchange email within the term?
 
-**Result.** Same qualitative shape as triadic closure: sharp rise from $k = 0$, then saturation. Sharing one class is already informative; 3+ classes produces a much higher closure rate.
+**Result.** One shared class is already informative. But after that, the observed black curve stays **below** the independent-focus baseline: additional shared classes add less than the toy model predicts.
 
-**Why this matters.**
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-caution small">
+
 
 - Focal closure runs **without any shared friend**. Strangers in the same context form ties through repeated exposure alone.
 - This is the mechanism that turns "people share classes" into "people share friendships" — and it produces homophily-like patterns even when there is **no preference for similarity at all**.
 - It is L05's main answer to *Question 3* from the opening slide ("could shared context explain the clustering?"). Often, yes.
 
 
-</div>
-
+Interpret the dotted line as a baseline, not a fitted causal law. The gap below it means shared classes are partly redundant: taking five classes together is not five independent chances to become connected.
 
 </div>
 
 
 Notes:
-Focal closure is L05's distinctive concept (triadic was L03's). The empirical signature is the same saturating curve, but the mechanism is different: instead of introductions through mutual friends, the focus itself provides repeated exposure. The teaching link to homophily is direct: if STEM students share many classes, focal closure alone can generate a homophily-rich within-STEM friendship network without any selection effect. This is exactly the "third explanation" (context) that Module 2 introduced — and the affiliation network model from Module 3 is the formal representation.
+Focal closure is L05's distinctive concept (triadic was L03's). The dotted curve is the same independent-opportunity baseline used for triadic closure, now with shared classes as the opportunities: $T_{\text{base}}(k)=1-(1-p)^k$. Since $T_{\text{base}}(1)=p$, $p$ can be read from the one-shared-class effect. The important empirical difference from triadic closure is that the focal-closure curve turns downward and levels off below the independent baseline. Subsequent shared classes after the first have diminishing returns. The teaching link to homophily is direct: if STEM students share many classes, focal closure alone can generate a homophily-rich within-STEM friendship network without any selection effect.
 
 --
 
@@ -1032,9 +1177,9 @@ Focal closure is L05's distinctive concept (triadic was L03's). The empirical si
 <div class="grid-2-1">
 
 
-<div class="column">
+<div class="column figure-70">
 
-
+  
 ![Membership closure curve: probability of joining a focus versus number of friends already in it](/courses/network-science/figures/membership-closure-experiment.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
 
@@ -1049,6 +1194,14 @@ Focal closure is L05's distinctive concept (triadic was L03's). The empirical si
 
 **Result.** Same saturating shape. One friend already in the focus is a strong predictor of joining; additional friends compound — but with diminishing returns.
 
+
+</div>
+
+
+</div>
+
+
+
 **The flipped direction.**
 
 - Triadic and focal closure close *person–person* ties.
@@ -1056,14 +1209,108 @@ Focal closure is L05's distinctive concept (triadic was L03's). The empirical si
 - This is how **social networks shape affiliations**, not just the other way around. Friendships and foci co-evolve through both directions of closure.
 
 
+Notes:
+Membership closure flips the bipartite arrow: instead of foci producing person–person ties (focal closure), person–person ties produce focus-memberships. This LiveJournal figure is a separate Easley-Kleinberg example, not the Kossinets-Watts university data. In the classroom example, if an Arts student A1 has multiple STEM friends, A1 is more likely to take a STEM elective. This is how friendships drive affiliations, completing the co-evolution loop between the network and the foci.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Wikipedia Editing as Membership Closure
+
+
+<div class="grid-2-1">
+
+
+<div class="column figure-70">
+
+
+![Wikipedia membership closure curve: probability of editing an article versus number of friends who already edited it](/courses/network-science/figures/membership-closure-experiment-wiki.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
 </div>
 
+
+<div class="column">
+
+
+**Dataset.** Wikipedia edit histories plus editor communication. Editors are people; articles are foci; user-talk interactions define editor-editor social ties.
+
+**Setup.** An editor is connected to an article after editing it.
+
+For an editor who has **not yet edited** an article, count $k$: how many of their communication partners have already edited that article?
+
+</div>
+
+
+</div>
+
+
+**Result.** The probability of editing the article rises with $k$. Friends already active in a focus make joining that focus more likely, with diminishing marginal returns.
+
+
+
+<div class="c-info">
+
+This is membership closure with a shared knowledge object as the focus: friends already active around an article make later editing of that article more likely.
 
 </div>
 
 
 Notes:
-Membership closure flips the bipartite arrow: instead of foci producing person–person ties (focal closure), person–person ties produce focus-memberships. This is the third closure mechanism and the one most often missed in introductory treatments. In the classroom example, if an Arts student A1 has multiple STEM friends, A1 is more likely to *take* a STEM elective. This is how friendships drive affiliations, completing the co-evolution loop between the network and the foci.
+This is the Wikipedia experiment discussed by Easley and Kleinberg. The social network is editor-editor communication via user talk pages; the affiliation network connects editors to articles they have edited. The plot asks whether an editor is more likely to edit an article when more of their communication partners have already edited it. The answer is yes: the probability rises with the number of friends already associated with the article, while marginal gains diminish.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Wikipedia Editors: Selection and Socialization
+
+
+<div class="grid-2-1">
+
+
+<div class="column figure-70">
+
+
+![Wikipedia editor similarity before and after first communication](/courses/network-science/figures/selection-socialization-wikipedia.png)
+<span class="figure-credit">Source: Easley & Kleinberg 2010</span>
+
+
+</div>
+
+
+<div class="column small">
+
+
+**Dataset.** Wikipedia edit histories plus first user-talk communication between pairs of editors (Crandall et al. 2008).
+
+**Design.** Align editor pairs at time 0: the moment they first communicate. Then track similarity in edited articles before and after that first contact.
+
+**Reading.**
+
+- Before first contact, future communication partners already become more similar than baseline: **selection**.
+- After first contact, similarity continues rising more slowly: possible **socialization**.
+- This is a feedback loop: similarity makes interaction more likely, and interaction can further increase similarity.
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-caution small">
+
+The figure separates timing, not perfect causality. It strongly suggests both selection and socialization, but unobserved shared contexts can still contribute to the pattern.
+
+</div>
+
+
+Notes:
+This is the second Wikipedia example from Crandall et al. (2008). It is different from the previous membership-closure slide: the previous slide asks whether friends pull an editor into an article; this slide asks how editor-editor similarity changes around the moment of first communication. The steep increase before first communication is selection: similar editors are more likely to encounter or contact each other. The slower increase after first communication is consistent with socialization: once editors interact, their future editing patterns become more similar. The important teaching point is the timing logic: measuring similarity around first contact helps separate "similar people meet" from "people become more similar after meeting," though it does not remove every possible confound.
 
 --
 
@@ -1080,19 +1327,7 @@ A study finds that the probability of two coworkers becoming Facebook friends ri
 
 **1.** Steep initial rise from 1% to 20%, then much smaller gains (30%, 33%) — a **saturating** curve.
 
-</div>
-
-
-
-<div class="fragment">
-
 **2.** At $k = 1$: $1 - (1-q) = q$, so $q \approx 0.20$.
-
-</div>
-
-
-
-<div class="fragment">
 
 **3.** The model predicts $1 - (1-0.20)^2 = 0.36$ but we observe **0.30** — a shortfall. Shared friends are *correlated* (typically embedded in the same group), so they provide less independent opportunity than the model assumes. Diminishing returns are *steeper* than independence predicts.
 
@@ -1133,6 +1368,60 @@ This module answers Question 4 from the opening slide: "Would mild preferences s
 
 --
 
+## Segregation as a Graph
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Segregation** means that groups are separated across neighborhoods or network regions: most local contacts are same-type, and cross-type contact is rare. It is a **global pattern** in the whole graph, not just one person's preference.
+
+</div>
+
+
+Schelling turned homophily into a dynamic model: **how can small local preferences for similar neighbors accumulate into large-scale segregation?** The model is useful because it separates a local rule from the global pattern it produces.
+
+
+<div class="small cm-gap c-blue">
+
+**Model:** The graph version makes the mechanism explicit:
+
+- **nodes** are agents or households
+- **edges** are neighborhood/contact relations
+- a **grid** is a regular graph: each interior cell has the same local neighborhood size
+- **node type** is the attribute that matters locally
+- **updating** means moving on a grid or rewiring ties in a network
+
+</div>
+
+
+
+</div>
+
+
+<div class="column">
+
+
+![A grid is a regular graph used to simplify local-neighborhood dynamics](/courses/network-science/figures/schelling-grid-as-graph.svg)
+
+
+</div>
+
+
+</div>
+
+
+
+Notes:
+Use this as the motivation for Schelling before introducing the threshold rule. The model belongs in a network science lecture because it turns "neighborhood" into an adjacency relation. A square grid is a regular graph topology: households are nodes, adjacent cells are edges, and most cells have the same number of neighbors. In online or organizational settings, there may be no physical grid; the same logic becomes rewiring, recommendation, or group switching. This connects the module back to the whole L05 arc: homophily is a measured local tendency, segregation is the macro-pattern, selection/socialization are causal mechanisms, and Schelling is a generative model showing how local rules can amplify into global structure.
+
+--
+
 ## Schelling's Threshold Model
 
 
@@ -1161,32 +1450,7 @@ The formal model is simple enough to simulate in a few lines of code, yet its ou
 
 --
 
-<!-- .slide: class="smaller" -->
-
-## Schelling — A Local Rule
-
-Let $\tau = 1/3$. An agent compares its local neighborhood to that threshold.
-
-| Same-type neighbors | Total neighbors | Same-type fraction | Status |
-|---:|---:|---:|---|
-| 2 | 8 | $0.25$ | Unsatisfied: move or rewire |
-| 3 | 8 | $0.375$ | Satisfied: stay |
-| 4 | 8 | $0.50$ | Satisfied: stay |
-
-
-<div class="c-info small">
-
-The rule is mild: the agent does **not** require a majority of similar neighbors. Strong segregation emerges because many mild local moves are repeated.
-
-</div>
-
-
-Notes:
-This numerical slide makes the threshold rule operational. Students should see that the model does not assume extremist preferences. With a threshold of one third, an agent with 3 of 8 same-type neighbors stays. The global segregation is an emergent outcome of iteration, not a direct expression of each agent's desired final map.
-
---
-
-<!-- .slide: class="figure-85" -->
+<!-- .slide: class="figure-80" -->
 
 ## One Step of the Model
 
@@ -1256,19 +1520,7 @@ Translate Schelling's spatial model into a network setting.
 
 **1. Network neighbor:** a graph-adjacent node — your immediate contacts.
 
-</div>
-
-
-
-<div class="fragment">
-
 **2. Moving:** rewiring — dropping ties to dissimilar contacts and forming new ones with similar contacts.
-
-</div>
-
-
-
-<div class="fragment">
 
 **3. The platform is an automated Schelling rewirer.** It surfaces similar people — equivalent to offering each agent a move toward a higher same-type fraction. This *amplifies* homophily: the local rule ("recommend similar") is mild, but at machine speed it produces sharp global outcomes (filter bubbles, echo chambers).
 
@@ -1292,28 +1544,25 @@ Global polarization can emerge without anyone explicitly aiming for it. Mild loc
 
 ---
 
-## Wrap-Up — The Three Gaps
+## Wrap-Up — Lecture 05
 
-Across Lectures 03–05, the course has exposed three kinds of gap between what we *want to know* about a network and what the data *actually shows*:
+L05 added **context and time** to the graph. Nodes now have attributes, ties have timestamps, and social settings become explicit foci.
 
-| Lecture | Gap type | Theoretical ideal | Practical limitation | Strategy |
-|---|---|---|---|---|
-| **L03** | Computational | True tie labels (MaxSTC) | NP-hard | Polynomial proxies (clustering, overlap) |
-| **L04** | Computational | Optimal partition ($\max Q$) | NP-hard | Heuristics (GN, Louvain, Leiden) |
-| **L05** | Causal | Mechanism (selection vs. socialization) | Not identifiable from snapshots | Longitudinal data, affiliation models |
+| Question | L05 answer |
+|---|---|
+| Is similarity more than chance? | Compare observed homophily to a population baseline. |
+| Why are similar people connected? | Distinguish selection, socialization, and shared context. |
+| Where do ties form? | Model foci with affiliation networks and co-occurrence graphs. |
+| How do local rules scale up? | Use closure curves and Schelling dynamics to connect micro behavior to macro patterns. |
 
-Every concept in the three lectures occupies one cell of this table.
-
-### Looking Ahead: Lecture 06
-
-If signs (positive and negative) — not just connection strengths — matter, how do whole social structures stabilize or destabilize? Structural balance theory turns the question of friend-and-enemy relations into a graph-theoretic claim with measurable predictions.
+The central lesson: a graph snapshot can show a pattern, but explaining the mechanism requires baselines, temporal data, context, or a generative model.
 
 ### Reading
 
 Chapter 4 of Easley & Kleinberg (2010) covers homophily, selection, and socialization. McPherson, Smith-Lovin & Cook (2001), *Birds of a Feather*, is the definitive review of homophily research. Christakis & Fowler (2007) is the Framingham obesity study; Lyons (2011) provides the methodological critique.
 
 Notes:
-The three-gap table closes the L03–L05 arc. The computational gap and the causal gap are fundamentally different in character: the first is about algorithms, the second is about study design. Both are present in any real network analysis, and the responsible analyst must address both. Lecture 06 opens a new thread — signed graphs and structural balance — which introduces yet another kind of constraint: not computational or causal but *logical* (can the sign pattern be consistent across all triangles?).
+Close by emphasizing the L05 shift: the graph is no longer just topology. Attributes, timing, and social context determine what the observed pattern can mean. Homophily is measurable, but not self-explanatory; selection, socialization, shared foci, closure processes, and Schelling dynamics are different mechanisms that can produce similar-looking structure.
 
 ---
 
@@ -1322,7 +1571,9 @@ The three-gap table closes the L03–L05 arc. The computational gap and the caus
 ## Image Credits & References
 
 - Cinelli, Matteo and De Francisci Morales, Gianmarco and Galeazzi, Alessandro and Quattrociocchi, Walter and Starnini, Michele (2021). The echo chamber effect on social media. *Proceedings of the National Academy of Sciences*.
+- Crandall, David and Cosley, Dan and Huttenlocher, Daniel and Kleinberg, Jon and Suri, Siddharth (2008). Feedback Effects Between Similarity and Social Influence in Online Communities. *Proceedings of the 14th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*.
 - Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning about a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
+- McPherson, Miller and Smith-Lovin, Lynn and Cook, James M. (2001). Birds of a Feather: Homophily in Social Networks. *Annual Review of Sociology*.
 - Nyhan, Brendan and Settle, Jaime and Thorson, Emily and Wojcieszak, Magdalena and Barber\'a, Pablo and Chen, Annie Y. and Allcott, Hunt and Brown, Taylor and Crespo-Tenorio, Adriana and Dimmery, Drew and Freelon, Deen and Gentzkow, Matthew and Gonz\'alez-Bail\'on, Sandra and Guess, Andrew M. and Kennedy, Edward and Kim, Young Mie and Lazer, David and Malhotra, Neil and Moehler, Devra and Pan, Jennifer and Thomas, Daniel Robert and Tromble, Rebekah and Velasco Rivera, Carlos and Wilkins, Arjun and Xiong, Beixian and Kiewiet de Jonge, Chad and Franco, Annie and Mason, Winter and Stroud, Natalie Jomini and Tucker, Joshua A. (2023). Like-minded sources on Facebook are prevalent but not polarizing. *Nature*.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

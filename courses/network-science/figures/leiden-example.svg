@@ -16,6 +16,7 @@
       .edge { stroke: #607d8b; stroke-width: 2; }
       .weak { stroke: #b0bec5; stroke-width: 1.5; stroke-dasharray: 4 4; }
       .cut { stroke: #d32f2f; stroke-width: 3; stroke-dasharray: 6 4; }
+      .outline { fill: none; stroke: #2e7d32; stroke-width: 2; stroke-dasharray: 6 5; }
     </style>
   </defs>
 
@@ -25,6 +26,7 @@
     <rect class="box" x="0" y="0" width="238" height="205"/>
     <text x="119" y="24" text-anchor="middle" class="label">1. Local moving</text>
     <text x="119" y="186" text-anchor="middle" class="small">same greedy ΔQ idea as Louvain</text>
+    <path class="outline" d="M34 46 H210 V130 H34 Z"/>
 
     <line class="edge" x1="56" y1="84" x2="92" y2="62"/>
     <line class="edge" x1="56" y1="84" x2="92" y2="110"/>
@@ -40,7 +42,8 @@
     <circle class="green" cx="152" cy="62" r="11"/>
     <circle class="green" cx="152" cy="110" r="11"/>
     <circle class="green" cx="188" cy="84" r="11"/>
-    <text x="122" y="145" text-anchor="middle" class="small">provisional community may be fragile</text>
+    <text x="122" y="145" text-anchor="middle" class="small">one provisional community</text>
+    <text x="122" y="161" text-anchor="middle" class="small">may be fragile</text>
   </g>
 
   <line x1="282" y1="160" x2="328" y2="160" class="edge" marker-end="url(#arrow)"/>
@@ -48,7 +51,8 @@
   <g transform="translate(348,58)">
     <rect class="box" x="0" y="0" width="190" height="205"/>
     <text x="95" y="24" text-anchor="middle" class="label">2. Refine</text>
-    <text x="95" y="186" text-anchor="middle" class="small">split badly connected parts</text>
+    <text x="95" y="42" text-anchor="middle" class="small">before aggregation</text>
+    <text x="95" y="186" text-anchor="middle" class="small">split weakly connected parts</text>
 
     <line class="edge" x1="43" y1="96" x2="74" y2="76"/>
     <line class="edge" x1="43" y1="96" x2="74" y2="116"/>
@@ -64,6 +68,9 @@
     <circle class="orange" cx="122" cy="76" r="11"/>
     <circle class="orange" cx="122" cy="116" r="11"/>
     <circle class="orange" cx="153" cy="96" r="11"/>
+    <text x="58" y="145" text-anchor="middle" class="small">C1</text>
+    <text x="138" y="145" text-anchor="middle" class="small">C2</text>
+    <text x="95" y="164" text-anchor="middle" class="small">split before collapse</text>
   </g>
 
   <line x1="560" y1="160" x2="608" y2="160" class="edge" marker-end="url(#arrow)"/>
@@ -71,7 +78,7 @@
   <g transform="translate(628,58)">
     <rect class="box" x="0" y="0" width="168" height="205"/>
     <text x="84" y="24" text-anchor="middle" class="label">3. Aggregate</text>
-    <text x="84" y="186" text-anchor="middle" class="small">only refined communities collapse</text>
+    <text x="84" y="186" text-anchor="middle" class="small">C1 and C2 collapse separately</text>
 
     <circle class="green" cx="54" cy="96" r="30"/>
     <circle class="orange" cx="114" cy="96" r="30"/>
@@ -81,8 +88,8 @@
   </g>
 
   <g transform="translate(72,300)" font-size="12" fill="#455a64">
-    <text x="0" y="0" font-weight="700">Still no pre-given k:</text>
-    <text x="114" y="0">Leiden also lets the partition size emerge, but prevents badly connected communities from being aggregated too early.</text>
-    <text x="0" y="22">The refinement step gives stronger internal-connectivity guarantees than Louvain while keeping the same scalable compression logic.</text>
+    <text x="0" y="0" font-weight="700">Refinement check:</text>
+    <text x="112" y="0">a community found by local moving is not automatically collapsed into one super-node.</text>
+    <text x="0" y="22">Leiden first splits weakly connected provisional communities, then aggregates only the refined pieces.</text>
   </g>
 </svg>

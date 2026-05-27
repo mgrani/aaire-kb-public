@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/index.Kt0jKsNQ.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/index.CBOk6nSS.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 04: Communities and Graph Partitioning
@@ -96,7 +96,7 @@ This table is L04's version of the L03 roadmap. The first row is slightly differ
 
 <!-- .slide: class="figure-90" -->
 
-## L04 Argument Map
+## Argument Map
 
 ![Argument map for Lecture 04: from node importance to community detection](/courses/network-science/figures/l04-argument-map.svg)
 
@@ -122,7 +122,7 @@ This takeaway names the shape of the lecture before any content arrives. Refer b
 
 <!-- .slide: class="module-slide" -->
 
-## Roles and Social Capital
+## Motivation: Roles and Social Capital in a Social Network
 
 
 <div class="guiding-question">
@@ -1184,6 +1184,13 @@ The informal definition is intentional: it gives the structural criterion withou
 ## Modularity — The Canonical Objective
 
 
+<div class="grid-4-1">
+
+
+<div class="column">
+
+
+
 <div class="c-definition">
 
 **Modularity** $Q$ of a partition $\{C_1, \dots, C_k\}$ of a graph with $m$ edges and adjacency matrix $A$:
@@ -1222,11 +1229,19 @@ where $k_i$ is node degree, $\delta(c_i, c_j)=1$ for same-community pairs, $l_c$
 </div>
 
 
-
-<div class="grid-2 gap-sm">
+</div>
 
 
 <div class="column">
+
+![Modularity example](/courses/network-science/figures/modularity-example.svg)
+![Observed versus expected internal density for modularity](/courses/network-science/figures/modularity-observed-expected.svg)
+
+</div>
+
+
+</div>
+
 
 **Interpretation.** For every within-community pair, compare the *observed* edge $A_{ij}$ to the *expected* edge density $k_i k_j / 2m$ under a random rewiring that preserves degrees (the **configuration model**). $Q$ is the total surplus of within-community edges over chance.
 
@@ -1234,19 +1249,6 @@ where $k_i$ is node degree, $\delta(c_i, c_j)=1$ for same-community pairs, $l_c$
 <div class="c-info smaller">
 
 $Q$ ranges roughly in $[-\tfrac{1}{2}, 1]$. Values in $[0.3, 0.7]$ typically indicate significant community structure; $Q \approx 0$ means no more internal density than expected by chance.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-![Observed versus expected internal density for modularity](/courses/network-science/figures/modularity-observed-expected.svg)
-
-</div>
-
 
 </div>
 
@@ -1467,11 +1469,11 @@ Cho, Lee & Kim (2023) model international trade as a network of countries connec
 
 **Panels**
 
-$\Phi^{*}$ is the **cooccurrence threshold**: countries are grouped only if they appear together in the same community in at least that share of multiresolution runs. Higher $\Phi^{*}$ keeps only more stable links.
+$\Phi^\ast$ is the **cooccurrence threshold**: countries are grouped only if they appear together in the same community in at least that share of multiresolution runs. Higher $\Phi^\ast$ keeps only more stable links.
 
-- **a** $\Phi^{*}=0$: one large trade component
-- **b** $\Phi^{*}=0.41$: four broad blocs
-- **c** $\Phi^{*}=0.96$: 16 stable country groups
+- **a** $\Phi^\ast=0$: one large trade component
+- **b** $\Phi^\ast=0.41$: four broad blocs
+- **c** $\Phi^\ast=0.96$: 16 stable country groups
 
 </div>
 
@@ -1493,7 +1495,7 @@ $\Phi^{*}$ is the **cooccurrence threshold**: countries are grouped only if they
 
 <div class="c-info smaller">
 
-Figure: selected country configurations at cooccurrence thresholds $\Phi^{*}=0$, $0.41$, and $0.96$; reproduced from Fig. 4 in Cho, Lee & Kim (2023), CC BY 4.0.
+Figure: selected country configurations at cooccurrence thresholds $\Phi^\ast=0$, $0.41$, and $0.96$; reproduced from Fig. 4 in Cho, Lee & Kim (2023), CC BY 4.0.
 
 </div>
 
@@ -1618,6 +1620,8 @@ The dendrogram is the explicit representation of multi-scale community structure
 <div class="c-info smaller">
 
 Edges with high edge-betweenness are exactly the **local bridges** and **weak ties** from Lecture 03 — they carry many shortest paths because all cross-community communication must cross them. Girvan–Newman is an algorithmic version of Granovetter's weak-tie argument.
+
+**Time complexity:** $O(|V| \cdot |E|^2)$ worst case, because edge betweenness is recomputed after each edge removal.
 
 </div>
 
@@ -1932,7 +1936,7 @@ Hidalgo, Klinger, Barabasi & Hausmann (2007) build a **product-space network**: 
 </div>
 
 
-**Network formation.** Nodes are SITC-4 product classes. A country is linked to a product when it exports it with **revealed comparative advantage** ($RCA>1$). Two products are similar if countries that export one competitively also tend to export the other competitively:
+**Network formation.** Nodes are SITC-4 product classes. A country is linked to a product when it exports it with **revealed comparative advantage** (exports more than expected relative to the world average, $RCA>1$). Two products are similar if countries that export one competitively also tend to export the other competitively:
 
 
 <div class="smaller">
