@@ -186,16 +186,16 @@ The SIR model on networks differs from the classical well-mixed SIR in one cruci
 
 ## The Role of Hubs
 
-In networks with heterogeneous degree (e.g. scale-free networks):
+In homogeneous networks, the average degree is often enough. In heterogeneous networks, the **variance of degree** matters: hubs create many more transmission opportunities than typical nodes.
 
 
 <div class="c-info smaller">
 
-**Pastor-Satorras & Vespignani (2001).** On scale-free networks with power-law degree distribution $P(k) \propto k^{-\gamma}$ (with $\gamma \leq 3$), the epidemic threshold vanishes:
+For an uncorrelated random network, the epidemic threshold depends on the first two moments of the degree distribution:
 
-$$R_0^{\text{critical}} \to 0 \quad \text{as } n \to \infty$$
+$$T_c \approx \frac{\langle k\rangle}{\langle k^2\rangle - \langle k\rangle}$$
 
-Any non-zero transmission rate leads to an epidemic — because hubs always have enough contacts to sustain spreading.
+Here $T$ is transmissibility across an edge. If $T > T_c$, a macroscopic outbreak is possible.
 
 </div>
 
@@ -203,13 +203,61 @@ Any non-zero transmission rate leads to an epidemic — because hubs always have
 
 <div class="fragment">
 
-**Implication for vaccination:** Targeting hubs for vaccination is far more effective than random vaccination, because removing a hub from the susceptible pool breaks many more transmission paths than removing a random node.
+**Pastor-Satorras & Vespignani (2001).** In an idealized infinite scale-free network with $P(k) \propto k^{-\gamma}$ and $\gamma \leq 3$, $\langle k^2\rangle$ diverges, so $T_c \to 0$.
 
 </div>
 
 
 Notes:
-This result connects directly to L04's centrality: betweenness and degree centrality identify the nodes whose removal would most disrupt spreading. The "vaccinate the hubs" strategy is the dynamical version of L04's "identify the brokers" — both target nodes whose structural position gives them disproportionate influence.
+This is the hard result. The naive $R_0 = \beta/\gamma \cdot \langle k\rangle$ hides degree heterogeneity. In a heterogeneous network, a newly infected node is more likely to be reached through an edge leading to a high-degree node; high-degree nodes also create many onward edges. The branching factor is therefore controlled by $\langle k^2\rangle / \langle k\rangle$, not just $\langle k\rangle$. If the second moment diverges, the theoretical epidemic threshold vanishes in the infinite-network limit.
+
+--
+
+## Reading the Hub Result Correctly
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+**What the theorem says**
+
+- Hubs make simple contagion unusually robust.
+- In an idealized infinite scale-free network with $\gamma \leq 3$, no finite epidemic threshold remains.
+- Even low transmissibility can spread if it reaches sufficiently connected nodes.
+
+
+</div>
+
+
+<div class="column">
+
+
+**What it does *not* say**
+
+- Not every real disease infects everyone.
+- Real contact networks are finite, layered, clustered, temporal, and capacity-limited.
+- Immunity, vaccination, behavior change, geography, and pathogen biology restore practical thresholds.
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-important">
+
+So the policy implication is not fatalism. It is **targeted intervention**: protect or reduce exposure around high-degree and high-betweenness nodes because they disproportionately sustain transmission.
+
+</div>
+
+
+Notes:
+This slide prevents over-interpretation. Some social contact layers are heavy-tailed, but "society" is not a single infinite uncorrelated scale-free graph. People have time budgets, repeated contacts, households, workplaces, schools, geography, masks, vaccines, and behavioral responses. The vanishing-threshold result explains why hubs and superspreading matter so much; it does not mean control is impossible. This result connects directly to L04's centrality: degree and betweenness identify nodes whose removal, vaccination, testing, or exposure reduction can most disrupt spreading.
 
 --
 
