@@ -245,7 +245,14 @@ Fast slide — HPC is the infrastructure backbone. The pipeline runs daily: craw
 <div class="column">
 
 
-<video data-autoplay loop muted playsinline controls style="width:100%;border:1px solid #e0e0e0;border-radius:4px" poster="../../_assets/ows/screenshots/owi-dashboard-2605-poster.jpg" src="../../_assets/ows/screenshots/owi-dashboard-2605.mp4"></video>
+<video id="owi-vid" muted playsinline controls style="width:100%;border:1px solid #e0e0e0;border-radius:4px" poster="../../_assets/ows/screenshots/owi-dashboard-2605-poster.jpg" src="../../_assets/ows/screenshots/owi-dashboard-2605.mp4"></video>
+
+<div style="font-size:0.52em;margin-top:0.35em;display:flex;gap:1.2em;flex-wrap:wrap">
+<span onclick="var v=document.getElementById('owi-vid');v.currentTime=10;v.play()" style="cursor:pointer;color:#0083A1">▶ Statistics <span style="color:#aaa">0:10</span></span>
+<span onclick="var v=document.getElementById('owi-vid');v.currentTime=44;v.play()" style="cursor:pointer;color:#0083A1">▶ Datasets <span style="color:#aaa">0:44</span></span>
+<span onclick="var v=document.getElementById('owi-vid');v.currentTime=52;v.play()" style="cursor:pointer;color:#0083A1">▶ Corpora <span style="color:#aaa">0:52</span></span>
+<span onclick="var v=document.getElementById('owi-vid');v.currentTime=74;v.play()" style="cursor:pointer;color:#0083A1">▶ Models <span style="color:#aaa">1:14</span></span>
+</div>
 
 
 <div class="figure-credit">
@@ -339,7 +346,7 @@ Results in numbers. Stress two things: the scale (over a billion objects, with s
 <div class="column">
 
 
-<video data-autoplay loop muted playsinline controls style="width:85%;border:1px solid #e0e0e0;border-radius:4px" poster="../../_assets/ows/screenshots/ourrs-manufactruing-2605-poster.jpg" src="../../_assets/ows/screenshots/ourrs-manufactruing-2605.mp4"></video>
+<video muted playsinline controls style="width:80%;border:1px solid #e0e0e0;border-radius:4px" poster="../../_assets/ows/screenshots/ourrs-manufactruing-2605-poster.jpg" src="../../_assets/ows/screenshots/ourrs-manufactruing-2605.mp4"></video>
 
 </div>
 
@@ -381,14 +388,6 @@ documents · media · products · events · places · FAQs · Scholarly · Artef
 </div>
 
 
-<div class="stat-card">
-
-### 0.04–3.6 s
-"manufacturing 3d" → 411k results
-
-</div>
-
-
 <div class="stat-card s-violet">
 
 ### in-browser AI
@@ -409,7 +408,7 @@ private Qwen3 summaries, ~400 MB
 
 <div class="c-positive small">
 
-OUR²S turns the open index into a **working, AI-augmented search engine** — documents *and* structured entities, summarised privately in the browser.
+OUR²S turns the OWI into a **working search engine** — documents *and* structured entities, summarised privately in the browser.
 
 </div>
 
@@ -743,10 +742,17 @@ This is the conceptual pivot of the talk. Search is no longer only a human-facin
 
 Search for context relevant documents. Usually as Vector search, to cover linguistic and semantic diversity.
 
-**RAG splits memory in two**
 
-- **parametric:**, i.e. model capabilties
-- **non-parametric:**, i.e. knowledge
+<div class="gap">
+
+
+</div>
+
+**RAG introduces a "memory" hierarchy:**
+
+
+- **parametric:** model capabilties & internal knowledge
+- **non-parametric:** external knowledge
 
 
 </div>
@@ -808,7 +814,7 @@ The Open Web Index provides **embeddings** for retrieval on selected web documen
 
 <div class="c-insight">
 
-The memory layer must be cheap enough for **scaling search** .
+Compression essential for **scaling up search**.
 
 </div>
 
@@ -961,6 +967,14 @@ RAG becomes multi-hop and interactive. ReAct interleaves reasoning and acting; T
     <path d="M388 250 C 470 250, 482 286, 570 286" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahv)"/>
     <text x="430" y="244" font-size="11" font-style="italic" fill="#6d28d9">externalise</text>
   </g>
+  <g class="fragment" data-fragment-index="3">
+    <!-- white disc clears the externalise arrow so the loop icon reads cleanly -->
+    <circle cx="477" cy="335" r="36" fill="white" opacity="0.92"/>
+    <!-- 300° clockwise arc: top (477,307) → upper-left (453,321) -->
+    <path d="M 477 307 A 28 28 0 1 1 453 321" fill="none" stroke="#164374" stroke-width="2.5" marker-end="url(#ah)"/>
+    <text x="477" y="331" text-anchor="middle" font-size="14" font-weight="700" fill="#164374">× n</text>
+    <text x="477" y="348" text-anchor="middle" font-size="10" fill="#555555">iterations</text>
+  </g>
 </svg>
 
 
@@ -1085,7 +1099,64 @@ Structured microdata is an excellent candidate generator for agent actions. Sear
 
 ---
 
-## Beyond Web Data: Interaction & Knowledge
+## Beyond Web Data: Traces & Evaluation
+
+
+<div class="eyebrow">
+
+Open challenges in agentic search — our work
+
+</div>
+
+
+
+### Synthetically creating agent traces
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+**AgentSim** — simulates RAG agents over document collections to generate synthetic, **document-grounded** reasoning traces
+
+- **103k+** verifiable steps (Agent-Trace Corpus)
+- 100% grounding rate on substantive answers.
+- Agent-trace synthetic data generating is both **GPU compute heavy** and requires **search systems**.
+
+<span class="sidenote">AgentSim, Agent-Trace Corpus · arXiv:2604.26653</span>
+
+
+
+</div>
+
+
+<div class="column">
+
+
+<img src="../../_assets/ows/screenshots/agent-sim-concept.png" alt="AgentSim: corpus-aware seeding, RAG simulation, active validation loop" style="max-height:420px;width:auto;display:block;margin:0 auto"/>
+
+
+</div>
+
+
+</div>
+
+
+### Comparing to simulated human users
+
+**UXSim** — grounds an adaptive LLM agent with classical simulators → accurate, **explainable** user-search simulation without costly user studies.
+
+<span class="sidenote">Zerhoudi & Granitzer, CIKM '25 · arXiv:2602.24241</span>
+
+
+Notes:
+The key insight: agent traces are a form of training data, and generating them synthetically is a data-generation problem — not just an evaluation problem. AgentSim builds those traces by simulating RAG agents over grounded corpora with corpus-aware seeding and an active validation loop. Both trace generation and evaluation (UXSim) are GPU compute intensive, placing them in the same infrastructure category as model training.
+
+---
+
+## Beyond Web Data: Knowledge & Interaction
 
 
 <div class="eyebrow">
@@ -1097,31 +1168,6 @@ Open challenges in agentic search — our work
 
 
 <div class="grid-2 gap-lg">
-
-
-<div class="column middle">
-
-**How should retrieval adapt to the user?**
-
-**PersonaRAG** — user-centric agents personalise retrieval → higher answer quality (BLEU) than CoT and vanilla RAG across TriviaQA, WebQ, NQ.
-
-<span class="sidenote">Zerhoudi & Granitzer 2024 · arXiv:2407.09394</span>
-
-</div>
-
-
-<div class="column middle">
-
-<img src="../../_assets/ows/personarag-results-top3.png" alt="PersonaRAG vs. baselines — answer quality" style="max-height:208px;width:auto;display:block;margin:0 auto"/>
-
-</div>
-
-
-</div>
-
-
-
-<div class="grid-2 gap-lg fade-in">
 
 
 <div class="column middle">
@@ -1145,76 +1191,24 @@ Open challenges in agentic search — our work
 </div>
 
 
-Notes:
-Two challenges beyond the data itself, one per row (second row fades in). PersonaRAG (Zerhoudi & Granitzer 2024): retrieval is a personalisation problem — user-centric agents adapt what is retrieved and lift answer quality over Chain-of-Thought and vanilla RAG. NuggetIndex: how should knowledge be structured so an agent can search it efficiently? Distil documents into atomic factual nuggets — fewer tokens, less noise, facts preserved for grounding.
-
----
-
-## Beyond Web Data: Behaviour & Evaluation
-
-
-<div class="eyebrow">
-
-Open challenges in agentic search — our work
-
-</div>
-
-
-
-<div class="grid-2 gap-lg">
-
-
-<div class="column middle">
-
-**Where do grounded agent traces come from?**
-
-**AgentSim** — simulates RAG agents to generate synthetic, **document-grounded** reasoning traces for training & evaluation.
-
-<span class="sidenote">AgentSim, Agent-Trace Corpus · arXiv:2604.26653</span>
-
-</div>
-
-
-<div class="column middle">
-
-
-| Agent-Trace Corpus | |
-|---|---|
-| verifiable steps | **103k+** |
-| corpora | MS MARCO · Quasar-T · CausalQA |
-| grounding | 100% on substantive answers |
-
-
-</div>
-
-
-</div>
-
-
 
 <div class="grid-2 gap-lg fade-in">
 
 
 <div class="column middle">
 
-**How to evaluate without costly user studies?**
+**How should retrieval adapt to the user?**
 
-**UXSim** — grounds an adaptive LLM agent with classical simulators → accurate, **explainable** user-search simulation.
+**PersonaRAG** — user-centric agents personalise retrieval → higher answer quality (BLEU) than CoT and vanilla RAG across TriviaQA, WebQ, NQ.
 
-<span class="sidenote">Zerhoudi & Granitzer, CIKM '25 · arXiv:2602.24241</span>
+<span class="sidenote">Zerhoudi & Granitzer 2024 · arXiv:2407.09394</span>
 
 </div>
 
 
 <div class="column middle">
 
-
-| Approach | Grounded | Flexible |
-|---|:---:|:---:|
-| Traditional simulators | ✓ | — |
-| LLM agent | — | ✓ |
-| **UXSim (hybrid)** | ✓ | ✓ |
-
+<img src="../../_assets/ows/personarag-results-top3.png" alt="PersonaRAG vs. baselines — answer quality" style="max-height:208px;width:auto;display:block;margin:0 auto"/>
 
 </div>
 
@@ -1223,7 +1217,7 @@ Open challenges in agentic search — our work
 
 
 Notes:
-The other two challenges, one per row (second row fades in). AgentSim: where do grounded behavioural traces come from? It generates synthetic, verifiable RAG-agent traces — 103k+ steps across three IR corpora, 100% grounding on substantive answers. UXSim: how to evaluate interactive search without expensive user studies? It grounds an adaptive LLM agent with classical simulators, giving accurate and explainable user simulation.
+NuggetIndex addresses how to structure knowledge so an agent can search it efficiently — distilling documents to atomic factual nuggets reduces token count and noise while preserving grounding facts. PersonaRAG addresses how retrieval should adapt to the individual user — user-centric agents lift answer quality over CoT and vanilla RAG. Second row fades in.
 
 ---
 
@@ -1337,7 +1331,7 @@ We are **looking forward to collaborations** on open web data, retrieval memory,
 
 <div class="takeaway">
 
-Better models and better data matter **only when they become systems people actually use.**
+Better models and better data matter **only when they become systems people use.**
 
 </div>
 
