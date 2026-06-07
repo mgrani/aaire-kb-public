@@ -66,9 +66,9 @@ For each partition:
 
 Modularity $Q$ measures whether communities are denser than expected by chance:
 
-$$Q = \frac{1}{2m} \sum_{c} \left[ e_c - \frac{a_c^2}{4m} \right]$$
+$$Q = \sum_c \left(\frac{l_c}{m} - \left(\frac{d_c}{2m}\right)^2\right)$$
 
-where $e_c$ = edges inside community $c$, $a_c$ = sum of degrees in community $c$, $m$ = total edges.
+where $l_c$ = edges inside community $c$, $d_c$ = sum of degrees in community $c$, $m$ = total edges.
 
 1. For **P2** from Exercise 5.A.1, compute $Q$ by hand (use $m=7$).
 2. What does $Q = 0$ mean? What does $Q = 1$ mean? What range is typical for real networks?
@@ -81,13 +81,15 @@ where $e_c$ = edges inside community $c$, $a_c$ = sum of degrees in community $c
 
 **1. Computing $Q$ for P2** ($m = 7$ total edges):
 
-Community $\{A,B,C\}$: internal edges $e_1 = 3$. Degrees: $A=2$, $B=3$, $C=2$ → $a_1 = 7$. Expected internal edges $= a_1^2 / (4m) = 49/28 \approx 1.75$.
+Community $\{A,B,C\}$: internal edges $l_1 = 3$. Degrees: $A=2$, $B=3$, $C=2$ → $d_1 = 7$.
 
-Community $\{D,E,F\}$: internal edges $e_2 = 3$. Degrees: $D=3$, $E=2$, $F=2$ → $a_2 = 7$. Expected $= 49/28 \approx 1.75$.
+Community $\{D,E,F\}$: internal edges $l_2 = 3$. Degrees: $D=3$, $E=2$, $F=2$ → $d_2 = 7$.
 
-$$Q = \frac{1}{2 \cdot 7}\left[(3 - 1.75) + (3 - 1.75)\right] = \frac{1}{14} \cdot 2.5 \approx 0.18$$
+$$Q = \left(\frac{3}{7} - \left(\frac{7}{14}\right)^2\right) + \left(\frac{3}{7} - \left(\frac{7}{14}\right)^2\right)$$
 
-This is a small graph, so $Q$ is modest despite the clear structure. Larger real-world networks with similar community clarity yield higher $Q$.
+$$Q = 2 \cdot \left(\frac{3}{7} - \frac{1}{4}\right) = \frac{5}{14} \approx 0.357$$
+
+This is a small graph, so $Q$ is positive but not extremely high despite the clear structure. Larger real-world networks with similar community clarity often yield higher $Q$.
 
 **2. Interpreting $Q$:**
 
@@ -117,6 +119,7 @@ Using `nx.karate_club_graph()`:
 
 ```python
 import networkx as nx
+import matplotlib.pyplot as plt
 
 G = nx.karate_club_graph()
 communities = nx.community.greedy_modularity_communities(G)
@@ -124,15 +127,42 @@ Q = nx.community.modularity(G, communities)
 
 print(f"Modularity Q = {Q:.3f}, Communities = {len(communities)}")
 
-# Fraction correctly assigned to known factions
-factions = nx.get_node_attributes(G, "club")
-# (Comparison logic — usually 85-95% match)
+def majority_vote_accuracy(G, node_to_group):
+    correct = 0
+    for group in set(node_to_group.values()):
+        members = [n for n, g in node_to_group.items() if g == group]
+        labels = [G.nodes[n]["club"] for n in members]
+        majority = max(set(labels), key=labels.count)
+        correct += sum(label == majority for label in labels)
+    return correct / G.number_of_nodes()
+
+node_to_community = {}
+for i, community in enumerate(communities):
+    for node in community:
+        node_to_community[node] = i
+
+accuracy = majority_vote_accuracy(G, node_to_community)
+print(f"Faction matching by majority vote = {accuracy:.3f}")
+
+# Visualisation
+pos = nx.spring_layout(G, seed=7)
+node_colours = [node_to_community[n] for n in G.nodes()]
+nx.draw(
+    G,
+    pos,
+    node_color=node_colours,
+    cmap="tab10",
+    with_labels=True,
+    node_size=450,
+)
+plt.title("Greedy modularity communities")
+plt.show()
 ```
 
 **Interpretation:**
 
 - **Resolution limit:** Greedy modularity typically finds 3–4 communities ($Q \approx 0.4$), whereas the known faction split has only 2 groups. The algorithm splits the larger faction into two sub-clusters.
-- **Accuracy:** Despite the extra split, the high faction matching (85%+) shows that modularity effectively captures the core social divisions of the network.
+- **Accuracy:** Majority-vote matching handles the fact that detected community IDs do not directly equal faction labels. Despite possible extra communities, greedy modularity usually captures the core social divisions well.
 
 
 
@@ -168,7 +198,7 @@ The graph splits into two disconnected triangles: $\{1,2,3\}$ and $\{4,5,6\}$. A
 
 **3. Highest betweenness after removal:**
 
-Within each isolated triangle, all three edges are equivalent. Each edge is on the shortest path between 2 pairs (via the triangle), so all intra-triangle edges have equal betweenness.
+Within each isolated triangle, all three edges are equivalent. Each edge lies on exactly one shortest path: the direct path between its two endpoints. So every intra-triangle edge has the same unnormalised betweenness, equal to 1.
 
 **4. Why $3$–$4$ is guaranteed highest:**
 
@@ -194,22 +224,70 @@ Using `nx.karate_club_graph()`:
 
 ```python
 import networkx as nx
+import matplotlib.pyplot as plt
 
 G = nx.karate_club_graph()
 comp = nx.community.girvan_newman(G)
 top2 = list(next(comp))  # 2-community level
 
-# Accuracy vs. known factions
-factions = nx.get_node_attributes(G, "club")
-faction_ids = {n: 0 if factions[n] == "Mr. Hi" else 1 for n in G.nodes()}
+def majority_vote_accuracy(G, node_to_group):
+    correct = 0
+    for group in set(node_to_group.values()):
+        members = [n for n, g in node_to_group.items() if g == group]
+        labels = [G.nodes[n]["club"] for n in members]
+        majority = max(set(labels), key=labels.count)
+        correct += sum(label == majority for label in labels)
+    return correct / G.number_of_nodes()
 
-# Comparison logic: count matching nodes
-# accuracy typically ~97% for Girvan-Newman on this specific split
+gn_assignment = {}
+for i, community in enumerate(top2):
+    for node in community:
+        gn_assignment[node] = i
+
+gn_accuracy = majority_vote_accuracy(G, gn_assignment)
+print(f"Girvan-Newman faction matching = {gn_accuracy:.3f}")
+
+# Compare to greedy modularity
+greedy = nx.community.greedy_modularity_communities(G)
+greedy_assignment = {}
+for i, community in enumerate(greedy):
+    for node in community:
+        greedy_assignment[node] = i
+
+greedy_accuracy = majority_vote_accuracy(G, greedy_assignment)
+print(f"Greedy modularity faction matching = {greedy_accuracy:.3f}")
+
+# Top-5 edge betweenness before and after one removal
+def top_edge_betweenness(H, k=5):
+    scores = nx.edge_betweenness_centrality(H)
+    return sorted(scores.items(), key=lambda item: -item[1])[:k]
+
+initial_top = top_edge_betweenness(G)
+G_after = G.copy()
+G_after.remove_edge(*initial_top[0][0])
+after_top = top_edge_betweenness(G_after)
+
+print("Initial top edges:", initial_top)
+print("After one removal:", after_top)
+
+def plot_top_edges(top_edges, title):
+    labels = [str(edge) for edge, _ in top_edges]
+    values = [score for _, score in top_edges]
+    plt.figure(figsize=(8, 4))
+    plt.bar(labels, values)
+    plt.xticks(rotation=45, ha="right")
+    plt.ylabel("edge betweenness")
+    plt.title(title)
+    plt.tight_layout()
+    plt.show()
+
+plot_top_edges(initial_top, "Top-5 edge betweenness before first removal")
+plot_top_edges(after_top, "Top-5 edge betweenness after first removal")
 ```
 
 **Interpretation:**
 
-- **Precision:** Girvan-Newman at 2 communities typically recovers the exact faction split (~97% accuracy). Unlike modularity, it doesn't over-partition the factions.
+- **Precision:** Girvan-Newman at 2 communities usually matches the known faction split very closely. Unlike modularity, it is forced here to return exactly two groups.
 - **Top-down logic:** By iteratively removing the highest-betweenness (bridge) edges, the algorithm cleanly isolates the two social hubs (Mr. Hi and the Officer) and their respective followers.
 
 
@@ -258,7 +336,7 @@ Using `nx.karate_club_graph()` and `scipy`:
 1. Compute pairwise **shortest-path distances** between all nodes. Use this as the distance matrix.
 2. Apply hierarchical clustering with average linkage: `scipy.cluster.hierarchy.linkage(...)`.
 3. Plot the resulting dendrogram.
-4. Cut at a height to obtain 2 clusters. What fraction of nodes match the known factions?
+4. Cut the dendrogram to obtain 2 clusters. What fraction of nodes match the known factions?
 
 
 --
@@ -293,12 +371,29 @@ plt.show()
 
 # 4. Cut to get 2 clusters
 labels = fcluster(Z, t=2, criterion="maxclust")
+
+node_to_cluster = {
+    node: labels[i]
+    for i, node in enumerate(nodes)
+}
+
+def majority_vote_accuracy(G, node_to_group):
+    correct = 0
+    for group in set(node_to_group.values()):
+        members = [n for n, g in node_to_group.items() if g == group]
+        true_labels = [G.nodes[n]["club"] for n in members]
+        majority = max(set(true_labels), key=true_labels.count)
+        correct += sum(label == majority for label in true_labels)
+    return correct / G.number_of_nodes()
+
+accuracy = majority_vote_accuracy(G, node_to_cluster)
+print(f"Faction matching by majority vote = {accuracy:.3f}")
 ```
 
 **Interpretation:**
 
 - **Dendrogram structure:** The dendrogram shows two main branches merging at the highest height — these correspond to the two factions.
-- **Robustness:** Average linkage with shortest-path distances is robust for capturing social proximity. Some fringe bridge-nodes may be misclassified if they sit equidistant from both centers in terms of hops.
+- **Robustness:** Average linkage with shortest-path distances captures broad social proximity, but some fringe bridge-nodes may be misclassified if they sit close to both centers in terms of hops.
 
 
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
