@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/index.CBOk6nSS.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/index.DyehHkal.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 08: Network Dynamics
@@ -161,26 +161,64 @@ The connection to L03 is direct: weak ties were valuable for information flow be
 
 ## The SIR Model
 
-![SIR compartment model with transition rates](/courses/network-science/figures/sir-compartments.svg)
+![SIR compartments and the epidemic curve: S declines, I rises to a peak then falls, R accumulates to a final size below one](/courses/network-science/figures/sir-dynamics.svg)
 
 
 <div class="c-definition smaller">
 
-**SIR model on a network.**
+**SIR — the canonical epidemic model.** Every individual sits in one of three **compartments**: **S** (Susceptible, can still catch it), **I** (Infected, currently infectious), or **R** (Recovered/Removed, immune or removed). Two transitions drive the dynamics:
 
-Each node is in one of three states: **Susceptible** (S), **Infected** (I), or **Recovered** (R).
+- **S → I** at infection rate $\beta$ (per infectious contact),
+- **I → R** at recovery rate $\gamma$ (per infected individual).
 
-- **Infection:** Each S–I edge transmits with probability $\beta$ per time step.
-- **Recovery:** Each I node recovers with probability $\gamma$ per time step.
-- **Basic reproduction number:** $R_0 = \frac{\beta}{\gamma} \cdot \langle k \rangle$, where $\langle k \rangle$ is the average degree.
+</div>
 
-**Epidemic threshold:** The disease spreads (becomes an epidemic) if $R_0 > 1$.
+
+
+<div class="c-info smaller">
+
+In the **well-mixed** mean-field model the fractions evolve as
+$$\dot S = -\beta\,S\,I, \qquad \dot I = \beta\,S\,I - \gamma\,I, \qquad \dot R = \gamma\,I,$$
+with **basic reproduction number** $R_0 = \beta/\gamma$ (expected secondary infections per case). If $R_0 > 1$, $I$ grows to an **epidemic peak** and then falls as susceptibles run out; the process leaves a **final size** $R(\infty) < 1$ — some never get infected (**herd immunity**).
 
 </div>
 
 
 Notes:
-The SIR model on networks differs from the classical well-mixed SIR in one crucial way: the *degree distribution* matters. In the classical model, every individual contacts every other with equal probability; on a network, high-degree nodes (hubs) have more contacts and therefore higher infection and transmission rates. This makes hubs both more vulnerable and more dangerous — the "superspreader" effect.
+The well-mixed assumption is "everyone can contact everyone with equal probability" — a mean-field approximation that turns the network into a single mixed pool. Three things are worth reading off the curve: (1) **the peak** — its height is what overwhelms hospitals; its timing tells us when to act. (2) **The threshold** — $R_0 = 1$ is the bifurcation between fadeout and epidemic; "flattening the curve" interventions lower the effective $R_0$. (3) **The final size** — even when $R_0$ is large, $R(\infty) < 1$: the epidemic ends not because everyone has been infected, but because the susceptible pool has fallen below the level that sustains spread. This is the mathematical content of herd immunity. The next slide replaces the well-mixed assumption with an actual network — and the basic reproduction number gains a structural factor $\langle k\rangle$.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## SIR on Networks
+
+![SIR compartment model with the network reproduction number R0 = (beta/gamma) times average degree](/courses/network-science/figures/sir-compartments.svg)
+
+
+<div class="c-definition smaller">
+
+**From well-mixed to networked.** Compartments and rates are the same, but **contacts are now edges**, not the whole population:
+
+- **Infection:** each **S–I edge** transmits with probability $\beta$ per time step.
+- **Recovery:** each I node recovers with probability $\gamma$ per time step.
+- **Reproduction number:** $R_0 = \dfrac{\beta}{\gamma}\,\langle k\rangle$ — the well-mixed ratio scaled by the **average degree** $\langle k\rangle$.
+
+**Epidemic threshold:** an epidemic takes off when $R_0 > 1$.
+
+</div>
+
+
+
+<div class="fragment c-info smaller">
+
+But $\langle k\rangle$ hides the story: with a **broad degree distribution**, the *variance* of $k$ dominates. Hubs are infected early and reinfect many — the superspreader effect that the next slide makes precise.
+
+</div>
+
+
+Notes:
+The SIR model on networks differs from the classical well-mixed SIR in one crucial way: the *degree distribution* matters. In the classical model every individual contacts every other with equal probability; on a network, high-degree nodes (hubs) have more contacts and therefore higher infection and transmission rates. This makes hubs both more vulnerable and more dangerous — the "superspreader" effect. The mean-field correction $R_0 = (\beta/\gamma)\langle k\rangle$ is only the first step: replacing $\langle k\rangle$ with the second moment $\langle k^2\rangle/\langle k\rangle$ recovers the Pastor-Satorras & Vespignani result on the next slide, where heterogeneity pushes the epidemic threshold to zero.
 
 --
 

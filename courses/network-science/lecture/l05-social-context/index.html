@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/index.CBOk6nSS.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/index.DyehHkal.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 05: Social Context and Link Formation
@@ -509,8 +509,6 @@ Walk through the three causal diagrams: selection (similarity → tie), socializ
 ## Empirical Test: Does Exposure Cause Polarization?
 
 
-<div class="slide-citation">Source: Nyhan et al. 2023</div>
-
 
 
 <div class="grid-3-1">
@@ -522,6 +520,8 @@ Walk through the three causal diagrams: selection (similarity → tie), socializ
 
 ![Nyhan et al. (2023, Nature) field experiment: exposure changed, attitudes did not](/courses/network-science/figures/echo-chambers-nyhan-experiment.svg)
 
+<div class="slide-citation">Source: Nyhan et al. 2023</div>
+
 
 </div>
 
@@ -530,7 +530,7 @@ Walk through the three causal diagrams: selection (similarity → tie), socializ
 
 
 
-<div class="c-info smaller">
+<div class="c-info small">
 
 **Selection question:** do already-polarized users choose like-minded friends, pages, and platforms?
 
@@ -1031,21 +1031,26 @@ $$P(\text{new tie} \mid k \text{ shared friends}) = 1 - (1 - q)^k$$
 - $(1-q)^k$: none of the $k$ mutual friends creates one.
 - $1-(1-q)^k$: at least one opportunity appears.
 
-The model gives us a **comparison curve**, not a claim that friends really act independently. Departures from the baseline point to redundancy, clustering, or rare high-$k$ cases.
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<div class="fragment">
+
+**What does this mean?**
+The model gives us a **comparison curve**, not a claim that friends really act independently. The table uses a large $q$ only to make the curvature visible. In the Easley-Kleinberg figure, $q$ is tiny, so the curve looks almost linear on the plotted range.
 
 In the empirical figure, the second dotted curve is the same baseline shifted one step right: it asks what the curve would look like if the first mutual friend had a smaller effect.
 
 </div>
 
-
-</div>
-
-
-</div>
-
-
 Notes:
-Introduce this before the Kossinets-Watts triadic closure plot because the red dotted lines in the figure are independent-opportunity baselines. The formula is a complement rule: closure happens if at least one of the $k$ mutual friends creates an opportunity. If one mutual friend fails to create an opportunity with probability $1-q$, and the $k$ opportunities are treated as independent, then all $k$ fail with probability $(1-q)^k$. Subtracting from 1 gives the probability that at least one opportunity succeeds. Easley and Kleinberg plot this curve plus a one-step-shifted version, roughly $1-(1-q)^{k-1}$ for $k \geq 1$, because the first common friend has a small absolute effect in the data. This is intentionally simple. It provides a reference shape against which the empirical black curve can be read.
+Introduce this before the Kossinets-Watts triadic closure plot because the red dotted lines in the figure are independent-opportunity baselines. The formula is a complement rule: closure happens if at least one of the $k$ mutual friends creates an opportunity. If one mutual friend fails to create an opportunity with probability $1-q$, and the $k$ opportunities are treated as independent, then all $k$ fail with probability $(1-q)^k$. Subtracting from 1 gives the probability that at least one opportunity succeeds. The pedagogical table uses $q=0.20$ because the concavity is easy to see. In the empirical plot, however, $q$ is roughly $4 \times 10^{-4}$, so $1-(1-q)^k \approx kq$ for the shown $k$ values; the curvature is mathematically present but visually negligible. Easley and Kleinberg plot this curve plus a one-step-shifted version, roughly $1-(1-q)^{k-1}$ for $k \geq 1$, because the first common friend has a small absolute effect in the data. This is intentionally simple. It provides a reference shape against which the empirical black curve can be read.
 
 --
 
@@ -1061,6 +1066,8 @@ Introduce this before the Kossinets-Watts triadic closure plot because the red d
 
 
 Black curve: observed probability $T(k)$. Red dotted curves: independent-opportunity baselines from the previous slide. (Upper/Lower: $1-(1-q)^k$; $1-(1-q)^{k-1}$; $q \approx 4 \times 10^{-4}$)
+
+Because $q$ is very small here, $1-(1-q)^k \approx kq$ over the plotted range, so the dotted baseline appears nearly linear even though the exact function is concave.
 
 ![Triadic closure curve: probability of a new email tie versus number of mutual friends](/courses/network-science/figures/triadic-closure-experiment.png)
 <span class="figure-credit">Source: Easley & Kleinberg 2010</span>
@@ -1463,6 +1470,26 @@ The blue agent at (1,1) has 1/8 same-type neighbors — below $\tau = 3/8$. It r
 
 </div>
 
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## Schelling Simulation
+
+![Three snapshots of a Schelling simulation: initial random mix, mid-process clustering, and stable sharply segregated state](/courses/network-science/figures/schelling-simulation.svg)
+<span class="figure-credit">Source: Own Schelling simulation, in the spirit of Easley & Kleinberg (2010), Fig. 4.19</span>
+
+
+<div class="c-info smaller">
+
+A $20\times20$ grid with $\approx\!45\%$ blue, $\approx\!45\%$ orange, $\approx\!10\%$ vacant, run with threshold $\tau = 3/8$. Each round, every unsatisfied agent moves to a vacant cell where it *would* be satisfied; the process halts when nobody wants to move. Within a handful of rounds, the locally-mild rule produces **macroscopically sharp** boundaries — exactly the picture the empirical map shows next.
+
+</div>
+
+
+Notes:
+This is the simulation Easley & Kleinberg use (Networks, Crowds, and Markets, Fig. 4.19) to make Schelling's central point concrete. The preference is mild — $\tau = 3/8$ means "I just want a third of my neighbors to be like me" — yet at equilibrium each agent's neighborhood is overwhelmingly same-type. The macro-segregation is **dramatically disproportionate** to the micro-preference. Two lessons worth flagging: (1) global segregation does not require globally segregationist preferences; (2) it is the **iteration** of local moves that amplifies the mild rule — a one-shot placement under the same threshold would still look random. The next slide shows that real cities exhibit the same kind of sharp boundary the simulation produces.
 
 --
 
