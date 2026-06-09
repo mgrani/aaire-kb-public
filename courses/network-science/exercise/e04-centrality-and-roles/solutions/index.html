@@ -48,12 +48,12 @@ Consider the graph with nodes $\{A,B,C,D,E,F\}$ and edges $A$–$B$, $A$–$C$, 
 
 **2. Betweenness — by inspection:**
 
-The graph has two triangle-like clusters: $\{A,B,C\}$ on the left and $\{D,E,F\}$ on the right, joined by edge $B$–$D$. Every shortest path from any node in $\{A,C\}$ to any node in $\{D,E,F\}$ must pass through $B$ then $D$. Both $B$ and $D$ have very high betweenness; $D$ slightly higher because it is the unique gateway to $\{E,F\}$.
+The graph has two triangle-like clusters: $\{A,B,C\}$ on the left and $\{D,E,F\}$ on the right, joined by edge $B$–$D$. Every shortest path from any node in $\{A,C\}$ to any node in $\{D,E,F\}$ must pass through $B$ then $D$. By symmetry, $B$ and $D$ have the same betweenness: each lies on 6 shortest paths between other node pairs (normalised betweenness $= 0.6$).
 
 **3. Highest degree centrality:** $B$ and $D$ are tied at $3/5$.
-**Highest betweenness:** $D$ (and $B$ close behind), but $D$ edges to $E$ and $F$ which are a "terminal" cluster, making $D$ the unique gateway.
+**Highest betweenness:** $B$ and $D$ are also tied. They are the two endpoints of the bridge edge between the two triangles.
 
-**4. Structural role of $D$:** $D$ is a **broker** or **bridge** node. It sits on the unique path connecting the left cluster $\{A,B,C\}$ to the right cluster $\{D,E,F\}$. Removing $D$ would disconnect those two groups. High betweenness with moderate degree is the signature of a structural bridge.
+**4. Structural role of $B$ and $D$:** Both are **broker** or **bridge** nodes. They sit on the unique paths connecting the left cluster $\{A,B,C\}$ to the right cluster $\{D,E,F\}$. Removing either one would disconnect the two groups. High betweenness with moderate degree is the signature of a structural bridge.
 
 
 
@@ -91,12 +91,48 @@ centralities = {
 for name, c in centralities.items():
     top3 = sorted(c, key=c.get, reverse=True)[:3]
     print(f"{name}: {top3}")
+
+# Four-panel visualisation
+pos = nx.spring_layout(G, seed=7)
+fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+
+for ax, (name, c) in zip(axes.flat, centralities.items()):
+    sizes = [300 + 2500 * c[n] for n in G.nodes()]
+    nx.draw_networkx(
+        G,
+        pos=pos,
+        ax=ax,
+        node_size=sizes,
+        node_color=[c[n] for n in G.nodes()],
+        cmap="viridis",
+        with_labels=True,
+        font_size=8,
+    )
+    ax.set_title(name)
+    ax.axis("off")
+
+plt.tight_layout()
+plt.show()
+
+# Largest rank disagreement across measures
+ranks = {}
+for name, c in centralities.items():
+    ordered = sorted(c, key=c.get, reverse=True)
+    for rank, node in enumerate(ordered, start=1):
+        ranks.setdefault(node, {})[name] = rank
+
+spread = {
+    node: max(node_ranks.values()) - min(node_ranks.values())
+    for node, node_ranks in ranks.items()
+}
+most_disagreeing = max(spread, key=spread.get)
+print(most_disagreeing, ranks[most_disagreeing])
 ```
 
 **Interpretation:**
 
 - **Leading hubs:** Nodes 0 and 33 lead in almost every measure — they are the faction leaders with high degree and influence.
-- **Structural disagreement:** Node 32 often shows high betweenness relative to its degree because it acts as a bridge to node 33's faction. High eigenvector centrality in dense cores often pairs with low betweenness due to redundant paths.
+- **Structural disagreement:** Nodes can rank differently because each centrality encodes a different theory of importance. For example, a node can have high betweenness if it connects regions of the graph, even when it is not one of the strongest hubs by degree or eigenvector centrality.
 
 
 
@@ -110,11 +146,11 @@ for name, c in centralities.items():
 
 ## Exercise 4.B.1: Embedded vs. Broker
 
-Consider a graph with two triangles $\{1,2,3\}$ and $\{4,5,6\}$ connected by edge $3$–$4$, plus node $7$ connected only to nodes $3$ and $4$.
+Consider a graph with two triangles $\{1,2,3\}$ and $\{4,5,6\}$, plus node $7$ connected only to nodes $3$ and $4$. There is no direct edge $3$–$4$.
 
 1. Is node $1$ **embedded** or a **broker**? What evidence supports your answer?
 2. Is node $7$ **embedded** or a **broker**? What is its clustering coefficient $C_7$?
-3. If edge $3$–$4$ is removed, what happens to node $7$'s structural role?
+3. If edge $3$–$4$ is added, what happens to node $7$'s structural role?
 4. Burt (1992) argues brokers gain "information advantage." What unique information could node $7$ access that nodes in $\{1,2,3\}$ cannot?
 
 
@@ -122,11 +158,11 @@ Consider a graph with two triangles $\{1,2,3\}$ and $\{4,5,6\}$ connected by edg
 
 **Solution:**
 
-**1. Node 1 — embedded:** Node $1$ is surrounded by the closed triangle $\{1,2,3\}$ where edges $1$–$2$, $1$–$3$, $2$–$3$ all exist. Its neighbours are mutually connected. Clustering coefficient $C_1 = 1$. Node $1$ cannot reach $\{4,5,6\}$ without going through $3$ (and then $4$), so it has no direct brokerage opportunity.
+**1. Node 1 — embedded:** Node $1$ is surrounded by the closed triangle $\{1,2,3\}$ where edges $1$–$2$, $1$–$3$, $2$–$3$ all exist. Its neighbours are mutually connected. Clustering coefficient $C_1 = 1$. Node $1$ cannot reach $\{4,5,6\}$ without going through $3$, $7$, and $4$, so it has no direct brokerage opportunity.
 
-**2. Node 7 — broker:** Node $7$ connects to $3$ and $4$, which are the two bridge points between the triangles. Are $3$ and $4$ connected? Yes — edge $3$–$4$ exists. So $C_7 = 1$ (the one possible edge between $7$'s two neighbours exists). Despite $C_7 = 1$, node $7$ structurally straddles two groups: it can hear information from both the $\{1,2,3\}$ cluster (via $3$) and the $\{4,5,6\}$ cluster (via $4$).
+**2. Node 7 — broker:** Node $7$ connects to $3$ and $4$, which are the two contact points for the two triangles. Are $3$ and $4$ connected? No. So $C_7 = 0$ (the one possible edge between $7$'s two neighbours is absent). Node $7$ bridges a structural hole: it is the only route between the $\{1,2,3\}$ cluster and the $\{4,5,6\}$ cluster.
 
-**3. If $3$–$4$ is removed:** Node $7$ would then connect to $3$ (in cluster $\{1,2,3\}$) and $4$ (in cluster $\{4,5,6\}$) with no edge between its neighbours → $C_7 = 0$. Now node $7$ becomes the **only** bridge between the two components. Its brokerage role becomes critical.
+**3. If $3$–$4$ is added:** Node $7$ would no longer be the only route between the two triangles. Its clustering coefficient becomes $C_7 = 1$ because its two neighbours are now connected, and its brokerage role becomes weaker because the graph has a direct alternative path between the two groups.
 
 **4. Information advantage:** Node $7$ can learn about jobs, ideas, and events in the $\{4,5,6\}$ cluster that are invisible to $\{1,2,3\}$ (and vice versa), because information circulates within dense clusters but rarely crosses to the other side without a broker. This is Burt's "structural hole" argument: the gap between the two triangles is the structural hole, and $7$ bridges it.
 
@@ -139,8 +175,8 @@ Consider a graph with two triangles $\{1,2,3\}$ and $\{4,5,6\}$ connected by edg
 Using the two-triangle + node 7 graph from Exercise 4.B.1:
 
 1. Build the graph in NetworkX. Compute betweenness centrality for all nodes.
-2. Verify that node $7$ has high betweenness despite $C_7 = 1$.
-3. Explain the apparent contradiction: high clustering coefficient yet high betweenness.
+2. Verify that node $7$ has high betweenness and low clustering coefficient.
+3. Explain why this combination is a good proxy for brokerage.
 4. On the karate club graph: find the 3 nodes with the highest betweenness but **lowest** clustering coefficient. What does this combination mean structurally?
 
 
@@ -152,26 +188,30 @@ Using the two-triangle + node 7 graph from Exercise 4.B.1:
 import networkx as nx
 
 G = nx.Graph()
-G.add_edges_from([(1,2),(2,3),(1,3), (4,5),(5,6),(4,6), (3,4), (7,3),(7,4)])
+G.add_edges_from([(1,2),(2,3),(1,3), (4,5),(5,6),(4,6), (7,3),(7,4)])
 
 bc = nx.betweenness_centrality(G, normalized=True)
 cc = nx.clustering(G)
 
-# High betweenness despite high clustering coefficient
-# Score = betweenness / (clustering + 1e-6) — ranks bridge-brokers
+print("Node 7 betweenness:", bc[7])
+print("Node 7 clustering:", cc[7])
+
+# High betweenness and low clustering: sort by betweenness first,
+# then use clustering coefficient to distinguish bridge-like positions.
 K = nx.karate_club_graph()
 bc_k = nx.betweenness_centrality(K)
 cc_k = nx.clustering(K)
-scores = {n: bc_k[n] / (cc_k[n] + 1e-6) for n in K.nodes()}
-top3 = sorted(scores, key=scores.get, reverse=True)[:3]
-print("Bridge-brokers:", top3)
+top_brokers = sorted(K.nodes(), key=lambda n: (-bc_k[n], cc_k[n]))[:3]
+
+for n in top_brokers:
+    print(n, "betweenness =", round(bc_k[n], 3), "clustering =", round(cc_k[n], 3))
 ```
 
 **Interpretation:**
 
 - **Metric contrast:** Clustering coefficient is a local density measure (neighbours connected?), while betweenness is a global routing measure (on shortest paths?).
-- **Brokerage with high C:** Node 7 has $C_7 = 1$ because its two neighbours are tied, but it still has high betweenness because it provides an alternative path between two large clusters.
-- **Pure bridges:** High betweenness with low clustering (like node 32 in the karate club) indicates a pure bridge connecting otherwise separate groups.
+- **Brokerage signature:** Node 7 has high betweenness because all shortest paths between the two triangles pass through it, and $C_7 = 0$ because its two neighbours are not directly connected.
+- **Pure bridges:** High betweenness with low clustering indicates a bridge-like position: the node connects otherwise separate parts of the graph rather than sitting inside one dense neighbourhood.
 
 
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
