@@ -244,8 +244,6 @@ Give them 3 minutes. (1) $\bar{d} \approx \log(3 \times 10^9) / \log(300) \appro
 
 ---
 
-<!-- .slide: class="module-slide" -->
-
 ## The Watts–Strogatz Model
 
 
@@ -829,6 +827,134 @@ Hyperlinks are **directed** — page A can link to page B without B linking back
 
 --
 
+<!-- .slide: class="figure-80" -->
+
+## Scale-Free Structure of the Web
+
+The Web is not degree-homogeneous. Most pages receive few incoming links, while a small number of pages receive enormous numbers of links.
+
+![Two degree distributions: narrow versus heavy-tailed](/courses/network-science/figures/degree-distribution-compare.svg)
+
+
+<div class="c-definition smaller">
+
+**Scale-free-like Web.** A directed information network whose in-degree distribution is heavy-tailed / approximately power-law:
+
+$$P(k_{in}) \propto k_{in}^{-\alpha}$$
+
+There is no single "typical" page: attention concentrates around hubs (Barab\'asi & Albert 1999).
+
+</div>
+
+
+Notes:
+This is the better home for scale-free graphs than the opening small-world module. On the Web, degree splits into out-degree and in-degree. Out-degree is how many pages a page links to; in-degree is how many pages link to it. The famous scale-free claim is mainly about in-degree: most pages receive few links, while a small number of pages become authorities or hubs with enormous visibility. This also connects directly to PageRank from L04: incoming links are treated as endorsements, so the heavy-tailed in-degree distribution becomes a heavy-tailed attention distribution.
+
+--
+
+## Barabási-Albert: A Model of Web Growth
+
+
+<div class="c-definition">
+
+**Preferential attachment.** New pages tend to link to pages that are already visible.
+
+In a simplified directed Barabási-Albert model:
+
+1. Start with a small connected Web.
+2. Add one new page at a time.
+3. Each new page creates $m$ outgoing hyperlinks.
+4. Existing page $v$ receives a new link with probability proportional to its current in-degree:
+
+$$P(\text{new page links to } v) \propto k^{\text{in}}_v$$
+
+</div>
+
+
+
+<div class="fragment c-info">
+
+This is the **rich-get-richer** mechanism: popular pages attract more links, which makes them even more visible.
+
+</div>
+
+
+Notes:
+Use this as a stylized model, not a complete theory of the Web. In the original Barabási-Albert model, attachment probability is proportional to degree. For the Web, the directed interpretation is in-degree: pages with many incoming links are easier to discover, cite, copy, rank, and reuse, so they tend to receive even more incoming links. In practical models one often adds baseline attractiveness so brand-new or low-degree pages can still receive links, but the core idea remains preferential attachment.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## Barabási-Albert in Four Steps
+
+![Four steps in the Barabási-Albert preferential attachment model](/courses/network-science/figures/l07-barabasi-albert-steps.svg)
+
+Notes:
+Use this as the visual analogue to the Watts-Strogatz four-step slide, but frame it as a Web-growth model. The graph is not rewired from a fixed lattice; it grows. Each new page chooses targets with probability proportional to current popularity. Over many steps this produces a heavy-tailed distribution: many obscure pages and a few highly linked authorities.
+
+--
+
+## What Preferential Attachment Explains
+
+| Web pattern | Preferential-attachment explanation | Limitation |
+|---|---|---|
+| Heavy-tailed in-degree | Popular pages attract more links | Not every popular page is high quality |
+| Short paths to authorities | Hubs connect many topics | Direction still restricts reachability |
+| Attention inequality | Visibility compounds over time | Aging and novelty also matter |
+| Link copying | Authors imitate existing link lists | Communities and spam distort the signal |
+
+
+<div class="fragment c-important">
+
+BA explains why hubs can emerge, but it is not a full model of the Web. The real Web also depends on content quality, topical communities, search engines, aging, copied links, platforms, and incentives.
+
+</div>
+
+
+Notes:
+This slide narrows the claim. Preferential attachment is useful because it explains a robust macro-pattern with a simple local mechanism. But the Web is not just a pure rich-get-richer process. Content quality matters; new pages can become popular; old pages decay; search engines amplify some links and hide others; topic communities create dense regions; spam and SEO manipulate link structure; and many links are copied from templates, blogrolls, documentation, and navigation menus.
+
+--
+
+## Kleinberg on the Web: Structured Shortcuts
+
+Scale-free hubs help explain **which pages become highly linked**. Kleinberg-style models explain a different question: **when can local navigation make progress toward a target?**
+
+| Model idea | Web interpretation |
+|---|---|
+| Preferential attachment | popular pages attract more incoming links |
+| Kleinberg long-range links | hyperlinks connect across topical or semantic distance |
+| Greedy routing | users follow links that seem closer to the information goal |
+
+
+<div class="fragment c-important">
+
+Kleinberg does **not** imply scale-free. It uses a power law over **distance**, not over **degree**. The Web can be scale-free-like and small-world-like at the same time, but those are separate properties.
+
+</div>
+
+
+Notes:
+This connects the Web module back to the navigability theorem without claiming that the real Web literally satisfies Kleinberg's grid assumptions. For Web navigation, "distance" is not geographic distance; it may be topical, semantic, institutional, linguistic, or social. A hyperlink from a local topic page to a related global authority is a structured shortcut. If links reflect useful semantic distances, local browsing can make progress. But scale-free degree alone does not guarantee navigability: a hub can be popular without being semantically helpful for a particular target.
+
+--
+
+## Web Synthesis
+
+
+<div class="takeaway">
+
+The Web can be seen as both **scale-free-like** and **small-world-like**. Preferential attachment explains the emergence of hubs, because popular pages attract more links over time. Kleinberg-style models explain navigability through structured shortcuts, especially when links reflect topical or semantic distance. However, the real Web is shaped by additional mechanisms such as content quality, topic communities, search engines, aging, and copied links.
+
+</div>
+
+
+Notes:
+This is the synthesis slide for the Web module. It states the balanced conclusion: BA gives a plausible mechanism for heavy-tailed in-degree; small-world structure explains short directed paths within the reachable core; Kleinberg gives the condition for local navigability; and real Web formation is richer than any one model. This is also the right place to remind students that models are explanatory lenses, not complete replicas.
+
+--
+
 ## The Bow-Tie Structure
 
 
@@ -937,7 +1063,9 @@ Give them 4 minutes. (1) Yes: IN → SCC → OUT. The IN component can reach the
 | How can networks be clustered *and* short? | Watts-Strogatz shortcuts | A few long-range edges collapse $L$ while $C$ stays high. |
 | Can local actors find short paths? | Kleinberg's theorem | Findability needs the right multi-scale link geometry. |
 | Do people actually complete searches? | Milgram; Dodds et al. | Many paths die because motivation and information are limited. |
-| What changes on the Web? | Directed bow-tie structure | Reachability is asymmetric; central indexes help navigation. |
+| What changes on the Web? | Directed bow-tie structure | Reachability is asymmetric; only the SCC behaves like a small world. |
+| Why is the Web hub-dominated? | Barabási-Albert | Preferential attachment can produce scale-free-like in-degree. |
+| Is the Web locally navigable? | Structured shortcuts | Topical/semantic links help, but search engines centralize navigation. |
 
 
 <div class="takeaway">
@@ -953,7 +1081,7 @@ How do things *spread* on networks — diseases, information, behaviors? The str
 
 ### Reading
 
-Chapter 20 of Easley & Kleinberg (2010) covers the small-world phenomenon and Watts-Strogatz. Kleinberg (2000), *The Small-World Phenomenon: An Algorithmic Perspective*, is the source for the decentralized search theorem. Dodds, Muhamad & Watts (2003) is the email experiment. Broder et al. (2000) is the bow-tie structure of the Web.
+Chapter 20 of Easley & Kleinberg (2010) covers the small-world phenomenon and Watts-Strogatz. Barabási & Albert (1999) introduces scale-free networks and power-law degree distributions. Kleinberg (2000), *The Small-World Phenomenon: An Algorithmic Perspective*, is the source for the decentralized search theorem. Dodds, Muhamad & Watts (2003) is the email experiment. Broder et al. (2000) is the bow-tie structure of the Web.
 
 Notes:
 Close the lecture by distinguishing the three layers one more time: existence of short paths (small-world property), structural explanation (Watts-Strogatz), and decentralized findability (Kleinberg plus empirical search experiments). Lecture 08 introduces the final conceptual shift: from structure to dynamics. The graph is no longer just an object to analyze — it becomes a *medium* through which processes propagate.
@@ -964,6 +1092,7 @@ Close the lecture by distinguishing the three layers one more time: existence of
 
 ## Image Credits & References
 
+- Barab\'asi, Albert-L\'aszl\'o and Albert, R\'eka (1999). Emergence of Scaling in Random Networks. *Science*.
 - Easley, David and Kleinberg, Jon (2010). Networks, Crowds, and Markets: Reasoning about a Highly Connected World. *Cambridge University Press*. [https://www.cs.cornell.edu/home/kleinber/networks-book/](https://www.cs.cornell.edu/home/kleinber/networks-book/)
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
