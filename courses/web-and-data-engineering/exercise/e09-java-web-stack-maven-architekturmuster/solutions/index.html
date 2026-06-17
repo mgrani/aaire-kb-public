@@ -172,7 +172,6 @@ Machen Sie sich auf [maven.apache.org/what-is-maven.html](https://maven.apache.o
    |<span class="fragment"> `validate` </span>| <span class="fragment">Prüft, ob das Projekt syntaktisch korrekt konfiguriert ist und alle notwendigen Informationen (z. B. in der `pom.xml`) vorhanden sind.</span> | 
    |<span class="fragment"> `compile` </span>| <span class="fragment">Übersetzt den Java-Quellcode (`.java`) in Bytecode (`.class`) und legt diesen im Zielverzeichnis `target/classes/` ab.</span> | 
    |<span class="fragment"> `test` </span>| <span class="fragment">Führt automatisierte Unit-Tests (z. B. mit JUnit) aus. Schlagen Tests fehl, bricht der gesamte Build-Prozess an dieser Stelle ab.</span> | 
-   |<span class="fragment"> `package` </span>| <span class="fragment">Nimmt den kompilierten Bytecode und schnürt daraus das finale, auslieferbare Archiv-Format, das in der `pom.xml` definiert wurde (meist eine `.jar`- oder `.war`-Datei).</span> | 
 
 --
 
@@ -182,6 +181,7 @@ Machen Sie sich auf [maven.apache.org/what-is-maven.html](https://maven.apache.o
 
 	| Phase | Fachliche Bedeutung und Aufgabe |
 	|---|---|
+	|<span class="fragment"> `package` </span>| <span class="fragment">Nimmt den kompilierten Bytecode und schnürt daraus das finale, auslieferbare Archiv-Format, das in der `pom.xml` definiert wurde (meist eine `.jar`- oder `.war`-Datei).</span> | 
 	|<span class="fragment"> `verify` </span>| <span class="fragment">Führt erweiterte Integrationstests aus und überprüft das erzeugte Paket auf Qualitätskriterien, um sicherzustellen, dass es stabil ist.</span> |
 	|<span class="fragment"> `install` </span>| <span class="fragment">Kopiert das fertig geschnürte Paket (`.jar`) in das lokale Repository des Entwicklers. Dadurch kann dieses Artefakt als Abhängigkeit in anderen, eigenen lokalen Projekten verwendet werden.</span> |
 	|<span class="fragment"> `deploy` </span>| <span class="fragment">Kopiert das finale Artefakt auf ein entferntes, zentrales Repository, um es anderen Entwicklern und Produktionsumgebungen zur Verfügung zu stellen.</span> |
@@ -216,12 +216,13 @@ Warum beschäftigen wir uns also mit Maven-Koordinaten und Build-Lebenszyklen? D
 
 	* `validate` & `compile`: Der Quellcode wird formal auf syntaktische Korrektheit geprüft und komplett frisch übersetzt.
 	* `test`: Maven sucht nach *allen* im Projekt hinterlegten automatisierten Tests (z. B. JUnit) und führt diese aus. Schlägt auch nur ein einziger Test fehl, bricht Maven den Prozess sofort ab. Dies ist ein genialer Schutzmechanismus, damit niemals fehlerhafter Code in Produktion geht.
-	* `package`: Sind alle Tests grün, schnürt Maven das finale Paket – eine sogenannte „Fat JAR“. Diese einzelne Datei enthält Ihren gesamten Code, die statischen Frontend-Dateien und sogar den kompletten Webserver (*Tomcat*).
-	* `install` & `deploy`: Zum Schluss wird das fertige, geprüfte Paket entweder in das lokale Repository kopiert (`install`), damit andere Entwickler im Team es nutzen können, oder direkt auf einen echten Webserver bzw. in ein zentrales Firmen-Repository hochgeladen (`deploy`).
+
 --
 
 ## Zusatz: Warum lernen wir Maven, wenn in Spring Boot alles „von selbst“ läuft? 
 
+* `package`: Sind alle Tests grün, schnürt Maven das finale Paket – eine sogenannte „Fat JAR“. Diese einzelne Datei enthält Ihren gesamten Code, die statischen Frontend-Dateien und sogar den kompletten Webserver (*Tomcat*).
+* `install` & `deploy`: Zum Schluss wird das fertige, geprüfte Paket entweder in das lokale Repository kopiert (`install`), damit andere Entwickler im Team es nutzen können, oder direkt auf einen echten Webserver bzw. in ein zentrales Firmen-Repository hochgeladen (`deploy`).  
 
 **Das Fazit für die Praxis:** In der täglichen Entwicklung nimmt uns die IDE die Arbeit ab und nutzt nur das absolute Minimum von Maven (`compile`). Erst der vollständige Maven-Lebenszyklus bis hin zu `package` oder `deploy` sorgt jedoch dafür, dass Ihr Projekt völlig unabhängig von IntelliJ, Betriebssystemen oder Cloud-Anbietern auf jedem Rechner der Welt exakt gleich getestet, gebaut und gestartet werden kann.
 
@@ -255,7 +256,7 @@ Vergleichen Sie die fünf gängigen Session-Tracking-Methoden. Füllen Sie dazu 
 | URL-Kodierung | <span class="fragment">Ja</span> | <span class="fragment">Hoch</span> | <span class="fragment">Fallback, wenn Cookies deaktiviert sind</span> |
 | Hidden Fields | <span class="fragment">Ja</span> | <span class="fragment">Hoch</span> | <span class="fragment">Mehrstufige Formulare</span> |
 | Cookies | <span class="fragment">Nein</span> | <span class="fragment">Gering (mit `HttpOnly`)</span> | <span class="fragment">Standard für klassische Webanwendungen</span> |
-| HTTP Authorization Header | <span class="fragment">Ja</span> | <span class="fragment">Abhängig von der Token-Speicherung, oft hoch</span> | <span class="fragment">REST-APIs, Single-Page-Apps (JWT)</span> |
+| HTTP Authorization Header | <span class="fragment">Ja</span> | <span class="fragment">gering, Abhängig von der Token-Speicherung, </span> | <span class="fragment">REST-APIs, Single-Page-Apps (JWT)</span> |
 | Session Tracking API (`HttpSession`) | <span class="fragment">Ja (via Fallback)</span> | <span class="fragment">Gering (durch Framework-Schutz)</span> | <span class="fragment">Serverzentrierte Java-Webapplikationen</span> |
 
 --
