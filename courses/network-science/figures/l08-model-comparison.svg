@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" font-family="Arial, Helvetica, sans-serif">
+  <title>Same graph, different diffusion rules</title>
+  <desc>Five panels compare reachability, random walk, damped diffusion, independent cascade, and threshold diffusion on the same directed graph.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#607d8b"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2e7d32"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#c62828"/>
+    </marker>
+    <style>
+      .panel { fill: #ffffff; stroke: #cfd8dc; stroke-width: 1.2; }
+      .title { font-size: 14px; font-weight: 700; fill: #263238; }
+      .small { font-size: 10.5px; fill: #455a64; }
+      .tiny { font-size: 9.5px; fill: #607d8b; }
+      .edge { stroke: #90a4ae; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .edge-active { stroke: #2e7d32; stroke-width: 3; fill: none; marker-end: url(#arrow-green); }
+      .edge-fail { stroke: #c62828; stroke-width: 3; fill: none; marker-end: url(#arrow-red); stroke-dasharray: 5 4; }
+      .node { fill: #eceff1; stroke: #607d8b; stroke-width: 1.4; }
+      .seed { fill: #1565c0; stroke: #0d47a1; stroke-width: 1.8; }
+      .active { fill: #2e7d32; stroke: #1b5e20; stroke-width: 1.8; }
+      .partial { fill: #90caf9; stroke: #1565c0; stroke-width: 1.6; }
+      .blocked { fill: #eeeeee; stroke: #9e9e9e; stroke-width: 1.4; }
+      .label-white { font-size: 11px; font-weight: 700; fill: #ffffff; text-anchor: middle; dominant-baseline: middle; }
+      .label-dark { font-size: 11px; font-weight: 700; fill: #263238; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" class="title">Same graph, five different diffusion rules</text>
+  <text x="480" y="47" text-anchor="middle" class="small">A starts the process. The graph is fixed; only the spreading rule changes.</text>
+
+  <!-- reusable coordinates within each panel: A(45,95), B(105,55), C(105,135), D(170,95), E(235,95) -->
+
+  <g transform="translate(24,72)">
+    <rect class="panel" x="0" y="0" width="285" height="190" rx="8"/>
+    <text x="142" y="24" text-anchor="middle" class="title">1. Reachability</text>
+    <text x="142" y="42" text-anchor="middle" class="small">all outgoing neighbors activate</text>
+    <path class="edge-active" d="M58 95 L91 63"/>
+    <path class="edge-active" d="M58 95 L91 127"/>
+    <path class="edge-active" d="M119 61 L156 87"/>
+    <path class="edge-active" d="M119 129 L156 103"/>
+    <path class="edge-active" d="M184 95 L221 95"/>
+    <circle class="seed" cx="45" cy="95" r="16"/><text class="label-white" x="45" y="95">A</text>
+    <circle class="active" cx="105" cy="55" r="16"/><text class="label-white" x="105" y="55">B</text>
+    <circle class="active" cx="105" cy="135" r="16"/><text class="label-white" x="105" y="135">C</text>
+    <circle class="active" cx="170" cy="95" r="16"/><text class="label-white" x="170" y="95">D</text>
+    <circle class="active" cx="235" cy="95" r="16"/><text class="label-white" x="235" y="95">E</text>
+    <text x="142" y="170" text-anchor="middle" class="tiny">If a path exists, the signal eventually follows it.</text>
+  </g>
+
+  <g transform="translate(337,72)">
+    <rect class="panel" x="0" y="0" width="285" height="190" rx="8"/>
+    <text x="142" y="24" text-anchor="middle" class="title">2. Random walk</text>
+    <text x="142" y="42" text-anchor="middle" class="small">limited attention splits over links</text>
+    <path class="edge-active" d="M58 95 L91 63"/>
+    <path class="edge-active" d="M58 95 L91 127"/>
+    <path class="edge" d="M119 61 L156 87"/>
+    <path class="edge" d="M119 129 L156 103"/>
+    <path class="edge" d="M184 95 L221 95"/>
+    <text x="73" y="72" class="tiny">1/2</text>
+    <text x="73" y="124" class="tiny">1/2</text>
+    <circle class="seed" cx="45" cy="95" r="16"/><text class="label-white" x="45" y="95">A</text>
+    <circle class="partial" cx="105" cy="55" r="16"/><text class="label-dark" x="105" y="55">B</text>
+    <circle class="partial" cx="105" cy="135" r="16"/><text class="label-dark" x="105" y="135">C</text>
+    <circle class="node" cx="170" cy="95" r="16"/><text class="label-dark" x="170" y="95">D</text>
+    <circle class="node" cx="235" cy="95" r="16"/><text class="label-dark" x="235" y="95">E</text>
+    <text x="142" y="170" text-anchor="middle" class="tiny">Mass moves probabilistically, not all at once.</text>
+  </g>
+
+  <g transform="translate(650,72)">
+    <rect class="panel" x="0" y="0" width="285" height="190" rx="8"/>
+    <text x="142" y="24" text-anchor="middle" class="title">3. Damped diffusion</text>
+    <text x="142" y="42" text-anchor="middle" class="small">explore, then restart near A</text>
+    <path class="edge-active" d="M58 95 L91 63"/>
+    <path class="edge-active" d="M58 95 L91 127"/>
+    <path class="edge" d="M119 61 L156 87"/>
+    <path class="edge" d="M119 129 L156 103"/>
+    <path class="edge" d="M184 95 L221 95"/>
+    <path d="M222 110 C175 165 90 165 53 112" stroke="#f9a825" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+    <text x="142" y="153" text-anchor="middle" class="tiny" fill="#8d6e00">restart keeps relevance near seed</text>
+    <circle class="seed" cx="45" cy="95" r="16"/><text class="label-white" x="45" y="95">A</text>
+    <circle class="partial" cx="105" cy="55" r="15"/><text class="label-dark" x="105" y="55">B</text>
+    <circle class="partial" cx="105" cy="135" r="15"/><text class="label-dark" x="105" y="135">C</text>
+    <circle class="node" cx="170" cy="95" r="13"/><text class="label-dark" x="170" y="95">D</text>
+    <circle class="node" cx="235" cy="95" r="11"/><text class="label-dark" x="235" y="95">E</text>
+  </g>
+
+  <g transform="translate(180,295)">
+    <rect class="panel" x="0" y="0" width="285" height="190" rx="8"/>
+    <text x="142" y="24" text-anchor="middle" class="title">4. Independent cascade</text>
+    <text x="142" y="42" text-anchor="middle" class="small">each edge gets one chance</text>
+    <path class="edge-active" d="M58 95 L91 63"/>
+    <path class="edge-fail" d="M58 95 L91 127"/>
+    <path class="edge-active" d="M119 61 L156 87"/>
+    <path class="edge" d="M119 129 L156 103"/>
+    <path class="edge-active" d="M184 95 L221 95"/>
+    <text x="76" y="126" class="tiny" fill="#c62828">fails</text>
+    <circle class="seed" cx="45" cy="95" r="16"/><text class="label-white" x="45" y="95">A</text>
+    <circle class="active" cx="105" cy="55" r="16"/><text class="label-white" x="105" y="55">B</text>
+    <circle class="blocked" cx="105" cy="135" r="16"/><text class="label-dark" x="105" y="135">C</text>
+    <circle class="active" cx="170" cy="95" r="16"/><text class="label-white" x="170" y="95">D</text>
+    <circle class="active" cx="235" cy="95" r="16"/><text class="label-white" x="235" y="95">E</text>
+    <text x="142" y="170" text-anchor="middle" class="tiny">Spread is binary and stochastic.</text>
+  </g>
+
+  <g transform="translate(494,295)">
+    <rect class="panel" x="0" y="0" width="285" height="190" rx="8"/>
+    <text x="142" y="24" text-anchor="middle" class="title">5. Linear threshold</text>
+    <text x="142" y="42" text-anchor="middle" class="small">activation needs reinforcement</text>
+    <path class="edge-active" d="M58 95 L91 63"/>
+    <path class="edge-active" d="M58 95 L91 127"/>
+    <path class="edge-active" d="M119 61 L156 87"/>
+    <path class="edge-active" d="M119 129 L156 103"/>
+    <path class="edge-active" d="M184 95 L221 95"/>
+    <text x="143" y="80" class="tiny">B + C</text>
+    <text x="140" y="118" class="tiny">meet threshold</text>
+    <circle class="seed" cx="45" cy="95" r="16"/><text class="label-white" x="45" y="95">A</text>
+    <circle class="active" cx="105" cy="55" r="16"/><text class="label-white" x="105" y="55">B</text>
+    <circle class="active" cx="105" cy="135" r="16"/><text class="label-white" x="105" y="135">C</text>
+    <circle class="active" cx="170" cy="95" r="16"/><text class="label-white" x="170" y="95">D</text>
+    <circle class="active" cx="235" cy="95" r="16"/><text class="label-white" x="235" y="95">E</text>
+    <text x="142" y="170" text-anchor="middle" class="tiny">One exposure may be insufficient.</text>
+  </g>
+</svg>

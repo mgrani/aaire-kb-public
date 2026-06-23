@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 720" font-family="Arial, Helvetica, sans-serif">
+  <title>Independent cascade attempts over time</title>
+  <desc>Three-step independent cascade example showing one successful edge, one failed edge, and one later successful attempt.</desc>
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#78909c"/></marker>
+    <marker id="g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2e7d32"/></marker>
+    <marker id="r" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#c62828"/></marker>
+    <style>.panel{fill:#fff;stroke:#cfd8dc;stroke-width:1.2}.title{font-size:13px;font-weight:700;fill:#263238;text-anchor:middle}.small{font-size:10px;fill:#455a64;text-anchor:middle}.edge{stroke:#90a4ae;stroke-width:2;fill:none;marker-end:url(#a)}.ok{stroke:#2e7d32;stroke-width:3;fill:none;marker-end:url(#g)}.fail{stroke:#c62828;stroke-width:3;fill:none;marker-end:url(#r);stroke-dasharray:6 4}.off{fill:#eceff1;stroke:#78909c;stroke-width:1.4}.new{fill:#2e7d32;stroke:#1b5e20;stroke-width:2}.old{fill:#a5d6a7;stroke:#2e7d32;stroke-width:1.7}.blocked{fill:#eee;stroke:#9e9e9e;stroke-width:1.4}.lw{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}.ld{font-size:11px;font-weight:700;fill:#263238;text-anchor:middle;dominant-baseline:middle}</style>
+  </defs>
+  <text x="180" y="24" class="title">One chance per outgoing edge</text>
+  <text x="180" y="42" class="small">each edge succeeds or fails independently</text>
+  <g transform="translate(28,62)">
+    <rect class="panel" x="0" y="0" width="304" height="190" rx="8"/><text x="152" y="22" class="title">t = 0</text>
+    <path class="edge" d="M70 92 L122 58"/><path class="edge" d="M70 92 L122 126"/><path class="edge" d="M154 58 L206 92"/><path class="edge" d="M154 126 L206 92"/>
+    <circle class="new" cx="55" cy="92" r="17"/><text class="lw" x="55" y="92">A</text><circle class="off" cx="138" cy="52" r="17"/><text class="ld" x="138" y="52">B</text><circle class="off" cx="138" cy="132" r="17"/><text class="ld" x="138" y="132">C</text><circle class="off" cx="222" cy="92" r="17"/><text class="ld" x="222" y="92">D</text>
+    <text x="152" y="170" class="small">A will try B and C once.</text>
+  </g>
+  <g transform="translate(28,274)">
+    <rect class="panel" x="0" y="0" width="304" height="190" rx="8"/><text x="152" y="22" class="title">t = 1</text>
+    <path class="ok" d="M70 92 L122 58"/><path class="fail" d="M70 92 L122 126"/><path class="edge" d="M154 58 L206 92"/><path class="edge" d="M154 126 L206 92"/>
+    <circle class="old" cx="55" cy="92" r="17"/><text class="ld" x="55" y="92">A</text><circle class="new" cx="138" cy="52" r="17"/><text class="lw" x="138" y="52">B</text><circle class="blocked" cx="138" cy="132" r="17"/><text class="ld" x="138" y="132">C</text><circle class="off" cx="222" cy="92" r="17"/><text class="ld" x="222" y="92">D</text>
+    <text x="152" y="170" class="small">A does not retry C.</text>
+  </g>
+  <g transform="translate(28,486)">
+    <rect class="panel" x="0" y="0" width="304" height="190" rx="8"/><text x="152" y="22" class="title">t = 2</text>
+    <path class="edge" d="M70 92 L122 58"/><path class="fail" d="M70 92 L122 126"/><path class="ok" d="M154 58 L206 92"/><path class="edge" d="M154 126 L206 92"/>
+    <circle class="old" cx="55" cy="92" r="17"/><text class="ld" x="55" y="92">A</text><circle class="old" cx="138" cy="52" r="17"/><text class="ld" x="138" y="52">B</text><circle class="blocked" cx="138" cy="132" r="17"/><text class="ld" x="138" y="132">C</text><circle class="new" cx="222" cy="92" r="17"/><text class="lw" x="222" y="92">D</text>
+    <text x="152" y="170" class="small">B gets one chance to continue.</text>
+  </g>
+</svg>

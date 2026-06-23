@@ -14,38 +14,53 @@ Dr. Kanishka Ghosh Dastidar
 Dr. Jelena Mitrovic
 
 Notes:
-This lecture makes the final conceptual shift of the course: from structure to dynamics. The graph is no longer just an object to analyze — it becomes a *medium* through which processes propagate. The structural properties from L03–L07 (ties, bridges, communities, hubs, small-world shortcuts) now determine how fast and how far a process spreads. The central insight is that the same network structure can help one kind of spreading (simple contagion) and block another (complex contagion). This is the sixth and final gap in the course arc: the *process-structure interaction gap* — knowing the structure alone does not predict the outcome without knowing the process.
+This lecture makes the final conceptual shift of the course: from structure to dynamics. The graph is no longer just an object to analyze; it becomes the medium through which processes move. The didactic rhythm is deliberately repeated: intuitive example first, then theory, then a practical example, then applications. Students should leave with a modeling vocabulary: if something spreads, first ask what the node states are, what makes a node change state, whether the state sticks, and which network structures help or block the process.
 
 ---
 
 ## From Structure to Dynamics
 
-Lectures 03–07 analyzed networks as static objects: edges, roles, communities, balance, short paths. Today we ask: **what happens *on* the network?**
+Lectures 03-07 analyzed networks as static objects: ties, bridges, communities, balance, short paths, hubs, and small-world shortcuts.
 
-The same structural features we studied — weak ties, bridges, communities, hubs — play different roles depending on *what is spreading*. Let us return to the workplace one last time.
+Today we ask a different question:
+
+
+<div class="c-important">
+
+**What happens *on* the network?**
+
+</div>
+
+
+A cold, a rumor, PageRank score, a product failure, and a health behavior can all spread over edges. But they do not follow the same rule.
+
+Notes:
+Keep this opening simple. Students have already seen the structural vocabulary. The new idea is that structure is only half the model. The process rule decides whether a bridge is useful, whether a hub is dangerous, whether clustering helps, and whether time ordering matters.
 
 --
 
-<!-- .slide: class="figure-85" -->
+<!-- .slide: class="figure-75" -->
 
-## A Final Visit to the Workplace
+## Intuition: Same Network, Different Processes
 
-![Same network, two processes — opposite outcomes](/courses/network-science/figures/l08-scenario.svg)
+![Same network, two processes - opposite outcomes](/courses/network-science/figures/l08-scenario.svg)
 
 
 <div class="c-info smaller">
 
-**Left:** A rumor (simple contagion) starts with Ana. One hearing suffices — it crosses the Dia–Fin bridge and reaches everyone. **Right:** A new tool (complex contagion, threshold $q = 2$) starts with Ana. Fin needs 2 adopter contacts, but only Dia uses it — the bridge blocks adoption. Same edge, opposite effects.
+**Cold:** one infectious contact can be enough, so the Dia-Fin bridge can carry the cold to the second team.
+
+**Health behavior:** Fin may need to see two peers join before changing behavior, so the same bridge is too thin. The behavior stalls at the community boundary.
 
 </div>
 
 
 Notes:
-This figure is the anchor for the entire lecture. The punchline is immediate and visible: the Dia–Fin bridge that *accelerates* the rumor *blocks* the tool. Every structural concept from the course now has a dynamical consequence, and that consequence depends on the process, not just the structure.
+This figure remains the anchor for the lecture. The key lesson is not just "things spread"; it is "the same edge can have opposite effects for different processes." In the language of the lecture, the cold is simple contagion, while the health behavior is threshold-based complex contagion.
 
 --
 
-## Four Questions from One Comparison
+## Four Questions
 
 
 <div class="grid-2-1">
@@ -53,19 +68,17 @@ This figure is the anchor for the entire lecture. The punchline is immediate and
 
 <div class="column">
 
-1. **Simple contagion.** If a disease spreads through any single contact, which structural features make it spread fastest?
-2. **Complex contagion.** If a behavior requires reinforcement from multiple neighbors, how does the same structure help or hinder?
-3. **Intervention.** Should we vaccinate the hub (Dia) or the peripheral node (Eli)? Does the answer change for disease vs. behavior?
-4. **Timing.** If the Dia–Fin edge only exists on Tuesdays, does the rumor still cross? Does timing change the outcome?
-
-Every concept in today's lecture answers one of these.
+1. **What spreads?** Signal, probability mass, disease, adoption, failure?
+2. **What changes a node?** One exposure, repeated exposure, a threshold, or a flow equation?
+3. **Does the state stick?** Forever, temporarily, or not at all?
+4. **Which topology helps?** Hubs, bridges, clusters, shortcuts, communities, or time-respecting paths?
 
 </div>
 
 
 <div class="column top">
 
-![Two processes on the same network](/courses/network-science/figures/l08-scenario.svg)
+![Diffusion process across three time steps](/courses/network-science/figures/diffusion-process.svg)
 
 </div>
 
@@ -74,32 +87,32 @@ Every concept in today's lecture answers one of these.
 
 
 Notes:
-Questions 1–2 map to Modules 1–2 (SIR model and threshold cascades). Question 3 connects dynamics to intervention strategy. Question 4 motivates Module 4 (temporal networks). The key pedagogical point is that *all four questions require knowing both the structure and the process* — neither alone determines the answer.
+These four questions replace the old quick-check structure. They also provide the repeated modeling checklist for all applications. For every new spreading problem, students should identify the object being spread, the state-transition rule, the state memory, and the relevant topology.
 
 --
 
-## A Sixth Kind of Gap
+## The Process-Structure Gap
 
-The course has accumulated five gaps between theory and data. L08 adds a sixth: the **process-structure interaction gap**.
+The course has accumulated several gaps between clean theory and real data. L08 adds the **process-structure gap**.
 
-| Lecture | Gap type |
-|---|---|
-| L03–L04 | Computational (NP-hard ideals vs. polynomial proxies) |
-| L05 | Causal (mechanism unidentifiable from snapshots) |
-| L06 | Structural (completeness required but absent) |
-| L07 | Navigational (paths exist but aren't findable locally) |
-| **L08** | **Process-structure** (same structure, different outcomes depending on the process) |
+| Lecture | Gap type | Core issue |
+|---|---|---|
+| L03-L04 | Computational | exact ideals vs. feasible proxies |
+| L05 | Causal | snapshots do not identify mechanisms |
+| L06 | Structural | complete-graph theory vs. sparse data |
+| L07 | Navigational | short paths exist but may not be findable |
+| **L08** | **Process-structure** | same graph, different outcomes for different processes |
 
 
 <div class="fragment">
 
-The process-structure gap is not about missing data or computational limits. It is about the fact that **network structure is necessary but not sufficient** — the spreading rule determines which structural features matter and how.
+Network structure is necessary but not sufficient. A spreading model needs both a graph and a rule.
 
 </div>
 
 
 Notes:
-This slide closes the gap taxonomy. The first four gaps were about what we can *know* about a network; the fifth (L07) was about what actors *inside* the network can do; the sixth is about what happens *on* the network. All six share a common lesson: simple structural measurements never tell the whole story.
+This slide connects the lecture to the course arc. Avoid spending long on the taxonomy. The important idea is that there is no universal "best" structural feature for spreading. A bridge helps a cold but can block a behavior that needs reinforcement. A hub accelerates simple contagion but may be less useful for threshold behavior if its neighbors are isolated from each other.
 
 --
 
@@ -108,7 +121,7 @@ This slide closes the gap taxonomy. The first four gaps were about what we can *
 
 <div class="takeaway">
 
-The same edge can accelerate one process and block another. Network dynamics require knowing both the structure (the graph) and the process (the spreading rule) — neither alone determines the outcome.
+Network dynamics ask how states, signals, behaviors, or risks move over edges. The right model depends on the spreading rule: flow, cascade, threshold, infection, recovery, persistence, and timing.
 
 </div>
 
@@ -117,59 +130,670 @@ The same edge can accelerate one process and block another. Network dynamics req
 
 <!-- .slide: class="module-slide" -->
 
-## Simple Contagion and the SIR Model
+## Basic Network Diffusion Models
 
 
 <div class="guiding-question">
 
-**Guiding Question:** How do diseases and rumors spread through a network, and what structural features control the speed?
+**Guiding Question:** How can we model the spread of a signal, activation, or influence before we specialize to epidemics?
 
 </div>
 
 
 Notes:
-Simple contagion means that a single contact with an infected/informed neighbor suffices for transmission. This is the right model for diseases (one exposure can infect), memes (one viewing can spread), and information forwarding (one message can propagate). The SIR model is the canonical formal framework.
+This module comes before SIR because students need a broader concept of diffusion first. Epidemic models are then a special case with disease-like states and recovery. The sequence is example first, then theory, then practical comparison, then applications.
 
 --
 
-## Simple Contagion — Definition
+<!-- .slide: class="figure-84" -->
+
+## Intuitive Example: A Message Starts at A
+
+![Diffusion process across three time steps](/courses/network-science/figures/diffusion-process.svg)
+
+
+<div class="c-info smaller">
+
+A message starts at one seed node. It may move like a wave, leak like probability mass, trigger each neighbor independently, or require social reinforcement.
+
+</div>
+
+
+The graph gives possible channels. The diffusion rule says which channels are actually used.
+
+Notes:
+Use a simple verbal trace: A tells B and C; B and C may tell D; D may tell E. Then ask: is D active because one message is enough, because two messages reinforced each other, or because some fraction of attention flowed there? Those are different models.
+
+--
+
+## Case 1: Deterministic Reachability
+
+Start with the simplest possible rule:
 
 
 <div class="c-definition">
 
-**Simple contagion.** A node becomes active (infected, informed) through a **single** contact with an active neighbor. The probability of transmission per contact is independent of how many other active neighbors exist.
-
-In network terms: each edge from an active to an inactive node carries independent transmission probability $\beta$ per time step.
+If a node is active, it activates **all** of its inactive neighbors in the next step.
 
 </div>
 
 
+This is the BFS idea from L02 turned into a spreading process.
 
-<div class="fragment">
+| Time | Active nodes |
+|---|---|
+| $t=0$ | $A$ |
+| $t=1$ | $A,B,C$ |
+| $t=2$ | $A,B,C,D$ |
+| $t=3$ | $A,B,C,D,E$ |
 
-**Key structural implication:** Weak ties and bridges *help* simple contagion — they carry the process to new communities that would otherwise be unreachable. This is why epidemics and rumors spread globally: they exploit the same inter-community shortcuts that Granovetter identified as carriers of novel information.
+Notes:
+This is the standard classroom baseline because it separates topology from uncertainty. If a path exists, the signal eventually follows it. It is useful for reachability, shortest spreading time, and dependency analysis, but it is too strong for many human processes.
+
+--
+
+## Why Reachability Is Too Strong
+
+In real spreading, two things often fail:
+
+1. **Not every neighbor is contacted.** Ana may tell only one person, not everyone.
+2. **Not every contacted neighbor responds.** A person may ignore a message or not click a link.
+
+
+<div class="c-info">
+
+So we need a softer model: instead of activating all neighbors, let the spread choose paths probabilistically.
+
+</div>
+
+
+**Application.** Browsing, attention, and search behavior: users follow one link at a time, not every outgoing link at once.
+
+Notes:
+This slide motivates random walks. It should feel obvious: deterministic spread is useful but unrealistic when attention is limited. A student should understand why the next model exists before seeing the matrix notation.
+
+--
+
+## Case 2: Random-Walk Diffusion
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+A random walker sits on one node. At each step, it chooses one outgoing edge and moves along it.
+
+If node $j$ has out-degree $d_j$, then each outgoing neighbor receives probability $1/d_j$.
+
+For the transition matrix $P$:
+
+- $P_{ij}=1/d_j$ if there is an edge $j \to i$
+- $P_{ij}=0$ otherwise
+
+$P$ is a **transition matrix**: column $j$ says where probability moves next from node $j$.
+
+</div>
+
+
+<div class="column">
+
+For $A \to B$, $A \to C$, $B \to D$, $C \to D$:
+
+| $P$ | from A | from B | from C | from D |
+|---|---:|---:|---:|---:|
+| **to A** | 0 | 0 | 0 | 0 |
+| **to B** | 1/2 | 0 | 0 | 0 |
+| **to C** | 1/2 | 0 | 0 | 0 |
+| **to D** | 0 | 1 | 1 | 0 |
+
+From $A$, half the mass goes to $B$ and half to $C$.
+
+</div>
+
 
 </div>
 
 
 Notes:
-The connection to L03 is direct: weak ties were valuable for information flow because they bridged communities. The same structural feature makes them dangerous for disease spread — a single infected contact in another community is enough to seed a new outbreak. The "strength of weak ties" is simultaneously the "vulnerability of weak ties" depending on whether the process is beneficial (information) or harmful (disease).
+This slide defines transition matrix mathematically and visually. The convention here is column-stochastic: $x_{t+1}=Px_t$, so column j distributes the mass currently at node j. Mention that some textbooks use the transpose convention; the modeling idea is the same.
+
+--
+
+
+## Random-Walk Theory: Reading the State Vector
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+The probability state vector $x_t$ has one entry per node.
+
+
+<div class="c-info smaller">
+
+If the node order is $(A,B,C,D,E)$, then
+
+$$x_t = [0, 1/2, 1/2, 0, 0]$$
+
+means: at time $t$, the walker is at $B$ with probability $1/2$ and at $C$ with probability $1/2$.
+
+</div>
+
+
+The entries sum to $1$ when probability is conserved.
+
+</div>
+
+
+<div class="column top figure-110">
+
+![Random-walk diffusion over three steps](/courses/network-science/figures/l08-random-walk-steps.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Use this slide to make the vector concrete. The vector is not a list of active nodes. It is a probability distribution over possible locations of the walker. The entries sum to 1 when probability is conserved. In this example the mass starts at A, splits evenly to B and C, and then recombines at D.
+
+--
+
+## Random-Walk Theory and Application
+
+If $x_t$ stores the probability mass at time $t$, then:
+
+$$x_{t+1} = P x_t.$$
+
+
+<div class="c-info">
+
+The process no longer asks "which nodes become active?" It asks "where is the probability mass after repeated movement?"
+
+</div>
+
+
+**Example.** Starting from $A$, probability splits between $B$ and $C$, then recombines at $D$.
+
+**Application.** Web browsing, PageRank-like importance, traffic flow, spreading activation in search and recommendation.
+
+Notes:
+This distinguishes binary activation from graded diffusion. Students should see that random-walk diffusion is not an epidemic model. It is a flow model.
+
+--
+
+
+## Why Plain Random Walks Need Damping
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+A plain random walk can drift too far from the original topic or get trapped in a sink.
+
+
+<div class="c-info">
+
+Imagine searching for "network diffusion." Following links forever may eventually land on a barely related page. A useful model should sometimes return to the original query or seed node.
+
+</div>
+
+
+This return is called **damping**, **restart**, or **teleportation**, depending on the application.
+
+**Application.** Personalized search: explore nearby pages, but keep pulling attention back to the user's original interest.
+
+</div>
+
+
+<div class="column top figure-110">
+
+![Plain random walk versus damped random walk](/courses/network-science/figures/l08-damped-random-walk.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the intuitive explanation before the formula. Damping solves two problems: attention should decay with distance, and directed graphs can have sinks or traps. PageRank used the same idea globally; personalized PageRank uses a query- or seed-specific restart vector.
+
+--
+
+## Case 3: Damped Diffusion
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+
+<div class="c-definition">
+
+A damped diffusion mixes two actions:
+
+1. **follow the network** with probability $\alpha$
+2. **restart** at the seed distribution $x_0$ with probability $1-\alpha$
+
+$$x_{t+1} = \alpha P x_t + (1-\alpha)x_0, \qquad 0 < \alpha < 1.$$
+
+</div>
+
+
+
+<div class="c-info">
+
+$x_0$ is the **restart distribution**: it says where the walk returns when it restarts. For personalized search, $x_0$ is concentrated on the query or seed nodes.
+
+$\alpha$ is the **link-following probability**. Large $\alpha$: explore farther. Small $\alpha$: stay close to $x_0$.
+
+</div>
+
+
+<div class="small">
+
+PageRank uses this random-surfer idea for ranking Web pages (Brin & Page, 1998).
+
+</div>
+
+
+</div>
+
+
+<div class="column top figure-100">
+
+![Damped diffusion state-vector update](/courses/network-science/figures/l08-damped-vector-steps.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+This should now feel motivated rather than appearing as a trick. The restart vector x0 can be uniform, as in classic PageRank, or concentrated on a seed/query for personalized PageRank.
+
+--
+
+## Why Random Walks Are Still Too Smooth
+
+Random walks describe attention or probability mass. But many social processes are **events**:
+
+- a person shares a post or does not
+- a customer buys or does not
+- a device fails or does not
+
+
+<div class="c-info">
+
+For event-like spread, we need a model where each exposure can succeed or fail.
+
+</div>
+
+
+That gives the **independent cascade** model.
+
+Notes:
+This is the transition from continuous/graded diffusion to binary event diffusion. It also explains why independent cascade is not just a random walk with different notation. A random walk moves one unit of probability mass along one outgoing edge per walker step. Independent cascade models event attempts along edges.
+
+--
+
+
+## Case 4: Independent Cascade
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+
+<div class="c-definition">
+
+Each newly active node gets **one chance** to activate each inactive neighbor.
+
+For an edge $u \to v$, activation succeeds with probability $p_{uv}$.
+
+</div>
+
+
+
+<div class="c-important smaller">
+
+Independent cascade is **not** a random walk. The active node does **not** choose one outgoing edge. It tries **all** outgoing edges once, and each edge succeeds or fails independently. Therefore one active node can activate many neighbors in the same step, or none.
+
+</div>
+
+
+
+<div class="small">
+
+**Example.** Ana posts a link. Ben clicks and shares with probability $0.3$; Cai clicks and shares with probability $0.1$. If Ben does not share now, Ana does not keep retrying forever.
+
+**Application.** Viral marketing, information cascades, link sharing, one-shot recommendations.
+
+Kempe, Kleinberg & Tardos (2003) use this model for influence maximization.
+
+</div>
+
+
+</div>
+
+
+<div class="column top figure-100">
+
+![Independent cascade over two rounds](/courses/network-science/figures/l08-independent-cascade.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+The "one chance per edge" assumption is the key simplification. If Ana has edges to Ben, Cai, and Dia, Ana attempts all three edges once. These attempts are independent Bernoulli trials: Ben may activate, Cai may not, Dia may activate. There is no conservation of probability mass and no rule that all unchosen edges go to zero because no single edge is chosen. It makes sense for a one-time exposure but not for repeated pressure or coordination. That limitation motivates the next model.
+
+--
+
+## Why One Exposure Is Sometimes Not Enough
+
+Some behaviors are not triggered by one contact:
+
+- joining a protest may require seeing several friends join
+- registering for a health program may require social proof
+- changing a habit may require repeated reinforcement
+
+
+<div class="c-info">
+
+Here the important signal is not "did one edge transmit?" but "how much of my neighborhood is already active?"
+
+</div>
+
+
+That gives the **linear threshold** model.
+
+Notes:
+Use the health-program example to connect smoothly to Centola later. This avoids the unclear workplace-tool framing while preserving the important complex-contagion concept.
 
 --
 
 <!-- .slide: class="figure-90" -->
 
-## The SIR Model
-
-![SIR compartments and the epidemic curve: S declines, I rises to a peak then falls, R accumulates to a final size below one](/courses/network-science/figures/sir-dynamics.svg)
+## Case 5: Linear Threshold
 
 
-<div class="c-definition smaller">
+<div class="grid-3-1">
 
-**SIR — the canonical epidemic model.** Every individual sits in one of three **compartments**: **S** (Susceptible, can still catch it), **I** (Infected, currently infectious), or **R** (Recovered/Removed, immune or removed). Two transitions drive the dynamics:
 
-- **S → I** at infection rate $\beta$ (per infectious contact),
-- **I → R** at recovery rate $\gamma$ (per infected individual).
+<div class="column">
+
+
+
+<div class="c-definition">
+
+Node $v$ activates when enough weighted active neighbors point to it:
+
+$$\sum_{u \in N(v)} w_{uv} x_u \geq \theta_v.$$
+
+$x_u=1$ means neighbor $u$ is active; $\theta_v$ is $v$'s adoption threshold.
+
+</div>
+
+
+**Example.** Fin joins a health program only after seeing at least two close colleagues join.
+
+**Application.** Behavior change, norm adoption, political mobilization, technologies that need coordination.
+
+Granovetter (1978) formalized threshold models of collective behavior; Kempe, Kleinberg & Tardos (2003) use linear threshold models for influence spread.
+
+</div>
+
+
+<div class="column top figure-100">
+
+![Linear threshold diffusion with reinforcement](/courses/network-science/figures/l08-linear-threshold.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+The weights can represent tie strength or exposure intensity. If all weights are equal, the rule becomes a fraction or count of active neighbors. This is the bridge to complex contagion: reinforcement from multiple neighbors is the mechanism.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## Practical Comparison: Same Graph, Different Rules
+
+![Same graph with five diffusion rules](/courses/network-science/figures/l08-model-comparison.svg)
+
+
+<div class="c-info smaller">
+
+The graph is fixed. Reachability activates every reachable node; random walks move probability mass; damping keeps diffusion close to the seed; independent cascade makes each edge uncertain; threshold diffusion requires reinforcement.
+
+</div>
+
+
+Notes:
+This figure is the visual synthesis for Module 1. Walk from left to right: first the unrealistic but clear baseline, then limited attention, then restart/damping, then stochastic one-shot transmission, then reinforcement. The students should see that the same graph does not imply the same spreading outcome.
+
+--
+## Applications: Which Diffusion Rule Fits?
+
+| Application | Natural model | Why |
+|---|---|---|
+| Web ranking | damped random-walk diffusion | attention flows through links with teleportation |
+| Viral post | independent cascade | one exposure can trigger sharing |
+| Health behavior | threshold model | peers provide social proof |
+| Search over related concepts | diffusion with decay | nearby concepts should count more |
+| Failure propagation | cascade model | one failed dependency can trigger another |
+
+
+<div class="c-info smaller">
+
+The modeling choice is substantive. Choosing a rule means making a claim about how exposure changes behavior.
+
+</div>
+
+
+Notes:
+This slide should slow students down. Diffusion models are not just formulas; they encode assumptions about human behavior, technical dependencies, or information flow. A health-behavior intervention should usually not be modeled as PageRank, and PageRank should not be interpreted as an epidemic.
+
+--
+
+## Module Takeaway
+
+
+<div class="takeaway">
+
+Basic diffusion models differ in what a node state means: binary activation, probability mass, graded attention, one-shot influence, or threshold behavior. Epidemic models are one important special case, not the whole category.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Epidemic Models and State Memory
+
+
+<div class="guiding-question">
+
+**Guiding Question:** What changes when diffusion is modeled as infection, recovery, immunity, or reinfection?
+
+</div>
+
+
+Notes:
+State memory asks what happens after exposure: does the state remain, disappear, or become resistant to future infection? That single modeling choice separates SI, SIS, and SIR.
+
+
+--
+<!-- .slide: class="figure-90" -->
+
+## Epidemic State Vocabulary
+
+![Epidemic model states and transitions](/courses/network-science/figures/l08-epidemic-states.svg)
+
+
+<div class="c-info smaller">
+
+The acronym names the allowed path through states: **SI** means $S \to I$, **SIS** means $S \to I \to S$, and **SIR** means $S \to I \to R$.
+
+</div>
+
+
+Notes:
+Use this as the vocabulary slide. S means susceptible: can still be infected. I means infected and infectious: currently able to transmit. R means recovered or removed: no longer infectious and no longer susceptible in the model.
+
+--
+
+## Case 1: SI
+
+
+<div class="c-definition">
+
+**SI:** $S \to I$
+
+Susceptible nodes become infected. There is **no recovery** and no removal.
+
+</div>
+
+
+**Intuition.** Infection or activation accumulates. Once a node enters $I$, it stays in $I$ and can keep transmitting.
+
+**Example.** On a path, an infection starting at $B$ grows outward until all reachable nodes are infected.
+
+**Application.** Cumulative awareness, irreversible adoption, permanent compromise, reachability with epidemic labels.
+
+
+Notes:
+The key teaching point: SI is the basic model. It is useful when the state is sticky and no recovery process matters for the question.
+
+--
+
+## SI: Formal Network Update
+
+Let $G=(V,E)$ and let $X_i(t)\in\{S,I\}$ be the state of node $i$ at time $t$.
+
+For a susceptible node $i$, define its infected neighbors:
+
+$$N_I(i,t)=\{j\in N(i):X_j(t)=I\}.$$
+
+With edge transmission probability $\beta$, the discrete-time update is:
+
+$$
+\Pr[X_i(t+1)=I\mid X_i(t)=S]
+=1-(1-\beta)^{|N_I(i,t)|}.
+$$
+
+
+<div class="c-info small">
+
+The equation says: node $i$ becomes infected unless all currently infected neighbors fail to transmit.
+
+</div>
+
+
+
+<div class="c-info small">
+
+Algorithmically, this is a **stochastic simulation**: at each step, every infected node tries to infect susceptible neighbors. Infected nodes never leave $I$.
+
+</div>
+
+
+
+<div class="c-info small">
+
+This is the epidemic version of **Case 1: Deterministic Reachability** if activation is certain; with probabilistic one-shot edge attempts, it becomes close to **Case 4: Independent Cascade**.
+
+</div>
+
+
+Notes:
+This is the first place where students see how the state-machine view becomes code. The probability is easier to explain as the complement: no infected neighbor succeeds with probability $(1-\beta)$ per infected neighbor. If there are many infected neighbors, the infection probability increases.
+
+--
+
+<!-- .slide: class="figure-75" -->
+
+## Case 2: SIS
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**SIS:** $S \to I \to S$
+
+Infected nodes recover, but recovery returns them to the susceptible state.
+
+</div>
+
+
+**Intuition.** The infection can come back. A node that recovered is not protected.
+
+**Example.** In a small group, Ana recovers from a cold but later catches it again from Ben.
+
+**Application.** Recurring infections without lasting immunity, malware that can be removed and reinstalled, repeated misinformation exposure.
+
+</div>
+
+
+<div class="column top">
+
+![SIS state machine: susceptible and infected with recovery back to susceptible](/courses/network-science/figures/l08-sis-state-machine.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+SIS changes the question from "how far did it ever spread?" to "can it persist?" Reinfection is the defining mechanism. Hubs can be especially important because they can keep reintroducing infection to many neighbors.
+
+--
+
+## SIS: Formal Network Update
+
+SIS uses the same infection step as SI, but infected nodes can recover:
+
+$$
+\Pr[X_i(t+1)=I\mid X_i(t)=S]
+=1-(1-\beta)^{|N_I(i,t)|}
+$$
+
+$$
+\Pr[X_i(t+1)=S\mid X_i(t)=I]=\gamma.
+$$
+
+
+<div class="c-info smaller">
+
+$\gamma$ is the recovery probability per time step: an infected node returns to $S$ with probability $\gamma$ and remains infected with probability $1-\gamma$.
 
 </div>
 
@@ -177,77 +801,833 @@ The connection to L03 is direct: weak ties were valuable for information flow be
 
 <div class="c-info smaller">
 
-In the **well-mixed** mean-field model the fractions evolve as
-$$\dot S = -\beta\,S\,I, \qquad \dot I = \beta\,S\,I - \gamma\,I, \qquad \dot R = \gamma\,I,$$
-with **basic reproduction number** $R_0 = \beta/\gamma$ (expected secondary infections per case). If $R_0 > 1$, $I$ grows to an **epidemic peak** and then falls as susceptibles run out; the process leaves a **final size** $R(\infty) < 1$ — some never get infected (**herd immunity**).
+Algorithmically: infection and recovery are repeated forever. A simulation stops only when the infection dies out, reaches a time limit, or approaches a stable endemic level.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+**Endemic** means the infection does not disappear, but remains present at a roughly stable nonzero level.
 
 </div>
 
 
 Notes:
-The well-mixed assumption is "everyone can contact everyone with equal probability" — a mean-field approximation that turns the network into a single mixed pool. Three things are worth reading off the curve: (1) **the peak** — its height is what overwhelms hospitals; its timing tells us when to act. (2) **The threshold** — $R_0 = 1$ is the bifurcation between fadeout and epidemic; "flattening the curve" interventions lower the effective $R_0$. (3) **The final size** — even when $R_0$ is large, $R(\infty) < 1$: the epidemic ends not because everyone has been infected, but because the susceptible pool has fallen below the level that sustains spread. This is the mathematical content of herd immunity. The next slide replaces the well-mixed assumption with an actual network — and the basic reproduction number gains a structural factor $\langle k\rangle$.
+This slide gives SIS the same level of formality as SIR. Emphasize that SIS is not mainly about final reach, because final reach can be all nodes over a long time even when the current infected fraction is small. The key outputs are persistence, extinction probability, and long-run infected fraction.
+
+--
+
+<!-- .slide: class="figure-75" -->
+
+## Case 3: SIR
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**SIR:** $S \to I \to R$
+
+Infected nodes recover into a recovered/removed state. They no longer transmit and cannot be infected again in the model.
+
+</div>
+
+
+**Intuition.** The infection burns through reachable parts of the graph and leaves immune or removed nodes behind.
+
+**Example.** A one-time infection moves along a path as a wave: current cases are $I$, past cases are $R$.
+
+**Application.** Diseases with immunity, one-shot outbreaks, finite attention cascades, final outbreak size.
+
+</div>
+
+
+<div class="column top">
+
+![SIR state machine: susceptible, infected, recovered or removed](/courses/network-science/figures/l08-sir-state-machine.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+SIR is the model where timing becomes especially visible: infections rise, peak, and fall because the susceptible pool is depleted and recovered nodes block reinfection.
+
+--
+
+## SIR: Formal Network Update
+
+SIR uses infection plus one-way removal:
+
+$$
+\Pr[X_i(t+1)=I\mid X_i(t)=S]
+=1-(1-\beta)^{|N_I(i,t)|}
+$$
+
+$$
+\Pr[X_i(t+1)=R\mid X_i(t)=I]=\gamma.
+$$
+
+Recovered or removed nodes stay removed:
+
+$$\Pr[X_i(t+1)=R\mid X_i(t)=R]=1.$$
+
+Notes:
+SIR has the same local infection rule as SI and SIS. The only difference is the memory state after infection. This is why it is useful to teach the models as variants of one state-transition template rather than as unrelated acronyms.
+
+--
+
+## SIR: What We Compute
+
+SIR is used for time-dependent outbreak quantities:
+
+| Quantity | Meaning |
+|---|---|
+| $I(t)$ | current number or fraction infected |
+| $\max_t I(t)$ | peak load |
+| time of peak | when capacity pressure is highest |
+| $R(\infty)$ | final outbreak size |
+| extinction probability | probability the outbreak dies early |
+
+
+<div class="c-info smaller">
+
+On networks, exact closed-form solutions are rare. We usually simulate the stochastic process, approximate it with aggregate equations, or use percolation-style results for final size. **Percolation** means asking which nodes are reachable if each edge is kept as a successful transmission edge with some probability (Kermack & McKendrick, 1927; Newman, 2002; Van Mieghem, 2014).
+
+</div>
+
+
+Notes:
+This is the practical answer to "how do you use it?" In computer science terms, SIR is often implemented as an event simulation or synchronous update. Analytical approximations help identify thresholds, peaks, and final sizes, but the exact stochastic network process has a huge state space.
+
+--
+
+<!-- .slide: class="figure-70" -->
+
+## Practical Example: Same Path, Three Epidemics
+
+![SI, SIS, and SIR compared on the same path graph](/courses/network-science/figures/l08-si-sis-sir-comparison.svg)
+
+
+<div class="c-info smaller">
+
+The graph and seed are the same. The only difference is the memory rule after infection: stay infected, return to susceptible, or move to recovered/removed.
+
+</div>
+
+
+Notes:
+Walk through the three panels. SI accumulates infection. SIS allows recurrence and persistence because recovered nodes become susceptible again. SIR creates a moving infection wave and leaves recovered nodes behind.
 
 --
 
 <!-- .slide: class="figure-90" -->
 
-## SIR on Networks
+## Aggregate View: From Nodes to Counts
 
-![SIR compartment model with the network reproduction number R0 = (beta/gamma) times average degree](/courses/network-science/figures/sir-compartments.svg)
+The network model stores a state for every node:
 
+$$X(t)=(X_1(t),X_2(t),\ldots,X_n(t)).$$
 
-<div class="c-definition smaller">
+The network simulation tracks every node state. The **aggregate view** compresses those node states into counts or fractions:
 
-**From well-mixed to networked.** Compartments and rates are the same, but **contacts are now edges**, not the whole population:
-
-- **Infection:** each **S–I edge** transmits with probability $\beta$ per time step.
-- **Recovery:** each I node recovers with probability $\gamma$ per time step.
-- **Reproduction number:** $R_0 = \dfrac{\beta}{\gamma}\,\langle k\rangle$ — the well-mixed ratio scaled by the **average degree** $\langle k\rangle$.
-
-**Epidemic threshold:** an epidemic takes off when $R_0 > 1$.
-
-</div>
+$$
+S(t)=|\{i:X_i(t)=S\}|,\quad
+I(t)=|\{i:X_i(t)=I\}|,\quad
+R(t)=|\{i:X_i(t)=R\}|.
+$$
 
 
+<div class="c-info">
 
-<div class="fragment c-info smaller">
-
-But $\langle k\rangle$ hides the story: with a **broad degree distribution**, the *variance* of $k$ dominates. Hubs are infected early and reinfect many — the superspreader effect that the next slide makes precise.
+Aggregation answers "how many?" It no longer answers "which node?", "which bridge?", or "which community?"
 
 </div>
 
 
 Notes:
-The SIR model on networks differs from the classical well-mixed SIR in one crucial way: the *degree distribution* matters. In the classical model every individual contacts every other with equal probability; on a network, high-degree nodes (hubs) have more contacts and therefore higher infection and transmission rates. This makes hubs both more vulnerable and more dangerous — the "superspreader" effect. The mean-field correction $R_0 = (\beta/\gamma)\langle k\rangle$ is only the first step: replacing $\langle k\rangle$ with the second moment $\langle k^2\rangle/\langle k\rangle$ recovers the Pastor-Satorras & Vespignani result on the next slide, where heterogeneity pushes the epidemic threshold to zero.
+This slide defines aggregate view before showing the SIR curve. The key tradeoff is compression. Aggregates are useful for population-level outcomes, but they deliberately discard the structural path of the outbreak.
 
 --
 
-## The Role of Hubs
+## Aggregate View: SIS Approximation
 
-In homogeneous networks, the average degree is often enough. In heterogeneous networks, the **variance of degree** matters: hubs create many more transmission opportunities than typical nodes.
+A **well-mixed** approximation ignores the graph and assumes every infected node can contact every susceptible node with equal chance.
+
+For SIS, write $I(t)$ for the infected fraction and $S(t)=1-I(t)$.
+
+$$
+\frac{dI}{dt} = \beta S I - \gamma I
+= \beta I(1-I)-\gamma I.
+$$
 
 
 <div class="c-info smaller">
 
-For an uncorrelated random network, the epidemic threshold depends on the first two moments of the degree distribution:
-
-$$T_c \approx \frac{\langle k\rangle}{\langle k^2\rangle - \langle k\rangle}$$
-
-Here $T$ is transmissibility across an edge. If $T > T_c$, a macroscopic outbreak is possible.
+This is an **ordinary differential equation (ODE)**: it describes how one quantity changes continuously over time. It is not the closed-form solution; the right-hand side gives the instantaneous rate of change of the infected fraction.
 
 </div>
 
 
 
-<div class="fragment">
+<div class="c-definition smaller">
 
-**Pastor-Satorras & Vespignani (2001).** In an idealized infinite scale-free network with $P(k) \propto k^{-\gamma}$ and $\gamma \leq 3$, $\langle k^2\rangle$ diverges, so $T_c \to 0$.
+Infection grows through $\beta S I$ and shrinks through recovery $\gamma I$. In the simplest well-mixed form, persistence requires roughly $\beta/\gamma > 1$.
 
 </div>
 
 
 Notes:
-This is the hard result. The naive $R_0 = \beta/\gamma \cdot \langle k\rangle$ hides degree heterogeneity. In a heterogeneous network, a newly infected node is more likely to be reached through an edge leading to a high-degree node; high-degree nodes also create many onward edges. The branching factor is therefore controlled by $\langle k^2\rangle / \langle k\rangle$, not just $\langle k\rangle$. If the second moment diverges, the theoretical epidemic threshold vanishes in the infinite-network limit.
+This slide explains "aggregate approximation" after the aggregate-count slide. It compresses the node-level stochastic process into one population-level variable, I(t). Well-mixed means the model no longer knows the network edges. Because SIS has no removed state, S(t) can be replaced by 1-I(t). The formula shown is the ordinary differential equation, not an explicit solution for I(t).
+
+--
+
+## Aggregate View: SIS on a Network
+
+On a graph, the well-mixed approximation can miss hub effects. A common network mean-field intuition is:
+
+$$
+\frac{\beta}{\gamma} \gtrsim \frac{1}{\lambda_{\max}(A)}.
+$$
+
+Here $\lambda_{\max}(A)$ is the largest eigenvalue of the adjacency matrix. Intuitively, it measures how strongly the network can amplify repeated spreading along edges: hubs, dense cores, and many mutually reinforcing paths make it larger.
+
+
+<div class="c-info smaller">
+
+Interpretation: if the network has structures that amplify reinfection, especially hubs, SIS can persist at lower infection rates than a homogeneous model suggests (Pastor-Satorras & Vespignani, 2001; Van Mieghem, 2014).
+
+</div>
+
+
+Notes:
+This slide connects SIS to the linear algebra students have already seen in centrality/PageRank contexts. The exact stochastic SIS process on a finite network can still die out by chance, but the threshold approximation explains whether persistence is structurally likely.
+
+--
+
+<!-- .slide: class="figure-90" -->
+
+## Aggregate View: The SIR Curve
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition smaller">
+
+In the well-mixed SIR approximation:
+
+$$
+\frac{dS}{dt} = -\beta S I
+$$
+
+$$
+\frac{dI}{dt} = \beta S I - \gamma I
+$$
+
+$$
+\frac{dR}{dt} = \gamma I.
+$$
+
+$\beta$ is the infection rate, $\gamma$ is the recovery rate; assumes homogeneous mixing, not explicit edges.
+
+</div>
+
+
+
+
+</div>
+
+
+<div class="column">
+
+![SIR infection over time: S declines, I rises to a peak then falls, R accumulates to a final size below one](/courses/network-science/figures/sir-dynamics.svg)
+
+
+<div class="tiny">
+
+Read the chart as three aggregate time series: $S(t)$ falls as susceptible people are infected, $I(t)$ rises while new infections exceed recoveries and then falls after the peak, and $R(t)$ accumulates everyone who has recovered or been removed. $R(\infty)$ is the final outbreak size; $S(\infty)$ is the fraction that escaped infection.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="c-info small">
+
+The basic reproduction number is:
+
+$$R_0=\beta/\gamma.$$
+
+It is the expected number of secondary infections caused by one infected case in a fully susceptible well-mixed population. If $R_0>1$, early growth is possible; if $R_0<1$, infections tend to die out.
+
+</div>
+
+
+
+Notes:
+This slide now comes after the aggregate definition. The well-mixed model assumes everyone can contact everyone in the same way. On an actual network, contacts are edges. The curve gives three important quantities: outbreak threshold, epidemic peak, and final size.
+
+--
+
+## SIR: Closed Form or Approximation?
+
+The standard well-mixed SIR equations usually do **not** give a simple closed-form expression for $S(t)$, $I(t)$, and $R(t)$ over time.
+
+
+<div class="c-info smaller">
+
+In practice, we usually compute SIR curves by numerical integration of the ODEs, meaning ordinary differential equations, or by stochastic simulation on a graph.
+
+</div>
+
+
+
+<div class="c-important smaller">
+
+This does not mean "theory is useless." It means analytical results usually answer specific questions rather than giving the full curve in one formula.
+
+</div>
+
+
+Notes:
+This slide prevents students from expecting a neat formula for the full epidemic curve. Use it as a bridge: we cannot usually write down S(t), I(t), and R(t) explicitly for all t, but we can still derive useful properties of the outbreak.
+
+--
+
+## Analytical Results: Threshold and Peak
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Threshold intuition**
+
+At the beginning, almost everyone is susceptible. The central question is:
+
+
+<div class="c-definition smaller">
+
+Does one infected case create more than one new infected case on average?
+
+</div>
+
+
+In the simplest well-mixed SIR model, this is summarized by $R_0=\beta/\gamma$.
+
+If $R_0>1$, early growth is possible. If $R_0<1$, the outbreak tends to die out.
+
+</div>
+
+
+<div class="column">
+
+**Peak condition**
+
+The infected curve peaks when it stops increasing:
+
+$$\frac{dI}{dt}=0.$$
+
+For well-mixed SIR:
+
+$$\frac{dI}{dt}=\beta S I-\gamma I.$$
+
+So the peak occurs when infection pressure and recovery balance:
+
+$$\beta S = \gamma.$$
+
+</div>
+
+
+</div>
+
+
+Notes:
+This slide gives two analytical uses of the ODE without solving the full trajectory. The threshold is about early growth. The peak condition is about when current infections stop rising. These are actionable even when the complete curve must be computed numerically.
+
+--
+
+## Analytical Results: Final Size and Uncertainty
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Final-size relation**
+
+Even without a closed form for the whole curve, SIR can characterize the final outbreak size implicitly.
+
+
+<div class="c-info smaller">
+
+Implicit means the result is defined by an equation that usually still needs numerical solving.
+
+</div>
+
+
+This helps estimate $R(\infty)$: the fraction that has recovered/been removed when the outbreak ends.
+
+</div>
+
+
+<div class="column">
+
+**Stochastic simulation**
+
+On a finite network, the same parameters can produce different outbreak paths.
+
+Simulation estimates:
+
+- extinction probability
+- distribution of peak sizes
+- distribution of final outbreak sizes
+- seed-node sensitivity
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important smaller">
+
+Basic SIR is not usually discussed as a chaotic system. The practical robustness issue is stochastic variability: near a threshold, small random differences can decide whether an outbreak dies early or becomes large.
+
+</div>
+
+
+Notes:
+This slide completes the answer to "what do analytical results give us?" Final size is often available only implicitly, while stochastic simulation gives distributions rather than a single curve. This also prepares students for reporting uncertainty bands.
+
+--
+
+## Simulation or Closed Form?
+
+There are three common computational levels:
+
+| Level | Representation | What it gives |
+|---|---|---|
+| stochastic network simulation | state of every node | sample paths, uncertainty, seed effects |
+| aggregate ODE (ordinary differential equation) | counts/fractions $S(t),I(t),R(t)$ | smooth curves, thresholds, peak intuition |
+| network approximation | degree moments, eigenvalues, percolation | topology-sensitive thresholds/final size |
+
+
+<div class="c-important smaller">
+
+Closed-form solutions are limited. For real networks, simulation is the default; formulas are used to understand regimes and check intuition.
+
+</div>
+
+
+Notes:
+This slide directly addresses how the models are used. The right answer is not "simulate or solve" universally. It depends on the question. For teaching, make students map the research question to the computational level.
+
+--
+
+## Network Simulation Template
+
+For SI, SIS, and SIR, the simulation pattern is nearly the same:
+
+```text
+initialize node states
+for t = 1 ... T:
+  collect infection attempts over S-I edges
+  apply successful infections with probability beta
+  apply recovery/removal with probability gamma
+  record S(t), I(t), R(t)
+```
+
+
+<div class="c-info smaller">
+
+The model-specific part is the post-infection state: SI keeps nodes infected, SIS returns them to susceptible, SIR moves them to recovered/removed.
+
+</div>
+
+
+Notes:
+This slide makes the computer science detail explicit. It also clarifies why the same implementation skeleton can support all three models. Mention that event-based simulations such as Gillespie-style algorithms are often used for continuous-time versions; synchronous updates are easier for teaching and classroom examples.
+
+--
+
+## Simulation Stability: What To Expect
+
+Stochastic epidemic simulations are not single deterministic answers. Repeated runs can differ, especially near the epidemic threshold.
+
+| Model | Expected long-run behavior |
+|---|---|
+| SI | monotone growth until no reachable susceptible nodes remain |
+| SIS | extinction or noisy persistence around an endemic level |
+| SIR | one outbreak wave, then absorption when $I(t)=0$ |
+
+
+<div class="c-info smaller">
+
+Near a threshold, small random differences can decide whether the infection dies early or becomes large. Report several runs, averages, and uncertainty bands rather than one trajectory.
+
+</div>
+
+
+Notes:
+This slide explains simulation stability in student-friendly terms. SI and SIR have absorbing endpoints in finite graphs. SIS also has an absorbing all-susceptible state in finite stochastic simulations, but above threshold it may persist for a long time around a quasi-stationary endemic level before eventual extinction.
+
+--
+
+## Numerical Stability: Iteration Can Amplify Error
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+Even a simple iterative rule can become numerically sensitive:
+
+$$x_{t+1}=r x_t(1-x_t).$$
+
+For some values, such as $r=3.9$, two almost identical starting values can separate quickly (May, 1976).
+
+
+<div class="c-info smaller">
+
+This logistic iterator is not an epidemic model. It is a warning: simulations are repeated numerical updates, and repeated updates can amplify rounding, step-size, and modeling choices.
+
+</div>
+
+
+</div>
+
+
+<div class="column top">
+
+![Two logistic iterator trajectories with almost identical starts diverge](/courses/network-science/figures/l08-logistic-iterator-instability.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+Use this as a visual computational caution. The point is not to say SIR is chaotic, but to make students respect iterative simulation. If a result changes when the time step or implementation details change, the simulation result is not yet robust.
+
+--
+
+## Reproducibility: Seeds, Precision, Hardware
+
+
+<div class="c-info smaller">
+
+Reproducibility also depends on random seeds. Fellicious, Weissgerber & Granitzer (2020) show this for CNN accuracy: reporting a single run can hide relevant variation caused by initialization and training randomness.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+On GPUs and parallel hardware, precision and operation order add another layer: floating-point reductions can produce slightly different results even when the mathematical formula is the same (Goldberg, 1991; Higham, 2002).
+
+</div>
+
+
+For simulation studies, this means:
+
+- the random seed controls one possible trajectory through the stochastic process;
+- the time step controls how the continuous process is discretized;
+- CPU/GPU and precision settings can change accumulated rounding behavior;
+- parallel update order can change results when operations are not exactly associative.
+
+
+<div class="c-important smaller">
+
+A robust claim should survive reasonable changes in seed, step size, precision, and hardware.
+
+</div>
+
+
+Notes:
+The Fellicious, Weissgerber and Granitzer paper is a good local example for random seed effects in neural network experiments. GPU execution adds further concerns through precision and parallel operation ordering. Keep the message practical: students should document seeds, run several repetitions, and test whether conclusions survive reasonable implementation changes.
+
+--
+
+## Numerical Stability: Practical Checks
+
+For epidemic simulations, check robustness before interpreting a single curve:
+
+| Check | Why it matters |
+|---|---|
+| repeat many runs | separates typical behavior from one random path |
+| report uncertainty bands | shows threshold sensitivity and stochastic spread |
+| vary time step or update rule | catches discretization artifacts |
+| keep probabilities in $[0,1]$ | prevents invalid numerical states |
+| compare CPU/GPU or precision settings | detects hardware and floating-point effects |
+| record random seeds | makes results reproducible |
+| compare to aggregate intuition | catches obvious implementation errors |
+
+
+<div class="c-important smaller">
+
+Numerical stability is not just "no crash." It means the qualitative conclusion survives reasonable changes in resolution, seed, and implementation choices.
+
+</div>
+
+
+Notes:
+This is the practical computer science slide. It connects stochastic simulation to reproducibility and validation. The checks are intentionally simple enough for students to apply in exercises.
+
+--
+
+## Module Takeaway
+
+
+<div class="takeaway">
+
+Epidemic models are diffusion models with explicit state transitions. The crucial modeling decision is state memory: infected forever (SI), recover and become susceptible again (SIS), or recover into removal/immunity (SIR).
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Effects of Network Topology
+
+
+<div class="guiding-question">
+
+**Guiding Question:** How does the same spreading rule behave on different graph families?
+
+</div>
+
+
+Notes:
+This module is where the lecture connects back to L04 and L07 most strongly. We are not introducing topology from scratch. We are asking what previously learned structures do to diffusion.
+
+--
+
+## Intuitive Example: A Cold Starts at One Node
+
+Imagine the same cold with the same $\beta$ and $\gamma$ starts in five different networks:
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+| Topology | First intuition |
+|---|---|
+| line or grid | slow wave |
+| random graph | threshold-like outbreak |
+| small-world | local spread plus long jumps |
+| scale-free | hubs dominate |
+| community graph | fast inside, delayed between groups |
+
+</div>
+
+
+<div class="column top">
+
+![Cold seed in five network topologies](/courses/network-science/figures/l08-cold-topology-intuition.svg)
+
+</div>
+
+
+</div>
+
+
+Notes:
+This slide should be verbal and visual in the classroom. Students already know line, random graph, small-world, scale-free, and community graph from earlier lectures. The point is to forecast the epidemic behavior before formulas.
+
+--
+
+<!-- .slide: class="figure-75" -->
+
+## Theory: Homogeneous Networks
+
+In relatively homogeneous networks, most nodes have similar degree. Average degree is therefore a useful first approximation.
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+<div class="c-definition small">
+
+For **SIR-like outbreaks**, average degree multiplies infection opportunities:
+
+$$R_0 \approx \frac{\beta}{\gamma}\langle k\rangle.$$
+
+An infected node has about $\langle k\rangle$ neighbors and remains infectious for about $1/\gamma$ time steps.
+
+</div>
+
+
+
+<div class="c-definition small">
+
+For **SIS-like persistence**, recovery must beat repeated reinfection:
+
+$$\frac{\beta}{\gamma} \gtrsim \frac{1}{\langle k\rangle}.$$
+
+So higher average degree lowers the needed infection strength: more neighbors create more chances to reintroduce infection.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column top">
+
+![Homogeneous network threshold intuition for SIR and SIS](/courses/network-science/figures/l08-homogeneous-thresholds.svg)
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="c-info smaller">
+
+This is not fully well-mixed all-to-all contact. It is a network approximation: contacts are still edges, but because degrees are similar, $\langle k\rangle$ is used as the typical number of contact opportunities.
+
+</div>
+
+
+Notes:
+Keep the formulas as intuition, not universal laws. The SIR expression says expected secondary infections scale with infectiousness times contact opportunities. The SIS expression can be read as the same condition rearranged: persistence becomes plausible when infection strength times average degree exceeds recovery. They assume a relatively homogeneous graph and ignore clustering, degree correlations, and repeated contacts. Fully well-mixed models assume everyone can contact everyone in an aggregate rate; homogeneous-network models keep edges but summarize them by average degree.
+
+--
+
+<!-- .slide: class="figure-75" -->
+
+## Theory: Heterogeneous Networks and Hubs
+
+In heterogeneous networks, the average degree can be misleading because infections are more likely to reach high-degree nodes.
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+
+<div class="c-info small">
+
+For SIR on uncorrelated random networks, a common threshold approximation uses **transmissibility** $T$: the probability that infection crosses an edge before recovery.
+
+$$T_c \approx \frac{\langle k\rangle}{\langle k^2\rangle - \langle k\rangle}.$$
+
+$T_c$ is the critical edge-transmission probability. If $T > T_c$, a large outbreak becomes possible.
+
+</div>
+
+
+
+</div>
+
+
+<div class="column top small">
+
+![Heterogeneous network threshold intuition for SIR and SIS](/courses/network-science/figures/l08-heterogeneous-thresholds.svg)
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+For SIS, the analogous question is persistence. A common network threshold intuition is:
+
+$$\frac{\beta}{\gamma} \gtrsim \frac{1}{\lambda_{\max}(A)}.$$
+
+</div>
+
+
+Notes:
+This slide clarifies T_c. For SIR, T_c is not R0 itself; it is the critical transmissibility per edge. For SIS, the focus is not final outbreak size but persistence, and eigenvalue-based thresholds are common. Both results say that hubs and dense cores can make spreading easier than the average-degree view suggests.
+
+--
+
+## Vanishing Threshold: What It Means
+
+Pastor-Satorras & Vespignani (2001) showed that idealized infinite scale-free networks with sufficiently heavy-tailed degree distributions can have a **vanishing epidemic threshold**.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Mathematical idea**
+
+If the second moment $\langle k^2\rangle$ grows without bound, then thresholds such as
+
+$$T_c \approx \frac{\langle k\rangle}{\langle k^2\rangle-\langle k\rangle}$$
+
+can approach zero.
+
+</div>
+
+
+<div class="column">
+
+**Interpretation**
+
+There is no positive critical value that the disease must exceed in the infinite-network limit.
+
+Even weak transmission can be above threshold because hubs create many repeated spreading opportunities.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important smaller">
+
+This does **not** mean parameters such as $\beta$, $\gamma$, or $R_0$ no longer matter. They still affect speed, prevalence, and finite-network outbreak size. The result says the critical threshold can become extremely small in idealized hub-dominated networks.
+
+</div>
+
+
+Notes:
+This slide prevents the common overstatement that scale-free networks spread epidemics independently of R0. A better phrasing is: in the infinite idealized limit, the threshold can tend to zero, so any positive transmission strength may be above threshold. Real networks are finite and constrained, so the threshold is usually small, not literally zero.
 
 --
 
@@ -259,26 +1639,22 @@ This is the hard result. The naive $R_0 = \beta/\gamma \cdot \langle k\rangle$ h
 
 <div class="column">
 
+**What it says**
 
-**What the theorem says**
-
-- Hubs make simple contagion unusually robust.
-- In an idealized infinite scale-free network with $\gamma \leq 3$, no finite epidemic threshold remains.
-- Even low transmissibility can spread if it reaches sufficiently connected nodes.
-
+- Hubs are infected early with high probability.
+- Hubs create many onward transmission opportunities.
+- Targeted hub protection can be far more effective than random protection.
 
 </div>
 
 
 <div class="column">
 
+**What it does not say**
 
-**What it does *not* say**
-
-- Not every real disease infects everyone.
-- Real contact networks are finite, layered, clustered, temporal, and capacity-limited.
-- Immunity, vaccination, behavior change, geography, and pathogen biology restore practical thresholds.
-
+- Every real disease infects everyone.
+- Every social network is scale-free.
+- Control is impossible.
 
 </div>
 
@@ -287,442 +1663,386 @@ This is the hard result. The naive $R_0 = \beta/\gamma \cdot \langle k\rangle$ h
 
 
 
-<div class="fragment c-important">
+<div class="c-important">
 
-So the policy implication is not fatalism. It is **targeted intervention**: protect or reduce exposure around high-degree and high-betweenness nodes because they disproportionately sustain transmission.
+The practical lesson is targeted intervention, not fatalism.
 
 </div>
 
 
 Notes:
-This slide prevents over-interpretation. Some social contact layers are heavy-tailed, but "society" is not a single infinite uncorrelated scale-free graph. People have time budgets, repeated contacts, households, workplaces, schools, geography, masks, vaccines, and behavioral responses. The vanishing-threshold result explains why hubs and superspreading matter so much; it does not mean control is impossible. This result connects directly to L04's centrality: degree and betweenness identify nodes whose removal, vaccination, testing, or exposure reduction can most disrupt spreading.
+This slide is important because scale-free epidemic claims are often overgeneralized. Make students distinguish model result, real network, and policy implication.
 
 --
 
-<!-- .slide: class="figure-84" -->
+## Theory: Clustering, Shortcuts, and Communities
 
-## Diffusion on a Network
 
-![Diffusion process across three time steps](/courses/network-science/figures/diffusion-process.svg)
+
+| Structure | Effect on simple contagion | Effect on threshold / complex contagion |
+|---|---|---|
+| local clustering | repeated contacts, local saturation | reinforcement, easier adoption |
+| weak tie / bridge | fast jump to new group | often too thin to trigger adoption |
+| small-world shortcut | collapses path length | helps only if reinforcement follows |
+| community boundary | bottleneck for global spread | may trap adoption inside modules |
 
 
 <div class="c-info smaller">
 
-A simple contagion starting from a single node. At each step, each active node transmits to each inactive neighbor with probability $\beta$. Degree and centrality determine which nodes are reached first; communities determine where the wavefront pauses.
+Watts & Strogatz (1998) explain how few shortcuts can sharply reduce distances while preserving clustering. Centola (2010) shows that for complex contagion, clustering can beat shorter paths.
 
 </div>
 
 
---
 
-## Takeaway
+<div class="tiny">
 
+- **Simple contagion:** one successful exposure can be enough to transmit, as in a cold or SI/SIR infection.
 
-<div class="takeaway">
-
-Simple contagion spreads through any single contact. Weak ties and bridges accelerate global spread by carrying the process to new communities. Hubs are superspreaders. Vaccination strategies should target high-degree or high-betweenness nodes.
-
-</div>
-
-
---
-
-## Quick Check
-
-In the workplace network, a cold virus starts with Ana ($\beta = 0.3$ per contact per day, $\gamma = 0.2$ per day). Ana has 4 direct contacts (Ben, Cai, Dia, Eli).
-
-1. Estimate $R_0$ using Ana's degree as a proxy for $\langle k \rangle$.
-2. Will the cold become an epidemic in this workplace?
-3. If you could vaccinate exactly one person to slow the spread, who should it be?
-
-Notes:
-Give them 4 minutes. (1) $R_0 = \beta/\gamma \times \langle k \rangle = 0.3/0.2 \times 4 = 6$. (2) Yes — $R_0 = 6 \gg 1$. (3) Dia — she is the only bridge to Team B. Vaccinating her disconnects the two teams, confining the epidemic to Team A. This is the "vaccinate the broker" strategy from L04 applied dynamically.
-
---
-
-## Quick Check — Solution
-
-**1.** $R_0 = \frac{\beta}{\gamma} \times \langle k \rangle = \frac{0.3}{0.2} \times 4 = 6$ <!-- .element: class="fragment" -->
-
-**2.** Yes — $R_0 = 6 \gg 1$. The virus will spread through the workplace. <!-- .element: class="fragment" -->
-
-**3. Vaccinate Dia.** She is the only bridge to Team B. Removing her from the susceptible pool severs the only transmission path between teams — confining the epidemic to Team A. This is the dynamical version of "target the broker" from L04. <!-- .element: class="fragment" -->
-
----
-
-<!-- .slide: class="module-slide" -->
-
-## Complex Contagion and Threshold Cascades
-
-
-<div class="guiding-question">
-
-**Guiding Question:** Why do some behaviors need social reinforcement — and how does this change which network structures help or hinder spreading?
+-  **Threshold / complex contagion:** one exposure is usually not enough; adoption needs reinforcement from several neighbors, as in the linear threshold model.
 
 </div>
 
 
 Notes:
-This module introduces the second fundamental spreading model. Where simple contagion is probabilistic and one-contact-sufficient, complex contagion is threshold-based and requires *multiple* active neighbors. The structural consequences are the opposite of simple contagion — and this reversal is the conceptual climax of the lecture.
+This table is the core bridge between L07 and L08. Simple contagion means a single exposure can trigger transmission. Threshold or complex contagion means social reinforcement matters, so one bridge may not be sufficient. Small-world shortcuts are excellent for simple contagion because one contact can seed a new region. For threshold behavior, shortcuts alone may not be enough; local reinforcement matters.
 
 --
 
-## Complex Contagion — Definition
+## Theory: Directed and Temporal Networks
 
-
-<div class="c-definition">
-
-**Complex contagion.** A node adopts when at least a **fraction $q$** of its neighbors have already adopted. This models behaviors that require social reinforcement:
-
-- adopting a new technology (need to see colleagues using it)
-- joining a protest (need to see enough friends going)
-- changing a social norm (need to see enough peers conforming)
-
-**Threshold rule:** Node $v$ adopts if $\frac{|\text{active neighbors of } v|}{|\text{all neighbors of } v|} \geq q$.
-
-</div>
-
-
-Notes:
-The threshold $q$ captures the idea that some adoptions are risky, costly, or norm-dependent — you will not switch to a new tool if you are the only one using it, no matter how much one enthusiastic colleague tells you. This is qualitatively different from catching a cold: for disease, one contact can suffice; for behavior, social proof matters.
-
---
-
-## The Weak-Tie Paradox
-
-
-<div class="c-info">
-
-**In simple contagion:** weak ties and bridges *accelerate* spread — they carry the process to new communities. Granovetter's "strength of weak ties."
-
-**In complex contagion:** weak ties and bridges *block* spread — a single cross-community contact cannot provide enough reinforcement to trigger adoption. The bridge is *too thin*.
-
-</div>
-
-
-
-<div class="fragment">
-
-**What helps complex contagion instead?** Dense clusters and wide bridges — multiple ties between communities that can jointly provide enough reinforcement to cross the threshold.
-
-</div>
-
-
-Notes:
-This is the central insight of the lecture. The same structural feature (a bridge) has opposite dynamical effects depending on the process. In the workplace scenario: the Dia–Fin bridge is perfect for a rumor (one telling suffices) but useless for a new tool (Fin needs 2 adopter contacts, but only Dia uses it). For the tool to cross, Fin would need a *second* connection to Team A — widening the bridge.
-
---
-
-<!-- .slide: class="figure-84" -->
-
-## Cascade Example
-
-![Threshold cascade with local rule and global result](/courses/network-science/figures/threshold-cascade.svg)
-
-
-<div class="c-info smaller">
-
-A threshold cascade starting from two initially active nodes. At each step, nodes whose active-neighbor fraction meets the threshold $q$ adopt. The cascade may spread globally or stall — the outcome depends on both the threshold $q$ and the local network density around the wavefront.
-
-</div>
-
-
---
-
-## When Do Cascades Go Global?
+Direction and timing can block paths that look available in an undirected static graph.
 
 
 <div class="c-definition smaller">
 
-**Cascade condition.** In a network where each node has the same threshold $q$, a global cascade starting from a small seed set is possible if:
+**Directed spreading:** $A \to B$ does not imply $B \to A$. Out-degree controls spreading potential; in-degree controls exposure.
 
-- the network contains enough **dense clusters** (where neighbors reinforce each other above $q$)
-- these clusters are linked by **wide bridges** (multiple edges providing enough reinforcement to trigger adoption in the neighboring cluster)
-- the threshold $q$ is not too high (if $q > 1/2$, cascades require majority adoption locally, which is hard to trigger)
+**Temporal spreading:** a path must be time-respecting. If $A$ meets $B$ after $B$ meets $C$, then $A \to B \to C$ is not usable for that outbreak.
+
+</div>
+
+
+
+<div class="c-info smaller">
+
+Temporal network analysis studies this ordering explicitly rather than collapsing all contacts into one static graph (Holme & Saramaki, 2012).
 
 </div>
 
 
 Notes:
-The cascade condition connects to L04's community structure: communities are dense clusters that can *sustain* adoption internally, and the question is whether there are enough cross-community ties to *trigger* adoption in the next community. This is the opposite of Girvan-Newman's logic (remove inter-community edges to find communities); here, inter-community edges are needed for adoption to *cross* community boundaries.
-
---
-
-## Back to the Workplace
-
-| Feature | Simple contagion (rumor) | Complex contagion (tool, $q=2$) |
-|---|---|---|
-| **Dia–Fin bridge** | Carries the rumor across | Blocks the tool — 1 contact < threshold |
-| **Dense Team A core** | Helps locally, not critical for crossing | Essential — sustains internal adoption |
-| **Strategy to spread globally** | Protect the bridge | Widen the bridge (add more cross-team ties) |
-| **Vaccination / blocking** | Vaccinate Dia to stop spread | No single node blocks it — density matters |
-
-Notes:
-This table summarizes the lecture's key comparison. For simple contagion, the bridge is the bottleneck — controlling it controls the process. For complex contagion, density and bridge width are the bottlenecks — you cannot control the process by targeting a single node. This has implications for policy: disease control targets bridges and hubs; behavior-change campaigns need community-level saturation.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-Simple contagion spreads through any single contact — weak ties help. Complex contagion requires social reinforcement — weak ties block. The same network structure plays opposite roles depending on the process, and intervention strategies must account for which kind of contagion is at work.
-
-</div>
-
-
---
-
-## Quick Check
-
-A social network has two dense communities of 20 people each, connected by:
-
-- **Scenario A:** a single bridge edge
-- **Scenario B:** 5 parallel edges between the two communities
-
-A behavior with threshold $q = 0.2$ starts in community 1 (all 20 adopt).
-
-1. In Scenario A, will the behavior cross to community 2?
-2. In Scenario B, will it cross? Show your reasoning for a node in community 2 that has 10 neighbors total.
-3. Would a *disease* (simple contagion) cross in both scenarios?
-
-Notes:
-Give them 5 minutes. (1) In Scenario A, the bridging node in community 2 has 1 active neighbor (the bridge contact) out of ~10 total. Fraction = 1/10 = 0.1 < 0.2 = $q$. Does not cross. (2) In Scenario B, a node with 5 cross-community ties has 5/10 = 0.5 ≥ 0.2. Crosses. (3) Yes to both — simple contagion only needs one contact, and both scenarios have at least one.
-
---
-
-## Quick Check — Solution
-
-**1. Scenario A: No.** The bridging node has ~1 active neighbor out of ~10 total: $1/10 = 0.1 < q = 0.2$. The single bridge is too thin. <!-- .element: class="fragment" -->
-
-**2. Scenario B: Yes.** A node with 5 cross-community ties: $5/10 = 0.5 \geq q = 0.2$. The wide bridge provides enough reinforcement. <!-- .element: class="fragment" -->
-
-**3. A disease crosses in both.** Simple contagion needs only one S–I contact. Even Scenario A's single bridge suffices. <!-- .element: class="fragment" -->
-
----
-
-<!-- .slide: class="module-slide" -->
-
-## Empirical Anchor: Centola's Online Experiment
-
-
-<div class="guiding-question">
-
-**Guiding Question:** Does the simple/complex contagion distinction hold up empirically?
-
-</div>
-
-
-Notes:
-This module provides the empirical anchor for L08, following Kossinets-Watts (L03), Zachary (L04), Christakis-Fowler (L05), Leskovec et al. (L06), and Dodds et al. (L07). The study is Centola (2010), the first experimental demonstration that complex contagion spreads faster through clustered networks.
-
---
-
-## The Study
-
-
-<div class="c-info">
-
-**Centola (2010),** *The Spread of Behavior in an Online Social Network Experiment*, [**Science 329, 1194–1197**](https://doi.org/10.1126/science.1185231).
-
-Centola created an online health forum and randomly assigned **1 528 participants** to one of two network structures:
-
-| Condition | Structure | Clustering |
-|---|---|---|
-| **Clustered** | Lattice-like (high clustering) | High |
-| **Random** | Watts-Strogatz-style (low clustering) | Low |
-
-Both networks had the same degree and diameter. Participants could register for a health program, and registration was visible to their network neighbors.
-
-</div>
-
-
-Notes:
-The experimental design is elegant: by randomly assigning participants to different network structures while controlling for degree and diameter, Centola isolated the effect of *clustering* on behavior spreading. The behavior in question — registering for a health program — is a classic complex contagion: it is a costly action that benefits from social reinforcement ("if my friends signed up, maybe I should too").
-
---
-
-## What Centola Found
-
-**1. Behavior spread faster and further in the clustered network.**
-
-- In the clustered condition, adoption reached **54%** of the network.
-- In the random condition, adoption reached only **38%**.
-
-**2. Adoption was driven by *multiple* exposures, not single contacts.**
-
-- Participants who saw 2+ neighbors register were far more likely to adopt than those who saw only 1 — consistent with a threshold rule.
-
-
-<div class="fragment">
-
-**3. The random network had shorter paths** — so if simple contagion were the mechanism, it should have won. It lost. **Clustering beat shortcuts for behavior spreading.**
-
-</div>
-
-
-Notes:
-Finding 3 is the punchline. The random network had all the advantages for simple contagion: shorter paths, more diverse neighborhoods, faster information flow. But for a behavior that required social reinforcement, those advantages were irrelevant — what mattered was local density (clustering) that could push multiple neighbors above the threshold simultaneously. This is the first experimental demonstration of the theoretical distinction between simple and complex contagion on networks.
-
---
-
-## What the Study Could Not See
-
-
-<div class="c-info">
-
-**1. Binary behavior.** The study tracked registration (yes/no), not the *intensity* or *quality* of adoption. A participant who registered but never used the program was counted the same as an active user.
-
-**2. Controlled networks ≠ natural networks.** The assigned structures were regular and static. Real social networks are heterogeneous, dynamic, and have degree distributions that the experiment did not replicate.
-
-**3. Single behavior type.** The study tested one health-program registration. Whether the clustering advantage generalizes to other complex contagions (political mobilization, technology adoption, norm change) was not tested directly.
-
-**4. No decay or reversal.** Once registered, participants stayed registered. Real adoption can reverse — people abandon tools, lose interest, or face counter-influence.
-
-</div>
-
-
-Notes:
-The limitations follow the standard pattern: the experiment isolates one variable (clustering) at the cost of ecological validity. The result is clean and causal but narrow. Real spreading processes involve heterogeneous thresholds, time-varying networks, competing behaviors, and incomplete observation — all beyond the study's scope. The lesson is that the simple/complex distinction is real and experimentally confirmed, but applying it to specific real-world cases requires careful context analysis.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-Centola (2010) experimentally confirmed the simple/complex contagion distinction: behavior spreading is faster in clustered networks (where local reinforcement is available), not random networks (where paths are shorter). Clustering beats shortcuts for complex contagion.
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-## Temporal Networks
-
-
-<div class="guiding-question">
-
-**Guiding Question:** What do we miss when we replace an evolving network with a single static snapshot?
-
-</div>
-
-
-Notes:
-All prior modules treated the graph as fixed. In reality, edges appear and disappear over time — an email is sent at a specific moment, a meeting lasts a specific hour, a friendship forms and dissolves. If the spreading process is time-sensitive, the *order* of edge activations matters as much as which edges exist.
-
---
-
-## Time-Respecting Paths
-
-
-<div class="c-definition">
-
-A **temporal network** is a graph where each edge $e$ has an activation time $t(e)$.
-
-A **time-respecting path** from $u$ to $v$ is a sequence of edges $e_1, e_2, \dots, e_k$ where:
-- the edges form a path from $u$ to $v$
-- $t(e_1) < t(e_2) < \cdots < t(e_k)$
-
-A path that exists in the *aggregated* static network may not exist as a time-respecting path — the edges may activate in the wrong order.
-
-</div>
-
-
-Notes:
-This is the formal content of "timing matters." In the workplace scenario: if the Dia–Fin contact happens only on Tuesdays and the Ana–Dia contact happens on Wednesdays, a rumor starting at Ana on Wednesday cannot reach Fin until the following Tuesday. The static aggregation (all edges present) would suggest immediate reachability; the temporal reality introduces delay and potentially blocks spreading entirely if the process has a finite window.
+This preserves the useful old temporal-network module but compresses it into the topology module. The key phrase is time-respecting path. Static aggregation can create phantom paths that cannot carry a real process.
 
 --
 
 <!-- .slide: class="figure-84" -->
 
-## Snapshot View
+## Practical Example: Time-Respecting Paths
 
 ![Temporal snapshots of a changing network](/courses/network-science/figures/temporal-snapshots.svg)
 
 
 <div class="c-info smaller">
 
-The same set of nodes at three time points. An edge present in the aggregated static graph (taking the union across all snapshots) may not support a time-respecting path if the edges activate in the wrong order.
+An edge present in the aggregated static graph may not support spreading if the contacts occur in the wrong order.
 
 </div>
 
 
+Notes:
+Use the simple example: A-B at time 1, B-C at time 3, C-D at time 2. The static path A-B-C-D exists, but the temporal path fails because C-D happened before the process reached C.
+
 --
 
-## Consequences for Spreading
+## Practical Example: Intervention by Topology
 
-1. **Reachability shrinks.** The set of node pairs connected by time-respecting paths is generally *smaller* than the set connected by static paths.
-2. **Speed depends on timing.** A contagion may reach a node in 2 static hops but require waiting 5 time steps for edges to activate in the right order.
-3. **Aggregation hides bottlenecks.** A bridge that exists only briefly may appear permanent in the aggregated graph, masking its role as a temporal bottleneck.
+| Topology | Intervention logic |
+|---|---|
+| grid | local containment can stop the wavefront |
+| random graph | reduce average transmissibility or degree |
+| scale-free | protect hubs and high-exposure venues |
+| community graph | monitor bridges between modules |
+| directed graph | distinguish spreaders from receivers |
+| temporal graph | change timing, not only edges |
 
 Notes:
-Temporal networks are the formal framework for the observation that "the same graph can support different outcomes when edges change" from the original L08. The key insight is that aggregating edges across time is an information-destroying operation — it hides causal order and can create the illusion of paths that never existed temporally.
+This table translates theory into action. It also reinforces that "remove central nodes" is not a universal answer. In a temporal network, rescheduling contacts can be as important as removing contacts.
 
 --
 
-## Takeaway
+## Applications: Topology Changes the Question
+
+| Applied setting | Structural feature to inspect |
+|---|---|
+| public health | hubs, households, workplaces, temporal contacts |
+| online misinformation | directed follower graph and bridges |
+| organizational communication | bottlenecks and redundant channels |
+| product adoption | clustered communities and wide bridges |
+| infrastructure failure | dependency direction and cascade paths |
+
+Notes:
+The applications should feel like modeling prompts. Ask students: What are the nodes? What are the edges? What spreads? Is one exposure enough? Does the state stick? Which topology is likely to dominate?
+
+--
+
+## Module Takeaway
 
 
 <div class="takeaway">
 
-Temporal networks make edge timing explicit. Static aggregation can hide bottlenecks and create phantom paths. For time-sensitive processes (epidemics, cascades, information flow), the order of edge activations matters as much as which edges exist.
+Topology does not merely change the speed of spread. It can change the phase behavior: whether a process dies out, explodes, persists, stalls at a boundary, or becomes impossible because contacts occur in the wrong order.
 
 </div>
 
 
---
+---
 
-## Quick Check
+<!-- .slide: class="module-slide" -->
 
-A temporal network has 4 nodes (A, B, C, D) and the following edges with activation times:
+## Examples and Applications
 
-- A–B at $t = 1$
-- B–C at $t = 3$
-- C–D at $t = 2$
 
-1. Does a time-respecting path from A to D exist?
-2. Does a time-respecting path from A to D exist in the *static* aggregated graph?
-3. What is the minimum change needed to create a time-respecting A→D path?
+<div class="guiding-question">
+
+**Guiding Question:** How do we choose a diffusion model for a real case?
+
+</div>
+
 
 Notes:
-Give them 3 minutes. (1) A–B ($t=1$) → B–C ($t=3$) is valid (1 < 3), but C–D activates at $t=2 < 3$, so the C–D edge has already "passed" by the time the process reaches C. No time-respecting path A→D exists. (2) In the static graph: A–B–C–D is a valid path. Yes. (3) Either change C–D activation to $t > 3$ (e.g., $t = 4$), or add a direct A–D or B–D edge at an appropriate time.
+This final module consolidates the lecture. It keeps the empirical anchor from the old L08 but places it after students have the conceptual machinery.
 
 --
 
-## Quick Check — Solution
+## Intuitive Example: Model Choice Is a Claim
 
-**1. No.** A–B ($t=1$) → B–C ($t=3$) works, but C–D activates at $t=2$, which is *before* the process reaches C at $t=3$. The C–D edge has already "expired." <!-- .element: class="fragment" -->
+When we choose a diffusion model, we are not just choosing a formula.
 
-**2. Yes.** The aggregated static graph has path A–B–C–D. Static analysis hides the timing conflict. <!-- .element: class="fragment" -->
 
-**3. Change C–D to $t > 3$** (e.g., $t = 4$), giving the time-respecting path A–B ($t=1$) → B–C ($t=3$) → C–D ($t=4$). <!-- .element: class="fragment" -->
+<div class="c-important">
+
+We are claiming what kind of exposure changes a node.
+
+</div>
+
+
+| If you believe... | Use... |
+|---|---|
+| one exposure can trigger spread | simple contagion / independent cascade |
+| repeated social proof is necessary | threshold / complex contagion |
+| infection can return | SIS |
+| infection produces immunity/removal | SIR |
+| attention flows continuously | random-walk or damped diffusion |
+
+Notes:
+This slide is a useful checkpoint near the end. It also trains students to critique modeling papers: what behavioral assumption is hidden in the diffusion rule?
+
+--
+
+## Theory: A Compact Model Map
+
+| Model | Node state | Transition rule | Typical output |
+|---|---|---|---|
+| Damped diffusion | continuous score | matrix update with restart | ranking / relevance |
+| Independent cascade | inactive / active | one probabilistic chance per edge | final adoption set |
+| Linear threshold | inactive / active | weighted exposure exceeds threshold | cascade size |
+| SI | susceptible / infected | infection without recovery | cumulative reach |
+| SIS | susceptible / infected | recovery allows reinfection | persistence |
+| SIR | susceptible / infected / removed | infection then removal | peak and final size |
+
+Notes:
+This table is the lecture's main synthesis artifact. It is also useful for exam preparation and exercise work.
+
+--
+
+## Practical Example: PageRank as Diffusion
+
+
+<div class="c-info">
+
+In PageRank, a random surfer repeatedly follows outgoing links but sometimes jumps to a random page. The stationary distribution is a ranking over nodes.
+
+</div>
+
+
+$$x_{t+1} = \alpha P x_t + (1-\alpha)v.$$
+
+| Network view | Search-engine interpretation |
+|---|---|
+| node | Web page |
+| directed edge | hyperlink |
+| probability mass | attention / prestige |
+| damping | random jump |
+
+PageRank is therefore a damped diffusion process on a directed graph (Brin & Page, 1998).
+
+Notes:
+This explicitly links back to L04. It also shows that not all diffusion is disease-like. PageRank has no infected or recovered nodes. It is a flow model.
+
+--
+
+## Practical Example: Behavior Spreading
+
+
+<div class="c-info">
+
+Some behaviors require reinforcement because adoption is risky, costly, identity-relevant, or coordination-dependent.
+
+</div>
+
+
+Examples:
+
+- joining a protest
+- joining a health program
+- adopting a health practice
+- moving to a new communication platform
+
+Granovetter (1978) formalized threshold models of collective behavior. Kempe, Kleinberg & Tardos (2003) later made threshold and cascade models central to influence maximization.
+
+Notes:
+The examples should feel socially intuitive. A person may not join a protest because one acquaintance joins, but may join if several close contacts do. This is the intuitive base for threshold models.
+
+--
+
+## Empirical Anchor: Centola's Experiment
+
+
+<div class="c-info">
+
+**Centola (2010),** *The Spread of Behavior in an Online Social Network Experiment*, [**Science 329, 1194-1197**](https://doi.org/10.1126/science.1185231).
+
+Centola randomly assigned 1,528 participants in an online health forum to network structures that varied in clustering while controlling other features.
+
+</div>
+
+
+| Condition | Structure | Prediction for complex contagion |
+|---|---|---|
+| clustered | more local reinforcement | faster behavior spread |
+| random | shorter paths, less reinforcement | weaker behavior spread |
+
+Notes:
+This preserves the empirical anchor from the original lecture. The critical design point is causal identification: random assignment of network structure allowed Centola to isolate clustering's effect on behavior spread.
+
+--
+
+## What Centola Found
+
+Centola found that adoption spread farther and faster in clustered networks than in random networks.
+
+
+<div class="c-important">
+
+For behavior spreading, clustering beat shortcuts.
+
+</div>
+
+
+Why this matters:
+
+- random networks had shorter paths, which should help simple contagion
+- clustered networks supplied repeated social exposure
+- the result supports the complex-contagion interpretation for this behavior
+
+Notes:
+Centola's study is narrow but powerful. It does not prove that all behaviors are complex contagions. It shows that when adoption requires reinforcement, clustered networks can outperform random-shortcut networks despite longer paths.
+
+--
+
+## What the Study Could Not See
+
+
+<div class="c-info smaller">
+
+**Controlled networks are not natural networks.** Real social networks are heterogeneous, layered, temporal, and adaptive.
+
+**The behavior was binary.** Registration was observed, not intensity or long-term engagement.
+
+**The process had no reversal.** Once registered, participants stayed registered in the measured outcome.
+
+**The result is about one behavior.** Other behaviors may be simpler, more private, cheaper, or more reversible.
+
+</div>
+
+
+Notes:
+This follows the empirical-anchor pattern in the earlier lectures. Clean causal designs usually narrow the setting. That is not a weakness; it is the tradeoff that makes the result interpretable.
+
+--
+
+## Applications: Pick the Model Before the Metric
+
+| Situation | First modeling question |
+|---|---|
+| vaccination strategy | SIR or SIS? who are hubs and bridges? |
+| misinformation | one exposure or repeated exposure? directed graph? |
+| health campaign | threshold? which groups need reinforcement? |
+| Web ranking | which random-walk distribution is meaningful? |
+| supply-chain failure | directed dependencies? irreversible failures? |
+| temporal contact tracing | which paths are time-respecting? |
+
+Notes:
+This is the final practical translation. The message is: do not start with centrality. Start with the process. Then decide which structural measures matter.
+
+--
+
+## Module Takeaway
+
+
+<div class="takeaway">
+
+Diffusion modeling is model selection. Before computing a metric, decide what exposure means, whether the state sticks, and which topology the process can actually use.
+
+</div>
+
 
 ---
 
-## Wrap-Up — The Six Gaps
+## Wrap-Up
 
-| Lecture | Gap type | Core tension |
-|---|---|---|
-| **L03–L04** | Computational | Exact optimization is NP-hard |
-| **L05** | Causal | Mechanism unidentifiable from snapshots |
-| **L06** | Structural | Complete-graph theory meets sparse data |
-| **L07** | Navigational | Short paths exist but aren't locally findable |
-| **L08** | Process-structure | Same structure, different outcomes for different processes |
-| | Temporal | Static aggregation hides causal order |
+| Question | Modeling choice |
+|---|---|
+| What spreads? | signal, attention, behavior, infection, failure |
+| What changes a node? | flow, one exposure, threshold, infection |
+| Does it stick? | SI, SIS, SIR, behavior change, decay |
+| Which topology matters? | hubs, bridges, clusters, communities, direction, timing |
+| What is the outcome? | score, reach, peak, persistence, final size |
 
-The course has built a single message: **network analysis requires matching the right structural concept to the right question**, and there is no single structural measure that answers every question. Edges, roles, communities, balance, navigability, and dynamics each require their own tools — and each reveals a different kind of gap between what we want to know and what the data can show.
 
-### Reading
+<div class="takeaway">
 
-Chapter 19 of Easley & Kleinberg (2010) covers cascades and thresholds. Chapter 21 covers epidemics. Centola (2010), *The Spread of Behavior in an Online Social Network Experiment* (Science), is the key empirical study. Holme & Saramäki (2012), *Temporal Networks* (Physics Reports), is the standard survey on time-varying graphs.
+The same graph can accelerate, block, localize, or sustain a process. Network dynamics require matching the spreading rule to the structure.
+
+</div>
+
 
 Notes:
-The six-gap table is the final version of the course summary. Each lecture contributed one or two gaps; together they form a taxonomy of the obstacles that arise when applying theoretical network concepts to real-world data. The course's overarching lesson is that network science is not a single tool but a *toolkit* — and the analyst's job is to match the right tool to the right question, with full awareness of what each tool can and cannot see.
+This is the final synthesis. It should leave students with a method rather than a list of models: define the process, choose the state rule, inspect the topology, then interpret outcomes.
+
+--
+
+## References and Further Reading
+
+- Brin, S. & Page, L. (1998). *The Anatomy of a Large-Scale Hypertextual Web Search Engine*. Computer Networks and ISDN Systems.
+- Granovetter, M. (1978). *Threshold Models of Collective Behavior*. American Journal of Sociology. DOI: [10.1086/226707](https://doi.org/10.1086/226707).
+- Watts, D. J. & Strogatz, S. H. (1998). *Collective dynamics of small-world networks*. Nature. DOI: [10.1038/30918](https://doi.org/10.1038/30918).
+- May, R. M. (1976). *Simple mathematical models with very complicated dynamics*. Nature. DOI: [10.1038/261459a0](https://doi.org/10.1038/261459a0).
+- Fellicious, C., Weissgerber, T. & Granitzer, M. (2020). *Effects of Random Seeds on the Accuracy of Convolutional Neural Networks*. LOD 2020, LNCS 12566. DOI: [10.1007/978-3-030-64580-9_8](https://doi.org/10.1007/978-3-030-64580-9_8).
+- Goldberg, D. (1991). *What Every Computer Scientist Should Know About Floating-Point Arithmetic*. ACM Computing Surveys. DOI: [10.1145/103162.103163](https://doi.org/10.1145/103162.103163).
+- Higham, N. J. (2002). *Accuracy and Stability of Numerical Algorithms*. SIAM.
+- Kermack, W. O. & McKendrick, A. G. (1927). *A Contribution to the Mathematical Theory of Epidemics*. Proceedings of the Royal Society A. DOI: [10.1098/rspa.1927.0118](https://doi.org/10.1098/rspa.1927.0118).
+- Pastor-Satorras, R. & Vespignani, A. (2001). *Epidemic spreading in scale-free networks*. Physical Review Letters. DOI: [10.1103/PhysRevLett.86.3200](https://doi.org/10.1103/PhysRevLett.86.3200).
+- Newman, M. E. J. (2002). *Spread of epidemic disease on networks*. Physical Review E. DOI: [10.1103/PhysRevE.66.016128](https://doi.org/10.1103/PhysRevE.66.016128).
+- Van Mieghem, P. (2014). *Exact Markovian SIR and SIS epidemics on networks and an upper bound for the epidemic threshold*. arXiv: [1402.1731](https://arxiv.org/abs/1402.1731).
+- Kempe, D., Kleinberg, J. & Tardos, E. (2003). *Maximizing the Spread of Influence through a Social Network*. KDD. DOI: [10.1145/956750.956769](https://doi.org/10.1145/956750.956769).
+- Centola, D. (2010). *The Spread of Behavior in an Online Social Network Experiment*. Science. DOI: [10.1126/science.1185231](https://doi.org/10.1126/science.1185231).
+- Holme, P. & Saramaki, J. (2012). *Temporal Networks*. Physics Reports. DOI: [10.1016/j.physrep.2012.03.001](https://doi.org/10.1016/j.physrep.2012.03.001).
+- Easley, D. & Kleinberg, J. (2010). *Networks, Crowds, and Markets*, Chapters 19 and 21.
+
+Notes:
+These references ground the non-basic claims in the lecture. The slide uses the same author-year style as the rest of the course and includes DOI links where they are central sources.
 </textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
