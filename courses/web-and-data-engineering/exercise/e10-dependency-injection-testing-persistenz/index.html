@@ -1,0 +1,280 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Übungsblatt 10 — Dependency Injection, Testing und Persistenz</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/index.DyehHkal.css"></head> <body>  <div class="reveal"> <div class="slides"> <section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"> <textarea data-template><!-- .slide: class="title-slide" -->
+
+# Übungsblatt 10
+## Dependency Injection, Testing und Persistenz
+
+5430UE Web and Data Engineering
+
+24. Juni 2026
+
+Prof. Dr. Michael Granitzer, Tobias Fuchs
+
+---
+
+## Lernziele
+
+- Grundlegendes Verständnis der Konzepte Inversion of Control (IoC) und Dependency Injection (DI) im Spring Framework.
+- Einblick in verschiedene Testarten sowie die Test-Pyramide.
+- Grundlegendes Verständnis der Dateninitialisierung beim Anwendungsstart und der Vererbungsabbildung mit JPA.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Dependency Injection (DI) und Inversion of Control (IoC)
+
+--
+
+## Dependency Injection (DI) und Inversion of Control (IoC) (1/3)
+
+Eines der Kernkonzepte des Spring Frameworks ist die *Dependency Injection* (DI) als konkrete Umsetzung des *Inversion of Control* (IoC) Prinzips.
+
+1.  Erklären Sie in eigenen Worten, was man unter Dependency Injection versteht und wie das Konzept grundlegend funktioniert. Gehen Sie dabei kurz auf die Begriffe *Inversion of Control (IoC)*, *IoC-Container* und *Spring Bean* ein.
+
+--
+
+## Dependency Injection (DI) und Inversion of Control (IoC) (2/3)
+
+Grundlage für die folgenden beiden Teilaufgaben stellen die nachfolgend gegebenen Implementierungen eines `OrderService` dar.
+
+```java
+// Version A
+@Service
+public class OrderService {
+	private final EmailService email = new EmailService();
+	public void placeOrder(Order o) { email.send(o); }
+}
+
+// Version B
+@Service
+public class OrderService {
+	private final EmailService email;
+	
+	public OrderService(EmailService email) { 
+		this.email = email; 
+	}
+	
+	public void placeOrder(Order o) { email.send(o); }
+}
+```
+--
+
+## Dependency Injection (DI) und Inversion of Control (IoC) (3/3)
+
+2. Welche der beiden Versionen ist besser testbar? Begründen Sie Ihre Antwort.
+
+3. Was macht Spring im Hintergrund automatisch bei Version B, wenn die Anwendung gestartet wird?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Die Test-Pyramide
+
+--
+
+## Die Test-Pyramide
+
+Beschreiben Sie die drei Ebenen der Test-Pyramide für eine (Spring Boot) Anwendung.
+
+1. Was testet jede Ebene? Nennen Sie ein konkretes Beispiel.
+
+2. Wie verhält sich die empfohlene Anzahl der Tests sowie deren Ausführungsgeschwindigkeit von der untersten zur obersten Ebene?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Datenbank-Initialisierung mit dem CommandLineRunner
+
+--
+
+## Datenbank-Initialisierung mit dem CommandLineRunner
+
+Bei der Entwicklung einer Spring Boot-Anwendung ist es oft hilfreich, wenn beim Start automatisch Testdaten in die (In-Memory-)Datenbank geladen werden, damit man direkt mit der Entwicklung der Endpunkte oder der UI beginnen kann.
+
+Laden Sie sich dazu das Projekt `CommandLineRunnerDemo.zip` aus Stud.IP herunter. Das Projekt enthält bereits eine fertige Entität `Product` (mit Name und Preis) sowie das zugehörige `ProductRepository`.
+
+1. Was ist ein `CommandLineRunner` in Spring Boot und zu welchem exakten Zeitpunkt im Lebenszyklus der Anwendung wird er ausgeführt?  
+2. Im Projekt finden Sie die leere Klasse `DataInitializer`. Erweitern Sie diese Klasse so, dass sie beim Starten der Anwendung automatisch drei verschiedene Produkte in der Datenbank speichert. (Anforderungen an den Code siehe Folgeseite)
+
+--
+
+## Anforderungen an die Code-Implementierung
+
+- Nutzen Sie Dependency Injection, um das `ProductRepository` einzubinden.
+- Geben Sie unmittelbar vor und nach dem Speichern der Daten jeweils eine Meldung über `System.out.println(...)` auf der Konsole aus (z. B. *„Starte Initialisierung...“*), damit Sie den Zeitpunkt der Ausführung in den Start-Logs von Spring gut erkennen können.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# JPA Vererbungsstrategien
+
+--
+
+## JPA Vererbungsstrategien
+
+Sie modellieren eine Klassenhierarchie für das Personalwesen einer Hochschule: Eine abstrakte Basisklasse `Person` (Attribute: `id`, `name`), von der die Klassen `Student` (zusätzlich: `semester: int`) und `Lehrkraft` (zusätzlich: `lehrstuhl: String`) erben.
+
+1. Skizzieren Sie die drei JPA-Vererbungsstrategien (`SINGLE_TABLE`, `JOINED`, `TABLE_PER_CLASS`). Erklären Sie jeweils in einem Satz, wie die Tabellenstruktur aussieht, nennen Sie Vor- und Nachteile und geben Sie an, wie die Annotation an der Basisklasse `Person` aussehen muss.
+
+2. Welche Strategie würden Sie für dieses konkrete Szenario wählen und warum?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Vertiefung: Die Test-Pyramide in der Praxis (Hands-On)
+
+--
+
+## Vertiefung: Die Test-Pyramide in der Praxis (Hands-On) (1/2)
+
+*Hinweis: Diese Aufgabe wird in der Übung je nach zur Verfügung stehender Zeit besprochen.*
+
+Laden Sie sich das Projekt `testdemo.zip` aus Stud.IP herunter und öffnen Sie es in Ihrer IDE.
+
+**Aufbau des Projekts:**
+Das Projekt simuliert ein stark vereinfachtes Immatrikulationssystem.
+- `Student` hält die Daten (hier nur den Namen).
+- `StudentService` enthält die Geschäftslogik und prüft, ob der Name gültig ist.
+- `StudentController` nimmt HTTP-POST-Anfragen entgegen und ruft den Service auf.
+
+--
+
+## Vertiefung: Die Test-Pyramide in der Praxis (Hands-On) (2/2)
+
+Die zugehörigen Testklassen finden Sie im Projektbaum unter `src/test/java/wde/testdemo`. Die Tests sind lauffähig, jedoch fehlen Erklärungen.
+
+1. **Klassifizierung:** Ordnen Sie die drei Testklassen (`StudentTestA`, `StudentTestB`, `StudentTestC`) der korrekten Ebene der Testpyramide zu (Unit Test, Integration Test, E2E Test). Begründen Sie Ihre Zuordnung kurz anhand der im Code verwendeten Annotationen oder fehlenden Spring-Kontexte.
+
+2. **Code-Verständnis:** Analysieren Sie den Quellcode der drei Testklassen. Ergänzen Sie aussagekräftige (Inline-)Kommentare direkt im Quellcode, die erklären, *was* in den markanten Zeilen passiert (insbesondere bei den Annotationen und Mocking-Befehlen).
+
+
+
+---
+
+## Materialien zum Übungsblatt
+
+-  Aufgabe *Datenbank-Initialisierung mit dem CommandLineRunner*:  [Vorlage CommandLineRunner (`CommandLineRunnerDemo.zip`)](./materials/CommandLineRunnerDemo.zip)
+-  Aufgabe *Die Test-Pyramide in der Praxis (Hands-On)*:  [Vorlage Test-Pyramide (`testdemo.zip`)](./materials/testdemo.zip)
+
+
+
+
+</textarea> </section> </div> </div> <script src="/reveal.js/dist/reveal.js"></script> <script src="/reveal.js/dist/plugin/markdown.js"></script> <script src="/reveal.js/dist/plugin/math.js"></script> <script src="/reveal.js/dist/plugin/notes.js"></script> <script src="/reveal.js/dist/plugin/highlight.js"></script> <script src="/reveal.js/dist/plugin/search.js"></script> <script src="/reveal.js/dist/plugin/zoom.js"></script> <script src="/reveal.js-menu/menu.js"></script> <script src="/vendor/toc-progress/plugin.js"></script> <script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script> </body> </html>
