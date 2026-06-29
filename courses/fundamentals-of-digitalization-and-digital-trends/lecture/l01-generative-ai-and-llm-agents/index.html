@@ -569,6 +569,7 @@ A little more formally, because some of you will want the real shape of it. A *f
 
 
 --
+<!-- .slide: class="small" -->
 
 ## Do LLMs reason?
 
@@ -776,82 +777,56 @@ There is a name for all of this wrapper. The loop, the tool wiring, the memory a
 
 --
 
+<!-- .slide: class="figure-80" -->
+
 ## Giving the model knowledge: RAG
 
 **Retrieval-Augmented Generation** — look things up *before* answering.
 
-
-<div class="flow-row">
-
-
-<div class="stat-card s-navy">
-
-### Query
-the question
-
-</div>
-
-
-<div class="flow-arrow">
-
-→
-
-</div>
-
-
-<div class="stat-card s-teal">
-
-### Retrieve
-find relevant passages
-
-</div>
-
-
-<div class="flow-arrow">
-
-→
-
-</div>
-
-
-<div class="stat-card s-violet">
-
-### Augment
-add them to the prompt
-
-</div>
-
-
-<div class="flow-arrow">
-
-→
-
-</div>
-
-
-<div class="stat-card s-green">
-
-### Generate
-answer from sources
-
-</div>
-
-
-</div>
-
+![RAG: index documents as vectors offline; at query time embed the question, vector-search the index for the top-k passages, and let the LLM answer from them.](/courses/fundamentals-of-digitalization-and-digital-trends/figures/rag-architecture.svg)
 
 
 <div class="c-warning">
 
-A pure model can **hallucinate** — state false things fluently and confidently. RAG curbs this by **grounding** the answer in retrieved sources it can cite.
+A pure model can **hallucinate**. RAG curbs this by **grounding** the answer in retrieved sources it can cite.
 
 </div>
 
 
 Notes:
-A pure language model only knows what was baked in during training — frozen, and prone to making things up. RAG fixes both problems. Before answering, the system retrieves relevant documents — from your company wiki, a legal database, the web — and puts them into the prompt as evidence. The model then answers grounded in those passages and can cite them.
+Read the schematic as two lanes. Offline, the *indexing* lane: take your documents — a company wiki, a legal database, the web — split them into passages ("chunks"), run each chunk through an encoder that turns text into a vector, and store all those vectors in a vector index. Online, the *query* lane: embed the user's question with the same encoder, do a vector search to pull the top-k most similar chunks, drop those passages into the prompt next to the question, and let the LLM answer from them — grounded, and able to cite its sources.
 
-For the business students: this is how most real enterprise AI works today. You do not retrain a giant model on your documents; you let it *retrieve* them at question time. It is cheaper, current, and auditable.
+Two things to stress. First, the model is no longer answering from frozen training memory; it answers from evidence fetched at question time — cheaper, current, auditable, and the standard way enterprise AI works today (you don't retrain a giant model on your documents, you let it *retrieve* them). Second — the next slide — *why a vector index and not just keyword search?* Because the match is on meaning, not exact words.
+
+--
+
+## Why vector search? keywords vs. meaning
+
+![Sparse keyword index (match exact terms) versus dense vector index (match meaning via embeddings).](/courses/fundamentals-of-digitalization-and-digital-trends/figures/sparse-vs-dense-index.svg)
+
+
+<div class="grid-2 small">
+
+
+<div class="c-blue">
+
+**Sparse / keyword** — an inverted file: the query word must *literally appear*. Fast, exact, but blind to wording.
+
+</div>
+
+
+<div class="c-violet">
+
+**Dense / vector** — encode query and chunks into vectors; retrieve the **nearest** ones. Matches *meaning*, so it survives synonyms and paraphrase.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Why bother embedding everything into vectors instead of plain keyword search? This is the linguistic-complexity problem. Classical search — the sparse, inverted-file approach on the left — needs the query's words to actually occur in the document. Ask for "car" and a page that only says "automobile" is missed; ask a question and a document that answers it in completely different words is invisible. Natural language is full of synonyms, paraphrase, and ambiguity, so literal matching is brittle. The dense approach on the right encodes both the query and every chunk into the same vector space — our "map of meaning" from module 1 — and retrieves the nearest vectors. Now "car" and "automobile" sit close, a question lands near its answer, and it even crosses languages. The cost is that exact nearest-neighbour search scans the whole index, so in practice we use approximate methods — but conceptually: sparse matches *words*, dense matches *meaning*, and meaning is what RAG needs.
 
 --
 
@@ -890,6 +865,93 @@ Notes:
 Plain RAG retrieves once. But hard questions are not answered in one lookup — they need investigation. Agentic search puts retrieval inside the agent loop: the model searches, reads what it found, notices a gap, reformulates, searches again, and only then synthesises an answer. It behaves like a researcher working through a problem rather than a single database query.
 
 This is the current frontier of search and "deep research" tools: the model is not just answering from one retrieval, it is conducting an inquiry.
+
+--
+
+## Agentic retrieval: the workflow
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+![An agent loops plan → retrieve → check → refine — calling tools and memory — until the evidence is enough.](/courses/fundamentals-of-digitalization-and-digital-trends/figures/agentic-search-flow.svg)
+
+</div>
+
+
+<div class="column small">
+
+Search becomes an **investigation**, not a single lookup:
+
+- **plan** the next sub-question
+- **retrieve** with search + tools
+- **check** the evidence so far
+- **refine** and search again
+- **answer** with provenance, once it is enough
+
+
+<div class="c-info">
+
+Retrieval inside a control loop — the agent decides *what to look up next*, and tools + memory feed every step.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Here is the loop concretely — a figure from our open-web-search work. A user task comes in on the left; instead of one retrieval, the agent runs a cycle: plan a sub-question, retrieve with search and tools, check the evidence it has, refine and go again — and only emits an answer, with provenance, once the evidence is sufficient. The dashed link reminds us that tools and memory feed the loop at every turn. This is exactly the agent loop from two slides ago, with *retrieval* as the tool — which is why "deep research" assistants behave like a junior analyst rather than a search box.
+
+--
+
+## PersonaRAG — retrieval with user-centric agents
+
+
+<div class="grid-3-1">
+
+
+<div class="column">
+
+![PersonaRAG workflow: a set of user-centric agents around the retrieval pipeline.](/courses/fundamentals-of-digitalization-and-digital-trends/figures/personarag-workflow.png)
+<span class="figure-credit">Source: Zerhoudi & Granitzer 2024</span>
+
+</div>
+
+
+<div class="column small">
+
+Plain RAG retrieves for a *query* — not for a *user's* intent and history.
+
+**PersonaRAG** wraps retrieval in a small society of **user-centric agents**:
+
+- user-profile agent
+- contextual-retrieval agent
+- live-session agent
+- document-ranking agent
+- feedback agent
+
+
+<div class="c-green">
+
+The output is a **personalised evidence set**, not just a ranked list — **+10%** over vanilla RAG on WebQuestions (Zerhoudi & Granitzer 2024).
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+A concrete research example from our group — PersonaRAG (Zerhoudi & Granitzer, 2024). The idea applies the multi-agent picture *to retrieval itself*: standard RAG looks up passages for the literal query, but a real user has preferences, a task, and an interaction history. PersonaRAG models those as a handful of in-context agents — a user-profile agent, a contextual-retrieval agent, a live-session agent, a ranking agent, and a feedback agent — that together shape what gets retrieved and how it is ranked. The retrieved set becomes *personalised evidence* rather than a generic ranked list, and across TriviaQA, WebQuestions and NaturalQuestions this lifts answer quality over both chain-of-thought and vanilla RAG. The wider lesson, and the bridge to the next module: once retrieval is agentic and personalised, *managing context* — what to keep, update, forget, and expose — becomes a first-class problem.
 
 --
 
@@ -1241,6 +1303,7 @@ Open the floor. These prompts work across disciplines deliberately. Push student
 - Mitchell, Tom M. (1997). Machine Learning. *McGraw-Hill*.
 - Park, Joon Sung and O'Brien, Joseph C. and Cai, Carrie J. and Morris, Meredith Ringel and Liang, Percy and Bernstein, Michael S. (2023). Generative Agents: Interactive Simulacra of Human Behavior. *Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology (UIST)*.
 - Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia (2017). Attention Is All You Need. *Advances in Neural Information Processing Systems (NeurIPS)*. [https://arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762)
+- Zerhoudi, Saber and Granitzer, Michael (2024). PersonaRAG: Enhancing Retrieval-Augmented Generation Systems with User-Centric Agents. *arXiv preprint arXiv:2407.09394*. [https://arxiv.org/abs/2407.09394](https://arxiv.org/abs/2407.09394)
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
