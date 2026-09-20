@@ -63,15 +63,15 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   box(gPull, 10, 116, 460, 186, TEAL)
   label(gPull, 30, 140, 'your machine or cluster', 13, TEAL, 700)
-  ;['owi/de/2025-09-17', 'owi/curlie/science', 'owi/site-list/news'].forEach((n, i) => {
+  ;['year=2025/month=09/day=17/language=de', 'year=2025/month=09/day=18/language=de', 'year=2025/month=09/day=18/language=en'].forEach((n, i) => {
     const y = 158 + i * 34
     gPull.append('rect').attr('x', 30).attr('y', y).attr('width', 18).attr('height', 22).attr('rx', 3)
       .attr('fill', WHITE).attr('stroke', SOFT)
     gPull.append('path').attr('d', `M 40 ${y} l 8 8 h -8 z`).attr('fill', RULE)
-    label(gPull, 58, y + 16, n, 12.5, INK, 400, 'start', mono)
+    label(gPull, 58, y + 16, n, 11.5, INK, 400, 'start', mono)
   })
-  label(gPull, 30, 272, 'Only the slice the experiment needs. Partitions merge', 12.5, SOFT)
-  label(gPull, 30, 289, 'by union, so nothing has to be re-indexed.', 12.5, SOFT)
+  label(gPull, 30, 272, 'Partitioned by date and language, so the slice an', 12.5, SOFT)
+  label(gPull, 30, 289, 'experiment needs is a path. Partitions merge by union.', 12.5, SOFT)
 
   // ── route 2: query it where it lies ────────────────────────────────────────
   const gQuery = svg.append('g')

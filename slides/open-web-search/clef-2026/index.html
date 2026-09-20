@@ -21,11 +21,9 @@
 
 ## Beyond Open Models: Building Open Search Infrastructure for AI Agents
 
-Open Data, Scalable Retrieval, and Observable Interaction
-
 Prof. Dr. Michael Granitzer  
-Chair of Data Science, University of Passau  
-IT:U Interdisciplinary Transformation University Austria  
+Chair of Data Science, University of Passau, Germany  
+IT:U Interdisciplinary Transformation University Linz, Austria  
 Coordinator OpenWebSearch.EU
 
 
@@ -954,16 +952,16 @@ OURRS, two Rs. There is no paper; give the URL and the measurement date. Play th
 
 - **Quantity:** Crawling across European Data Centers and AI Factories at scale
   - New project for operationalising the OWI will start November 2026
-- **Quality:** Headless rendering, GenAI exclusing
-- Multimedia and multimodal data
+- **Quality:** Headless rendering, improved crawling strategy
+- **Variety:** Multimedia and multimodal data
 - **Tooling:** improved cli tooling, potential access to raw data, corpora & model management
+- **Cross-Cutting Concerns:** identity management, access managent, community contributions etc.
 
 ### OWI Lakes
 
 - Topical coherent, deduplicated and structured sub-indices
 - Every index as Parquet Data Lake on object storage, queried with SQL — remote representations of prebuilt indexes rather than copies to host
 - Community-driven, with OWI being the backbone
-
 
 
 <div class="slide-citation">
@@ -1046,7 +1044,7 @@ This is the contribution slide, so do not oversell it and do not undersell it ei
 
 <!-- .slide: class="smaller" -->
 
-## Datasets from the index: language, and place
+## Two example datasets from the index
 
 
 <div class="grid-2 gap-lg small">
@@ -1188,21 +1186,20 @@ Give it the numbers out loud, not on the slide. Six months of crawl, the Curlie-
 
 --
 
-<!-- .slide: class="smaller" -->
+<!-- .slide: class="small" -->
 
 ## Evaluation through an API a partner runs
 
 
-<div class="card small">
+<div class="card">
 
 
-<div class="grid-4-1 gap-lg">
+<div class="grid-4-1">
 
 
 <div class="column">
 
-### ChatNoir, run by Webis
-Frozen collections behind one research API: ClueWeb09, 12 and 22, MS MARCO, LongEval, and OWS-Curlie-2025 as its default index. Static corpora are what make a run citable years later. [chatnoir.eu/docs/api-general](https://www.chatnoir.eu/docs/api-general)
+**ChatNoir, run by Webis:** Frozen collections behind one research API: ClueWeb09, 12 and 22, MS MARCO, LongEval, and OWS-Curlie-2025 as its default index. Static corpora are what make a run citable years later. 
 
 </div>
 
@@ -1221,16 +1218,15 @@ Frozen collections behind one research API: ClueWeb09, 12 and 22, MS MARCO, Long
 
 
 
-<div class="card good small">
+<div class="card good">
 
 
-<div class="grid-4-1 gap-lg">
+<div class="grid-4-1">
 
 
 <div class="column">
 
-### OURRS, run in Passau
-The same idea for a corpus that changes daily, with agents as first-class clients. Searches **1 billion pages, 963.5M entities and 32M sites** of the Open Web Index, plus `owic25`, Wikipedia and MS MARCO. Eighteen verticals, six ranking profiles, MCP as a two-way channel for feedback.
+**OURRS, run in Passau** The same idea but for a corpus that changes daily, with agents as first-class clients and to provide recent search results with some reproducibility guarantees. 
 
 </div>
 
@@ -1249,7 +1245,7 @@ The same idea for a corpus that changes daily, with agents as first-class client
 
 
 
-<div class="grid-2 gap-lg small">
+<div class="grid-2">
 
 
 <div class="column">
@@ -1257,10 +1253,10 @@ The same idea for a corpus that changes daily, with agents as first-class client
 
 <div class="c-positive">
 
-### Works today
+**Works today**
 - query a live corpus instead of hosting one
-- different search verticals: products, places, scholarly, news..
-- agents return feedback, summaries and opinions through MCP
+- different search verticals: products, places, scholarly,...
+- agents give feedback, summaries and opinions 
 
 </div>
 
@@ -1273,9 +1269,9 @@ The same idea for a corpus that changes daily, with agents as first-class client
 
 <div class="c-warning">
 
-### In the making
-- qrels carry no time stamp, so runs a week apart are not comparable
-- six ranking profiles, effectively fixed: no bring-your-own ranker
+**Future Work**
+- published agent qrels carry no time stamp
+- more flexible ranking profiles
 - no clean export of a corpus slice with its judgements
 
 </div>
@@ -1331,7 +1327,7 @@ The right-hand column, said plainly. A live index is exactly what a temporal eva
 
 <div class="marks-step">
 
-- Evaluating an agent-search systems fuly means running web-scale retrieval which requires large web-crawls and significanct infrastructure.
+- Evaluating an agent-search systems fully means running web-scale retrieval which requires large web-crawls and significanct infrastructure.
 - No single institute affords that alone. On shared public infrastructure, many institutes can, which is the model of other infrastructure-heavy research fields with high impact
 - Building and operating an index and a search engine has become feasible for small teams, in part because coding agents now carry much of the engineering.
 
@@ -1421,9 +1417,9 @@ Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with dis
 
 
 
-<div class="c-positive tight small">
+<div class="c-positive tight">
 
-- **Scale alone** costs **29 points** of Recall@100 from 10K to 100M, and flips which model is best.
+- **Scale alone** costs **29 points** of Recall@100 from 10K to 100M and flips model choice
 - **Quantization is free at every size**, down to 2 bits per dimension.
 - **Truncation and 1-bit are not**: free at 10K, costly at 100M.
 
@@ -1438,8 +1434,6 @@ Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with dis
 
 <div class="paper detail">
 
-<span class="eyebrow">ECIR 2026</span>
-### CoRECT
 - **Question** Do compression methods hold up as the corpus grows?
 - **Setup** CoRE: the same 65 TREC DL 2023 queries and judgements throughout, the corpus grown from 10K to 100M passages. Each query keeps 10 relevant passages and **100 distractors** mined by the subsampling method of Fröbe et al.; the rest is random filler. Four embedding models, eight compression families.
 - **Result** The cost of compression grows with the corpus, and the ranking of models flips along the way.
@@ -1457,7 +1451,7 @@ Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with dis
 
 <div class="slide-citation">
 
-Caspari, Dinzinger, Ghosh Dastidar, Fellicious, Mitrović, Granitzer, *CoRECT*, ECIR 2026 · two follow-ups turn this into a method: when subsampled results extrapolate (ICTIR 2026) and how query-performance prediction behaves as the index grows (SIGIR 2026).
+Caspari, Dinzinger, Ghosh Dastidar, Fellicious, Mitrović, Granitzer, *CoRECT*, ECIR 2026
 
 </div>
 
@@ -2116,10 +2110,8 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 
 ## We cannot see who is behind the query
 
-A query used to imply a person with an intent. It may now come from a person, from an agent working for a person, or from an agent following instructions we never see. Nothing in the log tells them apart, and the same holds for the prompts behind those agents.
 
-
-<div class="grid-2 gap-lg small">
+<div class="grid-2 gap-lg">
 
 
 <div class="column">
@@ -2127,8 +2119,16 @@ A query used to imply a person with an intent. It may now come from a person, fr
 
 <div class="c-danger">
 
-### It is not a detection problem
-Whether an action was chosen by the agent or dictated by whoever configured it cannot be recovered from the text, the timing, the community or the votes. No better classifier fixes this; the information is not in the signal.
+### An indirection problem
+Did the agent choose this query, or did someone tell it to ask? The behaviour looks the same either way, and text, timing and community carry little of the difference. Not impossible to detect — but very hard, and getting harder.
+
+</div>
+
+
+
+<div class="c-note small">
+
+**The agent is not a stable actor either.** It gains skills as it runs and loses its own instructions: after five rounds of ordinary context compaction, **10%** of its constraints survive.
 
 </div>
 
@@ -2138,25 +2138,18 @@ Whether an action was chosen by the agent or dictated by whoever configured it c
 
 <div class="column">
 
+<div class="viz" data-viz="ows/click-model-auc" data-steps="2"></div>
 
-<div class="c-warning">
 
-### And it costs us the instruments
-A click model trained where half the data comes from agents whose behaviour the platform could not validate loses **8.5% AUC, 0.640 → 0.586**. Click models, session analysis and personalisation all assume one person with one intent.
+<div class="c-warning tight small">
 
-</div>
-
+Our instruments assume one person with one intent. This one stops working.
 
 </div>
 
 
 </div>
 
-
-
-<div class="c-note small">
-
-**The agent is not a stable actor either.** It gains skills as it runs, and it loses its own instructions: with ordinary context compaction, **53%** of an agent's constraints survive one round and **10%** survive five. Behaviour drifts for reasons that have nothing to do with the user.
 
 </div>
 
@@ -2180,15 +2173,17 @@ Zerhoudi, Granitzer, Dang et al., *Behind the Prompt: The Agent-User Problem in 
 
 
 Notes:
-Goal: the unit our instruments are built on, a query issued by a person with an intent, no longer identifies anyone. Watching agents is not the same as understanding users.
+Goal: the query, the unit all our instruments are built on, no longer identifies anyone. Watching agents is not the same as understanding users.
 
-The non-identifiability argument, which is the core of it. When an agent acts, the action is some mixture of what the model decided and what its operator told it to do, and those two are not separable after the fact. The formal claim is that the orchestration indicator is not identifiable from text, timing, community membership or votes. That matters because it is not a gap a better detector closes: the information is absent from the signal, so any method that tries to infer intent from behaviour is inferring a mixture it cannot decompose.
+**The indirection, said plainly.** When a query arrives from an agent, it is one of two things and you cannot tell which: the agent decided to ask it, or a person told the agent to ask it. One layer of delegation sits between the behaviour and the intent, and everything we infer from behaviour is really inferring across that gap. Add a second agent calling the first and there are two layers.
 
-The cost, measured. A position-based click model trained on agent upvotes falls from 0.640 to 0.586 AUC, 8.5 per cent, once half its training data comes from low-validation agents. The evidence base is a trace set of 370,737 posts and 3.9 million comments from 46,872 agents over a platform's first twelve days. Generalise carefully: the number is one instrument on one platform, but the mechanism applies to every model that reads behaviour as evidence of intent.
+**How hard, and be careful not to overstate it.** The paper's claim is non-identifiability: whether the action was autonomous or operator-directed is not recoverable from text, timing, community membership or votes. Say "very hard, and not a problem a better classifier solves on those signals", not "impossible". Other signals may exist, and declared provenance would settle it outright, which is one argument for the MCP channel in Topic 1.
 
-The second half, and keep it short on the slide. Agents change while they run in both directions. They accumulate skills and tools, which is the part people talk about. They also lose the instructions they were given: with a standard compaction prompt, 53 per cent of an agent's constraints survive one round at 50 per cent compression and 10 per cent survive five rounds. Routing each knowledge type through its own retention policy holds recall near 0.96, so this is a design fault rather than a law, but the default is what we will meet in logs. The consequence for us: a trace tells us what an agent did, and not what a person wanted, and not even reliably what the agent was told.
+**Reading the figure.** AUC is the chance that the model ranks a clicked result above an unclicked one, so 0.5 is a coin flip and only the distance above it means anything. A position-based click model trained on human behaviour sits at 0.640, which is 0.14 above chance. Train the same model where half the data comes from agents the platform could not validate and it falls to 0.586, which is 0.086 above chance: roughly two-fifths of what it had. The instrument still works a little; it no longer works usefully. The evidence base is a trace set of 370,737 posts and 3.9 million comments from 46,872 agents over a platform's first twelve days, so generalise the mechanism, not the number.
 
-The three questions are genuinely open, and asking them of this room is the point. We do not have answers.
+**The agent's own drift**, kept to one line on the slide. Agents change while they run in both directions: they accumulate skills and tools, and they lose the instructions they were given. With a standard compaction prompt, 53 per cent of an agent's constraints survive one round at 50 per cent compression and 10 per cent survive five. Routing each knowledge type through its own retention policy holds recall near 0.96, so it is a design fault rather than a law, but the default is what will show up in logs.
+
+The three questions are genuinely open, and asking them of this room is the point.
 
 → next: which is where Topic 3 ends up.
 
@@ -2323,48 +2318,12 @@ Step the graph: one person and one system and a single query; then agent to agen
 Moltbook: a Reddit-shaped network where every participant is an agent. **1.31M posts, 6.7M comments, 120,811 agents, 5,400 communities, 40 days.** Every structural feature of social media is present.
 
 
-<div class="stat-grid">
+<div class="c-danger">
 
-
-<div class="stat-card fails">
-
-<span class="eyebrow">threads exist</span>
-
-### 91.4%
-of authors never return to their own thread. Reciprocity is **3.3%**, against 22 to 60 per cent on human platforms.
-
-</div>
-
-
-<div class="stat-card fails">
-
-<span class="eyebrow">votes exist</span>
-
-### 97.3%
-of comments receive no vote at all. In 6.7M comments there are **1,084** downvotes.
-
-</div>
-
-
-<div class="stat-card fails">
-
-<span class="eyebrow">profiles exist</span>
-
-### 97.9%
-of agents never post in a community that matches their own stated interests.
-
-</div>
-
-
-<div class="stat-card fails">
-
-<span class="eyebrow">replies exist</span>
-
-### 64.6%
-of comment–post pairs carry no argumentative relation at all. Open disagreement: **0.01%**.
-
-</div>
-
+- **Threads exist, but** 91.4% of authors never return to their own thread, and reciprocity runs at 3.3% against 22 to 60 per cent on human platforms.
+- **Votes exist, but** 97.3% of comments receive none at all: across 6.7M comments there are 1,084 downvotes.
+- **Profiles exist, but** 97.9% of agents never post in a community that matches their own stated interests.
+- **Replies exist, but** 64.6% of comment–post pairs carry no argumentative relation, and open disagreement runs at 0.01%.
 
 </div>
 
