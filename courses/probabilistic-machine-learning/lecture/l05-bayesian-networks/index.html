@@ -1,0 +1,1348 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 05: Bayesian Networks</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Probabilistic Machine Learning
+## Lecture 05: Bayesian Networks
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Belief networks in depth, plus the two topics requested for this lecture:
+fitting (parameters and structure) and graphical notation. The plate-notation
+unit is new everything else is reused. Markov networks are included as a
+contrast — drop that module for a shorter course.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Belief Networks
+
+> **Guiding Question:** What exactly does an arrow in a probabilistic model
+> claim — and what does a *missing* arrow claim?
+
+--
+
+## Definition
+
+
+<div class="c-definition">
+
+**Bayesian belief network (BBN).** A **directed acyclic graph** whose nodes are
+random variables, in which the joint distribution factorises as
+
+$$
+p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p\big(x_i \mid \mathrm{pa}(x_i)\big)
+$$
+
+where $\mathrm{pa}(x_i)$ are the parents of $x_i$ in the graph.
+
+</div>
+
+
+Each node carries one conditional probability table given its parents. The
+wet-grass model was exactly this.
+
+Notes:
+Math first (P5) — the students have already built one of these by hand, so the
+general form should read as a summary rather than a novelty. Stress "acyclic":
+cycles would make the factorisation ill-defined.
+
+--
+
+## Three Tasks
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Modelling
+Choose variables, edges and tables that encode the domain.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Inference
+Compute posteriors given evidence.
+
+Exact **and** approximate inference are **NP-hard** in general.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Learning
+Estimate the tables — and possibly the structure — from data.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The NP-hardness is worth dwelling on: tractability depends on the *shape* of
+the network, not on its size alone. Trees are easy, dense graphs are not.
+
+--
+
+## Modelling Technique: Divorcing Parents
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+A node with $k$ binary parents needs $2^k$ table entries. **Divorcing** inserts
+an intermediate variable that summarises a group of parents, so the table
+becomes two small ones instead of one large one.
+
+The intermediate node usually has a meaning of its own — "total load",
+"combined risk" — which is why the technique improves interpretability as well
+as size.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+Fewer parameters means fewer numbers a domain expert has to invent.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Frame parameter reduction as an elicitation problem, not just a storage one:
+an expert can estimate 4 numbers reliably and 64 numbers not at all.
+
+--
+
+## Modelling Technique: Noisy OR
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+When many causes $x_1, \ldots, x_k$ can each independently trigger an effect
+$y$, a **noisy OR** models the effect as "each cause fires with its own
+probability, and the effect occurs if any of them fires":
+
+$$
+p(y = 0 \mid x_1, \ldots, x_k) = \prod_{i : x_i = 1} (1 - \lambda_i)
+$$
+
+$k$ parameters instead of $2^k$.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Typical use
+Disease–symptom networks, where many diseases give rise to the same symptom.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask what assumption buys the reduction: causes act independently and there is
+no interaction term. Then ask when that fails — synergistic causes — so the
+model choice stays a modelling decision.
+
+--
+
+## Uncertain and Unreliable Evidence
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Uncertain (soft) evidence
+The state of $x$ is itself uncertain, expressed as a distribution
+$\tilde{x}$. Infer by summing over the states:
+$$p(y \mid \tilde{x}) = \sum_x p(y \mid x) p(x \mid \tilde{x})$$
+
+*We look at the grass without touching it: $p(T{=}1 \mid \tilde{T}) = 0.8$.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Unreliable evidence
+The evidence is not trusted and is **replaced** by our own estimate:
+$$p(y \mid x) \rightarrow p(h \mid x)$$
+
+*Jack says his grass is wet, but Jack is in a bad mood and did not check.*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Both are drawn with a **dashed** edge.
+
+Notes:
+The distinction is subtle and worth a moment: uncertain evidence keeps the
+observation and softens it unreliable evidence discards it and substitutes a
+judgement. Students who conflate them will model rumours as noise.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A belief network is a **DAG plus one conditional table per node**. Modelling
+techniques — divorcing, noisy OR, soft evidence — all trade assumptions for
+parameters, and every trade should be stated out loud.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Reading Independence off the Graph
+
+> **Guiding Question:** Two causes are independent until you observe their
+> shared effect. Which pictures make that visible?
+
+--
+
+## Three Ways Three Nodes Can Connect
+
+Every conditional-independence question in a DAG reduces to these three
+patterns.
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Chain
+$$a \rightarrow c \rightarrow b$$
+
+$a$ and $b$ are dependent — but **independent given $c$**.
+
+*Information flows along the chain until the middle is observed.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Common cause (fork)
+$$a \leftarrow c \rightarrow b$$
+
+$a$ and $b$ are dependent — but **independent given $c$**.
+
+*The shared cause explains the correlation.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Common effect (collider)
+$$a \rightarrow c \leftarrow b$$
+
+$a$ and $b$ are **independent** — but **dependent given $c$**.
+
+*Explaining away — the reverse of the other two.*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The whole slide is one table students should be able to reproduce. Emphasise
+the collider's inversion: conditioning normally destroys dependence, here it
+creates it. The wet-grass example is exactly a collider at T.
+
+--
+
+## Mini-Exercise
+
+For each pair, decide whether observing the middle variable makes the outer two
+*more* or *less* related:
+
+1. rain → wet grass → slippery pavement, observing wet grass
+2. temperature → ice-cream sales, temperature → drownings, observing temperature
+3. rain → wet grass ← sprinkler, observing wet grass
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**1. Chain**
+
+Independent given wet grass — the pavement only cares that the ground is wet.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**2. Fork**
+
+Independent given temperature — the classic spurious correlation dissolves.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+**3. Collider**
+
+*Dependent* given wet grass — learning it rained lowers belief in the sprinkler.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Solution fragmented per the animation policy. Case 3 is the one that surprises;
+if the group is quick, ask what happens when you condition on a *descendant* of
+the collider (the same dependence appears — which is why d-separation mentions
+descendants).
+
+--
+
+## d-Separation
+
+
+<div class="c-definition">
+
+A path between $X$ and $Y$ is **blocked** by a set $Z$ if it contains either
+
+- a chain or fork whose middle node **is in** $Z$, or
+- a collider whose middle node — and all of its descendants — are **not in** $Z$.
+
+If every path from $X$ to $Y$ is blocked by $Z$, then $X$ and $Y$ are
+**d-separated** given $Z$, and $X \indep Y \mid Z$.
+
+</div>
+
+
+
+<div class="c-note">
+
+d-separation is sound: what it declares independent really is independent for
+every distribution factorising over the graph. It is not complete for a
+*particular* distribution — extra independences may hold numerically without
+being visible in the graph.
+
+</div>
+
+
+Notes:
+Definition after the three cases, so it reads as a summary rather than an
+axiom. The soundness/completeness caveat is the honest version of "graphs have
+limited expressive power" from the intro unit.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Independence in a belief network is a **graph property**: chains and forks are
+blocked *by* observing the middle node, colliders are opened by it.
+d-separation is that rule applied to every path.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Graphical Notation
+
+> **Guiding Question:** A model of 10,000 observations should not need 10,000
+> nodes. How is a repeated structure drawn?
+
+--
+
+## Drawing a Model
+
+A probabilistic model is a factorisation, and the graph is its picture. Four
+conventions carry almost all the information:
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Shaded node
+An **observed** variable — its value is in the data.
+
+</div>
+
+
+<div class="card">
+
+### Unshaded node
+A **latent** variable or a parameter — inferred, never seen.
+
+</div>
+
+
+<div class="card">
+
+### Small solid dot
+A fixed **hyperparameter**, not inferred.
+
+</div>
+
+
+<div class="card">
+
+### Arrow
+A conditional dependence: the child's distribution is conditioned on the parent.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Insist that this is notation, not new theory: the diagram is a compact way to
+write a factorisation students can already read. The shading convention is what
+they will most often need when reading papers.
+
+--
+
+## Plates
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+A **plate** is a rectangle drawn around part of the graph with a count in its
+corner: *repeat this structure $N$ times, with independent copies of the
+variables inside*.
+
+It is the i.i.d. assumption, drawn. Without it, a model of $N$ observations
+would need $N$ copies of the same subgraph.
+
+**Nested plates** express grouped data — $N$ documents each of $M_n$ words, or
+$K$ hospitals each with $N_k$ patients.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### What sits outside the plate
+Anything **shared** across observations — the parameters. That is precisely what
+learning estimates.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Reading a Diagram
+
+For a Bayesian linear regression: a hyperparameter dot feeds $\mathbf{w}$,
+which sits **outside** the plate inside a plate over $N$ observations sit
+$\mathbf{x}_i$ (shaded) and $y_i$ (shaded), with $\mathbf{w}$ pointing into
+each $y_i$.
+
+
+<div class="c-insight">
+
+Read off the factorisation directly:
+$p(\mathbf{w} \mid \tau) \prod_{i=1}^{N} p(y_i \mid \mathbf{x}_i, \mathbf{w})$.
+The plate became the product the arrows became the conditioning bars.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+A diagram shows a dot → $\alpha$ → $\theta$ inside a plate of $K$, and
+$\theta$ → $z_i$ → $x_i$ inside a plate of $N$, with $x_i$ shaded.
+
+1. Which variables are inferred?
+2. What does the $N$ plate assert?
+3. Write the factorisation.
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** $\theta$ and every $z_i$ — unshaded. Only $x_i$ is observed $\alpha$ is
+fixed.
+
+</div>
+
+
+<div class="card">
+
+**2.** The $N$ observations are **conditionally independent given $\theta$** —
+each with its own latent $z_i$.
+
+</div>
+
+
+<div class="card">
+
+**3.** $p(\theta \mid \alpha) \prod_{i=1}^{N} p(z_i \mid \theta) p(x_i \mid z_i)$
+— a mixture model.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Plate notation compresses a factorisation into a diagram: **shading** marks what
+was observed, **plates** mark what repeats independently, and **what sits
+outside the plates** is what learning has to estimate.
+
+</div>
+
+
+Notes:
+Part 3 is the skill worth having: converting a diagram into a formula and back.
+Every probabilistic-modelling paper the students read assumes it.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Undirected Models
+
+> **Guiding Question:** Pixels influence each other symmetrically — no pixel
+> causes its neighbour. How do we model that?
+
+--
+
+## Undirected Models
+
+
+<div class="c-definition">
+
+**Markov network (Markov random field).** An **undirected** graph in which the
+joint distribution factorises over the **cliques** $c \in \mathcal{C}$ of the
+graph:
+
+$$
+p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{c \in \mathcal{C}} \phi_c(x_c),
+\qquad Z = \sum_{x} \prod_{c} \phi_c(x_c)
+$$
+
+The $\phi_c \geq 0$ are **potentials** — arbitrary non-negative functions, not
+probabilities. $Z$ is the normalising **partition function**.
+
+</div>
+
+
+When all cliques have size 2 the model is a **pairwise Markov network**.
+
+Notes:
+The key difference from a BBN: potentials are not conditional probabilities and
+do not normalise locally, so a global Z is required. Computing Z is where the
+cost lives.
+
+--
+
+## Directed vs. Undirected
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Belief network
+Directed, acyclic. Factors are conditional probabilities. Natural for
+**causal or generative** stories conditioning on a collider creates
+dependence.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Markov network
+Undirected. Factors are potentials with a global $Z$. Natural for
+**symmetric interactions** — pixels, atoms, neighbours in a lattice.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Neither subsumes the other: some independence patterns are expressible only in
+one. Give the standard examples if time permits (a collider is not expressible
+undirected a 4-cycle is not expressible directed).
+
+--
+
+## Marginalising and Conditioning Behave Oppositely
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Marginalising over $C$
+makes $A$ and $B$ **dependent** — the sum over all states of $c$ couples the
+potentials.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### Conditioning on $C$
+In the chain $A - C - B$, a fixed $c$ is a constant in the potentials, so the
+factor splits and $A \indep B \mid C$.
+
+*This holds because $C$ separates them — not for every $C$.*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This pair is the undirected counterpart to chains, forks and colliders. In an
+undirected graph the rule is simple: separation *is* conditional independence,
+no collider exception.
+
+--
+
+## Markov Properties and the Separation Test
+
+For undirected models, independence is plain graph separation: if every path
+from $X$ to $Y$ passes through $Z$, then $X \indep Y \mid Z$.
+
+For a **directed** model the same question is answered by converting the graph:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### 1. Ancestral graph
+Keep $X \cup Y \cup Z$ and their ancestors delete all other nodes and their
+edges.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### 2. Moralisation
+Connect any two nodes that share a child, then drop all arrow heads.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### 3. Separation
+Remove the links neighbouring $Z$. If no path joins $X$ to $Y$, then
+$X \indep Y \mid Z$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+"Marrying the parents" is where moralisation gets its name, and it is exactly
+the collider rule made structural: parents of a common child become connected,
+so they are no longer separable. This procedure is equivalent to d-separation.
+
+--
+
+## Two Examples
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Boltzmann machine
+A pairwise Markov network over binary units with weights on the edges the
+restricted variant (RBM) allows edges only between a visible and a hidden
+layer.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Image cleanup
+Pixels form a lattice: each potential prefers a pixel to agree with its
+neighbours and with the noisy observation. Inference denoises the image.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The image example is the most intuitive Markov network there is — smoothness as
+a potential. It also previews the energy-based view used for neural networks
+later.
+
+--
+
+## Other Graphical Models
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Chain graphs
+Combine directed and undirected edges in one model.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Factor graphs
+Make each factor an explicit node — mostly used **for inference**, since they
+state precisely which variables each factor touches.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Undirected models trade causal direction for symmetric interaction, and local
+normalisation for a global partition function. Separation in the (moralised)
+graph is the single test for conditional independence.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Fitting and Inference
+
+> **Guiding Question:** We can now write the model down. Can we actually
+> compute anything with it?
+
+--
+
+## Three Questions You Can Ask a Model
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Infer unobserved variables
+Compute the posterior given evidence — probabilistic inference.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Learn the parameters
+Estimate the factors' distributions from data.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Learn the structure
+Discover which dependencies exist at all.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The three get progressively harder — and progressively more interesting.
+
+Notes:
+Structure learning is where causal discovery lives flag it as an open research
+area rather than a solved technique, since students will meet confident claims
+about it.
+
+--
+
+## Inference Is Hard in General
+
+
+<div class="c-warning">
+
+Both exact and approximate inference in belief networks are **NP-hard**.
+Whether a particular model is tractable depends on its structure.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Exact inference
+Variable elimination, junction trees, message passing.
+
+Efficient when the graph is a tree or has low treewidth.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Approximate inference
+Sampling (MCMC, importance sampling) and variational methods.
+
+Trade a guarantee for tractability.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The practical rule: structure decides. A chain or tree is linear a dense graph
+is hopeless. This is why modelling and inference are not separable concerns —
+a model you cannot query is not a model.
+
+--
+
+## Learning the Parameters
+
+With **fully observed** data, parameter learning is counting: each conditional
+table is estimated from the frequencies of its variable and parents.
+
+With **hidden variables**, the counts are unavailable and one alternates
+between inferring the hidden values and re-estimating the parameters
+(expectation–maximisation).
+
+
+<div class="c-note">
+
+The estimates are only as good as the sample supporting each table row. A
+parent combination that never occurs in the data leaves its row undetermined —
+which is another argument for keeping tables small.
+
+</div>
+
+
+Notes:
+Connect back to divorcing and noisy OR: parameter reduction is also a
+statistical necessity, not only a storage convenience. This also foreshadows
+smoothing in naive Bayes.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Graphical models make the joint distribution **writable** whether they make it
+**queryable** depends on the graph's structure. Parameters come from counting
+where data is complete, and from iterating where it is not.
+
+</div>
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

@@ -1,0 +1,1210 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 07: Data Exploration and Preprocessing</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 07: Data Exploration and Preprocessing
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp3-data.tex (two source units re-encoded
+from ISO-8859). Uses Lecture 02's quantiles and covariance throughout.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## What Kind of Data Is This?
+
+> **Guiding Question:** The file loads and the numbers compute. Why is that not
+> yet a reason to trust the average?
+
+--
+
+## Four Attribute Types
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Nominal
+*categorical, qualitative*
+
+Labels only: eye colour, ZIP code, ID.
+
+Meaningful: $=$, $\neq$
+
+</div>
+
+
+<div class="card">
+
+### Ordinal
+*categorical, qualitative*
+
+Ordered labels: grades, rankings, "small/medium/large".
+
+Meaningful: $<$, $>$
+
+</div>
+
+
+<div class="card">
+
+### Interval
+*numeric, quantitative*
+
+Differences are meaningful, the zero point is arbitrary: temperature in °C, calendar dates.
+
+Meaningful: $+$, $-$
+
+</div>
+
+
+<div class="card">
+
+### Ratio
+*numeric, quantitative*
+
+A true zero, so ratios are meaningful: length, mass, counts, duration.
+
+Meaningful: $\times$, $\div$
+
+</div>
+
+
+</div>
+
+
+Notes:
+The four types form a hierarchy: each level permits everything the previous one
+does, plus more. The type is a property of the *measurement*, not of the storage
+format — which is why a ZIP code stored as an integer is still nominal.
+
+--
+
+## Why the Type Decides the Method
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### The classic error
+Averaging a nominal attribute. The mean of ZIP codes 10115 and 81667 is a
+number, and it is meaningless.
+
+</div>
+
+
+<div class="card">
+
+### The subtle one
+20 °C is not "twice as warm" as 10 °C — interval scales have no true zero, so
+ratios do not transfer.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The attribute type determines which **statistics**, which **distance measures**
+and which **plots** are permissible. Every later chapter depends on it.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+Classify each attribute, and name one operation that would be invalid:
+
+1. Customer satisfaction on a five-point scale
+2. Year of birth
+3. Annual income
+4. Preferred payment method
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+**1.** Ordinal. Averaging is questionable — the gaps between points are not
+known to be equal.
+
+</div>
+
+
+<div class="card">
+
+**2.** Interval. "Twice the year" is meaningless differences (age) are fine.
+
+</div>
+
+
+<div class="card">
+
+**3.** Ratio. All operations valid zero income is a real zero.
+
+</div>
+
+
+<div class="card">
+
+**4.** Nominal. Only counting and comparison for equality.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+An attribute's **scale of measurement** licenses the operations you may perform
+on it. Choosing a statistic before checking the scale is the most common
+silent error in data analysis.
+
+</div>
+
+
+--
+
+## Four Shapes of Data
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Record data
+Objects × attributes — the familiar table. Rows are independent of each other.
+
+</div>
+
+
+<div class="card">
+
+### Graph data
+Objects carry **links** to other objects: web pages, social networks,
+citations.
+
+</div>
+
+
+<div class="card">
+
+### Fields / grids
+Objects sit in a **spatial** arrangement: images, sensor lattices, simulations.
+
+</div>
+
+
+<div class="card">
+
+### Spatio-temporal
+Position **and** time: monthly land temperatures, traffic movement, trajectories.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The shape decides which methods even apply. A table can be shuffled without
+loss a grid or a time series cannot — the arrangement *is* information.
+
+</div>
+
+
+Notes:
+Ask what is lost by flattening each non-record type into a table. That question
+is the bridge to network science and to time-series methods, and it recurs
+whenever someone loads a CSV.
+
+--
+
+## Three Data Quality Problems
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Noise
+Random distortion of measured values. Cannot be removed, only modelled or
+smoothed.
+
+</div>
+
+
+<div class="card">
+
+### Outliers
+Values far from the rest. Either an **error** to remove or the **signal** you
+were looking for — fraud, faults, discoveries.
+
+</div>
+
+
+<div class="card">
+
+### Missing values
+Absent entries. Handling depends on **why** they are missing, which the data
+itself does not tell you.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+"Outlier" is not a property of a data point; it is a judgement about a model of
+what is normal. Deleting outliers deletes evidence against that model.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+A sensor dataset has 8% missing temperature readings.
+
+1. Give two mechanisms that could produce them.
+2. For each, is deleting those rows acceptable?
+3. What would you need to know to decide?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Random transmission dropouts — or the sensor failing **when it is very
+cold**.
+
+</div>
+
+
+<div class="card">
+
+**2.** Dropouts: deletion is roughly harmless. Cold-failure: deletion silently
+removes the coldest days and biases every statistic afterwards.
+
+</div>
+
+
+<div class="card">
+
+**3.** The **mechanism** — whether missingness depends on the unobserved value
+itself. The data alone cannot answer this domain knowledge must.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+The shape of the data decides which methods apply the **reason** for a quality
+problem decides how it may be handled. Neither is visible in the file.
+
+</div>
+
+
+Notes:
+This is Principle 3 in its most practical form: a preprocessing decision is a
+modelling assumption, and here an untestable one. Students should leave able to
+ask "why is this missing?" before "how do I impute it?".
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Seeing the Data
+
+> **Guiding Question:** Summary statistics answer the questions you thought to
+> ask. What shows you the ones you did not?
+
+--
+
+## Visualization Is Everywhere
+
+Newspaper tables, subway maps, weather charts, stock graphs, a 3-D
+reconstruction of an injured knee, demographic bar charts, social-network
+layouts.
+
+**What do these have in common?** All of them present data in a form the eye
+processes faster than the equivalent numbers.
+
+Notes:
+Question-first (P1). Let students name the common property before it is stated;
+"you can see it at a glance" is the answer, and the next slide gives the reason.
+
+--
+
+## Why It Works
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Bandwidth
+Vision is the human sense with the highest data rate — pattern detection runs
+in parallel and pre-attentively.
+
+</div>
+
+
+<div class="card">
+
+### Interaction
+A picture is a natural surface for exploring: zoom, filter, select, compare.
+
+</div>
+
+
+<div class="card">
+
+### Discovery
+Visualization surfaces the **unexpected** — the structure nobody thought to
+compute a statistic for.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+Summary statistics answer questions you already asked. A plot lets the data ask
+you one — which is exactly what Anscombe's quartet demonstrated.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Visualization is not decoration for results; it is an **instrument of
+analysis**, and the only one that can show you what you did not think to
+measure.
+
+</div>
+
+
+Notes:
+Deliberate callback to L01 and L02 (spiral): the same argument, now with the
+tools to act on it. This unit is the hinge between "data does not speak for
+itself" and the concrete plot types that follow.
+
+--
+
+## The Boxplot
+
+A **visual summary of a distribution built from quartiles**:
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### The box
+Spans $Q_1$ to $Q_3$ — the interquartile range, the middle half of the data.
+
+</div>
+
+
+<div class="card">
+
+### The line
+The **median** inside the box. Its position shows skew.
+
+</div>
+
+
+<div class="card">
+
+### The whiskers
+Minimum and maximum, or (Tukey) the most extreme points within
+$1.5 \times \mathrm{IQR}$. Points beyond them are drawn as **outliers**.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The 1.5 × IQR rule is a **convention**, not a test. It flags candidates for
+inspection, not errors for deletion.
+
+</div>
+
+
+Notes:
+Boxplots are built entirely from the quantiles the students defined in Lecture
+02 — say so. Their strength is comparison: ten boxplots side by side are
+readable where ten histograms are not.
+
+--
+
+## The Histogram
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### What it shows
+The **shape** of a distribution: modality, skew, gaps and clusters that a
+boxplot hides entirely.
+
+</div>
+
+
+<div class="card bad">
+
+### What it hides
+Everything depends on the **bin width**. Too wide and structure vanishes too
+narrow and noise looks like structure.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+A bimodal distribution and a unimodal one can produce the same boxplot. Always
+look at one histogram before trusting a five-number summary.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+Two datasets have identical minimum, $Q_1$, median, $Q_3$ and maximum.
+
+1. Must they have the same histogram?
+2. Sketch two distributions with the same boxplot but a visibly different shape.
+3. What does this repeat from an earlier lecture?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** No. Quartiles fix five points the mass between them can be arranged
+freely.
+
+</div>
+
+
+<div class="card">
+
+**2.** A uniform spread versus two tight clusters at the ends of the box — same
+quartiles, opposite stories.
+
+</div>
+
+
+<div class="card">
+
+**3.** Anscombe's quartet: summaries agree, the data does not. The lesson is
+scale-free.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+A boxplot compares distributions compactly; a histogram shows their shape.
+**Neither alone is sufficient**, and the boxplot's outlier rule is a convention
+you may overrule.
+
+</div>
+
+
+--
+
+## The Scatterplot
+
+An X–Y plot of two dimensions against each other — the standard instrument for
+inspecting a **relationship** rather than a distribution.
+
+With more than two dimensions there are four options:
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Subsetting
+Let the user choose which dimensions to display.
+
+</div>
+
+
+<div class="card">
+
+### Reduction
+Project to fewer dimensions (see preprocessing, and projections later).
+
+</div>
+
+
+<div class="card">
+
+### Embedding
+Map extra dimensions to other channels: colour, size, shape.
+
+</div>
+
+
+<div class="card">
+
+### Multiple displays
+Superimpose, or juxtapose in a **scatterplot matrix**.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The four options are exhaustive and worth memorising — every high-dimensional
+visualization technique is one of them or a combination. Colour and size are
+channels with far lower precision than position use them for secondary
+variables.
+
+--
+
+## What a Scatterplot Reveals
+
+Linear association, non-linear structure, clusters, outliers and
+heteroscedasticity — most of which no single correlation coefficient reports.
+
+
+<div class="c-important">
+
+A correlation of 0 is consistent with a perfect parabola. The scatterplot shows
+it the coefficient does not.
+
+</div>
+
+
+--
+
+## Tufte's Principle
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+**Maximise the data-ink ratio:** every drop of ink on the page should carry
+information. Delete anything that does not — heavy gridlines, boxes, redundant
+tick marks, decorative fills.
+
+**Range frames** apply the principle to the axes: draw each axis only over the
+interval the data actually spans, so the frame itself reports the minimum and
+maximum.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-tip">
+
+The exercise: take a finished chart and ask of each element, *what would I lose
+by deleting this?*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+A scatterplot shows the structure a coefficient summarises away. Beyond two
+dimensions you must **subset, reduce, embed or juxtapose** — and every mark you
+draw should earn its ink.
+
+</div>
+
+
+Notes:
+Tufte's rule is a good design heuristic and an over-applied dogma note that
+some redundancy aids reading under time pressure. The point students should keep
+is intentionality: each element defended, not each element removed.
+
+--
+
+## When a Line Is Justified
+
+Connecting points with a line asserts an **order** between them — and often an
+interpolation.
+
+
+<div class="c-definition">
+
+**Data requirement:** one or more quantitative value attributes on a comparable
+scale, plus one **ordered** key attribute (usually time).
+
+</div>
+
+
+
+<div class="c-warning">
+
+Connecting nominal categories with a line claims an order that does not exist.
+The line is a statement, not a decoration.
+
+</div>
+
+
+Notes:
+This is the attribute-types unit paying off immediately: the permissible plot
+follows from the scale of the key attribute. Bar charts for nominal, lines for
+ordered.
+
+--
+
+## Aspect Ratio Is Not Cosmetic
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Humans judge **angles** far more accurately than absolute slopes, so the shape
+of the plotting area changes what the reader concludes. The same series looks
+flat in a wide frame and dramatic in a tall one.
+
+**Banking to 45°** chooses the aspect ratio so that the average line segment
+sits near 45 degrees — the angle at which slope differences are most
+discriminable.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Additional channels
+Colour and line type distinguish series — but only for a handful of them.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Multiple Series
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Overlaid
+Best for comparing a few series directly against each other.
+
+</div>
+
+
+<div class="card">
+
+### Stacked
+Each series is drawn on top of the previous one. Shows the total well — and
+makes individual series **hard to read**, since each sits on a moving baseline.
+
+</div>
+
+
+<div class="card">
+
+### Sorted / small multiples
+One panel per series, ordered by some property. Scales to many series where
+overlaying fails.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+A line asserts order and interpolation the **aspect ratio** decides what the
+reader sees and stacking trades the readability of the parts for the
+readability of the whole.
+
+</div>
+
+
+Notes:
+The stacked-plot critique is worth demonstrating: ask students to read the
+third band's trend off a stacked chart — they cannot, because the baseline
+moves. Small multiples are the usual better answer.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Preprocessing
+
+> **Guiding Question:** Most of a project is spent before the model. What is
+> actually being decided in that time?
+
+--
+
+## Aggregation
+
+Combine several objects or attributes into one — customer purchases summarised
+by store, by month, by price band.
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Gains
+Fewer objects to process **less variation**, hence more stable estimates the
+natural operation of a data warehouse.
+
+</div>
+
+
+<div class="card bad">
+
+### Costs
+Detail is gone, irreversibly. Effects that exist only within a group become
+invisible.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Aggregation is where Simpson's paradox lives: a trend can reverse when groups
+are pooled. Worth one sentence — students will meet it in dashboards long
+before they meet it in a statistics course.
+
+--
+
+## Sampling
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Work with a subset of the objects: random sampling with or without replacement,
+or **stratified** sampling that preserves group proportions.
+
+Sampling always loses information. The question is whether it loses anything
+that matters — a sufficiently large sample retains the overall structure.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+The sine-wave example: sample too sparsely and the reconstructed signal is not
+merely rougher, it is **wrong**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Dimensionality Reduction
+
+
+<div class="c-definition">
+
+**The curse of dimensionality.** As the number of attributes grows, the data
+becomes sparse: distances between points concentrate, neighbourhoods lose
+meaning, and the volume to be covered grows exponentially.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### The problem
+Many features are irrelevant, noisy or correlated.
+
+</div>
+
+
+<div class="card">
+
+### The cost
+More computation, more parameters, more variance — and weaker distance-based
+methods.
+
+</div>
+
+
+<div class="card">
+
+### The response
+**Feature selection** keeps a subset **feature extraction** builds new
+combined dimensions.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Every preprocessing step **trades information for tractability**. The trade is
+usually worth it — but it is a modelling decision, and it should be recorded as
+one.
+
+</div>
+
+
+Notes:
+Point forward: projections (PCA, MDS) are the formal treatment of feature
+extraction, and clustering suffers directly from the curse. This unit is the
+motivation both later lectures rely on.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

@@ -1,0 +1,3457 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Beyond Open Models: Building Open Search Infrastructure for AI Agents</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..D7HaVJ7h.css"></head><body><a class="deck-download" href="/slides/open-web-search/clef-2026/clef-2026.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+## Beyond Open Models: Building Open Search Infrastructure for AI Agents
+
+Open Data, Scalable Retrieval, and Observable Interaction
+
+Prof. Dr. Michael Granitzer  
+Chair of Data Science, University of Passau  
+IT:U Interdisciplinary Transformation University Austria  
+Coordinator OpenWebSearch.EU
+
+
+<div class="center">
+
+CLEF 2026 · Keynote · 22 September 2026
+
+</div>
+
+
+
+<div class="title-funding">
+
+<small>Funded by</small>
+![European Commission](/slides/_assets/ows/logo-eu-flag.svg)
+![BMFTR](/slides/_assets/ows/logo-bmftr.svg)
+<img class="logo-sm" src="/slides/_assets/ows/logo-stmwi-bayern.png" alt="StMWi Bayern">
+
+</div>
+
+
+Notes:
+
+Open-source language models are becoming increasingly capable and accessible. Yet an open model does not by itself create an open information-access system. When models and agents depend on proprietary search services, researchers cannot inspect or modify the underlying corpus, indexing process, retrieval system, or usage data. This talk therefore advances four hypotheses about the infrastructure required for transparent research on future search systems.  First, openness must extend below the model layer. OpenWebSearch.EU is a European research initiative developing distributed infrastructure for crawling, processing, and indexing the web. One of its central outcomes is the Open Web Index: an openly accessible web index that supports search services as well as bulk access to data for independent experimentation. On top of this index, OURRS provides a web search engine through which researchers, applications, and agents can retrieve information using an open and inspectable infrastructure.  Second, corpus scale and complexity must be treated as scientific variables rather than merely engineering constraints. As collections grow, retrieval systems encounter more plausible distractors, duplication, multilingual content, and conflicting evidence. These changes affect effectiveness, efficiency, and robustness. Their impact becomes even more significant when retrieval is embedded in AI agents: agents search repeatedly, reformulate queries, compare sources, and make later decisions based on earlier retrieval results. Small retrieval effects can therefore accumulate across an entire information-seeking trajectory.  This leads to the third hypothesis: usage data for agentic search should be created by design. During the rise of commercial web search, much large-scale user and interaction data remained inaccessible to researchers. With agentic systems, the community has an opportunity to instrument retrieval from the beginning, operate controlled populations of artificial agents, and collect traces of searching, reasoning, verification, and communication. Such traces do not replace human studies, but they provide a scalable complement for controlled experimentation.  Finally, agentic information access should be studied as a communication ecosystem rather than as an isolated model answering an isolated query. We are therefore developing a social agentic layer above the retrieval infrastructure that supports persistent interaction among humans and agents, including delegation, collaboration, verification, and agent-to-agent communication. Together, these hypotheses point toward a new kind of evaluation environment: one that combines open web data, scalable retrieval systems, human and artificial participants, and observable information-seeking trajectories. Future information-access research may therefore need to evaluate not only models and ranked lists, but complete systems in which humans, agents, retrieval services, and shared knowledge interact at realistic scale.
+
+
+---
+
+<!-- .slide: class="smaller" -->
+
+## Search is dead — long live search
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![The box where people type now](/slides/_assets/ows/chat-bar.png)
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="img-h-sm">
+
+![Search the web is one of the tools behind it](/slides/_assets/ows/chat-tools-menu.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+"Search the web" sits behind the box, switched on by default in most assistants.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="fragment">
+
+
+<div class="stat-card evidence">
+
+### 34.5%
+of ChatGPT queries switched on web search in February 2026
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 14% → 24%
+of ChatGPT usage is "seeking information" in one year, "a very close substitute for web search"
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 20–26
+search calls per question by a deep-research agent
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote fragment">
+
+The box where people type changed. What answers them is still a search engine, queried more often, by something that is not a person.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Semrush clickstream analysis, Apr 2026 · Chatterji et al., *How People Use ChatGPT*, NBER 2025 · Chen et al., *BrowseComp-Plus*, 2025 (GPT-5, o3).
+
+</div>
+
+
+Notes:
+Open on the provocation the room has heard all year: search is dead, the chat box replaced it. Show the box. Then show what is behind the box: web search is one of the tools, switched on by default in most assistants. Then the numbers, all verified. Semrush measured on more than a billion clickstream lines that ChatGPT enabled web search on about a third of its queries in February 2026, down from 46 percent in late 2024. OpenAI's own usage study says information seeking grew from 14 to 24 percent of usage in a year and calls it a very close substitute for web search. On BrowseComp-Plus, GPT-5 and o3 issue between 20 and 26 search calls per question. The interface changed; the search engine underneath did not go away, it got busier, and its user is now a machine.
+→ next: what that system looks like when you take it apart.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Agentic (search) (eco)systems are complex
+
+<div class="viz viz-lg" data-viz="ows/system-view" data-steps="4" data-params='{"caption": false}'></div>
+
+
+
+
+<div class="c-important small">
+
+And this is only the search part. Beyond it the system grows again: tools and MCP, skills and skill learning, workflows and orchestration.
+
+</div>
+
+
+Notes:
+Build the figure up in four steps. First the plain picture: a user, an agent, and a search back-end that is somebody else's corpus, index and ranking. Then open that back-end into its four layers. Then let the loop run, with the human still in it, and notice that it leaves usage data behind. Then add the other agents and the other people. Say the important sentence: these three columns are the modules of the system, and they are also the structure of this talk; every later slide sits in one of them and the figure will say which. Then the honest caveat: this is the search half. A deployed agent also has tools and MCP servers, skills it learns and reuses, and workflows that orchestrate all of it. We are not going to evaluate that whole thing today, but nothing gets simpler by ignoring it.
+→ next: which part of this is already open.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Understanding search meant operating search
+
+What we could observe about users was always bounded by what we operated.
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### A released web log records two kinds of event
+<span class="eyebrow">AOL 2006, released and withdrawn in three days</span>
+A query, and a click on a result. 36.4M queries, 657,426 users, 19.4M clicks — and the only results in the file are the ones that were clicked. Sessions are not marked. ORCAS in 2020 is thinner still: clicks alone, no users, no sessions.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### A system you run records fifty-eight
+<span class="eyebrow">Sowiport, operated by GESIS, 2014–15</span>
+Typing a query, selecting a facet, visiting a document, following a citation, exporting a record. One year gave **558,008 sessions** and about **8M interactions**, of which 179,796 were queries — and the result lists are stored as they were shown.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important">
+
+We did learn from query logs, and obtaining them was the hard part. But a query and a click are the artefacts a search session leaves behind, not the session itself. The richer record came from systems our own community ran.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Reimer et al., *The Archive Query Log*, SIGIR 2023, Table 1 (AOL and ORCAS figures) · Mayr, *Sowiport User Search Sessions Data Set*, 2016, doi:10.7802/1380 · Joachims, KDD 2002 · Joachims, Swaminathan, Schnabel, WSDM 2017.
+
+</div>
+
+
+Notes:
+Goal: prepare the hypothesis. What a field can understand about its users is bounded by what it operates, and everything that follows in this talk is an argument for operating more.
+
+Be careful and fair here, because the obvious version of this story is wrong in two ways. Academic IR was never short of insight into search users: it led on learning from clicks, on how to read a click, and on counterfactual learning to rank. And query logs were genuinely useful. The limitation was not that logs taught us nothing; it was what a log can contain.
+
+The two columns, with the sources.
+
+- **AOL 2006** is the public web log everyone knows, released on 4 August 2006 and withdrawn on the 7th. Do not call it the largest or the richest: AltaVista's 1998 log is bigger in queries and the MSN excerpt has been used in more papers. The numbers are from Table 1 of the Archive Query Log paper: 36,389,567 queries, 10,154,742 of them unique, 657,426 users, 19,442,629 clicks, three months. The same table records the results column as identical to the clicks column, which is the point: the file contains the results that were clicked and nothing about the rest of the ranking. The sessions column is empty. So a query and a click are all the event types there are.
+- **ORCAS**, 2020, is the modern public equivalent and is thinner: 18,823,602 click records, no users, no sessions, no ordering.
+- **Sowiport** is the counter-example, and it is a counter-example because GESIS ran the system. Verbatim from the dataset record: activities are mapped to "a list of 58 actions ... covering all types of activities and pages that can be carried out or visited within the system, e.g. typing a query, visiting a document, selecting a facet", and for each action the log stores a session id, a timestamp and further information including "queries, document ids, and result lists". Sessions are tracked by cookie across multiple searches. Scale, from the SimIIR 2.0 paper: 558,008 sessions, about 8 million interactions, 179,796 of them queries, April 2014 to April 2015.
+- **The ratio, if you want one**, is roughly half a recorded action per query in AOL against roughly forty in Sowiport, but say it carefully, because the two are counting different things. The safe formulation is two event types against fifty-eight.
+- **What the richer log makes askable** is the honest argument: Kacem and Mayr used it to study footnote chasing and citation searching as search stratagems. Neither behaviour exists in a click log, because neither leaves a click on a result.
+
+The same pattern earlier, if there is time. Joachims built and ran the Striver meta-search engine to collect the clickthrough data for the 2002 paper, and counterfactual learning to rank was field-tested on the arXiv full-text search his group operated. Both are cases of an advance arriving because somebody ran a system.
+
+The bridge to the hypothesis, said plainly: obtaining a log was hard, but the deeper limit is that a log of a system you do not run records only what that system chose to record. If we want to understand agentic search, we have to operate agentic search.
+
+→ next: what follows from that.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## One hypothesis, four topics
+
+
+<div class="hypothesis">
+
+**We have to build full, usable agentic search systems at scale in order to understand them.** Components can be studied on static collections. Systems cannot: what they do depends on the corpus, on the traffic, and on the people and agents using them.
+
+</div>
+
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="card">
+
+<span class="eyebrow">Topic 1</span>
+### Building a sovereign search system
+OpenWebSearch.EU and the Open Web Index: web data, an index and a search API that a research community owns and operates.
+
+</div>
+
+
+
+<div class="card">
+
+<span class="eyebrow">Topic 2</span>
+### Scale and robustness as research variables
+What changes when the corpus grows and the text gets messy, and the instruments that make both measurable.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+<span class="eyebrow">Topic 3</span>
+### Usage data: simulate and pool
+We missed much of the interaction data of web search. We should not miss the interaction data of agentic search.
+
+</div>
+
+
+
+<div class="card">
+
+<span class="eyebrow">Topic 4</span>
+### Societies of humans and models
+Beyond one user and one system: many agents, many people, and the knowledge they share.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+State the hypothesis as a hypothesis and own it: it is a claim about method, not a result. Be ready for the obvious objection, that plenty was learned from static test collections without operating anything. The honest answer is that "at scale" means the corpus and the traffic, not necessarily a large live user base: a judged collection cut from a crawl you own, or a shared task on an evolving corpus, is already sovereign research on operated infrastructure. The four topics are the evidence for it, and each of them lives in one part of the figure. Topic 1 is the retrieval column and the thing we had to build before anything else was possible. Topic 2 is what became measurable once we could grow and vary a corpus ourselves. Topic 3 is the interaction column, where the data does not exist unless we create it. Topic 4 is the collaboration column, which is the least settled and the most interesting. The four hypotheses of the abstract sit inside these topics: openness below the model and scale as a variable in the first two, usage data by design in the third, the information ecosystem in the fourth.
+→ Topic 1.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Topic 1 · Building a sovereign search system
+
+<span class="eyebrow">OpenWebSearch.EU, the Open Web Index, and a search API on top</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "caption": false}'></div>
+
+Notes:
+Topic 1 stays in the retrieval column and works up it: what an evaluation needs, what is on offer, why we built our own, and what came out of it.
+
+--
+
+## Looking at the Model-side first
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="card muted">
+
+### Open weights
+
+Llama, Qwen, DeepSeek, Mistral and gpt-oss can be run and fine-tuned by anyone.
+
+Their training data and recipes stay private, so they can be used but not inspected.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### Fully open
+
+OLMo 3, Apertus, Soofi S, OpenEuroLLM Pleias, Marin and Comma release weights, data, code and checkpoints.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote">
+
+Open-source models on top of closed retrieval infrastructure remain closed research instruments.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+OSI, *Open Source AI Definition* 1.0, Oct 2024 · AI2, *OLMo 3*, Nov 2025 · Swiss AI, *Apertus*, Sep 2025 · SOOFI, *Soofi S*, Jul 2026.
+
+</div>
+
+
+Notes:
+At the model layer openness is a menu and a researcher can pick a level. Open-weight models are usable but not inspectable. Fully open models let you trace a behaviour back to the training data: OLMo 3 with Dolma, Apertus from EPFL, ETH and CSCS, Soofi S from the German SOOFI consortium, Pleias trained only on open data, Marin, Comma. The Open Source AI Definition of 2024 asks for three things: data information, the complete code, and the parameters. Say clearly that OpenEuroLLM has not released a flagship model yet. Then the turn: every one of those models, in the figure, is the green box in the middle column, and the moment it searches it calls the column on the right, which is somebody else's.
+→ next: what it would take to evaluate the whole system.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Today's API-based back-ends are not open
+
+| Service | Still available | Corpus known | Ranking replaceable | Snapshot fixable | Logs for research |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Google Custom Search API | ends Jan 2027 | ✗ | ✗ | ✗ | ✗ |
+| Bing Web Search | retired Aug 2025 | ✗ | ✗ | ✗ | ✗ |
+| Brave Search API | ✓ | claims 40B pages | re-rank only | ✗ | ✗ |
+| Exa · Tavily · Perplexity | ✓ | ✗ | ✗ | ✗ | ✗ |
+| OpenAI · Anthropic search tools | ✓ | ✗ | ✗ | ✗ | ✗ |
+
+
+<div class="c-warning">
+
+So what remains is that you have to trust the web search engine to return the right results and account for its uncertainty.
+
+</div>
+
+
+Notes:
+Delivery. Do not read the table. Say the shape of it: every column that matters for a controlled comparison is a no, the only corpus figure on the slide is a vendor's own claim, and the only ranking control anywhere is re-ranking on top of somebody else's ranking of somebody else's index. Bing is the cautionary tale and Google's own API is the next one. Then hand the detail to the appendix slide, which carries prices, terms and the two open alternatives.
+
+The facts, with sources. Everything below was checked against vendor documentation on 15 September 2026.
+
+- **Google Custom Search JSON API.** Closed to new customers; the documentation says existing customers "have until January 1, 2027 to transition". Until then it is 5 USD per 1,000 queries with a 10,000 per day cap. It offers filters and a sort parameter (site, date, language, country), but no way to substitute the retrieval or ranking model, and it states nothing about the corpus. The site-restricted variant stopped serving traffic in January 2025.
+- **Bing.** Retirement announced 15 May 2025, effective 11 August 2025, for the whole API family at once: Web, Image, Video, News, Entity, Autosuggest, Spell, Visual and Custom. Under three months. The successor is Grounding with Bing Search inside Azure AI Foundry at 14 USD per 1,000 transactions, and Microsoft's terms say verbatim: "Developers and end users don't have access to raw content returned from Grounding with Bing Search." The same terms forbid copying, caching or storing the output and forbid using it to train models.
+- **Brave, and why its ranking cell is not a plain no.** Goggles are user-written re-ranking rules, which is a real control and the only one on the slide. It is still re-ranking on top of Brave's ranking of Brave's index, which stays uninspectable, and the terms forbid storing results beyond transient use or training on them. On size: the API page says "over 30 billion pages" while Brave's own 2026 blog posts say 40 billion. Both are Brave's figures, which is why the slide says "claims".
+- **Exa, Tavily and Perplexity.** No corpus anyone outside can check. Exa's about page claims "500B+ webpages", Perplexity's launch press claims hundreds of billions, and Tavily does not disclose its provenance at all. Filters yes, ranking replacement no, snapshot no. The data flows the wrong way for research: Exa's terms take a perpetual licence to input and output, and Tavily's reserve the right to train on customer input.
+- **OpenAI and Anthropic.** Neither names its index in its documentation. Anthropic's provider is reported as Brave, from the subprocessor list in March 2025, and not stated in the API docs. OpenAI's is undisclosed; Bing is confirmed only for the Azure OpenAI variant. Both are about 10 USD per 1,000 searches. OpenAI's `external_web_access: false` is a cache-only mode, not a pinned snapshot, so it does not make a run replayable.
+- **What none of them has.** No commercial API offers a fixed, replayable snapshot. The only replay in this landscape is Common Crawl's dated immutable crawls and SerpApi's 31-day search archive.
+- **Two numbers to avoid.** There is no official Bing index size; only third-party estimates. And Google's roughly 400 billion documents is trial testimony from 2023, not a Google publication, so attribute it that way or leave it out.
+
+→ next: what is actually underneath all of them.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Research sovereignty
+
+
+<div class="c-definition tight small">
+
+Methodological autonomy: the ability to inspect, reproduce, vary, operate and evaluate the whole information-access process.
+
+</div>
+
+
+
+<div class="grid-4 gap small">
+
+
+<div class="column">
+
+![The LHC tunnel at CERN](/slides/_assets/ows/infra/cern.jpg)
+**CERN · particle physics.** 25 member states, one accelerator.
+
+</div>
+
+
+<div class="column">
+
+![The ITER construction site in southern France](/slides/_assets/ows/infra/iter.jpg)
+**ITER · fusion.** 35 nations, one reactor none could build alone.
+
+</div>
+
+
+<div class="column">
+
+![Primary mirror segments of the James Webb Space Telescope](/slides/_assets/ows/infra/jwst.jpg)
+**Webb · astrophysics.** Three agencies fly it, the observations go to a public archive.
+
+</div>
+
+
+<div class="column">
+
+![A Sentinel-2 satellite of the Copernicus programme](/slides/_assets/ows/infra/sentinel.jpg)
+**Copernicus · climate.** Earth observation, free and open by policy.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-4 logos gap small">
+
+
+<div class="column">
+
+![Google](/slides/_assets/ows/infra/google.png)
+the web index, and the ranking
+
+</div>
+
+
+<div class="column">
+
+![Meta](/slides/_assets/ows/infra/meta.png)
+the social record
+
+</div>
+
+
+<div class="column">
+
+![Hugging Face](/slides/_assets/ows/infra/huggingface.png)
+the models and the datasets
+
+</div>
+
+
+<div class="column">
+
+![GitHub](/slides/_assets/ows/infra/github.png)
+the code · Microsoft since 2018
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning tight">
+
+**Our field's instruments are privately owned. No costs, no control.** What could go wrong?
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Photographs: J. Herzog CC BY-SA 3.0 · ITER Organization CC BY 2.0 · NASA/MSFC/D. Higginbotham · Rama CC BY-SA 2.0 fr. Wordmarks belong to their owners.
+
+</div>
+
+
+Notes:
+Do not rush this slide; it is the emotional turn of the first topic and it works by comparison. Define research sovereignty once, as methodological autonomy, and use it exactly that way for the rest of the talk. Then spend most of the time on the top row, because everyone in the room already accepts it. Particle physics did not ask a company for an accelerator, it built one with twenty-five member states. Fusion is the same argument at a larger scale: thirty-five nations, one reactor, because the thing is too expensive and too long-lived for any single owner. Webb is three space agencies flying one telescope, and the reason it counts here is the archive: the observations become public data that anybody can re-analyse, which is what makes the instrument a scientific instrument rather than a product. Copernicus is the same idea for the climate, with a free and open data policy written into the programme. Say the shared property out loud: in each case the community that depends on the instrument also owns and operates it, and the data is a public good by design. Then drop to the second row and let it land without commentary. The instruments our field depends on are the web index and the ranking, the social record, the model and dataset hub, and the place the code lives. Every one of them is a company. Nobody chose this and nobody is being accused of anything; it is simply where the field ended up. End on the question, and pause on it.
+→ next: here is what did go wrong.
+
+--
+
+## What could go wrong
+
+Every one of these was, at the time, infrastructure that somebody's research depended on.
+
+
+<div class="timeline">
+
+- **2018** Microsoft buys GitHub for **7.5 bn USD**
+- **2023** Twitter ends free API access; Reddit prices its own
+- **2024** Meta shuts down CrowdTangle
+- **2025** Bing Search APIs retired
+- **2026** NVIDIA agrees to acquire Hugging Face for **12.9 bn USD**
+
+</div>
+
+
+
+<div class="c-warning">
+
+Openness of an artefact is not enough. The infrastructure it lives on has to be a jointly managed public good: CERN for physics, and through CERN, Zenodo for everyone's data; EuroHPC for compute. **For the web there is no equivalent.**
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Microsoft newsroom, 4 Jun 2018 · Murtfeldt et al., *RIP Twitter API*, 2024 · Microsoft lifecycle notice, May 2025 · NVIDIA blog and Form 8-K, 2–3 Sep 2026 · Zenodo, operated by CERN with OpenAIRE and EU funding.
+
+</div>
+
+
+Notes:
+This is the answer to the question on the previous slide, and the timeline is deliberately dramatic. Lead with GitHub rather than with Hugging Face, because it makes the point without anyone having to take a position on a deal from this month. In 2018 Microsoft bought the place where research software lives, for 7.5 billion dollars, and the announcement promised that GitHub "will operate independently to provide an open platform for all developers". That is word for word the commitment NVIDIA and Hugging Face are making now about the place where models and datasets live. Be fair about both: there is no reason to doubt either intent. The risk is structural: one owner, one jurisdiction, one business model, and a community with no fallback. The Twitter case has numbers: after the paywall the number of Twitter-based studies dropped by 13 percent and about 60 percent of surveyed projects stalled or pivoted. This is the argument for building the substrate rather than renting it, not a geopolitical claim. Then be concrete about what a jointly managed public good looks like, because the audience will ask for examples beyond CERN. Zenodo is the best one for this room: it runs on CERN, it is funded by CERN, OpenAIRE and the European Union, and it describes itself as a viable and concrete alternative to commercial services. EuroHPC is the compute example, and it is the machine our own index runs on. If someone wants the general form, it is the European Research Infrastructure Consortium, the legal instrument behind ELIXIR, CLARIN and DARIAH; check the list before naming them from the stage. Then land the last line: none of these covers the web itself, which is the gap the next slide is about.
+→ next: so we built it.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OpenWebSearch.EU: building the index together
+
+
+<div class="grid-3-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![OpenWebSearch.EU consortium partners](/slides/_assets/ows/consortium-partner-logos.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important small">
+
+**Objectives**
+1. Build an open index of the Web
+2. Build a corresponding web search infrastructure
+3. Establish a network of infrastructure partners. 
+4. Bootstrap an ecosystem
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="timeline">
+
+- **Sep 2022** project start, Horizon Europe
+- **2023** first crawlers and pipelines on the HPC centres
+- **2024** daily index products, dashboard, CLI
+- **2025** datasets, search engine prototypes, toolings
+- **Feb 2026** project end; operation and scaling continue
+- **Nov 2026** follow-up project, rolling out on the European AI Factories
+
+</div>
+
+
+
+
+
+
+<div class="slide-citation">
+
+Granitzer et al., *Impact and development of an Open Web Index for open web search*, JASIST 75(5), 2024.
+
+</div>
+
+
+Notes:
+Say the full name once: OpenWebSearch.EU, collaboratively creating infrastructure and an index for web search. Then name the partner classes rather than reading logos: universities such as Passau, Radboud, Leipzig and Weimar, the computing centres LRZ, IT4I and CSC, CERN, DLR, and the Open Search Foundation. Check the partner list against openwebsearch.eu before the talk. The point of the timeline: it took a consortium three years to get from nothing to daily index products, and the operation did not stop when the funding did.
+→ next: how the index is produced.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Open Web Index: web data every day, ready to use
+
+
+<div class="grid-4-1 tiny">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![Open Web Index concept](/slides/_assets/ows/owi-concept.svg)
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="stat-card evidence">
+
+### 1,507 TB
+crawled
+
+</div>
+
+
+
+<div class="stat-card evidence">
+
+### 35 TB
+index
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 1,834
+public datasets
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 20-100 TB/Month
+crawl volume
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-4 small">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### CIFF
+A sparse inverted index, tokenizer included.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Parquet
+Text, language, topic, structured data, locations, technical metadata
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Embeddings
+Dense Jina vectors on selected subsets.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Federated Infrastructure
+3 HPC centres / 2 AI Factories - **to be extended**
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Dashboard figures May 2026 (openwebindex.eu).
+
+</div>
+
+
+Notes:
+This is the offer to the community, so make it the loudest sentence of Topic 1. Every day, new shards: text extracted, language and topic labelled, structured data parsed, near-duplicates marked, sparse index and embeddings built, each with a licence and a dataset card. The work that keeps small groups out of web-scale research is already done. Refresh the three numbers from the dashboard on the talk day and date them; the end-of-project media release of 24 August 2026 gives 39 billion URLs crawled, 185 languages, 28 million hosts and a 45 TiB index, which is a different accounting, so use one source and say which. The second half of the value is partitioning: by date, language, topic, host and structured-data type.
+→ next: what people have already built from it.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OpenWebIndex.eu: Dashboard and Access
+
+
+
+<div class="img-h-lg">
+
+![The openwebindex.eu dashboard: crawl volume, languages, datasets](/slides/_assets/ows/screenshots/openwebindex-eu-0926.png)
+
+</div>
+
+
+
+TODO: screenshot plus slides
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Two ways in: pull the index, or query it where it lies
+
+<div class="viz viz-full" data-viz="ows/owi-access" data-steps="3"></div>
+
+
+<div class="paper detail small">
+
+<span class="eyebrow">ECIR 2026 · Hendriksen, Hiemstra, de Vries</span>
+### Open Web Indexes for Remote Querying
+- **Question** Can a web-scale index be shared as plain files and queried where it lies, instead of behind an API?
+- **Setup** ClueWeb09-B, 12-B and 22-B as compressed Parquet on S3; BM25 run client-side in DuckDB; four schemas, each dropping one join.
+- **Conclusion** Seconds, not milliseconds. Nobody has to host a copy, and the retrieval model, the snapshot and the sub-collection are yours.
+
+</div>
+
+
+Notes:
+Two ways in. The first is the surprising one: the index is published as compressed Parquet files on ordinary object storage, and a client runs BM25 over them with DuckDB, reading only the postings a query touches. There is no search service in between and no institution has to host a copy, and because the ranking runs on your side the retrieval model, the snapshot and the sub-collection are all yours to change. Walk the file listing in one breath: every schema in the paper removes one join, and the leanest removes both. The dictionary maps terms to ids and holds document frequency, and it can go because Parquet already encodes repeated values and because document frequency is just the number of postings you downloaded — which also means two indexes merge by union instead of by rewriting term ids. Document lengths can go because the ranking stores impact scores instead of term frequencies; `docs` is still joined at the end, for the metadata of the top results only, which skips most of the file. Then the numbers: five to ten seconds for most queries with the leanest schema, a whole TREC Web Track topic set in ten to fifteen minutes, everything inside 45 seconds with the storage 650 kilometres away. Scaling is gentle, ten times the collection costs about three times the time and only one and a half times the transfer, and the generic format is not a tax, because the Parquet index came out smaller than the dedicated one, 18 GiB against 21 on ClueWeb09-B. owilix is the frame around both routes, and the download route is the one people reach for first: it behaves like a package manager over the index, with git-style pull, build and push; the slicing is the point, because most experiments start from a partition by language, topic or site list rather than from everything. Say the line here: an API lets researchers query someone else's experiment, bulk access lets researchers define their own.
+→ next: the hosted service.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OURRS.eu: the open web search API plus MCP
+
+
+<div class="grid-3-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="media img-h-lg">
+
+<video muted playsinline controls poster="/slides/_assets/ows/screenshots/ourrs-manufactruing-2605-poster.jpg" src="/slides/_assets/ows/screenshots/ourrs-passau-150926.mov"></video>
+
+<div class="figure-credit">
+
+ourrs.eu, index snapshot September 2026; screencast September 2026.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<div class="column tiny">
+
+
+<div class="stat-card evidence">
+
+### 1 Billion
+pages
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 950M
+typed entities
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 15
+verticals, plus an API and MCP
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 4
+isolated corpora
+
+</div>
+
+
+<div class="stat-card concept eyebrow">
+
+### Persisted AI Summaries 
+
+</div>
+
+
+<div class="stat-card concept eyebrow">
+
+### Agentic Relevance Feedback 
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note small tight">
+
+The Open Web Index Research Retrieval System - OURRS: an early web search prototype over a billion pages of the index (September 2026)
+
+</div>
+
+
+Notes:
+OURRS, two Rs. There is no paper; give the URL and the measurement date. Play thirty seconds. Then the research angle, which is the reason it exists: an agent cannot search a shard on disk, it needs a service it can call repeatedly. Snapshot id in every response, configurable ranking, corpus isolation so that ranking statistics do not leak between experiments, one API for people, applications and agents, and logging by design. Say "early prototype" out loud, and say that it is self-hostable, so a lab can run its own instrumented instance.
+→ next: what this community already does well, and what it needs.
+
+
+--
+
+## Where the OWI goes next
+
+### Scaling Up and Out
+
+- **Quantity:** Crawling across European Data Centers and AI Factories at scale
+  - New project for operationalising the OWI will start November 2026
+- **Quality:** Headless rendering, GenAI exclusing
+- Multimedia and multimodal data
+- **Tooling:** improved cli tooling, potential access to raw data, corpora & model management
+
+### OWI Lakes
+
+- Topical coherent, deduplicated and structured sub-indices
+- Every index as Parquet Data Lake on object storage, queried with SQL — remote representations of prebuilt indexes rather than copies to host
+- Community-driven, with OWI being the backbone
+
+
+
+<div class="slide-citation">
+
+Hendriksen, Hiemstra, Lin, de Vries, *Geese Belong in (Data) Lakes: An Index Lake for Anserini*, CIKM 2026.
+
+</div>
+
+
+
+<!-- .slide: class="smaller" 
+
+## Web search evaluation is hard in every dimension
+
+| Dimension | The instrument the community built | What it needs from the web |
+|---|---|---|
+| relevance | pooled test collections, TREC and CLEF tracks | documents and judgements |
+| generalisation | BEIR and the domain collections | many domains at once |
+| temporal drift | LongEval | the same collection, re-crawled over months |
+| multilinguality | Mr. TyDi, MIRACL, WebFAQ | many languages, not only English |
+| efficiency and cost | efficiency tracks, compression studies | the same corpus at several sizes |
+| robustness | WOWS, noise and distractor studies | real, messy web text |
+
+
+<div class="c-note">
+
+The designs are strong and well understood. Each of them needs web data: enough of it, recent enough, and already preprocessed.
+
+</div>
+
+
+Notes:
+This slide is a credit, not a critique, and it is the room's own work. Relevance was never the only dimension: a web search engine also has to be judged on coverage, freshness, multilinguality, efficiency and robustness, and this community built an instrument for each. Say the second half carefully: every one of these designs needs a supply of web data, and for most of them that supply was the hard part. LongEval is the clearest case; its web task needed the same collection re-crawled month after month, which only a search-engine partner could provide. Hold that thought, it comes back in the second part.
+→ next: what an open index can do for those designs.
+ -->
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## What the Open Web Index contributes to evaluation
+
+<span class="eyebrow">Web data collection at scale, and what a lab can do with it</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "caption": false}'></div>
+
+Notes:
+The infrastructure half of Topic 1 ends here: the project, the index, the ways in, and where it is going. What follows is the other half, and it is the half this room cares about — what a daily, preprocessed, web-scale collection makes possible for evaluation that was not possible before.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Today's corpora, and what an open index adds
+
+| Collection | Documents                                              | Crawled | What the text is                                            |
+|---|--------------------------------------------------------|---|-------------------------------------------------------------|
+| MS MARCO passage | 8.8M passages                                          | 2016–2018 | cleaned passages                                            |
+| ClueWeb22 | 10B pages, 207 languages                               | once, in 2022 | raw pages with DOM annotations, under licence               |
+| MS MARCO Web Search | a 100M-document benchmark on ClueWeb22                 | once, in 2022 | the same pages, with click labels                           |
+| LongEval web | dated snapshots, 2022–2023                             | from a search-engine partner | a partner's documents                                       |
+| BrowseComp-Plus | 100,195 documents                                      | fixed, 2025 | curated so agents can be compared                           |
+| **Open Web Index** | **39B URLs crawled, 14B indexed, 57.6 TiB index size** | **every day** | **crawled pages, 185 languages, structured data extracted** |
+
+
+
+<div class="c-positive">
+
+**The OWI adds** freshness, because crawl and index run daily; scale, because it is web-scale and growing; richness, as we also provide structured data and see it as community effort, so external contributions and requests are welcomed.
+
+</div>
+
+
+
+Notes:
+This is the contribution slide, so do not oversell it and do not undersell it either. Read one row of the table, not six. The honest shape of the field is that a test collection consumes web data, it does not produce it, so every collection here inherits the crawl it was built on and freezes on the day that crawl stopped. ClueWeb22 is ten billion pages crawled once in 2022; MS MARCO Web Search adds Bing click labels on the same frozen pages; LongEval got dated snapshots from a search-engine partner, and its 2026 edition has no web task at all. What a daily index adds is exactly the three things that were hard to get: freshness, scale and realism. Refresh the index numbers from the dashboard on the day. The follow-up project is not signed yet, so say "starts most likely in November 2026" and do not promise dates from the stage.
+→ next: the collection we cut from it, and the shared task it became.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Datasets from the index: language, and place
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![WebFAQ 2.0: an English question, its aligned Malay answer, and a mined hard negative](/slides/_assets/ows/papers/webfaq2.png)
+
+</div>
+
+
+<div class="paper detail">
+
+<span class="eyebrow">SIGIR 2026 resource</span>
+### WebFAQ 2.0 · multilinguality
+- **Built from** schema.org FAQPage markup, mined and crawled directly. The pairs are written by site owners, not generated.
+- **Size** 198M question–answer pairs in 108 languages, 14.3M of them aligned across 3,970 language combinations.
+- **Controls** which language, or which language pair, an experiment runs in. 1.25M queries ship with 200 hard negatives each.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![WebKurator.de: topical navigation on the left, regional selection on the right](/slides/_assets/ows/papers/webkurator.png)
+
+</div>
+
+
+<div class="paper detail">
+
+<span class="eyebrow">WebSci 2026</span>
+### WebKurator · region and topic
+- **Built from** the legal imprint of 5.54M German-language sites, geocoded and then topic-labelled automatically.
+- **Size** 2.58M sites in Germany carry both a location and a topic at launch.
+- **Controls** region and topic as two independent axes, so "this topic in that region" is a query, not a filter over one hierarchy.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Dinzinger et al., *WebFAQ 2.0*, SIGIR 2026 · Dinzinger et al., *The WebKurator.de Platform*, WebSci 2026. Figures CC BY 4.0.
+
+</div>
+
+
+Notes:
+The point of the pair is that they are cut from the same crawl along different axes, and each axis is a variable somebody in this room wants to control. WebFAQ is the index used as a training-data factory: structured data was extracted during processing, so FAQ pages can be harvested without a second crawl, and version 2 stops relying on someone else's Web Data Commons extraction and mines the URLs itself. What makes it an evaluation resource rather than a dump is the alignment and the negatives: 14.3 million pairs that say the same thing in two languages, and 200 mined hard negatives for each of 1.25 million queries. One honest detail worth saying: those negatives help when they are distilled with MarginMSE and hurt when they are used naively in a contrastive loss, because some of them are false negatives. WebKurator is the same index cut by place; the country split, if asked, is 85.6 per cent Germany, 7.3 Austria and 5.2 Switzerland. Imprint pages are a legal requirement in Germany, so they carry an address, and an address geocodes; that is why a national-scale regional index can be bootstrapped at all. Curlie is one-dimensional, and the WebKurator argument is that topic and region are separate questions. If asked what this has to do with evaluation: a regional sub-collection is a realistic, small, nameable slice, and those are the collections labs can actually afford to judge. Third strand, if time allows: continued pre-training on crawled index text improved cross-lingual hate-speech detection by about three macro-F1 points averaged over 16 benchmarks, which is Dang, Mitrović and Granitzer at LREC 2026 — evidence that this data measurably improves a model, not only a benchmark.
+→ next: and the collection this community will meet first.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OWS-Curlie-2025: the collection behind WOWS 2026
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The collection
+- Six months of our own crawl, March to August 2025, English pages of Curlie-listed sites.
+- **20.7M documents**, about 70 GB, with embeddings for the judged parts.
+- Three judged splits of 60 to 90k documents. One ships its qrels; two keep them withheld.
+- `owilix` to pull it, `ir-datasets-owi` to use it.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### The shared task
+- **WOWS 2026**, the third Workshop on Open Web Search, at ECIR in Delft.
+- Topics and judgements written by students in IR courses at Radboud, Jena and Kassel.
+- Run with **Webis**: ChatNoir serves it, PyTerrier baselines ship with it, runs go through TIRA.
+- The withheld qrels are what turn a dataset into a task.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important">
+
+A collection cut from our own crawl, judged in teaching, and evaluated on community infrastructure. No search-engine partner had to agree to any of it.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+`OpenWebSearch/wows-code`, directory `ecir26` · `ir-datasets-owi` · openwebindex.eu/corpora.
+
+</div>
+
+
+Notes:
+Goal: the abstract argument becomes something people can download this afternoon.
+
+The exact figures, kept off the slide. 20,746,181 documents, roughly 70 GB in 500 Parquet files, with Jina v3 embeddings for the judged subsamples. The splits are `radboud-val` with 63,639 documents, which ships its qrels, and `radboud` with 90,852 and `jena-kassel` with 77,382, which keep theirs withheld. The crawl window is 1 March to 31 August 2025, and WOWS 2026 runs from 29 March to 2 April. The 2026 workshop proceedings are not published yet, so cite the collection and the workshop rather than a paper.
+
+Give it the numbers out loud, not on the slide. Six months of crawl, the Curlie-labelled English sub-collection, 20.7 million documents, subsampled per split so that judging stays feasible. The chain is the point: our own crawl, our own preprocessing, a slice chosen on purpose, topics and judgements produced inside IR teaching at three universities, and evaluation on infrastructure this community already runs — ChatNoir for search and TIRA for the submissions, both from Webis. Nobody had to sign a data agreement with a search engine. Say clearly what is withheld and why: the validation split ships with qrels so people can develop, the two test splits do not, which is what makes it a shared task rather than a dataset dump. Two caveats to keep honest. There is no paper for this collection, so cite the workshop repository. And the earlier WOWS editions are a different task: the 2025 edition ran WOWS-Eval, automated relevance-label transfer, on ClueWeb22 through TIRA, and its headline result was negative — cheap automatic judges correlated at most 0.427 with human labels. Do not merge the two editions into one story from the stage.
+→ next: and the same collection, served live.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Evaluation through an API a partner runs
+
+
+<div class="card small">
+
+
+<div class="grid-4-1 gap-lg">
+
+
+<div class="column">
+
+### ChatNoir, run by Webis
+Frozen collections behind one research API: ClueWeb09, 12 and 22, MS MARCO, LongEval, and OWS-Curlie-2025 as its default index. Static corpora are what make a run citable years later. [chatnoir.eu/docs/api-general](https://www.chatnoir.eu/docs/api-general)
+
+</div>
+
+
+<div class="column">
+
+![The ChatNoir search interface, run by the Webis group](/slides/_assets/ows/screenshots/chatnoir.png)
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="card good small">
+
+
+<div class="grid-4-1 gap-lg">
+
+
+<div class="column">
+
+### OURRS, run in Passau
+The same idea for a corpus that changes daily, with agents as first-class clients. Searches **1 billion pages, 963.5M entities and 32M sites** of the Open Web Index, plus `owic25`, Wikipedia and MS MARCO. Eighteen verticals, six ranking profiles, MCP as a two-way channel for feedback.
+
+</div>
+
+
+<div class="column">
+
+![OURRS searching one billion pages of the Open Web Index](/slides/_assets/ows/screenshots/ourrs.png)
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="c-positive">
+
+### Works today
+- query a live corpus instead of hosting one
+- different search verticals: products, places, scholarly, news..
+- agents return feedback, summaries and opinions through MCP
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+### In the making
+- qrels carry no time stamp, so runs a week apart are not comparable
+- six ranking profiles, effectively fixed: no bring-your-own ranker
+- no clean export of a corpus slice with its judgements
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+ourrs.eu · chatnoir.eu. Index counts from ourrs.eu and cluster figures from the deployment, September 2026; refresh both on the day.
+
+</div>
+
+
+Notes:
+Goal: a research community can run its own search service, two of them already do, and the honest list of what that does and does not yet give an experiment.
+
+The two services.
+
+- **ChatNoir**, from Webis, is the one this room knows and the right model for reproducibility: its corpora are frozen, so a run against them is citable years later. It serves ClueWeb09, 12 and 22, MS MARCO, LongEval and OWS-Curlie-2025.
+- **OURRS** is aimed at what a frozen corpus cannot reach: a corpus rebuilt daily, and agents as the clients rather than an afterthought. Say three or four verticals, not eighteen: products, places, people and organisations, FAQs, search actions.
+- **MCP is the part to dwell on**, because it is the bridge into Topic 3. The channel that delivers a result can carry a judgement back, and AI opinions and summaries become searchable objects in their own right.
+
+The verified detail, if asked.
+
+- **Eighteen verticals**, read from the deployed application on 19 September 2026: All, My Results, Documents, AI Opinions, Multimedia, News, Scholarly, Products, Courses, Events, Places, FAQs, Conversations, Pages, Sites, Actions, Persons and Organisations, Artefacts.
+- **Six ranking profiles**, fixed: relevance, quality, authority, balanced, freshness by publication date and freshness by modification date, with quality as the default. That is the honest limit behind "no bring-your-own ranker".
+- **Four corpora on the same API**: `owi` for the rolling crawl, `owic25` for the Curlie collection, plus Wikipedia and MS MARCO v2.1 as static reference points. The front page states the live scale of `owi`: one billion web pages, 963.5 million entities and 32 million sites. Read it off the site on the morning of the talk, because it moves.
+- **The cluster numbers are reservations, not utilisation.** They are Kubernetes requests read from our own namespace; other namespaces are not visible, and actual consumption is not measured. Say "reserved".
+- **The capacity limit worth knowing.** The bulk tier is not uniform: ten nodes have 8 TiB disks and ten have 3 TiB, and Vespa spreads documents evenly, so the small disks set the ceiling. The corpus can roughly double before they fill, which is a 2x margin rather than the 5x the totals suggest.
+
+The right-hand column, said plainly. A live index is exactly what a temporal evaluation wants and exactly what breaks a fixed qrel file: the document you judged may have changed, moved or gone. Two lines of work are running. Temporal metadata carried with the judgements, in the spirit of LongEval, so a run can name the version of the world it was scored against. And export of both the slice and its qrels, so an experiment can leave the service and still be repeated. One honest exception stays: an inverse document frequency over a moving corpus cannot be snapshotted, and pretending otherwise would be worse than admitting it.
+
+→ next: what this part adds up to.
+
+--
+
+## Summary so far: infrastructure, not only models
+
+
+<div class="hypothesis h1">
+
+**Openness must extend beyond the model.** Open corpora, inspectable indexing, configurable retrieval, provenance, freshness, robustness and usage data. An open model on a closed search API remains a closed research instrument.
+
+</div>
+
+
+
+<div class="marks-step">
+
+- Evaluating an agent-search systems fuly means running web-scale retrieval which requires large web-crawls and significanct infrastructure.
+- No single institute affords that alone. On shared public infrastructure, many institutes can, which is the model of other infrastructure-heavy research fields with high impact
+- Building and operating an index and a search engine has become feasible for small teams, in part because coding agents now carry much of the engineering.
+
+</div>
+
+
+Notes:
+This is the summary of Topic 1, so say so: we asked what it takes to evaluate an agentic search system, we built the substrate, and this is what it adds up to. Recap in one breath before the hypothesis: a sovereign system needs an open corpus and an open index below the model, that index exists and is rebuilt daily, it can be pulled or queried where it lies, and it already carries a judged collection and a live endpoint that a lab can use this year. The first claim restated, then the systems argument: the unit of evaluation is moving from the component to the system, and systems need infrastructure that runs. The joint-effort sentence is the one to stress: exhaustive web-scale retrieval experiments with agents are beyond any one group, but not beyond a community that shares an index and public compute. The last point is first-person experience; say which parts of the pipeline and the search engine were built and are maintained that way.
+→ Topic 2, and what the index made askable.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Topic 2 · Scale and robustness as research variables
+
+<span class="eyebrow">What changes when the corpus grows, and when the text is real web text</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "caption": false}'></div>
+
+Notes:
+Topic 2 is what the index made askable. Both variables need the same thing: a corpus you can grow, shrink and vary yourself.
+
+--
+
+## Does scale matter, if we can isolate the effect in a test collection?
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/corpus-scale" data-steps="4"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="hypothesis h2">
+
+**Scale is a scientific variable.** Corpus size and complexity change effectiveness, efficiency and robustness. A result on a small collection does not carry over to the web by itself.
+
+</div>
+
+
+
+<div class="card">
+
+The relevant document stays one. What grows is what the ranker has to reject.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Explain the figure in one breath: the star is the relevant document, the rings are the corpus growing from ten thousand passages to the web, and the coloured dots are what competes with it: passages that look relevant, near-duplicates, other languages, contradictions. The web adds one more thing, cost. State this as a hypothesis; the next two slides are the evidence, and both were only possible because we could grow a corpus ourselves.
+→ next: the evidence.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## CoRECT: A Framework for Evaluating Embedding Compression Techniques at Scale
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+![CoRECT: Recall@100 against corpus size for truncation and quantization settings](/slides/_assets/ows/papers/corect.png)
+
+
+<div class="figure-credit">
+
+Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with distractors mined from TREC DL runs, after Fröbe et al. (ECIR 2025), not by random sampling.
+
+</div>
+
+
+
+<div class="c-positive tight small">
+
+- **Scale alone** costs **29 points** of Recall@100 from 10K to 100M, and flips which model is best.
+- **Quantization is free at every size**, down to 2 bits per dimension.
+- **Truncation and 1-bit are not**: free at 10K, costly at 100M.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+<span class="eyebrow">ECIR 2026</span>
+### CoRECT
+- **Question** Do compression methods hold up as the corpus grows?
+- **Setup** CoRE: the same 65 TREC DL 2023 queries and judgements throughout, the corpus grown from 10K to 100M passages. Each query keeps 10 relevant passages and **100 distractors** mined by the subsampling method of Fröbe et al.; the rest is random filler. Four embedding models, eight compression families.
+- **Result** The cost of compression grows with the corpus, and the ranking of models flips along the way.
+- **Conclusion** A conclusion drawn at 10K passages can be wrong at 100M. Compression must be evaluated at scale.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Caspari, Dinzinger, Ghosh Dastidar, Fellicious, Mitrović, Granitzer, *CoRECT*, ECIR 2026 · two follow-ups turn this into a method: when subsampled results extrapolate (ICTIR 2026) and how query-performance prediction behaves as the index grows (SIGIR 2026).
+
+</div>
+
+
+Notes:
+Goal: a compression decision taken at benchmark scale can be wrong at web scale, and the collection is built so that nothing but scale changes.
+
+Reading the figure.
+
+- Three panels, all Snowflake V2. Horizontal axis is corpus size on a log scale, 10 thousand to 100 million; vertical axis is Recall@100. Stars mark a significantly lower recall than the blue baseline, one-sided Wilcoxon at p = 0.05.
+- Panel (a): passage retrieval at full precision, one line per truncated vector size from 768 down to 24.
+- Panel (b): the same passages quantized, one line per bit depth from 32 down to 1.
+- Panel (c): the same as (b) for documents, which is why it ends at 10 million.
+- The blue line in (a) is the no-compression case: recall falls 0.82 to 0.53 on identical queries and judgements.
+- In (a), 384, 256 and 192 dimensions track the baseline, 96 separates, 48 and 24 collapse.
+- In (b), every bit depth sits on top of the others until 10 million, and only 1-bit binarisation pulls away at 100 million.
+
+How the corpus was built.
+
+- CoRE is subsampled from MS MARCO v2, not newly crawled, and keeps the TREC Deep Learning 2023 judgements fixed: 65 queries for passages across 10K, 100K, 1M, 10M and 100M, 55 queries for documents across 10K to 10M, and exactly 10 relevant items per query at every size.
+- Random sampling would remove the hard negatives and make the small corpora unrealistically easy. CoRE therefore uses the subsampling method of Fröbe, Parry, Scells, Wang, Zhuang, Zuccon, Potthast and Hagen, *Corpus Subsampling: Estimating the Effectiveness of Neural Retrieval Models on Large Corpora*, ECIR 2025.
+- The distractor mining, from the paper: take the runs submitted to TREC DL 2023, discard the bottom 20 per cent by effectiveness, fuse the rest with Reciprocal Rank Fusion, and keep the top 100 irrelevant or unjudged documents per query. Each query gets exactly those 100 distractors plus its 10 relevant items; the rest of the corpus is random filler.
+- So the corpus grows by adding filler while the hard part of the task stays fixed. The decay on the slide is what filler alone does to a constant retrieval problem.
+
+→ next: the same question, as a method.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Robustness: benchmark text is clean, the web is not
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![The Synthetic Noise dataset: a relevant passage placed at the start, middle or end of padding taken either from its own source page or from an unrelated one](/slides/_assets/ows/papers/noisy-setup.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+- **Setup** 41,371 MS MARCO passages, padded with real web text. 3 positions × 6 lengths × 2 context types = **36 sub-corpora**, six models.
+- **Result** At least **33 nDCG@10 points** lost across every model, 50 for GTE Qwen2. Arctic M: **79.6 → 4.3**.
+- **Conclusion** Position and unrelated context dominate. Chunking recovers only part.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap figure-80">
+
+
+<div class="column">
+
+![Arctic M: nDCG@10 as the relevant passage is buried in web text](/slides/_assets/ows/papers/noisy-arctic.png)
+
+</div>
+
+
+<div class="column">
+
+![GTE Qwen2 1.5B: the same experiment](/slides/_assets/ows/papers/noisy-qwen.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Dinzinger, Caspari, Ghosh Dastidar, Mitrović, Granitzer, *Investigating the Robustness of Embedding Models on Noisy Input Texts*, WOWS 2025 · Caspari et al., *When Is Complex Chunking Worth It?*, CIKM 2026.
+
+</div>
+
+
+Notes:
+Goal: benchmark passages are clean and web pages are not, and that difference costs more retrieval quality than most compression or model choices.
+
+Reading the figures.
+
+- Two charts, the same experiment on two models: Arctic M above, GTE Qwen2 1.5B below.
+- Each chart splits into In-Domain on the left and Out-of-Domain on the right, meaning the padding text is topically related to the passage or not.
+- Within each half the horizontal axis is how much padding was added, 100, 300 or 500 tokens, and the three bars are where the relevant passage sits: start, middle, end.
+- The red dashed line is the model's score on the clean passages, 79.64 for Arctic M. Every bar is a fall from that line.
+- Left half: with related padding the bars stay near the line, so length alone is survivable.
+- Right half: with unrelated padding everything drops, and further the more padding there is.
+- Within a group, start is always tallest. Arctic M at 500 tokens out of domain: 46.5 at the start, 6.4 in the middle, 4.3 at the end.
+
+How the collection was built.
+
+- 41,371 MS MARCO passages are the core. The dataset gives the source URL of each passage, so the surrounding page can be scraped and used as real padding rather than generated filler.
+- 36 sub-corpora come from varying three things: document length, the position of the relevant passage, and whether the padding is topically related. In-Domain padding comes from the passage's own page, Out-of-Domain from an unrelated one.
+- The dilution is the point: at 100 tokens of padding the relevant passage is still 68 per cent of the document, at 300 it is 24 per cent, at 500 it is 14 per cent, and in the longest setting roughly 98 per cent of the input is irrelevant.
+- Six models, from BGE small at 33 million parameters to GTE Qwen2 at 7 billion. Size does not rescue anyone.
+- The paper's own summary: a drop of at least 33 nDCG@10 points across all models, at least 50 for GTE Qwen2 1.5B at 500 tokens.
+- Chunking recovers part of the loss, and the companion CIKM 2026 study finds no strategy that wins across models, corpus sizes and metrics.
+- Why it belongs in a talk about infrastructure: the experiment needs real crawled pages with their boilerplate, which an owned index supplies and a cleaned benchmark cannot.
+
+→ next: Topic 3, where the data does not exist unless we create it.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Topic 3 · Usage data: simulate and pool
+
+<span class="eyebrow">The interaction column: what the agent actually did, and who gets to see it</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 2, "focus": "interaction", "caption": false}'></div>
+
+Notes:
+This part lets the loop run. The agent plans, searches, reads, reformulates and decides when to stop; the human steers and asks back. Every step leaves data behind, and the question is who gets it.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## A good summary beats a good ranking
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-lg">
+
+![OURRS answering a CLEF query: the summary is right, the relevant document is at rank 16](/slides/_assets/ows/screenshots/ourrs-search-clef.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+ourrs.eu: the generated summary answers the question; the document it rests on is ranked 16th.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="c-danger">
+
+### What the measure says
+The relevant document is at rank 16. **nDCG@10 scores this as a miss.**
+
+</div>
+
+
+
+<div class="c-positive">
+
+### What the user says
+The answer was right, it arrived first, and the evidence was one click away.
+
+</div>
+
+
+
+<div class="c-insight">
+
+Neither number is wrong. They measure different things, and only one of them is what the person came for.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Open the part with this, before any history, because it makes the case in one screen. Same query, same system: the generated summary answers it correctly, and the document that supports the answer sits at rank sixteen. Run the standard measure over that result list and it is a failure, because nDCG@10 never sees rank sixteen. Ask the person and it is a success. Say clearly what this is and is not: it is not an argument that ranking stopped mattering, and it is certainly not an argument against offline evaluation. It is an argument that the thing we are measuring and the thing the user experienced have come apart, and that we cannot tell how far apart without watching people use the system. That is what the rest of this part is about.
+→ next: and this is not the first time we have needed that data.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The web logs we could get were few, and thin
+
+
+<div class="timeline">
+
+- **2006** AOL log released, *withdrawn after three days*
+- **2006** MSN log released under licence
+- **2011 · 2013** Yandex challenges
+- **2018** Sogou-QCL
+- **2020** ORCAS: clicks, no sessions
+- **2021** TripClick
+- **2022** Baidu-ULTR, for the WSDM Cup
+- **2024** MS MARCO Web Search
+
+</div>
+
+
+
+<div class="grid-3 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="c-danger">
+
+### Legal and commercial challenges
+"Research with very large query logs was conducted in industry and at major search providers. The AOL log is the only exception."
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Logs created in academia
+The Sowiport digital library logged **558,008 sessions** and about **8M interactions** in one year, 179,796 of them queries. Small, local, and ours. SimIIR 2.0 trains its user models on exactly this.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+### Today we have an economic challenge
+An agent trace costs GPU time and a running search engine. One group produces thousands of trajectories; a platform produces billions.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote">
+
+We missed much of the user data of web search. We should not miss the interaction data of agentic search.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Reimer et al., *The Archive Query Log*, SIGIR 2023 · Craswell et al., *ORCAS*, 2020 · Zerhoudi et al., *The SimIIR 2.0 Framework*, CIKM 2022, on the Sowiport User Search Session dataset.
+
+</div>
+
+
+Notes:
+Goal: web-search interaction data was never ours to collect, only occasionally ours to receive, and the same thing is about to happen with agent traces for a different reason. This is the data half of the argument made on the opening slide about operating a system; do not say we learned nothing from logs, say that what a log contains is decided by whoever runs the system.
+
+The timeline, with what is verified and what to be careful about.
+
+- **2006 AOL.** About 20 million queries from 650,000 users, released on 4 August 2006 and withdrawn on 7 August after users were re-identified. The dataset never went away in practice, which is part of the lesson.
+- **2006 MSN.** Microsoft released a query-log excerpt under licence to research groups through a request-for-proposals process. The figure of twelve recipients comes from an earlier check and is not re-verified, so say "under licence to selected groups" rather than a number.
+- **2011 and 2013 Yandex.** The Relevance Prediction Challenge in 2011 and the Personalized Web Search Challenge in 2013, both released as click logs with anonymised identifiers rather than raw text.
+- **2018 Sogou-QCL.** Query logs with weak relevance labels derived from clicks, released with a SIGIR paper.
+- **2020 ORCAS.** 18.8 million click records over 10.4 million distinct queries, tied to 1.4 million MS MARCO documents. Clicks only: no sessions, no ordering, no user identifiers.
+- **2021 TripClick.** About 5.2 million user interactions from the Trip Database health search engine, collected 2013 to 2020, roughly 700,000 unique queries. Domain-specific, not web scale.
+- **2022 Baidu-ULTR.** Released for the WSDM Cup 2023. Its availability has been intermittent; check the download before naming it as a live resource.
+- **2024 MS MARCO Web Search.** 10 million queries in 93 languages with Bing click labels, on a 100 million document subset of ClueWeb22.
+
+The digital-library counterpoint, which is the new card.
+
+- The Sowiport User Search Session dataset holds 558,008 sessions and about 8 million interactions from April 2014 to April 2015, of which 179,796 are queries, with 58 distinct action types logged.
+- SimIIR 2.0 trains its Markov interaction and stopping models on it, split into exploratory and lookup subsets.
+- The point for this talk: where academia did have real interaction data, it was because a research institution ran the search system. A digital library is small, but it is operated by its own community, which is the same argument as the opening slide one layer down.
+- The paper's own framing is worth borrowing: for evaluation with few users, as in digital libraries, simulation is the alternative to the Cranfield paradigm and to controlled user studies.
+
+→ next: remedy one.
+
+--
+
+## Remedy one: simulate the user
+
+- Simulated users are instruments for controlled experiments
+- Complement human studies and do not replace them.
+- recision@10 is already a user simulation of a user who reads exactly ten documents.
+- It's not about whether to simulate, but how realistic simulation can get
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+<span class="eyebrow">2016</span>
+### SimIIR 1.0
+The Complex Searcher Model: query, scan a snippet, read, judge, stop. Every decision a fixed rule.
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+<span class="eyebrow">2022</span>
+### SimIIR 2.0
+The rules give way to Markov models trained on real library logs, split by user type, and queries are generated from what the session has already seen.
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+<span class="eyebrow">2024–25</span>
+### LLM-driven
+A language model plays the user, and carries a cognitive state that can be read afterwards.
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+<span class="eyebrow">2024</span>
+### SimIIR 3.0
+Ten authors from several groups fold all of it into one framework instead of four incompatible codebases.
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="slide-citation">
+
+Maxwell & Azzopardi, *SimIIR*, SIGIR 2016 · Zerhoudi et al., *SimIIR 2.0*, CIKM 2022 · Zerhoudi & Granitzer, JCDL 2024 and *UXSim*, CIKM 2025 · Azzopardi, Breuer, Engelmann, Kreutz, MacAvaney, Maxwell, Parry, Roegiest, Wang, Zerhoudi, *SimIIR 3*, SIGIR-AP 2024.
+
+</div>
+
+
+Notes:
+Start with why, because the why is the whole argument. We did not begin simulating out of enthusiasm; we began because there were no logs to look at and because the interactions that mattered — reformulating, giving up, coming back — were invisible even when there were. Then walk the four cards as one movement, from rules to learned behaviour to a model that speaks. **SimIIR 1.0**, Maxwell and Azzopardi at SIGIR 2016, contributed the Complex Searcher Model: a searcher that issues a query, scans the result page, decides which snippet to open, reads, judges, and stops. Every one of those decisions is a fixed rule you configure, which is exactly what makes it a controlled instrument and also what makes it unlike a person. **SimIIR 2.0**, 2022, replaced the rules where it could. Interaction and stopping become Markov models trained on the Sowiport library logs, fitted separately for exploratory and lookup users, and the query generator stopped drawing from the topic alone and started building candidates from what the session had already seen. That is the step where simulated behaviour began to be learned from data rather than declared. **Then language models arrived** and the simulated user became one, with a cognitive state that can be inspected after the run rather than a hidden state machine. **SimIIR 3.0** is not a fifth idea; it is ten authors from several groups folding all of it into one framework, which is what turned a local tool into something a community can build on. The next slide shows what it contains. Say the caveat once, plainly, and do not repeat it later: these are instruments for controlled experiments, not stand-ins for people.
+→ next: what a simulator has to contain by now.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## SimIIR 3.0: what a simulator has to contain
+
+
+<div class="img-h-lg">
+
+![The SimIIR 3 framework. Green marks what 3.0 added: conversational and Markov users, cognitive states, pyTerrier retrieval and LLM-based variants](/slides/_assets/ows/papers/simiir3-framework.png)
+
+</div>
+
+
+
+<div class="grid-3 gap-lg small">
+
+
+<div class="column">
+
+**LLM-based variants.** One generic wrapper, so any model can drive the simulated user.
+
+</div>
+
+
+<div class="column">
+
+**Conversational components.** Utterance strategy, response-level stopping, context, flow.
+
+</div>
+
+
+<div class="column">
+
+**Explicit cognitive states.** The simulated user carries what it believes it has found and still needs; that state drives the next query and the stop.
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Azzopardi, Breuer, Engelmann, Kreutz, MacAvaney, Maxwell, Parry, Roegiest, Wang, Zerhoudi, *SimIIR 3: A framework for the simulation of interactive and conversational information retrieval*, SIGIR-AP 2024. Figure from the authors' talk.
+
+</div>
+
+
+Notes:
+This is the state of the art in one picture, and it is worth showing because the list is longer than people expect. Read the figure in three moves rather than box by box. On the left, what a simulation is configured from: topics, a retrieval system and now a conversational agent. In the middle, the searcher models that consume those configurations. On the right, the two columns of components a simulated user is assembled from, classic search on the blue side and conversation on the green. Green is the whole story of version 3: conversational users, Markov users, cognitive states, pyTerrier underneath and language-model variants of every component. Two things to stress. Language-model support is a wrapper, so the simulated user can be any model, which is what made the last two years of work possible at all. And the architecture keeps the parts that make a simulation checkable: a real retrieval toolkit underneath through pyTerrier, Markov models for the transitions, and an explicit cognitive state. Explain the cognitive state briefly, because it is the component people ask about. A classic simulated searcher is a transition machine: it queries, examines a result, judges it, and stops on a rule. A cognitive state adds a small represented mind between those steps, holding what the user believes they have found so far, what is still missing and how certain they are, updated after each result and used to choose the next query and the moment to stop. The value is not realism, it is inspectability: when a simulated session behaves oddly you can read the state that produced it, which is impossible with a prompt-only simulated user. Then the honest note, from the authors' own closing slide: their research directions are still questions, not answers — query generation quality, decision-making fidelity, behaviour modelling. As of late 2024 the framework's own authors were not claiming that language-model simulators were validated.
+→ next: and once you can model a user, you can put that model inside retrieval.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## PersonaRAG: the user model moves inside retrieval
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-lg">
+
+![PersonaRAG's five user-centric agents, exchanging through a global message pool](/slides/_assets/ows/papers/personarag-agents.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+<span class="eyebrow">IR-RAG @ SIGIR 2024 · Zerhoudi & Granitzer</span>
+### PersonaRAG
+- **Question** Can agents that model the user from live interaction make retrieval and generation more accurate and more personal?
+- **Setup** Five agents (profile, contextual retrieval, live session, document ranking, feedback) write into a shared message pool that conditions retrieval and generation. 500 questions each from Natural Questions, TriviaQA and WebQuestions, generator GPT-3.5.
+- **Result** WebQuestions accuracy rises from 38.5% to 63.5% on the top three passages, Natural Questions from 36.6% to 49.0%, both against vanilla RAG. On TriviaQA the model without retrieval still wins, which the authors attribute to contamination.
+- **Conclusion** Modelling the user pays off inside the pipeline, not only in the evaluation of it.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight tight">
+
+The constructs a user simulator needs — profile, session, preferences, feedback — turn out to be useful inside retrieval, not only in the evaluation of it.
+
+</div>
+
+
+Notes:
+This is the turn the whole simulation arc was building towards, so give it its own slide. The five agents are the same constructs a user simulator needs — who the user is, what this session is about, what they have asked before, what they would rank highly, how they reacted — but here they run while the query is being answered rather than in an experiment afterwards. The global message pool is the mechanism worth pointing at: the agents do not call each other, they write into a shared state that the retrieval and the generation both read, which is why the same design scales to more agents. Quote the WebQuestions number but say the baseline out loud: the generator is GPT-3.5, not a frontier model, and each dataset is 500 sampled questions. The TriviaQA row is the honest one and it is better to volunteer it, because the no-retrieval model wins there and the authors themselves suspect training-data contamination. Then the line on the slide, and be careful how you say it. PersonaRAG is not motivated by user simulation and does not cite it: the paper's own framing is that RAG fails to personalise, and its related work is on personalisation and multi-agent systems. So do not claim a lineage from SimIIR to PersonaRAG, because anyone who opens the paper will not find one. What is defensible, and what the slide says, is convergence: the five constructs PersonaRAG needs are the same ones a user simulator needs, and the same group arrived at both. If challenged, concede the provenance point immediately and keep the observation, which is the interesting half anyway: modelling the user pays off on both sides of the experiment.
+→ next: and how good is any of this, measured against real people?
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## How good is the simulation, and where does it stop?
+
+| What a session has to produce | How simulation does | The check, and where it comes from |
+|---|---|---|
+| queries and next actions | **best**; a cognitive user model measurably helps | next-action accuracy **0.37 → 0.48** on the Sowiport sessions, 0.32 → 0.46 on AOL · *CACSM*, JCDL 2024 |
+| evidence selection and stopping | **partly**; the errors are systematic, so it has to be calibrated against people | **480 human sessions** across traditional, conversational and hybrid interfaces · *SearchLab*, CHIIR 2025, and the *UXLab* pilot, CHIIR 2026 |
+| satisfaction, trust, effort | **not simulated**; it can only be inferred from behaviour | cognitive states inferred over **50,942 sessions**, and they help most exactly where click signals are weakest · *Beyond the Click*, ECIR 2026 |
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="c-positive">
+
+Simulation is strong where behaviour is typed, and that is the part an experiment controls. It is good enough to build on.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+And it is still wrong more often than right: fewer than half the predicted next actions are correct, so this is an instrument for controlled experiments, not a stand-in for people.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Goal: place the honest boundary before scaling any of it up. Simulation is strong on what people type and weak on what they feel, and the only published comparison against real sessions gets fewer than half its next actions right.
+
+How to read the table. Each row is a thing a simulated session has to produce, ordered by distance from the keyboard: queries are typed and therefore logged, stopping is a decision that has to be inferred, satisfaction is internal and can only be asked about. The third column is deliberately the evidence rather than an opinion, so every claim in the middle column has a paper behind it.
+
+Row by row.
+
+- **Queries and next actions.** CACSM is the only published comparison of one of our simulators against held-out human sessions, which is why it is the number to quote rather than a claim of realism. Adding a cognitive user model lifts next-action accuracy from 0.3683 to 0.4772 on the Sowiport sessions and from 0.3150 to 0.4609 on AOL. Say the second half out loud: on plain query and click prediction a simple probabilistic baseline still wins, and do not quote its stop-prediction numbers, which are degenerate at 1.0.
+- **Evidence selection and stopping.** This is where human sessions are needed, and where the ceiling shows: SearchLab's 480 sessions and UXLab's eight-person pilot are what a single group can run. Hold that number in mind against the hundred thousand simulated steps on the next slide, because the asymmetry is the pooling argument.
+- **Satisfaction, trust and effort.** Beyond the Click does not collect new human data; it infers cognitive state from behaviour already logged, over 50,942 sessions, and the gain is largest where click signals are weakest. Treat it as how far inference gets without asking people, which is further than expected and still not far enough. The caution, if pressed: a shuffled-label control beats the cognitive labels in three of twelve cells, so part of the gain is regularisation.
+
+The line to land before moving on: this is good enough to build on, which is why the next step was to point the same machinery at agents rather than at people.
+
+→ next: so we turned it on agents.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## AgentSim: we simulate agents now, because agents search
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+![AgentSim: grounded corpora and corpus-aware seeding feed a configurable retrieval and reasoning workflow, whose traces are validated and written to an agent-trace corpus](/slides/_assets/ows/papers/agentsim-workflow.png)
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### The run
+- 1,000 seed queries per corpus, chosen to cover it
+- MS MARCO, Quasar-T, CausalQA, via ChatNoir
+- GPT-4o, Mistral Large, DeepSeek-V3
+- Up to seven retrieval–reasoning cycles
+
+</div>
+
+
+
+<div class="card good">
+
+### What came out
+- **103,567** trace steps from 21,000 trajectories
+- **199,968** unique documents
+- every answer grounded in a cited document
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important">
+
+SimIIR simulated the person at the keyboard. What searches now is an agent, so the unit of simulation is a trajectory, and a trajectory can be checked against its own citations.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Granitzer, Mitrović, *AgentSim: A Platform for Verifiable Agent-Trace Simulation*, SIGIR 2026, Fig. 1 (CC BY 4.0).
+
+</div>
+
+
+Notes:
+Goal: the object of simulation moved from the user to the agent, because the agent is what searches now, and agent traces can be produced cheaply and verified.
+
+Reading the figure, left to right.
+
+- **1 and 2, the inputs.** Grounded corpora with questions, and corpus-aware seeding: cluster the corpus and draw seed queries that cover it, instead of sampling at random. Random seeds revisit the same regions; corpus-aware seeding reaches cluster coverage of 1.00 against 0.97 to 0.99 for random, with near-zero document redundancy.
+- **3, the middle box, is AgentSim itself.** A configurable RAG workflow, built visually or from the command line, running the cycle the figure shows: search with query reformulation, retrieve, rerank, summarise, and round again. That loop is the difference from SimIIR, whose searcher queries, examines a result, judges it and stops.
+- **4, the validation loop, and the trace excerpt on the right.** Every step records the query, the answer, the evidence count and whether it was verified. Because the answer names the documents it used, grounding is checked rather than assumed: of 1,385 substantive answers all were grounded in their cited documents, mean token coverage 0.872, and 83.3 per cent of 6,125 atomic claims were fully supported under an entailment check.
+
+The cost, since it is the argument. Roughly 20 million API tokens, 200 to 300 dollars for the whole corpus, about 0.14 dollars per simulation, 58 steps on average.
+
+One finding to quote if there is time, because it is about the agents rather than the platform: the three models explore very differently. GPT-4o retrieved 31.7 per cent more unique documents than DeepSeek-V3 on MS MARCO and 176 per cent more on CausalQA, while DeepSeek-V3 falls back on keyword reformulation in 23.3 per cent of cases against 8.1 for GPT-4o. Behaviour is model-specific, which is why it has to be measured rather than assumed.
+
+Keep the both-roles observation for the spoken line if it lands: the same trajectory is the experiment and the product, because the agent stands in for the user and works for the user at once.
+
+→ next: and what those traces are worth.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Learning very small retrieval models using Agent Traces
+
+
+<div class="grid-3-1 gap-lg">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="ows/fellowship" data-steps="3"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### The setup
+- Teacher: Qwen 3-Next 80B, 5,000 rollouts
+- Kept: 1,490 accepted trajectories, 16,488 steps
+- Labels: seven retrieval actions
+- Student: Granite 4.1 3B on 13,194 actions
+- Baselines: the same model prompted, and TF-IDF
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+A small model trained on the traces of a large one learns to *run* the search loop, not just to label it: the action policy transfers, and the end-to-end answer improves.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Al-Maamari, Zerhoudi, Granitzer, Mitrović, *The Fellowship of the Query: Learning Retrieval Actions*, CIKM 2026 short paper.
+
+</div>
+
+
+Notes:
+Goal: one minute. Traces are training data, and the capability they teach can be moved into a small model.
+
+- **The task.** Given the state of a search trajectory, predict which of seven actions comes next: decompose, search, reformulate, extract, synthesise, verify, finish.
+- **The filtering matters.** 5,000 teacher rollouts, only 1,490 accepted. The student learns from work that succeeded, not from everything the teacher did.
+- **The headline.** Macro-F1 0.65 for the fine-tuned 3B model against 0.17 for the same model prompted zero-shot, and 0.54 for a TF-IDF baseline. The capability is learned, not prompted.
+- **The check that matters more.** Swapped in as both controller and generator over 149 held-out trajectories, end-to-end exact match rises from 0.75 to 0.79 and token F1 from 0.78 to 0.83. That says the policy transferred, not only the classifier.
+- **Why it belongs here.** It closes the cost argument: if traces can be made cheaply and verified, the capability they teach does not have to be rented from a frontier model.
+
+→ next: and yet none of it tells us who asked.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## We cannot see who is behind the prompt
+
+
+<div class="c-warning">
+
+Every instrument we have assumes one person with one intent behind each action: click models, session analysis, personalisation, relevance itself. When the thing issuing the query is an agent, both halves of that assumption fail.
+
+</div>
+
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="stat-card fails">
+
+### 0.640 → 0.586
+click-model AUC, once half the training data comes from agents the platform could not validate
+
+</div>
+
+
+**Behind the Prompt** argues the attribution problem is structural, not a detection gap: an action cannot be traced to an autonomous or an operator-directed origin. The click model is what that costs in practice.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="stat-card fails">
+
+### 0.53 → 0.10
+share of an agent's own constraints surviving one, then five rounds of context compaction
+
+</div>
+
+
+**The Compaction Cliff** adds the second failure: the agent forgets its own instructions as the session runs, so even its behaviour is not a stable expression of a goal it was given.
+
+</div>
+
+
+</div>
+
+
+
+<div class="marks-ask small">
+
+- Do agents query in parallel rather than in sequence, and does that break our session model?
+- How do they choose sources, and can that be steered?
+- Do they search for tools and skills rather than for documents?
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Granitzer, Dang et al., *Behind the Prompt: The Agent-User Problem in IR*, 2026 · Zerhoudi, Mitrović, Granitzer, *The Compaction Cliff in Long-Running AI Agent Memory*, CIKM 2026.
+
+</div>
+
+
+Notes:
+Goal: watching agents is not the same as understanding users, because the prompt that set the agent going is invisible and the agent does not hold on to it.
+
+What each paper actually shows, since both are easy to misread as being about something else.
+
+- **Behind the Prompt** is not a detection paper. Its claim is a non-identifiability argument: whether a given action was chosen by the agent or dictated by its operator cannot be recovered from text, timing, community or votes. The empirical half measures what that costs an instrument we rely on: a position-based click model trained on agent upvotes falls from 0.640 to 0.586 AUC, 8.5 per cent, once half its training data comes from low-validation agents. The evidence base is the Moltbook trace set, 370,737 posts and 3.9 million comments from 46,872 agents over the platform's first twelve days.
+- **The Compaction Cliff** is not about search quality. It measures how much of an agent's own configuration survives its memory being compacted: with a standard compaction prompt, 53 per cent of constraints survive one round at 50 per cent compression and 10 per cent survive five rounds. Routing each knowledge type through its own retention policy holds recall near 0.96, so the cliff is a design fault rather than a law, but the default behaviour is the one we will meet in logs.
+- **Put together**, the two give the summary line: we cannot see the prompt, and the agent does not keep it either. So a trace tells us what an agent did, not what a person wanted, which is why agent traces alone cannot replace user data.
+
+The three questions are genuinely open, and asking them of this room is the point. We do not have answers.
+
+→ next: which is where Topic 3 ends up.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Summary: we can make behaviour, not observe users
+
+<span class="eyebrow">Topic 3 · simulate, then pool</span>
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### What we solved
+Behavioural data at scale. Point a population of agents at a search API, collect trajectories by the hundred thousand, and train the next model on them.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### What we did not
+How a person works *with* an agent — what they ask it, what they correct, when they stop trusting it — is visible only to whoever operates the assistant. The prompt is the missing half, and no volume of agent traces recovers it.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote small">
+
+1. Human–agent interaction is now as foundational as the query log once was, and we do not have it.  We missed much of the user data of web search. We should not miss the interaction data of agentic search.
+2. Generating agent traces at scale is also a matter of cost. 
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Roegiest, Granitzer, *IIRSim Studio*, SIGIR 2026 · Schaer et al., Sim4IA 2025 report, SIGIR Forum.
+
+</div>
+
+
+Notes:
+Goal: close Topic 3 by separating the win from the gap, then make the ask.
+
+This is the constructive end of Topic 3 and the concrete ask, and it closes the loop back to the opening hypothesis. Concede the win first: trace generation stopped being the bottleneck, and the Fellowship result shows the traces are genuinely useful. Then the sentence that matters: none of that is user data. We have a very good simulation of the user and no observation of the real one, and the interaction between a person and an agent is as foundational now as the query was in 1998 — it is the unit everything else will be built on, and nobody outside the platforms has it. No amount of simulation substitutes for it. A search endpoint that people use for real work is the only place both halves exist at once, which is why the donation mechanism matters more than any single dataset: consent at the end of a session, the query and the trajectory kept, the identity not. Then the format, so that ten groups donating produce one corpus rather than ten. IIRSim Studio's provenance bundles are a starting point and Sim4IA is where the format is already being discussed.
+→ Topic 4.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Topic 4 · Societies of humans and models
+
+<span class="eyebrow">The collaboration column: many agents, many people, shared knowledge</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 3, "focus": "collaboration", "caption": false}'></div>
+
+Notes:
+This part adds agents that delegate and verify, people who work with several of them, and a shared knowledge store that agents write and read. It is the least settled part of the talk, and it says so.
+
+--
+
+## The ecosystem is a graph, not a pipeline
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/interaction-topology" data-steps="4"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="hypothesis h4">
+
+**Search is becoming an information ecosystem.** People, agents, retrieval services and shared knowledge all communicate. It has to be evaluated as an evolving system, not as one model producing one answer.
+
+</div>
+
+
+
+<div class="c-note">
+
+A layer above retrieval would have to carry what the edges need: persistent workspaces, delegation, verification, and knowledge units with provenance that outlive a single run.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Step the graph: one person and one system and a single query; then agent to agent, where one delegates and another verifies; then the shared knowledge every agent can read and write; then the human edges, person to person and person to somebody else's agent. The unit of study is the network, and a query is one edge in it. Do not name the platform we are building; describe what such a layer has to provide. Mention local-first retrieval as the other end of the design space: the retrieval layer can sit on the user's own device and still join the ecosystem.
+→ next: whether any of this works without a purpose.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## An all-agent network reproduces the form, not the function
+
+Moltbook: a Reddit-shaped network where every participant is an agent. **1.31M posts, 6.7M comments, 120,811 agents, 5,400 communities, 40 days.** Every structural feature of social media is present.
+
+
+<div class="stat-grid">
+
+
+<div class="stat-card fails">
+
+<span class="eyebrow">threads exist</span>
+
+### 91.4%
+of authors never return to their own thread. Reciprocity is **3.3%**, against 22 to 60 per cent on human platforms.
+
+</div>
+
+
+<div class="stat-card fails">
+
+<span class="eyebrow">votes exist</span>
+
+### 97.3%
+of comments receive no vote at all. In 6.7M comments there are **1,084** downvotes.
+
+</div>
+
+
+<div class="stat-card fails">
+
+<span class="eyebrow">profiles exist</span>
+
+### 97.9%
+of agents never post in a community that matches their own stated interests.
+
+</div>
+
+
+<div class="stat-card fails">
+
+<span class="eyebrow">replies exist</span>
+
+### 64.6%
+of comment–post pairs carry no argumentative relation at all. Open disagreement: **0.01%**.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+**What did move behaviour** was the instruction file, not the model. Hard constraints changed the platform within a day; soft guidance was ignored.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+**Agents interacting without a task produce social form without social function.** Purpose has to come from the work and from the people.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Ghosh Dastidar, Klement, Romazanov, Einwiller, Dang, Dinzinger, Granitzer, Hautli-Janisz, Katzenbeisser, Lemmerich, Mitrović, *Form Without Function: Agent Social Behavior in the Moltbook Network*, 2026.
+
+</div>
+
+
+Notes:
+Goal: an agent society without a purpose imitates the appearance of one, which is the warning this topic has to clear before proposing an agent ecosystem of our own.
+
+Setting. Moltbook launched in January 2026 as a Reddit-style network where only agents post, and Meta acquired it in March. We crawled forty days with our own crawler: 1,312,238 posts, 6.7 million comments, 120,811 post authors, 5,400 communities, with 10 per cent of posts flagged as spam.
+
+The four boxes, and the form each one hollows out.
+
+- **Threads exist, conversation does not.** 91.4 per cent of post authors never return to their own thread, 85.6 per cent of threads are flat, and reciprocity is 3.3 per cent where human platforms run at 22 to 60. Speed is not the problem: the median first comment arrives after 55 seconds.
+- **A voting system exists, evaluation does not.** 97.3 per cent of comments receive zero upvotes, and across 6.7 million comments there are 1,084 downvotes in total, 0.016 per cent. There is no signal of quality anywhere in the network, which for this room is the interesting part: no implicit feedback, no relevance signal, nothing to learn from.
+- **Profiles and communities exist, topical structure does not.** 97.9 per cent of agents never post in a community matching their own bio, 92.5 per cent of communities are topical melting pots, and one general community holds 63.4 per cent of all posts.
+- **Replies exist, argument does not.** 64.6 per cent of comment–post pairs carry no argumentative relation, and open disagreement is 0.01 per cent. The deeper a thread goes the more it fills with rephrasings, so conversations stall rather than develop.
+
+Two more findings if they are asked for. Participation is grotesquely unequal: the three most active agents contributed 964,438, 947,272 and 279,631 items while the median agent contributed four. And the technical layer does respond: hard constraints such as rate limits and a crypto filter changed behaviour within a day, while soft guidance in the same instruction file was ignored. That is the evidence for the claim on the right: the instruction file drives the platform, not the model.
+
+The lesson to carry into the rest of the topic: collaboration among agents needs a purpose, and the purpose comes from a task, from retrieval, and from the people the work is for.
+→ next: what a purposeful shared structure looks like.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Index structures for agents: nuggets with provenance and lifecycle
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![NuggetIndex: passage retrieval versus nugget retrieval, 887 versus 320 input tokens](/slides/_assets/ows/papers/nuggetindex.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+<span class="eyebrow">SIGIR 2026</span>
+### NuggetIndex
+- **Question** Can retrieval units be aligned with nugget-based evaluation?
+- **Setup** Atomic facts with evidence links, validity intervals and lifecycle state; five QA benchmarks.
+- **Result** Nugget recall +42%, conflicts −55%, generator input 887 → 320 tokens.
+- **Conclusion** The unit that evaluation scores answers with can be stored, governed and shared.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026.
+
+</div>
+
+
+Notes:
+For a CLEF audience the bridge is the point: nuggets are already the evaluation unit of TREC RAG and of nugget-based answer scoring; NuggetIndex stores the same unit with provenance and a lifecycle, so evaluation unit and index unit coincide. The caution from the companion study: what is shared matters more than how much. Most context enrichment reduces accuracy, and with aligned enrichment a small model beats a frontier model on raw passages by nineteen points.
+→ next: collecting nuggets and opinions together.
+
+--
+
+## Collecting them together: AI Opinions and NuggetPedia
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![OURRS AI Opinions vertical for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+ourrs.eu, "passau" in the AI Opinions vertical: about 870 opinions published by agents, each with model tag, votes and the documents behind it.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### AI Opinions
+An opinion is generated once, stored with its evidence and model, and retrievable by later users and agents. Contradicting and superseding opinions are linked.
+
+</div>
+
+
+
+<div class="card">
+
+### NuggetPedia
+Agents submit and vote on nuggets over MCP; governance decides what stays.
+
+</div>
+
+
+
+<div class="c-insight">
+
+**Not doable alone.** The value of opinions and governed nuggets grows with the number of agents that contribute and query.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Show the live query. The page says it plainly: these are opinions, not answers from this search engine. Each opinion carries the model that wrote it, the author's confidence, votes, and the documents behind it, with the instruction to read the sources rather than trust the opinion. Two consequences: retrieval gets cheaper and more consistent, and the opinions become an object of study: provenance, drift, disagreement. Then the pooling point again: one group's agents produce too few opinions to matter. Governance, who may write and how conflicts are resolved, is open. Retake the screenshot on the talk day.
+→ next: the platform where such swarms actually run.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OpenIIR: agents in swarms, and what they argue about
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### What it runs
+Populations of persona-driven agents in deliberative panels, on social platforms and through recommender feeds, with producers and detectors that co-evolve. Local-first, containerised, with deterministic replay so a run can be repeated exactly.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### Why it closes this talk
+The opinions such a swarm produces are the same objects the index caches and serves. A population that deliberates, an index that stores what it concluded, and a retrieval service both sides call: that is the ecosystem, running.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+Simulation started as a way to cover for missing users. It ends up as the instrument for studying populations we could not observe any other way.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, *OpenIIR: An Open Simulation Platform for Information Retrieval Research*, CIKM 2026, arXiv:2605.09321 · successor to SimIIR 2.0 (CIKM 2022) and SimIIR 3 (SIGIR-AP 2024).
+
+</div>
+
+
+Notes:
+Close the arc that started in Topic 3. Simulation entered this talk as a remedy for missing usage data; it leaves as the only practical way to study a population of agents at all. OpenIIR runs personas in panels that deliberate, in feeds that recommend and on platforms where they post, and it replays deterministically, which is what makes a claim about a population checkable. Connect it to the two previous slides: the nuggets and the opinions in the index are exactly what such swarms write and read. Then stop; the evaluation problem that this creates is the next slide.
+→ next: why evaluating this is the hard part.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Evaluating the ecosystem is the hard part
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+Trajectories, not answers. Populations, not users. Drift, not snapshots.
+
+Actors, layers and time multiply: humans and agent populations, on corpus, retrieval, shared knowledge and communication, over weeks.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-danger">
+
+This is either evaluated on shared, open infrastructure, or it is evaluated inside platforms, and then not by us.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+| Area | Exists today | What an open stack adds |
+|---|---|---|
+| corpus snapshots at web scale | LongEval, WOWS-Eval, BrowseComp-Plus | dated, partitionable, re-indexable snapshots |
+| agent populations as participants | Sim4IA, user simulation tracks | pooled, verifiable traces in one format |
+| trajectory-level measures | final-answer accuracy, nugget recall | retrieval, evidence and verification per step |
+| mixed human–agent studies | user studies, conversational tracks | humans and agents on the same instance |
+| agent-written content | — | opinions and nuggets as objects of evaluation |
+
+Notes:
+Tone: "here is what we find interesting and are starting to do", not "here is what CLEF must do". Several rows already have a home in CLEF and TREC labs; credit LongEval, WOWS-Eval and Sim4IA. The new rows are the last three. The sovereignty line returns here: complex human–agent systems will be evaluated somewhere; the question is whether the community can do it on infrastructure it controls. Offer the index, OURRS instances and the trace format, and ask what the room would want from them.
+→ conclusion.
+
+---
+
+## Three columns, three requirements
+
+<div class="viz viz-lg" data-viz="ows/two-dimensions" data-steps="3"></div>
+
+Notes:
+Reveal row by row. Openness and research sovereignty give us an open corpus and index below the model, an open instrumented search service, and an open layer for shared knowledge. Scale turns corpora, traces and populations into variables. Joint effort is what makes any of it affordable: one index on public compute, traces pooled in one format, and the ecosystem evaluated together rather than left to platforms.
+→ next: the four claims in one breath.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Four claims, one hypothesis
+
+
+<div class="grid-2 gap">
+
+
+<div class="column">
+
+
+<div class="hypothesis h1">
+
+**Openness must extend below the model.** *OpenWebSearch.EU and the Open Web Index.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="hypothesis h2">
+
+**Scale is a scientific variable.** *Index partitions, corpus variants, OURRS.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="hypothesis h3">
+
+**Usage data must be created by design.** *Simulation, instrumented retrieval, pooled traces.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="hypothesis h4">
+
+**Search is becoming an information ecosystem.** *A social agentic layer above retrieval.*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote">
+
+Not one of the four could be tested without operating the system. Models may become commodities; trustworthy retrieval will remain infrastructure.
+
+</div>
+
+
+Notes:
+One sentence each, with the strongest evidence from the talk: the landscape for the first, the CoRECT chart for the second, the trace corpus and the agent-user problem for the third, the agent social network for the fourth. Then close the loop with the opening hypothesis: every one of these is a claim we could only test because we built the thing and ran it. Then the closing line, and stop.
+
+--
+
+## Let's build this together
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="c-positive">
+
+### Open for cooperation
+
+- open web data and index partitions for your experiments
+- OURRS instances to instrument
+- agent traces in a shared format
+- shared evaluation on open snapshots
+
+→ openwebsearch.eu · ourrs.eu · Chair of Data Science, University of Passau
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### Thanks
+
+The OpenWebSearch.EU consortium; the Passau Data Science group: S. Zerhoudi, M. Dinzinger, L. Caspari, K. Ghosh Dastidar, J. Mitrović, and colleagues; funders: European Commission (Horizon Europe, NGI), BMFTR, StMWi Bayern.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Leave the slide up during questions.
+
+--
+
+<!-- .slide: class="credits-slide" -->
+
+## References
+
+- Granitzer et al. *Impact and development of an Open Web Index for open web search.* JASIST 75(5), 2024. doi:10.1002/asi.24818
+- Hendriksen, Dinzinger, Farzana, Fathima, Fröbe, Schmidt, Zerhoudi, Granitzer, Hagen, Hiemstra, Potthast, Stein. *The Open Web Index: Crawling and Indexing the Web for Public Use.* ECIR 2024. doi:10.1007/978-3-031-56069-9_10
+- Hendriksen, Hiemstra, de Vries. *Open Web Indexes for Remote Querying.* ECIR 2026. doi:10.1007/978-3-032-21289-4_25
+- Dinzinger, Caspari, Salman, Topi, Mitrović, Granitzer. *WebFAQ 2.0: A Multilingual QA Dataset with Mined Hard Negatives for Dense Retrieval.* SIGIR 2026. doi:10.1145/3805712.3808621
+- Dinzinger, Arndt, Böck, Mitrović, Granitzer. *The WebKurator.de Platform.* WebSci 2026. arXiv:2609.03971 · Gienapp et al. *The German Commons.* 2025. arXiv:2510.13996
+- Dang, Mitrović, Granitzer. *Toward Generalized Cross-Lingual Hateful Language Detection with Web-Scale Data and Ensemble LLM Annotations.* LREC 2026.
+- Caspari, Dinzinger, Ghosh Dastidar, Fellicious, Mitrović, Granitzer. *CoRECT: A Framework for Evaluating Embedding Compression Techniques at Scale.* ECIR 2026. arXiv:2510.19340
+- Dinzinger, Ghosh Dastidar, Caspari, Mitrović, Granitzer. *Bridging the Gap between Subsampled and Full-Corpus Evaluation.* ICTIR 2026. doi:10.1145/3805713.3820404
+- Ghosh Dastidar, Dinzinger, Caspari, Mitrović, Granitzer. *Query Performance Prediction under Corpus Growth in Dense Retrieval.* SIGIR 2026. doi:10.1145/3805712.3809960
+- Chen et al. *BrowseComp-Plus.* 2025. arXiv:2508.06600 · Chatterji et al. *How People Use ChatGPT.* NBER WP 34255, 2025 · Semrush, *ChatGPT traffic analysis*, Apr 2026 · Murtfeldt et al. *RIP Twitter API.* 2024. arXiv:2404.07340
+
+--
+
+<!-- .slide: class="credits-slide" -->
+
+## References (continued)
+
+- Zerhoudi, Günther, Plassmeier, Borst, Seifert, Hagen, Granitzer. *The SimIIR 2.0 Framework.* CIKM 2022. doi:10.1145/3511808.3557711 · Azzopardi, Breuer, Engelmann, Kreutz, MacAvaney, Maxwell, Parry, Roegiest, Wang, Zerhoudi. *SimIIR 3.* SIGIR-AP 2024. doi:10.1145/3673791.3698427
+- Zerhoudi, Granitzer. *UXSim: Towards a Hybrid User Search Simulation.* CIKM 2025. arXiv:2602.24241 · Zerhoudi. *OpenIIR: An Open Simulation Platform for IR Research.* CIKM 2026. arXiv:2605.09321
+- Zerhoudi, Granitzer. *Beyond the Click.* ECIR 2026. arXiv:2602.24265 · *SearchLab.* CHIIR 2025. doi:10.1145/3698204.3716475 · *From SERPs to Agents (UXLab).* CHIIR 2026. arXiv:2601.09937
+- Maxwell & Azzopardi. *Simulating Interactive Information Retrieval (SimIIR).* SIGIR 2016. doi:10.1145/2911451.2911469
+- Al-Maamari, Zerhoudi, Granitzer, Mitrović. *The Fellowship of the Query: Learning Retrieval Actions.* CIKM 2026, short paper.
+- Zerhoudi, Granitzer, Mitrović. *AgentSim: A Platform for Verifiable Agent-Trace Simulation.* SIGIR 2026. arXiv:2604.26653 · Zerhoudi, Roegiest, Granitzer. *IIRSim Studio.* SIGIR 2026. arXiv:2604.23406
+- Zerhoudi, Granitzer, Dang, Mitrović, Lemmerich, Hautli-Janisz, Katzenbeisser, Ghosh Dastidar. *Behind the Prompt: The Agent-User Problem in Information Retrieval.* 2026. arXiv:2603.03630
+- Zerhoudi, Ghosh Dastidar, Klement, Romazanov, Einwiller, Dang, Dinzinger, Granitzer, Hautli-Janisz, Katzenbeisser, Lemmerich, Mitrović. *Form Without Function: Agent Social Behavior in the Moltbook Network.* 2026. arXiv:2604.13052
+- Zerhoudi, Granitzer, Mitrović. *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG.* SIGIR 2026. arXiv:2604.27306 · *Metadata, Structure, or Strategy?* ECML-PKDD 2026. arXiv:2606.29645 · Zerhoudi, Mitrović, Granitzer. *The Compaction Cliff.* CIKM 2026. arXiv:2608.22752
+- Zerhoudi, Roegiest, Mitrović, Granitzer. *As We May Search.* ICTIR 2026. arXiv:2606.29652 · Reimer et al. *The Archive Query Log.* SIGIR 2023. arXiv:2304.00413 · Craswell et al. *ORCAS.* CIKM 2020. arXiv:2006.05324
+- Yao et al. *ReAct.* 2022 · Asai et al. *Self-RAG.* 2023 · Jin et al. *Search-R1.* 2025 · Schaer et al. *Sim4IA 2025 report.* SIGIR Forum 59(2) · Breuer et al. *LongEval at CLEF 2026.*
+
+--
+
+<!-- .slide: class="small smaller" -->
+
+## Appendix: search back-ends, in detail
+
+| Back-end | Corpus inspectable | Ranking replaceable | Snapshot fixable | Bulk access | Logs for research | Size · freshness · terms (Sep 2026) |
+|---|:---:|:---:|:---:|:---:|:---:|---|
+| Google Custom Search JSON API | ✗ | ✗ | ✗ | ✗ | ✗ | web-scale · closed to new customers, ends 1 Jan 2027 · 5 USD per 1k |
+| Bing Web Search → Grounding with Bing | ✗ | ✗ | ✗ | ✗ | ✗ | retired 11 Aug 2025 · successor returns no raw results · 14 USD per 1k |
+| Brave Search API | ✗ | re-rank only | ✗ | ✗ | ✗ | own index, claims 40B pages · Goggles re-ranking · 5 USD per 1k · no storing or training |
+| Exa · Tavily · Perplexity Search | ✗ | ✗ | ✗ | ✗ | ✗ | provenance undisclosed or claimed (Exa: 500B+) · 5–7 USD per 1k |
+| OpenAI · Anthropic web-search tools | ✗ | ✗ | ✗ | ✗ | ✗ | inside the model API · 10 USD per 1k calls · Anthropic via Brave |
+| ClueWeb22 + ChatNoir | ✓ | partly | ✓ | licence | — | 10B pages, 207 languages · frozen 2022 · free licence, shipping fee |
+| MS MARCO Web Search | ✓ | partly | ✓ | ✓ | clicks | 100M-document benchmark on ClueWeb22, 10M queries · frozen |
+| Open Web Index + OURRS | ✓ | ✓ | ✓ | ✓ | by design | 39B URLs crawled, 45 TiB index · daily · free |
+
+Notes:
+Backup slide for questions on the landscape. The one cell that is not a plain no is Brave's: Goggles let a user write re-ranking rules, on top of Brave's ranking of Brave's index. Every cell was checked against vendor documentation and dataset pages on 15 September 2026; the sources are in the plan's fact sheet. Re-check prices on the talk day. The columns are the two axes of the quadrant: transparency and completeness.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: where that puts us
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/search-landscape" data-steps="3"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+Transparency on one axis: can we inspect, fix, configure and log.
+
+Completeness on the other: size, freshness, languages.
+
+</div>
+
+
+
+<div class="c-insight">
+
+The open index is the first point in the upper right, and OURRS is the service on it. Both are still an order of magnitude below commercial index sizes, which is why scale is the next question.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote">
+
+An API lets researchers query someone else's experiment; bulk access lets researchers define their own.
+
+</div>
+
+
+Notes:
+Step it: commercial services are complete and closed, top left. Open web data and the services built on it are transparent and partial, bottom right, and the upper right was empty. Then the index and OURRS arrive. Say the gap out loud and honestly: about 39 billion URLs crawled and an index in the tens of terabytes, against Google's undated "hundreds of billions of pages" and Brave's claimed 40 billion. We are an order of magnitude short, and the factor is an estimate, not a measurement.
+Backup slide: the same comparison as a quadrant, including the commercial services.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: agents could discover search endpoints themselves
+
+
+<div class="grid-3-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![A site's own search box surfaced in results via schema.org SearchAction](/slides/_assets/ows/sitelinks-searchbox-snippet.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+schema.org SearchAction, the markup behind the sitelinks search box. Source: metayer.de
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="timeline">
+
+- **2005** OpenSearch description format
+- **2014** schema.org SearchAction
+- **2024** Model Context Protocol
+- **2025** NLWeb: every site an MCP server
+
+</div>
+
+
+
+<div class="c-insight">
+
+An old idea becomes an agent affordance: 3.65 million sites in the Open Web Index describe their own search, agents could pick endpoints, and web search decentralises.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Entity counts by schema.org type, Open Web Index API, corpus 2026-05 · Google, sitelinks search box, Sep 2014 · Microsoft, NLWeb, May 2025.
+
+</div>
+
+
+Notes:
+SearchAction is old: introduced with Google's sitelinks search box in 2014, on top of the even older OpenSearch format from 2005, and Google retired the search box in 2024 for lack of human use. Agents may revive it: 3.65 million sites in the index declare their own search endpoint, and with MCP and NLWeb a site's search becomes something an agent can call directly. An open index is the candidate generator for that. Whether agents search better through a federation of site endpoints than through one big index is a research question, not a result.
+Backup slide: an aside on decentralised search, kept out of the main flow.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: what it takes to evaluate such a system
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/system-view" data-params='{"stage": 3, "caption": false}'></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="c-definition">
+
+An evaluation is a controlled, repeatable comparison on a known object. 
+
+</div>
+
+
+
+<div class="marks-step">
+
+- We must know what is searched, so the corpus has to be inspectable.
+- We must be able to repeat, so a snapshot has to be fixable.
+- We must change one thing at a time, so index and ranking have to be configurable.
+- We must see the process, so queries, results and steps have to be observable.
+- The object must resemble the real thing, in size, freshness and structure.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is where the criteria come from, so say the first sentence slowly: an evaluation is a controlled, repeatable comparison on a known object. Cranfield gave us fixed documents, fixed topics and judgements for exactly that reason. The five requirements are that definition applied to the system in the figure. Note which column each one lands in: the first three are the retrieval column, the fourth is the interaction and collaboration columns, and the fifth cuts across all of them. Transparency and control are not values here; they are what "controlled comparison" means once the object is a running search system.
+→ next: what the back-ends on offer give us.
+
+--
+
+
+<!-- .slide: class="smaller" -->
+
+## The index is built every day: crawl, process, index, publish
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-lg">
+
+![Open Web Index pipeline from index generation to search applications and data products](/slides/_assets/ows/owi-pipeline-infographic.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="marks-num">
+
+- Crawling runs continuously on cloud partitions with a shared frontier.
+- Processing extracts text, language, topic, structured data and legal signals.
+- Indexing produces a sparse index, metadata and embeddings for every daily shard.
+- Publishing puts each shard on the dashboard with a licence and a dataset card.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Hendriksen et al., *The Open Web Index: Crawling and Indexing the Web for Public Use*, ECIR 2024 · Granitzer et al., Procedia CS 2025 (EuroHPC pipelines).
+
+</div>
+
+
+Notes:
+Four steps, one sentence each. The pipeline runs federated across LRZ, IT4I and CSC; LEXIS orchestrates the daily workflow, and the crawl obeys robots and takedown signals, which is what "legal signals" means. Public compute is the point: this runs on EuroHPC machines, which is why a research consortium can afford it at all. HPC detail only if asked.
+→ next: what comes out of it every day.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: in an agent, small retrieval effects compound
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/trajectory-compounding" data-steps="3"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="c-definition small">
+
+**What the curve compares.** Suppose a change to the retriever alters the outcome of one search step with probability **ε**, and that steps are independent. After **k** steps the share of trajectories in which at least one step came out differently is **1 − (1 − ε)ᵏ**. The dashed line marks where that reaches half.
+
+</div>
+
+
+
+<div class="paper">
+
+<span class="eyebrow">BrowseComp-Plus, 2025</span>
+### The multiplier is real
+GPT-5 and o3 issue **20–26 search calls** on a hard question, where open models issue fewer than two. A better retriever saves one to three of them.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Chen et al., *BrowseComp-Plus*, 2025 — search calls per question on a fixed 100k-document corpus.
+
+</div>
+
+
+Notes:
+Goal: a per-step effect too small to matter on a ranked list decides the majority of agent runs. The figure is arithmetic, not measurement, so say what is being compared before showing it.
+
+- **What ε is.** The probability that one retrieval step comes out differently because of the change being evaluated: a different ranker, a compressed index, a noisier corpus. It is a per-step effect, the kind an offline evaluation would report as a small delta and dismiss.
+- **What the y axis is.** Not accuracy, and not how often the agent gets the answer right. It is the share of trajectories in which at least one step was affected, which is the share of runs where the comparison could have gone differently at all.
+- **The assumption, stated out loud.** Steps are treated as independent, so the share of untouched trajectories is (1 − ε) multiplied by itself k times. Real trajectories are correlated: a bad result early sends the agent somewhere else, which makes the true effect larger, not smaller. So take the curve as the optimistic bound and say so.
+- **What "half the trajectories" means and why it is the interesting point.** It is the trajectory length at which a coin flip decides whether your change touched the run. Below it, most runs are identical whatever you did; above it, most runs differ somewhere. At one per cent per step that crossing is at 69 steps, at two per cent it is 35, at five per cent it is 14.
+- **Where real agents sit on this curve.** On BrowseComp-Plus, GPT-5 and o3 issue 20 to 26 search calls for one hard question, while open models issue fewer than two. At 23 calls, a two per cent per-step effect has touched 37 per cent of trajectories and a five per cent effect has touched 69 per cent. That is the multiplier: the same delta that looks negligible on a ranked list decides the majority of agent runs.
+- **The consequence for evaluation.** A comparison done one query at a time cannot see this, because the compounding lives in the trajectory. This is why the interaction column of the system figure needs an evaluation of its own.
+Backup slide: the arithmetic behind the claim that per-step effects compound, kept out of the main flow.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+        },
+        plugins: [
+          window.RevealMarkdown,
+          window.RevealMath?.KaTeX,
+          window.RevealNotes,
+          window.RevealHighlight,
+          window.RevealSearch,
+          window.RevealZoom,
+          window.RevealMenu,
+        ].filter(Boolean),
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+      });
+    </script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

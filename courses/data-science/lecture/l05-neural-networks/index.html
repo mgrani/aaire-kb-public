@@ -1,0 +1,1996 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 05: Neural Networks</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 05: Neural Networks
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chpM2-neural-networks.tex. Builds directly
+on Lecture 04: the perceptron is the linear classifier again, the delta rule is
+LMS again, and the sigmoid is logistic regression's again — each returning with
+a new purpose. Structured as a sequence of failures and their fixes.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Where the Metaphor Comes From
+
+> **Guiding Question:** A neuron switches a million times slower than a
+> transistor. Why is the brain the metaphor for artificial intelligence at all?
+
+--
+
+## The Neuron
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### $10^{11}$
+neurons in the human brain (counted)
+
+</div>
+
+
+<div class="card">
+
+### $10^{14}$
+synapses (estimated)
+
+</div>
+
+
+<div class="card">
+
+### 100k–200k
+other neurons a single neuron's dendrites connect to
+
+</div>
+
+
+<div class="card">
+
+### $10^{-3}$ s
+the fastest a neuron switches
+
+</div>
+
+
+</div>
+
+
+A neuron receives signals through its dendrites, integrates them, and fires
+along its axon when the combined input passes a threshold.
+
+Notes:
+The switching time is the number to dwell on: a neuron is a million times
+slower than a transistor, yet the brain recognises a face in ~0.1 s — about a
+hundred sequential steps. Whatever it does, it does in parallel and shallowly.
+
+--
+
+## What the Metaphor Buys — and What It Costs
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Worth borrowing
+Many simple units, massively connected behaviour that emerges from weights
+rather than from rules learning by adjusting connection strengths.
+
+</div>
+
+
+<div class="card bad">
+
+### Not worth claiming
+Artificial neurons are **not** models of biological ones. Backpropagation has
+no established biological counterpart, and no one is simulating a brain.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+"Neural network" is a historical name, not a claim about neuroscience. Treat
+brain analogies in marketing material accordingly.
+
+</div>
+
+
+Notes:
+Critique practice (P2, AI-context section): students meet brain analogies daily
+in press coverage of AI. Give them the distinction now so they can hear the
+difference between an architecture inspired by something and a model of it.
+
+--
+
+## The Idea Is Old The Success Is Recent
+
+The perceptron dates from 1958, backpropagation from the 1980s. The methods in
+this lecture are decades old. **What changed in 2012?**
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### More data
+Large labelled datasets that did not previously exist.
+
+</div>
+
+
+<div class="card">
+
+### More compute
+GPUs able to run many passes over those datasets.
+
+</div>
+
+
+<div class="card">
+
+### Better practice
+Activation functions (ReLU), initialisation (Glorot), architectures (ResNet),
+regularisation (dropout, batch norm), optimisers (RMSProp, ADAM).
+
+</div>
+
+
+</div>
+
+
+Notes:
+The guiding question of the module. Emphasise that no single item is a
+breakthrough in theory — the third column is a list of engineering fixes to
+problems that had made deep networks untrainable, which the rest of the lecture
+will meet one by one.
+
+--
+
+## What This Implies
+
+
+<div class="c-insight">
+
+The bottleneck was never the idea. It was **data, compute and a set of
+practical fixes** — which is why "we tried neural networks in 1995 and they did
+not work" was both true and misleading.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+A colleague says: "Deep learning was invented in 2012."
+
+1. What is wrong with that claim?
+2. Which of the three columns above was the *binding* constraint before 2012?
+3. What would have to change for the next such jump?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** The methods are decades old — perceptron 1958, backpropagation in the
+1980s. What arrived in 2012 was the ability to *train them at scale*.
+
+</div>
+
+
+<div class="card">
+
+**2.** Arguably all three, but data and compute were binding: the algorithmic
+fixes were largely developed once large models became runnable enough to
+diagnose.
+
+</div>
+
+
+<div class="card">
+
+**3.** Any of them again — a new data regime, cheaper compute, or a fix for a
+failure mode we currently work around rather than solve.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Neural networks are not new mathematics; they are old mathematics that became
+trainable. Every "new" technique below exists because a specific failure mode
+had to be removed.
+
+</div>
+
+
+Notes:
+Set the reading frame for the whole lecture: each subsequent unit answers "what
+went wrong, and what fixed it". This makes the material a story rather than a
+catalogue.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## The Perceptron
+
+> **Guiding Question:** Least squares was nudged by examples it already
+> classified correctly. What would a learning rule for *decisions* look like?
+
+--
+
+## The Model
+
+A perceptron computes a weighted sum of its inputs and applies a **threshold**:
+
+$$
+h_{\mathbf{w}}(\mathbf{x}) = \mathrm{sign}\Big(w_0 + \sum_{j=1}^{p} w_j x_j\Big)
+= \mathrm{sign}(\mathbf{w}^{\top}\mathbf{x})
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Inputs
+$x_1, \ldots, x_p$, plus a constant $x_0 = 1$ carrying the bias $w_0$
+
+</div>
+
+
+<div class="card">
+
+### Weights
+$w_0, w_1, \ldots, w_p$ — **the hypothesis is exactly this vector**
+
+</div>
+
+
+<div class="card">
+
+### Output
+$+1$ or $-1$: which side of the boundary the input lies on
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+This is the same object as *linear regression for classification* from Lecture
+04 — a hyperplane and a sign. What is new is how the weights are found.
+
+</div>
+
+
+Notes:
+Say the connection out loud (P7 spiral): students already know the geometry, so
+the only new content is the learning rule. The bias trick (x₀ = 1) is worth one
+sentence — it turns an affine boundary into a linear one in p+1 dimensions.
+
+--
+
+## Weight Adaptation
+
+
+<div class="c-algorithm">
+
+**Perceptron learning rule**
+
+For each training example $(\mathbf{x}, y)$ with $y \in \lbrace -1, +1 \rbrace$:
+
+$$
+\Delta w_j = \eta \big(y - h_{\mathbf{w}}(\mathbf{x})\big) x_j
+$$
+
+Weights change **only when the example is misclassified** correctly classified
+examples leave the hypothesis untouched.
+
+</div>
+
+
+
+<div class="c-insight">
+
+Contrast with least squares, which is nudged by *every* example including the
+ones it already gets right. This is exactly the defect that made squared loss a
+poor classification loss.
+
+</div>
+
+
+Notes:
+The comparison is the payoff of having taught regression-for-classification
+first. Ask what happens to the update when the prediction is correct: y − h = 0,
+so nothing moves. That is the fix, in one line.
+
+--
+
+## The Perceptron Convergence Theorem
+
+
+<div class="c-definition">
+
+If the training data is **linearly separable**, the perceptron rule finds a
+separating hyperplane in a **finite** number of updates — regardless of the
+starting weights and of the learning rate.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### What it promises
+Termination with zero training error, guaranteed, when a solution exists.
+
+</div>
+
+
+<div class="card bad">
+
+### What it does not promise
+Anything at all when the data is **not** separable — the procedure simply never
+settles. And nothing about *which* separating hyperplane you get, or how it
+generalises.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Math-first-then-meaning (P5). Both boxes matter: the theorem is strong and
+narrow. The "which hyperplane" gap is what support vector machines later close
+by asking for the maximum-margin one.
+
+--
+
+## Mini-Exercise
+
+A perceptron with $w_0 = -1.5$, $w_1 = 1$, $w_2 = 1$ receives binary inputs.
+
+1. What does it output for $(0,0)$, $(0,1)$, $(1,0)$, $(1,1)$?
+2. Which logical function is this?
+3. Which weights would give you OR instead?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Sums: $-1.5$, $-0.5$, $-0.5$, $+0.5$ → $-1, -1, -1, +1$
+
+</div>
+
+
+<div class="card">
+
+**2.** **AND** — it fires only when both inputs are 1.
+
+</div>
+
+
+<div class="card">
+
+**3.** $w_0 = -0.5$ with $w_1 = w_2 = 1$: any single 1 now clears the threshold.
+
+</div>
+
+
+</div>
+
+
+The bias $w_0$ *is* the threshold, with its sign flipped.
+
+</div>
+
+
+Notes:
+Doing AND and OR by hand makes the next unit's punchline land: they will try
+the same trick for XOR and fail, which is the historically decisive failure.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A perceptron is a **hyperplane plus a sign**, learned by correcting only its
+mistakes. Convergence is guaranteed — but only when a separating hyperplane
+exists at all.
+
+</div>
+
+
+--
+
+## Three Open Questions
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Which solution?
+Every separating hyperplane satisfies the theorem. The one you get depends on
+the initial weights and the order of the examples.
+
+</div>
+
+
+<div class="card">
+
+### How long?
+"Finite" can be very large; the bound depends on the margin between the classes.
+
+</div>
+
+
+<div class="card">
+
+### And if not separable?
+The procedure oscillates forever. Real data usually is not separable.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Zero training error is not the objective — generalisation is. A hyperplane that
+grazes the training points may sit in the worst possible place for new ones.
+
+</div>
+
+
+Notes:
+Connect back to L04: this is the training-error trap in a new guise. The margin
+idea introduced here (distance to the nearest point) is the seed of SVMs and of
+why "any separator" is not good enough.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## The Limit of One Layer
+
+> **Guiding Question:** You built AND and OR with a single perceptron. Why can
+> you not build XOR — and what does that tell us about model families?
+
+--
+
+## The Question
+
+You built AND and OR with a single perceptron. **Now build XOR:**
+output 1 when exactly one input is 1.
+
+| $x_1$ | $x_2$ | XOR |
+|---|---|---|
+| 0 | 0 | 0 |
+| 0 | 1 | **1** |
+| 1 | 0 | **1** |
+| 1 | 1 | 0 |
+
+Try to find weights $w_0, w_1, w_2$. Take a minute.
+
+Notes:
+Let them actually try (P1/P2). The failure is the lesson, and it lands only if
+they have attempted it. Collect one or two candidate weight vectors and test
+them against the table together.
+
+--
+
+## Why It Cannot Work
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Plot the four points. The two positive cases sit on **opposite corners** of the
+square, and so do the two negative ones.
+
+A perceptron can only draw **one straight line**. No single line puts $(0,1)$
+and $(1,0)$ on one side while keeping $(0,0)$ and $(1,1)$ on the other.
+
+XOR is **not linearly separable** — and no amount of training will change that.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+The limit is in the **hypothesis space**, not in the learning rule.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the sharpest example in the course of a hypothesis space that simply
+does not contain the target function (P3, and the inductive-bias unit from L04).
+No optimiser can find what the model family cannot express.
+
+--
+
+## The Consequence, Historically
+
+Minsky and Papert's 1969 analysis of exactly this limitation is widely credited
+with the collapse of neural-network funding for over a decade.
+
+
+<div class="c-note">
+
+The criticism was mathematically correct and practically overdrawn: the fix —
+stack a second layer — was already known. What was missing was a way to
+**train** it.
+
+</div>
+
+
+Notes:
+A good moment for epistemic humility (P2): a correct result, correctly proved,
+still misdirected a field for fifteen years because of what it was taken to
+imply. Ask what the analogous over-reading might be today.
+
+--
+
+## The Fix: A Hidden Layer
+
+XOR **is** expressible with two layers — for instance as
+$(x_1 \lor x_2) \land \lnot(x_1 \land x_2)$: two perceptrons computing OR and
+NAND, and a third computing AND of their outputs.
+
+
+<div class="c-insight">
+
+The hidden layer builds a **new representation** in which the problem *is*
+linearly separable. That is what depth buys: not more lines, but better
+coordinates to draw them in.
+
+</div>
+
+
+
+<div class="takeaway">
+
+A single perceptron is limited by what one hyperplane can separate. Stacking
+layers removes that limit — which is why the next question is how to train a
+stack at all.
+
+</div>
+
+
+Notes:
+The insight box is the thesis of the entire lecture, and the phrase to leave on
+the board: *depth learns the representation*. It connects straight back to α,
+the representation function from L04, which was previously chosen by hand.
+
+--
+
+## Why the Threshold Has to Go
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### The step function
+$\mathrm{sign}(\mathbf{w}^{\top}\mathbf{x})$ has derivative **zero everywhere**
+it is defined, and no derivative at all at the boundary.
+
+</div>
+
+
+<div class="card good">
+
+### The sigmoid
+$$\sigma(z) = \frac{1}{1 + e^{-z}}$$
+smooth, bounded, and with a derivative that is non-zero where it matters.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+Without a usable gradient there is no way to assign blame to a weight buried in
+a hidden layer. **Differentiability is what makes depth trainable.**
+
+</div>
+
+
+Notes:
+The students met the sigmoid in logistic regression, so this is consolidation
+with a new motive (P7 spiral): there it made the output a probability, here it
+makes the network differentiable. Same function, different reason.
+
+--
+
+## A Useful Property
+
+$$
+\sigma'(z) = \sigma(z) \big(1 - \sigma(z)\big)
+$$
+
+The derivative is expressible in terms of the output — so a neuron that has
+already computed its activation can compute its own gradient for free.
+
+
+<div class="c-warning">
+
+Both tails are flat: for large $|z|$ the derivative is nearly zero and learning
+stalls. This is the **vanishing gradient** problem, and it is why ReLU replaced
+the sigmoid in deep networks.
+
+</div>
+
+
+Notes:
+The property is a computational convenience with real consequences for
+backpropagation's cost. The warning previews why the 2012 list included "new
+activation functions" — it was this failure being removed.
+
+--
+
+## Mini-Exercise
+
+1. Compute $\sigma(0)$, and $\sigma'(0)$ using the identity above.
+2. A neuron's weighted input is $z = 12$. What is $\sigma'(z)$ roughly, and
+ what does that mean for its weight update?
+3. XOR needed a hidden layer. Why did it *also* need this change of activation?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** $\sigma(0) = 0.5$, so $\sigma'(0) = 0.5 \times 0.5 = 0.25$ — the
+steepest the sigmoid ever gets.
+
+</div>
+
+
+<div class="card">
+
+**2.** $\sigma(12) \approx 0.999994$, so $\sigma' \approx 6 \times 10^{-6}$:
+the update is effectively zero. The neuron is **saturated** and stops learning.
+
+</div>
+
+
+<div class="card">
+
+**3.** The extra layer makes XOR *expressible* a differentiable activation
+makes the stack *trainable*. Expressiveness without a gradient is useless.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+The sigmoid buys differentiability — the precondition for training depth — at
+the price of saturating tails where learning stalls.
+
+</div>
+
+
+Notes:
+Part 3 is the module's whole argument in one answer, and it is worth writing on
+the board: expressible ≠ trainable.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Depth, and How to Train It
+
+> **Guiding Question:** A hidden neuron has no target of its own. How much of
+> the final error is it responsible for?
+
+--
+
+## Structure
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Layer
+$L_i = \lbrace n_{1,i}, \ldots, n_{k,i} \rbrace$ — a set of neurons.
+$L_0$ is the input layer.
+
+</div>
+
+
+<div class="card">
+
+### Fully connected
+Every neuron in $L_{i-1}$ feeds every neuron in $L_i$.
+
+</div>
+
+
+<div class="card">
+
+### Parameters
+$\mathbf{W}_i \in \mathbb{R}^{|L_i| \times |L_{i-1}|}$ — one row of weights per
+neuron.
+
+</div>
+
+
+</div>
+
+
+The forward pass is then a chain of matrix products with a non-linearity
+between them:
+
+$$
+\mathbf{a}_i = \sigma\big(\mathbf{W}_i \mathbf{a}_{i-1}\big),
+\qquad \mathbf{a}_0 = \mathbf{x}
+$$
+
+Notes:
+Matrix form is worth the notation: it is how the computation is actually
+implemented, and it makes the next point obvious — without σ the whole chain
+collapses.
+
+--
+
+## Why the Non-Linearity Is Not Optional
+
+
+<div class="c-important">
+
+Without $\sigma$, a stack of layers is
+$\mathbf{W}_3\mathbf{W}_2\mathbf{W}_1\mathbf{x}$ — a **single matrix**, hence a
+single linear model. Depth without non-linearity buys nothing at all.
+
+</div>
+
+
+
+<div class="c-insight">
+
+Each layer transforms the representation; the final layer draws a hyperplane in
+the coordinates the earlier layers built. This is XOR's fix, generalised.
+
+</div>
+
+
+Notes:
+Ask students to multiply two 2×2 matrices and observe they get a 2×2 matrix.
+The argument is that short. It also explains why choosing an activation
+function is a modelling decision, not a detail.
+
+--
+
+## Mini-Exercise
+
+A network has 4 inputs, one hidden layer of 5 neurons, and 3 outputs, fully
+connected, with a bias per neuron.
+
+How many parameters does it have?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+$$
+\underbrace{(4 \times 5) + 5}_{\text{hidden layer}} +
+\underbrace{(5 \times 3) + 3}_{\text{output layer}} = 25 + 18 = 43
+$$
+
+Small networks have many parameters; the counts grow as the **product** of
+adjacent layer sizes, which is why parameter counts explode with width.
+
+</div>
+
+
+
+<div class="takeaway">
+
+A multilayer network is matrix products separated by non-linearities. **The
+non-linearity is what makes depth mean anything**, and each hidden layer is a
+learned change of coordinates.
+
+</div>
+
+
+Notes:
+Connect the parameter count to L04's bias–variance discussion: capacity grows
+fast, so the regularisation unit later is not optional bookkeeping.
+
+--
+
+## The Error Surface
+
+For weights $\mathbf{w}$ and training set $D$, the squared error
+
+$$
+E(\mathbf{w}) = \frac{1}{2}\sum_{(\mathbf{x},y) \in D}\big(y - h_{\mathbf{w}}(\mathbf{x})\big)^2
+$$
+
+is a **surface over the weight space**. Training means walking downhill on it.
+
+<div class="viz" data-viz="ml/gradient-descent" data-steps="5"
+ data-params='{"eta": 0.3, "start": -2.8}'></div>
+
+Notes:
+The same visualization as in L04's optimisation unit, deliberately: students
+should recognise that nothing new is happening — only the function being
+minimised has changed. Ask what the axes are now (weights, not a single
+parameter) and what the picture would look like in 10⁶ dimensions.
+
+--
+
+## Two Ways to Descend
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Batch gradient descent
+Accumulate the gradient over **all** examples, then take one step.
+
+Stable, expensive per step, and it needs the whole dataset in memory.
+
+</div>
+
+
+<div class="card">
+
+### Incremental (stochastic) gradient descent
+Update after **each** example.
+
+Noisier, far cheaper per step, and the noise can help escape poor regions.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The **delta rule**, $\Delta w_j = \eta (y - \mathbf{w}^{\top}\mathbf{x}) x_j$,
+is incremental gradient descent on the squared error — the LMS rule from
+Lecture 04 under a new name.
+
+</div>
+
+
+Notes:
+Three names for one thing (LMS, delta rule, incremental gradient descent) is a
+genuine source of confusion in the literature naming them together once saves
+students later grief. Modern practice sits between the two: mini-batches.
+
+--
+
+## Mini-Exercise
+
+You are training on 1,000,000 examples and each pass over the data takes an
+hour.
+
+1. How many weight updates does **batch** gradient descent make per hour?
+2. How many does **incremental** make?
+3. Which would you start with, and what is the risk?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** One.
+
+</div>
+
+
+<div class="card">
+
+**2.** One million — each on a noisy estimate of the true gradient.
+
+</div>
+
+
+<div class="card">
+
+**3.** Incremental (or mini-batch): progress per unit of computation is vastly
+higher. The risk is instability — the noisy steps can diverge if $\eta$ is too
+large.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The arithmetic makes the case for stochastic methods far better than an
+assertion does. Part 3 links back to the learning-rate comparison in L04.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Training is descent on an error surface. **Batch** steps are accurate and rare;
+**incremental** steps are noisy and frequent — and on real data, frequency wins.
+
+</div>
+
+
+--
+
+## The Credit Assignment Problem
+
+The output layer's error is measurable: we know the target. But a hidden
+neuron has **no target of its own**.
+
+> How much of the final error is this hidden weight responsible for?
+
+Notes:
+Guiding question of the module (P1). This is the question that stalled the
+field for a decade — the XOR fix was known, the training method was not.
+
+--
+
+## The Answer: Blame Flows Backwards
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Output layer
+The error is computed directly against the target $y(\mathbf{x})$.
+
+</div>
+
+
+<div class="card">
+
+### Hidden layers
+The error of a neuron is the **weighted sum of the errors of the neurons it
+feeds** — each scaled by the weight through which it contributed.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+A neuron that contributed strongly to a wrong answer receives a large share of
+the blame. That is the whole idea; the calculus is the chain rule applied
+layer by layer.
+
+</div>
+
+
+Notes:
+Give the sentence before the formula (P4). Students who leave with "blame is
+distributed backwards in proportion to contribution" have the concept, even if
+the derivation fades.
+
+--
+
+## The Algorithm
+
+
+<div class="c-algorithm">
+
+**Backpropagation (incremental form)**
+
+**repeat**
+&nbsp;&nbsp;**for each** $(\mathbf{x}, y) \in D$:
+&nbsp;&nbsp;&nbsp;&nbsp;**forward:** compute activations layer by layer up to the output
+&nbsp;&nbsp;&nbsp;&nbsp;**backward:** compute the output error, then propagate it to each earlier layer
+&nbsp;&nbsp;&nbsp;&nbsp;**update:** $w \leftarrow w - \eta \cdot (\text{error at the target neuron}) \cdot (\text{activation at the source neuron})$
+**until** convergence **or** $t > t_{\max}$
+
+</div>
+
+
+
+<div class="c-note">
+
+Both passes cost about the same as one forward pass. Training is therefore
+roughly three times the cost of inference — the fact behind every training-cost
+estimate you read.
+
+</div>
+
+
+Notes:
+The update rule has the same shape as LMS and the delta rule: error × input.
+Point that out — it is the third appearance of one pattern, and recognising it
+is worth more than the derivation.
+
+--
+
+## Mini-Exercise
+
+A hidden neuron feeds two output neurons through weights $0.8$ and $-0.2$.
+On one example the output errors are $\delta_1 = 0.5$ and $\delta_2 = 1.0$.
+
+1. Which output does the hidden neuron get more blame from?
+2. Compute its propagated error (before the activation derivative).
+3. What happens to the update if this neuron's activation was near 0?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Output 1: the weight is four times larger in magnitude, so more of its
+error routes back here.
+
+</div>
+
+
+<div class="card">
+
+**2.** $0.8 \times 0.5 + (-0.2) \times 1.0 = 0.2$ — the negative weight
+partly cancels.
+
+</div>
+
+
+<div class="card">
+
+**3.** The update is proportional to the source activation, so a near-zero
+activation produces a near-zero update: that weight barely learns.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Part 3 is the seed of the vanishing-gradient discussion and of why
+initialisation matters. Part 2's cancellation surprises students who expect
+blame to accumulate monotonically.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Backpropagation solves **credit assignment**: error flows backwards, weighted by
+the connections that carried the signal forward. It is the chain rule, applied
+once per layer — no more and no less.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Making Training Work
+
+> **Guiding Question:** The network fits the training data perfectly and fails
+> on new data. Which of your assumptions was wrong?
+
+--
+
+## Two Failure Modes
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### Local minima
+A point that is lowest in its neighbourhood but not globally:
+$E(\mathbf{w}_{\text{opt}}) \leq E(\mathbf{w}_{\text{local}})$.
+
+In practice, large networks appear to have **many** local minima, most of them
+close in value to the best one — so this matters less than intuition suggests.
+
+</div>
+
+
+<div class="card bad">
+
+### Flat regions
+Near-zero gradients produce near-zero steps. Training appears to have converged
+when it has merely stalled — the sigmoid's saturated tails are the usual cause.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The local-minima nuance is worth stating carefully: the textbook fear turned out
+to be largely misplaced for high-dimensional networks, while flat regions and
+saddle points are the real obstacle. This is a case where the field's own
+intuition changed.
+
+--
+
+## Momentum
+
+$$
+\Delta \mathbf{w}_t = -\eta \nabla E(\mathbf{w}_t) + \alpha \Delta \mathbf{w}_{t-1}
+$$
+
+Each step keeps a fraction $\alpha$ of the previous one: consistent directions
+accumulate speed, oscillating directions cancel.
+
+
+<div class="c-note">
+
+Momentum helps through flat regions and damps zig-zagging in narrow valleys —
+but the learning rate $\eta$ remains critical for convergence.
+
+</div>
+
+
+Notes:
+The rolling-ball metaphor is standard and accurate enough. Ask which of the two
+failure modes momentum addresses (flat regions, partially) and which it does
+not (a genuinely bad minimum).
+
+--
+
+## Adaptive Learning Rates
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### AdaGrad
+One learning rate **per parameter**, scaled by the accumulated sum of squared
+gradients.
+
+Parameters with large gradients slow down quickly rarely-updated parameters
+keep a large step size.
+
+</div>
+
+
+<div class="card">
+
+### And its successors
+RMSProp replaces the ever-growing sum with a moving average **ADAM** combines
+that with momentum, and is the common default today.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+The obstacles are flat regions and badly scaled parameters, not mythical local
+minima. **Momentum** adds inertia, **adaptive methods** give each parameter its
+own step size — and both exist to remove a specific, diagnosable failure.
+
+</div>
+
+
+Notes:
+Return to the framing from the history unit: every optimiser on this slide is a
+fix for an observed pathology. Students should be able to name the pathology
+each one addresses.
+
+--
+
+## Capacity Cuts Both Ways
+
+A network with enough neurons can fit **any** training set — including its
+noise. The decision surface becomes intricate where the data is sparse.
+
+<div class="viz viz-lg" data-viz="ml/bias-variance" data-steps="5"
+ data-params='{"degrees": [1, 2, 3, 5, 9, 14]}'></div>
+
+Notes:
+Stepped viz (P6): each click raises model capacity. Ask for a prediction before
+each step — training error falls monotonically (0.55 → 0.02), but test error
+bottoms out at degree 5 and then climbs. The gap between the two curves *is*
+overfitting, made visible. Polynomials stand in for network capacity the
+phenomenon is identical.
+
+--
+
+## Regularization
+
+
+<div class="c-definition">
+
+Add a penalty on the weights to the loss:
+$$
+E_{\text{reg}}(\mathbf{w}) = E(\mathbf{w}) + \lambda \lVert \mathbf{w} \rVert
+$$
+where $\lambda$ controls how much the penalty counts.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### $L_2$ — $\lVert \mathbf{w} \rVert_2$
+Penalises **peaky** weight vectors and prefers diffuse ones: every input to a
+neuron gets used a little. The default choice.
+
+</div>
+
+
+<div class="card">
+
+### $L_1$ — $\lVert \mathbf{w} \rVert_1$
+Produces **sparse** weights (many exact zeros): a neuron uses only its most
+important inputs, so it acts as a feature selector.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+A regulariser is a way of writing **background knowledge** into the objective —
+"prefer simple explanations", or "expect most inputs to be irrelevant". It is
+the inductive bias from Lecture 04, made explicit and tunable.
+
+</div>
+
+
+Notes:
+The insight box is the conceptual payoff and links three lectures: bias is not
+an accident to be minimised, it is a choice to be stated. λ is the dial between
+fitting the data and honouring the assumption.
+
+--
+
+## Dropout
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+During training, each neuron's output is **silenced with probability**
+$1 - p$. The network cannot rely on any single unit, so it must spread the
+representation across many.
+
+Because training silences a fraction of the units, a layer's total output is
+smaller during training than at inference. The surviving activations are
+therefore scaled by $\tfrac{1}{p}$ to compensate.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+Dropout is active during **training only**. Forgetting to disable it at
+inference time is a classic bug.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The scaling detail is exactly the kind of thing that is skipped and then
+debugged for a day. Ask why the network "cannot rely on a single unit" — it is
+co-adaptation being broken deliberately.
+
+--
+
+## Mini-Exercise
+
+Your network reaches 99% training accuracy and 71% validation accuracy.
+
+1. What is the diagnosis?
+2. Name three different interventions.
+3. Which one would you try first, and why?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Overfitting — a 28-point gap between training and validation.
+
+</div>
+
+
+<div class="card">
+
+**2.** More data stronger regularisation ($\lambda$, dropout) a smaller
+network early stopping.
+
+</div>
+
+
+<div class="card">
+
+**3.** More data if it is obtainable — it reduces variance without adding
+assumptions. Otherwise regularisation, because it is the cheapest to try and
+its effect is directly measurable.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Part 3 rewards reasoning about cost and assumptions rather than reciting a
+list. Note that "smaller network" is the honest option students under-use.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Capacity that can fit the signal can also fit the noise. **Regularisation
+encodes what you believe about the unseen data** — and the gap between training
+and validation error is how you find out whether you believed correctly.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 6
+## Learning the Representation
+
+> **Guiding Question:** In Lecture 04 we chose the features by hand. Can a
+> network choose them for us — and how would we know if it did?
+
+--
+
+## Learning to Reproduce the Input
+
+An **autoencoder** is trained so that its output reproduces its input, through
+a hidden layer that is **narrower** than the input.
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Encoder
+maps the input to the narrow hidden layer
+
+</div>
+
+
+<div class="card">
+
+### Bottleneck
+a compressed code — the representation being learned
+
+</div>
+
+
+<div class="card">
+
+### Decoder
+reconstructs the input from that code
+
+</div>
+
+
+</div>
+
+
+No labels are required: the target *is* the input.
+
+Notes:
+This is the first unsupervised method in the course. The label-free framing is
+worth emphasising — it is the mechanism behind pretraining, and behind
+"self-supervised" methods students will hear about constantly.
+
+--
+
+## What Makes It Work
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### The bottleneck does the work
+A narrow hidden layer can be read as a **noisy compression** of the input: the
+network must discard whatever it can afford to lose.
+
+</div>
+
+
+<div class="card bad">
+
+### Too wide and it cheats
+If the hidden layer is large enough, the network simply learns the **identity
+function** and has represented nothing.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Denoising autoencoders
+Corrupt the input, then require reconstruction of the *clean* version — the
+identity function is no longer a solution.
+
+</div>
+
+
+<div class="card">
+
+### Weight sharing
+Tie the decoder to the encoder, $\mathbf{W}_{1,2} = \mathbf{W}_{0,1}^{\top}$,
+halving the parameters.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+For binary inputs, cross-entropy replaces squared error as the reconstruction
+loss — the same substitution as in logistic regression.
+
+</div>
+
+
+Notes:
+The "too wide and it cheats" failure is the interesting one: an objective that
+is trivially satisfiable teaches nothing. Ask what the analogous failure is for
+a language model trained to copy its input.
+
+--
+
+## Mini-Exercise
+
+You train an autoencoder with a 784-dimensional input and a 784-neuron hidden
+layer. Reconstruction error goes to almost zero.
+
+1. Is this a good result?
+2. What has the network probably learned?
+3. Give two ways to fix the setup.
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** No — near-zero error here is a warning sign, not a success.
+
+</div>
+
+
+<div class="card">
+
+**2.** The identity function: copy the input across. No compression, no
+representation.
+
+</div>
+
+
+<div class="card">
+
+**3.** Narrow the bottleneck or keep the width and corrupt the input
+(denoising), so copying no longer solves the task.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+An autoencoder learns a representation by being **forced to lose information**.
+Remove the constraint and it learns nothing — a reminder that the objective,
+not the architecture, decides what a model learns.
+
+</div>
+
+
+Notes:
+Close the lecture on the through-line: L04 chose the representation by hand
+(the function α) here the network learns it, and the quality of what it learns
+is determined entirely by the pressure the objective puts on it.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

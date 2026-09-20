@@ -1,0 +1,2073 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 03: Linear Models — Classical and Probabilistic</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Probabilistic Machine Learning
+## Lecture 03: Linear Models — Classical and Probabilistic
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+The spine of the course: every classical method is stated first in its usual
+form and then re-derived as maximum likelihood under a stated noise model.
+Reused units carry the classical account the three probabilistic units are new.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Linear Regression, Classically
+
+> **Guiding Question:** Why squared error — and what exactly does "linear"
+> forbid?
+
+--
+
+## The Task: Predicting Acceleration
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The world
+$O$ — vehicles
+
+$Y = \mathbb{R}$ — time to accelerate to 100 km/h
+
+$\gamma(o)$ — the true acceleration time of vehicle $o$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The model world
+$\alpha$ — measure wheels, horsepower, weight, torque
+
+$X$ — those four numbers, for every vehicle
+
+$h_\Theta$ — a linear function of them
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Deliberately mundane. The value is that every abstract symbol from the previous
+unit now has a concrete referent students can argue with — especially α, where
+"which four numbers" is a real modelling decision.
+
+--
+
+## The Data
+
+| wheels | horsepower | weight | torque | **acceleration time** |
+|---|---|---|---|---|
+| 4 | 150 | 1350 | 250 | 9.8 |
+| 4 | 320 | 1600 | 430 | 4.9 |
+| 6 | 95 | 2100 | 210 | 16.2 |
+| … | … | … | … | … |
+
+The last column is $y$ the rest is $\mathbf{x}$.
+
+Notes:
+Ask which column is likely useless (wheels, in a passenger-car dataset) and
+what would happen if it were included anyway — an invitation to regularisation
+later.
+
+--
+
+## The Remaining Two Pieces
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Loss function
+**Mean squared error** — the average of the squared differences between
+predicted and observed acceleration times.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Learning algorithm
+**LMS** — least mean squares, which adjusts the parameters to reduce that
+error.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Four choices — representation, model family, loss, optimiser — and the system
+is fully specified. Every method in this chapter is a different set of four.
+
+</div>
+
+
+
+<div class="takeaway">
+
+A learning problem becomes concrete the moment you can name its **task,
+experience and performance measure**, and its system becomes buildable the
+moment you can name its **representation, model, loss and optimiser**.
+
+</div>
+
+
+Notes:
+Close by returning to the four-box map. This unit is the template students
+should apply when reading any paper: identify the four boxes before judging the
+result.
+
+--
+
+## Fitting $h$ by Repeated Correction
+
+
+<div class="c-algorithm">
+
+**LMS (least mean squares)**
+
+Initialise the weights $w$.
+
+**repeat**
+&nbsp;&nbsp;pick a training example $(\mathbf{x}, y)$
+&nbsp;&nbsp;compute the prediction $h_w(\mathbf{x})$
+&nbsp;&nbsp;compute the error $ e = y - h_w(\mathbf{x})$
+&nbsp;&nbsp;update every weight: $ w_i \leftarrow w_i + \eta e x_i$
+**until** convergence on $D$
+
+</div>
+
+
+Notes:
+Read the update aloud in words: move each weight in the direction that would
+have reduced this example's error, in proportion to how much that feature
+contributed. That sentence is all of gradient descent, before any calculus.
+
+--
+
+## What the Update Rule Encodes
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Direction
+The sign of $e$ decides whether the prediction goes up or down.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Attribution
+The factor $x_i$ gives each feature credit proportional to its value.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Step size
+The learning rate $\eta$ trades speed against stability.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Too large an $\eta$ oscillates or diverges too small an $\eta$ converges
+slowly. It is a hyperparameter — chosen, not learned.
+
+</div>
+
+
+Notes:
+Ask what happens with η far too large before showing it the prediction that
+"it overshoots and gets worse" is usually made correctly, which earns the
+hyperparameter concept. The visualisation in the optimisation unit shows it.
+
+--
+
+## Classification versus Regression
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Classification
+$Y$ is a finite set of labels.
+
+*Will this customer default — yes or no?*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Regression
+$Y = \mathbb{R}$, the target is a quantity.
+
+*What credit line should this customer receive?*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The learning machinery is the same only the shape of $Y$ — and therefore the
+loss — changes.
+
+Notes:
+Keep the same running example across both to make the point that the task, not
+the data, decides which you are doing. The credit example returns in logistic
+regression, where a regression model is pressed into classification.
+
+--
+
+## The Model
+
+
+<div class="c-definition">
+
+**Linear regression** predicts the target as a weighted sum of the features:
+
+$$
+h_{\mathbf{w}}(\mathbf{x}) = w_0 + w_1 x_1 + \ldots + w_p x_p
+= \mathbf{w}^{\top}\mathbf{x}
+$$
+
+with $x_0 = 1$ absorbing the intercept.
+
+</div>
+
+
+The hypothesis space is $\mathbb{R}^{p+1}$: one hypothesis per weight vector.
+
+Notes:
+Point back at the hypothesis-space unit — here it is a continuous space of
+finite dimension, which is why calculus rather than enumeration finds the
+optimum.
+
+--
+
+## The Objective: Residual Sum of Squares
+
+$$
+\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{R}^{p+1}} \mathrm{RSS}(\mathbf{w}),
+\qquad
+\mathrm{RSS}(\mathbf{w}) = \sum_{i=1}^{n}\big(y_i - \mathbf{w}^{\top}\mathbf{x}_i\big)^2
+$$
+
+
+<div class="c-note">
+
+RSS measures **effectiveness** — how good the predictions are. Do not confuse
+it with **efficiency**, which is about runtime and computational effort.
+
+</div>
+
+
+Notes:
+The effectiveness/efficiency distinction is from the source and worth keeping;
+students routinely say "efficient model" when they mean "accurate model".
+
+--
+
+## One Feature: The Closed Form
+
+For a single feature the minimiser can be written down directly:
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Slope
+$$\hat{w}_1 = \frac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2}$$
+
+The covariance of $x$ and $y$ over the variance of $x$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Intercept
+$$\hat{w}_0 = \overline{y} - \hat{w}_1 \overline{x}$$
+
+The fitted line passes through the point of means.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Both formulas are built from quantities the students defined in the statistics
+module — covariance and variance. Say that explicitly: regression is not new
+mathematics, it is the old summary statistics arranged to answer a prediction
+question.
+
+--
+
+## How Much Variance Is Explained?
+
+
+<div class="c-definition">
+
+$$
+\mathrm{TSS} = \mathrm{ESS} + \mathrm{RSS},
+\qquad
+R^2 = \frac{\mathrm{ESS}}{\mathrm{TSS}} = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}}
+$$
+where TSS is the total, ESS the explained and RSS the residual sum of squares.
+
+</div>
+
+
+$R^2$ is the fraction of the target's variation the model accounts for: 0 means
+no better than predicting the mean, 1 means an exact fit.
+
+
+<div class="c-warning">
+
+**Training** $R^2$ never decreases when a feature is added, however useless the
+feature. A high training $R^2$ is not evidence that a model generalises —
+test $R^2$ and adjusted $R^2$ can and do fall.
+
+</div>
+
+
+Notes:
+Connect to the baseline unit: R² = 0 is exactly the trivial-regression
+baseline. The warning is the regression counterpart of training error — and the
+motivation for the cross-validation the students already know.
+
+--
+
+## Higher Dimensions
+
+With $p$ features the same objective in matrix form,
+
+$$
+\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}
+$$
+
+gives the optimum in one step whenever $\mathbf{X}^{\top}\mathbf{X}$ is
+invertible.
+
+
+<div class="c-note">
+
+Invertibility fails when features are linearly dependent or when $p > n$ —
+more unknowns than equations. Both are common in practice, and both are why
+regularisation exists.
+
+</div>
+
+
+Notes:
+Do not derive the normal equations state them and spend the time on when they
+break. The p > n case is the modern one — genomics, text — and motivates the
+next chapters more than the algebra does.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Linear regression fits a weighted sum by minimising squared residuals. Its
+solution is built from **covariance over variance**, and $R^2$ reports how much
+variation it explains — not whether it will generalise.
+
+</div>
+
+
+--
+
+## Linear in the Parameters, Not in the Features
+
+
+<div class="c-important">
+
+A model is **linear** when it is linear in the **weights** $\mathbf{w}$. The
+features may be arbitrary transformations of the input.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Plain
+$$h(\mathbf{x}) = w_0 + w_1 x$$
+a straight line
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Polynomial
+$$h(\mathbf{x}) = w_0 + w_1 x + w_2 x^2$$
+a curve — still a *linear model*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Basis functions
+$$h(\mathbf{x}) = \sum_j w_j \phi_j(\mathbf{x})$$
+any fixed feature map $\phi$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the slide that unlocks the rest: the same least-squares machinery fits
+curves, interactions and periodic patterns, as long as the transformation is
+chosen in advance. Ask what is *not* expressible — anything where the
+transformation itself must be learned, which is the neural-network module.
+
+--
+
+## Consequences
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The good
+The closed-form solution and all statistical guarantees carry over unchanged.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The catch
+The feature map is a **modelling decision**. Choose too rich a basis and the
+model overfits too poor and it underfits.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Increasing polynomial degree is a dial on the bias–variance axis you can watch
+turning.
+
+</div>
+
+
+Notes:
+Tie back to principles: the basis is the inductive bias made explicit. This is
+the cleanest example in the course of choosing a hypothesis space deliberately.
+
+--
+
+## The Question Nobody Asks
+
+We minimised the *squared* residuals. Why squares — why not absolute
+deviations, or fourth powers?
+
+Notes:
+Guiding question. Most students have never been given a reason beyond
+differentiability. There is a real one, and it is worth the slide.
+
+--
+
+## Geometric View
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+The predictions $\mathbf{X}\mathbf{w}$ live in the **column space** of
+$\mathbf{X}$ — everything the features can express. The observed
+$\mathbf{y}$ generally does not.
+
+Least squares picks the point of that space **closest to $\mathbf{y}$ in
+Euclidean distance**: the orthogonal projection. The residual is perpendicular
+to every feature.
+
+</div>
+
+
+<div class="card">
+
+### Consequence
+The residual carries no remaining linear information about the features.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The orthogonality condition is the geometric content of the normal equations.
+It also explains why adding a feature can never increase RSS: the space you
+project onto only grew.
+
+--
+
+## The Gauss–Markov Theorem
+
+
+<div class="c-definition">
+
+**Gauss–Markov (informal).** Among all estimators that are
+
+- **linear** in the observed outputs $(y_1, \ldots, y_n)$, and
+- **unbiased**,
+
+the least-squares estimator has the **lowest variance**. It is the *Best Linear
+Unbiased Estimator* — BLUE.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Best
+lowest variance among the candidates
+
+</div>
+
+
+<div class="card">
+
+### Linear
+a linear function of the observations
+
+</div>
+
+
+<div class="card">
+
+### Unbiased
+right on average over repeated samples
+
+</div>
+
+
+</div>
+
+
+Notes:
+Spell out what the theorem does *not* say: nothing about non-linear or biased
+estimators — and biased estimators (ridge, lasso) can beat OLS in prediction
+error. That is not a contradiction, it is a different criterion.
+
+--
+
+## What This Buys, and What It Costs
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### The payoff
+Minimising RSS yields optimal statistical properties under **very mild
+assumptions** — no normality needed, only uncorrelated errors of constant
+variance.
+
+</div>
+
+
+<div class="card bad">
+
+### The price
+Alternatives — absolute error, Huber loss — are **more robust to outliers** but
+give up the BLUE guarantee.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Squared error is not an arbitrary convenience: it is the loss whose minimiser
+is the best linear unbiased estimator. Departing from it is legitimate — but it
+is a trade, and you should be able to name what you traded.
+
+</div>
+
+
+Notes:
+Close the loop with the robustness discussion from descriptive statistics: mean
+versus median reappears here as squared versus absolute loss. Same trade-off,
+new context — exactly the spiral the pedagogic concept asks for.
+
+--
+
+## Two Ways to the Same Minimum
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Direct (closed form)
+$$\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}$$
+
+Exact, one step. Requires forming and inverting a $(p{+}1)\times(p{+}1)$
+matrix — costly for large $p$, impossible when it is singular.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Iterative (gradient descent)
+$$\mathbf{w} \leftarrow \mathbf{w} - \eta \nabla \mathrm{RSS}(\mathbf{w})$$
+
+Approximate, many steps. Scales to large $p$ and $n$, works when the direct
+solution does not exist, and extends to models with no closed form at all.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The iterative rule is exactly the **LMS algorithm** from Module 2: the update
+$w_i \leftarrow w_i + \eta e x_i$ *is* a step along $-\nabla \mathrm{RSS}$,
+written per example instead of per dataset.
+
+</div>
+
+
+Notes:
+The right-hand column is the one that generalises: logistic regression and
+neural networks have no closed form, so the iterative method is the only one
+that survives the rest of the course. Make the LMS identification explicit —
+students otherwise carry two unconnected procedures.
+
+--
+
+## Watching Gradient Descent Work
+
+<div class="viz viz-lg" data-viz="ml/gradient-descent" data-steps="6"
+ data-params='{"eta": 0.25, "start": -2.6}'></div>
+
+Notes:
+Stepped viz (P6). Each click is one update. Ask before the first click where
+the steps will be largest — where the slope is steepest, far from the minimum —
+and why they shrink as the minimum approaches, without η changing.
+
+--
+
+## The Learning Rate Decides Everything
+
+<div class="viz viz-lg" data-viz="ml/gradient-descent" data-steps="6"
+ data-params='{"eta": 0.9, "start": -2.6, "compare": 0.05}'></div>
+
+Teal: $\eta = 0.9$ — overshoots and oscillates across the minimum.
+Red: $\eta = 0.05$ — stable, but barely moves.
+
+
+<div class="c-warning">
+
+The learning rate is a **hyperparameter**: it is chosen, not learned, and both
+failure modes are silent — one looks unstable, the other looks converged.
+
+</div>
+
+
+Notes:
+Predict-then-check: ask which curve belongs to which η before revealing. The
+"looks converged" failure is the dangerous one — a slow run and a finished run
+produce the same-looking loss curve over a short window.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Use the **closed form** when the matrix is small and well-conditioned use
+**gradient descent** when it is not — which, for everything after this unit, is
+always.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## The Probabilistic Reading
+
+> **Guiding Question:** Least squares was justified after the fact. What if we
+> had stated how the data arose *first* — would we get the same estimator?
+
+--
+
+## Turning a Model Into an Estimator
+
+We have a model with parameters $\theta$ and data $D$. The model assigns each
+possible dataset a probability.
+
+
+<div class="c-definition">
+
+The **likelihood** is that probability, read as a function of the **parameters**
+with the data held fixed:
+$$
+L(\theta) = p(D \mid \theta)
+$$
+The **maximum likelihood estimate** is
+$\hat{\theta}_{\mathrm{ML}} = \arg\max_{\theta} p(D \mid \theta)$.
+
+</div>
+
+
+
+<div class="c-warning">
+
+$p(D \mid \theta)$ is a probability over **data**, not over parameters. The
+likelihood is not a distribution over $\theta$ and does not integrate to 1.
+
+</div>
+
+
+Notes:
+The warning is the single most common confusion in the course. The likelihood is
+the same expression as the sampling distribution, read along the other axis.
+Bayesian methods later put an actual distribution on θ this is where the two
+approaches part.
+
+--
+
+## Why the Logarithm
+
+Under the **i.i.d. assumption** — observations independent and identically
+distributed — the likelihood factorises:
+
+$$
+L(\theta) = \prod_{i=1}^{n} p(x_i \mid \theta)
+\qquad\Longrightarrow\qquad
+\ell(\theta) = \sum_{i=1}^{n} \log p(x_i \mid \theta)
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Same maximum
+$\log$ is monotone, so it does not move the arg max.
+
+</div>
+
+
+<div class="card">
+
+### Numerically safe
+A product of thousands of small probabilities underflows; a sum of logs does
+not.
+
+</div>
+
+
+<div class="card">
+
+### Differentiable sums
+Sums differentiate term by term — gradient methods apply directly.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The i.i.d. assumption is doing real work here. Time series, spatial data and
+grouped data violate it, and the factorisation is then simply wrong.
+
+</div>
+
+
+--
+
+## Example: A Biased Coin
+
+$n$ flips, $h$ heads, parameter $\theta = P(\text{heads})$:
+
+$$
+\ell(\theta) = h \log \theta + (n - h)\log(1 - \theta)
+\qquad
+\frac{d\ell}{d\theta} = \frac{h}{\theta} - \frac{n-h}{1-\theta} = 0
+\qquad
+\hat{\theta}_{\mathrm{ML}} = \frac{h}{n}
+$$
+
+
+<div class="c-insight">
+
+The estimator is the observed frequency — the answer intuition would have given.
+MLE **derives** it rather than assuming it, and the same derivation works where
+intuition has nothing to offer.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+You flip a coin **3 times** and see 3 heads.
+
+1. What is $\hat{\theta}_{\mathrm{ML}}$?
+2. Is that a reasonable belief about the coin?
+3. What is the estimator missing?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** $\hat{\theta} = 3/3 = 1$ — the coin never comes up tails.
+
+</div>
+
+
+<div class="card">
+
+**2.** No. Three flips is no basis for excluding tails entirely.
+
+</div>
+
+
+<div class="card">
+
+**3.** Any **prior** knowledge that coins are usually near-fair, and any account
+of its own **uncertainty**. MLE returns a single point and no error bars.
+
+</div>
+
+
+</div>
+
+
+Both gaps are what the Bayesian treatment later repairs.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Maximum likelihood picks the parameters under which the observed data is most
+probable. It is the bridge from a **model of the world** to a **learning
+algorithm** — and it is blind to prior knowledge and to its own uncertainty.
+
+</div>
+
+
+Notes:
+The three-heads example is the hook for the whole Bayesian thread: students
+should feel MLE's failure before regularisation and priors are offered as the
+fix.
+
+--
+
+## The Same Model, Told Differently
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Classical account
+Fit a line by **minimising squared error**:
+$$\hat{\mathbf{w}} = \arg\min_{\mathbf{w}} \sum_i (y_i - \mathbf{w}^{\top}\mathbf{x}_i)^2$$
+
+Justified after the fact by Gauss–Markov: it is the best linear unbiased
+estimator.
+
+</div>
+
+
+<div class="card">
+
+### Probabilistic account
+State how the data **arose**:
+$$y = \mathbf{w}^{\top}\mathbf{x} + \varepsilon,
+\qquad \varepsilon \sim \mathcal{N}(0, \sigma^{2})$$
+
+Then estimate $\mathbf{w}$ by maximum likelihood.
+
+</div>
+
+
+</div>
+
+
+**Do these give the same answer?**
+
+Notes:
+Question-first (P1) and the organising contrast of the lecture. Let students
+guess before the derivation. The answer — identical — is the point: least
+squares was a probabilistic model all along, with its assumptions unstated.
+
+--
+
+## The Derivation
+
+The noise model says $p(y_i \mid \mathbf{x}_i, \mathbf{w}) =
+\mathcal{N}(y_i \mid \mathbf{w}^{\top}\mathbf{x}_i, \sigma^{2})$, so
+
+$$
+\ell(\mathbf{w}) = \sum_{i=1}^{n} \log \frac{1}{\sqrt{2\pi\sigma^{2}}}
+\exp\left(-\frac{(y_i - \mathbf{w}^{\top}\mathbf{x}_i)^{2}}{2\sigma^{2}}\right)
+= \text{const} - \frac{1}{2\sigma^{2}} \sum_{i=1}^{n} (y_i - \mathbf{w}^{\top}\mathbf{x}_i)^{2}
+$$
+
+
+<div class="c-important">
+
+Maximising the log-likelihood **is** minimising the residual sum of squares.
+The constant and the $1/2\sigma^{2}$ do not move the arg max.
+$$\hat{\mathbf{w}}_{\mathrm{ML}} = \hat{\mathbf{w}}_{\mathrm{OLS}}$$
+
+</div>
+
+
+Notes:
+Walk the two lines slowly — this is the moment the course's thesis becomes
+concrete. The squared term falls out of the *exponent of the Gaussian*: squared
+error is not a choice, it is what a Gaussian noise assumption implies.
+
+--
+
+## What the Probabilistic View Adds
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### The assumptions become visible
+Additive noise, **zero mean**, **constant variance** (homoscedasticity),
+**independent** across observations, **Gaussian**.
+
+</div>
+
+
+<div class="card">
+
+### They become checkable
+Plot the residuals. Fanning out? Variance is not constant. Skewed? Not Gaussian.
+Patterned? Not independent.
+
+</div>
+
+
+<div class="card">
+
+### You get a distribution
+Not just $\hat{y}$ but $p(y \mid \mathbf{x})$ — a **predictive distribution**
+with an interval, not a point.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Choosing a loss and choosing a noise model are the **same decision**. Squared
+error ⇔ Gaussian noise absolute error ⇔ Laplace noise, which is why it is more
+robust to outliers.
+
+</div>
+
+
+Notes:
+The loss/noise correspondence is the transferable idea, and it explains the
+robustness result from the Gauss–Markov unit rather than merely asserting it:
+the Laplace distribution has heavier tails, so large residuals are less
+surprising and pull the fit less.
+
+--
+
+## Mini-Exercise
+
+You fit a linear model to house prices. The residual plot shows the spread of
+errors **growing** with the predicted price.
+
+1. Which assumption is violated?
+2. Is $\hat{\mathbf{w}}$ still meaningful?
+3. What is definitely wrong?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Homoscedasticity — the noise variance is not constant.
+
+</div>
+
+
+<div class="card">
+
+**2.** The point estimate remains unbiased it is just no longer the
+minimum-variance one.
+
+</div>
+
+
+<div class="card">
+
+**3.** Every **interval** and every **p-value**: they are computed from a single
+$\sigma$ that does not exist. Predictions are over-confident for expensive
+houses and under-confident for cheap ones.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Least squares **is** maximum likelihood under Gaussian noise. Stating the model
+probabilistically changes no estimate — it exposes the assumptions and buys you
+a predictive distribution.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## From Regression to Classification
+
+> **Guiding Question:** A decision is a yes or a no. What goes wrong when we
+> fit a straight line to one?
+
+--
+
+## Fitting a Line to Labels
+
+Encode the two classes as $y \in \lbrace -1, +1 \rbrace$, fit a linear model,
+and classify by the sign of the prediction:
+
+$$
+h(\mathbf{x}) = \mathrm{sign}\big(\mathbf{w}^{\top}\mathbf{x}\big)
+$$
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### One feature
+The **discrimination point** $x'$ satisfies
+$$w_0 + w_1 x' = 0$$
+Everything to one side is one class.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Two features
+The **discrimination line** satisfies
+$$w_0 + w_1 x_1 + w_2 x_2 = 0$$
+In $p$ dimensions it becomes a hyperplane.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The decision boundary is where the model output crosses zero — a level set. Say
+it once here it holds for logistic regression, SVMs and a neural network's
+final layer alike.
+
+--
+
+## Where It Breaks
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Squared loss punishes correctness
+A point far on the *correct* side has a large residual, so least squares drags
+the boundary toward it.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### The boundary shifts
+Adding well-classified points — or an outlier — moves the discrimination
+point, even when nothing was misclassified.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+The output is also unbounded: $\mathbf{w}^{\top}\mathbf{x}$ can be 17 or −40,
+and neither is interpretable as a degree of belief.
+
+</div>
+
+
+Notes:
+Force the interpretation (P2): ask why "being very right" should ever count as
+error. Once students see that squared loss is the wrong loss for a decision,
+the sigmoid arrives as a fix rather than a formula.
+
+--
+
+## Two Problems, One Fix
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### $\mathrm{sign}(\mathbf{w}^{\top}\mathbf{x})$ is not differentiable
+No gradient means no gradient descent — the optimisation machinery does not
+apply.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### The boundary is unstable
+Squared loss on $\pm 1$ labels lets well-classified points shift the
+discrimination point.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+Replace the hard threshold with the **logistic sigmoid**:
+$$
+h_\Theta(\mathbf{x}) = \mathrm{expit}\big(\mathbf{w}^{\top}\mathbf{x}\big)
+\approx P(y = 1 \mid \mathbf{x})
+$$
+
+</div>
+
+
+The output becomes a smooth, bounded quantity that can be read as a
+probability — and can be differentiated.
+
+Notes:
+Both problems have the same root: a decision is a step function, and steps have
+no useful derivative. Softening the step is the standard move; it returns as
+the activation function in neural networks.
+
+--
+
+## Odds and Log-Odds
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Odds
+The ratio of favourable to remaining cases.
+
+*Rolling a six: odds 1 : 5.*
+
+</div>
+
+
+<div class="card">
+
+### Logit
+The **log-odds** of a probability $p$:
+$$\mathrm{logit}(p) = \ln \frac{p}{1-p}$$
+
+</div>
+
+
+<div class="card">
+
+### Range
+$p \in (0,1)$ maps to $(-\infty, +\infty)$ — exactly the range a linear model
+produces.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+**The modelling assumption:** the logit of the target is a linear combination
+of the features.
+$$
+\ln \frac{P(y=1 \mid \mathbf{x})}{1 - P(y=1 \mid \mathbf{x})} = \mathbf{w}^{\top}\mathbf{x}
+$$
+
+</div>
+
+
+Notes:
+This is the cleanest way in: we do not force a probability to be linear (it
+cannot be — it is bounded), we make its log-odds linear. The sigmoid is then
+not an arbitrary squashing function but the inverse of the logit.
+
+--
+
+## The Model
+
+Inverting the logit gives the **logistic sigmoid**:
+
+$$
+h_\Theta(\mathbf{x}) = \mathrm{expit}(\mathbf{w}^{\top}\mathbf{x})
+= \frac{1}{1 + e^{-\mathbf{w}^{\top}\mathbf{x}}}
+$$
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Shape
+An S-curve: near-linear around 0, saturating towards 0 and 1 at the extremes.
+
+</div>
+
+
+<div class="card">
+
+### Reading
+$h_\Theta(\mathbf{x}) = P(y = 1 \mid \mathbf{x})$, and the decision boundary is
+still $\mathbf{w}^{\top}\mathbf{x} = 0$ — where the sigmoid passes $0.5$.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The boundary is unchanged from linear regression for classification what
+changed is the *loss* and the interpretability of the output. Worth stating
+explicitly, since students often expect a curved boundary.
+
+--
+
+## The Loss: Cross-Entropy
+
+
+<div class="c-definition">
+
+**Binary cross-entropy (log loss)**
+$$
+L(\Theta) = -\frac{1}{n}\sum_{i=1}^{n}
+\Big[ y_i \ln h_\Theta(\mathbf{x}_i) + (1 - y_i)\ln\big(1 - h_\Theta(\mathbf{x}_i)\big) \Big]
+$$
+
+For $|Y| > 2$ classes, the multiclass form sums over the classes with a softmax
+output.
+
+</div>
+
+
+Where does it come from? From the **likelihood**:
+$P(y_i = 1 \mid \mathbf{x}_i \Theta) = h_\Theta(\mathbf{x}_i)$ and
+$P(y_i = 0 \mid \mathbf{x}_i \Theta) = 1 - h_\Theta(\mathbf{x}_i)$.
+Maximising the likelihood of the data is minimising this loss.
+
+Notes:
+The derivation is one line and worth doing aloud: write the likelihood of one
+example as h^y (1−h)^(1−y), take the product over examples, take the log,
+negate. Maximum likelihood is the origin of the loss — not a separate idea.
+
+--
+
+## Why It Fixes the Problem
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Confident and correct
+Loss goes to zero — no penalty for being emphatically right.
+
+</div>
+
+
+<div class="card bad">
+
+### Confident and wrong
+Loss goes to infinity — exactly the errors we want punished.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+There is no closed-form solution the parameters are found by gradient descent
+on this loss.
+
+</div>
+
+
+Notes:
+Contrast directly with the squared-loss failure two units back: cross-entropy
+punishes confident mistakes and ignores confident successes, which is what a
+classification loss should do.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Logistic regression is a **linear model of the log-odds**, trained by
+maximising likelihood. It keeps the linear decision boundary but produces a
+calibrated probability — and a loss that punishes the right kind of error.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Logistic Regression, Probabilistically
+
+> **Guiding Question:** Cross-entropy was chosen because it punishes confident
+> mistakes. Where does it actually come from?
+
+--
+
+## The Same Pattern Again
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Classical account
+Squash a linear score with a sigmoid, then minimise **cross-entropy** because it
+punishes confident mistakes.
+
+</div>
+
+
+<div class="card">
+
+### Probabilistic account
+State the generative story: the label is a **Bernoulli** draw,
+$$y \mid \mathbf{x} \sim \mathrm{Bernoulli}\big(\sigma(\mathbf{w}^{\top}\mathbf{x})\big)$$
+then maximise the likelihood.
+
+</div>
+
+
+</div>
+
+
+--
+
+## The Derivation
+
+With $h_i = \sigma(\mathbf{w}^{\top}\mathbf{x}_i)$, one observation has
+probability $h_i^{y_i}(1-h_i)^{1-y_i}$, so
+
+$$
+\ell(\mathbf{w}) = \sum_{i=1}^{n}\Big[ y_i \log h_i + (1-y_i)\log(1-h_i)\Big]
+= - n \cdot \text{(cross-entropy)}
+$$
+
+
+<div class="c-important">
+
+Cross-entropy **is** the negative log-likelihood of a Bernoulli model. As with
+squared error and the Gaussian, the loss was never an independent choice.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Gaussian noise
+→ squared error → linear regression
+
+</div>
+
+
+<div class="card">
+
+### Bernoulli labels
+→ cross-entropy → logistic regression
+
+</div>
+
+
+</div>
+
+
+Notes:
+Two instances of one pattern, side by side. Ask what loss a **Poisson** model
+would imply for count data — the students can now derive it rather than look it
+up, which is the transferable skill.
+
+--
+
+## What It Adds: Calibration
+
+The output is now a **claim about frequencies**: among all cases predicted at
+0.7, roughly 70% should be positive.
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Calibrated
+A reliability plot — predicted probability against observed frequency — lies on
+the diagonal. The number can be fed into a cost-based decision.
+
+</div>
+
+
+<div class="card bad">
+
+### Miscalibrated
+Systematically over- or under-confident. Accuracy can still be high the
+probabilities are simply not usable as probabilities.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Accuracy does not test calibration and calibration does not test accuracy. A
+model that outputs the base rate for everyone is perfectly calibrated and
+useless.
+
+</div>
+
+
+--
+
+## Regularisation Is a Prior
+
+Adding an $L_2$ penalty to the loss:
+
+$$
+\arg\max_{\mathbf{w}} \underbrace{\log p(D \mid \mathbf{w})}_{\text{likelihood}}
+ + \underbrace{\log p(\mathbf{w})}_{\text{prior}}
+\qquad\text{with}\qquad
+p(\mathbf{w}) = \mathcal{N}(0, \tau^{2}\mathbf{I})
+$$
+
+
+<div class="c-insight">
+
+$L_2$ regularisation is exactly a **zero-mean Gaussian prior** on the weights,
+and the regularised estimate is the **MAP** estimate. $L_1$ corresponds to a
+Laplace prior, whose peak at zero is why it produces sparsity.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Cross-entropy is the Bernoulli negative log-likelihood **regularisation is a
+prior** and the probabilistic reading turns two heuristics into one principle —
+maximise likelihood, optionally times a prior.
+
+</div>
+
+
+Notes:
+This slide retires two pieces of folklore at once. Students who have met "L2
+shrinks weights" and "L1 gives sparsity" as facts now have the reason. It also
+sets up Bayesian linear regression, where the prior stays a distribution instead
+of collapsing to a point.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

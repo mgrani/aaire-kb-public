@@ -1,0 +1,1137 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 07: Selected Probabilistic Algorithms</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Probabilistic Machine Learning
+## Lecture 07: Selected Probabilistic Algorithms
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+The closing lecture applies the course's programme — write the generative story,
+condition on data, read off answers — to three settings. The clustering units are reused from the data-science
+course purely as the hard-assignment contrast that motivates mixtures, so this
+lecture needs no prior clustering lecture.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Hard Assignments First
+
+> **Guiding Question:** k-means gives every point exactly one cluster. What is
+> lost for a point that sits between two?
+
+--
+
+## Learning Without a Target
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Supervised
+A **target concept** is given: each example carries a label, and the objective
+is to reproduce it on new data.
+
+</div>
+
+
+<div class="card">
+
+### Unsupervised
+**No target concept.** The data carries no labels, and the objective must come
+from the structure itself.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-definition">
+
+**Cluster analysis** is the unsupervised classification of a set of objects
+into groups such that objects **within** a group are similar and objects in
+**different** groups are dissimilar.
+
+</div>
+
+
+Notes:
+The definition contains the whole difficulty: "similar" is not defined. Ask
+what a cluster of customers *is* — the answer depends on a distance the analyst
+chooses, which is the epistemic-modelling point (P3) in its sharpest form.
+
+--
+
+## The Stages of a Cluster Analysis
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Represent
+Choose the attributes and their scaling.
+
+</div>
+
+
+<div class="card">
+
+### Measure
+Choose a distance or similarity.
+
+</div>
+
+
+<div class="card">
+
+### Group
+Run an algorithm that optimises some criterion.
+
+</div>
+
+
+<div class="card">
+
+### Interpret
+Decide whether the groups mean anything.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Every clustering algorithm **always returns clusters**, including on data that
+has none. The output is never evidence that structure exists.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Clustering has no ground truth. The **representation and the distance encode
+what "similar" means** — the algorithm only optimises the criterion you handed
+it.
+
+</div>
+
+
+Notes:
+Stage 4 is the one that gets skipped. This is the unit to return to when
+evaluation appears at the end of the lecture: internal measures score the
+criterion, not the meaning.
+
+--
+
+## What a Distance Must Satisfy
+
+
+<div class="c-definition">
+
+A **metric** $d$ satisfies, for all $\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3$:
+
+1. $d(\mathbf{x}_1, \mathbf{x}_2) \geq 0$ — non-negativity
+2. $d(\mathbf{x}_1, \mathbf{x}_1) = 0$ — identity
+3. $d(\mathbf{x}_1, \mathbf{x}_2) = d(\mathbf{x}_2, \mathbf{x}_1)$ — symmetry
+4. $d(\mathbf{x}_1, \mathbf{x}_3) \leq d(\mathbf{x}_1, \mathbf{x}_2) + d(\mathbf{x}_2, \mathbf{x}_3)$ — triangle inequality
+
+</div>
+
+
+The pairwise distances of $n$ objects form the **distance matrix**, which is
+what most clustering algorithms actually consume.
+
+Notes:
+Not every useful similarity is a metric — cosine similarity and many
+domain-specific scores violate the triangle inequality, and some algorithms
+depend on it. Worth naming so students check before assuming.
+
+--
+
+## Numeric Attributes: the Minkowski Family
+
+$$
+d(\mathbf{x}_1, \mathbf{x}_2) = \Big(\sum_{i=1}^{p} |x_{1i} - x_{2i}|^{r}\Big)^{1/r}
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### $r = 1$
+**Manhattan** — sum of absolute differences. Robust to single large deviations.
+
+</div>
+
+
+<div class="card">
+
+### $r = 2$
+**Euclidean** — straight-line distance. The default.
+
+</div>
+
+
+<div class="card">
+
+### $r \to \infty$
+**Chebyshev** — the largest single-attribute difference dominates.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Minkowski distances are **not scale-invariant**. An attribute measured in
+metres and one in millimetres do not contribute equally — standardise first, or
+the unit of measurement chooses your clusters.
+
+</div>
+
+
+--
+
+## Binary Attributes
+
+With $f_{11}$ the count of attributes present in both objects, $f_{00}$ absent
+in both, and $f_{01}, f_{10}$ present in exactly one:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Simple Matching Coefficient
+$$\mathrm{SMC} = \frac{f_{11} + f_{00}}{f_{11} + f_{00} + f_{01} + f_{10}}$$
+Counts **shared absences** as agreement.
+
+</div>
+
+
+<div class="card">
+
+### Jaccard Coefficient
+$$J = \frac{f_{11}}{f_{11} + f_{01} + f_{10}}$$
+**Ignores** shared absences.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+For sparse data the difference is decisive: two shopping baskets agree on
+thousands of products **neither** contains. SMC would call them nearly
+identical Jaccard would not.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+Two documents are represented by which of 10,000 words they contain. Document A
+has 30 words, document B has 35, and they share 20.
+
+1. Compute SMC and Jaccard.
+2. Which is the honest similarity here?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+**1.** $f_{11} = 20$, $f_{01} + f_{10} = 25$, $f_{00} = 9955$.
+
+$\mathrm{SMC} = \frac{9975}{10000} = 0.9975$ &nbsp;·&nbsp;
+$J = \frac{20}{45} \approx 0.44$
+
+</div>
+
+
+<div class="card">
+
+**2.** Jaccard. SMC reports 99.75% similarity for two documents that share
+fewer than half their words — the agreement is almost entirely about words
+neither uses.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+The distance measure **is** the definition of similarity. Scale sensitivity and
+the treatment of shared absences change the clustering before any algorithm
+runs.
+
+</div>
+
+
+--
+
+## The Idea
+
+Represent each cluster by one **exemplar** — a centroid — and assign every
+object to the nearest one. The quality criterion is the total squared distance
+to the assigned exemplar:
+
+$$
+\mathrm{SSE} = \sum_{j=1}^{k} \sum_{\mathbf{x} \in C_j} d(\mathbf{x}, \boldsymbol{\mu}_j)^2
+$$
+
+
+<div class="c-important">
+
+Minimising SSE over all assignments is **NP-hard**. k-means is a heuristic that
+finds a local optimum — which is why its result depends on where it starts.
+
+</div>
+
+
+Notes:
+Name the criterion before the algorithm: k-means is not "the clustering
+algorithm", it is a greedy optimiser of one particular objective. Different
+objective, different notion of cluster.
+
+--
+
+## The Algorithm
+
+
+<div class="c-algorithm">
+
+**k-means (Lloyd)**
+
+1. Choose $k$ initial centroids.
+2. **Assign** each object to the nearest centroid.
+3. **Move** each centroid to the mean of its assigned objects.
+4. Repeat 2–3 until the assignment stops changing.
+
+</div>
+
+
+<div class="viz viz-lg" data-viz="ml/kmeans-steps" data-steps="6"
+ data-params='{"k": 3}'></div>
+
+Notes:
+Stepped viz (P6): odd clicks assign, even clicks move. The centroids start
+deliberately badly. Ask before each assignment step which points will change
+colour — students track the boundary moving, which is the mechanism.
+
+--
+
+## Properties
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Fast
+$O(n k p)$ per iteration, and few iterations in practice — it scales where HAC
+does not.
+
+</div>
+
+
+<div class="card">
+
+### Converges
+SSE decreases at every step and cannot increase, so the procedure terminates.
+
+</div>
+
+
+<div class="card bad">
+
+### To a local optimum
+The result depends on initialisation. Standard practice: restart several times
+and keep the best SSE.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+**k-medoids** uses an actual data point as the exemplar instead of the mean. It
+is slower but works with any distance matrix — including where a "mean" is
+undefined.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+1. Why must k-means terminate?
+2. Why is the mean the right update for the SSE criterion?
+3. What would change if you used the **median** instead?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Both steps can only decrease SSE, and there are finitely many
+assignments — so no assignment can repeat without the procedure having stopped.
+
+</div>
+
+
+<div class="card">
+
+**2.** The mean is exactly the point minimising the **sum of squared**
+distances to a set — the update solves its half of the objective optimally.
+
+</div>
+
+
+<div class="card">
+
+**3.** The median minimises the sum of **absolute** distances, so you would be
+optimising a different, more outlier-robust criterion (k-medians).
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+k-means alternates **assign** and **move**, minimising SSE to a local optimum.
+The mean is not a convenience — it is the minimiser of the criterion, which is
+why changing the criterion changes the update.
+
+</div>
+
+
+Notes:
+Part 3 is the conceptual payoff and connects to the mean/median robustness
+discussion from Lecture 02. Same trade, third appearance.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Mixture Models and EM
+
+> **Guiding Question:** If the cluster label were just another unobserved
+> variable, could we infer it the way we infer anything else?
+
+--
+
+## Soft Clustering
+
+k-means assigns each point to exactly one cluster. But a point **between** two
+groups is not confidently in either — and the hard assignment throws that
+information away.
+
+
+<div class="c-definition">
+
+A **Gaussian mixture model** says each point was generated in two steps:
+
+1. pick a component $k$ with probability $\pi_k$,
+2. draw $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$.
+
+$$
+p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
+$$
+
+</div>
+
+
+The component that generated each point is a **latent variable** — never
+observed.
+
+Notes:
+This is the course's programme in miniature: write the generative story, then
+condition. The latent variable is the formal version of "which cluster does this
+belong to", now a quantity with a posterior instead of a label.
+
+--
+
+## Why This Needs a New Algorithm
+
+If we knew the assignments, fitting each Gaussian would be trivial. If we knew
+the Gaussians, computing the assignments would be trivial. **We know neither.**
+
+
+<div class="c-algorithm">
+
+**Expectation–Maximisation**
+
+**E-step.** Given the current parameters, compute the **responsibility** of
+component $k$ for point $i$ — the posterior over the latent variable:
+$$
+\gamma_{ik} = \frac{\pi_k \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)}
+{\sum_j \pi_j \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_j, \boldsymbol{\Sigma}_j)}
+$$
+
+**M-step.** Given the responsibilities, re-estimate each
+$\pi_k, \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k$ by weighted maximum
+likelihood.
+
+Repeat. The log-likelihood never decreases.
+
+</div>
+
+
+
+<div class="c-insight">
+
+The E-step is **Bayes' theorem**: prior $\pi_k$ times likelihood, normalised
+over components. Nothing new is being invented.
+
+</div>
+
+
+--
+
+## The Relationship to k-Means
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### k-means
+Hard assignment; spherical, equal-sized clusters implied by the SSE criterion;
+one label per point.
+
+</div>
+
+
+<div class="card">
+
+### GMM with EM
+**Soft** assignment (responsibilities); each component has its own
+**covariance**, so clusters may be elongated and differently sized; a full
+density model.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+k-means is the limiting case of EM on a GMM with equal spherical covariances as
+the variance goes to zero — the responsibilities collapse to 0/1. The
+alternating structure is the same because it is the same idea.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+A point sits exactly between two fitted components.
+
+1. What does k-means report?
+2. What does the GMM report?
+3. Give a decision where the difference matters.
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** One cluster label — arbitrary, and with no indication that it was close.
+
+</div>
+
+
+<div class="card">
+
+**2.** Responsibilities near $0.5/0.5$: an explicit statement of ambiguity.
+
+</div>
+
+
+<div class="card">
+
+**3.** Any decision where being wrong is costly — route the ambiguous case to a
+human, or defer. That requires knowing it was ambiguous.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+A mixture model makes the cluster assignment a **latent variable with a
+posterior**. EM alternates inferring it and re-fitting the parameters — and
+k-means is what remains when the uncertainty is squeezed out.
+
+</div>
+
+
+Notes:
+Close on the recurring pattern: alternate between inferring what you cannot see
+and re-estimating what explains it. The same structure appears in HMMs, in topic
+models and in variational inference generally.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Keeping the Uncertainty
+
+> **Guiding Question:** Your model predicts €2.1M for a house four times larger
+> than anything it was trained on. Should it say so?
+
+--
+
+## Keeping the Distribution
+
+MAP estimation put a prior on the weights and then **collapsed it to a single
+point**. The Bayesian treatment keeps the whole distribution:
+
+$$
+p(\mathbf{w} \mid D) = \frac{p(D \mid \mathbf{w}) p(\mathbf{w})}{p(D)}
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Prior
+$p(\mathbf{w}) = \mathcal{N}(0, \tau^{2}\mathbf{I})$ — before any data, small
+weights are more plausible.
+
+</div>
+
+
+<div class="card">
+
+### Likelihood
+The Gaussian noise model from the linear-regression unit.
+
+</div>
+
+
+<div class="card">
+
+### Posterior
+Also Gaussian — the prior is **conjugate**, so the update has a closed form.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Nothing here is new machinery: it is Bayes' theorem with vectors. The
+conjugacy is a convenience that keeps the arithmetic closed-form; without it the
+same posterior would need sampling or approximation.
+
+--
+
+## Watching the Posterior Concentrate
+
+<div class="viz viz-lg" data-viz="math/bayes-updating" data-steps="4"
+ data-params='{"prior": [2, 2], "observations": [1, 1, 0, 1]}'></div>
+
+The same mechanism, shown for a single parameter: the prior is broad, each
+observation narrows it, and the posterior is what the next observation updates.
+
+Notes:
+Legitimate here — unlike in the introductory probability lecture, students now
+have distributions, priors and likelihoods, so a density over a parameter is
+readable rather than a forward reference. Ask what the curve would look like
+after a thousand observations, and what that says about epistemic uncertainty.
+
+--
+
+## The Payoff: Predictions With Honest Error Bars
+
+Instead of one prediction, integrate over every plausible parameter setting:
+
+$$
+p(y^{*} \mid \mathbf{x}^{*}, D) = \int p(y^{*} \mid \mathbf{x}^{*}, \mathbf{w}) p(\mathbf{w} \mid D) d\mathbf{w}
+$$
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Near the data
+Many plausible weight vectors agree, so the **predictive interval is narrow**.
+
+</div>
+
+
+<div class="card">
+
+### Far from the data
+Plausible weight vectors disagree wildly, so the **interval widens** — the model
+reports that it is extrapolating.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+This is **epistemic** uncertainty, made operational. A point estimate — MLE or
+MAP — extrapolates with exactly the same confidence it interpolates, which is
+the failure mode behind most confidently wrong predictions.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+Two models are fitted to house prices for homes of 50–150 m². Both predict
+€2.1M for a 600 m² house.
+
+1. Model A is OLS. What does it report about that prediction?
+2. Model B is Bayesian. What would you expect it to report?
+3. Which one would you put in front of a client?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** A point estimate with the **same** residual-based interval as anywhere
+else — no signal that 600 m² is far outside the data.
+
+</div>
+
+
+<div class="card">
+
+**2.** A very wide predictive interval: the training data barely constrains the
+slope that far out.
+
+</div>
+
+
+<div class="card">
+
+**3.** B — not because the number is better (it is the same) but because it
+tells the client not to rely on it.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Bayesian regression replaces a **best parameter** with a **distribution over
+parameters**, and a prediction with a **predictive distribution**. The interval
+widens where the data is thin — which is exactly where a point estimate is most
+dangerous.
+
+</div>
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

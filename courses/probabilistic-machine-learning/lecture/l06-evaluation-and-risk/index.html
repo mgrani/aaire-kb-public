@@ -1,0 +1,1266 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 06: Evaluation and Empirical Risk Minimisation</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Probabilistic Machine Learning
+## Lecture 06: Evaluation and Empirical Risk Minimisation
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Evaluation units reused verbatim from the data-science course the ERM unit is
+new and placed last, so it arrives as the theory that explains the practice the
+students have just been taught rather than as an abstraction preceding it.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## What Are We Measuring?
+
+> **Guiding Question:** A model reports 99.9% accuracy and has never detected a
+> single case. What should we have measured instead?
+
+--
+
+## What We Want to Know
+
+
+<div class="c-definition">
+
+The **true misclassification rate** of a hypothesis $h$ is the probability that
+it errs on a randomly drawn object:
+
+$$
+\mathrm{err}^*(h) = P\big(h(\mathbf{x}) \neq y(\mathbf{x})\big)
+$$
+
+</div>
+
+
+It is defined over the **whole distribution of objects** — which we cannot
+observe.
+
+Notes:
+Deliberately parallel to the population/sample distinction from the statistics
+module: err* is a population quantity. Students who see the analogy will not be
+surprised by cross-validation.
+
+--
+
+## What We Can Measure
+
+We estimate $\mathrm{err}^*(h)$ by the error on a set of examples
+$D_s \subseteq D$ whose true labels are known:
+
+$$
+\mathrm{err}(h, D_s) = \frac{1}{|D_s|} \sum_{\mathbf{x} \in D_s}
+\mathbb{1}\big[h(\mathbf{x}) \neq y(\mathbf{x})\big]
+$$
+
+
+<div class="c-warning">
+
+The estimate is only as good as the sample. Which examples land in $D_s$ — and
+whether $h$ has seen them before — decides whether the number means anything.
+
+</div>
+
+
+Notes:
+Everything in the next unit follows from that warning. Ask what happens if D_s
+is the data the model was fitted on the answer motivates hold-out estimation
+without needing to be told.
+
+--
+
+## A Number Alone Means Nothing
+
+"95% accuracy" is not a result until you know what a trivial method achieves.
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Trivial classification
+Always predict the **majority class**.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Trivial regression
+Always predict a **central tendency** — the mean or median of $y$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Random guessing
+Draw a label from the marginal distribution $p(y)$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Insist on the habit: report the baseline next to the model, always. This is the
+cheapest defence against self-deception in the whole course.
+
+--
+
+## Example: Why Accuracy Deceives
+
+A screening test for a disease affecting **1 in 1,000** people.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The "model"
+Always predict *healthy*.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Its accuracy
+**99.9%** — and it has never detected a single case.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+On imbalanced data the majority baseline is nearly unbeatable by accuracy, and
+completely useless. The metric, not the model, is the problem.
+
+</div>
+
+
+Notes:
+The same base-rate structure as the Bayes unit, now as an evaluation trap. This
+is the motivation for precision and recall, which follow immediately.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Estimating Error Honestly
+
+> **Guiding Question:** Every error number comes from a sample. Which sampling
+> schemes give a number you may quote?
+
+--
+
+## Training Error Is Not an Estimate
+
+When the evaluation set equals the training set, $D_{tr} = D$, the resulting
+number measures how well the model **memorised**, not how well it will
+generalise.
+
+
+<div class="c-warning">
+
+Training error is a lower bound on the true error, and an arbitrarily bad one.
+A model with enough capacity can drive it to zero while learning nothing.
+
+</div>
+
+
+Notes:
+Connect straight to the bias–variance unit: training error falls monotonically
+with capacity, which is exactly why it cannot be the criterion for choosing
+capacity.
+
+--
+
+## Four Estimation Schemes
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Hold-out (2-fold)
+Split $D$ into a training and a test part, $D_{tr} \subset D$. Fit on one,
+evaluate on the other.
+
+*Simple, but wastes data and depends on the split.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### $k$-fold cross-validation
+Partition $D$ into $k$ folds; each fold serves once as the test set. Average
+the $k$ errors.
+
+*Uses all data for both roles $k$ = 5 or 10 is customary.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Leave-one-out ($n$-fold)
+$k = n$: every example is a test set of size one.
+
+*Nearly unbiased, expensive, and high variance.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Bootstrapping
+Resample $D$ with replacement to build training sets evaluate on the examples
+left out.
+
+*Useful when $D$ is small.*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask which scheme a Kaggle-style leaderboard implements, and what repeatedly
+consulting a fixed test set does to its status as an estimate — the test set
+becomes training data for the modeller.
+
+--
+
+## Misclassification Costs
+
+Not every error costs the same. A missed diagnosis and a false alarm have
+different consequences, so counting errors equally is itself a modelling
+assumption.
+
+
+<div class="c-note">
+
+A **cost matrix** assigns a cost to each (true class, predicted class) pair;
+the objective becomes expected cost rather than error rate.
+
+</div>
+
+
+Notes:
+This is the hinge into precision and recall in two units' time. Ask the group
+to set the two costs for a spam filter and then for a cancer screen the ratios
+they choose differ by orders of magnitude, and both are defensible.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+An error number is meaningless without the sampling scheme that produced it.
+**Never evaluate on data the model was fitted on**, and state the cost model
+when errors are not interchangeable.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Which Kind of Wrong?
+
+> **Guiding Question:** Being imprecise and being incomplete are different
+> failures. Which one does your application care about?
+
+--
+
+## Why the Error Rate Is Not Enough
+
+For multiclass classification $h_\Theta : X \to Y$ with
+$Y \subseteq \lbrace 1, \ldots, N \rbrace$, the plain error rate:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Fails on imbalance
+The majority baseline scores high while detecting nothing.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Hides the distribution
+Which classes the errors fall on stays invisible.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Hides the kind of error
+Missing assignments and imprecise assignments count the same.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Three distinct failures, deliberately separated: imbalance, distribution across
+classes, and type of error. Each one motivates a different part of what follows.
+
+--
+
+## The Confusion Matrix
+
+Rows are true classes, columns are predictions cell $(i,j)$ counts the
+examples of class $i$ that $h$ assigned to $j$. The diagonal is correct, and
+every off-diagonal cell names a specific confusion.
+
+
+<div class="c-note">
+
+The matrix is the raw material: every measure below is a ratio of its cells.
+Read it before reading any summary number.
+
+</div>
+
+
+Notes:
+On a well-known dataset the off-diagonal structure is often interpretable —
+which two classes get confused tells you something about the representation,
+not just the score.
+
+--
+
+## Four Counts, Per Class
+
+For a class $j$, every prediction falls into one of four cells:
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### $TP_j$ — true positives
+Assigned to $j$ **and** truly in $j$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### $FP_j$ — false positives
+Assigned to $j$ but **not** in $j$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### $FN_j$ — false negatives
+**Not** assigned to $j$ but truly in $j$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### $TN_j$ — true negatives
+Not assigned to $j$ and not in $j$.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+Read the letters as **decision then correctness**: P/N is what $h$ decided,
+T/F is whether that decision was right.
+
+</div>
+
+
+Notes:
+The mnemonic in the tip box removes nearly all of the confusion students have
+with these four terms. Have them classify a concrete example aloud before
+moving on.
+
+--
+
+## Precision and Recall
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Recall — completeness
+$$\mathrm{rec}_j = \frac{TP_j}{TP_j + FN_j}$$
+
+Of everything that truly belongs to $j$, what fraction did $h$ find?
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Precision — exactness
+$$\mathrm{prec}_j = \frac{TP_j}{TP_j + FP_j}$$
+
+When $h$ says $j$, how often is it right?
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Both are **conditional probabilities with different conditions** — recall
+conditions on the truth, precision on the prediction. Swapping them is the same
+error as swapping the conditionals in Bayes' theorem.
+
+</div>
+
+
+Notes:
+The link to Bayes is the payoff of teaching probability first: precision and
+recall are P(correct | predicted) and P(found | true). Ask which one a search
+engine optimises and which one a screening programme optimises.
+
+--
+
+## Mini-Exercise
+
+A spam filter processes 1,000 emails, 100 of which are spam. It flags 80
+emails, of which 60 are genuinely spam.
+
+Compute precision and recall. Which one would you rather improve, and why?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Precision** $= 60/80 = 0.75$
+
+A quarter of flagged mail is legitimate.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Recall** $= 60/100 = 0.60$
+
+Forty spam messages still arrive.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+For a spam filter, **precision** usually matters more: a lost legitimate email
+costs far more than a spam message that slips through. The cost matrix decides,
+not the metric.
+
+</div>
+
+
+Notes:
+The final sentence is the one to stabilise — the choice between precision and
+recall is a statement about costs, which is why the cost-matrix slide came
+earlier.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The confusion matrix shows **which** errors occur precision and recall split
+"being wrong" into **being imprecise** and **being incomplete**. Which one you
+optimise is a decision about costs, not about mathematics.
+
+</div>
+
+
+--
+
+## Squared Error
+
+
+<div class="c-definition">
+
+$$
+\mathrm{MSE} = \frac{1}{n}\sum_{i=1}^{n}\big(h(\mathbf{x}_i) - y_i\big)^2
+\qquad
+\mathrm{RMSE} = \sqrt{\mathrm{MSE}}
+$$
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### MSE
+Average quadratic loss always non-negative, lower is better.
+
+Unit is the **square** of the target's unit — hard to interpret directly.
+
+Large errors are penalised disproportionately.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### RMSE
+Same ordering as MSE, but back in the **target's own unit** — which is why it
+is the one usually reported.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The quadratic penalty is a modelling choice with consequences: it makes the fit
+sensitive to outliers, which connects back to robustness in descriptive
+statistics. Ask when that sensitivity is desirable — when large errors really
+are disproportionately costly.
+
+--
+
+## Absolute and Relative Error
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### MAE
+$$\frac{1}{n}\sum_i \big| h(\mathbf{x}_i) - y_i \big|$$
+
+Easier to interpret than RMSE treats all errors proportionally.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Mean error
+Drop the absolute value to keep the **direction** — reveals systematic over- or
+under-prediction.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Mean relative error
+$$\frac{1}{n}\sum_i \frac{|h(\mathbf{x}_i) - y_i|}{|y_i|}$$
+
+The average error *per unit of target* — comparable across scales.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Normalised RMSE variants aim to make errors comparable between datasets, but
+are hard to interpret. Prefer a measure whose unit you can name.
+
+</div>
+
+
+Notes:
+The mean error (with sign) is underused and worth highlighting: a model can
+have excellent RMSE and still be biased in one direction, which matters for
+forecasting and pricing.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Squared measures punish large errors and lose the unit absolute measures stay
+interpretable signed measures expose bias. Report the one whose **unit and
+failure mode** match the decision the prediction feeds.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Empirical Risk Minimisation
+
+> **Guiding Question:** Every method in this course minimises something on the
+> training data. What is the quantity we actually wanted — and what does the
+> substitution cost?
+
+--
+
+## What We Actually Want to Minimise
+
+
+<div class="c-definition">
+
+The **risk** of a hypothesis $h$ under loss $L$ and the true data distribution
+$p(\mathbf{x}, y)$:
+$$
+R(h) = \mathbb{E}_{(\mathbf{x},y) \sim p}\big[L\big(h(\mathbf{x}), y\big)\big]
+$$
+
+</div>
+
+
+This is the quantity that matters — expected loss on data we have not seen. It
+is also **uncomputable**: $p$ is unknown.
+
+Notes:
+Math first (P5). Everything in the lecture follows from the gap between what we
+want (an expectation under p) and what we can measure (an average over a
+sample). Students have met this as population versus sample; here it is named.
+
+--
+
+## What We Can Compute
+
+
+<div class="c-definition">
+
+The **empirical risk** — the average loss on the training sample:
+$$
+\hat{R}(h) = \frac{1}{n}\sum_{i=1}^{n} L\big(h(\mathbf{x}_i), y_i\big)
+$$
+**Empirical risk minimisation (ERM)** chooses
+$\hat{h} = \arg\min_{h \in \mathcal{H}} \hat{R}(h)$.
+
+</div>
+
+
+
+<div class="c-important">
+
+Nearly every method in this course is ERM with a particular loss and hypothesis
+space — including maximum likelihood, which is ERM with the **negative
+log-likelihood** as the loss.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Squared loss
+linear regression
+
+</div>
+
+
+<div class="card">
+
+### Cross-entropy
+logistic regression, neural networks
+
+</div>
+
+
+<div class="card">
+
+### 0/1 loss
+what we usually care about, and rarely optimise — it has no useful gradient
+
+</div>
+
+
+</div>
+
+
+Notes:
+The unification is the payoff of the lecture: one principle, many algorithms.
+The 0/1 remark explains why surrogate losses exist at all — a recurring theme
+from the perceptron onwards.
+
+--
+
+## The Generalisation Gap
+
+$$
+R(h) = \underbrace{\hat{R}(h)}_{\text{measurable}} +
+\underbrace{\big(R(h) - \hat{R}(h)\big)}_{\text{generalisation gap}}
+$$
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Why the gap opens
+$\hat{h}$ was **chosen using the same data** that then measures it. The
+minimum of a noisy objective is optimistically biased.
+
+</div>
+
+
+<div class="card">
+
+### What controls it
+The **capacity** of $\mathcal{H}$ and the sample size $n$. Richer hypothesis
+spaces fit the noise better and generalise worse for a given $n$.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+This is the bias–variance trade-off stated in terms of risk — and the reason
+training error is not an estimate of anything.
+
+</div>
+
+
+--
+
+## Structural Risk Minimisation
+
+Rather than minimising empirical risk alone, minimise it **plus a complexity
+penalty**:
+
+$$
+\hat{h} = \arg\min_{h \in \mathcal{H}} \hat{R}(h) + \lambda \Omega(h)
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### $\Omega$ as capacity control
+Restrict effective capacity so the gap stays small.
+
+</div>
+
+
+<div class="card">
+
+### $\Omega$ as a prior
+The MAP reading: $\lambda\Omega(h) = -\log p(h)$.
+
+</div>
+
+
+<div class="card">
+
+### Same equation
+Regularisation, priors and capacity control are three descriptions of one term.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+A model has training error 0.02 and test error 0.19.
+
+1. Which quantity is $R(h)$ better estimated by?
+2. Why is the training error not simply "a bit optimistic"?
+3. Give two ways to shrink the gap, one changing $\mathcal{H}$ and one not.
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** The **test** error, 0.19 — measured on data not used to choose $h$.
+
+</div>
+
+
+<div class="card">
+
+**2.** Because $h$ was selected **to minimise** the training error. The
+selection itself introduces the bias the more hypotheses were compared, the
+larger it is.
+
+</div>
+
+
+<div class="card">
+
+**3.** Change $\mathcal{H}$: regularise, or use a smaller model. Leave
+$\mathcal{H}$: collect more data.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+We want **risk** and can only measure **empirical risk**. ERM minimises the
+proxy the **generalisation gap** is the price, and every regulariser — read as
+a penalty or as a prior — is an attempt to control it.
+
+</div>
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

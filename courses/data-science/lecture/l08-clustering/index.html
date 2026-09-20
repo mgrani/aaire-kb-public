@@ -1,0 +1,2038 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 08: Cluster Analysis</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 08: Cluster Analysis
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp6-clustering.tex. Builds on Lecture 07
+(attribute types decide permissible distances) and Lecture 04 (the evaluation
+module reuses precision and recall).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Learning Without Labels
+
+> **Guiding Question:** With no target concept, what makes one grouping of the
+> data better than another?
+
+--
+
+## Learning Without a Target
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Supervised
+A **target concept** is given: each example carries a label, and the objective
+is to reproduce it on new data.
+
+</div>
+
+
+<div class="card">
+
+### Unsupervised
+**No target concept.** The data carries no labels, and the objective must come
+from the structure itself.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-definition">
+
+**Cluster analysis** is the unsupervised classification of a set of objects
+into groups such that objects **within** a group are similar and objects in
+**different** groups are dissimilar.
+
+</div>
+
+
+Notes:
+The definition contains the whole difficulty: "similar" is not defined. Ask
+what a cluster of customers *is* — the answer depends on a distance the analyst
+chooses, which is the epistemic-modelling point (P3) in its sharpest form.
+
+--
+
+## The Stages of a Cluster Analysis
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Represent
+Choose the attributes and their scaling.
+
+</div>
+
+
+<div class="card">
+
+### Measure
+Choose a distance or similarity.
+
+</div>
+
+
+<div class="card">
+
+### Group
+Run an algorithm that optimises some criterion.
+
+</div>
+
+
+<div class="card">
+
+### Interpret
+Decide whether the groups mean anything.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Every clustering algorithm **always returns clusters**, including on data that
+has none. The output is never evidence that structure exists.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Clustering has no ground truth. The **representation and the distance encode
+what "similar" means** — the algorithm only optimises the criterion you handed
+it.
+
+</div>
+
+
+Notes:
+Stage 4 is the one that gets skipped. This is the unit to return to when
+evaluation appears at the end of the lecture: internal measures score the
+criterion, not the meaning.
+
+--
+
+## What a Distance Must Satisfy
+
+
+<div class="c-definition">
+
+A **metric** $d$ satisfies, for all $\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3$:
+
+1. $d(\mathbf{x}_1, \mathbf{x}_2) \geq 0$ — non-negativity
+2. $d(\mathbf{x}_1, \mathbf{x}_1) = 0$ — identity
+3. $d(\mathbf{x}_1, \mathbf{x}_2) = d(\mathbf{x}_2, \mathbf{x}_1)$ — symmetry
+4. $d(\mathbf{x}_1, \mathbf{x}_3) \leq d(\mathbf{x}_1, \mathbf{x}_2) + d(\mathbf{x}_2, \mathbf{x}_3)$ — triangle inequality
+
+</div>
+
+
+The pairwise distances of $n$ objects form the **distance matrix**, which is
+what most clustering algorithms actually consume.
+
+Notes:
+Not every useful similarity is a metric — cosine similarity and many
+domain-specific scores violate the triangle inequality, and some algorithms
+depend on it. Worth naming so students check before assuming.
+
+--
+
+## Numeric Attributes: the Minkowski Family
+
+$$
+d(\mathbf{x}_1, \mathbf{x}_2) = \Big(\sum_{i=1}^{p} |x_{1i} - x_{2i}|^{r}\Big)^{1/r}
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### $r = 1$
+**Manhattan** — sum of absolute differences. Robust to single large deviations.
+
+</div>
+
+
+<div class="card">
+
+### $r = 2$
+**Euclidean** — straight-line distance. The default.
+
+</div>
+
+
+<div class="card">
+
+### $r \to \infty$
+**Chebyshev** — the largest single-attribute difference dominates.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Minkowski distances are **not scale-invariant**. An attribute measured in
+metres and one in millimetres do not contribute equally — standardise first, or
+the unit of measurement chooses your clusters.
+
+</div>
+
+
+--
+
+## Binary Attributes
+
+With $f_{11}$ the count of attributes present in both objects, $f_{00}$ absent
+in both, and $f_{01}, f_{10}$ present in exactly one:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Simple Matching Coefficient
+$$\mathrm{SMC} = \frac{f_{11} + f_{00}}{f_{11} + f_{00} + f_{01} + f_{10}}$$
+Counts **shared absences** as agreement.
+
+</div>
+
+
+<div class="card">
+
+### Jaccard Coefficient
+$$J = \frac{f_{11}}{f_{11} + f_{01} + f_{10}}$$
+**Ignores** shared absences.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+For sparse data the difference is decisive: two shopping baskets agree on
+thousands of products **neither** contains. SMC would call them nearly
+identical Jaccard would not.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+Two documents are represented by which of 10,000 words they contain. Document A
+has 30 words, document B has 35, and they share 20.
+
+1. Compute SMC and Jaccard.
+2. Which is the honest similarity here?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+**1.** $f_{11} = 20$, $f_{01} + f_{10} = 25$, $f_{00} = 9955$.
+
+$\mathrm{SMC} = \frac{9975}{10000} = 0.9975$ &nbsp;·&nbsp;
+$J = \frac{20}{45} \approx 0.44$
+
+</div>
+
+
+<div class="card">
+
+**2.** Jaccard. SMC reports 99.75% similarity for two documents that share
+fewer than half their words — the agreement is almost entirely about words
+neither uses.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+The distance measure **is** the definition of similarity. Scale sensitivity and
+the treatment of shared absences change the clustering before any algorithm
+runs.
+
+</div>
+
+
+--
+
+## Three Families
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Hierarchical
+Build a **tree** of nested groupings, by merging (agglomerative) or splitting
+(divisive). No $k$ required in advance.
+
+</div>
+
+
+<div class="card">
+
+### Partitional / exemplar-based
+Split the data into $k$ groups, each summarised by a representative, optimising
+a criterion. Requires $k$.
+
+</div>
+
+
+<div class="card">
+
+### Density-based
+Clusters are **dense regions** separated by sparse ones. Finds arbitrary shapes
+and marks noise requires density parameters instead of $k$.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+No family is best. They differ in what they assume a cluster *is* — nested,
+compact-around-a-centre, or dense — and that assumption is the inductive bias.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Choosing an algorithm family means choosing a **definition of cluster**. The
+question is never "which is best" but "which shape of structure am I claiming
+exists".
+
+</div>
+
+
+Notes:
+Foreshadow the failure examples: k-means on concentric rings, DBSCAN on varying
+density. Each family's failure case is exactly its assumption being violated.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Hierarchical Clustering
+
+> **Guiding Question:** Can we avoid committing to a number of clusters — and
+> what does that cost?
+
+--
+
+## The Algorithm
+
+
+<div class="c-algorithm">
+
+**HAC**
+
+Start with every object as its own cluster: $\mathcal{C} = \lbrace \lbrace x_1 \rbrace, \ldots, \lbrace x_n \rbrace \rbrace$.
+
+**while** $|\mathcal{C}| > 1$:
+&nbsp;&nbsp;find the closest pair
+$\lbrace C, C' \rbrace = \arg\min_{C_i \neq C_j} d_{\mathcal{C}}(C_i, C_j)$
+&nbsp;&nbsp;replace them by their union $C \cup C'$
+
+</div>
+
+
+The merge order is recorded as a **dendrogram** — a tree whose height shows the
+distance at which each merge happened. Cutting it at a chosen height yields a
+clustering.
+
+
+<div class="c-important">
+
+No $k$ is needed to run the algorithm — only to **read** the result.
+
+</div>
+
+
+Notes:
+The dendrogram is the real output: a whole family of clusterings, one per cut
+height. That is HAC's distinguishing advantage over k-means, and the reason it
+survives despite its cost.
+
+--
+
+## The Linkage Criterion
+
+The object distance $d$ is given $d_{\mathcal{C}}$ — the distance between
+**clusters** — must still be defined, and it changes everything.
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Single link
+distance of the **closest** pair.
+
+Finds elongated shapes prone to chaining.
+
+</div>
+
+
+<div class="card">
+
+### Complete link
+distance of the **farthest** pair.
+
+Prefers compact, roughly equal-sized clusters.
+
+</div>
+
+
+<div class="card">
+
+### Group average
+**mean** distance over all cross-pairs.
+
+A compromise between the two extremes.
+
+</div>
+
+
+<div class="card">
+
+### Ward
+merge that increases **within-cluster variance** least.
+
+Compact, similarly-sized clusters; the common default.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Same data, same distance, four different dendrograms. Have students predict
+which criterion produces long thin clusters before the chaining unit shows it.
+
+--
+
+## Mini-Exercise
+
+Four points on a line at positions 0, 1, 5, 6.
+
+1. Which pair merges first, and at what height?
+2. Under **single link**, what is the distance between clusters $\lbrace 0,1 \rbrace$ and $\lbrace 5,6 \rbrace$?
+3. Under **complete link**?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Both $\lbrace 0,1 \rbrace$ and $\lbrace 5,6 \rbrace$ are at distance 1 —
+the first merge is a tie at height 1.
+
+</div>
+
+
+<div class="card">
+
+**2.** Single link: $d(1,5) = 4$ — the closest cross-pair.
+
+</div>
+
+
+<div class="card">
+
+**3.** Complete link: $d(0,6) = 6$ — the farthest cross-pair.
+
+</div>
+
+
+</div>
+
+
+Same clusters, different heights: the linkage criterion rescales the dendrogram
+and therefore changes where a cut lands.
+
+</div>
+
+
+
+<div class="takeaway">
+
+HAC merges the closest pair repeatedly and returns a **dendrogram**, not a
+clustering. The **linkage criterion** is a second modelling decision, as
+consequential as the distance itself.
+
+</div>
+
+
+--
+
+## Single Link's Characteristic Failure
+
+Single link merges on the **closest pair only**, so a thin bridge of points
+between two dense groups is enough to join them: each intermediate point is
+close to the next, and the chain propagates.
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### The same property, useful
+Elongated and curved clusters are found correctly — single link follows the
+shape of the data rather than imposing a compact one.
+
+</div>
+
+
+<div class="card bad">
+
+### The same property, harmful
+A handful of noise points lying between two well-separated groups merges them.
+The result is one long cluster nobody wanted.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+This is one property seen from two sides, not a bug. Single link is a
+**transitive** notion of similarity: near-of-near counts as near.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Chaining is what "closest pair" means when noise fills the gap. Choose single
+link when clusters may be elongated, and avoid it when the data is noisy.
+
+</div>
+
+
+Notes:
+Ask which real domains have genuinely chain-shaped clusters — road networks,
+river systems, gene sequences. In those cases chaining is the desired behaviour,
+which is the point.
+
+--
+
+## Merges Are Irrevocable
+
+HAC is **greedy**: it takes the locally closest pair at every step and never
+reconsiders. Two objects placed in the same cluster early can never be
+separated later, however the data develops.
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### The consequence
+The dendrogram's structure is **nested by construction** — but the nesting may
+not reflect the data. An early mistake is inherited by every later level.
+
+</div>
+
+
+<div class="card">
+
+### The comparison
+The same defect as ID3's greedy splitting, in the opposite direction: one grows
+a tree top-down, the other bottom-up, and neither backtracks.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+With some linkage criteria (notably centroid linkage) the merge heights can even
+**decrease** — an *inversion* — producing a dendrogram that cannot be read as a
+hierarchy at all. Single, complete, average and Ward linkage are monotonic and
+avoid this.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Hierarchical clustering imposes a hierarchy whether or not the data has one, and
+its greedy merges are **irrevocable**. Read a dendrogram as one possible
+history, not as the structure of the data.
+
+</div>
+
+
+Notes:
+The parallel to ID3 is worth drawing explicitly — students have just met greedy
+non-backtracking search in the decision-tree lecture, and recognising the same
+trade in a different family is exactly the spiral the pedagogic concept wants.
+
+--
+
+## What HAC Gives You
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Strengths
+No $k$ required; run a **whole family** of clusterings in one dendrogram;
+works from a distance matrix alone, so any similarity measure will do —
+including on objects with no vector representation.
+
+</div>
+
+
+<div class="card bad">
+
+### Weaknesses
+Cost: $O(n^2)$ memory for the distance matrix and $O(n^2 \log n)$ or worse in
+time, so it does not scale to large $n$. Greedy, irrevocable merges. And the
+result depends strongly on the linkage criterion.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+Use HAC when $n$ is moderate, when you want to **inspect** the structure rather
+than commit to a $k$, or when your objects only admit a pairwise similarity.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Hierarchical clustering trades **scalability for insight**: it is expensive and
+greedy, but it hands you the whole hierarchy and asks nothing about $k$.
+
+</div>
+
+
+Notes:
+The "distance matrix alone" property is the underrated one: strings, graphs and
+sequences can be clustered this way without ever being embedded in a vector
+space — which partitional methods require.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## k-Means
+
+> **Guiding Question:** k-means always returns k clusters. When is that an
+> answer, and when is it an artefact?
+
+--
+
+## The Idea
+
+Represent each cluster by one **exemplar** — a centroid — and assign every
+object to the nearest one. The quality criterion is the total squared distance
+to the assigned exemplar:
+
+$$
+\mathrm{SSE} = \sum_{j=1}^{k} \sum_{\mathbf{x} \in C_j} d(\mathbf{x}, \boldsymbol{\mu}_j)^2
+$$
+
+
+<div class="c-important">
+
+Minimising SSE over all assignments is **NP-hard**. k-means is a heuristic that
+finds a local optimum — which is why its result depends on where it starts.
+
+</div>
+
+
+Notes:
+Name the criterion before the algorithm: k-means is not "the clustering
+algorithm", it is a greedy optimiser of one particular objective. Different
+objective, different notion of cluster.
+
+--
+
+## The Algorithm
+
+
+<div class="c-algorithm">
+
+**k-means (Lloyd)**
+
+1. Choose $k$ initial centroids.
+2. **Assign** each object to the nearest centroid.
+3. **Move** each centroid to the mean of its assigned objects.
+4. Repeat 2–3 until the assignment stops changing.
+
+</div>
+
+
+<div class="viz viz-lg" data-viz="ml/kmeans-steps" data-steps="6"
+ data-params='{"k": 3}'></div>
+
+Notes:
+Stepped viz (P6): odd clicks assign, even clicks move. The centroids start
+deliberately badly. Ask before each assignment step which points will change
+colour — students track the boundary moving, which is the mechanism.
+
+--
+
+## Properties
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Fast
+$O(n k p)$ per iteration, and few iterations in practice — it scales where HAC
+does not.
+
+</div>
+
+
+<div class="card">
+
+### Converges
+SSE decreases at every step and cannot increase, so the procedure terminates.
+
+</div>
+
+
+<div class="card bad">
+
+### To a local optimum
+The result depends on initialisation. Standard practice: restart several times
+and keep the best SSE.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+**k-medoids** uses an actual data point as the exemplar instead of the mean. It
+is slower but works with any distance matrix — including where a "mean" is
+undefined.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+1. Why must k-means terminate?
+2. Why is the mean the right update for the SSE criterion?
+3. What would change if you used the **median** instead?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Both steps can only decrease SSE, and there are finitely many
+assignments — so no assignment can repeat without the procedure having stopped.
+
+</div>
+
+
+<div class="card">
+
+**2.** The mean is exactly the point minimising the **sum of squared**
+distances to a set — the update solves its half of the objective optimally.
+
+</div>
+
+
+<div class="card">
+
+**3.** The median minimises the sum of **absolute** distances, so you would be
+optimising a different, more outlier-robust criterion (k-medians).
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+k-means alternates **assign** and **move**, minimising SSE to a local optimum.
+The mean is not a convenience — it is the minimiser of the criterion, which is
+why changing the criterion changes the update.
+
+</div>
+
+
+Notes:
+Part 3 is the conceptual payoff and connects to the mean/median robustness
+discussion from Lecture 02. Same trade, third appearance.
+
+--
+
+## Four Failure Modes
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### Non-globular shapes
+Concentric rings, crescents, elongated bands. SSE rewards **compact, spherical**
+groups, so k-means cuts such shapes across the middle.
+
+</div>
+
+
+<div class="card bad">
+
+### Differing sizes
+A large sparse cluster next to a small dense one gets split, because splitting
+the large one lowers SSE more than respecting the boundary.
+
+</div>
+
+
+<div class="card bad">
+
+### Differing densities
+The criterion counts squared distance, not density — so a diffuse cluster is
+torn apart to reduce it.
+
+</div>
+
+
+<div class="card bad">
+
+### Outliers
+The mean is not robust: a single far point drags its centroid away from the
+group it is supposed to represent.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Every failure is the same failure: SSE encodes "compact and spherical, of
+similar spread". When that assumption holds, k-means is excellent; when it does
+not, the algorithm is not wrong — it is answering a different question.
+
+--
+
+## What to Do About It
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Change the representation
+Scale or transform features so the clusters *become* globular.
+
+</div>
+
+
+<div class="card">
+
+### Change the algorithm
+Density-based methods for arbitrary shapes k-medoids for outlier robustness.
+
+</div>
+
+
+<div class="card">
+
+### Change $k$
+Over-clustering and then merging can recover a non-globular shape from several
+spherical pieces.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+k-means fails exactly where its criterion stops matching the data. **Diagnose
+by plotting** — the failures are obvious visually and invisible in the SSE.
+
+</div>
+
+
+Notes:
+The last sentence links back to the visual-analytics units: SSE keeps falling
+as k grows regardless of whether the clusters are meaningful, so the number
+cannot detect the failure that the plot shows at a glance.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Density-Based Clustering
+
+> **Guiding Question:** Some points belong to no group at all. Which algorithms
+> are even allowed to say so?
+
+--
+
+## A Different Definition of Cluster
+
+A cluster is a **dense region** of points, separated from other dense regions by
+sparser ones. Density is defined by two parameters:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### $\varepsilon$
+the radius of a neighbourhood
+
+</div>
+
+
+<div class="card">
+
+### $\mathit{minPts}$
+how many points that neighbourhood must contain to count as dense
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Core point
+Has at least $\mathit{minPts}$ points within $\varepsilon$ — it is inside a
+dense region.
+
+</div>
+
+
+<div class="card">
+
+### Border point
+Within $\varepsilon$ of a core point, but not itself dense.
+
+</div>
+
+
+<div class="card">
+
+### Noise point
+Neither — and DBSCAN **leaves it unassigned**.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The third category is what distinguishes DBSCAN from everything before it: it is
+the first algorithm in the course allowed to say "this point belongs to no
+cluster". Ask why k-means cannot do that.
+
+--
+
+## The Algorithm
+
+
+<div class="c-algorithm">
+
+1. Label every point as core, border or noise.
+2. Connect core points that lie within $\varepsilon$ of each other — each
+ connected group becomes a cluster.
+3. Attach each border point to a cluster of an adjacent core point.
+4. Leave noise points unassigned.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Strengths
+Finds **arbitrarily shaped** clusters identifies noise explicitly $k$ is not
+required.
+
+</div>
+
+
+<div class="card bad">
+
+### Weaknesses
+Two parameters that interact and are hard to set and it struggles when clusters
+have **very different densities**, since one $\varepsilon$ must serve all.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+You run DBSCAN and get one giant cluster plus a handful of noise points. Then
+you halve $\varepsilon$ and get 40 tiny clusters and mostly noise.
+
+1. What does the first result tell you?
+2. And the second?
+3. How would you choose $\varepsilon$ more systematically?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** $\varepsilon$ is too large: every dense region is reachable from every
+other, so the whole dataset connects into one component.
+
+</div>
+
+
+<div class="card">
+
+**2.** Too small: almost no point reaches $\mathit{minPts}$ neighbours, so
+nearly everything is noise.
+
+</div>
+
+
+<div class="card">
+
+**3.** Plot the sorted distance to each point's $k$-th nearest neighbour and
+look for the **elbow** — the distance at which the curve rises sharply.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+DBSCAN replaces "compact around a centre" with "**dense and connected**", which
+buys arbitrary shapes and an explicit noise category — at the price of two
+parameters and an assumption of uniform density.
+
+</div>
+
+
+Notes:
+Part 3 previews the elbow heuristic that returns in the evaluation unit for
+choosing k. Same visual device, different quantity.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Evaluating a Clustering
+
+> **Guiding Question:** There is no ground truth. How do you know whether the
+> clusters mean anything?
+
+--
+
+## Three Kinds of Validation
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### External
+Compare against **known labels**. Measures agreement with a ground truth we
+normally do not have.
+
+</div>
+
+
+<div class="card">
+
+### Internal
+Score the clustering using **the data alone** — compactness and separation. No
+labels needed.
+
+</div>
+
+
+<div class="card">
+
+### Relative
+Compare **several clusterings** of the same data to choose among them, e.g.
+across values of $k$.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Internal measures score the same geometric properties the algorithms optimise.
+A clustering that scores well on compactness may simply reflect that k-means
+minimised compactness — not that the groups mean anything.
+
+</div>
+
+
+Notes:
+The warning is the central caution of the module: the evaluation and the
+objective can be the same quantity in disguise. External validation escapes it,
+which is why labelled benchmark data matters even for unsupervised methods.
+
+--
+
+## The Prior Question
+
+Before asking *how good* a clustering is, ask whether the data has **cluster
+tendency** at all: uniformly random points produce clusters under every
+algorithm, and internal measures will happily score them.
+
+
+<div class="takeaway">
+
+Choose the validation type by what you have: **labels** → external, **only
+data** → internal (with suspicion), **several candidates** → relative. And check
+that structure exists before scoring it.
+
+</div>
+
+
+--
+
+## Reusing Precision and Recall
+
+Given known classes, treat each **cluster** as a prediction of a **class**:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Recall of class $i$ in cluster $j$
+$$\mathrm{rec}(i,j) = \frac{n_{ij}}{n_i}$$
+the share of class $i$ that landed in cluster $j$
+
+</div>
+
+
+<div class="card">
+
+### Precision of class $i$ in cluster $j$
+$$\mathrm{prec}(i,j) = \frac{n_{ij}}{n_j}$$
+the share of cluster $j$ that belongs to class $i$
+
+</div>
+
+
+</div>
+
+
+$$
+F_1(i,j) = \frac{2 \cdot \mathrm{prec}(i,j) \cdot \mathrm{rec}(i,j)}{\mathrm{prec}(i,j) + \mathrm{rec}(i,j)}
+$$
+
+Each class is matched to the cluster maximising its $F_1$, and the overall score
+averages these, weighted by class size.
+
+Notes:
+Deliberate reuse from Lecture 04 (spiral): the same two conditional
+probabilities, now with clusters standing in for predicted labels. The extra
+wrinkle is the matching step — clusters carry no names, so they must be assigned.
+
+--
+
+## Why the Matching Step Matters
+
+
+<div class="c-important">
+
+A clustering has **no label for its clusters**. Any evaluation must first decide
+which cluster corresponds to which class — and different matching rules give
+different scores for the same clustering.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Splitting a class
+Two pure clusters covering one class score high precision, low recall each. The
+clustering is arguably *right* but the score punishes it.
+
+</div>
+
+
+<div class="card">
+
+### Merging two classes
+One cluster containing both scores high recall, low precision. $F_1$ punishes
+this too — as it should.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+100 objects in 2 true classes (50/50). A clustering produces three clusters:
+[50 of class A], [25 of class B], [25 of class B].
+
+1. Compute precision and recall for class A, and for class B in its best cluster.
+2. Is this clustering "wrong"?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+**1.** Class A: precision 1.0, recall 1.0 → $F_1 = 1$.
+Class B, best cluster: precision 1.0, recall 0.5 → $F_1 \approx 0.67$.
+
+</div>
+
+
+<div class="card">
+
+**2.** Not necessarily. Every cluster is **pure** class B was merely split.
+If B genuinely has two sub-types, the clustering found real structure the label
+set does not record.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+External validation reuses precision and recall, plus a **matching** of clusters
+to classes. A low score can mean a bad clustering — or a label set coarser than
+the structure in the data.
+
+</div>
+
+
+Notes:
+Part 2 is the interpretive point (P2): external validation assumes the labels
+are the truth. When clustering is used for discovery, disagreeing with the
+labels may be the finding.
+
+--
+
+## Comparing Two Matrices
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Proximity matrix
+The actual pairwise distances (or similarities) between objects.
+
+</div>
+
+
+<div class="card">
+
+### Incidence matrix
+The **ideal** structure implied by the clustering: 1 if two objects share a
+cluster, 0 otherwise.
+
+</div>
+
+
+</div>
+
+
+A good clustering makes the two agree: pairs in the same cluster should be
+close, pairs in different clusters far. Their **correlation** measures that
+agreement in one number.
+
+Notes:
+The trick is worth naming: an arbitrary clustering is turned into a matrix so
+that two structures can be compared numerically. The same device appears in
+graph comparison and in kernel methods.
+
+--
+
+## Reading It
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### High correlation
+The distance structure and the cluster structure agree — the partition follows
+the geometry.
+
+</div>
+
+
+<div class="card bad">
+
+### What it does not tell you
+Whether the geometry is meaningful. Correlation with a **self-imposed** ideal
+structure is not evidence of real groups.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+Visual variant: sort the proximity matrix by cluster and display it. Genuine
+clusters appear as dark blocks along the diagonal — and the absence of blocks
+is as informative as their presence.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Internal validation asks whether the partition **agrees with the distances**.
+It rewards consistency with the chosen distance measure, not correctness.
+
+</div>
+
+
+--
+
+## Two Quantities
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Cohesion
+How tight a cluster is — the within-cluster sum of distances (SSE is one form
+of it). **Lower is better.**
+
+</div>
+
+
+<div class="card">
+
+### Separation
+How far apart clusters are — the between-cluster distance. **Higher is better.**
+
+</div>
+
+
+</div>
+
+
+Every internal measure combines these two, and they trade against each other:
+splitting a cluster always improves cohesion and usually harms separation.
+
+--
+
+## The Silhouette Coefficient
+
+For a single object, with $a$ its mean distance to its **own** cluster and $b$
+its mean distance to the **nearest other** cluster:
+
+$$
+s = \frac{b - a}{\max(a, b)} \in [-1, 1]
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### $s \approx 1$
+Well inside its cluster, far from the others.
+
+</div>
+
+
+<div class="card">
+
+### $s \approx 0$
+On the boundary between two clusters.
+
+</div>
+
+
+<div class="card bad">
+
+### $s < 0$
+Closer to another cluster than to its own — probably misassigned.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+Average the silhouette over all objects for one score — but **plot the
+distribution** too. A good average can hide a cluster whose members are all
+near zero.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Cohesion and separation are the two axes of every internal measure. The
+**silhouette** combines them per object, which is why its distribution is more
+informative than its mean.
+
+</div>
+
+
+Notes:
+The per-object nature is what makes the silhouette useful in practice: it
+localises the problem to specific points and specific clusters, where SSE gives
+one global number that cannot be diagnosed.
+
+--
+
+## Worst Separation over Worst Cohesion
+
+
+<div class="c-definition">
+
+$$
+D = \frac{\min_{i \neq j} \delta(C_i, C_j)}{\max_{k} \Delta(C_k)}
+$$
+where $\delta$ is the distance between two clusters and $\Delta$ the diameter of
+a cluster. **Higher is better.**
+
+</div>
+
+
+The numerator is the **closest** pair of clusters; the denominator is the
+**widest** cluster. The index is therefore governed entirely by the two worst
+cases.
+
+Notes:
+Contrast with the silhouette, which averages: Dunn is a minimax criterion. Ask
+which is preferable when one bad cluster among twenty matters — and when it
+does not.
+
+--
+
+## Consequences
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### The virtue
+A single badly separated pair or one sprawling cluster **cannot** be hidden by
+good behaviour elsewhere.
+
+</div>
+
+
+<div class="card bad">
+
+### The cost
+Extremely sensitive to outliers and noise: one distant point inflates a
+diameter and collapses the index.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Dunn scores the **worst case**, so it is strict and fragile. Use it when no bad
+cluster is acceptable; prefer averaging measures when a few outliers are
+tolerable.
+
+</div>
+
+
+--
+
+## The Problem
+
+SSE **always** decreases as $k$ grows — with $k = n$ every point is its own
+cluster and SSE is zero. So the criterion cannot choose $k$ by itself.
+
+
+<div class="c-insight">
+
+The same structure as training error against model capacity: the objective
+improves monotonically with complexity, so **the objective cannot select the
+complexity**.
+
+</div>
+
+
+Notes:
+Deliberate parallel to overfitting (P7 spiral, third appearance after
+polynomials and trees). Students who see it will not be surprised that
+clustering needs an external criterion too.
+
+--
+
+## The Elbow
+
+Plot SSE against $k$ and look for the point where the curve **stops falling
+steeply** — where additional clusters buy little.
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### The reasoning
+Up to the elbow, each new cluster splits a genuinely heterogeneous group. Past
+it, new clusters merely subdivide homogeneous ones.
+
+</div>
+
+
+<div class="card bad">
+
+### The catch
+The elbow is often **not sharp**, and different observers read different values.
+It is a heuristic, not a criterion.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Alternatives
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Silhouette over $k$
+Pick the $k$ maximising the average silhouette — a genuine maximum rather than
+a bend.
+
+</div>
+
+
+<div class="card">
+
+### Gap statistic
+Compare SSE against the SSE expected on **random data with no clusters**.
+
+</div>
+
+
+<div class="card">
+
+### Domain constraints
+Often decisive: how many segments can the business actually act on?
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+No internal criterion selects $k$ on its own, because they all improve with $k$.
+The elbow is a **heuristic reading** of a trade-off the silhouette and the gap
+statistic formalise it, and the domain frequently overrules both.
+
+</div>
+
+
+Notes:
+End the lecture on the last card: the number of clusters is very often decided
+by what can be done with them, not by the geometry. That is the epistemic point
+the whole module has been building toward.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

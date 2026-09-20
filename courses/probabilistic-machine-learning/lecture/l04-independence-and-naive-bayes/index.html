@@ -1,0 +1,1423 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 04: Independence, Naive Bayes and Graphical Models</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Probabilistic Machine Learning
+## Lecture 04: Independence, Naive Bayes and Graphical Models
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+The user-requested arc: naive Bayes first, as a classifier that *works*, then
+the independence assumption it rests on, then the general framework that
+replaces the assumption with a modelling choice. All units reused from the
+data-science course.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Bayes as a Classifier
+
+> **Guiding Question:** The data tells us how attributes behave *given* the
+> class. We need the reverse. What does the conversion cost?
+
+--
+
+## Thinking With Uncertainty
+
+Bayes' theorem lets us update a **hypothesis** $H$ in the light of **data** $D$:
+
+$$
+P(H \mid D) = \frac{P(H) \cdot P(D \mid H)}{P(D)}
+$$
+
+This is the whole apparatus of evidence-based decision making in one line:
+a belief, a measurement of how well the belief explains what we saw, and a
+normalisation.
+
+Notes:
+Deliberate second pass over Bayes (P4/P5 decision rule: this is consolidation,
+so math first). The new element is the reading of H and D as hypothesis and
+data, which is the form used by every learning algorithm later in the course.
+
+--
+
+## Example: Do I Have the Flu?
+
+You have a headache and a cough. From the literature:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Likelihood
+90% of people with the flu show headache and coughing
+$$P(D \mid H) = 0.9$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Prior
+5% of people currently have the flu
+$$P(H) = 0.05$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Evidence
+headache and coughing occur in 20% of people
+$$P(D) = 0.2$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+**How likely is it that you have the flu?**
+
+
+<div class="fragment">
+
+$$
+P(H \mid D) = \frac{0.05 \cdot 0.9}{0.2} = 0.225
+$$
+
+</div>
+
+
+Notes:
+Ask for a guess first — most people say something close to 90%, repeating the
+base-rate error from the probability chapter. 22.5% is the answer.
+
+--
+
+## Why So Low?
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Few people have the flu
+The prior $P(H) = 0.05$ caps how far the evidence can carry us.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The symptoms are common
+$P(D) = 0.2$ means many people have these symptoms *without* the flu.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+A symptom is informative to the degree that it is **rare in general** but
+**common under the hypothesis**. A likelihood alone tells you nothing.
+
+</div>
+
+
+Notes:
+Two reasons, both structural. This is the criterion that reappears as feature
+informativeness in classification: a feature that fires for everything carries
+no information. Connect it explicitly — it makes information gain feel
+inevitable later.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Bayesian decision making weighs **prior × likelihood** against how ordinary the
+evidence is. Deciding under uncertainty means keeping all three numbers in
+view, not just the one the study reports.
+
+</div>
+
+
+--
+
+## Two Directions of the Same Connection
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Observed connection
+$$A_1, \ldots, A_p \mid B$$
+
+*Given the class, how do the attributes behave?* — the standard situation, and
+the one data can answer directly.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Reversed connection
+$$B \mid A_1, \ldots, A_p$$
+
+*Given the attributes, which class?* — the diagnosis situation, and the one we
+actually need.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+$$
+P(B \mid A_1, \ldots, A_p) = \frac{P(B) \cdot P(A_1, \ldots, A_p \mid B)}{P(A_1, \ldots, A_p)}
+$$
+
+</div>
+
+
+Notes:
+This is the base-rate lesson turned into an algorithm: the data gives us the
+easy direction, Bayes converts it into the one we need. Ask which direction a
+labelled dataset supplies — attributes given class, by construction.
+
+--
+
+## What the Classifier Needs
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Class priors
+$$P(\text{class} = y)$$
+How common is each class, before seeing any attribute?
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Attribute likelihoods
+$$P(\text{attribute} = v \mid \text{class} = y)$$
+How does each class distribute its attribute values?
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Given both, the posterior $P(\text{class} \mid \text{attributes})$ follows from
+Bayes — and the prediction is the class with the highest posterior.
+
+
+<div class="c-warning">
+
+Estimating $P(A_1, \ldots, A_p \mid B)$ requires the **joint** distribution of
+all attributes within each class: exponentially many parameters, and never
+enough data.
+
+</div>
+
+
+Notes:
+End the unit on the obstacle rather than the solution — the warning is exactly
+the parameter explosion from the graphical-models lecture, and naive Bayes is
+the crudest possible independence assumption applied to it.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Naive Bayes
+
+> **Guiding Question:** Its central assumption is almost always false, and it
+> classifies well anyway. How can both be true?
+
+--
+
+## Generative and Discriminative Classifiers
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Generative
+Model the **joint** distribution $P(A, B)$ — how the data was produced — then
+derive $P(B \mid A)$.
+
+*Naive Bayes.*
+
+</div>
+
+
+<div class="card">
+
+### Discriminative
+Model $P(B \mid A)$ **directly** — only the boundary between classes.
+
+*Logistic regression.*
+
+</div>
+
+
+</div>
+
+
+Notes:
+The distinction runs through the rest of machine learning. A generative model
+can be sampled from and can handle missing attributes a discriminative model
+spends all its capacity on the decision. Neither is universally better.
+
+--
+
+## The Naive Assumption
+
+
+<div class="c-important">
+
+Assume the attributes are **conditionally independent given the class**:
+$$
+P(A_1, \ldots, A_p \mid B) = \prod_{j=1}^{p} P(A_j \mid B)
+$$
+
+</div>
+
+
+Exponentially many parameters collapse to $p$ per class — one distribution per
+attribute.
+
+
+<div class="c-note">
+
+The assumption is almost always false. Naive Bayes nonetheless classifies well,
+because ranking the classes correctly is easier than estimating their
+probabilities correctly.
+
+</div>
+
+
+Notes:
+Direct callback to conditional independence: this is the same move as a
+graphical model, taken to its extreme — a star-shaped network with the class at
+the centre. The note is the honest part: the probabilities are miscalibrated,
+the argmax often is not.
+
+--
+
+## The Classifier
+
+$$
+P(B_i \mid A_1, \ldots, A_p) =
+\frac{P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
+{\sum_{i=1}^{k} P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Score each class
+prior × product of attribute likelihoods
+
+</div>
+
+
+<div class="card">
+
+### Normalise
+divide by the total over all classes — the theorem of total probability
+
+</div>
+
+
+<div class="card">
+
+### Predict
+the class with the largest posterior
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+For prediction alone the denominator can be skipped — it is the same for every
+class. It is needed only when the probability itself is reported.
+
+</div>
+
+
+Notes:
+The three-step structure is the whole algorithm. Point out that the denominator
+is total probability, which the students proved in the probability lecture —
+nothing new is being introduced here, only assembled.
+
+--
+
+## Example: Enjoy Sport?
+
+| Outlook | Temperature | Humidity | Wind | **EnjoySport** |
+|---|---|---|---|---|
+| sunny | hot | high | weak | no |
+| sunny | hot | high | strong | no |
+| overcast | hot | high | weak | yes |
+| rain | mild | high | weak | yes |
+| rain | cool | normal | weak | yes |
+| rain | cool | normal | strong | no |
+
+Estimate the priors and the per-attribute likelihoods by **counting**, then
+score a new day.
+
+Notes:
+Have the group compute P(yes) and P(sunny | yes) aloud — the estimation is pure
+counting, which is what makes the method so cheap. Then ask what happens for
+P(overcast | no): zero, which kills the entire product.
+
+--
+
+## The Zero-Frequency Problem
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+If an attribute value never occurs with a class in the training data, its
+estimated likelihood is **zero** — and one zero factor drives the whole product
+to zero, whatever the other attributes say.
+
+**Laplace smoothing** adds a pseudo-count to every combination, so that unseen
+does not mean impossible.
+
+</div>
+
+
+<div class="card bad">
+
+### One missing count
+vetoes every other piece of evidence
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Naive Bayes buys tractability with a **conditional independence assumption it
+knows to be false** — and works anyway, because classification needs the right
+argmax, not the right probability.
+
+</div>
+
+
+Notes:
+Close on the epistemic point (P3): a knowingly wrong assumption can still yield
+a useful model, provided you know which conclusions it does and does not
+support. Calibrated probabilities are exactly what it does not support.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Independence, Properly
+
+> **Guiding Question:** Naive Bayes assumed independence to survive. What does
+> the assumption actually claim — and when does conditioning create dependence
+> rather than remove it?
+
+--
+
+## Conditional Independence
+
+
+<div class="c-definition">
+
+**Definition.** Events $A$ and $B$ are **conditionally independent given $C$**
+(written $A \indep B \mid C$) iff
+$$
+P(A \cap B \mid C) = P(A \mid C) \cdot P(B \mid C)
+$$
+equivalently
+$$
+P(A \mid B \cap C) = P(A \mid C)
+$$
+
+</div>
+
+
+Reading: **once $C$ is known, $B$ carries no further information about $A$.**
+
+Notes:
+Math first (P5), but immediately give the reading. The second form is the one
+used in practice: it says B becomes redundant in the presence of C.
+
+--
+
+## Dependent, but Independent Given C
+
+Let $P(A) = \tfrac{8}{16}$, $P(B) = \tfrac{3}{16}$, $P(C) = \tfrac{4}{16}$ on a
+16-cell sample space.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+**Unconditionally dependent**
+
+$$P(A \cap B) = \tfrac{1}{16}$$
+$$P(A)\cdot P(B) = \tfrac{3}{32}$$
+
+$\tfrac{1}{16} \neq \tfrac{3}{32}$, so $A \nindep B$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+**Conditionally independent given $C$**
+
+$$P(A \cap B \mid C) = \tfrac{1}{4}$$
+$$P(A \mid C)\cdot P(B \mid C) = \tfrac{2}{4}\cdot\tfrac{2}{4} = \tfrac{1}{4}$$
+
+so $A \indep B \mid C$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Also directly: $P(A \mid B \cap C) = \tfrac{1}{2} = P(A \mid C)$.
+
+Notes:
+The whole idea in one comparison. Conditioning on C *created* independence that
+did not exist before. Ask for a real example: ice-cream sales and drownings are
+dependent, but conditionally independent given the temperature.
+
+--
+
+## Why This Matters
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Explaining away**
+
+A common cause $C$ can make two effects look related.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Model size**
+
+Conditional independence lets a joint distribution factorise into small pieces.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Later in the course**
+
+Naive Bayes assumes it. Graphical models are built from it.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Conditional independence neither implies nor is implied by ordinary
+independence. Both directions can fail.
+
+</div>
+
+
+Notes:
+Flag forward links without using them: students only need to know that this
+definition is the hinge for models later. The warning box is worth a moment —
+students routinely assume one form gives the other.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Conditioning can **create** independence as easily as it destroys it. "Given
+what I already know, does this extra fact still tell me anything?" is the
+question that makes large probabilistic models tractable.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## From Assumption to Model
+
+> **Guiding Question:** Naive Bayes assumes *everything* is independent given
+> the class. What if we could state exactly which independences hold?
+
+--
+
+## The Problem: Joint Distributions Explode
+
+Consider a joint distribution $p(x_1, \ldots, x_n)$ over $n$ **binary** random
+variables. How many configurations are there?
+
+
+<div class="fragment">
+
+$$
+2^n \quad\text{states}, \quad 2^n - 1 \quad\text{free parameters}
+$$
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Specification
+For large $n$, writing down all values is impossible.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Inference
+A single marginal $p(x_1)$ requires summing over $2^{n-1}$ states.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Chain rule?
+It rewrites the joint exactly — but does not reduce the number of values.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Guiding question of the module. 30 binary variables already exceed a billion
+parameters. Ask what would have to be true of the world for the table to be
+compressible — the answer is independence, which the students already have.
+
+--
+
+## What a Graphical Model Is
+
+
+<div class="c-definition">
+
+**Definition (Graphical model).** A graphical model depicts the
+dependence and independence relations of a distribution using a graph $G$ as
+its underlying structure.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Modelling
+Describe the variables of a domain and their interactions — how
+$p(x_1, \ldots, x_n)$ **factorises**.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Inference
+Answer queries such as $p(x_1 \mid x_2 = a, \ldots)$ efficiently over that
+factorisation.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Usually one class of model is used for modelling and another for inference the
+latter is often compiled from the former.
+
+Notes:
+Two purposes, two different graph classes — worth stating now so that Markov
+networks later do not look like a competing formalism but a compilation target.
+
+--
+
+## How a Graph Can Help
+
+Probabilistic inference is summing and multiplying. Let every variable be a
+node, and read edges as interaction:
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### No edge
+$$f(a,b) = g(a)\cdot h(b)$$
+The variables are independent — the factor splits.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Edge
+$$f(a,b) \neq g(a)\cdot h(b)$$
+The variables are dependent — the factor does not split.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Edge **direction** can encode further structure. The principle extends to any
+number of variables.
+
+
+<div class="c-note">
+
+Graphical models have limited expressive power: not every conditional
+independence statement can be drawn, and different graphs can represent the
+same distribution.
+
+</div>
+
+
+Notes:
+The honest caveat matters — students should not believe the graph captures
+everything. "The graph is a picture of a factorisation" is the accurate slogan.
+
+--
+
+## Example: Why Is the Grass Wet?
+
+Tracey leaves her house and sees that her grass is wet. **Was it rain, or did
+she leave the sprinkler on?** She notices her neighbour Jack's grass is also
+wet.
+
+
+<div class="grid-4">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### $R$
+raining (1) or not (0)
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### $S$
+Tracey's sprinkler on (1) or off (0)
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### $J$
+Jack's grass wet (1) or dry (0)
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### $T$
+Tracey's grass wet (1) or dry (0)
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Barber's classic example. Ask students to predict, before any arithmetic,
+whether Jack's wet grass makes the sprinkler more or less likely — this sets up
+explaining away, and intuitions differ, which is the point.
+
+--
+
+## Building the Model
+
+The full joint over four binary variables needs $2^4 - 1 = 15$ probabilities.
+The chain rule rewrites it but does not shrink it:
+
+$$
+p(T,J,R,S) = p(T \mid J,R,S) p(J \mid R,S) p(R \mid S) p(S)
+$$
+
+Now bring in **background knowledge** — assumptions of conditional independence:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+Tracey's grass does not depend on Jack's
+$$p(T \mid J,R,S) = p(T \mid R,S)$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+Jack's grass does not depend on Tracey's sprinkler
+$$p(J \mid R,S) = p(J \mid R)$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+Rain is not influenced by the sprinkler
+$$p(R \mid S) = p(R)$$
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+$$
+p(T,J,R,S) = p(T \mid R,S) p(J \mid R) p(R) p(S)
+$$
+Only $4 + 2 + 1 + 1 = 8$ probabilities remain — and each one is a question a
+person can actually answer.
+
+</div>
+
+
+Notes:
+The heart of the module: the reduction is not mathematical trickery, it is
+domain knowledge written as conditional independence. The second half of the
+callout matters as much as the first — the factors are locally interpretable.
+
+--
+
+## The Probability Tables
+
+| Factor | $p(\cdot)$ | $1 - p(\cdot)$ |
+|---|---|---|
+| $p(R=1)$ | 0.2 | 0.8 |
+| $p(S=1)$ | 0.1 | 0.9 |
+| $p(J=1 \mid R=0)$ | 0.2 | 0.8 |
+| $p(J=1 \mid R=1)$ | 1.0 | 0.0 |
+| $p(T=1 \mid R=1, S=0)$ | 1.0 | 0.0 |
+| $p(T=1 \mid R=1, S=1)$ | 1.0 | 0.0 |
+| $p(T=1 \mid R=0, S=1)$ | 0.9 | 0.1 |
+| $p(T=1 \mid R=0, S=0)$ | 0.0 | 1.0 |
+
+Missing edges in the graph are exactly the assumptions above the tables supply
+the numbers.
+
+Notes:
+Point out that the last row encodes "grass does not get wet by itself" and the
+1.0 entries encode "rain always wets grass" — modelling choices, visible and
+challengeable, which is the epistemic virtue of the approach (P3).
+
+--
+
+## Inference: What Does the Evidence Say?
+
+<div class="viz viz-lg" data-viz="math/explaining-away" data-steps="2"></div>
+
+Notes:
+Stepped viz (P6). Step 1: wet grass raises P(sprinkler) from 10% to 33.8%.
+Step 2: Jack's grass is wet too — rain now explains the wetness, and the
+sprinkler falls to 16.0%: most of the way back, but still above the 10% prior,
+because the sprinkler remains a possible additional cause. Ask for the
+prediction before each click.
+Computed by exact enumeration of the factorised joint, i.e. marginalisation the
+students already know.
+
+--
+
+## Explaining Away
+
+$$
+p(S=1 \mid T=1) = \frac{\sum_{J,R} p(T{=}1 \mid R,S{=}1) p(J \mid R) p(R) p(S{=}1)}
+{\sum_{J,R,S} p(T{=}1 \mid R,S) p(J \mid R) p(R) p(S)}
+$$
+
+
+<div class="c-insight">
+
+Two independent causes ($R$ and $S$) become **dependent once their common
+effect is observed**. Learning that rain occurred lowers the probability of the
+sprinkler, even though rain and sprinkler are unconditionally independent.
+
+</div>
+
+
+Notes:
+This is the conditional-independence unit returning with a vengeance:
+conditioning on a common effect *creates* dependence — the opposite of the
+common-cause case seen earlier. Name it "explaining away" it is the single
+most useful piece of vocabulary in this module.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A graphical model turns **background knowledge into a factorisation**: missing
+edges are conditional independence assumptions, and each one removes
+parameters. The graph is a picture of how the joint splits — nothing more, and
+nothing less.
+
+</div>
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

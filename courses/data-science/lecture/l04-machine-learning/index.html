@@ -1,0 +1,3761 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 04: Machine Learning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 04: Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp4-machine-learning.tex. Builds on
+Lecture 02 (probability, expectation, sampling) and Lecture 03 (conditional
+independence, which naive Bayes pushes to its extreme).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## What Is a Learning Problem?
+
+> **Guiding Question:** What has to be true of a task — and of the data —
+> before "learn it from examples" is a sensible answer?
+
+--
+
+## Learning From Answers
+
+A radiologist has labelled ten thousand scans. A bank has ten years of loans and
+knows which ones defaulted. In both cases **every example carries its answer**.
+
+<div class="viz viz-lg" data-viz="ml/learning-paradigms" data-steps="1"
+     data-params='{"kind": "supervised"}'></div>
+
+
+<div class="q">
+
+What information does the learner receive during training?
+
+</div>
+
+
+Notes:
+Ask before the click: what exactly does the learner see? The answer — an input
+*and* the output we wanted — is what makes this the easiest setting, and the
+most expensive one, because somebody had to produce every label.
+
+Good examples to name: image classification, medical diagnosis, house prices.
+The last one previews regression: the "answer" need not be a class.
+
+--
+
+## Learning Without Answers
+
+Now the same bank wants to know **what kinds of customer it has**. Nobody has
+ever written down the list — the categories are what we are looking for.
+
+<div class="viz viz-lg" data-viz="ml/learning-paradigms" data-steps="1"
+     data-params='{"kind": "unsupervised"}'></div>
+
+
+<div class="q">
+
+What can we learn when nobody tells us the correct answer?
+
+</div>
+
+
+Notes:
+Let the room answer first: groups of similar customers, the few dimensions that
+carry most of the variation, what is unusual. Name clustering, dimensionality
+reduction, latent structure — but only after they have said it.
+
+The honest difficulty to flag: without an answer key there is no unambiguous
+notion of "correct", so evaluation becomes a genuine problem. That returns in
+the clustering lecture.
+
+--
+
+## Learning by Acting
+
+A robot has to cross a room. Nobody can label the correct motor command for
+every situation it might find itself in — and it only discovers whether a move
+was good **after making it**.
+
+<div class="viz viz-lg" data-viz="ml/learning-paradigms" data-steps="2"
+     data-params='{"kind": "reinforcement"}'></div>
+
+
+<div class="q">
+
+How can a learner improve when it must act in order to find out whether the
+action was any good?
+
+</div>
+
+
+Notes:
+Step 1 draws action and consequence; step 2 closes the loop back into the
+agent's behaviour. Only now name the vocabulary: **agent**, **environment**,
+**action**, **reward**.
+
+The point that distinguishes this from supervised learning: the feedback says
+how good the outcome was, not what the right action would have been — and it
+may arrive long after the action that caused it.
+
+--
+
+## Same Goal, Different Information
+
+<div class="viz viz-lg" data-viz="ml/learning-paradigms" data-steps="3"
+     data-params='{"kind": "compare"}'></div>
+
+
+<div class="fragment">
+
+
+<div class="c-important">
+
+The paradigms differ in **what the learner is given** and **what feedback it
+gets** — not in what we ultimately want from it.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Reveal one row per click, so the comparison is assembled from the three
+examples the students have just seen rather than presented as a taxonomy.
+
+Ask which paradigm a spam filter uses (supervised), a recommender trained on
+clicks (arguably all three), a game engine (reinforcement). The boundaries are
+softer than the table suggests, and saying so is more honest than a clean
+three-way split.
+
+--
+
+## What Is Common to All Three?
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Nobody wrote the rule
+The mapping from situation to answer is **too complex or too implicit** to
+specify by hand.
+
+</div>
+
+
+<div class="card">
+
+### Examples exist
+There is data — or experience — in which the desired behaviour is
+demonstrated, even if it was never described.
+
+</div>
+
+
+</div>
+
+
+
+<div class="q">
+
+So what replaces the rule that nobody wrote?
+
+</div>
+
+
+Notes:
+This is the bridge to the next slide. Hold the question: in all three
+paradigms, something is derived from data that a developer would otherwise
+have had to write down. That "something" is the model — and comparing the two
+ways of getting it is the next slide.
+
+--
+
+## Two Ways to Get Behaviour
+
+<div class="viz viz-lg" data-viz="ml/programming-vs-learning" data-steps="3"></div>
+
+Notes:
+Three clicks. First the programming pipeline: the developer holds knowledge
+about the environment and writes it down as rules. Second the learning
+pipeline: the environment produces data, and an algorithm derives the model.
+Third — the point of the slide — **both arrive at the same destination**: a
+situation neither the developer nor the learner has seen.
+
+Ask between clicks two and three: what is the same in both rows? The
+environment on the left, and the demand on the right.
+
+--
+
+## What Actually Changed
+
+
+<div class="grid-2">
+
+
+<div class="card muted">
+
+<span class="eyebrow">Traditional programming</span>
+
+The developer's **knowledge becomes rules**. Deduction: rules plus input give
+the output.
+
+*The assumptions are visible — they are in the code.*
+
+</div>
+
+
+<div class="c-important">
+
+<span class="eyebrow">Machine learning</span>
+
+The environment's **data becomes a model**. Induction: examples plus a learning
+procedure give a rule.
+
+*The assumptions are still there — but now they are in the data, the model
+family and the objective.*
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+The rules do not disappear when nobody writes them. They become **harder to
+inspect** — which is why the rest of this lecture is about making every part of
+that pipeline explicit.
+
+</div>
+
+
+Notes:
+Deliberate callback to the three modes of reasoning: programming is deductive,
+learning is inductive. Students who saw that module will recognise the shape,
+and the guarantee that came with each.
+
+The warning is the honest framing of the trade and sets up the design questions
+at the end of the module.
+
+--
+
+## What Would It Mean for a Machine to Learn?
+
+Before any definition — three questions you would have to answer about *any*
+system before you could say it had learned anything:
+
+
+<div class="marks-ask">
+
+- What is it supposed to get better at?
+- What does it get to look at while getting better?
+- How would we know whether it improved?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Task $T$
+what the system should learn to do
+
+</div>
+
+
+<div class="card">
+
+### Experience $E$
+what it learns from
+
+</div>
+
+
+<div class="card">
+
+### Performance $P$
+how we decide it improved
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Questions first, names second (P4). Let the room produce the three questions in
+their own words — they always do — and only then attach Mitchell's (1997)
+vocabulary. A definition that arrives as a label for something already
+understood costs nothing to remember.
+
+--
+
+## Chess
+
+
+<div class="grid-1-2">
+
+
+<div class="card">
+
+### ♟
+A program that plays, loses, and plays again — millions of times against
+itself.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="marks-step">
+
+- **Task** — play chess well
+- **Experience** — games played against itself, and positions from expert play
+- **Performance** — fraction of games won; rating against other engines
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The classic example, and worth one observation: the experience here is
+*generated by the system itself*. No one labelled the good moves — the outcome
+of the game did.
+
+--
+
+## A Large Language Model
+
+
+<div class="grid-1-2">
+
+
+<div class="card">
+
+### ¶
+A model shown enormous quantities of text, asked only to continue it.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="marks-step">
+
+- **Task** — predict the next word
+- **Experience** — a very large corpus of text, then human feedback
+- **Performance** — likelihood of held-out text; later, human judgement
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+Two systems with nothing in common — a board game and a text corpus — fit the
+**same three-part description**. That is what makes it a definition rather than
+a description of one program.
+
+</div>
+
+
+Notes:
+Pause on the task: "predict the next word" looks far too weak to produce what
+these systems do. That is exactly why the choice of a *proxy* task is a real
+design decision — it must force the model to represent what actually matters.
+
+--
+
+## What Would We Ideally Like to Know?
+
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="0"
+     data-params='{"mode": "build"}'></div>
+
+
+<div class="q">
+
+There is some real process that turns a situation into an outcome. Why can we
+not simply write it down?
+
+</div>
+
+
+Notes:
+Only the real-world band is drawn: an object or situation $o$, the true process
+$γ$, the outcome $y$. Let the room answer the question — the process is
+unknown, or too complex, or not accessible to us at all. That inaccessibility
+is the reason everything that follows exists.
+
+Notation, kept from the source: **$γ$ is the ideal target function** on
+real-world objects.
+
+--
+
+## From the Real World to a Model of It
+
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="2"
+     data-params='{"mode": "build"}'></div>
+
+--
+
+## Two Worlds, One Correspondence
+
+
+<div class="c-important">
+
+$$
+γ(o) \;\rightsquigarrow\; h_Θ\big(α(o)\big) \;\equiv\; h_Θ(x)
+$$
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### $γ$
+the **real process** — unknown, and not ours to write down
+
+</div>
+
+
+<div class="card">
+
+### $α$
+the **representation** — what we chose to measure
+
+</div>
+
+
+<div class="card">
+
+### $h_Θ$
+the **model** — our approximation, with parameters $Θ$
+
+</div>
+
+
+</div>
+
+
+We never learn the world. We build a **model world** and approximate the
+process inside it.
+
+Notes:
+Two clicks: first the measurement — the **model-formation function $α$** turns
+an object into features $x = α(o)$ — then the model $h_Θ$ and its prediction.
+
+Be precise about the notation, because it is easy to garble: $γ$ is the real
+process, **$α$ is the representation**, $h_Θ$ is the model and $Θ$ are its
+parameters. $α$ is *not* the parameters.
+
+The relation on the fragment is the heart of the module: two worlds, and a
+correspondence between them that is only ever approximate. Most practical
+failures are failures of $α$ — the features did not carry what $γ$ depends on.
+
+--
+
+## Closing the Loop
+
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="4"
+     data-params='{"mode": "build"}'></div>
+
+Notes:
+Two more clicks complete the figure. Click 3 adds the **loss**, which is the
+first thing on the slide that compares the model world with the real one: it
+needs $ŷ$ *and* the outcome $y$ we actually wanted. Click 4 adds the
+**optimiser**, which changes the **parameters $Θ$** — and the loop closes.
+
+Read it aloud once as a sentence: measure the situation, predict, compare with
+what happened, adjust, repeat. Every method in this course fills these boxes
+differently.
+
+--
+
+## The Four Choices
+
+
+<div class="flow-row">
+
+
+<div class="stat-card s-teal">
+
+### Data
+what we measure
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card s-navy">
+
+### Model
+$h_Θ$ — what it may express
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card s-orange">
+
+### Loss
+what counts as wrong
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card s-violet">
+
+### Optimiser
+how $Θ$ is searched
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+The optimiser has settings of its own that are not learned from the data —
+**hyperparameters**. Choosing them is part of the outer process, not of the
+loop.
+
+</div>
+
+
+Notes:
+The compact restatement of the figure, and the map for the whole course: every
+algorithm later is a different set of these four. Have students place linear
+regression into the four boxes before moving on.
+
+--
+
+## Training Is Not Using
+
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="1"
+     data-params='{"mode": "inference"}'></div>
+
+
+<div class="q">
+
+Which of these boxes still exist when the system is actually deployed?
+
+</div>
+
+
+Notes:
+One click dims everything the training loop needed. What remains is a single
+path: a new situation, measured, through the model, to a prediction — with $Θ$
+now fixed.
+
+Ask the question before clicking. Students routinely assume the loss is
+somehow still "checking" the model in production; it is not, because in
+production nobody tells us $y$. That gap — no answers after deployment — is
+what monitoring and the evaluation methodology have to work around.
+
+--
+
+## The Task: Predicting Acceleration
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The world
+$O$ — vehicles
+
+$Y = \mathbb{R}$ — time to accelerate to 100 km/h
+
+$\gamma(o)$ — the true acceleration time of vehicle $o$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The model world
+$\alpha$ — measure wheels, horsepower, weight, torque
+
+$X$ — those four numbers, for every vehicle
+
+$h_\Theta$ — a linear function of them
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Deliberately mundane. The value is that every abstract symbol from the previous
+unit now has a concrete referent students can argue with — especially α, where
+"which four numbers" is a real modelling decision.
+
+--
+
+## The Data
+
+| wheels | horsepower | weight | torque | **acceleration time** |
+|---|---|---|---|---|
+| 4 | 150 | 1350 | 250 | 9.8 |
+| 4 | 320 | 1600 | 430 | 4.9 |
+| 6 | 95 | 2100 | 210 | 16.2 |
+| … | … | … | … | … |
+
+The last column is $y$ the rest is $\mathbf{x}$.
+
+Notes:
+Ask which column is likely useless (wheels, in a passenger-car dataset) and
+what would happen if it were included anyway — an invitation to regularisation
+later.
+
+--
+
+## The Remaining Two Pieces
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Loss function
+**Mean squared error** — the average of the squared differences between
+predicted and observed acceleration times.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Learning algorithm
+**LMS** — least mean squares, which adjusts the parameters to reduce that
+error.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Four choices — representation, model family, loss, optimiser — and the system
+is fully specified. Every method in this chapter is a different set of four.
+
+</div>
+
+
+
+<div class="takeaway">
+
+A learning problem becomes concrete the moment you can name its **task,
+experience and performance measure**, and its system becomes buildable the
+moment you can name its **representation, model, loss and optimiser**.
+
+</div>
+
+
+Notes:
+Close by returning to the four-box map. This unit is the template students
+should apply when reading any paper: identify the four boxes before judging the
+result.
+
+--
+
+## Designing the Learning Problem
+
+Before any model is chosen, four things have to be decided — and each of them
+is a claim about the world.
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">The task</span>
+
+
+<div class="marks-ask">
+
+- What should the system predict or decide?
+- What is one unit of prediction?
+- What counts as success?
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">The data</span>
+
+
+<div class="marks-ask">
+
+- Which observations represent the problem?
+- How were the examples sampled?
+- Will future cases look like these?
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">The representation $α$</span>
+
+
+<div class="marks-ask">
+
+- What are the inputs, concretely?
+- Which features are available — and which are merely convenient?
+- What is lost in the measurement?
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">The target</span>
+
+
+<div class="marks-ask">
+
+- What is $γ$, in words a domain expert would accept?
+- Is the label we have the thing we care about, or a proxy for it?
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Every box is a modelling decision that the mathematics will later take for
+granted. The proxy question in the last box is the one with the most
+consequences in practice: "did the patient have a disease" versus "was the
+patient diagnosed", "is this content good" versus "was it clicked".
+
+--
+
+## Designing the System
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">Model and objective</span>
+
+
+<div class="marks-ask">
+
+- What does the model family assume, and how flexible is it?
+- Does minimising this loss correspond to what we actually want?
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Learning</span>
+
+
+<div class="marks-ask">
+
+- Which procedure searches the parameters?
+- How sensitive is the result to initialisation and randomness?
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Designing the System — Evaluation
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">Evaluation and generalisation</span>
+
+
+<div class="marks-ask">
+
+- Which metric matters, and which data is held out?
+- How uncertain is the estimate of performance?
+- What happens when the environment changes?
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Uncertainty and use</span>
+
+
+<div class="marks-ask">
+
+- Which uncertainty must be represented explicitly?
+- Is the prediction informing a decision — and what do the errors cost?
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-important">
+
+These are the questions the rest of the course answers. Each lecture takes one
+or two of them and makes them precise.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Close the module by pointing at the questions rather than at topics — the
+roadmap on the next slide then reads as answers to them. The last box is
+deliberately the one that returns to Lecture 01's opening: a prediction exists
+to support a decision.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## How Learning Is Possible
+
+> **Guiding Question:** Infinitely many rules fit the data we have seen. What
+> licenses a machine to prefer one of them?
+
+--
+
+## Learning as Search
+
+
+<div class="c-definition">
+
+The **hypothesis space** $\mathcal{H}$ is the set of all functions the model
+family can express — every possible value of the parameters $\Theta$.
+Learning is the search for the best $h_\Theta \in \mathcal{H}$.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Exhaustive search
+Examine all of $\mathcal{H}$. Feasible only when the space is small (with a few
+special exceptions).
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Heuristic search
+Use assumptions to explore only part of the space. Efficient, but the optimum
+may be missed.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Except for very simple problems you cannot have both: searching **all**
+hypotheses **efficiently and robustly**.
+
+</div>
+
+
+Notes:
+Framing learning as search makes the later algorithms comparable: gradient
+descent, tree induction and k-means are all heuristic searches through
+differently shaped spaces.
+
+--
+
+## Inductive Reasoning and Inductive Bias
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+**Inductive reasoning:** generalising from seen examples to unseen ones — from
+observations to a rule that predicts future observations.
+
+**Inductive bias:** the assumptions by which an algorithm generalises. The
+choice of hypothesis space is already one; so are assumptions about noise,
+outliers, the data distribution and the shape of errors.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+Without an inductive bias, a system **cannot generalise** at all.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The claim in the box is stronger than students expect and worth defending: with
+no assumptions, any behaviour on unseen data is consistent with the training
+data, so nothing can be inferred. Bias is not a defect to be removed, it is the
+precondition for learning — the question is only whether it is the right bias.
+
+--
+
+## The Bias–Variance Trade-Off
+
+Learning trades **fitting the observed data** against **holding to prior
+assumptions about unseen data**.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Bias
+The tendency to favour particular outcomes regardless of the data — the
+*stubborn learner*.
+
+High bias → robust to noise, but misses real structure → **underfitting**.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Variance
+The tendency to follow irregularities in the data.
+
+High variance → captures patterns, but also noise → **overfitting**.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+More parameters generally means more variance. The trade-off is not a defect of
+particular algorithms — it is a property of inductive inference.
+
+</div>
+
+
+Notes:
+Do not give the decomposition formula here the intuition carries the chapter.
+Ask which of the two a very deep decision tree suffers from, and which a
+constant predictor has — the extremes make the axis concrete before any model
+does.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Learning is a **search** through a hypothesis space, steered by an **inductive
+bias** you chose — knowingly or not. Every model sits somewhere on the
+bias–variance axis, and no model escapes it.
+
+</div>
+
+
+--
+
+## Fitting $h$ by Repeated Correction
+
+
+<div class="c-algorithm">
+
+**LMS (least mean squares)**
+
+Initialise the weights $w$.
+
+**repeat**
+&nbsp;&nbsp;pick a training example $(\mathbf{x}, y)$
+&nbsp;&nbsp;compute the prediction $h_w(\mathbf{x})$
+&nbsp;&nbsp;compute the error $ e = y - h_w(\mathbf{x})$
+&nbsp;&nbsp;update every weight: $ w_i \leftarrow w_i + \eta e x_i$
+**until** convergence on $D$
+
+</div>
+
+
+Notes:
+Read the update aloud in words: move each weight in the direction that would
+have reduced this example's error, in proportion to how much that feature
+contributed. That sentence is all of gradient descent, before any calculus.
+
+--
+
+## What the Update Rule Encodes
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Direction
+The sign of $e$ decides whether the prediction goes up or down.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Attribution
+The factor $x_i$ gives each feature credit proportional to its value.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Step size
+The learning rate $\eta$ trades speed against stability.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Too large an $\eta$ oscillates or diverges too small an $\eta$ converges
+slowly. It is a hyperparameter — chosen, not learned.
+
+</div>
+
+
+Notes:
+Ask what happens with η far too large before showing it the prediction that
+"it overshoots and gets worse" is usually made correctly, which earns the
+hyperparameter concept. The visualisation in the optimisation unit shows it.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Linear Regression
+
+> **Guiding Question:** Why squared error — and what exactly does "linear"
+> forbid?
+
+--
+
+## Classification versus Regression
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Classification
+$Y$ is a finite set of labels.
+
+*Will this customer default — yes or no?*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Regression
+$Y = \mathbb{R}$, the target is a quantity.
+
+*What credit line should this customer receive?*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The learning machinery is the same only the shape of $Y$ — and therefore the
+loss — changes.
+
+Notes:
+Keep the same running example across both to make the point that the task, not
+the data, decides which you are doing. The credit example returns in logistic
+regression, where a regression model is pressed into classification.
+
+--
+
+## The Model
+
+
+<div class="c-definition">
+
+**Linear regression** predicts the target as a weighted sum of the features:
+
+$$
+h_{\mathbf{w}}(\mathbf{x}) = w_0 + w_1 x_1 + \ldots + w_p x_p
+= \mathbf{w}^{\top}\mathbf{x}
+$$
+
+with $x_0 = 1$ absorbing the intercept.
+
+</div>
+
+
+The hypothesis space is $\mathbb{R}^{p+1}$: one hypothesis per weight vector.
+
+Notes:
+Point back at the hypothesis-space unit — here it is a continuous space of
+finite dimension, which is why calculus rather than enumeration finds the
+optimum.
+
+--
+
+## The Objective: Residual Sum of Squares
+
+$$
+\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{R}^{p+1}} \mathrm{RSS}(\mathbf{w}),
+\qquad
+\mathrm{RSS}(\mathbf{w}) = \sum_{i=1}^{n}\big(y_i - \mathbf{w}^{\top}\mathbf{x}_i\big)^2
+$$
+
+
+<div class="c-note">
+
+RSS measures **effectiveness** — how good the predictions are. Do not confuse
+it with **efficiency**, which is about runtime and computational effort.
+
+</div>
+
+
+Notes:
+The effectiveness/efficiency distinction is from the source and worth keeping;
+students routinely say "efficient model" when they mean "accurate model".
+
+--
+
+## One Feature: The Closed Form
+
+For a single feature the minimiser can be written down directly:
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Slope
+$$\hat{w}_1 = \frac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2}$$
+
+The covariance of $x$ and $y$ over the variance of $x$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Intercept
+$$\hat{w}_0 = \overline{y} - \hat{w}_1 \overline{x}$$
+
+The fitted line passes through the point of means.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Both formulas are built from quantities the students defined in the statistics
+module — covariance and variance. Say that explicitly: regression is not new
+mathematics, it is the old summary statistics arranged to answer a prediction
+question.
+
+--
+
+## How Much Variance Is Explained?
+
+
+<div class="c-definition">
+
+$$
+\mathrm{TSS} = \mathrm{ESS} + \mathrm{RSS},
+\qquad
+R^2 = \frac{\mathrm{ESS}}{\mathrm{TSS}} = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}}
+$$
+where TSS is the total, ESS the explained and RSS the residual sum of squares.
+
+</div>
+
+
+$R^2$ is the fraction of the target's variation the model accounts for: 0 means
+no better than predicting the mean, 1 means an exact fit.
+
+
+<div class="c-warning">
+
+**Training** $R^2$ never decreases when a feature is added, however useless the
+feature. A high training $R^2$ is not evidence that a model generalises —
+test $R^2$ and adjusted $R^2$ can and do fall.
+
+</div>
+
+
+Notes:
+Connect to the baseline unit: R² = 0 is exactly the trivial-regression
+baseline. The warning is the regression counterpart of training error — and the
+motivation for the cross-validation the students already know.
+
+--
+
+## Higher Dimensions
+
+With $p$ features the same objective in matrix form,
+
+$$
+\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}
+$$
+
+gives the optimum in one step whenever $\mathbf{X}^{\top}\mathbf{X}$ is
+invertible.
+
+
+<div class="c-note">
+
+Invertibility fails when features are linearly dependent or when $p > n$ —
+more unknowns than equations. Both are common in practice, and both are why
+regularisation exists.
+
+</div>
+
+
+Notes:
+Do not derive the normal equations state them and spend the time on when they
+break. The p > n case is the modern one — genomics, text — and motivates the
+next chapters more than the algebra does.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Linear regression fits a weighted sum by minimising squared residuals. Its
+solution is built from **covariance over variance**, and $R^2$ reports how much
+variation it explains — not whether it will generalise.
+
+</div>
+
+
+--
+
+## Linear in the Parameters, Not in the Features
+
+
+<div class="c-important">
+
+A model is **linear** when it is linear in the **weights** $\mathbf{w}$. The
+features may be arbitrary transformations of the input.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Plain
+$$h(\mathbf{x}) = w_0 + w_1 x$$
+a straight line
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Polynomial
+$$h(\mathbf{x}) = w_0 + w_1 x + w_2 x^2$$
+a curve — still a *linear model*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Basis functions
+$$h(\mathbf{x}) = \sum_j w_j \phi_j(\mathbf{x})$$
+any fixed feature map $\phi$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the slide that unlocks the rest: the same least-squares machinery fits
+curves, interactions and periodic patterns, as long as the transformation is
+chosen in advance. Ask what is *not* expressible — anything where the
+transformation itself must be learned, which is the neural-network module.
+
+--
+
+## Consequences
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The good
+The closed-form solution and all statistical guarantees carry over unchanged.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The catch
+The feature map is a **modelling decision**. Choose too rich a basis and the
+model overfits too poor and it underfits.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Increasing polynomial degree is a dial on the bias–variance axis you can watch
+turning.
+
+</div>
+
+
+Notes:
+Tie back to principles: the basis is the inductive bias made explicit. This is
+the cleanest example in the course of choosing a hypothesis space deliberately.
+
+--
+
+## The Question Nobody Asks
+
+We minimised the *squared* residuals. Why squares — why not absolute
+deviations, or fourth powers?
+
+Notes:
+Guiding question. Most students have never been given a reason beyond
+differentiability. There is a real one, and it is worth the slide.
+
+--
+
+## Geometric View
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+The predictions $\mathbf{X}\mathbf{w}$ live in the **column space** of
+$\mathbf{X}$ — everything the features can express. The observed
+$\mathbf{y}$ generally does not.
+
+Least squares picks the point of that space **closest to $\mathbf{y}$ in
+Euclidean distance**: the orthogonal projection. The residual is perpendicular
+to every feature.
+
+</div>
+
+
+<div class="card">
+
+### Consequence
+The residual carries no remaining linear information about the features.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The orthogonality condition is the geometric content of the normal equations.
+It also explains why adding a feature can never increase RSS: the space you
+project onto only grew.
+
+--
+
+## The Gauss–Markov Theorem
+
+
+<div class="c-definition">
+
+**Gauss–Markov (informal).** Among all estimators that are
+
+- **linear** in the observed outputs $(y_1, \ldots, y_n)$, and
+- **unbiased**,
+
+the least-squares estimator has the **lowest variance**. It is the *Best Linear
+Unbiased Estimator* — BLUE.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Best
+lowest variance among the candidates
+
+</div>
+
+
+<div class="card">
+
+### Linear
+a linear function of the observations
+
+</div>
+
+
+<div class="card">
+
+### Unbiased
+right on average over repeated samples
+
+</div>
+
+
+</div>
+
+
+Notes:
+Spell out what the theorem does *not* say: nothing about non-linear or biased
+estimators — and biased estimators (ridge, lasso) can beat OLS in prediction
+error. That is not a contradiction, it is a different criterion.
+
+--
+
+## What This Buys, and What It Costs
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### The payoff
+Minimising RSS yields optimal statistical properties under **very mild
+assumptions** — no normality needed, only uncorrelated errors of constant
+variance.
+
+</div>
+
+
+<div class="card bad">
+
+### The price
+Alternatives — absolute error, Huber loss — are **more robust to outliers** but
+give up the BLUE guarantee.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Squared error is not an arbitrary convenience: it is the loss whose minimiser
+is the best linear unbiased estimator. Departing from it is legitimate — but it
+is a trade, and you should be able to name what you traded.
+
+</div>
+
+
+Notes:
+Close the loop with the robustness discussion from descriptive statistics: mean
+versus median reappears here as squared versus absolute loss. Same trade-off,
+new context — exactly the spiral the pedagogic concept asks for.
+
+--
+
+## Two Ways to the Same Minimum
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Direct (closed form)
+$$\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}$$
+
+Exact, one step. Requires forming and inverting a $(p{+}1)\times(p{+}1)$
+matrix — costly for large $p$, impossible when it is singular.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Iterative (gradient descent)
+$$\mathbf{w} \leftarrow \mathbf{w} - \eta \nabla \mathrm{RSS}(\mathbf{w})$$
+
+Approximate, many steps. Scales to large $p$ and $n$, works when the direct
+solution does not exist, and extends to models with no closed form at all.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The iterative rule is exactly the **LMS algorithm** from Module 2: the update
+$w_i \leftarrow w_i + \eta e x_i$ *is* a step along $-\nabla \mathrm{RSS}$,
+written per example instead of per dataset.
+
+</div>
+
+
+Notes:
+The right-hand column is the one that generalises: logistic regression and
+neural networks have no closed form, so the iterative method is the only one
+that survives the rest of the course. Make the LMS identification explicit —
+students otherwise carry two unconnected procedures.
+
+--
+
+## Watching Gradient Descent Work
+
+<div class="viz viz-lg" data-viz="ml/gradient-descent" data-steps="6"
+ data-params='{"eta": 0.25, "start": -2.6}'></div>
+
+Notes:
+Stepped viz (P6). Each click is one update. Ask before the first click where
+the steps will be largest — where the slope is steepest, far from the minimum —
+and why they shrink as the minimum approaches, without η changing.
+
+--
+
+## The Learning Rate Decides Everything
+
+<div class="viz viz-lg" data-viz="ml/gradient-descent" data-steps="6"
+ data-params='{"eta": 0.9, "start": -2.6, "compare": 0.05}'></div>
+
+Teal: $\eta = 0.9$ — overshoots and oscillates across the minimum.
+Red: $\eta = 0.05$ — stable, but barely moves.
+
+
+<div class="c-warning">
+
+The learning rate is a **hyperparameter**: it is chosen, not learned, and both
+failure modes are silent — one looks unstable, the other looks converged.
+
+</div>
+
+
+Notes:
+Predict-then-check: ask which curve belongs to which η before revealing. The
+"looks converged" failure is the dangerous one — a slow run and a finished run
+produce the same-looking loss curve over a short window.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Use the **closed form** when the matrix is small and well-conditioned use
+**gradient descent** when it is not — which, for everything after this unit, is
+always.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## From Regression to Classification
+
+> **Guiding Question:** A decision is a yes or a no. What goes wrong when we
+> fit a straight line to one?
+
+--
+
+## Fitting a Line to Labels
+
+Encode the two classes as $y \in \lbrace -1, +1 \rbrace$, fit a linear model,
+and classify by the sign of the prediction:
+
+$$
+h(\mathbf{x}) = \mathrm{sign}\big(\mathbf{w}^{\top}\mathbf{x}\big)
+$$
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### One feature
+The **discrimination point** $x'$ satisfies
+$$w_0 + w_1 x' = 0$$
+Everything to one side is one class.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Two features
+The **discrimination line** satisfies
+$$w_0 + w_1 x_1 + w_2 x_2 = 0$$
+In $p$ dimensions it becomes a hyperplane.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The decision boundary is where the model output crosses zero — a level set. Say
+it once here it holds for logistic regression, SVMs and a neural network's
+final layer alike.
+
+--
+
+## Where It Breaks
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Squared loss punishes correctness
+A point far on the *correct* side has a large residual, so least squares drags
+the boundary toward it.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### The boundary shifts
+Adding well-classified points — or an outlier — moves the discrimination
+point, even when nothing was misclassified.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+The output is also unbounded: $\mathbf{w}^{\top}\mathbf{x}$ can be 17 or −40,
+and neither is interpretable as a degree of belief.
+
+</div>
+
+
+Notes:
+Force the interpretation (P2): ask why "being very right" should ever count as
+error. Once students see that squared loss is the wrong loss for a decision,
+the sigmoid arrives as a fix rather than a formula.
+
+--
+
+## Two Problems, One Fix
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### $\mathrm{sign}(\mathbf{w}^{\top}\mathbf{x})$ is not differentiable
+No gradient means no gradient descent — the optimisation machinery does not
+apply.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### The boundary is unstable
+Squared loss on $\pm 1$ labels lets well-classified points shift the
+discrimination point.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+Replace the hard threshold with the **logistic sigmoid**:
+$$
+h_\Theta(\mathbf{x}) = \mathrm{expit}\big(\mathbf{w}^{\top}\mathbf{x}\big)
+\approx P(y = 1 \mid \mathbf{x})
+$$
+
+</div>
+
+
+The output becomes a smooth, bounded quantity that can be read as a
+probability — and can be differentiated.
+
+Notes:
+Both problems have the same root: a decision is a step function, and steps have
+no useful derivative. Softening the step is the standard move; it returns as
+the activation function in neural networks.
+
+--
+
+## Odds and Log-Odds
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Odds
+The ratio of favourable to remaining cases.
+
+*Rolling a six: odds 1 : 5.*
+
+</div>
+
+
+<div class="card">
+
+### Logit
+The **log-odds** of a probability $p$:
+$$\mathrm{logit}(p) = \ln \frac{p}{1-p}$$
+
+</div>
+
+
+<div class="card">
+
+### Range
+$p \in (0,1)$ maps to $(-\infty, +\infty)$ — exactly the range a linear model
+produces.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+**The modelling assumption:** the logit of the target is a linear combination
+of the features.
+$$
+\ln \frac{P(y=1 \mid \mathbf{x})}{1 - P(y=1 \mid \mathbf{x})} = \mathbf{w}^{\top}\mathbf{x}
+$$
+
+</div>
+
+
+Notes:
+This is the cleanest way in: we do not force a probability to be linear (it
+cannot be — it is bounded), we make its log-odds linear. The sigmoid is then
+not an arbitrary squashing function but the inverse of the logit.
+
+--
+
+## The Model
+
+Inverting the logit gives the **logistic sigmoid**:
+
+$$
+h_\Theta(\mathbf{x}) = \mathrm{expit}(\mathbf{w}^{\top}\mathbf{x})
+= \frac{1}{1 + e^{-\mathbf{w}^{\top}\mathbf{x}}}
+$$
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Shape
+An S-curve: near-linear around 0, saturating towards 0 and 1 at the extremes.
+
+</div>
+
+
+<div class="card">
+
+### Reading
+$h_\Theta(\mathbf{x}) = P(y = 1 \mid \mathbf{x})$, and the decision boundary is
+still $\mathbf{w}^{\top}\mathbf{x} = 0$ — where the sigmoid passes $0.5$.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The boundary is unchanged from linear regression for classification what
+changed is the *loss* and the interpretability of the output. Worth stating
+explicitly, since students often expect a curved boundary.
+
+--
+
+## The Loss: Cross-Entropy
+
+
+<div class="c-definition">
+
+**Binary cross-entropy (log loss)**
+$$
+L(\Theta) = -\frac{1}{n}\sum_{i=1}^{n}
+\Big[ y_i \ln h_\Theta(\mathbf{x}_i) + (1 - y_i)\ln\big(1 - h_\Theta(\mathbf{x}_i)\big) \Big]
+$$
+
+For $|Y| > 2$ classes, the multiclass form sums over the classes with a softmax
+output.
+
+</div>
+
+
+Where does it come from? From the **likelihood**:
+$P(y_i = 1 \mid \mathbf{x}_i \Theta) = h_\Theta(\mathbf{x}_i)$ and
+$P(y_i = 0 \mid \mathbf{x}_i \Theta) = 1 - h_\Theta(\mathbf{x}_i)$.
+Maximising the likelihood of the data is minimising this loss.
+
+Notes:
+The derivation is one line and worth doing aloud: write the likelihood of one
+example as h^y (1−h)^(1−y), take the product over examples, take the log,
+negate. Maximum likelihood is the origin of the loss — not a separate idea.
+
+--
+
+## Why It Fixes the Problem
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Confident and correct
+Loss goes to zero — no penalty for being emphatically right.
+
+</div>
+
+
+<div class="card bad">
+
+### Confident and wrong
+Loss goes to infinity — exactly the errors we want punished.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+There is no closed-form solution the parameters are found by gradient descent
+on this loss.
+
+</div>
+
+
+Notes:
+Contrast directly with the squared-loss failure two units back: cross-entropy
+punishes confident mistakes and ignores confident successes, which is what a
+classification loss should do.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Logistic regression is a **linear model of the log-odds**, trained by
+maximising likelihood. It keeps the linear decision boundary but produces a
+calibrated probability — and a loss that punishes the right kind of error.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Probabilistic Classification
+
+> **Guiding Question:** The data tells us how attributes behave *given* the
+> class. We need the reverse. What does the conversion cost?
+
+--
+
+## Thinking With Uncertainty
+
+Bayes' theorem lets us update a **hypothesis** $H$ in the light of **data** $D$:
+
+$$
+P(H \mid D) = \frac{P(H) \cdot P(D \mid H)}{P(D)}
+$$
+
+This is the whole apparatus of evidence-based decision making in one line:
+a belief, a measurement of how well the belief explains what we saw, and a
+normalisation.
+
+Notes:
+Deliberate second pass over Bayes (P4/P5 decision rule: this is consolidation,
+so math first). The new element is the reading of H and D as hypothesis and
+data, which is the form used by every learning algorithm later in the course.
+
+--
+
+## Example: Do I Have the Flu?
+
+You have a headache and a cough. From the literature:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Likelihood
+90% of people with the flu show headache and coughing
+$$P(D \mid H) = 0.9$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Prior
+5% of people currently have the flu
+$$P(H) = 0.05$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Evidence
+headache and coughing occur in 20% of people
+$$P(D) = 0.2$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+**How likely is it that you have the flu?**
+
+
+<div class="fragment">
+
+$$
+P(H \mid D) = \frac{0.05 \cdot 0.9}{0.2} = 0.225
+$$
+
+</div>
+
+
+Notes:
+Ask for a guess first — most people say something close to 90%, repeating the
+base-rate error from the probability chapter. 22.5% is the answer.
+
+--
+
+## Why So Low?
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Few people have the flu
+The prior $P(H) = 0.05$ caps how far the evidence can carry us.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The symptoms are common
+$P(D) = 0.2$ means many people have these symptoms *without* the flu.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+A symptom is informative to the degree that it is **rare in general** but
+**common under the hypothesis**. A likelihood alone tells you nothing.
+
+</div>
+
+
+Notes:
+Two reasons, both structural. This is the criterion that reappears as feature
+informativeness in classification: a feature that fires for everything carries
+no information. Connect it explicitly — it makes information gain feel
+inevitable later.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Bayesian decision making weighs **prior × likelihood** against how ordinary the
+evidence is. Deciding under uncertainty means keeping all three numbers in
+view, not just the one the study reports.
+
+</div>
+
+
+--
+
+## Two Directions of the Same Connection
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Observed connection
+$$A_1, \ldots, A_p \mid B$$
+
+*Given the class, how do the attributes behave?* — the standard situation, and
+the one data can answer directly.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Reversed connection
+$$B \mid A_1, \ldots, A_p$$
+
+*Given the attributes, which class?* — the diagnosis situation, and the one we
+actually need.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+$$
+P(B \mid A_1, \ldots, A_p) = \frac{P(B) \cdot P(A_1, \ldots, A_p \mid B)}{P(A_1, \ldots, A_p)}
+$$
+
+</div>
+
+
+Notes:
+This is the base-rate lesson turned into an algorithm: the data gives us the
+easy direction, Bayes converts it into the one we need. Ask which direction a
+labelled dataset supplies — attributes given class, by construction.
+
+--
+
+## What the Classifier Needs
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Class priors
+$$P(\text{class} = y)$$
+How common is each class, before seeing any attribute?
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Attribute likelihoods
+$$P(\text{attribute} = v \mid \text{class} = y)$$
+How does each class distribute its attribute values?
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Given both, the posterior $P(\text{class} \mid \text{attributes})$ follows from
+Bayes — and the prediction is the class with the highest posterior.
+
+
+<div class="c-warning">
+
+Estimating $P(A_1, \ldots, A_p \mid B)$ requires the **joint** distribution of
+all attributes within each class: exponentially many parameters, and never
+enough data.
+
+</div>
+
+
+Notes:
+End the unit on the obstacle rather than the solution — the warning is exactly
+the parameter explosion from the graphical-models lecture, and naive Bayes is
+the crudest possible independence assumption applied to it.
+
+--
+
+## Generative and Discriminative Classifiers
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Generative
+Model the **joint** distribution $P(A, B)$ — how the data was produced — then
+derive $P(B \mid A)$.
+
+*Naive Bayes.*
+
+</div>
+
+
+<div class="card">
+
+### Discriminative
+Model $P(B \mid A)$ **directly** — only the boundary between classes.
+
+*Logistic regression.*
+
+</div>
+
+
+</div>
+
+
+Notes:
+The distinction runs through the rest of machine learning. A generative model
+can be sampled from and can handle missing attributes a discriminative model
+spends all its capacity on the decision. Neither is universally better.
+
+--
+
+## The Naive Assumption
+
+
+<div class="c-important">
+
+Assume the attributes are **conditionally independent given the class**:
+$$
+P(A_1, \ldots, A_p \mid B) = \prod_{j=1}^{p} P(A_j \mid B)
+$$
+
+</div>
+
+
+Exponentially many parameters collapse to $p$ per class — one distribution per
+attribute.
+
+
+<div class="c-note">
+
+The assumption is almost always false. Naive Bayes nonetheless classifies well,
+because ranking the classes correctly is easier than estimating their
+probabilities correctly.
+
+</div>
+
+
+Notes:
+Direct callback to conditional independence: this is the same move as a
+graphical model, taken to its extreme — a star-shaped network with the class at
+the centre. The note is the honest part: the probabilities are miscalibrated,
+the argmax often is not.
+
+--
+
+## The Classifier
+
+$$
+P(B_i \mid A_1, \ldots, A_p) =
+\frac{P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
+{\sum_{i=1}^{k} P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Score each class
+prior × product of attribute likelihoods
+
+</div>
+
+
+<div class="card">
+
+### Normalise
+divide by the total over all classes — the theorem of total probability
+
+</div>
+
+
+<div class="card">
+
+### Predict
+the class with the largest posterior
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+For prediction alone the denominator can be skipped — it is the same for every
+class. It is needed only when the probability itself is reported.
+
+</div>
+
+
+Notes:
+The three-step structure is the whole algorithm. Point out that the denominator
+is total probability, which the students proved in the probability lecture —
+nothing new is being introduced here, only assembled.
+
+--
+
+## Example: Enjoy Sport?
+
+| Outlook | Temperature | Humidity | Wind | **EnjoySport** |
+|---|---|---|---|---|
+| sunny | hot | high | weak | no |
+| sunny | hot | high | strong | no |
+| overcast | hot | high | weak | yes |
+| rain | mild | high | weak | yes |
+| rain | cool | normal | weak | yes |
+| rain | cool | normal | strong | no |
+
+Estimate the priors and the per-attribute likelihoods by **counting**, then
+score a new day.
+
+Notes:
+Have the group compute P(yes) and P(sunny | yes) aloud — the estimation is pure
+counting, which is what makes the method so cheap. Then ask what happens for
+P(overcast | no): zero, which kills the entire product.
+
+--
+
+## The Zero-Frequency Problem
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+If an attribute value never occurs with a class in the training data, its
+estimated likelihood is **zero** — and one zero factor drives the whole product
+to zero, whatever the other attributes say.
+
+**Laplace smoothing** adds a pseudo-count to every combination, so that unseen
+does not mean impossible.
+
+</div>
+
+
+<div class="card bad">
+
+### One missing count
+vetoes every other piece of evidence
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Naive Bayes buys tractability with a **conditional independence assumption it
+knows to be false** — and works anyway, because classification needs the right
+argmax, not the right probability.
+
+</div>
+
+
+Notes:
+Close on the epistemic point (P3): a knowingly wrong assumption can still yield
+a useful model, provided you know which conclusions it does and does not
+support. Calibrated probabilities are exactly what it does not support.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 6
+## Measuring Performance
+
+> **Guiding Question:** A model reports 99.9% accuracy and has never detected a
+> single case. What should we have measured instead?
+
+--
+
+## What We Want to Know
+
+
+<div class="c-definition">
+
+The **true misclassification rate** of a hypothesis $h$ is the probability that
+it errs on a randomly drawn object:
+
+$$
+\mathrm{err}^*(h) = P\big(h(\mathbf{x}) \neq y(\mathbf{x})\big)
+$$
+
+</div>
+
+
+It is defined over the **whole distribution of objects** — which we cannot
+observe.
+
+Notes:
+Deliberately parallel to the population/sample distinction from the statistics
+module: err* is a population quantity. Students who see the analogy will not be
+surprised by cross-validation.
+
+--
+
+## What We Can Measure
+
+We estimate $\mathrm{err}^*(h)$ by the error on a set of examples
+$D_s \subseteq D$ whose true labels are known:
+
+$$
+\mathrm{err}(h, D_s) = \frac{1}{|D_s|} \sum_{\mathbf{x} \in D_s}
+\mathbb{1}\big[h(\mathbf{x}) \neq y(\mathbf{x})\big]
+$$
+
+
+<div class="c-warning">
+
+The estimate is only as good as the sample. Which examples land in $D_s$ — and
+whether $h$ has seen them before — decides whether the number means anything.
+
+</div>
+
+
+Notes:
+Everything in the next unit follows from that warning. Ask what happens if D_s
+is the data the model was fitted on the answer motivates hold-out estimation
+without needing to be told.
+
+--
+
+## Training Error Is Not an Estimate
+
+When the evaluation set equals the training set, $D_{tr} = D$, the resulting
+number measures how well the model **memorised**, not how well it will
+generalise.
+
+
+<div class="c-warning">
+
+Training error is a lower bound on the true error, and an arbitrarily bad one.
+A model with enough capacity can drive it to zero while learning nothing.
+
+</div>
+
+
+Notes:
+Connect straight to the bias–variance unit: training error falls monotonically
+with capacity, which is exactly why it cannot be the criterion for choosing
+capacity.
+
+--
+
+## Four Estimation Schemes
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Hold-out (2-fold)
+Split $D$ into a training and a test part, $D_{tr} \subset D$. Fit on one,
+evaluate on the other.
+
+*Simple, but wastes data and depends on the split.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### $k$-fold cross-validation
+Partition $D$ into $k$ folds; each fold serves once as the test set. Average
+the $k$ errors.
+
+*Uses all data for both roles $k$ = 5 or 10 is customary.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Leave-one-out ($n$-fold)
+$k = n$: every example is a test set of size one.
+
+*Nearly unbiased, expensive, and high variance.*
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Bootstrapping
+Resample $D$ with replacement to build training sets evaluate on the examples
+left out.
+
+*Useful when $D$ is small.*
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Ask which scheme a Kaggle-style leaderboard implements, and what repeatedly
+consulting a fixed test set does to its status as an estimate — the test set
+becomes training data for the modeller.
+
+--
+
+## Misclassification Costs
+
+Not every error costs the same. A missed diagnosis and a false alarm have
+different consequences, so counting errors equally is itself a modelling
+assumption.
+
+
+<div class="c-note">
+
+A **cost matrix** assigns a cost to each (true class, predicted class) pair;
+the objective becomes expected cost rather than error rate.
+
+</div>
+
+
+Notes:
+This is the hinge into precision and recall in two units' time. Ask the group
+to set the two costs for a spam filter and then for a cancer screen the ratios
+they choose differ by orders of magnitude, and both are defensible.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+An error number is meaningless without the sampling scheme that produced it.
+**Never evaluate on data the model was fitted on**, and state the cost model
+when errors are not interchangeable.
+
+</div>
+
+
+--
+
+## A Number Alone Means Nothing
+
+"95% accuracy" is not a result until you know what a trivial method achieves.
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Trivial classification
+Always predict the **majority class**.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Trivial regression
+Always predict a **central tendency** — the mean or median of $y$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Random guessing
+Draw a label from the marginal distribution $p(y)$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Insist on the habit: report the baseline next to the model, always. This is the
+cheapest defence against self-deception in the whole course.
+
+--
+
+## Example: Why Accuracy Deceives
+
+A screening test for a disease affecting **1 in 1,000** people.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### The "model"
+Always predict *healthy*.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Its accuracy
+**99.9%** — and it has never detected a single case.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+On imbalanced data the majority baseline is nearly unbeatable by accuracy, and
+completely useless. The metric, not the model, is the problem.
+
+</div>
+
+
+Notes:
+The same base-rate structure as the Bayes unit, now as an evaluation trap. This
+is the motivation for precision and recall, which follow immediately.
+
+--
+
+## Why the Error Rate Is Not Enough
+
+For multiclass classification $h_\Theta : X \to Y$ with
+$Y \subseteq \lbrace 1, \ldots, N \rbrace$, the plain error rate:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Fails on imbalance
+The majority baseline scores high while detecting nothing.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Hides the distribution
+Which classes the errors fall on stays invisible.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### Hides the kind of error
+Missing assignments and imprecise assignments count the same.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Three distinct failures, deliberately separated: imbalance, distribution across
+classes, and type of error. Each one motivates a different part of what follows.
+
+--
+
+## The Confusion Matrix
+
+Rows are true classes, columns are predictions cell $(i,j)$ counts the
+examples of class $i$ that $h$ assigned to $j$. The diagonal is correct, and
+every off-diagonal cell names a specific confusion.
+
+
+<div class="c-note">
+
+The matrix is the raw material: every measure below is a ratio of its cells.
+Read it before reading any summary number.
+
+</div>
+
+
+Notes:
+On a well-known dataset the off-diagonal structure is often interpretable —
+which two classes get confused tells you something about the representation,
+not just the score.
+
+--
+
+## Four Counts, Per Class
+
+For a class $j$, every prediction falls into one of four cells:
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### $TP_j$ — true positives
+Assigned to $j$ **and** truly in $j$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### $FP_j$ — false positives
+Assigned to $j$ but **not** in $j$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card bad">
+
+### $FN_j$ — false negatives
+**Not** assigned to $j$ but truly in $j$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card good">
+
+### $TN_j$ — true negatives
+Not assigned to $j$ and not in $j$.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+Read the letters as **decision then correctness**: P/N is what $h$ decided,
+T/F is whether that decision was right.
+
+</div>
+
+
+Notes:
+The mnemonic in the tip box removes nearly all of the confusion students have
+with these four terms. Have them classify a concrete example aloud before
+moving on.
+
+--
+
+## Precision and Recall
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Recall — completeness
+$$\mathrm{rec}_j = \frac{TP_j}{TP_j + FN_j}$$
+
+Of everything that truly belongs to $j$, what fraction did $h$ find?
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Precision — exactness
+$$\mathrm{prec}_j = \frac{TP_j}{TP_j + FP_j}$$
+
+When $h$ says $j$, how often is it right?
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Both are **conditional probabilities with different conditions** — recall
+conditions on the truth, precision on the prediction. Swapping them is the same
+error as swapping the conditionals in Bayes' theorem.
+
+</div>
+
+
+Notes:
+The link to Bayes is the payoff of teaching probability first: precision and
+recall are P(correct | predicted) and P(found | true). Ask which one a search
+engine optimises and which one a screening programme optimises.
+
+--
+
+## Mini-Exercise
+
+A spam filter processes 1,000 emails, 100 of which are spam. It flags 80
+emails, of which 60 are genuinely spam.
+
+Compute precision and recall. Which one would you rather improve, and why?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Precision** $= 60/80 = 0.75$
+
+A quarter of flagged mail is legitimate.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Recall** $= 60/100 = 0.60$
+
+Forty spam messages still arrive.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+For a spam filter, **precision** usually matters more: a lost legitimate email
+costs far more than a spam message that slips through. The cost matrix decides,
+not the metric.
+
+</div>
+
+
+Notes:
+The final sentence is the one to stabilise — the choice between precision and
+recall is a statement about costs, which is why the cost-matrix slide came
+earlier.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The confusion matrix shows **which** errors occur precision and recall split
+"being wrong" into **being imprecise** and **being incomplete**. Which one you
+optimise is a decision about costs, not about mathematics.
+
+</div>
+
+
+--
+
+## Squared Error
+
+
+<div class="c-definition">
+
+$$
+\mathrm{MSE} = \frac{1}{n}\sum_{i=1}^{n}\big(h(\mathbf{x}_i) - y_i\big)^2
+\qquad
+\mathrm{RMSE} = \sqrt{\mathrm{MSE}}
+$$
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### MSE
+Average quadratic loss always non-negative, lower is better.
+
+Unit is the **square** of the target's unit — hard to interpret directly.
+
+Large errors are penalised disproportionately.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### RMSE
+Same ordering as MSE, but back in the **target's own unit** — which is why it
+is the one usually reported.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The quadratic penalty is a modelling choice with consequences: it makes the fit
+sensitive to outliers, which connects back to robustness in descriptive
+statistics. Ask when that sensitivity is desirable — when large errors really
+are disproportionately costly.
+
+--
+
+## Absolute and Relative Error
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### MAE
+$$\frac{1}{n}\sum_i \big| h(\mathbf{x}_i) - y_i \big|$$
+
+Easier to interpret than RMSE treats all errors proportionally.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Mean error
+Drop the absolute value to keep the **direction** — reveals systematic over- or
+under-prediction.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Mean relative error
+$$\frac{1}{n}\sum_i \frac{|h(\mathbf{x}_i) - y_i|}{|y_i|}$$
+
+The average error *per unit of target* — comparable across scales.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Normalised RMSE variants aim to make errors comparable between datasets, but
+are hard to interpret. Prefer a measure whose unit you can name.
+
+</div>
+
+
+Notes:
+The mean error (with sign) is underused and worth highlighting: a model can
+have excellent RMSE and still be biased in one direction, which matters for
+forecasting and pricing.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Squared measures punish large errors and lose the unit absolute measures stay
+interpretable signed measures expose bias. Report the one whose **unit and
+failure mode** match the decision the prediction feeds.
+
+</div>
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

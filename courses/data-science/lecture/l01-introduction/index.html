@@ -1,0 +1,1352 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 01: Introduction</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 01: Introduction
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp1-introduction.tex. Examples and framing
+updated from the 2022 "big data" era to the current one the argumentative
+spine (data does not speak for itself) is unchanged and is what the rest of the
+course rests on. No prerequisites.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## The Data Deluge
+
+> **Guiding Question:** We generate more data than we can store. Does having
+> more of it make us know more?
+
+--
+
+## How Much Data Exists?
+
+| Year | Global datasphere | Per person on earth |
+|---|---|---|
+| 2002 | 5 exabytes of new information | — |
+| 2010 | ~1 zettabyte | a trillion gigabytes in total |
+| 2020 | ~40 zettabytes | ≈ 5,200 GB |
+| 2025 | ~175 zettabytes | ≈ 21,000 GB |
+
+
+<div class="c-note">
+
+In 2007 the amount of information produced first **surpassed available storage
+capacity**. Since then, most data that is generated is never stored.
+
+</div>
+
+
+Notes:
+The exact figures matter less than the two structural facts: growth is
+exponential, and generation outruns storage — so *selection* is unavoidable and
+someone is choosing. Ask who decides what gets kept that is a data-science
+question before it is an engineering one.
+
+--
+
+## Growth Is Not the Interesting Part
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Volume
+More bytes than anyone can read, index or curate.
+
+</div>
+
+
+<div class="card">
+
+### Heterogeneity
+Text, sensors, images, logs, transactions — rarely in a common schema.
+
+</div>
+
+
+<div class="card">
+
+### Velocity
+Streams that must be acted on before they can be stored.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The scarce resource is not data. It is **the ability to turn data into
+justified conclusions** — which is what this course is about.
+
+</div>
+
+
+Notes:
+Deliberately deflate the "big data" framing (P2): volume is a logistics
+problem. The course's subject is the inferential problem, which does not get
+easier with more rows — and sometimes gets harder, as the next unit shows.
+
+--
+
+## Science at Scale
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Large Hadron Collider
+1 MB per event, 600 million events per second — roughly **18 zettabytes per
+year** if everything were kept.
+
+A single tier-1 centre stores ~2.2 petabytes per year.
+
+</div>
+
+
+<div class="card">
+
+### The filter is the experiment
+Almost all events are **discarded in hardware**, in real time, by trigger
+rules written in advance.
+
+What is kept is decided by a theory of what matters.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The LHC is the sharpest possible illustration that data is never raw: the
+trigger encodes physics theory, so the stored dataset is already
+theory-laden. This directly sets up the "end of theory" argument next.
+
+--
+
+## Data at Web Scale
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Search
+Web-scale indexing processes petabytes per day and answers in milliseconds.
+
+</div>
+
+
+<div class="card">
+
+### Platforms
+Interaction logs — clicks, dwell time, scrolls — dwarf the content itself.
+
+</div>
+
+
+<div class="card">
+
+### Models
+Training corpora for language models are measured in trillions of tokens.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+In every case the value comes from **aggregation across many weak signals**,
+not from any single record.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Data is never raw: at the LHC a physics theory decides what is recorded, and on
+the web value comes from aggregating signals that are individually worthless.
+**Someone always chose what the dataset contains.**
+
+</div>
+
+
+Notes:
+Ask what a single click is worth versus a billion clicks — the answer motivates
+statistics as the discipline of extracting signal from individually
+uninformative observations. The takeaway is the bridge to Module 2.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Does Data Speak for Itself?
+
+> **Guiding Question:** Twenty-nine teams analysed the same dataset and the
+> same question. Why did they not get the same answer?
+
+--
+
+## "The End of Theory"
+
+> With enough data, the numbers speak for themselves. Correlation supersedes
+> causation, and science can advance without coherent models or unified
+> theories.
+
+**Chris Anderson, *Wired*, 2008.** The argument has returned, almost verbatim,
+in claims that sufficiently large models make domain theory unnecessary.
+
+**Is it right?**
+
+Notes:
+Guiding question of the module (P1). Do not answer yet. Ask for a show of hands
+and hold both camps — the next four slides supply the evidence, and students
+should feel the argument's pull before it is dismantled.
+
+--
+
+## One Dataset, Many Answers
+
+Twenty-nine research teams received **the same dataset** and the same question:
+
+> *Are football referees more likely to give red cards to dark-skinned players
+> than to light-skinned players?*
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### The result
+Odds ratios ranged from **0.89 to 2.93**. Twenty teams found a significant
+effect nine did not.
+
+</div>
+
+
+<div class="card bad">
+
+### The reason
+No team made an error. They made **different defensible modelling choices** —
+which covariates, which exclusions, which model family.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The data did not determine the answer. The **analysis** did. (Silberzahn et al. 2018)
+
+</div>
+
+
+Notes:
+The most important slide of the lecture. Emphasise that this is not a story
+about incompetence or fraud — it is what "researcher degrees of freedom" means.
+Ask what the honest reporting practice would be (pre-registration publishing
+the specification curve), and note that this is exactly what makes P3
+(epistemic modelling) a professional obligation rather than a philosophical
+nicety.
+
+--
+
+## Correlation Is Not Causation
+
+Spurious correlations are easy to find and get **easier as datasets grow**:
+with enough variables, some pair will track another closely by chance alone.
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Why it happens
+Testing many pairs makes an extreme correlation likely *somewhere*, even when
+every pair is independent.
+
+</div>
+
+
+<div class="card">
+
+### Why more data does not fix it
+More rows shrink the confidence interval around a **meaningless** number. The
+estimate gets more precise, not more valid.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The second box is the deep point and the one students miss: precision and
+validity are different axes. This returns in hypothesis testing, where a large
+n makes trivial effects "significant".
+
+--
+
+## Summary Statistics Hide the Data
+
+Datasets whose **summary numbers agree exactly** — same averages, same spread,
+same strength of association — can look completely different when plotted: a
+dinosaur, a star, a set of lines (Matejka & Fitzmaurice 2017).
+
+We will make "average", "spread" and "association" precise in Lecture 02, and
+meet this phenomenon again there as Anscombe's quartet.
+
+
+<div class="c-tip">
+
+Plot the data. Then plot it again, differently.
+
+</div>
+
+
+Notes:
+Forward *pointer*, not a forward dependency (P7): the phenomenon is shown
+visually and named in plain words; the statistics that make it precise are
+Lecture 02's job, where Anscombe's quartet returns as consolidation. Do not use
+the words variance or correlation as if defined here.
+
+--
+
+## Where This Leaves Us
+
+
+<div class="grid-3">
+
+
+<div class="card bad">
+
+### Data does not speak for itself
+Every dataset was selected, filtered and encoded by someone.
+
+</div>
+
+
+<div class="card bad">
+
+### Data cannot be read intuitively
+Human intuition fails at scale, in high dimensions, and with base rates.
+
+</div>
+
+
+<div class="card good">
+
+### So theory is needed *more*
+Models make the assumptions explicit enough to be criticised.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Big data does not end theory. It **raises the cost of implicit theory**,
+because assumptions that stay unstated now get automated and scaled.
+
+</div>
+
+
+Notes:
+Return to the guiding question and answer it explicitly. The last sentence is
+the one to leave on the board: the danger is not wrong theory, it is invisible
+theory. This is the thread the whole course pulls on.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## What Is Data Science?
+
+> **Guiding Question:** If data science is not statistics, not machine
+> learning and not engineering, what is left that is its own?
+
+--
+
+## A Definition
+
+
+<div class="c-definition">
+
+**Data Science** researches and applies technologies, systems and algorithms to
+gain knowledge from potentially large, heterogeneous and dynamically changing
+data sets — for a particular domain. (Dhar 2013)
+
+</div>
+
+
+The phrase doing the work is **"for a particular domain"**: without it, there
+is no criterion for which patterns count as knowledge.
+
+Notes:
+Math-first equivalent for a definitional slide (P5): show it, then interrogate
+it. Ask which word could be deleted without loss (probably "large") and which
+could not ("domain", "knowledge").
+
+--
+
+## Neighbouring Fields
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Machine Learning
+Learning from past experience to improve at a task in the future.
+
+</div>
+
+
+<div class="card">
+
+### Artificial Intelligence
+Building systems that behave intelligently.
+
+</div>
+
+
+<div class="card">
+
+### Data Engineering
+The twin field: managing, organising and providing access to data.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Data science is not a subset of any of them. It is the discipline of getting
+from a **domain question** to a **defensible answer**, using whichever of these
+tools fits.
+
+</div>
+
+
+Notes:
+Students arrive with these words used interchangeably. The distinction that
+sticks: ML is a method, data engineering is an infrastructure, data science is
+an inquiry.
+
+--
+
+## Three Kinds of Task
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Explorative
+Find patterns.
+
+*Which customers behave similarly?*
+
+</div>
+
+
+<div class="card">
+
+### Descriptive
+Summarise what is there.
+
+*What does an average customer spend?*
+
+</div>
+
+
+<div class="card">
+
+### Predictive
+Anticipate future outcomes.
+
+*Is this transaction fraudulent?*
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+Naming the task first constrains everything else — the method, the evaluation
+measure, and what counts as success.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Data science is defined by its **question and its domain**, not by its tools.
+Explorative, descriptive and predictive tasks demand different methods and
+different evidence — so the first decision in any project is which one you are
+doing.
+
+</div>
+
+
+Notes:
+This triple is the organising map of the whole course: clustering and
+projections are explorative, statistics is descriptive, classification and
+regression are predictive. Point forward to where each returns.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## How Knowledge Is Acquired
+
+> **Guiding Question:** A pattern in data is not yet knowledge. What has to
+> happen in between?
+
+--
+
+## Three Modes of Reasoning
+
+| | From | To | What it guarantees |
+|---|---|---|---|
+| **Deduction** *(logic)* | premises | what **must** follow | certain — but adds no new content |
+| **Induction** *(statistics)* | observed patterns | a **regularity**, a hypothesis | nothing — content-adding, not guaranteed |
+| **Abduction** *(probability)* | observations | the **best available explanation** | nothing — only comparable against rivals |
+
+Machine learning lives in the bottom two rows.
+
+Notes:
+Three modes, one criterion to compare them: what does each guarantee, and what
+does it buy? Deduction guarantees everything and discovers nothing induction
+and abduction discover and guarantee nothing. Data science lives in the latter
+two, which is why validation is a permanent obligation.
+
+--
+
+## The Scientific Reasoning Cycle
+
+The three modes are not alternatives — they take turns.
+
+**Example: gravity.**
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Deduction
+From the theory: all objects of equal mass fall at the same rate everywhere on
+earth.
+
+</div>
+
+
+<div class="card">
+
+### Induction
+Design an experiment, measure fall times at several locations, compute means
+and standard deviations.
+
+</div>
+
+
+<div class="card">
+
+### Abduction
+Times agree at one location but vary between locations. **Best explanation:**
+distance from earth's mass centre.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+The cycle turns: the abduced explanation becomes the next theory to deduce
+from. A data-science project runs the same loop, usually several times.
+
+</div>
+
+
+Notes:
+Have students place a machine-learning project in the cycle: choosing a model
+family is deduction from assumptions, fitting is induction, and diagnosing why
+it fails on a subgroup is abduction. The loop is the honest picture of the
+workflow, unlike the tidy pipeline diagrams.
+
+--
+
+## Mini-Exercise
+
+A dashboard shows that customers who use the mobile app churn **less** than
+those who do not.
+
+
+<div class="marks-num">
+
+- What would a purely **inductive** reading conclude?
+- Give two different **abductive** explanations.
+- What **deduction** would let you distinguish them?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+<span class="eyebrow">Induction</span>
+
+"App use reduces churn" — a regularity read straight off the data.
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Abduction</span>
+
+The app causes loyalty — *or* loyal customers install the app. Same
+correlation, opposite causal direction.
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Deduction</span>
+
+If the app causes loyalty, randomly prompting a subgroup to install it should
+lower their churn — an experiment deduced from the hypothesis.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Question and solution share a slide: the three prompts stay visible while the
+answers appear, so students can check each answer against the question that
+produced it. One click reveals all three.
+
+The exercise rehearses the whole cycle in a business setting and previews the
+correlation/causation problem. The key move is 3: a hypothesis earns its keep
+by predicting something checkable that its rival does not.
+
+--
+
+## What Counts as Knowledge?
+
+
+<div class="c-definition">
+
+**Knowledge discovery in databases (KDD)** is the non-trivial process of
+identifying patterns in data that are
+
+- **valid** — they hold beyond the sample,
+- **novel** — they were not already known,
+- **relevant** — they matter for a decision,
+- **interpretable** — they can be understood and acted upon.
+
+</div>
+
+
+
+<div class="c-warning">
+
+A pattern that fails **any** of the four is not knowledge. Most patterns a
+large dataset offers fail at least one.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Knowledge is a pattern that is **valid, novel, relevant and interpretable**.
+Data mining produces patterns only the four criteria turn one into knowledge —
+and most patterns fail at least one of them.
+
+</div>
+
+
+Notes:
+Use the four criteria as a checklist against a real finding — say, "customers
+who buy nappies buy beer". Valid? Maybe. Novel? Perhaps. Relevant? Only if it
+changes a decision. Interpretable? Only with a mechanism. This is the antidote
+to pattern-hunting.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## The Process and the Craft
+
+> **Guiding Question:** Most of a data-science project is spent before any
+> model is fitted. On what, and why does it matter?
+
+--
+
+## Step 1 — Selection of Data
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Types of source
+- **Unstructured:** flat files, documents, text and multimedia
+- **Structured:** relational databases, XML, web APIs
+
+</div>
+
+
+<div class="card">
+
+### Types of data
+media · object-relational · spatial and spatio-temporal · graphs and networks ·
+time series and sequences · data streams
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Selection is where the **first and largest** bias enters. What was not selected
+cannot be discovered later.
+
+</div>
+
+
+Notes:
+Tie back to the LHC trigger: selection encodes a theory of relevance. Ask what
+is systematically missing from a dataset of app users (everyone who never
+installed it) — survivorship bias, before it has a name.
+
+--
+
+## Step 2 — Preprocessing
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Selected
+manually or automatically, e.g. by crawling
+
+</div>
+
+
+<div class="card">
+
+### Cleaned
+errors and noise removed — *garbage in, garbage out*
+
+</div>
+
+
+<div class="card">
+
+### Integrated
+combined with other sources, resolving conflicts
+
+</div>
+
+
+<div class="card">
+
+### Transformed
+into a reusable representation for analysis
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+This step routinely consumes most of a project's effort — and every choice in
+it is a modelling decision, not a clerical one.
+
+</div>
+
+
+Notes:
+The "80% of the work" folklore is true but usually told as a complaint. Reframe
+it: preprocessing is where the representation α from the ML chapter is built,
+and the representation determines what can be learned at all.
+
+--
+
+## Steps 3–5 — Mining, Evaluation, Deployment
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Data mining
+Apply the algorithm — clustering, classification, rule mining — that fits the
+task.
+
+</div>
+
+
+<div class="card">
+
+### Evaluation
+Test the patterns against the four criteria: valid, novel, relevant,
+interpretable.
+
+</div>
+
+
+<div class="card">
+
+### Deployment
+Put the result where a decision is made, and monitor it there.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The process is a **loop**, not a pipeline. Evaluation routinely sends you back
+to selection.
+
+</div>
+
+
+Notes:
+The linear diagram is the standard depiction and the standard lie. Ask where
+the arrows back go — and note that in production, deployment feeds new data
+into selection, which is how feedback loops (and their pathologies) arise.
+
+--
+
+## What the Work Actually Looks Like
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Ask
+Turn a domain question into something a dataset could answer — and check that
+it is the question worth answering.
+
+</div>
+
+
+<div class="card">
+
+### Build
+Acquire, clean, model, evaluate. Iterate, mostly backwards.
+
+</div>
+
+
+<div class="card">
+
+### Communicate
+Deliver a result someone can act on, with its uncertainty attached.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The first and last boxes are the ones curricula under-serve and employers
+complain about. Say plainly that the middle box is what this course teaches,
+and the other two are where the value is realised or lost.
+
+--
+
+## Three Skill Areas
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Domain knowledge
+What the data means, which values are impossible, which differences matter.
+
+</div>
+
+
+<div class="card">
+
+### Statistics and modelling
+What may be inferred, with what uncertainty, under which assumptions.
+
+</div>
+
+
+<div class="card">
+
+### Engineering
+Getting the data, at scale, reproducibly, into production.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+The interesting failures happen **between** the three: a technically flawless
+model of the wrong quantity, or a correct analysis nobody can deploy.
+
+</div>
+
+
+
+<div class="takeaway">
+
+The process is a **loop, not a pipeline**, and it spans three skill areas that
+nobody holds equally. The characteristic failures happen at the seams — a
+flawless model of the wrong quantity, or a correct analysis nobody can deploy.
+
+</div>
+
+
+Notes:
+Resist the "unicorn" framing — nobody holds all three deeply. The realistic
+skill is knowing enough of the neighbouring areas to ask the right question of
+a colleague, which is also why the course insists on stating assumptions aloud.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 6
+## Applications, and Their Failures
+
+> **Guiding Question:** What happens to a model's validity once the world can
+> see the model?
+
+--
+
+## Web and Social Media
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Google Flu Trends
+Search queries were used to nowcast influenza faster than public health
+reporting.
+
+</div>
+
+
+<div class="card bad">
+
+### And then it failed
+It overestimated cases substantially, because search behaviour changed —
+partly *because of media coverage of the tool itself*.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+A model that acts on the world **changes the world it measures**. Validity is
+not a property a model keeps once earned.
+
+</div>
+
+
+Notes:
+The failure is more instructive than the success and belongs on the slide. It
+is the cleanest example of a feedback loop and previews model monitoring,
+distribution shift, and the KDD loop from the previous unit.
+
+--
+
+## Text and Language
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Classic tasks
+Summarisation, entity extraction, sentiment analysis, question answering — each
+once a research programme of its own.
+
+</div>
+
+
+<div class="card">
+
+### Today
+A single pretrained model handles all of them, with the task specified in
+words rather than in code.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+What did **not** change: the need to evaluate on data the model has not seen,
+and to state what the output may be used for.
+
+</div>
+
+
+Notes:
+The students' baseline experience is post-LLM, so the historical framing lands
+better as "these were separate fields" than as a list of tasks. The note is the
+continuity claim the course rests on.
+
+--
+
+## Business and the Public Sector
+
+Reported potentials from the era of the first big-data wave: large retail
+revenue gains, hundreds of billions in healthcare savings, comparable figures
+for e-government.
+
+
+<div class="c-warning">
+
+These are **projections from consultancy reports**, not measured outcomes.
+Treat them as claims to be interrogated — whose baseline, whose costs, and what
+happened afterwards?
+
+</div>
+
+
+
+<div class="takeaway">
+
+Applications show what is possible their failures show what must be checked.
+Ask of every deployed model: what changed in the world because it exists?
+
+</div>
+
+
+Notes:
+Explicit critique practice (P2 and the AI-context section): give students a
+confident number and ask what evidence would be needed to believe it. Ending
+the lecture on scepticism sets the tone for the rest of the course.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Dhar, Vasant (2013). Data science and prediction. *Communications of the ACM*.
+- Matejka, Justin and Fitzmaurice, George (2017). Same stats, different graphs: generating datasets with varied appearance and identical statistics through simulated annealing. *Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems*.
+- Silberzahn, Raphael and Uhlmann, Eric L and Martin, Daniel P and others (2018). Many analysts, one data set: making transparent how variations in analytic choices affect results. *Advances in Methods and Practices in Psychological Science*.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

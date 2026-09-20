@@ -1,0 +1,3901 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 02: Probability and Statistics</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Probabilistic Machine Learning
+## Lecture 02: Probability and Statistics
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Two sessions. Sessions 1 covers Modules 1–2 (the language and conditioning),
+session 2 covers Modules 3–4 (quantities and data). The module slides mark the
+boundary.
+
+Reuses the data-science probability units. Trimmed for a bachelor audience: the
+counting unit and the axiomatic-foundations examples are dropped, since this
+course needs the calculus of probability rather than its construction.
+Combinatorics can be reinstated by adding units/math/stochastic/counting.md to
+Module 1, and the extra Laplace worked examples by adding
+probability-measure-definition-examples.md after it.
+
+--
+
+## Where We Left Off
+
+Lecture 01 ended on three moves, and promised that their vocabulary would be
+made precise here:
+
+
+<div class="flow-row">
+
+
+<div class="stat-card s-navy">
+
+### Model the joint
+Module 3
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card s-teal">
+
+### Condition on the data
+Module 2
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card s-violet">
+
+### Read off answers
+Module 4
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+It also left a claim unpaid: that **epistemic** uncertainty is the kind more
+data removes. Module 4 turns that slogan into a rate.
+
+</div>
+
+
+Notes:
+Pick up the thread deliberately (the roadmap slide of L01 instructs the lecturer
+to return to it at the start of every lecture). Say which move each module
+equips, and say that the modules are met in the order the *mathematics* needs,
+not the order the three moves are performed in — conditioning is defined for
+events long before there is a joint distribution to condition.
+
+Keep this slide up while stating the plan; it is the only place in the lecture
+where the four modules are visible at once.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## A Language for Uncertainty
+
+> **Guiding Question:** We need a language that can say "how strongly", not just
+> "true or false". What must such a language satisfy — and who decides the
+> numbers?
+
+--
+
+## Example: Two Fruit Boxes
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-red">
+
+**Red box**
+
+2 apples, 6 oranges
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-blue">
+
+**Blue box**
+
+3 apples, 9 oranges
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+We pick a box, then a fruit from it.
+
+- If we pick the **red box 40%** of the time, how often do we get an apple?
+- We got an **orange** — which box did it probably come from?
+
+Notes:
+Deliberate overview slide (P4): the two questions are the whole chapter in
+miniature. Do not formalise anything yet — the point is that both questions are
+answerable by counting, and that the second one feels harder than the first.
+
+--
+
+## The Counts, in One Grid
+
+Twenty picks, recorded as a table of counts — box across, fruit down:
+
+| | $B = r$ | $B = b$ | **row total** |
+|---|---|---|---|
+| $F = a$ (apple) | 2 | 3 | **5** |
+| $F = o$ (orange) | 6 | 9 | **15** |
+| **column total** | **8** | **12** | **20** |
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Joint**
+
+a single cell over the total
+
+$P(B=r, F=a) = \tfrac{2}{20}$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Marginal**
+
+a row or column total over the total
+
+$P(F=a) = \tfrac{5}{20}$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Conditional**
+
+a cell over its own row or column
+
+$P(F=a \mid B=r) = \tfrac{2}{8}$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Everything on this slide is division of counts. Have students compute one of
+each kind before naming them. The names will be redefined formally later here
+they are labels for three ways of dividing the same table.
+
+--
+
+## The Two Rules
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Sum rule**
+$$
+P(X) = \sum_Y P(X, Y)
+$$
+Add along a row or column to remove a variable.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Product rule**
+$$
+P(X, Y) = P(Y \mid X) P(X)
+$$
+A cell is its column total times its share of that column.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Almost all of probability theory is these two rules applied repeatedly.
+
+Notes:
+This is the Bishop framing: two rules, everything else derived. Students who
+carry only these two out of the chapter are in good shape — the formal
+apparatus that follows exists to justify them and to extend them beyond finite
+tables.
+
+--
+
+## Bayes' Theorem, in Advance
+
+Combining the two rules and the symmetry $P(X,Y) = P(Y,X)$:
+
+$$
+P(Y \mid X) = \frac{P(X \mid Y) P(Y)}{P(X)},
+\qquad P(X) = \sum_Y P(X \mid Y) P(Y)
+$$
+
+**Which box did the orange come from?**
+
+
+<div class="fragment">
+
+$$
+P(B = r \mid F = o) = \frac{P(F=o \mid B=r) P(B=r)}{P(F=o)}
+= \frac{\tfrac{6}{8}\cdot 0.4}{0.75 \cdot 0.4 + 0.75 \cdot 0.6} = 0.4
+$$
+
+Here the fruit told us **nothing** about the box — both boxes have the same
+orange fraction. Evidence is only informative when the hypotheses predict
+different things.
+
+</div>
+
+
+Notes:
+The example is deliberately degenerate: identical ratios in both boxes make the
+posterior equal the prior. That is a stronger lesson than a numerical surprise —
+evidence updates belief only to the extent that hypotheses disagree. Change the
+red box to 1 apple / 7 oranges and rerun if the group wants to see movement.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Two rules — **sum** to remove a variable, **product** to split a joint — generate
+joint, marginal, conditional probabilities and Bayes' theorem. The rest of this
+chapter makes them precise and extends them beyond counting.
+
+</div>
+
+
+Notes:
+Signpost explicitly: everything just used informally gets a definition in the
+coming modules. This unit is the map, not the territory.
+
+--
+
+## What Makes an Experiment "Random"?
+
+
+<div class="c-definition">
+
+**Definition (Random experiment).** A procedure that can — at least in theory —
+be repeated infinitely often, characterised by:
+
+1. **Configuration** — a precisely specified system that can be reconstructed.
+2. **Procedure** — an instruction for executing the experiment.
+3. **Unpredictability** of the outcome.
+
+</div>
+
+
+**Coin flip:** a 1-Euro coin (configuration), placed on the thumb and snapped
+into the air (procedure), record heads or tails (outcome).
+
+Notes:
+Note what the definition does *not* say: nothing about the world being
+indeterministic. Ask students for a "natural random experiment" — rainfall,
+click-through, a queue — where nobody designed the configuration.
+
+--
+
+## Randomness as Missing Information
+
+
+<div class="c-note">
+
+A random experiment is still causal. Its unpredictability reflects **missing
+information about the causal chain**, not an absence of causes.
+
+Consequence: a random experiment can become a deterministic process once new
+information is available.
+
+</div>
+
+
+A coin flip filmed at 10,000 fps and measured precisely enough stops being
+random. What does that imply for a model that calls something "random"?
+
+Notes:
+This is the epistemic-modeling principle in probability form (P3): calling
+something random is a statement about our knowledge, not only about the system.
+Good place to ask where that matters in data science — noise vs. unmodelled
+signal is the same distinction.
+
+--
+
+## Sample Space and Events
+
+
+<div class="c-definition">
+
+**Definition (Sample space, event space).**
+A set $\Omega = \lbrace \omega_1, \omega_2, \ldots, \omega_n\rbrace $ is the **sample
+space** of a random experiment if every outcome is associated with exactly one
+element $\omega \in \Omega$. The elements are called **outcomes**.
+
+Let $\Omega$ be finite. Every subset $A \subseteq \Omega$ is an **event** the
+event $A$ **occurs** iff the observed outcome $\omega$ is a member of $A$.
+The set of all events, the power set $\mathcal{P}(\Omega)$, is the **event
+space**.
+
+</div>
+
+
+An outcome is a single result; an event is a *question you can ask* about the
+result.
+
+For infinite $\Omega$ — the drug dosage below — the event space is a suitable
+family of subsets rather than the full power set we return to this when
+continuous distributions appear.
+
+Notes:
+Math first (P5). The load-bearing word is "exactly one" — outcomes must be
+mutually exclusive and exhaustive, which is a modelling decision, not a
+mathematical one. The outcome/event distinction is the one students blur.
+
+--
+
+## Important Event Types
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+### $\emptyset$
+impossible event
+
+</div>
+
+
+<div class="column">
+
+### $\Omega$
+certain event
+
+</div>
+
+
+<div class="column">
+
+### $\overline{A} := \Omega \setminus A$
+complementary event
+
+</div>
+
+
+<div class="column">
+
+### $|A| = 1$
+elementary event
+
+</div>
+
+
+<div class="column">
+
+### $A \subseteq B$
+$A$ is a sub-event of $B$ — "$A$ entails $B$"
+
+</div>
+
+
+<div class="column">
+
+### $A \cap B = \emptyset$
+$A$ and $B$ are incompatible
+
+</div>
+
+
+</div>
+
+
+Notes:
+2x3 grid, read as vocabulary rather than results. "Entails" is worth dwelling
+on: set inclusion is logical implication between events, which is why the next
+unit can do algebra with pictures.
+
+--
+
+## Examples
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**One coin flip**
+
+$\Omega = \lbrace H, T\rbrace $
+
+$\mathcal{P}(\Omega) = \lbrace \emptyset, \lbrace H\rbrace , \lbrace T\rbrace , \lbrace H,T\rbrace \rbrace $
+
+Event "heads": $E = \lbrace H\rbrace $
+
+</div>
+
+
+<div class="column">
+
+**Two coin flips**
+
+$\Omega = \lbrace HH, HT, TH, TT\rbrace $
+
+Event "at least one head":
+$E = \lbrace HH, HT, TH\rbrace $
+
+Four outcomes, sixteen possible events.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Have students write down the event "exactly one head" ({HT, TH}) and the event
+"the first flip is heads" ({HH, HT}) — same sample space, different questions.
+
+--
+
+## The Event Space Grows Fast
+
+**Three-sided die:** $\Omega = \lbrace 1, 2, 3\rbrace $, so $\mathcal{P}(\Omega)$ has
+$2^3 = 8$ events, ordered by inclusion:
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+$\lbrace 1,2,3\rbrace $
+
+</div>
+
+
+<div class="column">
+
+$\lbrace 1,2\rbrace \quad \lbrace 1,3\rbrace \quad \lbrace 2,3\rbrace $
+
+</div>
+
+
+<div class="column">
+
+$\lbrace 1\rbrace \quad \lbrace 2\rbrace \quad \lbrace 3\rbrace \quad \emptyset$
+
+</div>
+
+
+</div>
+
+
+For $|\Omega| = n$ the event space has $2^n$ elements — which is exactly why the
+next unit is about counting.
+
+Notes:
+The lattice diagram of the original is replaced by three inclusion levels;
+the point is the 2^n growth, not the drawing. This motivates counting and,
+later, why we cannot always take the full power set for infinite Ω.
+
+--
+
+## Not Every Sample Space Is Finite
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Dosage of a drug**
+
+$\Omega = (0, \infty)$
+
+Uncountably many outcomes.
+
+</div>
+
+
+<div class="column">
+
+**Race with 7 teams**
+
+$\Omega = \lbrace \text{all orderings of } 1,\ldots,7\rbrace $
+
+$7! = 5040$ outcomes.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Choosing $\Omega$ is a modelling decision: it fixes what counts as an outcome,
+and therefore which questions can be asked at all.
+
+</div>
+
+
+Notes:
+Close the module on the modelling move (P3). Ask what is lost by modelling
+dosage as a positive real (measurement precision, dosing intervals) — the same
+question returns for every feature in every dataset later in the course.
+
+--
+
+## Venn Diagrams
+
+**Venn diagrams** are the graphical representation of events:
+
+- the rectangle represents the sample space $\Omega$
+- circles represent events $A \subseteq \Omega$, $A \in \mathcal{P}(\Omega)$
+
+Every region of the picture *is* a set — and every set operation is a region
+you can point at.
+
+Notes:
+Bridge from sets to pictures before any formula (P4). The payoff of the
+diagram: probability laws become area arguments in the next unit.
+
+--
+
+## Important Event Types
+
+**Before each step: which region will light up?**
+
+<div class="viz" data-viz="math/set-operations" data-steps="4"
+ data-params='{"sets": 2, "ops": ["A", "notA", "subset", "disjoint"]}'></div>
+
+Notes:
+Stepped visualization (P6, tier 2), one click per event type: the event A;
+the complement Ā = Ω∖A the subset B ⊂ A disjoint events A ∩ B = ∅.
+Predict-then-check on every click — students name the region first, the
+highlight confirms. Disjointness is the one to slow down on: it is a statement
+about events, not about probabilities.
+
+--
+
+## Algebra of Events
+
+| Law | Union form | Intersection form |
+|---|---|---|
+| Commutative | $A\cup B = B \cup A$ | $A\cap B = B\cap A$ |
+| Associative | $(A\cup B)\cup C = A \cup (B \cup C)$ | $(A\cap B)\cap C = A \cap (B \cap C)$ |
+| Distributive | $(A\cup B)\cap C = (A \cap C) \cup (B \cap C)$ | $(A\cap B)\cup C = (A \cup C) \cap (B \cup C)$ |
+
+Events form a set algebra — the same laws you know, but now every identity is
+a picture.
+
+--
+
+## Set Operations as Regions
+
+<div class="viz" data-viz="math/set-operations" data-steps="4"
+ data-params='{"sets": 3, "ops": ["AuB", "AnB", "AnBnC", "AuBuC"]}'></div>
+
+Notes:
+Second stepped pass with three sets: A∪B, A∩B, A∩B∩C, A∪B∪C. Same
+predict-then-check rhythm.
+
+--
+
+## Mini-Exercise
+
+Sketch (pen and paper) the regions for:
+
+1. $(A\cup B)\cap C$
+2. $(A\cap B)\cup C$
+
+Are they the same region? Which algebra law says so — or says they are not?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+They differ: $(A\cup B)\cap C$ lies entirely **inside** $C$, while
+$(A\cap B)\cup C$ contains **all** of $C$ plus the lens $A\cap B$ outside it.
+
+The distributive laws expand each into a different expression — the algebra
+distinguishes exactly what the picture shows.
+
+</div>
+
+
+Notes:
+Solution fragmented per the animation policy (solutions always click-gated).
+This replaces the last two TikZ slides of the original unit with an active
+task — same content, students draw instead of watch.
+
+--
+
+## An Intuition: Probability as Area
+
+Draw a Venn diagram on the ground, with each area proportional to the number of
+elementary events it contains. Throw a stone into the rectangle at random.
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+The probability of $A$ is how likely the stone lands inside $A$, assuming
+
+1. we hit the rectangle $\Omega$ for certain, and
+2. every part of $\Omega$ is equally likely to be hit.
+
+Probability is then a **measure of the state** $A \subseteq \Omega$ of a random
+experiment — literally, how much of the sample space the event occupies.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+Both assumptions are doing real work.
+
+Assumption 2 is the one we will have to give up.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Intuition first (P4), and it connects directly to the Venn unit: events were
+regions, now regions have size. Ask what happens to the picture if some parts
+of Ω are "heavier" than others — that is precisely what the axioms will allow.
+
+--
+
+## Two Ways to Read a Probability
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Frequentist**
+
+The probability of an elementary event $a$ is the fraction of repetitions of
+the experiment that yield $a$.
+
+*Requires* the experiment to be repeatable.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Bayesian**
+
+The probability of $a$ is the degree of certainty that $a$ will happen — even
+without conducting the experiment.
+
+*Requires* a stated state of knowledge.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Both interpretations yield the same mathematics. They are mental models for
+what the number *means*, not different theories.
+
+Notes:
+Interpretation over recitation (P2): ask which reading makes sense for "the
+probability that this patient has the disease" (no repetition available) versus
+"the probability that this machine part fails within a year". The distinction
+returns whenever we call something a prior.
+
+--
+
+## The Classical (Laplace) Definition
+
+
+<div class="c-definition">
+
+**Definition (Classical / Laplace probability).** If every elementary event in
+$\Omega$ is assigned the same probability, then
+
+$$
+P(A) = \frac{|A|}{|\Omega|}
+ = \frac{\text{number of cases favourable for } A}{\text{number of possible outcomes}}
+$$
+
+</div>
+
+
+An experiment whose configuration and procedure make outcomes equiprobable —
+by definition or by construction — is a **Laplace experiment** its
+probabilities need not be estimated, they are implied by the setup.
+
+Notes:
+This is the definition the counting unit was preparing. Emphasise that it is
+only usable under the Laplace assumption when that fails, probabilities must
+come from data.
+
+--
+
+## Why That Definition Is Not Enough
+
+
+<div class="c-warning">
+
+**The circularity.** "Laplace probability" defines probability using
+*equiprobability* — that is, using another notion of probability. Strictly
+speaking it is a circular definition.
+
+</div>
+
+
+The frequentist repair — defining probability as the limit of relative
+frequencies — fails too: such a limit exists only in mathematical settings,
+never in an experiment that can actually be repeated.
+
+**So what do we do?** Stop trying to *define* what probability is, and instead
+specify what it must *do*.
+
+Notes:
+This slide is the pivot of the module and answers the guiding question. Let the
+tension sit for a moment before the axioms arrive: students should feel why an
+axiomatic move is the honest way out, not a formal ritual.
+
+--
+
+## The Kolmogorov Axioms
+
+
+<div class="c-definition">
+
+**Definition (Probability measure, Kolmogorov 1933).** Let $\Omega$ be a sample
+space and $\mathcal{P}(\Omega)$ its event space. A function
+$P : \mathcal{P}(\Omega) \to \mathbb{R}$ is a **probability measure** if:
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+### Axiom I
+$$P(A) \geq 0$$
+non-negative
+
+</div>
+
+
+<div class="column">
+
+### Axiom II
+$$P(\Omega) = 1$$
+normalised
+
+</div>
+
+
+<div class="column">
+
+### Axiom III
+$$A \cap B = \emptyset \Rightarrow$$
+$$P(A \cup B) = P(A) + P(B)$$
+additive
+
+</div>
+
+
+</div>
+
+
+Nothing is said about *which* probabilities the events get — only about how any
+assignment must behave.
+
+
+<div class="c-note">
+
+**Beyond finite sample spaces.** When $\Omega$ is infinite, the event space is
+not the full power set but a **$\sigma$-algebra** of measurable sets, and
+Axiom III is required for **countably many** disjoint events. Everything we
+compute in this course is unaffected the construction belongs to measure
+theory.
+
+</div>
+
+
+Notes:
+Math first (P5). Ask: which axiom does the area picture make obvious? (All
+three — areas are non-negative, the whole rectangle is everything, disjoint
+regions have additive areas.) The axioms are the area intuition, minus the
+requirement that the areas be equal.
+
+--
+
+## Probability Space
+
+
+<div class="c-definition">
+
+**Definition.** Let $\Omega$ be a sample space, $\mathcal{P}(\Omega)$ an event
+space, and $P$ a probability measure. The triple
+$(\Omega, \mathcal{P}(\Omega), P)$ — also written $(\Omega, P)$ — is a
+**probability space**.
+
+</div>
+
+
+Every probabilistic statement in this course is made inside some probability
+space. Naming it is the discipline that keeps modelling assumptions visible.
+
+Notes:
+Whenever a later theorem opens with "let (Ω, P(Ω), P) be a probability space",
+students should hear "we have agreed on outcomes, questions, and a measure".
+
+--
+
+## What the Axioms Already Give Us
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+$$P(A) + P(\overline{A}) = 1$$
+*(Axioms II, III)*
+
+</div>
+
+
+<div class="column">
+
+$$P(\emptyset) = 0$$
+*(from the above with $A = \Omega$)*
+
+</div>
+
+
+<div class="column">
+
+$$A \subseteq B \Rightarrow P(A) \leq P(B)$$
+monotonicity *(Axioms I, II)*
+
+</div>
+
+
+<div class="column">
+
+$$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+inclusion–exclusion *(Axiom III)*
+
+</div>
+
+
+</div>
+
+
+For mutually exclusive $A_1, \ldots, A_p$:
+$P(A_1 \cup \ldots \cup A_p) = P(A_1) + \ldots + P(A_p)$.
+
+Notes:
+2x2 grid of consequences. Have students justify inclusion–exclusion on the Venn
+picture — the overlap was counted twice. Note that "A entails B implies A is no
+more likely than B" is monotonicity: the logic of events transfers to numbers.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Probability is not defined by counting or by repetition — it is any assignment
+of numbers to events that is **non-negative, normalised, and additive**. The
+Laplace formula is one such assignment, not the definition.
+
+</div>
+
+
+Notes:
+Stabilise the epistemic move: an axiomatic definition says what the object must
+do, leaving where the numbers come from to the modeller. That freedom is what
+lets the same theory carry frequentist and Bayesian readings.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Conditioning Is Inference
+
+> **Guiding Question:** A 99%-accurate test says you are sick. Why is that not a
+> 99% chance of being sick — and what exactly does the evidence do to your
+> belief?
+
+--
+
+## Motivating Example
+
+You roll a die twice. **After the first roll you see a 3.** Knowing this, what
+is the probability that both rolls sum to 8?
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+- Before the first roll: $\Omega = \lbrace (1,1), (1,2), \ldots, (6,6)\rbrace $, $|\Omega| = 36$
+- After seeing the 3, only $\Omega_{red} = \lbrace (3,1), \ldots, (3,6)\rbrace $ remains
+- Outcomes like $(2,4)$ have become **impossible**
+
+</div>
+
+
+<div class="column">
+
+- The reduced space now carries all the probability: $P(\Omega_{red}) = 1$
+- "Sum is 8" inside it: $E = \lbrace (3,5)\rbrace $
+
+$$P = \tfrac{1}{6}$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Intuition first (P4): conditioning is not a new kind of probability, it is the
+old probability computed in a **smaller sample space**. Let students do the
+count before the definition appears.
+
+--
+
+## Definition
+
+
+<div class="c-definition">
+
+**Definition (Conditional probability).**
+$$
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \qquad \text{if } P(B) > 0
+$$
+$P(A \mid B)$ is the probability of $A$ **under the condition** $B$.
+
+</div>
+
+
+Back to the stone: *given that the stone landed in area $B$, how likely is it
+that it also landed in $A$?* We renormalise by the area of $B$, because $B$ is
+now the whole world.
+
+Notes:
+Math first (P5) after the dice intuition. The division by P(B) is exactly the
+renormalisation students performed implicitly when they used the six remaining
+outcomes.
+
+--
+
+## Conditioning, Drawn
+
+<div class="viz viz-lg" data-viz="math/conditional-unit-square" data-steps="4"
+ data-params='{"pA": 0.4, "pBgivenA": 0.75, "pBgivenNotA": 0.25}'></div>
+
+**Before the last click:** what must the two shaded cells be divided by?
+
+Notes:
+Stepped visualization (P6): the A columns; B's share inside each column; keep
+only B; renormalise. The stretch factor *is* the 1/P(B) in the definition, so
+the picture performs the formula rather than illustrating it.
+
+Then use the sliders. Two settings are worth doing live: drag P(B|A) and
+P(B|¬A) to the same value — the bar's split stops moving and P(A|B) = P(A),
+which is independence, met two units early and by accident. Then set
+P(B|¬A) near zero: B becomes nearly conclusive evidence for A. Ask what has to
+be true of the two conditionals for evidence to be worth anything.
+
+--
+
+## Example: Two Coins
+
+Two coins are flipped. The event of interest is $B = \lbrace (h,h)\rbrace $.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**(a) "The first coin is heads"**
+
+$F = \lbrace (h,h), (h,t)\rbrace $
+
+$$P(B \mid F) = \frac{P(B \cap F)}{P(F)} = \frac{1/4}{1/2} = \frac{1}{2}$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**(b) "At least one coin is heads"**
+
+$A = \lbrace (h,h), (h,t), (t,h)\rbrace $
+
+$$P(B \mid A) = \frac{P(B \cap A)}{P(A)} = \frac{1/4}{3/4} = \frac{1}{3}$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Same event $B$, two different pieces of information, two different answers.
+**Why is (b) smaller?**
+
+Notes:
+Force interpretation (P2). The information in (a) is stronger — it names *which*
+coin — so it eliminates more of the sample space. This is the classic
+"boy or girl" puzzle in disguise expect disagreement, which is the point.
+
+--
+
+## Total Probability
+
+
+<div class="c-definition">
+
+**Theorem (Total probability).** Let $B_1, \ldots, B_k$ be mutually exclusive
+with $\Omega = B_1 \cup \ldots \cup B_k$ and $P(B_i) > 0$. Then for any event
+$A$:
+$$
+P(A) = \sum_{i=1}^{k} P(B_i) \cdot P(A \mid B_i)
+$$
+
+</div>
+
+
+**Proof.** Decompose $A$ along the partition and use additivity:
+
+$$
+P(A) = P((B_1 \cup \ldots \cup B_k) \cap A)
+ = \sum_{i=1}^{k} P(B_i \cap A)
+ = \sum_{i=1}^{k} P(B_i) \cdot P(A \mid B_i)
+$$
+
+Notes:
+Two axioms do all the work: completeness of the partition, then exclusiveness
+for additivity. This theorem is the denominator of Bayes' rule — say so now, so
+that Bayes looks assembled rather than conjured.
+
+--
+
+## Rules That Follow
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Product rule
+$$P(A \cap B) = P(B) \cdot P(A \mid B)$$
+$$\phantom{P(A \cap B)} = P(A) \cdot P(B \mid A)$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Reversing the condition
+$$P(B \mid A) = \frac{P(B) \cdot P(A \mid B)}{P(A)}$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Complement, same condition
+$$P(\overline{A} \mid B) = 1 - P(A \mid B)$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**But in general**
+$$P(A \mid \overline{B}) \neq 1 - P(A \mid B)$$
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Held fixed at $B$, the map $A \mapsto P(A \mid B)$ satisfies the Kolmogorov
+axioms — conditioning yields a **new probability measure** $P_B$.
+
+</div>
+
+
+Notes:
+2x2 grid. The top-right box is already Bayes' theorem — flag it, then move on;
+the next unit gives it its name and its interpretation. The bottom two boxes are
+the most common exam mistake: you may complement the *event*, not the
+*condition*.
+
+--
+
+## Chain Rule
+
+$$
+P(E_1 \cap E_2 \cap \ldots \cap E_n) =
+P(E_1) \cdot P(E_2 \mid E_1) \cdot P(E_3 \mid E_1 \cap E_2) \cdots
+P(E_n \mid E_1 \cap \ldots \cap E_{n-1})
+$$
+
+By successive application of the product rule.
+
+
+<div class="c-note">
+
+Any joint probability can be written as a chain of conditionals. Choosing a
+*good* order — and dropping conditions that do not matter — is exactly what
+graphical models will do later.
+
+</div>
+
+
+Notes:
+Do not belabour the proof; the payoff is the remark. The chain rule plus
+conditional independence is the entire idea behind belief networks.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Conditioning **shrinks the sample space and renormalises**. Everything else —
+product rule, total probability, Bayes, the chain rule — is bookkeeping on that
+single move.
+
+</div>
+
+
+--
+
+## Independence
+
+
+<div class="c-definition">
+
+**Definition (Statistical independence).** Two events $A$ and $B$ are
+**independent** iff
+$$
+P(A \cap B) = P(A) \cdot P(B)
+$$
+
+</div>
+
+
+If additionally $0 < P(B) < 1$, this is equivalent to
+
+$$
+P(A \mid B) = P(A) \qquad\text{and}\qquad P(A \mid B) = P(A \mid \overline{B})
+$$
+
+Independence means: **learning $B$ changes nothing about $A$.**
+
+Notes:
+The conditional form is the meaningful one; the product form is the one that is
+easy to check and stays defined when P(B) = 0. Emphasise the reading: knowing B
+tells you nothing new.
+
+--
+
+## The Classic Confusion
+
+
+<div class="c-warning">
+
+**Statistical independence does not mean the events are disjoint.**
+
+</div>
+
+
+Disjoint events with positive probability are about as **dependent** as events
+can be: if $A$ occurs, $B$ certainly did not.
+
+$$
+A \cap B = \emptyset \Rightarrow P(A \mid B) = 0 \neq P(A)
+$$
+
+Notes:
+Ask students to state, in one sentence, why disjointness is the opposite of
+independence. The Venn picture misleads here — non-overlapping circles look
+"unrelated", which is exactly wrong.
+
+--
+
+## Independence Is About Areas, Not Overlap
+
+<div class="viz" data-viz="math/independence-areas" data-steps="4"
+ data-params='{"pA": 0.3, "pB": 0.4, "pAB": 0.12}'></div>
+
+Notes:
+Stepped viz (P6): band A, band B, their intersection, then the test.
+0.3 · 0.4 = 0.12 — independent. Ask before the last click whether they expect
+equality. The lesson: independence is a numerical coincidence of areas, not a
+visual property of the drawing.
+
+--
+
+## The Same Picture, Dependent
+
+<div class="viz" data-viz="math/independence-areas" data-steps="4"
+ data-params='{"pA": 0.3, "pB": 0.4, "pAB": 0.20, "label": "C"}'></div>
+
+Here $P(A) \cdot P(C) = 0.12$ but $P(A \cap C) = 0.20$: the intersection is
+**larger** than independence would predict — $A$ and $C$ occur together more
+often than chance.
+
+Notes:
+Same marginals as the previous slide, different joint. This is the payoff of
+the pair: the marginals never tell you whether events are independent. Later,
+that is exactly why joint distributions are needed.
+
+--
+
+## More Than Two Events
+
+
+<div class="c-definition">
+
+Events $A_1, \ldots, A_n$ are (mutually) independent iff for **every** subset
+of indices $i_1, \ldots, i_l$:
+$$
+P(A_{i_1} \cap \ldots \cap A_{i_l}) = P(A_{i_1}) \cdots P(A_{i_l})
+$$
+
+</div>
+
+
+
+<div class="c-note">
+
+Pairwise independence is **not** enough — every subset must factorise.
+
+</div>
+
+
+Notes:
+Give the standard counterexample if time allows (two fair coins and the event
+"the results agree" are pairwise independent but not mutually independent).
+The distinction matters for naive Bayes, which assumes far more than pairwise.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Independence is a statement about **numbers**, not pictures: $P(A \cap B)$
+equals the product of the marginals. Disjoint is not independent, and identical
+marginals can hide either.
+
+</div>
+
+
+--
+
+## Bayes' Theorem — An Intuition First
+
+A test for a rare disease is **99% accurate**: positive for 99% of the sick,
+negative for 99% of the healthy. About **1 in 1,000 people** has the disease.
+
+**Your test comes back positive. How likely is it that you are actually sick?**
+
+
+<div class="fragment">
+
+
+<div class="c-important">
+
+Only about **9%** — the answer most people miss by a factor of ten.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Intuition-first entry (P4). Collect guesses by show of hands *before* clicking:
+most say 99%. The surprise is the motivation for the whole module. Do not
+explain yet — the next slide lets them count it themselves.
+
+--
+
+## Why? Count People, Not Percentages
+
+<div class="viz viz-lg" data-viz="math/bayes-natural-frequencies" data-steps="4"
+ data-params='{"population": 1000, "prevalence": 0.001, "sensitivity": 0.99, "specificity": 0.99}'></div>
+
+Notes:
+Stepped visualization (P6 tier 2), one click per step: the population the one
+sick person the ~10 false alarms among the 999 healthy restricting to the 11
+positives. Ask before the last click: "of these 11 flagged people, how many are
+sick?" Everything here is counting and restriction of the sample space — no new
+machinery. This *is* conditioning, drawn.
+
+--
+
+## What Just Happened
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Restricting attention to the people who tested positive is exactly the move
+from the conditional-probability definition:
+
+$$
+P(A \mid B) = \frac{P(A\cap B)}{P(B)}
+$$
+
+The 11 positives are the new sample space $B$ the single sick person among
+them is $A \cap B$. The rarity of the disease survives the evidence because
+there were so many more healthy people to misclassify.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**The trap**
+
+"99% accurate" describes
+$P(\text{positive} \mid \text{sick})$.
+
+You wanted
+$P(\text{sick} \mid \text{positive})$.
+
+These are different numbers.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Name the confusion explicitly — swapping the two conditionals is the single
+most common probabilistic error, in exams and in the newspapers. Bayes' theorem
+is the machine that converts one into the other.
+
+--
+
+## Bayes' Theorem — Two Events
+
+
+<div class="c-definition">
+
+**Theorem (Bayes, 2 events).** Let $(\Omega,\mathcal{P}(\Omega),P)$ be a
+probability space and $A, B \in \mathcal{P}(\Omega)$ two events with $P(B) > 0$.
+Then:
+
+</div>
+
+
+<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="4"
+ data-params='{"labels": ["posterior — what we believe after", "likelihood — how well A explains B", "prior — belief before the evidence", "evidence — how ordinary B is"]}'>
+
+$$
+\eqa{P(A \mid B)} = \frac{\eqb{P(B \mid A)} \cdot \eqc{P(A)}}{\eqd{P(B)}}
+$$
+
+</div>
+
+Which of the four was "99% accurate", and which one did the intuition ignore?
+
+Notes:
+Math-first-then-meaning (P5), legitimate here because the intuition already
+exists. Stepped equation walk-through: each click highlights one part and its
+brace — posterior, likelihood, prior, evidence — while the rest dims. Map the
+disease test onto the symbols as you go: A = sick, B = positive test. P(A) =
+1/1000 is the term everyone forgets. Reference: ([?sheldon2002first]).
+
+--
+
+## Proof — Two Events
+
+From the definition of conditional probability, twice:
+
+$$
+P(A \mid B) = \frac{P(A\cap B)}{P(B)}
+ = \frac{\frac{P(A \cap B)}{P(A)} \cdot P(A)}{P(B)}
+ = \frac{P(B \mid A) \cdot P(A)}{P(B)}
+$$
+
+Notes:
+One line: expand, multiply by P(A)/P(A), recognise the likelihood. Worth
+asking which step needed P(B) > 0 and which needed P(A) > 0.
+
+--
+
+## Bayes' Theorem — Multiple Hypotheses
+
+
+<div class="c-definition">
+
+**Theorem (Bayes, multiple events).** Let $A_i \in \mathcal{P}(\Omega)$ be
+mutually exclusive with $\Omega = A_1 \cup \ldots \cup A_k$ and $P(A_i) > 0$,
+and let $B$ be an event with $P(B) > 0$. Then
+
+$$
+P(A_i \mid B) = \frac{P(B \mid A_i)\cdot P(A_i)}{P(B)}
+ = \frac{P(B \mid A_i)\cdot P(A_i)}{\sum_{j=1}^{k} P(B \mid A_j) \cdot P(A_j)}
+$$
+
+</div>
+
+
+The denominator is the **total probability** of the evidence: the same
+observation, explained by every competing hypothesis, weighted by how much we
+believed each one beforehand.
+
+Notes:
+The hypotheses partition Ω — "sick vs. healthy" was the k = 2 case. This is the
+form that reappears as a classifier (naive Bayes) and in belief networks:
+score every hypothesis by likelihood × prior, then normalise.
+
+--
+
+## Proof — Multiple Hypotheses
+
+As before, with the theorem of total probability supplying the denominator:
+
+$$
+P(B) = \sum_{j=1}^{k} P(B \mid A_j) \cdot P(A_j)
+$$
+
+--
+
+## Mini-Exercise
+
+Same test, but now screening a **high-risk group** where 1 in 20 people is
+sick — the test is unchanged.
+
+Estimate $P(\text{sick} \mid \text{positive})$ before computing it.
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+Out of 1,000: 50 sick → ≈ 50 true positives 950 healthy → ≈ 10 false alarms.
+
+$$
+P(\text{sick} \mid \text{positive}) \approx \frac{50}{60} \approx 83\%
+$$
+
+**The test did not change. The prior did.** This is why screening decisions
+depend on who is screened.
+
+</div>
+
+
+Notes:
+Solution fragmented per the animation policy. The punchline is the comparison
+with 9%: identical likelihoods, different prior, completely different clinical
+meaning.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Bayes' theorem is the arithmetic of changing your mind: **posterior ∝
+likelihood × prior**. Evidence never speaks alone — it is always weighed
+against how plausible the hypothesis was to begin with.
+
+</div>
+
+
+Notes:
+Stabilise both halves: the base-rate trap (9%) and the prior's power (83%).
+Both return in Bayesian decision making and graphical models.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## From Outcomes to the Joint
+
+> **Guiding Question:** We rarely care which outcome occurred, only what it was
+> worth — and never about one quantity alone. How do we get from a sample space
+> to the joint distribution the three moves start from?
+
+Notes:
+Second session starts here. Open by recalling the three moves: this module
+builds the object that "model the joint" refers to.
+
+--
+
+## Motivation: We Rarely Care About the Outcome Itself
+
+Toss three fair coins:
+$\Omega = \lbrace H,T\rbrace \times \lbrace H,T\rbrace \times \lbrace H,T\rbrace $, eight outcomes.
+
+Usually the interesting quantity is not *which* sequence occurred, but the
+**number of heads** $Y$:
+
+
+<div class="grid-4">
+
+
+<div class="column">
+
+$$P(Y=0) = \tfrac{1}{8}$$
+$(T,T,T)$
+
+</div>
+
+
+<div class="column">
+
+$$P(Y=1) = \tfrac{3}{8}$$
+$(H,T,T), (T,H,T), (T,T,H)$
+
+</div>
+
+
+<div class="column">
+
+$$P(Y=2) = \tfrac{3}{8}$$
+$(H,H,T), (T,H,H), (H,T,H)$
+
+</div>
+
+
+<div class="column">
+
+$$P(Y=3) = \tfrac{1}{8}$$
+$(H,H,H)$
+
+</div>
+
+
+</div>
+
+
+$Y$ compresses eight outcomes into four numbers — and the probabilities come
+along automatically.
+
+Notes:
+Intuition first (P4). Ask what was lost in the compression (which coin showed
+heads) and what was gained (a quantity we can average, compare, plot). That
+trade is the entire point of a random variable.
+
+--
+
+## Definition
+
+
+<div class="c-definition">
+
+**Definition (Random variable).** A random variable $X$ maps outcomes to a
+measurable range $E$: $X : \Omega \to E$. Its probabilities are inherited from
+the underlying probability space:
+$$
+P(X \in S) = P(\lbrace \omega \in \Omega \mid X(\omega) \in S\rbrace )
+$$
+
+</div>
+
+
+
+<div class="c-warning">
+
+A random variable is neither random nor a variable — it is a **function** on the
+sample space. The randomness lives in $\omega$, not in $X$.
+
+</div>
+
+
+Notes:
+The naming trap is worth one minute; it removes a persistent confusion. The
+formula says: to get the probability of a value, collect all outcomes that map
+to it and use the measure we already have.
+
+--
+
+## The Function, Drawn
+
+<div class="viz viz-lg" data-viz="math/random-variable-map" data-steps="4"></div>
+
+Notes:
+Stepped visualization (P6), three coins: the eight outcomes; the arrows, one per
+outcome; the four values with their counts; the resulting mass function. Two
+things to say out loud while stepping. First, *every* outcome has exactly one
+arrow leaving it — that is what makes Y a function. Second, three arrows arrive
+at 1 and three at 2, and that is the entire reason those values are more
+probable. The probability was never invented; it was inherited.
+
+--
+
+## Examples
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+**Two coins**
+
+$\Omega = \lbrace HH, HT, TH, TT\rbrace $
+
+$X$ = number of heads
+
+</div>
+
+
+<div class="column">
+
+**People**
+
+$\Omega = \lbrace \text{person}_1, \text{person}_2, \ldots\rbrace $
+
+$X$ = height of the person
+
+</div>
+
+
+<div class="column">
+
+**Two dice**
+
+$\Omega = \lbrace \langle n_1, n_2\rangle\rbrace $
+
+$X(\omega) = n_1 + n_2$
+
+</div>
+
+
+</div>
+
+
+Notes:
+The middle example is the one that connects to data science: a dataset column
+*is* a random variable — a function from records to values. Say it explicitly;
+it makes the next chapters feel continuous with this one.
+
+--
+
+## Discrete and Continuous
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Discrete random variables**
+
+Countable range, usually $E \subseteq \mathbb{N}$.
+
+- number of children of a person
+- sum of two dice
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Continuous random variables**
+
+Real-valued range, $E = \mathbb{R}$.
+
+- height of a person
+- horsepower of a car
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The distinction decides *how* we may describe the probabilities — the subject of
+the next two units.
+
+Notes:
+Keep this light: the deep measure-theoretic reasons are out of scope. What
+students need is the practical consequence — sums for discrete, integrals for
+continuous.
+
+--
+
+## A Random Variable With Infinitely Many Values
+
+Flip a biased coin ($P(H) = p$) until the first head. Let $X$ be the number of
+flips needed:
+
+$$
+P(X = 1) = p, \quad P(X = 2) = (1-p)p, \quad P(X = 3) = (1-p)^2 p
+$$
+$$
+P(X = n) = (1-p)^{n-1} p
+$$
+
+Countably infinite range, and the probabilities still sum to 1.
+
+Notes:
+This is the geometric distribution, met before it is named — fine, because it is
+constructed from the chain rule the students already have. Ask them to verify
+the sum is 1 (geometric series) if the group is comfortable with it.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A random variable is a **function from outcomes to numbers** that carries the
+probability measure with it. It lets us stop talking about sample spaces and
+start talking about quantities — which is what the rest of the course does.
+
+</div>
+
+
+--
+
+## Probability Mass Function
+
+
+<div class="c-definition">
+
+**Definition (PMF).** For a discrete random variable $X$, the **probability
+mass function** is
+$$
+p(a) = P(X = a)
+$$
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+$p(a) > 0$ for at most countably many $a$
+
+</div>
+
+
+<div class="column">
+
+$\sum_i p(a_i) = 1$
+
+</div>
+
+
+<div class="column">
+
+$p$ is itself a probability measure
+
+</div>
+
+
+</div>
+
+
+Notes:
+The PMF is just the probability measure, re-indexed by values instead of
+outcomes. Everything from the axioms still applies — which is why the three
+properties are consequences, not new assumptions.
+
+--
+
+## Example: Sum of Two Dice
+
+<div class="viz" data-viz="math/distribution-explorer"
+ data-params='{"kind": "dice-sum"}'></div>
+
+The triangular shape is the counting from earlier units, drawn: six of the
+36 outcomes give 7, only one gives 2.
+
+Notes:
+Connect the picture to the Laplace count they already did. Ask why the shape is
+symmetric and peaked — more ways to make a middling sum. This is the first hint
+of why sums of random quantities concentrate.
+
+--
+
+## Expectation
+
+
+<div class="c-definition">
+
+**Definition (Expected value).**
+$$
+E[X] = \sum_i a_i \cdot p(a_i)
+$$
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+- Frequentist reading: the **average outcome** if the experiment were repeated
+ infinitely often
+- The first moment: $\mu = E[X^1]$ the first *central* moment
+ $E[X - E[X]]$ is always $0$
+
+</div>
+
+
+<div class="column">
+
+For a real function $g$:
+$$
+E[g(X)] = \sum_i g(a_i) p(a_i)
+$$
+and for constants $a, b$:
+$$
+E[aX + b] = a E[X] + b
+$$
+
+</div>
+
+
+</div>
+
+
+Notes:
+The linearity identity is the one used constantly later (in regression, in
+evaluation). Note that E[g(X)] ≠ g(E[X]) in general — ask for a counterexample
+with g(x) = x².
+
+--
+
+## Variance
+
+
+<div class="c-definition">
+
+**Definition (Variance).**
+$$
+\mathrm{Var}(X) = E\big[(X - \mu)^2\big] = E[X^2] - \big(E[X]\big)^2
+$$
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+- a measure of **dispersion** around the mean — larger variance, larger typical
+ deviation
+- the second central moment
+
+</div>
+
+
+<div class="column">
+
+- $\mathrm{Var}(aX + b) = a^2 \mathrm{Var}(X)$
+- $\sigma = \sqrt{\mathrm{Var}(X)}$ is the **standard deviation**, in the same
+ unit as $X$
+
+</div>
+
+
+</div>
+
+
+Notes:
+Two things to stabilise: the computational identity E[X²] − E[X]², and why we
+report σ rather than the variance (units). The b disappearing under variance is
+worth a question: shifting data does not change its spread.
+
+--
+
+## Bernoulli and Binomial
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Bernoulli$(p)$** — one trial
+
+$X = 1$ success, $X = 0$ failure
+
+$$E[X] = p, \quad \mathrm{Var}(X) = p(1-p)$$
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Binomial $B(n,p)$** — $n$ independent trials
+
+$$p(k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+$$E[X] = np, \quad \mathrm{Var}(X) = np(1-p)$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The binomial PMF is the counting formula times the probability of one specific
+sequence — combinatorics and independence in a single line.
+
+Notes:
+Point at where each earlier unit shows up: the binomial coefficient from
+counting, the product p^k(1−p)^(n−k) from independence. Nothing here is new
+machinery, which is exactly the message.
+
+--
+
+## How the Shape Depends on the Parameters
+
+<div class="viz viz-lg" data-viz="math/distribution-explorer" data-steps="4"
+ data-params='{"kind": "binomial", "p": 0.5, "n": 5, "sweep": {"param": "n", "values": [5, 10, 20, 40, 60]}}'></div>
+
+**Predict before each click:** as $n$ grows, does the distribution get wider or
+narrower — and what happens to its shape?
+
+Notes:
+Predict-then-check (P6). Two things happen at once: the spread in absolute terms
+grows (√n) while the shape becomes symmetric and bell-like. The second
+observation is the central limit theorem arriving early — name it only as an
+observation here the normal distribution is defined in the next unit.
+
+--
+
+## Mini-Exercise
+
+A quiz has 10 questions with 4 options each. A student guesses every answer.
+
+1. Which distribution describes the number of correct answers?
+2. What is the expected number correct?
+3. Is passing (≥ 5 correct) likely?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+1. $B(10, 0.25)$ — ten independent trials, constant success probability
+2. $E[X] = 10 \cdot 0.25 = 2.5$
+3. $P(X \geq 5) \approx 0.078$ — under 8%
+
+The independence assumption is what makes this a binomial ask when it would
+fail in a real exam.
+
+</div>
+
+
+Notes:
+Part 3 rewards recognising that the answer needs a sum over the tail, not one
+PMF value. The modelling caveat matters more than the arithmetic.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A discrete distribution is a PMF expectation and variance compress it into
+**where it sits** and **how much it spreads**. Bernoulli and binomial are the
+counting units in probabilistic clothing.
+
+</div>
+
+
+--
+
+## From Mass to Density
+
+
+<div class="c-definition">
+
+**Definition (PDF).** A continuous random variable $X$ has a **probability
+density function** $f$ with
+$$
+P(b \leq X \leq c) = \int_b^c f(a) da,
+\qquad \int_{-\infty}^{\infty} f(a) da = 1
+$$
+
+</div>
+
+
+
+<div class="c-warning">
+
+$f(a)$ is **not** a probability — it is probability *per unit interval*.
+Consequently $f(a) > 1$ is perfectly possible, and $P(X = a) = 0$ for every
+single value $a$.
+
+</div>
+
+
+Notes:
+The density-is-not-probability point is the single biggest source of confusion
+in this unit. A useful question: what is the probability that a person is
+exactly 180.000... cm tall? Zero — probability lives on intervals now.
+
+--
+
+## Probability Is Area Under the Curve
+
+<div class="viz viz-lg" data-viz="math/distribution-explorer" data-steps="1"
+ data-params='{"kind": "normal", "mu": 0, "sigma": 1, "shade": [-1, 1]}'></div>
+
+The shaded region is $P(-1 \leq X \leq 1)$ — the same "probability as area"
+intuition from the axioms unit, now with a curve instead of a Venn diagram.
+
+Notes:
+Deliberate callback (P7 spiral): area was the intuition for the axioms, and it
+still is. Ask what the total area must be, and why that forces the normalisation
+constant in the density formula.
+
+--
+
+## Expectation and Variance — Sums Become Integrals
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Discrete**
+$$E[X] = \sum_i a_i p(a_i)$$
+$$E[g(X)] = \sum_i g(a_i) p(a_i)$$
+
+</div>
+
+
+<div class="column">
+
+**Continuous**
+$$E[X] = \int_{-\infty}^{\infty} a f(a) da$$
+$$E[g(X)] = \int_{-\infty}^{\infty} g(a) f(a) da$$
+
+</div>
+
+
+</div>
+
+
+The rules are unchanged: $E[aX + b] = a E[X] + b$, and
+$\mathrm{Var}(X) = E[(X - \mu)^2]$.
+
+Notes:
+Emphasise the continuity of concepts across the discrete/continuous divide:
+only the summation symbol changed. Students who see this stop treating the two
+cases as separate theories.
+
+--
+
+## Two Basic Continuous Distributions
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Uniform on $[a,b]$**
+
+$$f(x) = \frac{1}{b-a} \text{ for } x \in [a,b]$$
+
+Every interval of equal length is equally likely — the Laplace assumption,
+continuous version.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Normal $N(\mu, \sigma^2)$**
+
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$$
+
+$E[X] = \mu$, $\mathrm{Var}(X) = \sigma^2$;
+$N(0,1)$ is the **standard** normal.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The uniform is worth naming as the continuous Laplace assumption — it makes the
+earlier discussion feel like one idea rather than two.
+
+--
+
+## What σ Does to the Shape
+
+<div class="viz viz-lg" data-viz="math/distribution-explorer" data-steps="3"
+ data-params='{"kind": "normal", "mu": 0, "sigma": 0.6, "sweep": {"param": "sigma", "values": [0.6, 1, 1.6, 2.4]}}'></div>
+
+The peak falls as the curve widens — the area is always 1.
+
+Notes:
+Predict-then-check: ask what must happen to the height when the width grows.
+The constraint "total area = 1" is doing the work, and it is the same
+normalisation axiom from the beginning of the module.
+
+--
+
+## Why the Normal Is Everywhere
+
+
+<div class="c-insight">
+
+The **central limit theorem**: under mild conditions, averages of many
+independent observations converge to a normal distribution — whatever the
+original distribution was.
+
+</div>
+
+
+This is why the normal is the default when the true distribution is unknown, and
+why the binomial started looking bell-shaped as $n$ grew in the previous unit.
+
+Notes:
+State the CLT, do not prove it. The callback to the binomial sweep is the point:
+students already saw it happen. This also sets up sampling and hypothesis
+testing at the end of the module.
+
+--
+
+## Other Distributions You Will Meet
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+- **Exponential** — time until an event occurs (e.g. until the next earthquake)
+- **Gamma** — time until $n$ events have occurred
+
+</div>
+
+
+<div class="column">
+
+- **Beta** — values confined to a finite interval $[a,b]$
+- **Dirichlet** — distributions *over* probabilities
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Continuous distributions replace mass with **density** and sums with
+**integrals**. Probability remains area, expectation remains a weighted average,
+and the normal is the default shape because of the central limit theorem.
+
+</div>
+
+
+Notes:
+The last two (Beta, Dirichlet) are named for recognition only — they return in
+the probabilistic machine learning course as priors over probabilities. That is
+a legitimate forward *pointer*, not a forward dependency: nothing here uses them.
+
+--
+
+## More Than One Random Variable
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+### Univariate
+one random variable
+
+</div>
+
+
+<div class="column">
+
+### Bivariate
+two random variables
+
+</div>
+
+
+<div class="column">
+
+### Multivariate
+three or more
+
+</div>
+
+
+</div>
+
+
+A **joint distribution** describes the outcomes of several random variables *at
+the same time* — which is what every dataset with more than one column is.
+
+Notes:
+Make the dataset connection explicit: a table with columns age, income, and
+churn is a sample from a trivariate joint distribution. Everything in the rest
+of the course operates on joints.
+
+--
+
+## Joint Mass and Density
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Discrete** — joint PMF
+$$p_{X,Y}(a,b) = P(X = a, Y = b)$$
+
+</div>
+
+
+<div class="column">
+
+**Continuous** — joint PDF
+$$P((X,Y) \in R) = \iint_R f_{X,Y}(a,b) da db$$
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+**Notational convention from here on.** We stop distinguishing discrete from
+continuous variables and simply write $p(a, b, c, \ldots)$ for the probability
+that $\lbrace X_1, X_2, X_3, \ldots\rbrace $ is in state $a, b, c, \ldots$
+
+</div>
+
+
+Notes:
+Flag the convention as a deliberate simplification, and say why it is safe: the
+rules (marginalise, condition, factorise) are identical only the mechanics of
+summing versus integrating differ.
+
+--
+
+## Marginalisation
+
+
+<div class="c-definition">
+
+**Marginalisation** eliminates a random variable by summing over all its states.
+For $p(x_1, \ldots, x_n)$, a **marginal** over a subset is
+$$
+p(x_1) = \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \ldots, x_n)
+$$
+
+</div>
+
+
+"Forget about a variable, but keep its influence correctly accounted for."
+
+Notes:
+Marginalisation is the total-probability theorem, applied to random variables —
+say so, since students met it three units ago. That continuity is worth more
+than the formula.
+
+--
+
+## Example: Boys and Girls
+
+15% of families have no children, 20% have one, 35% have two, 30% have three.
+Each child is independently a boy or a girl with probability $\tfrac{1}{2}$.
+
+Let $B$ = number of boys, $G$ = number of girls.
+
+| $p(B,G)$ | $G=0$ | $G=1$ | $G=2$ | $G=3$ | $p(B)$ |
+|---|---|---|---|---|---|
+| $B=0$ | .15 | .10 | .0875 | .0375 | .375 |
+| $B=1$ | .10 | .175 | .1125 | 0 | .3875 |
+| $B=2$ | .0875 | .1125 | 0 | 0 | .2 |
+| $B=3$ | .0375 | 0 | 0 | 0 | .0375 |
+| $p(G)$ | .375 | .3875 | .2 | .0375 | 1 |
+
+The margins of the table *are* the marginals — which is where the name comes
+from.
+
+Notes:
+Have students read one cell aloud as a sentence ("7.5% of families have one boy
+and two girls"). Then ask whether B and G are independent — they are not, since
+the family size couples them. Good preparation for covariance.
+
+--
+
+## Covariance
+
+
+<div class="c-definition">
+
+$$
+\mathrm{cov}(A, B) = E\big[(A - E[A])(B - E[B])\big]
+$$
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+$\mathrm{cov} > 0$
+
+$A$ large when $B$ large — positively related
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+$\mathrm{cov} < 0$
+
+$A$ large when $B$ small — negatively related
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+$\mathrm{cov}(A,A) = \mathrm{Var}(A)$
+
+variance is self-covariance
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Independence implies zero covariance. **The converse is false** — covariance
+only detects *monotone linear* association.
+
+</div>
+
+
+Notes:
+The warning is the load-bearing statement. A classic counterexample: X uniform
+on [−1,1] and Y = X² are dependent but have zero covariance. This is why later
+methods that rely on correlation can miss real structure.
+
+--
+
+## Covariance Sees Only One Kind of Structure
+
+<div class="viz viz-lg" data-viz="math/covariance-cloud" data-steps="4"
+ data-params='{"rho": 0.7}'></div>
+
+**Predict first:** with $Y = X^2 - 1$, every point is fixed by its $x$. The
+covariance?
+
+Notes:
+Stepped, then manipulable (P6 tiers 2 and 3). The quadrant signs make the
+definition visible: covariance averages the sign of (x−x̄)(y−ȳ), so a cloud
+that is symmetric about the vertical line has the two signs in balance and
+averages to zero — however tightly the points sit on a curve.
+
+Collect the prediction before switching. Almost everyone says "large": the
+dependence is total. The reading afterwards is ≈ 0. That is the counterexample
+from the warning above, on screen, and it is the reason "uncorrelated" and
+"independent" must stay different words.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+The joint distribution holds everything **marginalisation** sums a variable
+away, **conditioning** restricts, and **covariance** summarises linear
+co-variation. Zero covariance is weaker than independence.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## The Data Is a Sample
+
+> **Guiding Question:** The distribution is unknown and all we ever have is a
+> sample. What can we honestly say about the population — and how wrong are we
+> allowed to assume we are?
+
+--
+
+## We Never Know the Distribution
+
+Up to now we assumed a distribution was given. In practice it is **unknown**,
+and we must estimate its properties from data.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Population**
+
+The entire group — all humans on earth, all transactions, all documents.
+
+Its properties ($\mu$, $\sigma^2$) are the truth we cannot observe.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Sample**
+
+The observations we actually have.
+
+Its properties ($\overline{x}$, $s^2$) are what we compute — estimates of the
+population's.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+**Descriptive statistics** summarise a sample, usually while assuming something
+about the underlying distribution.
+
+Notes:
+This slide is the hinge of the whole module: everything before it was
+deduction from a model, everything after is inference from data. The
+population/sample distinction is exactly the gap that statistics manages.
+
+--
+
+## What We Summarise
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+### Central tendency
+1st order moment
+
+sample mean, median
+
+</div>
+
+
+<div class="column">
+
+### Dispersion
+2nd central moment
+
+variance, standard deviation, IQR
+
+</div>
+
+
+<div class="column">
+
+### Shape
+3rd central moment
+
+skewness, quantiles
+
+</div>
+
+
+</div>
+
+
+Univariate statistics describe one random variable **multivariate** statistics
+describe $X_1, \ldots, X_d$ together.
+
+Notes:
+The moment ordering gives a clean mental index: where is it, how spread, how
+lopsided. Each has a robust and a non-robust representative — a distinction the
+next units make concrete.
+
+--
+
+## Means
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Sample mean**
+$$\overline{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$$
+
+**Weighted mean**
+$$\overline{x}_w = \frac{\sum_i w_i x_i}{\sum_i w_i}$$
+
+</div>
+
+
+<div class="column">
+
+**Geometric mean** — for rates and ratios
+$$\Big(\prod_i x_i\Big)^{1/n}$$
+
+**Harmonic mean** — for averaging rates
+$$\frac{n}{\sum_i 1/x_i}$$
+
+</div>
+
+
+</div>
+
+
+**Trimmed mean:** drop the $k$ smallest and largest values, then average — a
+cheap way to buy robustness.
+
+Notes:
+The sample mean estimates E[X]. Ask when the arithmetic mean is simply wrong:
+average speed over equal distances (harmonic), average growth rate
+(geometric). Choosing the mean is a modelling decision, not a formality.
+
+--
+
+## Median
+
+
+<div class="c-definition">
+
+The **median** is the middle value of the sorted sample: for odd $n$ the
+$\frac{n+1}{2}$-th value, for even $n$ the average of the two middle values.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card good">
+
+**Robust** against outliers — one extreme value moves the median by at most one
+position
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**Costlier** to compute: requires sorting, or an interval approximation over
+binned data
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+For binned data, the median is interpolated within its interval from the
+cumulative counts, the interval's lower border and width.
+
+Notes:
+The mean-versus-median contrast is the first robustness discussion of the
+course, and it returns in clustering (k-means vs. k-medoids) and in evaluation.
+Ask which one a salary report should quote, and why the answer is political.
+
+--
+
+## One Value, Two Very Different Reactions
+
+<div class="viz viz-lg" data-viz="math/robust-center" data-steps="3"></div>
+
+**Commit first:** drag the top salary to the far right. Which marker follows?
+
+Notes:
+Manipulable widget (P6 tier 3) with the prediction taken first, as the policy
+requires. The mean is drawn as the fulcrum the beam balances on, so the drag is
+visibly a lever: one value far out has to be balanced by everything else.
+
+Drag it all the way and stop. The mean is now above six of the seven salaries —
+a "typical" value that almost nobody earns. The median has moved by one
+position. Then ask the political question: which number goes in the recruitment
+advert, and which one in the union's press release?
+
+--
+
+## Mini-Exercise
+
+Salaries in a small firm (in k€): 38, 41, 42, 44, 45, 47, 260.
+
+Compute the mean and the median. Which number should appear in a recruitment ad,
+and which one describes a typical employee?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+Mean $\approx 73.9$, median $= 44$.
+
+The single large value pulls the mean above **every** salary except one. The
+median describes the typical employee the mean describes the payroll divided by
+headcount. Both are correct — they answer different questions.
+
+</div>
+
+
+Notes:
+The punchline: neither number is wrong, but only one is honest as a summary of
+"typical". This is the first appearance of the idea that a statistic encodes a
+question.
+
+--
+
+## Dispersion
+
+**Dispersion** describes how stretched or squeezed the data is around its
+centre.
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Sample variance** — the variance *of the observed data*
+$$s^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \overline{x})^2$$
+
+**Standard deviation** $s = \sqrt{s^2}$, in the unit of the data.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-tip">
+
+Computable in **one pass** over the data, $O(n)$, using
+$$\sum x_i^2 \text{ and } \sum x_i$$
+— which matters when the data does not fit in memory.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The one-pass remark is the data-engineering link: streaming aggregations rely on
+it. Mention the numerical-stability caveat if the group is advanced.
+
+--
+
+## Why the Denominator Changes
+
+
+<div class="c-definition">
+
+The **population variance** $\sigma^2$ is the variance over the whole
+population. If the true mean $\mu$ is unknown, we must estimate it — and using
+$\overline{x}$ in its place makes the deviations systematically too small.
+
+$$
+\hat{\sigma}^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \overline{x})^2
+$$
+
+</div>
+
+
+
+<div class="c-note">
+
+Dividing by $n-1$ compensates: one degree of freedom was spent estimating the
+mean from the same data.
+
+</div>
+
+
+Notes:
+Do not derive the correction give the intuition. A good probe: with n = 1, the
+sample variance is 0 (the point equals its own mean) — clearly not an estimate
+of population spread, and the corrected formula refuses to answer at all.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+$s^2$ describes **the sample** $\hat{\sigma}^2$ estimates **the population**.
+The $n-1$ is not a convention — it is the price of having estimated the mean
+from the same data.
+
+</div>
+
+
+--
+
+## Quantiles
+
+
+<div class="c-definition">
+
+The $k$-th $q$-**quantile** is the value $x$ such that $k/q$ of the values are
+smaller and $(q-k)/q$ are larger ($0 < k < q$).
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+### Percentiles
+$q = 100$
+
+"the 12th percentile"
+
+</div>
+
+
+<div class="column">
+
+### Quartiles
+$q = 4$
+
+$Q_1$ = 25th, $Q_2$ = 50th (= median), $Q_3$ = 75th percentile
+
+</div>
+
+
+<div class="column">
+
+### IQR
+$$\mathrm{IQR} = Q_3 - Q_1$$
+
+the middle half of the data
+
+</div>
+
+
+</div>
+
+
+Quantiles summarise **shape and skewness** without assuming a distribution.
+
+Notes:
+Quantiles are the distribution-free alternative to moments: no assumption of
+symmetry, no sensitivity to tails. The boxplot is their standard graphical form
+— minimum, Q1, median, Q3, maximum, with outliers marked separately.
+
+--
+
+## Anscombe's Quartet
+
+<div class="viz viz-lg" data-viz="math/anscombe-quartet" data-steps="5"></div>
+
+Notes:
+Stepped reveal (P6): one dataset per click, then the shared regression line.
+All four have the same mean, variance, correlation and least-squares line.
+Ask after the fourth click, before revealing: "these four have identical
+summary statistics — what does that tell you about summary statistics?"
+Anscombe (1973), the origin of "always plot your data".
+
+--
+
+## What the Quartet Teaches
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**Summaries compress — and compression loses.**
+
+Identical moments can hide a curve, an outlier, or a variable that barely
+varies at all.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-tip">
+
+**Plot first, summarise second.**
+
+Visual inspection is not a soft alternative to statistics it is how you find
+out which statistics are meaningful.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Quantiles describe a distribution without assuming its shape — and no set of
+summary numbers can replace looking at the data.
+
+</div>
+
+
+Notes:
+This is the bridge to the data-exploration chapter, where visual analytics gets
+its own treatment. Stabilise the lesson as a working rule, not a slogan: every
+summary answers one question and is silent about the rest.
+
+--
+
+## You Computed a Number. Which Number Did You Want?
+
+Seven salaries gave a sample mean of $\overline{x} = 43.7$ k€.
+
+
+<div class="q">
+
+What is the probability that the population mean $\mu$ is exactly 43.7 k€?
+
+</div>
+
+
+
+<div class="fragment">
+
+Zero. $\overline{x}$ is not $\mu$ — it is one **estimate** of it, computed from
+the seven people who happened to be in the sample.
+
+The honest question is not *what is $\mu$* but **how far from $\mu$ can this
+number be?**
+
+</div>
+
+
+Notes:
+Open on the gap, not on a definition (P1, P4). Most students will answer with a
+number or hedge; the point is that the question is malformed. Everything in this
+unit exists to replace "μ = 43.7" with "μ = 43.7 ± something", and to say where
+the something comes from.
+
+--
+
+## Estimator and Estimate
+
+
+<div class="c-definition">
+
+**Definition.** An **estimator** is a function of the sample —
+$\hat{\theta} = g(X_1, \ldots, X_n)$ — used to approximate an unknown quantity
+$\theta$ of the population. The number it takes on for one particular sample is
+an **estimate**.
+
+</div>
+
+
+The sample is random, so the estimator is a **function of random variables**:
+$\hat{\theta}$ is itself a random variable, with a distribution of its own.
+
+
+<div class="c-note">
+
+$\overline{x}$, $s^2$ and $\hat{\sigma}^2$ from the previous units are all
+estimators. We used them without saying what kind of object they are.
+
+</div>
+
+
+Notes:
+Math first (P5) — this is a second pass over objects the students already
+compute. The load-bearing sentence is the middle one: a statistic inherits
+randomness from the sample. Everything else follows from taking that seriously.
+
+--
+
+## An Estimator Has a Distribution
+
+<div class="viz viz-lg" data-viz="math/sampling-distribution" data-steps="4"
+ data-params='{"shape": "uniform", "n": 5}'></div>
+
+**Predict first:** after a thousand samples, what shape will the lower picture
+have — and how wide?
+
+Notes:
+Stepped visualization (P6 tier 2 with tier-3 controls). One click per step: draw
+one sample; record its mean; fifty samples; a thousand, with the normal curve
+and the standard error. Both pictures share the x-axis, so "the means are more
+tightly packed than the population" is something students see rather than
+something we assert. Collect predictions before the third click — the common
+guess is that the spread stays the same.
+
+--
+
+## Three Things the Picture Shows
+
+
+<div class="marks-step">
+
+- The means pile up **around $\mu$** — the estimator is not systematically off
+- The pile is **narrower than the population** — averaging cancels noise
+- The pile is **bell-shaped**, even though the population was not
+
+</div>
+
+
+
+<div class="c-definition">
+
+**Definition (Sampling distribution).** The distribution of an estimator
+$\hat{\theta}$ over all possible samples of size $n$.
+$\hat{\theta}$ is **unbiased** if $E[\hat{\theta}] = \theta$.
+
+</div>
+
+
+Notes:
+The three observations are, in order: unbiasedness, the standard error, and the
+central limit theorem — named on the next slides. Naming them here would be
+faster and worse. Ask which of the three would still hold for the *median*
+(the first two do; the third does too, but that needs a different argument).
+
+--
+
+## Use the Widget: Change the Population
+
+Set the population to **skewed** and then to **bimodal**, keeping $n = 5$.
+
+
+<div class="q">
+
+Which of the three observations survive a population that is not symmetric?
+
+</div>
+
+
+
+<div class="fragment">
+
+All three. The shape of the sampling distribution stops depending on the shape
+of the population as soon as $n$ is more than a handful — which is why one
+formula can cover cases we never inspect.
+
+</div>
+
+
+Notes:
+Tier-3 exploration, with the prediction committed first as the policy requires.
+The bimodal population is the persuasive one: two separate humps, and the means
+of five draws still form a single bell. Push n to 2 to show where it breaks
+down — the claim is asymptotic, not magic.
+
+--
+
+## Standard Error
+
+
+<div class="c-definition">
+
+**Definition (Standard error).** The standard deviation of an estimator's
+sampling distribution. For the sample mean of independent draws:
+$$
+\mathrm{SE}(\overline{X}) = \frac{\sigma}{\sqrt{n}}
+$$
+
+</div>
+
+
+It is measured in the unit of the data and answers "how far off is a typical
+estimate", where $\sigma$ answers "how far apart are typical *observations*".
+
+
+<div class="c-warning">
+
+$\sigma$ and $\mathrm{SE}$ are different quantities. More data does nothing to
+$\sigma$ — the world stays as variable as it was — and shrinks $\mathrm{SE}$.
+
+</div>
+
+
+Notes:
+The warning is the most valuable line in the unit and the one that ties back to
+the introduction: σ is aleatoric, SE is epistemic. Ask which one a weather
+forecast's "±3 °C" refers to; the answer is usually both, mixed.
+
+--
+
+## Precision Costs Data
+
+| Multiply the data by… | …and the standard error is multiplied by |
+|---|---|
+| 2 | 0.71 |
+| **4** | **½** |
+| 25 | ⅕ |
+| **100** | **⅒** |
+
+The $\sqrt{n}$ is why the last digit of an estimate is so expensive: halving the
+error costs four times the data, and a tenfold improvement costs a hundredfold.
+
+Notes:
+The economics of data collection in one line, and a sanity check students can
+apply to any claim about "more data". Ask what this implies for an A/B test that
+wants to detect a 0.1% difference. It also foreshadows why we later care about
+better *models* rather than only bigger *samples*.
+
+--
+
+## Two Theorems We Have Already Seen Happen
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-insight">
+
+**Law of large numbers**
+
+$\overline{X}_n \to \mu$ as $n \to \infty$.
+
+The estimate converges on the truth — the pile keeps narrowing.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-insight">
+
+**Central limit theorem**
+
+$\overline{X}_n$ is approximately
+$N(\mu, \sigma^2/n)$ for large $n$.
+
+And we know the *shape* of what is left.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The first says the error goes away; the second says how much of it is left after
+$n$ observations. Only the second lets us put a number on our ignorance.
+
+Notes:
+Deliberate spiral (P7): the CLT was stated in the continuous-distributions unit
+and was visible in the binomial sweep. Here it acquires a job. Emphasise the
+division of labour between the two theorems — students routinely quote the LLN
+where they need the CLT.
+
+--
+
+## From a Number to an Interval
+
+If $\overline{X} \approx N(\mu, \sigma^2/n)$, then for 95% of samples
+$\overline{X}$ lands within $1.96\thinsp\mathrm{SE}$ of $\mu$ — and therefore $\mu$
+lands within $1.96\thinsp\mathrm{SE}$ of $\overline{X}$.
+
+<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
+ data-params='{"labels": ["the estimate — our best single guess", "how confident we insist on being", "how noisy the estimate is"]}'>
+
+$$
+\eqa{\overline{x}} \pm \eqb{1.96} \cdot \eqc{\frac{\sigma}{\sqrt{n}}}
+$$
+
+</div>
+
+Notes:
+Math-first-then-meaning (P5), legitimate because the picture came first. Walk the
+three parts and ask what each one would have to do to make the interval wider.
+σ is treated as known here; the correction for an estimated σ (the t
+distribution) is a refinement, not a different idea, and is out of scope.
+
+--
+
+## What Does "95% Confident" Mean?
+
+<div class="viz viz-lg" data-viz="math/confidence-intervals" data-steps="4"
+ data-params='{"mu": 100, "sigma": 15, "n": 10, "level": 0.95}'></div>
+
+Notes:
+Stepped, then manipulable. One interval; twenty; sixty with the coverage tally;
+then the invitation to change the level and n. Ask before the third click how
+many of sixty intervals should miss. The red rows are the whole argument: the
+misses look exactly like the hits from the inside.
+
+--
+
+## The Sentence Almost Everyone Gets Wrong
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card muted">
+
+<span class="eyebrow">What it does not mean</span>
+
+"There is a 95% probability that $\mu$ lies in **this** interval."
+
+$\mu$ is a fixed number. It is either in this interval or it is not — there is
+no probability left to have.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+<span class="eyebrow">What it means</span>
+
+"95% of the intervals produced **by this procedure** contain $\mu$."
+
+The probability is a property of the recipe, evaluated before the data is seen.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the distinction the picture just made — the rows are the procedure, one
+row is your data. Expect resistance: the wrong reading is the useful-sounding
+one. Note also that a Bayesian credible interval *does* license the first
+sentence, at the price of requiring a prior — a forward pointer, not a
+dependency.
+
+--
+
+## Where This Leaves Us
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+The introduction distinguished two kinds of uncertainty. We can now measure one
+of them.
+
+
+<div class="marks-step">
+
+- $\sigma$ — how variable the world is. **Aleatoric.** Unchanged by data.
+- $\mathrm{SE} = \sigma/\sqrt{n}$ — how badly we know our own estimate.
+ **Epistemic.** Shrinks with data.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+"More data helps" was a slogan.
+
+It is now a rate: $1/\sqrt{n}$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Close the loop opened in the ML introduction. This is the slide to point back to
+whenever a later lecture claims a model is uncertain "because it has not seen
+enough" — that claim has a magnitude, and this is where it comes from.
+
+--
+
+## Mini-Exercise
+
+A shop measures the time customers spend at a counter. From $n = 100$ customers:
+$\overline{x} = 180$ s, and past records give $\sigma = 60$ s.
+
+1. What is the standard error of the mean?
+2. Give an approximate 95% confidence interval.
+3. The manager wants the interval to be **half** as wide. How many customers?
+
+
+<div class="fragment">
+
+1. $\mathrm{SE} = 60/\sqrt{100} = 6$ s
+2. $180 \pm 1.96 \cdot 6 \approx [168, 192]$ s
+3. Half the width needs twice the $\sqrt{n}$, so **four times the data**: $n = 400$.
+
+Note what did *not* change in part 3: $\sigma = 60$ s. Customers stay as
+variable as they were — only our knowledge of their average improves.
+
+</div>
+
+
+Notes:
+Solution fragmented below the questions (animation policy). Part 3 is the one
+that transfers: the √n law is the answer to nearly every "how much data do we
+need" question a student will be asked. If time allows, ask what part 2 would
+look like if σ had to be estimated too.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A statistic is a **random variable**. Its distribution over repeated samples is
+the sampling distribution; its spread is the **standard error**, $\sigma/\sqrt{n}$.
+A confidence interval reports that spread — and its percentage describes the
+**procedure**, not the one interval in front of you.
+
+</div>
+
+
+Notes:
+Stabilise three things: statistic-as-random-variable, the 1/√n rate, and the
+procedure reading of confidence. All three are used again in evaluation
+(error bars on a measured accuracy) and in the Bayesian lectures, where the
+same question gets a different — and more directly stated — answer.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

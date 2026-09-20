@@ -1,0 +1,1072 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 10: Projections and Dimensionality Reduction</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 10: Projections and Dimensionality Reduction
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp9-visual-analytics-projections.tex. Builds
+on Lecture 02 (variance, covariance), Lecture 07 (curse of dimensionality) and
+Lecture 08 (distance matrices).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## What a Projection Preserves
+
+> **Guiding Question:** Reducing dimensions must lose information. Which
+> information do you choose to keep?
+
+--
+
+## Seeing High-Dimensional Data
+
+A **geometric projection** maps high-dimensional data onto a low-dimensional
+space — usually 2-D or 3-D, so that it can be plotted and reasoned about.
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Linear projections
+$$\mathbf{z} = \mathbf{P} \mathbf{x}$$
+A matrix $\mathbf{P}$ maps every point. Distances and angles are distorted in a
+predictable, global way the map is interpretable and invertible in structure.
+
+</div>
+
+
+<div class="card">
+
+### Non-linear projections
+Preserve some **local** property — neighbourhoods, or pairwise distances —
+without a single global matrix. More faithful visually, harder to interpret.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+**The central question of the chapter:** how do we find the *best* projection —
+and by which criterion is one projection better than another?
+
+</div>
+
+
+Notes:
+Guiding question (P1). Every method that follows answers it differently: random
+projection says "any projection, with a guarantee", PCA says "the one keeping
+most variance", MDS says "the one preserving distances". Naming the criterion is
+naming the method.
+
+--
+
+## What Is Necessarily Lost
+
+Reducing dimensions **must** lose information — the question is only which.
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Variance
+PCA keeps as much of it as a linear map can.
+
+</div>
+
+
+<div class="card">
+
+### Distances
+MDS keeps pairwise distances as faithfully as possible.
+
+</div>
+
+
+<div class="card">
+
+### Guarantees
+Random projection keeps distances within a provable error, cheaply.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+A projection is defined by **what it chooses to preserve**. There is no
+best-in-general projection, only a best one for a stated criterion.
+
+</div>
+
+
+--
+
+## The Surprising Result
+
+
+<div class="c-definition">
+
+**Johnson–Lindenstrauss lemma.** For any $0 < \epsilon < 1$ and $n$ points in
+any dimension, a projection onto
+$$
+d = O\left(\frac{\log n}{\epsilon^{2}}\right)
+$$
+dimensions exists that preserves all pairwise distances to within a factor
+$1 \pm \epsilon$.
+
+</div>
+
+
+
+<div class="c-insight">
+
+The target dimension depends on the **number of points** and on the accuracy
+wanted — **not on the original dimensionality**. A million-dimensional dataset
+and a thousand-dimensional one need the same target dimension.
+
+</div>
+
+
+Notes:
+This is genuinely counterintuitive and worth pausing on. It says high-dimensional
+data is "thinner" than it looks: n points span at most n−1 dimensions, and
+approximate distances need far fewer.
+
+--
+
+## Construction
+
+
+<div class="c-algorithm">
+
+1. Draw a $d \times p$ matrix $\mathbf{R}$ with entries sampled independently
+ (Gaussian, or $\pm 1$ with equal probability).
+2. Project: $\mathbf{z} = \frac{1}{\sqrt{d}} \mathbf{R} \mathbf{x}$.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Properties
+No training, no data pass — the matrix does not depend on the data at all.
+Extremely fast, trivially applied to new points, and it comes with a bound.
+
+</div>
+
+
+<div class="card bad">
+
+### Limits
+The axes are meaningless, so the result is not interpretable. It preserves
+distances, not structure, and works best when $d$ is not too small.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Random projection preserves distances **with a guarantee and without looking at
+the data**. Use it when you need speed and a bound use PCA when you need
+meaning.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Principal Component Analysis
+
+> **Guiding Question:** PCA keeps the directions of largest variance. When is
+> variance the wrong thing to keep?
+
+--
+
+## Which Direction Matters?
+
+Consider a cloud of points that is stretched along one diagonal. Projecting onto
+the **short** axis collapses everything into a blob projecting onto the **long**
+axis keeps the points apart.
+
+
+<div class="c-important">
+
+**PCA's criterion:** keep the directions along which the data **varies most**.
+Variance is treated as information directions with little variance are treated
+as noise.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### 1st component
+The direction of maximum variance.
+
+</div>
+
+
+<div class="card">
+
+### 2nd component
+The direction of maximum remaining variance, **orthogonal** to the first.
+
+</div>
+
+
+<div class="card">
+
+### and so on
+Each component orthogonal to all previous ones, each capturing less variance.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Intuition first (P4). Ask whether "most variance" always means "most
+interesting" — it does not: for classification, the discriminating direction
+may have small variance. That caveat returns in the drawbacks slide.
+
+--
+
+## What the Components Are
+
+The components are ordered, so keeping the first $m$ gives the **best possible
+$m$-dimensional linear approximation** in the least-squares sense.
+
+
+<div class="c-note">
+
+Equivalently: PCA finds the linear subspace minimising the total squared
+distance from the points to their projections. Maximising retained variance and
+minimising reconstruction error are the **same** criterion.
+
+</div>
+
+
+
+<div class="takeaway">
+
+PCA orders directions by **variance** and keeps the top ones. Its assumption —
+that variance is information — is what makes it powerful and what makes it fail.
+
+</div>
+
+
+--
+
+## Covariance Is the Object to Diagonalise
+
+For centred data $\mathbf{X}$, the **covariance matrix**
+
+$$
+\mathbf{C} = \frac{1}{n-1} \mathbf{X}^{\top}\mathbf{X}
+$$
+
+holds the variance of each attribute on its diagonal and the covariance of each
+pair off it.
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Large diagonal entry
+That attribute varies a lot — potentially informative.
+
+</div>
+
+
+<div class="card">
+
+### Large off-diagonal entry
+Two attributes are **redundant**: one partly predicts the other.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The goal: find new axes in which the covariance matrix is **diagonal** — no
+redundancy left between components — and order them by variance.
+
+</div>
+
+
+Notes:
+Framing PCA as "remove redundancy, keep variation" makes the covariance matrix
+the natural object. It also connects directly to the joint-distribution unit
+from Lecture 02, where covariance was introduced.
+
+--
+
+## The Solution
+
+
+<div class="c-definition">
+
+The directions that diagonalise $\mathbf{C}$ are its **eigenvectors** the
+variance captured by each is the corresponding **eigenvalue**.
+
+Sorting eigenvectors by descending eigenvalue gives the principal components,
+and the projection matrix is the top $m$ of them.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Orthogonal
+Eigenvectors of a symmetric matrix are mutually orthogonal — the components are
+uncorrelated by construction.
+
+</div>
+
+
+<div class="card">
+
+### Ordered
+$\lambda_1 \geq \lambda_2 \geq \ldots$ ranks the directions by variance.
+
+</div>
+
+
+<div class="card">
+
+### Explained variance
+$\lambda_i / \sum_j \lambda_j$ is the share of total variance in component $i$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+PCA is the **eigendecomposition of the covariance matrix**: eigenvectors give
+the directions, eigenvalues give their importance, and the top ones are kept.
+
+</div>
+
+
+Notes:
+The explained-variance ratio is the practical output students will actually use
+— it is what a scree plot shows and how "how many components?" gets answered.
+
+--
+
+## The Procedure
+
+
+<div class="c-algorithm">
+
+1. **Centre** the data (and usually **standardise** it).
+2. Compute the covariance matrix $\mathbf{C}$.
+3. Compute its eigenvectors and eigenvalues.
+4. Sort by descending eigenvalue keep the top $m$.
+5. Project: $\mathbf{Z} = \mathbf{X} \mathbf{W}_m$.
+
+</div>
+
+
+
+<div class="c-warning">
+
+Step 1 is not optional. Without standardisation, an attribute measured in
+metres dominates one measured in kilometres purely through its **unit** — PCA
+would report the choice of unit as the principal direction.
+
+</div>
+
+
+Notes:
+Also known as the discrete Karhunen–Loève transform. The standardisation trap is
+the single most common practical error and worth stating as a rule: always ask
+what the units are before running PCA.
+
+--
+
+## Choosing the Number of Components
+
+A **scree plot** shows eigenvalues in descending order; the usual reading is the
+same elbow heuristic as for choosing $k$ in clustering, or a cumulative
+explained-variance threshold (80%, 95%).
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Benefits
+Removes correlated and noisy directions speeds up downstream methods makes
+2-D visualisation possible components are uncorrelated by construction.
+
+</div>
+
+
+<div class="card bad">
+
+### Drawbacks
+Components are **linear combinations of all attributes**, so interpretability is
+lost. Only **linear** structure is captured. And variance is assumed to equal
+importance — which for classification can be false.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+You run PCA on the iris dataset and the first two components explain 96% of the
+variance.
+
+1. What does that number mean?
+2. Does it mean the two components are good features for classifying species?
+3. When could a **low-variance** direction be the important one?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** A 2-D linear approximation reconstructs the data with only 4% of the
+total squared variation lost.
+
+</div>
+
+
+<div class="card">
+
+**2.** Not necessarily. PCA is **unsupervised** — it never saw the labels, and
+optimises reconstruction, not separability.
+
+</div>
+
+
+<div class="card">
+
+**3.** Whenever the classes differ along a direction with small spread — a thin
+but decisive offset. Discriminant analysis targets exactly that instead.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+PCA is centre → covariance → eigendecomposition → keep the top components. It
+optimises **reconstruction**, not discrimination, and it must be standardised
+first.
+
+</div>
+
+
+--
+
+## Points and Variables in One Picture
+
+A **biplot** overlays two things on the same axes:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### The objects
+Each data point, plotted by its scores on the first two components — an ordinary
+scatterplot of the projection.
+
+</div>
+
+
+<div class="card">
+
+### The variables
+Each original attribute drawn as an **arrow**: its loading on the two
+components. Direction shows what the attribute contributes to, length shows how
+strongly.
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Arrows together
+Those attributes are positively correlated.
+
+</div>
+
+
+<div class="card">
+
+### Arrows opposed
+Negatively correlated.
+
+</div>
+
+
+<div class="card">
+
+### Arrows at 90°
+Roughly uncorrelated.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-tip">
+
+A biplot is how you recover interpretability after PCA has destroyed it: the
+arrows say what the anonymous components *mean* in terms of the original
+attributes.
+
+</div>
+
+
+
+<div class="takeaway">
+
+The biplot answers "what do these axes mean?" by drawing the original attributes
+into the projected space — points and variables read together.
+
+</div>
+
+
+Notes:
+Worth demonstrating on any two-component PCA: students can immediately name PC1
+("overall size") and PC2 ("shape") from the arrow pattern, which no eigenvalue
+table conveys.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Beyond Variance
+
+> **Guiding Question:** Some objects have no coordinates — only similarities.
+> Can they still be mapped?
+
+--
+
+## The Problem With Matching Words
+
+A document is represented as a vector of term counts — the **term–document
+matrix**. Similarity is then the overlap of vocabulary, which fails twice:
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### Synonymy
+"car" and "automobile" never match, though the documents are about the same
+thing.
+
+</div>
+
+
+<div class="card bad">
+
+### Polysemy
+"bank" matches across finance and rivers, though the documents are unrelated.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The vocabulary is the wrong space. We want a space of **concepts**, in which
+related terms lie close together.
+
+</div>
+
+
+Notes:
+The two failures are the motivation for every embedding method that followed,
+right up to modern language models. Say so — students recognise the problem
+statement from tools they use.
+
+--
+
+## The Approach
+
+
+<div class="c-definition">
+
+Apply a **singular value decomposition** to the term–document matrix
+$\mathbf{A}$:
+$$
+\mathbf{A} \approx \mathbf{U}_k \boldsymbol{\Sigma}_k \mathbf{V}_k^{\top}
+$$
+and keep the $k$ largest singular values. Documents and terms are both
+represented in the resulting $k$-dimensional **latent space**.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Dimension reduction
+Thousands of terms collapse to a few hundred latent dimensions.
+
+</div>
+
+
+<div class="card">
+
+### Synonyms merge
+Terms that co-occur with the same contexts end up close together.
+
+</div>
+
+
+<div class="card">
+
+### Noise drops
+Rare, idiosyncratic usage lives in the discarded small singular values.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+SVD is PCA's underlying machinery applied to a rectangular matrix — the same
+"keep the strongest directions" idea, on term–document data.
+
+</div>
+
+
+
+<div class="takeaway">
+
+LSA projects documents and terms into a shared **latent space** via SVD, so that
+similarity survives synonymy. It is dimensionality reduction used as a
+representation, not just as compression.
+
+</div>
+
+
+Notes:
+Connect forward honestly: modern embeddings solve the same problem with learned,
+non-linear, context-sensitive representations — but the objective LSA states is
+still recognisable in them.
+
+--
+
+## A Different Criterion
+
+PCA needs coordinates and preserves **variance**. MDS needs only a **distance
+matrix** and preserves **the distances themselves**.
+
+
+<div class="c-definition">
+
+Given pairwise distances $d_{ij}$, find low-dimensional points
+$\mathbf{z}_1, \ldots, \mathbf{z}_n$ minimising the **stress**
+$$
+S = \sum_{i < j}\big(\lVert \mathbf{z}_i - \mathbf{z}_j \rVert - d_{ij}\big)^{2}
+$$
+
+</div>
+
+
+
+<div class="c-insight">
+
+This is the projection method for objects that have **no coordinates at all** —
+only a similarity: documents, molecules, survey respondents, perceived
+similarity ratings.
+
+</div>
+
+
+Notes:
+The distance-matrix-only requirement is the same property that made HAC
+applicable to non-vector data. Point at that parallel — it is the second time
+this course uses "all I need is a similarity".
+
+--
+
+## Classical MDS and Its Relatives
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Classical (metric) MDS
+Solved in closed form by an eigendecomposition of the (double-centred) squared
+distance matrix. With Euclidean distances it is **equivalent to PCA**.
+
+</div>
+
+
+<div class="card">
+
+### Non-metric MDS
+Preserves only the **rank order** of distances. Suited to ordinal similarity
+data — "A is more like B than like C" — where the numbers are not meaningful.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Reading the Result
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Stress tells you the cost
+A 2-D map of genuinely high-dimensional structure has high stress: the picture
+is a compromise, and the number says how big a one.
+
+</div>
+
+
+<div class="card bad">
+
+### Axes mean nothing
+Unlike PCA components, MDS axes have no interpretation — only **relative
+positions** carry information. Rotations and reflections are equivalent.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+MDS preserves **distances** rather than variance, works from a similarity matrix
+alone, and produces a map whose axes are meaningless but whose **neighbourhoods
+are faithful** — as far as the stress allows.
+
+</div>
+
+
+Notes:
+The "axes mean nothing" warning matters because students read MDS plots like
+scatterplots. Insist that only the pattern of proximity may be interpreted.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

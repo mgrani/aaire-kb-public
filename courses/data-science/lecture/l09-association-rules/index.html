@@ -1,0 +1,691 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 09: Association Rule Mining</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 09: Association Rule Mining
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp7-association-rule-mining.tex. This is the
+probability chapter applied to counting: support is a joint probability,
+confidence a conditional one, and lift a test of independence.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Itemsets and Their Search Space
+
+> **Guiding Question:** Ten thousand products give $2^{10000}$ candidate
+> itemsets. How can this problem possibly be solvable?
+
+--
+
+## The Question
+
+Given a set of transactions — shopping baskets, clicked pages, co-occurring
+symptoms — which **items appear together** more often than chance, and which
+**imply** which?
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Support
+$$P(A \cap B) > \sigma$$
+How often do these items occur in the same transaction?
+
+</div>
+
+
+<div class="card">
+
+### Confidence
+$$P(A \mid B) > \gamma$$
+Given $B$ is in the transaction, how often is $A$ too?
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Both are quantities the students already know: support is a **joint**
+probability, confidence a **conditional** one, both estimated by counting
+transactions.
+
+</div>
+
+
+Notes:
+Say the connection explicitly — this whole chapter is the probability material
+applied to a counting problem. Nothing new is being defined, only named for a
+new context.
+
+--
+
+## Formalisation
+
+
+<div class="c-definition">
+
+Let $I$ be a set of **items** and $X$ a set of **transactions**, each
+$x \subseteq I$.
+
+- An **itemset** is any $A \subseteq I$ a **$k$-itemset** has $|A| = k$.
+- Its **support** is $\sigma(A) = \frac{|\lbrace x \in X : A \subseteq x \rbrace|}{|X|}$.
+- $A$ is **frequent** if $\sigma(A) \geq \sigma_{\min}$.
+
+</div>
+
+
+--
+
+## The Search Space
+
+All itemsets over $I$ form a **lattice** ordered by inclusion — with $2^{|I|}$
+elements.
+
+
+<div class="c-warning">
+
+A supermarket with 10,000 products has $2^{10000}$ candidate itemsets.
+Enumeration is impossible; the entire chapter is about avoiding it.
+
+</div>
+
+
+
+<div class="takeaway">
+
+Support and confidence are joint and conditional probabilities estimated by
+counting. The difficulty is not the measure but the **size of the search
+space**.
+
+</div>
+
+
+Notes:
+The lattice picture matters for the next unit: A-Priori prunes whole subtrees of
+it, and the pruning rule only makes sense once the ordering is clear.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## The A-Priori Algorithm
+
+> **Guiding Question:** What single structural fact about support lets us
+> discard most of an exponential space without looking at the data?
+
+--
+
+## The Property That Makes It Possible
+
+
+<div class="c-important">
+
+**A-priori property (anti-monotonicity).** Every subset of a frequent itemset is
+frequent — equivalently: if an itemset is **infrequent, every superset of it is
+infrequent too**.
+
+</div>
+
+
+Adding an item can only ever *reduce* the number of transactions containing the
+set. So an infrequent itemset prunes its entire superset subtree from the search.
+
+Notes:
+The property is obvious once stated and is the whole algorithm. Ask students to
+justify it in one sentence before showing the consequence — "requiring more
+items cannot make a set more common".
+
+--
+
+## The Algorithm
+
+
+<div class="c-algorithm">
+
+**A-Priori**
+
+$L^1$ = all frequent 1-itemsets.
+
+**for** $k = 2$ $L^{k-1} \neq \emptyset$ $k{+}{+}$:
+&nbsp;&nbsp;**generate** candidates
+$C_k = \lbrace a \cup b \mid a \in L^{k-1}, b \in L^1, b \not\subseteq a \rbrace$
+&nbsp;&nbsp;**prune** any candidate having an infrequent subset
+&nbsp;&nbsp;**count** the support of the survivors in one pass over the transactions
+&nbsp;&nbsp;$L^k = \lbrace c \in C_k \mid \sigma(c) \geq \sigma_{\min} \rbrace$
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Generate
+build $k$-candidates from frequent $(k{-}1)$-itemsets
+
+</div>
+
+
+<div class="card">
+
+### Prune
+discard candidates with any infrequent subset — no data access needed
+
+</div>
+
+
+<div class="card">
+
+### Count
+one database pass per level
+
+</div>
+
+
+</div>
+
+
+--
+
+## Cost and Improvements
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### What it costs
+One pass over the transactions **per level** $k$, plus candidate generation.
+The bottleneck is I/O and the number of candidates.
+
+</div>
+
+
+<div class="card">
+
+### How it is improved
+Hashing candidates into buckets, transaction reduction (dropping transactions
+containing no frequent itemset), partitioning and sampling.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+$\lbrace \text{bread}, \text{milk} \rbrace$ has support $0.18$, and
+$\sigma_{\min} = 0.22$.
+
+1. Is $\lbrace \text{bread}, \text{milk} \rbrace$ frequent?
+2. What can you say about $\lbrace \text{bread}, \text{milk}, \text{eggs} \rbrace$?
+3. How many database passes did answering 2 require?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** No — $0.18 < 0.22$.
+
+</div>
+
+
+<div class="card">
+
+**2.** It is **infrequent**, necessarily: its support cannot exceed that of any
+subset.
+
+</div>
+
+
+<div class="card">
+
+**3.** **None.** The conclusion follows from the property alone. That is exactly
+where the savings come from.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+A-Priori turns one structural fact — **infrequent sets have no frequent
+supersets** — into a level-wise search that prunes most of an exponential space
+without touching the data.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## From Itemsets to Rules
+
+> **Guiding Question:** A rule holds 80% of the time — and tells you nothing.
+> How is that possible, and what should you measure instead?
+
+--
+
+## Generating Rules
+
+
+<div class="c-definition">
+
+An **association rule** $A \Rightarrow B$ (with $A \cap B = \emptyset$) has
+
+$$
+\text{support} = \sigma(A \cup B), \qquad
+\text{confidence} = \frac{\sigma(A \cup B)}{\sigma(A)}
+$$
+
+</div>
+
+
+Every frequent itemset $F$ is split in all possible ways into $A$ and
+$B = F \setminus A$ rules meeting the confidence threshold are kept.
+
+
+<div class="c-note">
+
+Support comes from the itemset and is already known. Only confidence must be
+computed — so rule generation needs **no further database passes**.
+
+</div>
+
+
+Notes:
+The two-stage structure (find frequent itemsets, then split them) is what makes
+the whole approach tractable. Confidence is a ratio of two numbers already
+counted.
+
+--
+
+## Confidence Is Not Enough
+
+Suppose 80% of all transactions contain milk. A rule
+$\text{bread} \Rightarrow \text{milk}$ with **confidence 0.80** has learned
+nothing: milk appears in 80% of baskets regardless of bread.
+
+
+<div class="c-definition">
+
+$$
+\mathrm{lift}(A \Rightarrow B) = \frac{P(B \mid A)}{P(B)}
+= \frac{\sigma(A \cup B)}{\sigma(A) \sigma(B)}
+$$
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### lift > 1
+$A$ makes $B$ **more** likely — a positive association.
+
+</div>
+
+
+<div class="card">
+
+### lift = 1
+$A$ and $B$ are **independent** — the rule carries no information.
+
+</div>
+
+
+<div class="card bad">
+
+### lift < 1
+$A$ makes $B$ **less** likely — the rule holds in reverse.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-insight">
+
+Lift is the independence test from Lecture 02 written as a ratio: it compares
+the joint probability against the product of the marginals.
+
+</div>
+
+
+Notes:
+This is the payoff of teaching independence properly. Confidence measures a
+conditional probability lift measures the *departure from independence*, which
+is what "association" was supposed to mean all along.
+
+--
+
+## Mini-Exercise
+
+A retailer reports: $\text{nappies} \Rightarrow \text{beer}$, support 0.02,
+confidence 0.60. Beer appears in 55% of all transactions.
+
+1. Compute the lift.
+2. Is the rule actionable?
+3. What would make it more convincing?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** $\mathrm{lift} = 0.60 / 0.55 \approx 1.09$ — barely above 1.
+
+</div>
+
+
+<div class="card">
+
+**2.** Hardly. A 9% relative increase over the base rate, on 2% of
+transactions, is a weak effect on a small slice.
+
+</div>
+
+
+<div class="card">
+
+**3.** A higher lift, a larger support, and evidence that it **persists** —
+across stores, seasons and time. And a mechanism: a rule with no explanation is
+a correlation.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Confidence alone rewards **popular** consequents. **Lift** corrects for the base
+rate by comparing against independence — the same correction Bayes' theorem
+makes for priors.
+
+</div>
+
+
+Notes:
+Close by connecting all three: support = joint, confidence = conditional,
+lift = departure from independence. Three probability concepts, one application
+— and the base-rate trap in a third guise.
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

@@ -1,0 +1,1509 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 06: Decision Trees and Ensembles</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CGb-pY4R.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+<!-- .slide: class="title-slide" -->
+
+# Data Science
+## Lecture 06: Decision Trees and Ensembles
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Converted from LNKB-tex part-en-ds-chp5-decision-tree-learning.tex. Builds on
+Lecture 04 (hypothesis space, inductive bias, bias–variance, cross-validation)
+and Lecture 02 (entropy is built from the probability material). The arc runs
+from the most interpretable model in the course to a committee that gives that
+interpretability up.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 1
+## Trees as Hypotheses
+
+> **Guiding Question:** A linear model hides its reasoning in 200 weights. What
+> would a model look like that can be read aloud?
+
+--
+
+## A Tree Is a Sequence of Questions
+
+Each inner node tests one attribute, each branch is an answer, each leaf is a
+class.
+
+| Example | Sky | Temperature | Humidity | Wind | **EnjoySport** |
+|---|---|---|---|---|---|
+| 1 | sunny | warm | normal | strong | yes |
+| 2 | sunny | warm | high | strong | yes |
+| 3 | rainy | cold | high | strong | **no** |
+| 4 | sunny | warm | high | strong | yes |
+
+To classify a new day, start at the root and follow the answers to a leaf.
+
+
+<div class="c-note">
+
+The tree **is** the hypothesis. Unlike a weight vector, it can be read aloud as
+a set of rules — which is why trees are the standard choice when a decision has
+to be explained.
+
+</div>
+
+
+Notes:
+Interpretability is the selling point and should be named early. Ask what
+"explaining" a linear model with 200 weights would look like by comparison —
+this is the accountability thread from Lecture 01 returning.
+
+--
+
+## Construction and Classification
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Construction *(recursive)*
+If the data is pure enough, make a leaf.
+Otherwise: choose a **split criterion**, decompose $D$ into
+$D_1, \ldots, D_s$, and recurse on each part.
+
+</div>
+
+
+<div class="card">
+
+### Classification *(recursive)*
+If the node is a leaf, return its class.
+Otherwise: follow the successor selected by the example's attribute value.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The whole learning problem reduces to one question: **which attribute to split
+on?** Everything else is bookkeeping.
+
+</div>
+
+
+Notes:
+The template is deliberately abstract — ID3, C4.5 and CART differ only in the
+split criterion and the stopping rule. Say that now so the next units read as
+variations, not as separate algorithms.
+
+--
+
+## When to Use Them
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Well suited
+Attribute-value data; discrete or continuous features; missing values;
+a need for an explainable model; no assumption of linearity.
+
+</div>
+
+
+<div class="card bad">
+
+### Poorly suited
+Smooth relationships (a tree approximates a diagonal boundary with a staircase);
+many equally relevant features; and — as we will see — stability.
+
+</div>
+
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+Using the four examples above, write down **by hand** a decision tree that
+classifies all of them correctly.
+
+1. Can you do it with a single test?
+2. How many different correct trees can you find?
+3. Which of them would you trust on a new day, and why?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Yes — splitting on `Sky` alone separates them: sunny → yes, rainy → no.
+
+</div>
+
+
+<div class="card">
+
+**2.** Several. `Temperature` (warm/cold) also separates them perfectly, as do
+combinations that test both.
+
+</div>
+
+
+<div class="card">
+
+**3.** Undecidable from four examples. Perfect training accuracy does not
+choose between competing hypotheses — this is the inductive-bias problem, and
+the next module gives it a criterion.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A decision tree is a **readable hypothesis** built by recursive splitting. The
+only real decision is which attribute to split on next — and the data alone
+does not settle it.
+
+</div>
+
+
+Notes:
+The staircase point is worth a sketch on the board: trees split axis-parallel,
+so a diagonal boundary costs many splits. That limitation motivates ensembles
+at the end of the lecture.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Choosing a Split
+
+> **Guiding Question:** Every attribute could be split on. What makes one split
+> better than another — and how do we measure it?
+
+--
+
+## What Makes a Split Good?
+
+A split is good if the resulting subsets are **purer** than what we started
+with — closer to containing a single class.
+
+So we need a number that measures impurity: maximal when the classes are evenly
+mixed, zero when a node is pure.
+
+Notes:
+Guiding question (P1). Let students propose a measure before showing entropy —
+"fraction of the majority class" is the usual proposal, and it is exactly
+misclassification error, whose weakness the visualization then shows.
+
+--
+
+## Three Measures
+
+<div class="viz viz-lg" data-viz="ml/impurity-measures" data-steps="4"
+ data-params='{"mark": 0.8}'></div>
+
+Notes:
+Stepped viz (P6): entropy, then Gini, then misclassification, then a concrete
+node at p = 0.8. Ask before the third click how misclassification will compare —
+its flatness is the reason it is rarely used as a split criterion, even though
+it is what we ultimately care about.
+
+--
+
+## Entropy
+
+
+<div class="c-definition">
+
+For a node with class probabilities $P(A_1), \ldots, P(A_k)$:
+$$
+H(\mathcal{A}) = -\sum_{i=1}^{k} P(A_i) \log_2 P(A_i)
+$$
+measured in **bits** — the average number of yes/no questions needed to
+identify the class of an example in that node.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Pure node
+$H = 0$ — no question needed
+
+</div>
+
+
+<div class="card">
+
+### Two classes, 50/50
+$H = 1$ bit — one question needed
+
+</div>
+
+
+<div class="card">
+
+### $k$ equal classes
+$H = \log_2 k$ bits
+
+</div>
+
+
+</div>
+
+
+Notes:
+The "questions needed" reading makes entropy concrete and is worth more than
+the formula. It also makes the next slide's subtraction obviously meaningful:
+information gain is *questions saved*.
+
+--
+
+## Conditional Entropy and Information Gain
+
+After splitting on an attribute $\mathcal{B}$ with outcomes $B_1, \ldots, B_s$:
+
+$$
+H(\mathcal{A} \mid \mathcal{B}) = \sum_{j=1}^{s} P(B_j) \cdot H(\mathcal{A} \mid B_j)
+$$
+
+— the impurity of each part, weighted by how much data lands in it.
+
+
+<div class="c-important">
+
+$$
+\mathrm{Gain}(\mathcal{B}) = H(\mathcal{A}) - H(\mathcal{A} \mid \mathcal{B})
+$$
+**Information gain** is the impurity removed by the split. Choose the attribute
+that maximises it.
+
+</div>
+
+
+Notes:
+The weighting by P(B_j) is what stops a split that isolates one example from
+looking good. Ask what would happen without it — a strong argument for reading
+formulas as decisions rather than as notation.
+
+--
+
+## Mini-Exercise
+
+A node holds 8 examples: 4 "yes", 4 "no". An attribute splits it into
+[3 yes, 1 no] and [1 yes, 3 no].
+
+1. What is the entropy before the split?
+2. What is the conditional entropy after it?
+3. What is the information gain?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** $H = 1$ bit — a perfectly even mix.
+
+</div>
+
+
+<div class="card">
+
+**2.** Each part has $H = -\tfrac{3}{4}\log_2\tfrac{3}{4} - \tfrac{1}{4}\log_2\tfrac{1}{4} \approx 0.811$;
+both hold half the data, so $H(\mathcal{A} \mid \mathcal{B}) \approx 0.811$.
+
+</div>
+
+
+<div class="card">
+
+**3.** $\mathrm{Gain} \approx 1 - 0.811 = 0.189$ bits.
+
+</div>
+
+
+</div>
+
+
+A split that leaves both branches 3:1 removes less than a fifth of a bit.
+
+</div>
+
+
+Notes:
+The small number is the lesson: intuitively the split "looks decent", but it
+buys little. Comparing this with a perfect split (gain = 1) calibrates
+expectations.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Impurity measures how mixed a node is; **information gain is the impurity a
+split removes**, weighted by the data it moves. Entropy and Gini agree closely;
+misclassification error is too flat to choose between splits.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 3
+## Building the Tree
+
+> **Guiding Question:** ID3 never reconsiders a split. What does that greedy
+> choice assume about the world?
+
+--
+
+## ID3
+
+
+<div class="c-algorithm">
+
+**ID3**(examples $D$, attributes $A$, target)
+
+1. If all examples share one class → return a leaf with that class.
+2. If $A$ is empty → return a leaf with the majority class.
+3. Otherwise choose $A^{*} \in A$ with the highest **information gain**.
+4. For each value $a$ of $A^{*}$: add the subtree
+ **ID3**($D_a$, $A \setminus \lbrace A^{*} \rbrace$, target).
+
+</div>
+
+
+Greedy and recursive: each split is chosen for immediate gain, and never
+reconsidered.
+
+Notes:
+Point at step 3 and name it: this is heuristic search from Lecture 04's
+principles unit. The hypothesis space of all trees is astronomically large;
+ID3 walks one path through it without backtracking.
+
+--
+
+## What ID3 Assumes
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Hypothesis space
+**All** decision trees over the attributes — so the target function is
+certainly in there. No representational bias.
+
+</div>
+
+
+<div class="card">
+
+### Search bias
+It prefers trees that place **high-gain attributes near the root**, and
+therefore **shorter trees**. It stops at the first tree that fits.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Is a preference for short trees justified? It is Occam's razor as an
+algorithm — a genuine assumption about the world, not a mathematical necessity.
+
+</div>
+
+
+Notes:
+Force the interpretation (P2, P3): ask why a shorter tree should generalise
+better. There is an argument (fewer short trees exist, so fitting the data by
+accident is less likely) but it is not airtight, and students should see it as
+a defensible choice rather than a fact.
+
+--
+
+## CART
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### What differs
+**Binary** splits only **Gini** impurity instead of entropy handles
+**regression** by splitting on variance reduction and predicting the mean in
+each leaf.
+
+</div>
+
+
+<div class="card">
+
+### What does not
+The template is unchanged: choose a split, decompose, recurse. CART is a
+different set of choices inside the same skeleton.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Binary splits avoid a defect of multi-way splits: an attribute with many values
+(an ID number, in the extreme) achieves high information gain by fragmenting
+the data into pure singletons that generalise to nothing.
+
+</div>
+
+
+Notes:
+The many-valued-attribute defect is the reason C4.5 introduced gain ratio. It is
+a good concrete instance of a metric being gamed by the structure of the data —
+a theme students will meet in evaluation and in production systems.
+
+--
+
+## Mini-Exercise
+
+Your dataset includes a `customer_id` column, unique for every row.
+
+1. What information gain does splitting on it achieve?
+2. What does the resulting tree look like?
+3. What does it predict for a new customer?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Maximal — every branch holds one example, so every leaf is pure and the
+conditional entropy is 0.
+
+</div>
+
+
+<div class="card">
+
+**2.** A root with one branch per training example: a lookup table, one level
+deep.
+
+</div>
+
+
+<div class="card">
+
+**3.** Nothing useful — a new customer's id matches no branch. Perfect training
+purity, zero generalisation.
+
+</div>
+
+
+</div>
+
+
+This is why gain must be corrected for the number of values (gain ratio), or
+splits restricted to binary (CART).
+
+</div>
+
+
+Notes:
+The cleanest overfitting example in the course, and it arrives before pruning
+is introduced, which motivates the next module.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+ID3 is a **greedy, non-backtracking search** whose bias is a preference for
+short trees. CART changes the split type and the impurity measure, not the
+idea. Both can be fooled by an attribute with too many values.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Overfitting and Pruning
+
+> **Guiding Question:** A tree can achieve 100% training accuracy on any
+> dataset. Why is that a symptom rather than an achievement?
+
+--
+
+## A Tree Grown to Purity Is Overfitted
+
+Left alone, ID3 splits until every leaf is pure — memorising the training set,
+noise included.
+
+<div class="viz viz-lg" data-viz="ml/bias-variance" data-steps="5"
+ data-params='{"degrees": [1, 2, 3, 5, 9, 14]}'></div>
+
+Tree depth plays the role of polynomial degree: more splits, lower training
+error, and eventually rising test error.
+
+Notes:
+Deliberate reuse of the visualization from the neural-network lecture (P6 and
+the spiral): the same phenomenon, a third model family. Students should now
+recognise the shape before the caption says it.
+
+--
+
+## Two Places to Intervene
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Stopping (pre-pruning)
+Halt splitting **during** construction — when a node is small, when gain is
+below a threshold, or at a depth limit.
+
+Cheap, but short-sighted: a weak split may enable a strong one beneath it.
+
+</div>
+
+
+<div class="card">
+
+### Pruning (post-pruning)
+Grow the full tree, then **remove** subtrees that do not earn their keep.
+
+More expensive, and generally more reliable.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The "weak split enabling a strong one" point is the standard argument for
+post-pruning, and it is the XOR structure again: neither attribute helps alone.
+
+--
+
+## Reduced Error Pruning
+
+
+<div class="c-algorithm">
+
+1. Split the data into a **training** and a **validation** set.
+2. Grow the full tree on the training set.
+3. For each inner node: consider replacing its subtree with a leaf carrying
+ the majority class.
+4. Keep the replacement if accuracy on the **validation** set does not fall.
+5. Repeat until no beneficial replacement remains.
+
+</div>
+
+
+
+<div class="c-important">
+
+The decision is made on data the tree was **not** grown on. Pruning against the
+training set would remove nothing — every subtree helps there by construction.
+
+</div>
+
+
+Notes:
+This is the hold-out principle from Lecture 04, now used to make a structural
+decision rather than to report a number. Ask what happens if the validation set
+is small — pruning decisions become noisy, which is why cost-complexity pruning
+with cross-validation is preferred in practice.
+
+--
+
+## Mini-Exercise
+
+A tree has 100% training accuracy with 340 leaves. After pruning it has 41
+leaves, 94% training accuracy and 89% validation accuracy — up from 78%.
+
+1. What did the 299 removed leaves contain?
+2. Why did training accuracy fall?
+3. Was pruning worth it?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Mostly noise — splits that separated individual training examples
+without capturing structure that recurs.
+
+</div>
+
+
+<div class="card">
+
+**2.** Because those examples are now misclassified. That is the intended
+outcome, not a regression.
+
+</div>
+
+
+<div class="card">
+
+**3.** Yes: +11 points on unseen data, and a tree small enough to read. Both
+axes improved.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Part 2 is where students hesitate — accepting worse training performance feels
+like failure. Naming it as the point of the exercise reinforces that training
+error was never the objective.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+An unpruned tree memorises. **Pruning trades training accuracy for
+generalisation**, and the trade must be judged on data the tree never saw.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 5
+## Ensembles
+
+> **Guiding Question:** Change a few examples and the tree changes completely.
+> Can that instability be turned into an advantage?
+
+--
+
+## Unstable Learners
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### High variance
+Many parameters, so small changes in the training data produce very different
+models.
+
+</div>
+
+
+<div class="card">
+
+### Runtime limits
+The learner cannot search its hypothesis space exhaustively and settles for a
+heuristic path.
+
+</div>
+
+
+<div class="card">
+
+### Insufficient capacity
+The model family is too simple to express the target at all.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+**Decision trees are the textbook unstable learner**: change a handful of
+examples and a different attribute wins at the root, producing a completely
+different tree.
+
+</div>
+
+
+Notes:
+Instability is the property that makes ensembles work, so it must be understood
+as a fact about trees before bagging looks like anything other than a trick.
+Ask why a greedy root choice makes the whole tree fragile.
+
+--
+
+## The Idea
+
+
+<div class="c-definition">
+
+**Ensemble learning** builds several learners and combines their predictions —
+by majority vote for classification, by averaging for regression.
+
+</div>
+
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Bagging
+**B**ootstrap **agg**regat**ing** — train on resampled datasets.
+
+</div>
+
+
+<div class="card">
+
+### Boosting
+Train weak learners in sequence, each focusing on the previous one's mistakes.
+
+</div>
+
+
+<div class="card">
+
+### Random forest
+Bagging plus randomised attribute selection at every split.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+Ensembles exploit instability: **many different wrong models, averaged, are
+right more often than any one of them**.
+
+</div>
+
+
+Notes:
+The takeaway is counterintuitive enough to state plainly. The condition for it
+to hold — errors must be at least partly independent — is what the next two
+units engineer deliberately.
+
+--
+
+## Bootstrap Aggregating
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+**The problem.** A group of predictors helps only if they differ — but we have
+one algorithm and one dataset, which yield one model.
+
+**The solution.** Manufacture different datasets: draw $n$ examples from $D$
+**with replacement**, train a predictor on each sample, and combine them by
+vote or average.
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+The learner never changes. Only the data it sees does.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Bootstrapping was introduced in Lecture 04 as an error-estimation scheme here
+the same resampling produces model diversity. Same tool, different job — worth
+naming as the spiral it is.
+
+--
+
+## What Resampling Actually Does
+
+Each bootstrap sample contains about **63.2%** of the distinct examples of $D$.
+The probability that a particular example is *never* drawn in $n$ tries is
+
+$$
+\Big(1 - \tfrac{1}{n}\Big)^{n} \xrightarrow[n \to \infty]{} e^{-1} \approx 0.368
+$$
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### The gain
+Each model sees a different two-thirds of the data, so their errors are partly
+independent. **Averaging reduces variance** — and therefore overfitting.
+
+</div>
+
+
+<div class="card">
+
+### The left-out third
+The ~36.8% not drawn is the *out-of-bag* sample, usable as a free validation
+set for that model.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The 63.2% is a nice concrete consequence of a limit students can verify. The
+out-of-bag idea is practically important: it gives an honest error estimate
+without a separate hold-out.
+
+--
+
+## Mini-Exercise
+
+You bag 100 trees. Each individually achieves 70% accuracy.
+
+1. Under what condition would the ensemble beat 70%?
+2. What happens if all 100 trees are identical?
+3. Does bagging reduce bias, variance, or both?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+**1.** Their **errors must be at least partly independent** — different trees
+must be wrong about different examples for the vote to correct them.
+
+</div>
+
+
+<div class="card">
+
+**2.** Nothing improves: 100 copies of one model vote unanimously and reproduce
+its 70%.
+
+</div>
+
+
+<div class="card">
+
+**3.** Mainly **variance**. Averaging does not fix a systematic error every
+model shares.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Part 2 is the crux and motivates random forests directly: bootstrap samples
+alone may not decorrelate trees enough, especially when one attribute dominates.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Bagging manufactures diversity by **resampling the data**, and averages away
+variance. It helps exactly to the extent that the models' errors are
+independent — and not at all when they are not.
+
+</div>
+
+
+--
+
+## Why Bagging Trees Is Not Enough
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### Trees stay similar
+If one attribute has much higher gain than the rest, it wins at the root of
+**every** bootstrap sample. The trees correlate, and averaging them buys little.
+
+</div>
+
+
+<div class="card bad">
+
+### And it costs
+Interpretability is gone — you can no longer read the model as a set of rules —
+while the computation of 100 near-identical trees is largely wasted.
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the direct answer to part 2 of the previous mini-exercise. Resampling
+alone does not guarantee diversity the dominant attribute defeats it.
+
+--
+
+## The Fix: Randomise the Split Too
+
+
+<div class="c-algorithm">
+
+**Random forest** (Breiman 2001)
+
+For each of $T$ trees:
+
+1. Draw a bootstrap sample from $D$.
+2. Grow a tree — but **at every node**, choose the split from a random subset
+ $A' \subset A$ of $m_A$ attributes rather than from all of them.
+3. Do not prune.
+
+Combine by majority vote (classification) or average (regression).
+
+</div>
+
+
+
+<div class="c-important">
+
+The dominant attribute is simply **absent** from most nodes' candidate sets, so
+other attributes get to define the tree. Diversity is engineered rather than
+hoped for.
+
+</div>
+
+
+Notes:
+Step 2 is the entire contribution, and it is one line. Typical m_A is √|A| for
+classification. Step 3 is counterintuitive — individual overfitting is
+tolerated because averaging handles the variance.
+
+--
+
+## What You Get and What You Give Up
+
+
+<div class="grid-2">
+
+
+<div class="card good">
+
+### Gained
+Strong accuracy with almost no tuning out-of-bag error for free a usable
+attribute-importance measure.
+
+</div>
+
+
+<div class="card bad">
+
+### Lost
+The readable single tree. A forest is a **committee**, and no member speaks for
+it.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-warning">
+
+Attribute importance from a forest is not a causal statement. It reports which
+attributes the trees found useful for splitting — under this data, this
+sampling, this correlation structure.
+
+</div>
+
+
+Notes:
+The warning matters because attribute importance is routinely over-read in
+practice, including in published work. It connects back to Lecture 01's
+correlation/causation module.
+
+--
+
+## Mini-Exercise
+
+You must choose between a single pruned decision tree (86% accuracy) and a
+random forest (91%) for:
+
+1. an internal churn-prediction model,
+2. an automated loan-refusal system that must be justified to applicants.
+
+Which do you choose in each case?
+
+--
+
+## Mini-Exercise — Solution
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+**1.** The **forest**: five accuracy points matter and nobody needs the model
+explained.
+
+</div>
+
+
+<div class="card">
+
+**2.** The **tree** — or a forest plus a documented, auditable process. A
+refusal that cannot be explained may be neither acceptable nor lawful.
+
+</div>
+
+
+</div>
+
+
+The best model is the one that fits the **decision**, not the leaderboard.
+
+</div>
+
+
+Notes:
+Close the lecture on this (P2, and the accountability thread from L01): model
+selection is a decision about consequences, not only about a metric. Expect
+disagreement on case 2 and let it run — that is the exercise working.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Random forests **engineer diversity** by randomising the attributes available at
+each split, turning unstable trees into a stable committee — at the cost of the
+one thing a single tree was best at: being readable.
+
+</div>
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push any un-indexed author fragments behind them.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
+          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          const onFragment = (offset) => (event) => {
+            const frags = event.fragments ?? [event.fragment];
+            for (const f of frags) {
+              if (f?.dataset?.vizFor !== id) continue;
+              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
+              return;
+            }
+          };
+          Reveal.on("fragmentshown", onFragment(0));
+          Reveal.on("fragmenthidden", onFragment(-1));
+          instance.setStep(0);
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>
