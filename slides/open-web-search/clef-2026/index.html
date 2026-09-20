@@ -1664,7 +1664,7 @@ Open the part with this, before any history, because it makes the case in one sc
 
 <!-- .slide: class="smaller" -->
 
-## The web logs we could get were few, and thin
+## What query logs could teach us, and what they could not
 
 
 <div class="timeline">
@@ -1688,24 +1688,10 @@ Open the part with this, before any history, because it makes the case in one sc
 <div class="column">
 
 
-<div class="c-danger">
+<div class="c-positive">
 
-### Legal and commercial challenges
-"Research with very large query logs was conducted in industry and at major search providers. The AOL log is the only exception."
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-note">
-
-### Logs created in academia
-The Sowiport digital library logged **558,008 sessions** and about **8M interactions** in one year, 179,796 of them queries. Small, local, and ours. SimIIR 2.0 trains its user models on exactly this.
+### What they gave us
+Click models, position and trust bias, counterfactual learning to rank. Most of what the field knows about reading implicit feedback came out of these files.
 
 </div>
 
@@ -1718,8 +1704,22 @@ The Sowiport digital library logged **558,008 sessions** and about **8M interact
 
 <div class="c-warning">
 
-### Today we have an economic challenge
-An agent trace costs GPU time and a running search engine. One group produces thousands of trajectories; a platform produces billions.
+### What they cannot contain
+A query and a click. No facet, no dwell, no scroll, and not the result page as it was shown, so what was *not* clicked cannot be recovered. One to three months each, so nothing longitudinal.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+### Why there are so few
+Providers "generally do not publish their logs to protect user privacy and vital business data". Releasing one can also go wrong: AOL was withdrawn in three days. And A/B testing is no substitute, because the traffic is theirs too.
 
 </div>
 
@@ -1731,9 +1731,36 @@ An agent trace costs GPU time and a running search engine. One group produces th
 
 
 
-<div class="pull-quote">
+<div class="grid-2 gap-lg small">
 
-We missed much of the user data of web search. We should not miss the interaction data of agentic search.
+
+<div class="column">
+
+
+<div class="c-positive">
+
+### The rich exception, and why
+Sowiport: **558,008 sessions**, 8M interactions of **58 kinds** in one year, with the result lists stored. Rich because a research institution operated the search system.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+### Today the constraint has changed
+An agent trace costs GPU time and a running search engine rather than a licence negotiation. One group produces thousands of trajectories; a platform produces billions.
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -1741,13 +1768,23 @@ We missed much of the user data of web search. We should not miss the interactio
 
 <div class="slide-citation">
 
-Reimer et al., *The Archive Query Log*, SIGIR 2023 · Craswell et al., *ORCAS*, 2020 · Zerhoudi et al., *The SimIIR 2.0 Framework*, CIKM 2022, on the Sowiport User Search Session dataset.
+Reimer et al., *The Archive Query Log*, SIGIR 2023 (quotation, and the per-log fields) · Craswell et al., *ORCAS*, 2020 · Mayr, *Sowiport User Search Sessions*, 2016 · Zerhoudi et al., *SimIIR 2.0*, CIKM 2022.
 
 </div>
 
 
 Notes:
-Goal: web-search interaction data was never ours to collect, only occasionally ours to receive, and the same thing is about to happen with agent traces for a different reason. This is the data half of the argument made on the opening slide about operating a system; do not say we learned nothing from logs, say that what a log contains is decided by whoever runs the system.
+Goal: query logs were valuable and are not the villain of this talk. They were limited in what they could contain, scarce, and hard to release, and none of those limits is going away. Say the positive half first and mean it: click models, position and trust bias and counterfactual learning to rank all came out of these files, and ORCAS and MS MARCO Web Search are genuinely useful recent releases.
+
+The three limits, in order.
+
+- **What a log records.** AOL is a query and a click, nothing else, and the Archive Query Log table shows the results column equal to the clicks column, so the ranking that was shown is not in the file. No facet selection, no dwell time, no scrolling, and no way to ask why something was not clicked. Most public logs cover one to three months, so nothing longitudinal is possible either.
+- **How few there are.** Across twenty-five years the same table lists only a handful at web scale, and several of those, Yandex and Baidu, arrived as competition data rather than as a resource.
+- **Why.** Quote the Archive Query Log paper directly, because it states both reasons at once: providers "generally do not publish their logs to protect user privacy and vital business data". Privacy is the one everybody names, and AOL is the cautionary tale, withdrawn after three days when users were re-identified. The commercial reason is just as real and less often said: a query log exposes demand and ranking quality to competitors. And the obvious alternative, running an A/B test instead, is closed for the same reason, because the traffic belongs to the provider.
+
+Then the exception, which is the argument of this talk in miniature. Sowiport is rich, 58 action types and the result lists stored, precisely because GESIS ran the system. Operating it was what made the observation possible.
+
+Close on what has changed: the barrier to agent traces is not legal and not commercial, it is cost. That is a problem a research community can attack, which is why the next slide is simulation.
 
 The timeline, with what is verified and what to be careful about.
 
@@ -1958,74 +1995,14 @@ This is the state of the art in one picture, and it is worth showing because the
 
 <div class="c-insight tight">
 
-The constructs a user simulator needs — profile, session, preferences, feedback — turn out to be useful inside retrieval, not only in the evaluation of it.
+The constructs a user simulator needs — profile, session, preferences, feedback — turn out to be useful components in an agentic retreival system, not only in the evaluation of it.
 
 </div>
 
 
 Notes:
 This is the turn the whole simulation arc was building towards, so give it its own slide. The five agents are the same constructs a user simulator needs — who the user is, what this session is about, what they have asked before, what they would rank highly, how they reacted — but here they run while the query is being answered rather than in an experiment afterwards. The global message pool is the mechanism worth pointing at: the agents do not call each other, they write into a shared state that the retrieval and the generation both read, which is why the same design scales to more agents. Quote the WebQuestions number but say the baseline out loud: the generator is GPT-3.5, not a frontier model, and each dataset is 500 sampled questions. The TriviaQA row is the honest one and it is better to volunteer it, because the no-retrieval model wins there and the authors themselves suspect training-data contamination. Then the line on the slide, and be careful how you say it. PersonaRAG is not motivated by user simulation and does not cite it: the paper's own framing is that RAG fails to personalise, and its related work is on personalisation and multi-agent systems. So do not claim a lineage from SimIIR to PersonaRAG, because anyone who opens the paper will not find one. What is defensible, and what the slide says, is convergence: the five constructs PersonaRAG needs are the same ones a user simulator needs, and the same group arrived at both. If challenged, concede the provenance point immediately and keep the observation, which is the interesting half anyway: modelling the user pays off on both sides of the experiment.
-→ next: and how good is any of this, measured against real people?
-
---
-
-<!-- .slide: class="smaller" -->
-
-## How good is the simulation, and where does it stop?
-
-| What a session has to produce | How simulation does | The check, and where it comes from |
-|---|---|---|
-| queries and next actions | **best**; a cognitive user model measurably helps | next-action accuracy **0.37 → 0.48** on the Sowiport sessions, 0.32 → 0.46 on AOL · *CACSM*, JCDL 2024 |
-| evidence selection and stopping | **partly**; the errors are systematic, so it has to be calibrated against people | **480 human sessions** across traditional, conversational and hybrid interfaces · *SearchLab*, CHIIR 2025, and the *UXLab* pilot, CHIIR 2026 |
-| satisfaction, trust, effort | **not simulated**; it can only be inferred from behaviour | cognitive states inferred over **50,942 sessions**, and they help most exactly where click signals are weakest · *Beyond the Click*, ECIR 2026 |
-
-
-<div class="grid-2 gap-lg small">
-
-
-<div class="column">
-
-
-<div class="c-positive">
-
-Simulation is strong where behaviour is typed, and that is the part an experiment controls. It is good enough to build on.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-warning">
-
-And it is still wrong more often than right: fewer than half the predicted next actions are correct, so this is an instrument for controlled experiments, not a stand-in for people.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Goal: place the honest boundary before scaling any of it up. Simulation is strong on what people type and weak on what they feel, and the only published comparison against real sessions gets fewer than half its next actions right.
-
-How to read the table. Each row is a thing a simulated session has to produce, ordered by distance from the keyboard: queries are typed and therefore logged, stopping is a decision that has to be inferred, satisfaction is internal and can only be asked about. The third column is deliberately the evidence rather than an opinion, so every claim in the middle column has a paper behind it.
-
-Row by row.
-
-- **Queries and next actions.** CACSM is the only published comparison of one of our simulators against held-out human sessions, which is why it is the number to quote rather than a claim of realism. Adding a cognitive user model lifts next-action accuracy from 0.3683 to 0.4772 on the Sowiport sessions and from 0.3150 to 0.4609 on AOL. Say the second half out loud: on plain query and click prediction a simple probabilistic baseline still wins, and do not quote its stop-prediction numbers, which are degenerate at 1.0.
-- **Evidence selection and stopping.** This is where human sessions are needed, and where the ceiling shows: SearchLab's 480 sessions and UXLab's eight-person pilot are what a single group can run. Hold that number in mind against the hundred thousand simulated steps on the next slide, because the asymmetry is the pooling argument.
-- **Satisfaction, trust and effort.** Beyond the Click does not collect new human data; it infers cognitive state from behaviour already logged, over 50,942 sessions, and the gain is largest where click signals are weakest. Treat it as how far inference gets without asking people, which is further than expected and still not far enough. The caution, if pressed: a shuffled-label control beats the cognitive labels in three of twelve cells, so part of the gain is regularisation.
-
-The line to land before moving on: this is good enough to build on, which is why the next step was to point the same machinery at agents rather than at people.
-
-→ next: so we turned it on agents.
+→ next: and then the thing being simulated changed.
 
 --
 
@@ -2077,9 +2054,9 @@ The line to land before moving on: this is good enough to build on, which is why
 
 
 
-<div class="c-important">
+<div class="c-important small">
 
-SimIIR simulated the person at the keyboard. What searches now is an agent, so the unit of simulation is a trajectory, and a trajectory can be checked against its own citations.
+SimIIR simulated the person at the keyboard. What searches now is an agent, so the unit of simulation is a whole trajectory. Every step records the documents it used, so the trace can be checked rather than believed.
 
 </div>
 
@@ -2099,7 +2076,7 @@ Reading the figure, left to right.
 
 - **1 and 2, the inputs.** Grounded corpora with questions, and corpus-aware seeding: cluster the corpus and draw seed queries that cover it, instead of sampling at random. Random seeds revisit the same regions; corpus-aware seeding reaches cluster coverage of 1.00 against 0.97 to 0.99 for random, with near-zero document redundancy.
 - **3, the middle box, is AgentSim itself.** A configurable RAG workflow, built visually or from the command line, running the cycle the figure shows: search with query reformulation, retrieve, rerank, summarise, and round again. That loop is the difference from SimIIR, whose searcher queries, examines a result, judges it and stops.
-- **4, the validation loop, and the trace excerpt on the right.** Every step records the query, the answer, the evidence count and whether it was verified. Because the answer names the documents it used, grounding is checked rather than assumed: of 1,385 substantive answers all were grounded in their cited documents, mean token coverage 0.872, and 83.3 per cent of 6,125 atomic claims were fully supported under an entailment check.
+- **4, the validation loop, and the trace excerpt on the right.** This is what the line under the figure means by checking a trace. A step is not only text: it records the query, the answer, and the documents the agent actually retrieved and used at that point. So a checker can take the claim a step makes and the documents it named, and ask whether one follows from the other, without a person reading it. That is the difference between inspecting a simulated session and verifying one. The result of doing that: of 1,385 substantive answers all were grounded in their cited documents, mean token coverage 0.872, and 83.3 per cent of 6,125 atomic claims were fully supported under an entailment check.
 
 The cost, since it is the argument. Roughly 20 million API tokens, 200 to 300 dollars for the whole corpus, about 0.14 dollars per simulation, 58 steps on average.
 
@@ -2150,7 +2127,7 @@ Keep the both-roles observation for the spoken line if it lands: the same trajec
 
 <div class="c-insight">
 
-A small model trained on the traces of a large one learns to *run* the search loop, not just to label it: the action policy transfers, and the end-to-end answer improves.
+A small model trained on the traces of a large one does not just label the next action. Put in charge of the search — choosing every action and writing the answer — it answers better than the pipeline it learned from.
 
 </div>
 
@@ -2169,7 +2146,7 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 - **The task.** Given the state of a search trajectory, predict which of seven actions comes next: decompose, search, reformulate, extract, synthesise, verify, finish.
 - **The filtering matters.** 5,000 teacher rollouts, only 1,490 accepted. The student learns from work that succeeded, not from everything the teacher did.
 - **The headline.** Macro-F1 0.65 for the fine-tuned 3B model against 0.17 for the same model prompted zero-shot, and 0.54 for a TF-IDF baseline. The capability is learned, not prompted.
-- **The check that matters more.** Swapped in as both controller and generator over 149 held-out trajectories, end-to-end exact match rises from 0.75 to 0.79 and token F1 from 0.78 to 0.83. That says the policy transferred, not only the classifier.
+- **The check that matters more, and what it means.** "Driving the loop" is the second experiment: instead of only predicting labels, the fine-tuned 3B model is put in both seats at once. As **controller** it decides which of the seven actions comes next at every step, and as **generator** it writes the answer at the end. Nothing of the large teacher model is left in the loop. Over 149 held-out trajectories that raises end-to-end exact match from 0.75 to 0.79 and token F1 from 0.78 to 0.83, so what transferred is the policy for running a search, not merely a classifier for naming steps.
 - **Why it belongs here.** It closes the cost argument: if traces can be made cheaply and verified, the capability they teach does not have to be rented from a frontier model.
 
 → next: and yet none of it tells us who asked.
@@ -2497,22 +2474,21 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 
 <!-- .slide: class="smaller" -->
 
-## Giving agents a purpose: publish an opinion, with its evidence
+## A purpose for agents: AI opinions plus evidence
 
 
-<div class="grid-3-2 gap-lg">
+<div class="grid-2-1 gap-lg">
 
 
 <div class="column">
 
+
+<div class="img-h-lg">
+
 ![The AI Opinions vertical of OURRS for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
 
-
-<div class="figure-credit">
-
-ourrs.eu, AI Opinions, query *passau*, September 2026: about 870 opinions published by agents. "These are opinions, not answers from this search engine. Read the sources rather than trusting the opinion."
-
 </div>
+
 
 
 </div>
@@ -2524,9 +2500,9 @@ ourrs.eu, AI Opinions, query *passau*, September 2026: about 870 opinions publis
 <div class="card">
 
 ### What each opinion carries
-- the **model** that wrote it, named on the result
-- the **documents** it cites, listed beside the page
-- an **epistemic stance**: the author calls this established
+- the **model** that wrote it, 
+- the **documents** it cites,
+- an **epistemic stance**,
 - **votes**, and relations: contradicting, superseding
 
 </div>
@@ -2539,7 +2515,7 @@ ourrs.eu, AI Opinions, query *passau*, September 2026: about 870 opinions publis
 - a **relation schema**: supports, counters, refines, questions
 - **validity and lifecycle**, so a claim can be retired rather than persist
 - **rounds**: generate, then critique, then review, with governance deciding what stays
-- all of it in **[NuggetPedia](https://nuggetpedia.com)**, the governed layer agents write into
+- predecessor was **[NuggetPedia](https://nuggetpedia.com)** which focused on more atomic facts
 
 </div>
 
@@ -2553,7 +2529,7 @@ ourrs.eu, AI Opinions, query *passau*, September 2026: about 870 opinions publis
 Notes:
 Goal: show what a purpose looks like for an agent. Not a task it completes and forgets, but an artefact it publishes that other agents and people can find, cite and contest.
 
-Read the header line aloud, because it sets the epistemic frame: about 870 opinions published by agents, and the page says plainly that these are opinions and not answers from this search engine.
+The credit for the screenshot, since it is no longer printed: ourrs.eu, the AI Opinions vertical, query *passau*, September 2026. Read the header line aloud, because it sets the epistemic frame: about 870 opinions published by agents, and the page says plainly that these are opinions and not answers from this search engine.
 
 The left card is all visible on the screen.
 
@@ -2582,7 +2558,7 @@ Retake the screenshot on the talk day; the opinion count moves.
 <div class="column">
 
 
-<div class="img-h-md">
+<div class="img-h-md figure-120">
 
 ![NuggetIndex: passage retrieval versus nugget retrieval, 887 versus 320 input tokens](/slides/_assets/ows/papers/nuggetindex.png)
 
@@ -2615,18 +2591,18 @@ Zerhoudi et al., NuggetIndex, Fig. 4: granularity and prompt efficiency.
 
 
 
+
+</div>
+
+
+</div>
+
+
 <div class="c-warning tight">
 
-Not a universal win: on static curated benchmarks passages still lead by 1.5 to 4 points. The gain is in time and conflict.
+Not a universal win: on static curated benchmarks (HotpotQA) the passages still lead by 1.5 to 4 points. The gain is in time and conflict.
 
 </div>
-
-
-</div>
-
-
-</div>
-
 
 
 <div class="slide-citation">
@@ -3256,7 +3232,67 @@ This is either evaluated on shared, open infrastructure, or it is evaluated insi
 
 Notes:
 Tone: "here is what we find interesting and are starting to do", not "here is what CLEF must do". Several rows already have a home in CLEF and TREC labs; credit LongEval, WOWS-Eval and Sim4IA. The new rows are the last three. The sovereignty line returns here: complex human–agent systems will be evaluated somewhere; the question is whether the community can do it on infrastructure it controls. Offer the index, OURRS instances and the trace format, and ask what the room would want from them.
-Backup slide: the area-by-area version of the open problem.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+Backup slide: the area-by-area version of the open problem.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: how good is the simulation, and where does it stop?
+
+| What a session has to produce | How simulation does | The check, and where it comes from |
+|---|---|---|
+| queries and next actions | **best**; a cognitive user model measurably helps | next-action accuracy **0.37 → 0.48** on the Sowiport sessions, 0.32 → 0.46 on AOL · *CACSM*, JCDL 2024 |
+| evidence selection and stopping | **partly**; the errors are systematic, so it has to be calibrated against people | **480 human sessions** across traditional, conversational and hybrid interfaces · *SearchLab*, CHIIR 2025, and the *UXLab* pilot, CHIIR 2026 |
+| satisfaction, trust, effort | **not simulated**; it can only be inferred from behaviour | cognitive states inferred over **50,942 sessions**, and they help most exactly where click signals are weakest · *Beyond the Click*, ECIR 2026 |
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="c-positive">
+
+Simulation is strong where behaviour is typed, and that is the part an experiment controls. It is good enough to build on.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+And it is still wrong more often than right: fewer than half the predicted next actions are correct, so this is an instrument for controlled experiments, not a stand-in for people.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Goal: place the honest boundary before scaling any of it up. Simulation is strong on what people type and weak on what they feel, and the only published comparison against real sessions gets fewer than half its next actions right.
+
+How to read the table. Each row is a thing a simulated session has to produce, ordered by distance from the keyboard: queries are typed and therefore logged, stopping is a decision that has to be inferred, satisfaction is internal and can only be asked about. The third column is deliberately the evidence rather than an opinion, so every claim in the middle column has a paper behind it.
+
+Row by row.
+
+- **Queries and next actions.** CACSM is the only published comparison of one of our simulators against held-out human sessions, which is why it is the number to quote rather than a claim of realism. Adding a cognitive user model lifts next-action accuracy from 0.3683 to 0.4772 on the Sowiport sessions and from 0.3150 to 0.4609 on AOL. Say the second half out loud: on plain query and click prediction a simple probabilistic baseline still wins, and do not quote its stop-prediction numbers, which are degenerate at 1.0.
+- **Evidence selection and stopping.** This is where human sessions are needed, and where the ceiling shows: SearchLab's 480 sessions and UXLab's eight-person pilot are what a single group can run. Hold that number in mind against the hundred thousand simulated steps on the next slide, because the asymmetry is the pooling argument.
+- **Satisfaction, trust and effort.** Beyond the Click does not collect new human data; it infers cognitive state from behaviour already logged, over 50,942 sessions, and the gain is largest where click signals are weakest. Treat it as how far inference gets without asking people, which is further than expected and still not far enough. The caution, if pressed: a shuffled-label control beats the cognitive labels in three of twelve cells, so part of the gain is regularisation.
+
+The line to land before moving on: this is good enough to build on, which is why the next step was to point the same machinery at agents rather than at people.
+
+Backup slide: what the simulators are worth, measured against held-out human sessions.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 

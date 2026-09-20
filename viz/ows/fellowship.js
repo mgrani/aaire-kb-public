@@ -95,9 +95,10 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   // end-to-end
   gRes.append('rect').attr('x', 678).attr('y', 254).attr('width', 312).attr('height', 104).attr('rx', 9)
     .attr('fill', SURFACE).attr('stroke', VIOLET).attr('stroke-width', 1.6)
-  txt(gRes, 834, 276, 'Driving the whole loop', 12.5, VIOLET, 700, 'middle')
+  txt(gRes, 834, 272, 'It runs the search itself', 12.5, VIOLET, 700, 'middle')
   txt(gRes, 834, 312, '0.75 → 0.79', 27, VIOLET, 700, 'middle')
-  txt(gRes, 834, 338, 'exact match, end to end', 12.5, SOFT, 400, 'middle')
+  txt(gRes, 834, 334, 'exact match, end to end: the 3B model now picks', 11.5, SOFT, 400, 'middle')
+  txt(gRes, 834, 349, 'every action and writes the answer', 11.5, SOFT, 400, 'middle')
 
   // ── the line under it all ─────────────────────────────────────────────────
   const gLine = svg.append('g')
