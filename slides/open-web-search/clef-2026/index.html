@@ -820,7 +820,13 @@ This is the offer to the community, so make it the loudest sentence of Topic 1. 
 
 
 
-TODO: screenshot plus slides
+
+<div class="center">
+
+### [openwebindex.eu](https://openwebindex.eu)
+
+</div>
+
 
 --
 
@@ -1044,14 +1050,16 @@ This slide is a credit, not a critique, and it is the room's own work. Relevance
 
 <!-- .slide: class="module-slide" -->
 
-## What the Open Web Index contributes to evaluation
+## Topic 2 · Corpora for evaluation, and scale as a variable
 
-<span class="eyebrow">Web data collection at scale, and what a lab can do with it</span>
+<span class="eyebrow">What an open index lets a lab cut for itself, and what that makes measurable</span>
 
 <div class="viz" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "caption": false}'></div>
 
 Notes:
-The infrastructure half of Topic 1 ends here: the project, the index, the ways in, and where it is going. What follows is the other half, and it is the half this room cares about — what a daily, preprocessed, web-scale collection makes possible for evaluation that was not possible before.
+Topic 1 ended with the infrastructure and where it goes next. This topic is what the room can do with it: the collections an open index lets a lab cut for itself, and the variables those collections expose.
+
+The through-line that holds nine slides together: a collection is an instrument for holding everything fixed except one thing. Language in one case, place in another, corpus size in a third, how messy the text is in a fourth. None of those cuts is available if the corpus belongs to somebody else.
 
 --
 
@@ -1153,7 +1161,7 @@ Dinzinger et al., *WebFAQ 2.0*, SIGIR 2026 · Dinzinger et al., *The WebKurator.
 
 Notes:
 The point of the pair is that they are cut from the same crawl along different axes, and each axis is a variable somebody in this room wants to control. WebFAQ is the index used as a training-data factory: structured data was extracted during processing, so FAQ pages can be harvested without a second crawl, and version 2 stops relying on someone else's Web Data Commons extraction and mines the URLs itself. What makes it an evaluation resource rather than a dump is the alignment and the negatives: 14.3 million pairs that say the same thing in two languages, and 200 mined hard negatives for each of 1.25 million queries. One honest detail worth saying: those negatives help when they are distilled with MarginMSE and hurt when they are used naively in a contrastive loss, because some of them are false negatives. WebKurator is the same index cut by place; the country split, if asked, is 85.6 per cent Germany, 7.3 Austria and 5.2 Switzerland. Imprint pages are a legal requirement in Germany, so they carry an address, and an address geocodes; that is why a national-scale regional index can be bootstrapped at all. Curlie is one-dimensional, and the WebKurator argument is that topic and region are separate questions. If asked what this has to do with evaluation: a regional sub-collection is a realistic, small, nameable slice, and those are the collections labs can actually afford to judge. Third strand, if time allows: continued pre-training on crawled index text improved cross-lingual hate-speech detection by about three macro-F1 points averaged over 16 benchmarks, which is Dang, Mitrović and Granitzer at LREC 2026 — evidence that this data measurably improves a model, not only a benchmark.
-→ next: and the collection this community will meet first.
+→ next: two more variables, and the first one is size.
 
 --
 
@@ -1224,6 +1232,133 @@ Goal: the abstract argument becomes something people can download this afternoon
 The exact figures, kept off the slide. 20,746,181 documents, roughly 70 GB in 500 Parquet files, with Jina v3 embeddings for the judged subsamples. The splits are `radboud-val` with 63,639 documents, which ships its qrels, and `radboud` with 90,852 and `jena-kassel` with 77,382, which keep theirs withheld. The crawl window is 1 March to 31 August 2025, and WOWS 2026 runs from 29 March to 2 April. The 2026 workshop proceedings are not published yet, so cite the collection and the workshop rather than a paper.
 
 Give it the numbers out loud, not on the slide. Six months of crawl, the Curlie-labelled English sub-collection, 20.7 million documents, subsampled per split so that judging stays feasible. The chain is the point: our own crawl, our own preprocessing, a slice chosen on purpose, topics and judgements produced inside IR teaching at three universities, and evaluation on infrastructure this community already runs — ChatNoir for search and TIRA for the submissions, both from Webis. Nobody had to sign a data agreement with a search engine. Say clearly what is withheld and why: the validation split ships with qrels so people can develop, the two test splits do not, which is what makes it a shared task rather than a dataset dump. Two caveats to keep honest. There is no paper for this collection, so cite the workshop repository. And the earlier WOWS editions are a different task: the 2025 edition ran WOWS-Eval, automated relevance-label transfer, on ClueWeb22 through TIRA, and its headline result was negative — cheap automatic judges correlated at most 0.427 with human labels. Do not merge the two editions into one story from the stage.
+→ next: and the same collection, served live.
+
+--
+
+## Does scale matter, if we can isolate the effect in a test collection?
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/corpus-scale" data-steps="4"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="hypothesis h2">
+
+**Scale is a scientific variable.** Corpus size and complexity change effectiveness, efficiency and robustness. A result on a small collection does not carry over to the web by itself.
+
+</div>
+
+
+
+<div class="card">
+
+The relevant document stays one. What grows is what the ranker has to reject.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Explain the figure in one breath: the star is the relevant document, the rings are the corpus growing from ten thousand passages to the web, and the coloured dots are what competes with it: passages that look relevant, near-duplicates, other languages, contradictions. The web adds one more thing, cost. State this as a hypothesis; the next two slides are the evidence, and both were only possible because we could grow a corpus ourselves.
+→ next: the evidence.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## CoRECT: A Framework for Evaluating Embedding Compression Techniques at Scale
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+![CoRECT: Recall@100 against corpus size for truncation and quantization settings](/slides/_assets/ows/papers/corect.png)
+
+
+<div class="figure-credit">
+
+Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with distractors mined from TREC DL runs, after Fröbe et al. (ECIR 2025), not by random sampling.
+
+</div>
+
+
+
+<div class="c-positive tight">
+
+- **Scale alone** costs **29 points** of Recall@100 from 10K to 100M and flips model choice
+- **Quantization is free at every size**, down to 2 bits per dimension.
+- **Truncation and 1-bit are not**: free at 10K, costly at 100M.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+- **Question** Do compression methods hold up as the corpus grows?
+- **Setup** CoRE: the same 65 TREC DL 2023 queries and judgements throughout, the corpus grown from 10K to 100M passages. Each query keeps 10 relevant passages and **100 distractors** mined by the subsampling method of Fröbe et al.; the rest is random filler. Four embedding models, eight compression families.
+- **Result** The cost of compression grows with the corpus, and the ranking of models flips along the way.
+- **Conclusion** A conclusion drawn at 10K passages can be wrong at 100M. Compression must be evaluated at scale.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Caspari, Dinzinger, Ghosh Dastidar, Fellicious, Mitrović, Granitzer, *CoRECT*, ECIR 2026
+
+</div>
+
+
+Notes:
+Goal: a compression decision taken at benchmark scale can be wrong at web scale, and the collection is built so that nothing but scale changes.
+
+Reading the figure.
+
+- Three panels, all Snowflake V2. Horizontal axis is corpus size on a log scale, 10 thousand to 100 million; vertical axis is Recall@100. Stars mark a significantly lower recall than the blue baseline, one-sided Wilcoxon at p = 0.05.
+- Panel (a): passage retrieval at full precision, one line per truncated vector size from 768 down to 24.
+- Panel (b): the same passages quantized, one line per bit depth from 32 down to 1.
+- Panel (c): the same as (b) for documents, which is why it ends at 10 million.
+- The blue line in (a) is the no-compression case: recall falls 0.82 to 0.53 on identical queries and judgements.
+- In (a), 384, 256 and 192 dimensions track the baseline, 96 separates, 48 and 24 collapse.
+- In (b), every bit depth sits on top of the others until 10 million, and only 1-bit binarisation pulls away at 100 million.
+
+How the corpus was built.
+
+- CoRE is subsampled from MS MARCO v2, not newly crawled, and keeps the TREC Deep Learning 2023 judgements fixed: 65 queries for passages across 10K, 100K, 1M, 10M and 100M, 55 queries for documents across 10K to 10M, and exactly 10 relevant items per query at every size.
+- Random sampling would remove the hard negatives and make the small corpora unrealistically easy. CoRE therefore uses the subsampling method of Fröbe, Parry, Scells, Wang, Zhuang, Zuccon, Potthast and Hagen, *Corpus Subsampling: Estimating the Effectiveness of Neural Retrieval Models on Large Corpora*, ECIR 2025.
+- The distractor mining, from the paper: take the runs submitted to TREC DL 2023, discard the bottom 20 per cent by effectiveness, fuse the rest with Reciprocal Rank Fusion, and keep the top 100 irrelevant or unjudged documents per query. Each query gets exactly those 100 distractors plus its 10 relevant items; the rest of the corpus is random filler.
+- So the corpus grows by adding filler while the hard part of the task stays fixed. The decay on the slide is what filler alone does to a constant retrieval problem.
+
 → next: and the same collection, served live.
 
 --
@@ -1356,7 +1491,7 @@ The right-hand column, said plainly. A live index is exactly what a temporal eva
 
 --
 
-## Summary so far: infrastructure, not only models
+## Summary so far
 
 
 <div class="hypothesis h1">
@@ -1369,251 +1504,17 @@ The right-hand column, said plainly. A live index is exactly what a temporal eva
 
 <div class="marks-step">
 
-- Evaluating an agent-search systems fully means running web-scale retrieval which requires large web-crawls and significanct infrastructure.
-- No single institute affords that alone. On shared public infrastructure, many institutes can, which is the model of other infrastructure-heavy research fields with high impact
-- Building and operating an index and a search engine has become feasible for small teams, in part because coding agents now carry much of the engineering.
+- Scale and text quality are variables for web search systems
+- Evaluating agentic search fully means running web-scale retrieval, which needs large crawls and real infrastructure.
+- No single institute affords that alone. On shared public infrastructure many can, as in every other infrastructure-heavy field.
+- Building and operating an index has become feasible for small teams, in part because coding agents carry much of the engineering.
 
 </div>
 
 
 Notes:
-This is the summary of Topic 1, so say so: we asked what it takes to evaluate an agentic search system, we built the substrate, and this is what it adds up to. Recap in one breath before the hypothesis: a sovereign system needs an open corpus and an open index below the model, that index exists and is rebuilt daily, it can be pulled or queried where it lies, and it already carries a judged collection and a live endpoint that a lab can use this year. The first claim restated, then the systems argument: the unit of evaluation is moving from the component to the system, and systems need infrastructure that runs. The joint-effort sentence is the one to stress: exhaustive web-scale retrieval experiments with agents are beyond any one group, but not beyond a community that shares an index and public compute. The last point is first-person experience; say which parts of the pipeline and the search engine were built and are maintained that way.
-→ Topic 2, and what the index made askable.
-
----
-
-<!-- .slide: class="module-slide" -->
-
-## Topic 2 · Scale and robustness as research variables
-
-<span class="eyebrow">What changes when the corpus grows, and when the text is real web text</span>
-
-<div class="viz" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "caption": false}'></div>
-
-Notes:
-Topic 2 is what the index made askable. Both variables need the same thing: a corpus you can grow, shrink and vary yourself.
-
---
-
-## Does scale matter, if we can isolate the effect in a test collection?
-
-
-<div class="grid-figure gap">
-
-
-<div class="column">
-
-<div class="viz viz-lg" data-viz="ows/corpus-scale" data-steps="4"></div>
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="hypothesis h2">
-
-**Scale is a scientific variable.** Corpus size and complexity change effectiveness, efficiency and robustness. A result on a small collection does not carry over to the web by itself.
-
-</div>
-
-
-
-<div class="card">
-
-The relevant document stays one. What grows is what the ranker has to reject.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Explain the figure in one breath: the star is the relevant document, the rings are the corpus growing from ten thousand passages to the web, and the coloured dots are what competes with it: passages that look relevant, near-duplicates, other languages, contradictions. The web adds one more thing, cost. State this as a hypothesis; the next two slides are the evidence, and both were only possible because we could grow a corpus ourselves.
-→ next: the evidence.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## CoRECT: A Framework for Evaluating Embedding Compression Techniques at Scale
-
-
-<div class="grid-2-1 gap-lg">
-
-
-<div class="column">
-
-![CoRECT: Recall@100 against corpus size for truncation and quantization settings](/slides/_assets/ows/papers/corect.png)
-
-
-<div class="figure-credit">
-
-Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with distractors mined from TREC DL runs, after Fröbe et al. (ECIR 2025), not by random sampling.
-
-</div>
-
-
-
-<div class="c-positive tight">
-
-- **Scale alone** costs **29 points** of Recall@100 from 10K to 100M and flips model choice
-- **Quantization is free at every size**, down to 2 bits per dimension.
-- **Truncation and 1-bit are not**: free at 10K, costly at 100M.
-
-</div>
-
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="paper detail">
-
-- **Question** Do compression methods hold up as the corpus grows?
-- **Setup** CoRE: the same 65 TREC DL 2023 queries and judgements throughout, the corpus grown from 10K to 100M passages. Each query keeps 10 relevant passages and **100 distractors** mined by the subsampling method of Fröbe et al.; the rest is random filler. Four embedding models, eight compression families.
-- **Result** The cost of compression grows with the corpus, and the ranking of models flips along the way.
-- **Conclusion** A conclusion drawn at 10K passages can be wrong at 100M. Compression must be evaluated at scale.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="slide-citation">
-
-Caspari, Dinzinger, Ghosh Dastidar, Fellicious, Mitrović, Granitzer, *CoRECT*, ECIR 2026
-
-</div>
-
-
-Notes:
-Goal: a compression decision taken at benchmark scale can be wrong at web scale, and the collection is built so that nothing but scale changes.
-
-Reading the figure.
-
-- Three panels, all Snowflake V2. Horizontal axis is corpus size on a log scale, 10 thousand to 100 million; vertical axis is Recall@100. Stars mark a significantly lower recall than the blue baseline, one-sided Wilcoxon at p = 0.05.
-- Panel (a): passage retrieval at full precision, one line per truncated vector size from 768 down to 24.
-- Panel (b): the same passages quantized, one line per bit depth from 32 down to 1.
-- Panel (c): the same as (b) for documents, which is why it ends at 10 million.
-- The blue line in (a) is the no-compression case: recall falls 0.82 to 0.53 on identical queries and judgements.
-- In (a), 384, 256 and 192 dimensions track the baseline, 96 separates, 48 and 24 collapse.
-- In (b), every bit depth sits on top of the others until 10 million, and only 1-bit binarisation pulls away at 100 million.
-
-How the corpus was built.
-
-- CoRE is subsampled from MS MARCO v2, not newly crawled, and keeps the TREC Deep Learning 2023 judgements fixed: 65 queries for passages across 10K, 100K, 1M, 10M and 100M, 55 queries for documents across 10K to 10M, and exactly 10 relevant items per query at every size.
-- Random sampling would remove the hard negatives and make the small corpora unrealistically easy. CoRE therefore uses the subsampling method of Fröbe, Parry, Scells, Wang, Zhuang, Zuccon, Potthast and Hagen, *Corpus Subsampling: Estimating the Effectiveness of Neural Retrieval Models on Large Corpora*, ECIR 2025.
-- The distractor mining, from the paper: take the runs submitted to TREC DL 2023, discard the bottom 20 per cent by effectiveness, fuse the rest with Reciprocal Rank Fusion, and keep the top 100 irrelevant or unjudged documents per query. Each query gets exactly those 100 distractors plus its 10 relevant items; the rest of the corpus is random filler.
-- So the corpus grows by adding filler while the hard part of the task stays fixed. The decay on the slide is what filler alone does to a constant retrieval problem.
-
-→ next: the same question, as a method.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Robustness: benchmark text is clean, the web is not
-
-
-<div class="grid-2 gap-lg">
-
-
-<div class="column">
-
-
-<div class="img-h-sm">
-
-![The Synthetic Noise dataset: a relevant passage placed at the start, middle or end of padding taken either from its own source page or from an unrelated one](/slides/_assets/ows/papers/noisy-setup.png)
-
-</div>
-
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="paper detail">
-
-- **Setup** 41,371 MS MARCO passages, padded with real web text. 3 positions × 6 lengths × 2 context types = **36 sub-corpora**, six models.
-- **Result** At least **33 nDCG@10 points** lost across every model, 50 for GTE Qwen2. Arctic M: **79.6 → 4.3**.
-- **Conclusion** Position and unrelated context dominate. Chunking recovers only part.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="grid-2 gap figure-80">
-
-
-<div class="column">
-
-![Arctic M: nDCG@10 as the relevant passage is buried in web text](/slides/_assets/ows/papers/noisy-arctic.png)
-
-</div>
-
-
-<div class="column">
-
-![GTE Qwen2 1.5B: the same experiment](/slides/_assets/ows/papers/noisy-qwen.png)
-
-</div>
-
-
-</div>
-
-
-
-<div class="slide-citation">
-
-Dinzinger, Caspari, Ghosh Dastidar, Mitrović, Granitzer, *Investigating the Robustness of Embedding Models on Noisy Input Texts*, WOWS 2025 · Caspari et al., *When Is Complex Chunking Worth It?*, CIKM 2026.
-
-</div>
-
-
-Notes:
-Goal: benchmark passages are clean and web pages are not, and that difference costs more retrieval quality than most compression or model choices.
-
-Reading the figures.
-
-- Two charts, the same experiment on two models: Arctic M above, GTE Qwen2 1.5B below.
-- Each chart splits into In-Domain on the left and Out-of-Domain on the right, meaning the padding text is topically related to the passage or not.
-- Within each half the horizontal axis is how much padding was added, 100, 300 or 500 tokens, and the three bars are where the relevant passage sits: start, middle, end.
-- The red dashed line is the model's score on the clean passages, 79.64 for Arctic M. Every bar is a fall from that line.
-- Left half: with related padding the bars stay near the line, so length alone is survivable.
-- Right half: with unrelated padding everything drops, and further the more padding there is.
-- Within a group, start is always tallest. Arctic M at 500 tokens out of domain: 46.5 at the start, 6.4 in the middle, 4.3 at the end.
-
-How the collection was built.
-
-- 41,371 MS MARCO passages are the core. The dataset gives the source URL of each passage, so the surrounding page can be scraped and used as real padding rather than generated filler.
-- 36 sub-corpora come from varying three things: document length, the position of the relevant passage, and whether the padding is topically related. In-Domain padding comes from the passage's own page, Out-of-Domain from an unrelated one.
-- The dilution is the point: at 100 tokens of padding the relevant passage is still 68 per cent of the document, at 300 it is 24 per cent, at 500 it is 14 per cent, and in the longest setting roughly 98 per cent of the input is irrelevant.
-- Six models, from BGE small at 33 million parameters to GTE Qwen2 at 7 billion. Size does not rescue anyone.
-- The paper's own summary: a drop of at least 33 nDCG@10 points across all models, at least 50 for GTE Qwen2 1.5B at 500 tokens.
-- Chunking recovers part of the loss, and the companion CIKM 2026 study finds no strategy that wins across models, corpus sizes and metrics.
-- Why it belongs in a talk about infrastructure: the experiment needs real crawled pages with their boilerplate, which an owned index supplies and a cleaned benchmark cannot.
-
-→ next: Topic 3, where the data does not exist unless we create it.
+This closes Topics 1 and 2 together, so say so: we asked what it takes to evaluate an agentic search system, we built the substrate, and this is what it adds up to. Recap in one breath before the hypothesis: a sovereign system needs an open corpus and an open index below the model, that index exists and is rebuilt daily, it can be pulled or queried where it lies, and it already carries a judged collection and a live endpoint that a lab can use this year. The first claim restated, then the systems argument: the unit of evaluation is moving from the component to the system, and systems need infrastructure that runs. The joint-effort sentence is the one to stress: exhaustive web-scale retrieval experiments with agents are beyond any one group, but not beyond a community that shares an index and public compute. The last point is first-person experience; say which parts of the pipeline and the search engine were built and are maintained that way.
+→ Topic 3, where the data does not exist unless we create it.
 
 ---
 
@@ -1632,7 +1533,7 @@ This part lets the loop run. The agent plans, searches, reads, reformulates and 
 
 <!-- .slide: class="smaller" -->
 
-## A good summary beats a good ranking
+## A good summary overcomes a bad ranking
 
 
 <div class="grid-2-1 gap-lg">
@@ -1702,7 +1603,7 @@ Open the part with this, before any history, because it makes the case in one sc
 
 ## Query Logs and their limits
 
-Click models, position and trust bias and counterfactual learning to rank all came out of these files. The limits below are structural, not a verdict on their worth.
+We collected logs to understand the user: what they asked, what they chose, and what that says about relevance. Click models, position and trust bias and counterfactual learning to rank all came out of these files. The limits below are structural, not a verdict on their worth.
 
 
 <div class="timeline">
@@ -1748,6 +1649,7 @@ Click models, position and trust bias and counterfactual learning to rank all ca
 - **558,008 sessions** and **8M interactions** of **58 kinds** in one year, with the result lists stored as they were shown.
 - Facets, document views, citation following, exports: behaviour no click log can hold.
 - Rich because a research institution operated the search system.
+- Still limited in time and user group
 
 </div>
 
@@ -1767,7 +1669,11 @@ Reimer et al., *The Archive Query Log*, SIGIR 2023 (quotation, and the per-log f
 
 
 Notes:
-Goal: query logs were valuable and are not the villain of this talk. They were limited in what they could contain, scarce, and hard to release, and none of those limits is going away. Say the positive half first and mean it: click models, position and trust bias and counterfactual learning to rank all came out of these files, and ORCAS and MS MARCO Web Search are genuinely useful recent releases.
+Goal: query logs were valuable and are not the villain of this talk.
+
+The bridge from the previous slide, and say it explicitly, because it is the reason this slide exists. That screenshot showed a ranking that was wrong and a user who was satisfied anyway. The only way to know which of those two things happened is to watch the user. That is why the field collected logs in the first place: not to count queries, but to learn what people actually did with the results we gave them.
+
+The competitive argument, if you want it sharper than the quotation on the slide: query and click logs are a live business asset, and access to them has become a competition-policy question rather than only a privacy one. There is a current European Commission case against Google and a complaint from DuckDuckGo that turn on exactly this; look up the reference before the talk, because I could not verify it from a primary source here and it should not be named from the stage unchecked. They were limited in what they could contain, scarce, and hard to release, and none of those limits is going away. Say the positive half first and mean it: click models, position and trust bias and counterfactual learning to rank all came out of these files, and ORCAS and MS MARCO Web Search are genuinely useful recent releases.
 
 The three limits, in order.
 
@@ -1805,7 +1711,7 @@ The digital-library counterpoint, which is the new card.
 
 - Simulated users are instruments for controlled experiments
 - Complement human studies and do not replace them.
-- recision@10 is already a user simulation of a user who reads exactly ten documents.
+- Precision@10 is already a user simulation of a user who reads exactly ten documents.
 - It's not about whether to simulate, but how realistic simulation can get
 
 
@@ -1832,7 +1738,7 @@ The Complex Searcher Model: query, scan a snippet, read, judge, stop. Every deci
 
 <span class="eyebrow">2022</span>
 ### SimIIR 2.0
-The rules give way to Markov models trained on real library logs, split by user type, and queries are generated from what the session has already seen.
+Extension by Markov models trained on real library logs, split by user type.
 
 </div>
 
@@ -1891,7 +1797,7 @@ Start with why, because the why is the whole argument. We did not begin simulati
 
 <!-- .slide: class="smaller" -->
 
-## SimIIR 3.0: what a simulator has to contain
+## SimIIR 3.0 and what it contains
 
 
 <div class="img-h-lg">
@@ -1939,7 +1845,8 @@ Azzopardi, Breuer, Engelmann, Kreutz, MacAvaney, Maxwell, Parry, Roegiest, Wang,
 
 Notes:
 This is the state of the art in one picture, and it is worth showing because the list is longer than people expect. Read the figure in three moves rather than box by box. On the left, what a simulation is configured from: topics, a retrieval system and now a conversational agent. In the middle, the searcher models that consume those configurations. On the right, the two columns of components a simulated user is assembled from, classic search on the blue side and conversation on the green. Green is the whole story of version 3: conversational users, Markov users, cognitive states, pyTerrier underneath and language-model variants of every component. Two things to stress. Language-model support is a wrapper, so the simulated user can be any model, which is what made the last two years of work possible at all. And the architecture keeps the parts that make a simulation checkable: a real retrieval toolkit underneath through pyTerrier, Markov models for the transitions, and an explicit cognitive state. Explain the cognitive state briefly, because it is the component people ask about. A classic simulated searcher is a transition machine: it queries, examines a result, judges it, and stops on a rule. A cognitive state adds a small represented mind between those steps, holding what the user believes they have found so far, what is still missing and how certain they are, updated after each result and used to choose the next query and the moment to stop. The value is not realism, it is inspectability: when a simulated session behaves oddly you can read the state that produced it, which is impossible with a prompt-only simulated user. Then the honest note, from the authors' own closing slide: their research directions are still questions, not answers — query generation quality, decision-making fidelity, behaviour modelling. As of late 2024 the framework's own authors were not claiming that language-model simulators were validated.
-→ next: and once you can model a user, you can put that model inside retrieval.
+Then set up the next slide, because the jump only works if you name the shared construct. The cognitive state was built so that a *simulated* user could be inspected: an explicit little model of what this searcher believes, needs and is uncertain about. PersonaRAG keeps that construct and changes its job. Same idea, same group, same word: a profile, a session context, an explicit state about the user, maintained while the search runs. In the simulator it exists so an experiment can be read afterwards; in PersonaRAG it exists so retrieval can be steered while the user is still searching. Be precise about the status of that link, because someone will check: PersonaRAG does not cite SimIIR and is not derived from it. What carries over is the construct, not a lineage.
+→ next: the same user model, moved from the experiment into the pipeline.
 
 --
 
@@ -2071,9 +1978,17 @@ Reading the figure, left to right.
 - **3, the middle box, is AgentSim itself.** A configurable RAG workflow, built visually or from the command line, running the cycle the figure shows: search with query reformulation, retrieve, rerank, summarise, and round again. That loop is the difference from SimIIR, whose searcher queries, examines a result, judges it and stops.
 - **4, the validation loop, and the trace excerpt on the right.** This is what the line under the figure means by checking a trace. A step is not only text: it records the query, the answer, and the documents the agent actually retrieved and used at that point. So a checker can take the claim a step makes and the documents it named, and ask whether one follows from the other, without a person reading it. That is the difference between inspecting a simulated session and verifying one. The result of doing that: of 1,385 substantive answers all were grounded in their cited documents, mean token coverage 0.872, and 83.3 per cent of 6,125 atomic claims were fully supported under an entailment check.
 
+**What the 199,968 documents are**, since it is an easy question to get wrong. They are not generated and they are not a new corpus. They are the distinct documents the agents actually retrieved, through ChatNoir, out of the three existing collections that form the environment: MS MARCO, Quasar-T and CausalQA. The paper is explicit that it builds on those resources rather than replacing them, using their queries as starting points and their document collections as the environment. So the number is a coverage measure: how much of the corpus the simulation genuinely touched, which is the thing corpus-aware seeding is designed to maximise.
+
+**What else came out of it besides a pile of traces**, because "why do these exist" is the fair question. Four things.
+- **The platform**, with the two mechanisms that are the methodological contribution: corpus-aware seeding and active validation.
+- **Training data that demonstrably works.** Distilling the traces into small models: Qwen 2.5 0.5B raised its abstain-detection F1 from 0.362 to 0.815, matching a base model three times its size, and every model size learned to abstain when the evidence was insufficient, recall above 0.88. That is the answer to what the traces are for.
+- **Behavioural findings about the models themselves**, which no static benchmark shows: the three analysts explore very differently, six of nine pairwise comparisons significant with effect sizes up to Cohen's d 1.59.
+- **Verifiability as a property of the dataset.** The authors note that no existing reasoning-trace dataset reports token-level grounding verification against source documents.
+
 The cost, since it is the argument. Roughly 20 million API tokens, 200 to 300 dollars for the whole corpus, about 0.14 dollars per simulation, 58 steps on average.
 
-One finding to quote if there is time, because it is about the agents rather than the platform: the three models explore very differently. GPT-4o retrieved 31.7 per cent more unique documents than DeepSeek-V3 on MS MARCO and 176 per cent more on CausalQA, while DeepSeek-V3 falls back on keyword reformulation in 23.3 per cent of cases against 8.1 for GPT-4o. Behaviour is model-specific, which is why it has to be measured rather than assumed.
+The numbers behind the behavioural finding, if asked: GPT-4o retrieved 31.7 per cent more unique documents than DeepSeek-V3 on MS MARCO and 176 per cent more on CausalQA, while DeepSeek-V3 falls back on keyword reformulation in 23.3 per cent of cases against 8.1 for GPT-4o.
 
 Keep the both-roles observation for the spoken line if it lands: the same trajectory is the experiment and the product, because the agent stands in for the user and works for the user at once.
 
@@ -2162,13 +2077,15 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 <div class="c-danger">
 
 ### An indirection problem
-Did the agent choose this query, or did someone tell it to ask? The behaviour looks the same either way, and text, timing and community carry little of the difference. Not impossible to detect — but very hard, and getting harder.
+Did the agent choose this query, or did someone tell it to ask? 
+
+The behaviour looks the same either way, and text, timing and community carry little of the difference. Not impossible to detect — but very hard, and getting harder.
 
 </div>
 
 
 
-<div class="c-note small">
+<div class="c-note">
 
 **The agent is not a stable actor either.** It gains skills as it runs and loses its own instructions: after five rounds of ordinary context compaction, **10%** of its constraints survive.
 
@@ -2183,12 +2100,9 @@ Did the agent choose this query, or did someone tell it to ask? The behaviour lo
 <div class="viz" data-viz="ows/click-model-auc" data-steps="2"></div>
 
 
-<div class="c-warning tight small">
+<div class="c-warning tight">
 
-Our instruments assume one person with one intent. This one stops working.
-
-</div>
-
+One user with one search intent is no longer a sufficient working model. 
 
 </div>
 
@@ -2196,14 +2110,8 @@ Our instruments assume one person with one intent. This one stops working.
 </div>
 
 
-
-<div class="marks-ask small">
-
-- Do agents query in parallel rather than in sequence, and does that break our session model?
-- How do they choose sources, and can that be steered?
-- Do they search for tools and skills rather than for documents?
-
 </div>
+
 
 
 
@@ -2754,8 +2662,8 @@ One sentence each, with the strongest evidence from the talk: the landscape for 
 - OURRS instances to instrument
 - agent traces in a shared format
 - shared evaluation on open snapshots
+- anything else in the domain
 
-→ openwebsearch.eu · ourrs.eu · Chair of Data Science, University of Passau
 
 </div>
 
@@ -3250,7 +3158,103 @@ Row by row.
 
 The line to land before moving on: this is good enough to build on, which is why the next step was to point the same machinery at agents rather than at people.
 
-Backup slide: what the simulators are worth, measured against held-out human sessions.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+Backup slide: what the simulators are worth, measured against held-out human sessions.
+
+--
+
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: robustness on noisy web text
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![The Synthetic Noise dataset: a relevant passage placed at the start, middle or end of padding taken either from its own source page or from an unrelated one](/slides/_assets/ows/papers/noisy-setup.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+- **Setup** 41,371 MS MARCO passages, padded with real web text. 3 positions × 6 lengths × 2 context types = **36 sub-corpora**, six models.
+- **Result** At least **33 nDCG@10 points** lost across every model, 50 for GTE Qwen2. Arctic M: **79.6 → 4.3**.
+- **Conclusion** Position and unrelated context dominate. Chunking recovers only part.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2 gap figure-80">
+
+
+<div class="column">
+
+![Arctic M: nDCG@10 as the relevant passage is buried in web text](/slides/_assets/ows/papers/noisy-arctic.png)
+
+</div>
+
+
+<div class="column">
+
+![GTE Qwen2 1.5B: the same experiment](/slides/_assets/ows/papers/noisy-qwen.png)
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Dinzinger, Caspari, Ghosh Dastidar, Mitrović, Granitzer, *Investigating the Robustness of Embedding Models on Noisy Input Texts*, WOWS 2025 · Caspari et al., *When Is Complex Chunking Worth It?*, CIKM 2026.
+
+</div>
+
+
+Notes:
+Goal: benchmark passages are clean and web pages are not, and that difference costs more retrieval quality than most compression or model choices.
+
+Reading the figures.
+
+- Two charts, the same experiment on two models: Arctic M above, GTE Qwen2 1.5B below.
+- Each chart splits into In-Domain on the left and Out-of-Domain on the right, meaning the padding text is topically related to the passage or not.
+- Within each half the horizontal axis is how much padding was added, 100, 300 or 500 tokens, and the three bars are where the relevant passage sits: start, middle, end.
+- The red dashed line is the model's score on the clean passages, 79.64 for Arctic M. Every bar is a fall from that line.
+- Left half: with related padding the bars stay near the line, so length alone is survivable.
+- Right half: with unrelated padding everything drops, and further the more padding there is.
+- Within a group, start is always tallest. Arctic M at 500 tokens out of domain: 46.5 at the start, 6.4 in the middle, 4.3 at the end.
+
+How the collection was built.
+
+- 41,371 MS MARCO passages are the core. The dataset gives the source URL of each passage, so the surrounding page can be scraped and used as real padding rather than generated filler.
+- 36 sub-corpora come from varying three things: document length, the position of the relevant passage, and whether the padding is topically related. In-Domain padding comes from the passage's own page, Out-of-Domain from an unrelated one.
+- The dilution is the point: at 100 tokens of padding the relevant passage is still 68 per cent of the document, at 300 it is 24 per cent, at 500 it is 14 per cent, and in the longest setting roughly 98 per cent of the input is irrelevant.
+- Six models, from BGE small at 33 million parameters to GTE Qwen2 at 7 billion. Size does not rescue anyone.
+- The paper's own summary: a drop of at least 33 nDCG@10 points across all models, at least 50 for GTE Qwen2 1.5B at 500 tokens.
+- Chunking recovers part of the loss, and the companion CIKM 2026 study finds no strategy that wins across models, corpus sizes and metrics.
+- Why it belongs in a talk about infrastructure: the experiment needs real crawled pages with their boilerplate, which an owned index supplies and a cleaned benchmark cannot.
+
+→ next: Topic 3, where the data does not exist unless we create it.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 

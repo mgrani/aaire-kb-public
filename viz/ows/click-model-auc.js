@@ -19,7 +19,7 @@ const DEFAULTS = { good: 0.64, bad: 0.586, lo: 0.5, hi: 0.68 }
 export async function mount(el, { d3, params, steps, isPrint }) {
   const cfg = Object.assign({}, DEFAULTS, params)
   const W = 470, H = 200
-  const M = { left: 34, right: 22, top: 54, bottom: 58 }
+  const M = { left: 34, right: 22, top: 54, bottom: 52 }
 
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
     .attr('aria-label', 'Click-model AUC falls from 0.64 to 0.586, where 0.5 is a coin flip')
@@ -41,10 +41,12 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       .attr('font-size', 11).attr('fill', '#9aa4b0').text(v.toFixed(2))
   })
 
-  svg.append('text').attr('x', M.left).attr('y', 22).attr('font-size', 13).attr('font-weight', 700)
+  svg.append('text').attr('x', M.left).attr('y', 20).attr('font-size', 13).attr('font-weight', 700)
     .attr('fill', INK).text('Click-model AUC')
-  svg.append('text').attr('x', W - M.right).attr('y', 22).attr('text-anchor', 'end')
-    .attr('font-size', 11.5).attr('fill', SOFT).text('most of the margin over chance, gone')
+  svg.append('text').attr('x', M.left).attr('y', 36).attr('font-size', 11).attr('fill', SOFT)
+    .text('task: will this result be clicked? \u2014 a position-based model')
+  svg.append('text').attr('x', M.left).attr('y', 50).attr('font-size', 11).attr('fill', SOFT)
+    .text('trained on the platform\u2019s own interaction data')
 
   const marker = (g, v, colour, label, dy) => {
     g.append('line').attr('x1', x(cfg.lo)).attr('x2', x(v)).attr('y1', yBar).attr('y2', yBar)
@@ -57,10 +59,12 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   }
 
   const gGood = svg.append('g')
-  marker(gGood, cfg.good, NAVY, 'trained on people', -24)
+  marker(gGood, cfg.good, NAVY, 'no agents in the training data', -24)
 
   const gBad = svg.append('g')
-  marker(gBad, cfg.bad, RED, 'half the data from agents', -60)
+  marker(gBad, cfg.bad, RED, 'half the training data from agents', -60)
+  gBad.append('text').attr('x', x(cfg.lo) + 4).attr('y', yBar + 44).attr('font-size', 11)
+    .attr('fill', RED).text('and it keeps falling as that share rises')
 
   let last = null
   function render(step) {
