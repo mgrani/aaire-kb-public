@@ -2495,23 +2495,15 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 
 --
 
-<!-- .slide: class="smaller" -->
-
-## Index structures for agents: nuggets with provenance and lifecycle
+## Giving agents a purpose: publish an opinion, with its evidence
 
 
-<div class="grid-2-1 gap-lg">
+<div class="grid-3-2 gap-lg">
 
 
 <div class="column">
 
-
-<div class="img-h-md">
-
-![NuggetIndex: passage retrieval versus nugget retrieval, 887 versus 320 input tokens](/slides/_assets/ows/papers/nuggetindex.png)
-
-</div>
-
+![The AI Opinions vertical of OURRS for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
 
 </div>
 
@@ -2519,14 +2511,21 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 <div class="column small">
 
 
-<div class="paper detail">
+<div class="card">
 
-<span class="eyebrow">SIGIR 2026</span>
-### NuggetIndex
-- **Question** Can retrieval units be aligned with nugget-based evaluation?
-- **Setup** Atomic facts with evidence links, validity intervals and lifecycle state; five QA benchmarks.
-- **Result** Nugget recall +42%, conflicts −55%, generator input 887 → 320 tokens.
-- **Conclusion** The unit that evaluation scores answers with can be stored, governed and shared.
+### What each opinion carries
+- the **model** that wrote it, named on the result
+- the **documents** it cites, listed beside the page
+- an **epistemic stance**: the author calls this established
+- **votes**, and a relation to other opinions: contradicting, superseding
+
+</div>
+
+
+
+<div class="c-important">
+
+"These are opinions, not answers from this search engine. Read the sources rather than trusting the opinion."
 
 </div>
 
@@ -2540,89 +2539,37 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 
 <div class="slide-citation">
 
-Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026.
+ourrs.eu, AI Opinions vertical, query *passau*, September 2026: about 870 opinions published by agents.
 
 </div>
 
 
 Notes:
-For a CLEF audience the bridge is the point: nuggets are already the evaluation unit of TREC RAG and of nugget-based answer scoring; NuggetIndex stores the same unit with provenance and a lifecycle, so evaluation unit and index unit coincide. The caution from the companion study: what is shared matters more than how much. Most context enrichment reduces accuracy, and with aligned enrichment a small model beats a frontier model on raw passages by nineteen points.
-→ next: collecting nuggets and opinions together.
+Goal: show what a purpose looks like for an agent. Not a task it completes and forgets, but an artefact it publishes that other agents and people can find, cite and contest.
 
---
+Show the live query and read the header line aloud, because it sets the epistemic frame: about 870 opinions published by agents, and the page says plainly that these are opinions and not answers from this search engine.
 
-## Collecting them together: AI Opinions and NuggetPedia
+What is on the screen, item by item.
 
+- Every opinion names the **model** that produced it. In this screenshot: granite-4.1-3b, qwen3-35b, Mistral-Medium. Provenance is at the level of the writer, not only the source.
+- The right-hand panel lists **every document the opinions on the page cite**, with the instruction to read them rather than trust the opinion.
+- Each opinion carries an **epistemic tag**: here, the author calls this established. That is a claim about confidence made by the writer, stored with the artefact.
+- The filter row offers **All, Contradicting, Superseding**: opinions stand in relation to each other, not in a list.
+- Votes sit on every item, which is the beginning of review.
 
-<div class="grid-2-1 gap-lg">
+Two consequences worth saying. Retrieval gets cheaper and more consistent when an opinion is generated once and reused. And the opinions become an object of study in their own right: provenance, drift, disagreement between models on the same question.
 
-
-<div class="column">
-
-
-<div class="img-h-md">
-
-![OURRS AI Opinions vertical for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
-
-</div>
-
-
-<div class="figure-credit">
-
-ourrs.eu, "passau" in the AI Opinions vertical: about 870 opinions published by agents, each with model tag, votes and the documents behind it.
-
-</div>
-
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="card">
-
-### AI Opinions
-An opinion is generated once, stored with its evidence and model, and retrievable by later users and agents. Contradicting and superseding opinions are linked.
-
-</div>
-
-
-
-<div class="card">
-
-### NuggetPedia
-Agents submit and vote on nuggets over MCP; governance decides what stays.
-
-</div>
-
-
-
-<div class="c-insight">
-
-**Not doable alone.** The value of opinions and governed nuggets grows with the number of agents that contribute and query.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Show the live query. The page says it plainly: these are opinions, not answers from this search engine. Each opinion carries the model that wrote it, the author's confidence, votes, and the documents behind it, with the instruction to read the sources rather than trust the opinion. Two consequences: retrieval gets cheaper and more consistent, and the opinions become an object of study: provenance, drift, disagreement. Then the pooling point again: one group's agents produce too few opinions to matter. Governance, who may write and how conflicts are resolved, is open. Retake the screenshot on the talk day.
-→ next: the platform where such swarms actually run.
+Retake the screenshot on the talk day; the opinion count moves.
+→ next: what has to sit underneath this for it to be more than a comment section.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## OpenIIR: agents in swarms, and what they argue about
+## Underneath it: relations, epistemic status, and more than one round
 
 
-<div class="grid-2 gap-lg">
+<div class="grid-3 gap-lg small">
 
 
 <div class="column">
@@ -2630,8 +2577,22 @@ Show the live query. The page says it plainly: these are opinions, not answers f
 
 <div class="card">
 
-### What it runs
-Populations of persona-driven agents in deliberative panels, on social platforms and through recommender feeds, with producers and detectors that co-evolve. Local-first, containerised, with deterministic replay so a run can be repeated exactly.
+### A relation schema
+Claims do not sit in a list, they point at each other: **supports, counters, refines, questions**, and at the opinion level contradicting and superseding. The unit of storage is a claim plus its edges.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Epistemic annotations
+Every unit records who wrote it, what it cites, how sure its author claims to be, the interval over which it held, and where it stands in its lifecycle. That is what NuggetIndex stores, and it is what makes a claim checkable later.
 
 </div>
 
@@ -2644,8 +2605,8 @@ Populations of persona-driven agents in deliberative panels, on social platforms
 
 <div class="card good">
 
-### Why it closes this talk
-The opinions such a swarm produces are the same objects the index caches and serves. A population that deliberates, an index that stores what it concluded, and a retrieval service both sides call: that is the ecosystem, running.
+### More than one round
+**Generate**, then **critique**, then **review**. Agents submit over MCP, other agents contest and refine, and governance decides what stays. A single pass produces text; rounds produce a position.
 
 </div>
 
@@ -2659,7 +2620,7 @@ The opinions such a swarm produces are the same objects the index caches and ser
 
 <div class="c-insight">
 
-Simulation started as a way to cover for missing users. It ends up as the instrument for studying populations we could not observe any other way.
+**Not doable alone.** The value of a shared claim layer grows with the number of agents that write into it and query it, which is the same pooling argument as the traces in Topic 3.
 
 </div>
 
@@ -2667,79 +2628,96 @@ Simulation started as a way to cover for missing users. It ends up as the instru
 
 <div class="slide-citation">
 
-Zerhoudi, *OpenIIR: An Open Simulation Platform for Information Retrieval Research*, CIKM 2026, arXiv:2605.09321 · successor to SimIIR 2.0 (CIKM 2022) and SimIIR 3 (SIGIR-AP 2024).
+Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026 (evidence links, validity intervals, lifecycle state) · NuggetPedia and the round structure are the design we are building, not a published result.
 
 </div>
 
 
 Notes:
-Close the arc that started in Topic 3. Simulation entered this talk as a remedy for missing usage data; it leaves as the only practical way to study a population of agents at all. OpenIIR runs personas in panels that deliberate, in feeds that recommend and on platforms where they post, and it replays deterministically, which is what makes a claim about a population checkable. Connect it to the two previous slides: the nuggets and the opinions in the index are exactly what such swarms write and read. Then stop; the evaluation problem that this creates is the next slide.
-→ next: why evaluating this is the hard part.
+Goal: name the three things that turn agent output into something a community can evaluate, and be clear about which of them exist and which are being built.
+
+- **Relations.** The appendix slide on NuggetIndex has the retrieval numbers; what matters here is the shape. A claim carries edges to other claims, and the vocabulary is small: supports, counters, refines, questions. The next slide shows a real graph built with exactly those four.
+- **Epistemic annotations.** This part is published: NuggetIndex stores atomic facts with evidence links, validity intervals and lifecycle state, which is how a claim can be re-checked and retired rather than silently persisting. Add the stance and the writer from the previous slide and you have a unit that says who claimed what, on what basis, and for how long.
+- **Rounds.** Say clearly that this is the design and not a result. One pass gives you generated text. Generation, then critique by other agents, then review, is what turns a pile of outputs into something with a position, and it is also where governance has to live: who may write, who may contest, what happens to a claim that loses.
+
+Then the pooling line, which connects back to Topic 3: one group's agents produce too few claims for any of this to matter. This only works as shared infrastructure.
+→ next: a platform where such swarms actually run.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Evaluating the ecosystem is the hard part
+## OpenIIR: swarms that argue, and the problem of judging what they produce
 
 
-<div class="grid-2 gap-lg">
+<div class="grid-3-2 gap-lg">
 
 
 <div class="column">
+
+![An OpenIIR argument graph: 246 claims and 296 relations from one deliberation, with supports, counters, refines and questions as edge types](/slides/_assets/ows/openiir-argumentation-graph.png)
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### What it runs
+Populations of persona-driven agents in deliberative panels, on social platforms and through recommender feeds, with producers and detectors that co-evolve. Local-first, containerised, deterministic replay.
+
+</div>
+
+
+
+<div class="card bad">
+
+### What we cannot yet score
+A swarm does not return an answer, it returns a graph: **246 claims, 296 relations** from one deliberation. Final-answer accuracy misses all of it, and there is no qrel for a structure. Per claim? Per edge? Per trajectory? Against whose judgement?
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 
 <div class="c-important">
 
-Trajectories, not answers. Populations, not users. Drift, not snapshots.
-
-Actors, layers and time multiply: humans and agent populations, on corpus, retrieval, shared knowledge and communication, over weeks.
+Trajectories, not answers. Populations, not users. Drift, not snapshots. This gets evaluated on shared open infrastructure, or inside platforms, and then not by us.
 
 </div>
 
 
-</div>
 
+<div class="slide-citation">
 
-<div class="column">
-
-
-<div class="c-danger">
-
-This is either evaluated on shared, open infrastructure, or it is evaluated inside platforms, and then not by us.
+Zerhoudi, *OpenIIR: An Open Simulation Platform for Information Retrieval Research*, CIKM 2026, arXiv:2605.09321 · successor to SimIIR 2.0 (CIKM 2022) and SimIIR 3 (SIGIR-AP 2024). Screenshot from an OpenIIR run.
 
 </div>
 
-
-</div>
-
-
-</div>
-
-
-| Area | Exists today | What an open stack adds |
-|---|---|---|
-| corpus snapshots at web scale | LongEval, WOWS-Eval, BrowseComp-Plus | dated, partitionable, re-indexable snapshots |
-| agent populations as participants | Sim4IA, user simulation tracks | pooled, verifiable traces in one format |
-| trajectory-level measures | final-answer accuracy, nugget recall | retrieval, evidence and verification per step |
-| mixed human–agent studies | user studies, conversational tracks | humans and agents on the same instance |
-| agent-written content | — | opinions and nuggets as objects of evaluation |
 
 Notes:
-Tone: "here is what we find interesting and are starting to do", not "here is what CLEF must do". Several rows already have a home in CLEF and TREC labs; credit LongEval, WOWS-Eval and Sim4IA. The new rows are the last three. The sovereignty line returns here: complex human–agent systems will be evaluated somewhere; the question is whether the community can do it on infrastructure it controls. Offer the index, OURRS instances and the trace format, and ask what the room would want from them.
+Goal: close the arc, and hand the room the open problem rather than a solution.
+
+Read the picture first. One deliberation among persona-driven agents produced 246 claims joined by 296 relations, and the legend gives the vocabulary: supports in green, counters in red, refines and questions dashed. This is the claim layer of the previous slide, produced rather than designed.
+
+Then the honest part, which is why this slide ends the talk rather than a result slide.
+
+- **The output is not an answer.** Scoring the final response of a swarm throws away the structure that the swarm exists to produce, and the structure is where the interesting behaviour is: which claims attracted counters, which were refined into agreement, which were never questioned.
+- **There is no ground truth for a graph.** We can judge a document against a topic. Nobody knows yet what it means for an argument graph to be correct, or even what the unit of judgement is: the individual claim, the edge, the path, or the trajectory that produced it.
+- **The measures we have do not transfer.** Precision and recall assume a fixed set of relevant items. A deliberation has no such set, and it changes as it runs.
+- **The honest framing for this room** is that these are open questions we find interesting and are starting to work on, not a programme CLEF must adopt. Several parts already have a home here: LongEval for drift, WOWS for open web search, Sim4IA for simulation. What we can offer is the index, OURRS instances and a trace format, and what we want back is a conversation about what would make this evaluable.
+
+Then the last line, which is the talk's argument in one sentence: complex human–agent systems will be evaluated somewhere. The only question is whether the community can do it on infrastructure it controls.
 → conclusion.
 
 ---
-
-## Three columns, three requirements
-
-<div class="viz viz-lg" data-viz="ows/two-dimensions" data-steps="3"></div>
-
-Notes:
-Reveal row by row. Openness and research sovereignty give us an open corpus and index below the model, an open instrumented search service, and an open layer for shared knowledge. Scale turns corpora, traces and populations into variables. Joint effort is what makes any of it affordable: one index on public compute, traces pooled in one format, and the ecosystem evaluated together rather than left to platforms.
-→ next: the four claims in one breath.
-
---
 
 <!-- .slide: class="smaller" -->
 
@@ -3207,7 +3185,126 @@ Goal: a per-step effect too small to matter on a ranked list decides the majorit
 - **What "half the trajectories" means and why it is the interesting point.** It is the trajectory length at which a coin flip decides whether your change touched the run. Below it, most runs are identical whatever you did; above it, most runs differ somewhere. At one per cent per step that crossing is at 69 steps, at two per cent it is 35, at five per cent it is 14.
 - **Where real agents sit on this curve.** On BrowseComp-Plus, GPT-5 and o3 issue 20 to 26 search calls for one hard question, while open models issue fewer than two. At 23 calls, a two per cent per-step effect has touched 37 per cent of trajectories and a five per cent effect has touched 69 per cent. That is the multiplier: the same delta that looks negligible on a ranked list decides the majority of agent runs.
 - **The consequence for evaluation.** A comparison done one query at a time cannot see this, because the compounding lives in the trajectory. This is why the interaction column of the system figure needs an evaluation of its own.
-Backup slide: the arithmetic behind the claim that per-step effects compound, kept out of the main flow.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+Backup slide: the arithmetic behind the claim that per-step effects compound, kept out of the main flow.
+
+--
+
+## Appendix: three columns, three requirements
+
+<div class="viz viz-lg" data-viz="ows/two-dimensions" data-steps="3"></div>
+
+Notes:
+Reveal row by row. Openness and research sovereignty give us an open corpus and index below the model, an open instrumented search service, and an open layer for shared knowledge. Scale turns corpora, traces and populations into variables. Joint effort is what makes any of it affordable: one index on public compute, traces pooled in one format, and the ecosystem evaluated together rather than left to platforms.
+Backup slide: the closing figure, kept out of the main flow.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: index structures for agents — nuggets with provenance and lifecycle
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![NuggetIndex: passage retrieval versus nugget retrieval, 887 versus 320 input tokens](/slides/_assets/ows/papers/nuggetindex.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="paper detail">
+
+<span class="eyebrow">SIGIR 2026</span>
+### NuggetIndex
+- **Question** Can retrieval units be aligned with nugget-based evaluation?
+- **Setup** Atomic facts with evidence links, validity intervals and lifecycle state; five QA benchmarks.
+- **Result** Nugget recall +42%, conflicts −55%, generator input 887 → 320 tokens.
+- **Conclusion** The unit that evaluation scores answers with can be stored, governed and shared.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026.
+
+</div>
+
+
+Notes:
+For a CLEF audience the bridge is the point: nuggets are already the evaluation unit of TREC RAG and of nugget-based answer scoring; NuggetIndex stores the same unit with provenance and a lifecycle, so evaluation unit and index unit coincide. The caution from the companion study: what is shared matters more than how much. Most context enrichment reduces accuracy, and with aligned enrichment a small model beats a frontier model on raw passages by nineteen points.
+Backup slide: the retrieval numbers behind the claim layer.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: evaluating the ecosystem, area by area
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+Trajectories, not answers. Populations, not users. Drift, not snapshots.
+
+Actors, layers and time multiply: humans and agent populations, on corpus, retrieval, shared knowledge and communication, over weeks.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-danger">
+
+This is either evaluated on shared, open infrastructure, or it is evaluated inside platforms, and then not by us.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+| Area | Exists today | What an open stack adds |
+|---|---|---|
+| corpus snapshots at web scale | LongEval, WOWS-Eval, BrowseComp-Plus | dated, partitionable, re-indexable snapshots |
+| agent populations as participants | Sim4IA, user simulation tracks | pooled, verifiable traces in one format |
+| trajectory-level measures | final-answer accuracy, nugget recall | retrieval, evidence and verification per step |
+| mixed human–agent studies | user studies, conversational tracks | humans and agents on the same instance |
+| agent-written content | — | opinions and nuggets as objects of evaluation |
+
+Notes:
+Tone: "here is what we find interesting and are starting to do", not "here is what CLEF must do". Several rows already have a home in CLEF and TREC labs; credit LongEval, WOWS-Eval and Sim4IA. The new rows are the last three. The sovereignty line returns here: complex human–agent systems will be evaluated somewhere; the question is whether the community can do it on infrastructure it controls. Offer the index, OURRS instances and the trace format, and ask what the room would want from them.
+Backup slide: the area-by-area version of the open problem.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 
