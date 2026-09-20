@@ -2495,6 +2495,8 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Giving agents a purpose: publish an opinion, with its evidence
 
 
@@ -2504,6 +2506,14 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 <div class="column">
 
 ![The AI Opinions vertical of OURRS for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
+
+
+<div class="figure-credit">
+
+ourrs.eu, AI Opinions, query *passau*, September 2026: about 870 opinions published by agents. "These are opinions, not answers from this search engine. Read the sources rather than trusting the opinion."
+
+</div>
+
 
 </div>
 
@@ -2517,29 +2527,25 @@ The lesson to carry into the rest of the topic: collaboration among agents needs
 - the **model** that wrote it, named on the result
 - the **documents** it cites, listed beside the page
 - an **epistemic stance**: the author calls this established
-- **votes**, and a relation to other opinions: contradicting, superseding
+- **votes**, and relations: contradicting, superseding
 
 </div>
 
 
 
-<div class="c-important">
+<div class="card good">
 
-"These are opinions, not answers from this search engine. Read the sources rather than trusting the opinion."
-
-</div>
-
-
-</div>
-
+### What has to sit underneath
+- a **relation schema**: supports, counters, refines, questions
+- **validity and lifecycle**, so a claim can be retired rather than persist
+- **rounds**: generate, then critique, then review, with governance deciding what stays
+- all of it in **[NuggetPedia](https://nuggetpedia.com)**, the governed layer agents write into
 
 </div>
 
 
+</div>
 
-<div class="slide-citation">
-
-ourrs.eu, AI Opinions vertical, query *passau*, September 2026: about 870 opinions published by agents.
 
 </div>
 
@@ -2547,52 +2553,45 @@ ourrs.eu, AI Opinions vertical, query *passau*, September 2026: about 870 opinio
 Notes:
 Goal: show what a purpose looks like for an agent. Not a task it completes and forgets, but an artefact it publishes that other agents and people can find, cite and contest.
 
-Show the live query and read the header line aloud, because it sets the epistemic frame: about 870 opinions published by agents, and the page says plainly that these are opinions and not answers from this search engine.
+Read the header line aloud, because it sets the epistemic frame: about 870 opinions published by agents, and the page says plainly that these are opinions and not answers from this search engine.
 
-What is on the screen, item by item.
+The left card is all visible on the screen.
 
-- Every opinion names the **model** that produced it. In this screenshot: granite-4.1-3b, qwen3-35b, Mistral-Medium. Provenance is at the level of the writer, not only the source.
+- Every opinion names the **model** that produced it: granite-4.1-3b, qwen3-35b, Mistral-Medium in this capture. Provenance at the level of the writer, not only the source.
 - The right-hand panel lists **every document the opinions on the page cite**, with the instruction to read them rather than trust the opinion.
-- Each opinion carries an **epistemic tag**: here, the author calls this established. That is a claim about confidence made by the writer, stored with the artefact.
-- The filter row offers **All, Contradicting, Superseding**: opinions stand in relation to each other, not in a list.
-- Votes sit on every item, which is the beginning of review.
+- Each opinion carries an **epistemic tag**, here "the author calls this established": a confidence claim made by the writer and stored with the artefact.
+- The filter row offers **All, Contradicting, Superseding**, so opinions stand in relation to one another rather than in a list.
 
-Two consequences worth saying. Retrieval gets cheaper and more consistent when an opinion is generated once and reused. And the opinions become an object of study in their own right: provenance, drift, disagreement between models on the same question.
+The right card is what turns that into something evaluable, and it is where **NuggetPedia** comes in: nuggetpedia.com, which describes itself as a governed knowledge layer for autonomous agents where every fact is atomic, traceable, temporally bounded and conflict-resolved. Place it for the audience: NuggetPedia is closer to NuggetIndex than to the opinions vertical, because it is the same governed atomic unit. What it shares with the opinions is the thing this topic is about, that the knowledge is created collaboratively by agents rather than written once by us. Be honest about status: the relation vocabulary and the validity and lifecycle fields are published in NuggetIndex; the round structure, generate then critique then review, is the design we are building. Governance is the open part: who may write, who may contest, what happens to a claim that loses.
+
+The pooling line connects back to Topic 3: one group's agents produce too few claims for any of this to matter. It only works as shared infrastructure.
 
 Retake the screenshot on the talk day; the opinion count moves.
-→ next: what has to sit underneath this for it to be more than a comment section.
+→ next: and does any of it actually help retrieval?
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Underneath it: relations, epistemic status, and more than one round
+## Does it help? Atomic claims as the unit retrieval serves
 
 
-<div class="grid-3 gap-lg small">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### A relation schema
-Claims do not sit in a list, they point at each other: **supports, counters, refines, questions**, and at the opinion level contradicting and superseding. The unit of storage is a claim plus its edges.
-
-</div>
-
-
-</div>
+<div class="grid-2-1 gap-lg">
 
 
 <div class="column">
 
 
-<div class="card">
+<div class="img-h-md">
 
-### Epistemic annotations
-Every unit records who wrote it, what it cites, how sure its author claims to be, the interval over which it held, and where it stands in its lifecycle. That is what NuggetIndex stores, and it is what makes a claim checkable later.
+![NuggetIndex: passage retrieval versus nugget retrieval, 887 versus 320 input tokens](/slides/_assets/ows/papers/nuggetindex.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+Zerhoudi et al., NuggetIndex, Fig. 4: granularity and prompt efficiency.
 
 </div>
 
@@ -2600,27 +2599,31 @@ Every unit records who wrote it, what it cites, how sure its author claims to be
 </div>
 
 
-<div class="column">
+<div class="column small">
 
 
-<div class="card good">
+<div class="paper detail">
 
-### More than one round
-**Generate**, then **critique**, then **review**. Agents submit over MCP, other agents contest and refine, and governance decides what stays. A single pass produces text; rounds produce a position.
+<span class="eyebrow">SIGIR 2026</span>
+### NuggetIndex
+- **Question** If claims are stored as governed atomic units, does retrieving *them* beat retrieving passages?
+- **Setup** A nugget is a fact with a validity interval and a lifecycle state, **active, deprecated or contested**, filtered by query time before ranking. Five QA benchmarks against BM25, dense and hybrid passages.
+- **Result** Nugget recall **+42%** and nDCG@10 **+96%** over BM25 passages; conflicts **−55%**; generator input **887 → 320 tokens**.
+- **Conclusion** The unit that evaluation already scores answers with can also be the unit retrieval serves.
+
+</div>
+
+
+
+<div class="c-warning tight">
+
+Not a universal win: on static curated benchmarks passages still lead by 1.5 to 4 points. The gain is in time and conflict.
 
 </div>
 
 
 </div>
 
-
-</div>
-
-
-
-<div class="c-insight">
-
-**Not doable alone.** The value of a shared claim layer grows with the number of agents that write into it and query it, which is the same pooling argument as the traces in Topic 3.
 
 </div>
 
@@ -2628,19 +2631,24 @@ Every unit records who wrote it, what it cites, how sure its author claims to be
 
 <div class="slide-citation">
 
-Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026 (evidence links, validity intervals, lifecycle state) · NuggetPedia and the round structure are the design we are building, not a published result.
+Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026, arXiv:2604.27306.
 
 </div>
 
 
 Notes:
-Goal: name the three things that turn agent output into something a community can evaluate, and be clear about which of them exist and which are being built.
+Goal: answer the obvious objection to the previous slide. Agents can publish claims, but does a claim layer do anything for retrieval? Measured, yes, and in a specific way.
 
-- **Relations.** The appendix slide on NuggetIndex has the retrieval numbers; what matters here is the shape. A claim carries edges to other claims, and the vocabulary is small: supports, counters, refines, questions. The next slide shows a real graph built with exactly those four.
-- **Epistemic annotations.** This part is published: NuggetIndex stores atomic facts with evidence links, validity intervals and lifecycle state, which is how a claim can be re-checked and retired rather than silently persisting. Add the stance and the writer from the previous slide and you have a unit that says who claimed what, on what basis, and for how long.
-- **Rounds.** Say clearly that this is the design and not a result. One pass gives you generated text. Generation, then critique by other agents, then review, is what turns a pile of outputs into something with a position, and it is also where governance has to live: who may write, who may contest, what happens to a claim that loses.
+State the transition precisely, because it is an argument by unit and not a direct evaluation of AI Opinions. The nuggets in this paper are extracted from corpora by a model, not published by a population of agents. What the two share is the **data model**: an atomic fact, its evidence, an interval over which it holds, and an epistemic state. NuggetIndex measures what happens when retrieval serves that unit instead of a passage. So the claim to make is "retrieving governed atomic units beats retrieving passages, on the dimensions that matter for a live corpus", not "our opinion layer improves search".
 
-Then the pooling line, which connects back to Topic 3: one group's agents produce too few claims for any of this to matter. This only works as shared infrastructure.
+The numbers, with what each one is for.
+
+- **RAVine**, static coverage on nuggetized MS MARCO with 84 queries and 3,182 gold nuggets: nDCG@10 up 96 per cent to .637, recall@10 up 243 per cent, nugget recall up 42 per cent, vital nugget recall up 47 per cent, all at p below .001.
+- **TimeQA**, temporal correctness: .931 against .840 for hybrid passage retrieval, and the conflict rate falls from .161 to .072. On SituatedQA the conflict rate falls from .230 to .010. The comparison that matters is with time-filtered passage baselines, which reach similar temporal correctness but see recall collapse to almost nothing.
+- **Efficiency**: median generator input 320 tokens against 887, a 9.3 MB index for 56,990 nuggets, retrieval at 1 ms median.
+- **The caveat on the slide is the honest one**: on static, human-curated HotpotQA, hybrid passage retrieval still leads by 1.5 to 4 points. This is not a better retriever in general; it is a better retriever when facts change and conflict, which is exactly the condition a daily index and a population of writing agents create.
+
+The bridge to the lifecycle vocabulary is worth one sentence: active, deprecated and contested are the same distinctions the relation schema makes on the previous slide, so the storage layer and the argument layer speak the same language.
 → next: a platform where such swarms actually run.
 
 --
@@ -3196,62 +3204,6 @@ Backup slide: the arithmetic behind the claim that per-step effects compound, ke
 Notes:
 Reveal row by row. Openness and research sovereignty give us an open corpus and index below the model, an open instrumented search service, and an open layer for shared knowledge. Scale turns corpora, traces and populations into variables. Joint effort is what makes any of it affordable: one index on public compute, traces pooled in one format, and the ecosystem evaluated together rather than left to platforms.
 Backup slide: the closing figure, kept out of the main flow.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Appendix: index structures for agents — nuggets with provenance and lifecycle
-
-
-<div class="grid-2-1 gap-lg">
-
-
-<div class="column">
-
-
-<div class="img-h-md">
-
-![NuggetIndex: passage retrieval versus nugget retrieval, 887 versus 320 input tokens](/slides/_assets/ows/papers/nuggetindex.png)
-
-</div>
-
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="paper detail">
-
-<span class="eyebrow">SIGIR 2026</span>
-### NuggetIndex
-- **Question** Can retrieval units be aligned with nugget-based evaluation?
-- **Setup** Atomic facts with evidence links, validity intervals and lifecycle state; five QA benchmarks.
-- **Result** Nugget recall +42%, conflicts −55%, generator input 887 → 320 tokens.
-- **Conclusion** The unit that evaluation scores answers with can be stored, governed and shared.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="slide-citation">
-
-Zerhoudi, Granitzer, Mitrović, *NuggetIndex: Governed Atomic Retrieval for Maintainable RAG*, SIGIR 2026.
-
-</div>
-
-
-Notes:
-For a CLEF audience the bridge is the point: nuggets are already the evaluation unit of TREC RAG and of nugget-based answer scoring; NuggetIndex stores the same unit with provenance and a lifecycle, so evaluation unit and index unit coincide. The caution from the companion study: what is shared matters more than how much. Most context enrichment reduces accuracy, and with aligned enrichment a small model beats a frontier model on raw passages by nineteen points.
-Backup slide: the retrieval numbers behind the claim layer.
 
 --
 
