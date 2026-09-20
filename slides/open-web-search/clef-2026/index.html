@@ -307,7 +307,7 @@ What changes when the corpus grows and the text gets messy, and the instruments 
 
 <span class="eyebrow">Topic 3</span>
 ### Usage data: simulate and pool
-We missed much of the interaction data of web search. We should not miss the interaction data of agentic search.
+We missed much of the interaction data of web search. We should not miss the interaction data of real users with agentic search systems.
 
 </div>
 
@@ -2084,7 +2084,7 @@ Keep the both-roles observation for the spoken line if it lands: the same trajec
 
 <div class="c-insight">
 
-A small model trained on the traces of a large one does not just label the next action. Put in charge of the search — choosing every action and writing the answer — it answers better than the pipeline it learned from.
+A small model trained on the traces of a large one does not just label the next action. Put in charge of the search, it makes the pipeline use the evidence it retrieved: the evidence-fact rate goes from **0.01 to 0.62**.
 
 </div>
 
@@ -2103,7 +2103,9 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 - **The task.** Given the state of a search trajectory, predict which of seven actions comes next: decompose, search, reformulate, extract, synthesise, verify, finish.
 - **The filtering matters.** 5,000 teacher rollouts, only 1,490 accepted. The student learns from work that succeeded, not from everything the teacher did.
 - **The headline.** Macro-F1 0.65 for the fine-tuned 3B model against 0.17 for the same model prompted zero-shot, and 0.54 for a TF-IDF baseline. The capability is learned, not prompted.
-- **The check that matters more, and what it means.** "Driving the loop" is the second experiment: instead of only predicting labels, the fine-tuned 3B model is put in both seats at once. As **controller** it decides which of the seven actions comes next at every step, and as **generator** it writes the answer at the end. Nothing of the large teacher model is left in the loop. Over 149 held-out trajectories that raises end-to-end exact match from 0.75 to 0.79 and token F1 from 0.78 to 0.83, so what transferred is the policy for running a search, not merely a classifier for naming steps.
+- **The second experiment, and what its numbers actually measure.** Instead of only predicting labels, the fine-tuned 3B model is put in both seats at once: as **controller** it chooses which of the seven actions comes next at every step, and as **generator** it writes the final answer. Nothing of the teacher model is left in the loop. The scores are **answer quality**, not retrieval and not action prediction: the model is placed in an end-to-end BM25 pipeline and its final answers are scored SQuAD-style against the gold answer, exact match and token overlap F1, over 149 held-out trajectories.
+- **Be precise about which gain holds.** Token F1 rises from 0.778 to 0.830 and the paired bootstrap interval is [0.002, 0.104], so it clears zero but only just. Exact match rises from 0.753 to 0.795 and **its interval crosses zero**, so do not present that one as an established improvement.
+- **The large effect is elsewhere, and it is the interesting one.** The evidence-fact rate, how often the answer actually uses a fact from the retrieved evidence, goes from **0.012 with the base controller to 0.616 with the fine-tuned one**. The small model does not mainly make answers more correct; it makes the pipeline actually use what it retrieved. The paper notes this metric is an automatic matching heuristic, not human-verified factuality.
 - **Why it belongs here.** It closes the cost argument: if traces can be made cheaply and verified, the capability they teach does not have to be rented from a frontier model.
 
 → next: and yet none of it tells us who asked.
@@ -2112,15 +2114,9 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 
 <!-- .slide: class="smaller" -->
 
-## We cannot see who is behind the prompt
+## We cannot see who is behind the query
 
-
-<div class="c-warning">
-
-Every instrument we have assumes one person with one intent behind each action: click models, session analysis, personalisation, relevance itself. When the thing issuing the query is an agent, both halves of that assumption fail.
-
-</div>
-
+A query used to imply a person with an intent. It may now come from a person, from an agent working for a person, or from an agent following instructions we never see. Nothing in the log tells them apart, and the same holds for the prompts behind those agents.
 
 
 <div class="grid-2 gap-lg small">
@@ -2129,15 +2125,13 @@ Every instrument we have assumes one person with one intent behind each action: 
 <div class="column">
 
 
-<div class="stat-card fails">
+<div class="c-danger">
 
-### 0.640 → 0.586
-click-model AUC, once half the training data comes from agents the platform could not validate
+### It is not a detection problem
+Whether an action was chosen by the agent or dictated by whoever configured it cannot be recovered from the text, the timing, the community or the votes. No better classifier fixes this; the information is not in the signal.
 
 </div>
 
-
-**Behind the Prompt** argues the attribution problem is structural, not a detection gap: an action cannot be traced to an autonomous or an operator-directed origin. The click model is what that costs in practice.
 
 </div>
 
@@ -2145,18 +2139,24 @@ click-model AUC, once half the training data comes from agents the platform coul
 <div class="column">
 
 
-<div class="stat-card fails">
+<div class="c-warning">
 
-### 0.53 → 0.10
-share of an agent's own constraints surviving one, then five rounds of context compaction
+### And it costs us the instruments
+A click model trained where half the data comes from agents whose behaviour the platform could not validate loses **8.5% AUC, 0.640 → 0.586**. Click models, session analysis and personalisation all assume one person with one intent.
+
+</div>
+
 
 </div>
 
 
-**The Compaction Cliff** adds the second failure: the agent forgets its own instructions as the session runs, so even its behaviour is not a stable expression of a goal it was given.
-
 </div>
 
+
+
+<div class="c-note small">
+
+**The agent is not a stable actor either.** It gains skills as it runs, and it loses its own instructions: with ordinary context compaction, **53%** of an agent's constraints survive one round and **10%** survive five. Behaviour drifts for reasons that have nothing to do with the user.
 
 </div>
 
@@ -2180,13 +2180,13 @@ Zerhoudi, Granitzer, Dang et al., *Behind the Prompt: The Agent-User Problem in 
 
 
 Notes:
-Goal: watching agents is not the same as understanding users, because the prompt that set the agent going is invisible and the agent does not hold on to it.
+Goal: the unit our instruments are built on, a query issued by a person with an intent, no longer identifies anyone. Watching agents is not the same as understanding users.
 
-What each paper actually shows, since both are easy to misread as being about something else.
+The non-identifiability argument, which is the core of it. When an agent acts, the action is some mixture of what the model decided and what its operator told it to do, and those two are not separable after the fact. The formal claim is that the orchestration indicator is not identifiable from text, timing, community membership or votes. That matters because it is not a gap a better detector closes: the information is absent from the signal, so any method that tries to infer intent from behaviour is inferring a mixture it cannot decompose.
 
-- **Behind the Prompt** is not a detection paper. Its claim is a non-identifiability argument: whether a given action was chosen by the agent or dictated by its operator cannot be recovered from text, timing, community or votes. The empirical half measures what that costs an instrument we rely on: a position-based click model trained on agent upvotes falls from 0.640 to 0.586 AUC, 8.5 per cent, once half its training data comes from low-validation agents. The evidence base is the Moltbook trace set, 370,737 posts and 3.9 million comments from 46,872 agents over the platform's first twelve days.
-- **The Compaction Cliff** is not about search quality. It measures how much of an agent's own configuration survives its memory being compacted: with a standard compaction prompt, 53 per cent of constraints survive one round at 50 per cent compression and 10 per cent survive five rounds. Routing each knowledge type through its own retention policy holds recall near 0.96, so the cliff is a design fault rather than a law, but the default behaviour is the one we will meet in logs.
-- **Put together**, the two give the summary line: we cannot see the prompt, and the agent does not keep it either. So a trace tells us what an agent did, not what a person wanted, which is why agent traces alone cannot replace user data.
+The cost, measured. A position-based click model trained on agent upvotes falls from 0.640 to 0.586 AUC, 8.5 per cent, once half its training data comes from low-validation agents. The evidence base is a trace set of 370,737 posts and 3.9 million comments from 46,872 agents over a platform's first twelve days. Generalise carefully: the number is one instrument on one platform, but the mechanism applies to every model that reads behaviour as evidence of intent.
+
+The second half, and keep it short on the slide. Agents change while they run in both directions. They accumulate skills and tools, which is the part people talk about. They also lose the instructions they were given: with a standard compaction prompt, 53 per cent of an agent's constraints survive one round at 50 per cent compression and 10 per cent survive five rounds. Routing each knowledge type through its own retention policy holds recall near 0.96, so this is a design fault rather than a law, but the default is what we will meet in logs. The consequence for us: a trace tells us what an agent did, and not what a person wanted, and not even reliably what the agent was told.
 
 The three questions are genuinely open, and asking them of this room is the point. We do not have answers.
 
@@ -2238,8 +2238,8 @@ How a person works *with* an agent — what they ask it, what they correct, when
 
 <div class="pull-quote small">
 
-1. Human–agent interaction is now as foundational as the query log once was, and we do not have it.  We missed much of the user data of web search. We should not miss the interaction data of agentic search.
-2. Generating agent traces at scale is also a matter of cost. 
+1. Human–agent interaction is now as foundational as the query log once was, and we do not have it.  We missed much of the user data of web search. We should not miss the interaction data of real users with agentic search systems.
+2. Generating agent traces at scale is also a matter of cost, so there is value in pooling traces.
 
 </div>
 
