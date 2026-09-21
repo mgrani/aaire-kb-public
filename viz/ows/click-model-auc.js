@@ -43,10 +43,10 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   svg.append('text').attr('x', M.left).attr('y', 20).attr('font-size', 13).attr('font-weight', 700)
     .attr('fill', INK).text('Click-model AUC')
-  svg.append('text').attr('x', M.left).attr('y', 36).attr('font-size', 11).attr('fill', SOFT)
-    .text('task: will this result be clicked? \u2014 a position-based model')
-  svg.append('text').attr('x', M.left).attr('y', 50).attr('font-size', 11).attr('fill', SOFT)
-    .text('trained on the platform\u2019s own interaction data')
+  svg.append('text').attr('x', M.left).attr('y', 37).attr('font-size', 11.5).attr('fill', INK)
+    .text('what a mixed population costs an instrument built for one')
+  svg.append('text').attr('x', M.left).attr('y', 51).attr('font-size', 10.5).attr('fill', '#9aa4b0')
+    .text('task: will this result be clicked? position-based model, platform interaction data')
 
   const marker = (g, v, colour, label, dy) => {
     g.append('line').attr('x1', x(cfg.lo)).attr('x2', x(v)).attr('y1', yBar).attr('y2', yBar)

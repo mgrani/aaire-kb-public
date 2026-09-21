@@ -21,7 +21,7 @@
 
 ## Beyond Open Models: Building Open Search Infrastructure for AI Agents
 
-Prof. Dr. Michael Granitzer  
+Michael Granitzer  
 Chair of Data Science, University of Passau, Germany  
 IT:U Interdisciplinary Transformation University Linz, Austria  
 Coordinator OpenWebSearch.EU
@@ -181,7 +181,7 @@ Build the figure up in four steps. First the plain picture: a user, an agent, an
 
 ## Understanding search meant operating search
 
-What we could observe about users was always bounded by what we operated.
+What you can observe on what you operated.
 
 
 <div class="grid-2 gap-lg small">
@@ -2077,9 +2077,9 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 <div class="c-danger">
 
 ### An indirection problem
-Did the agent choose this query, or did someone tell it to ask? 
+Spotting the agent is the easy half, and it is the half that does not help.
 
-The behaviour looks the same either way, and text, timing and community carry little of the difference. Not impossible to detect — but very hard, and getting harder.
+Even once you know a query came from an agent, you do not know what the person wanted. The query you see is the agent's. The instruction behind it never arrives.
 
 </div>
 
@@ -2102,7 +2102,7 @@ The behaviour looks the same either way, and text, timing and community carry li
 
 <div class="c-warning tight">
 
-One user with one search intent is no longer a sufficient working model. 
+One user with one search intent is no longer a sufficient working model. Our instruments already feel the mixture.
 
 </div>
 
@@ -2125,11 +2125,17 @@ Zerhoudi, Granitzer, Dang et al., *Behind the Prompt: The Agent-User Problem in 
 Notes:
 Goal: the query, the unit all our instruments are built on, no longer identifies anyone. Watching agents is not the same as understanding users.
 
+**Say the claim in its strong form, because the weak form invites an objection.** The claim is not that agents cannot be told apart from people. Sometimes they can, and platforms get better at it. The claim is that telling them apart does not recover the intent, because the intent sits one step further back, with whoever configured the agent, and that instruction is never transmitted with the query.
+
 **The indirection, said plainly.** When a query arrives from an agent, it is one of two things and you cannot tell which: the agent decided to ask it, or a person told the agent to ask it. One layer of delegation sits between the behaviour and the intent, and everything we infer from behaviour is really inferring across that gap. Add a second agent calling the first and there are two layers.
 
 **How hard, and be careful not to overstate it.** The paper's claim is non-identifiability: whether the action was autonomous or operator-directed is not recoverable from text, timing, community membership or votes. Say "very hard, and not a problem a better classifier solves on those signals", not "impossible". Other signals may exist, and declared provenance would settle it outright, which is one argument for the MCP channel in Topic 1.
 
-**Reading the figure.** AUC is the chance that the model ranks a clicked result above an unclicked one, so 0.5 is a coin flip and only the distance above it means anything. A position-based click model trained on human behaviour sits at 0.640, which is 0.14 above chance. Train the same model where half the data comes from agents the platform could not validate and it falls to 0.586, which is 0.086 above chance: roughly two-fifths of what it had. The instrument still works a little; it no longer works usefully. The evidence base is a trace set of 370,737 posts and 3.9 million comments from 46,872 agents over a platform's first twelve days, so generalise the mechanism, not the number.
+**What the figure is and is not evidence for**, because this is where the argument can be attacked. It is not evidence that the groups are indistinguishable. Quite the opposite: if mixing in agent data degrades the model, the two populations must behave differently, and an alert listener will point that out. What it shows is the cost of the mixture to an instrument built on the assumption of a single population. Separating the groups would fix it, and that is precisely what cannot be done per action.
+
+**Keep three splits apart if you are challenged.** Validated against unvalidated agents is separable by construction, since the paper defines those groups from five platform signals. Human against agent is partly detectable. Autonomous against operator-directed is the one that is not identifiable, and it is the one that carries the intent.
+
+**Reading the figure.** AUC is the chance that the model ranks a clicked result above an unclicked one, so 0.5 is a coin flip and only the distance above it means anything. A position-based click model trained on human behaviour sits at 0.640, which is 0.14 above chance. Train the same model where half the data comes from agents the platform could not validate and it falls to 0.586, which is 0.086 above chance: roughly two-fifths of what it had. The instrument still works a little; it no longer works usefully. Do not say it falls to a coin flip: 0.586 is above 0.5, and the only share verified here is the 50 per cent point. The paper's figure shows it continuing to fall as the agent share rises, but no value at the extreme is verified. The evidence base is a trace set of 370,737 posts and 3.9 million comments from 46,872 agents over a platform's first twelve days, so generalise the mechanism, not the number.
 
 **The agent's own drift**, kept to one line on the slide. Agents change while they run in both directions: they accumulate skills and tools, and they lose the instructions they were given. With a standard compaction prompt, 53 per cent of an agent's constraints survive one round at 50 per cent compression and 10 per cent survive five. Routing each knowledge type through its own retention policy holds recall near 0.96, so it is a design fault rather than a law, but the default is what will show up in logs.
 
