@@ -1357,9 +1357,10 @@ Caspari et al., CoRECT, Fig. 2. Corpus built by subsampling MS MARCO v2 with dis
 <div class="paper detail">
 
 - **Question** Do compression methods hold up as the corpus grows?
-- **Setup** CoRE: the same 65 TREC DL 2023 queries and judgements throughout, the corpus grown from 10K to 100M passages. Each query keeps 10 relevant passages and **100 distractors** mined by the subsampling method of Fröbe et al.; the rest is random filler. Four embedding models, eight compression families.
+- **Setup** CoRE: the same 65 TREC DL 2023 queries and judgements, the corpus grown from 10K to 100M passages. Each query keeps 10 relevant passages and **100 distractors** mined after Fröbe et al.; the rest is random filler. Four models, eight compression families.
 - **Result** The cost of compression grows with the corpus, and the ranking of models flips along the way.
 - **Conclusion** A conclusion drawn at 10K passages can be wrong at 100M. Compression must be evaluated at scale.
+- **Related** Recent work from Perplexity on "Q2D-Web: A Large-Scale Benchmark for Retrieval in Agentic RAG Systems".
 
 </div>
 
@@ -1543,7 +1544,7 @@ The right-hand column, said plainly. A live index is exactly what a temporal eva
 
 <div class="marks-step">
 
-- Scale and text quality are variables for web search systems
+- Scale and text quality are variables for web search systems to be considered
 - Evaluating agentic search fully means running web-scale retrieval, which needs large crawls and real infrastructure.
 - No single institute affords that alone. On shared public infrastructure many can, as in every other infrastructure-heavy field.
 - Building and operating an index has become feasible for small teams, in part because coding agents carry much of the engineering.
@@ -1642,7 +1643,7 @@ Open the part with this, before any history, because it makes the case in one sc
 
 ## Query Logs and their limits
 
-We collected logs to understand the user: what they asked, what they chose, and what that says about relevance. Click models, position and trust bias and counterfactual learning to rank all came out of these files. The limits below are structural, not a verdict on their worth.
+We collected logs to understand the user and usage.
 
 
 <div class="timeline">
@@ -1836,6 +1837,48 @@ Start with why, because the why is the whole argument. We did not begin simulati
 
 <!-- .slide: class="smaller" -->
 
+## SimIIR 1.0 and 2.0: the Complex Searcher Model
+
+
+<div class="figure-90">
+
+![The Complex Searcher Model: six numbered steps and four decision points, with the components SimIIR 2.0 replaced by Markov models marked in green](/slides/_assets/ows/papers/csm-flowchart.png)
+
+</div>
+
+
+
+<div class="card">
+
+Complex Searcher Model of SimIIR 1.0. Green are Markov models learned from logs developed in SimIIR 2.0. 
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Figure: Zerhoudi et al., *SimIIR 2.0*, CIKM 2022, Fig. 1 · the model itself: Maxwell & Azzopardi, SIGIR 2016.
+
+</div>
+
+
+Notes:
+Goal: show what a simulated searcher actually is before showing the framework that contains it. It is a loop of steps with decision points, and every decision point is where a model of a person has to be supplied.
+
+Walk the flowchart once. Examine the topic, generate a query, issue it, view the result page, examine a snippet. Then the first decision: is the snippet worth clicking? If yes, click, read, judge, and if relevant, mark it. Then the second decision, continue on this result page or abandon it. Then the third, stop the session or generate the next query. Six numbered activities, four diamonds, and the diamonds are where the user model lives.
+
+Say what the green means, because it is the previous slide's argument as a picture: in the original model those decisions were fixed rules and threshold parameters. SimIIR 2.0 replaced the stopping decisions and the query generation with Markov models trained on the Sowiport logs, so the behaviour became learned rather than declared.
+
+Then the right-hand card, which is the step into SimIIR 3. Conversational search has no result page to scan, so the same loop needed a parallel set of components: an utterance strategy instead of a querying strategy, a decision maker for the conversational response instead of one for the result page, a conversation context instead of a search context, and stopping at the level of a response rather than a result. Keep the label CSRP as the framework writes it, and do not expand the acronym from the stage unless you have checked it.
+
+The point to land before the next slide: the framework does not simulate a user in one piece. It assembles one out of these components, which is why the component list on the next slide is as long as it is.
+→ next: the whole component list, and what version 3 added.
+
+--
+
+<!-- .slide: class="smaller" -->
+
 ## SimIIR 3.0 and what it contains
 
 
@@ -1859,7 +1902,7 @@ Start with why, because the why is the whole argument. We did not begin simulati
 
 <div class="column">
 
-**Conversational components.** Utterance strategy, response-level stopping, context, flow.
+**A second searcher model, for conversation.** The same loop, with an utterance strategy instead of a query and stopping per response.
 
 </div>
 
