@@ -1879,6 +1879,71 @@ The point to land before the next slide: the framework does not simulate a user 
 
 <!-- .slide: class="smaller" -->
 
+## Conversational search needs its own searcher model
+
+
+<div class="grid-3-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-xl">
+
+![The two searcher models side by side, with the four points where the conversational loop departs from the classic one marked](/slides/_assets/ows/papers/searcher-models-annotated.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### Same shape, four departures
+1. **A need, not a query.** The searcher generates and issues an *information need*; there is no query string to select.
+2. **An action with no counterpart.** It can **request a suggestion**. A result page cannot be asked for more.
+3. **Stopping changes its object.** Not "continue on this SERP" but *is the information need satisfied*: a judgement about the conversation, not about a page.
+4. **The unit consumed is an information space**, not a ranked document.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Conversational searcher model after Azzopardi et al., *SimIIR 3*, SIGIR-AP 2024.
+
+</div>
+
+
+Notes:
+Goal: answer the obvious question about the previous slide. If a simulated searcher is a loop of decisions over a result page, what happens when there is no result page?
+
+Read the two panels as one shape. Both start the same way: examine the topic, then produce something to send to the system. On the left that is a query; on the right it is an information need. Both then examine what comes back, judge whether it is attractive, consume it if it is relevant, and decide whether to continue or stop.
+
+Then the differences, which are the interesting part.
+
+- **The unit changes.** Snippets and documents become information units, and "consume document" becomes "consume information space".
+- **A new action appears that has no counterpart in web search**: *request an info unit suggestion*. A conversational system can be asked for more, which a result page cannot, so the loop gains a branch the left-hand model does not have.
+- **The stopping question changes.** On the left it is "continue on this SERP" and "stop the session". On the right it is "is the information need satisfied", which is a judgement about the state of the conversation rather than about a page.
+
+The point for the framework: the decision structure is similar enough to share an architecture and different enough that the components cannot be reused unchanged. That is exactly why SimIIR 3 has two parallel component columns rather than one, which is the next slide.
+→ next: the whole component list, and what version 3 added.
+
+--
+
+<!-- .slide: class="smaller" -->
+
 ## SimIIR 3.0 and what it contains
 
 
@@ -1937,13 +2002,13 @@ Then set up the next slide, because the jump only works if you name the shared c
 ## PersonaRAG: the user model moves inside retrieval
 
 
-<div class="grid-2 gap-lg">
+<div class="grid-2-1 gap-lg">
 
 
 <div class="column">
 
 
-<div class="img-h-lg">
+<div class="img-h-xl">
 
 ![PersonaRAG's five user-centric agents, exchanging through a global message pool](/slides/_assets/ows/papers/personarag-agents.png)
 
@@ -1961,23 +2026,15 @@ Then set up the next slide, because the jump only works if you name the shared c
 <span class="eyebrow">IR-RAG @ SIGIR 2024 · Zerhoudi & Granitzer</span>
 ### PersonaRAG
 - **Question** Can agents that model the user from live interaction make retrieval and generation more accurate and more personal?
-- **Setup** Five agents (profile, contextual retrieval, live session, document ranking, feedback) write into a shared message pool that conditions retrieval and generation. 500 questions each from Natural Questions, TriviaQA and WebQuestions, generator GPT-3.5.
-- **Result** WebQuestions accuracy rises from 38.5% to 63.5% on the top three passages, Natural Questions from 36.6% to 49.0%, both against vanilla RAG. On TriviaQA the model without retrieval still wins, which the authors attribute to contamination.
-- **Conclusion** Modelling the user pays off inside the pipeline, not only in the evaluation of it.
+- **Setup** **Five agents** write into a shared message pool that conditions retrieval and generation. 500 questions each from NQ, TriviaQA and WebQuestions, generator GPT-3.5.
+- **Result** WebQuestions **38.5% → 63.5%** on the top three passages, **NQ 36.6% → 49.0%**, both against vanilla RAG. On TriviaQA the model without retrieval still wins.
+- **Conclusion** Profile, session, preferences, feedback: the constructs a user simulator needs turn out to be components of an agentic retrieval system, not only of its evaluation.
 
 </div>
 
 
 </div>
 
-
-</div>
-
-
-
-<div class="c-insight tight">
-
-The constructs a user simulator needs — profile, session, preferences, feedback — turn out to be useful components in an agentic retreival system, not only in the evaluation of it.
 
 </div>
 
@@ -2195,8 +2252,8 @@ It gains skills as it runs and loses its own instructions: after five rounds of 
 
 <div class="c-warning">
 
-### What that costs us
-One user with one search intent is no longer a sufficient working model. Our instruments already feel the mixture.
+### The mixture cannot be filtered out
+No action can be attributed, so any model trained on platform data carries agents of unknown quality.
 
 </div>
 
@@ -2224,11 +2281,18 @@ Goal: the query, the unit all our instruments are built on, no longer identifies
 
 **How hard, and be careful not to overstate it.** The paper's claim is non-identifiability: whether the action was autonomous or operator-directed is not recoverable from text, timing, community membership or votes. Say "very hard, and not a problem a better classifier solves on those signals", not "impossible". Other signals may exist, and declared provenance would settle it outright, which is one argument for the MCP channel in Topic 1.
 
-**What the figure is and is not evidence for**, because this is where the argument can be attacked. It is not evidence that the groups are indistinguishable. Quite the opposite: if mixing in agent data degrades the model, the two populations must behave differently, and an alert listener will point that out. What it shows is the cost of the mixture to an instrument built on the assumption of a single population. Separating the groups would fix it, and that is precisely what cannot be done per action.
+**Be precise about what the figure shows, because it is easy to misread and someone will.**
 
-**Keep three splits apart if you are challenged.** Validated against unvalidated agents is separable by construction, since the paper defines those groups from five platform signals. Human against agent is partly detectable. Autonomous against operator-directed is the one that is not identifiable, and it is the one that carries the intent.
+- **There are no humans in this data at all.** The platform is agent-native. The comparison is between two tiers of *agents*, not between agents and people.
+- **The tiers come from five external platform signals**: karma, verified email, follower ratio, owner linkage through a claim token, and comment-to-post ratio, chosen so that no behavioural observable is used as input. Top 40 per cent form the high-validation group, bottom 40 per cent the low-validation group, about 18,750 agents each.
+- **The model and the signal.** A position-based click model trained on agent upvotes. AUC falls from 0.640 to 0.586, 8.5 per cent, when half the training data comes from the low-validation tier, and the decline begins as soon as any of them appear.
+- **Do not make the absolute level the story.** The paper attributes the modest AUC to the signal: binary upvotes are noisier than search clicks. The finding is the decline, not the level.
+- **Do not claim the tiers are indistinguishable.** The paper says the opposite: population-level signals separate them, and the four behavioural observables differ with effect sizes from 0.55 to 0.88. What is not identifiable is the origin of an individual action.
+- **The base-rate objection is already answered.** The two groups differ in engagement, 76.2 against 44.2 per cent, but AUC measures ranking independently of base rates, so that gap does not explain the degradation.
 
-**Reading the figure.** AUC is the chance that the model ranks a clicked result above an unclicked one, so 0.5 is a coin flip and only the distance above it means anything. A position-based click model trained on human behaviour sits at 0.640, which is 0.14 above chance. Train the same model where half the data comes from agents the platform could not validate and it falls to 0.586, which is 0.086 above chance: roughly two-fifths of what it had. The instrument still works a little; it no longer works usefully. Do not say it falls to a coin flip: 0.586 is above 0.5, and the only share verified here is the 50 per cent point. The paper's figure shows it continuing to fall as the agent share rises, but no value at the extreme is verified. The evidence base is a trace set of 370,737 posts and 3.9 million comments from 46,872 agents over a platform's first twelve days, so generalise the mechanism, not the number.
+**The link that makes it an argument rather than an anecdote**, and it is the paper's own: because no action can be attributed to an autonomous or an operator-directed origin, nobody can filter the training data by it. Any model built on platform data will therefore contain agents of unknown quality, and the degradation is not a data-hygiene problem that better curation fixes.
+
+**Generalising honestly.** The mixture measured here is high against low validation agents on one platform over twelve days, 370,737 posts from 46,872 agents. The mixture we care about is people against agents against operator-directed agents. The mechanism transfers; the number does not.
 
 **The agent's own drift**, kept to one line on the slide. Agents change while they run in both directions: they accumulate skills and tools, and they lose the instructions they were given. With a standard compaction prompt, 53 per cent of an agent's constraints survive one round at 50 per cent compression and 10 per cent survive five. Routing each knowledge type through its own retention policy holds recall near 0.96, so it is a design fault rather than a law, but the default is what will show up in logs.
 
