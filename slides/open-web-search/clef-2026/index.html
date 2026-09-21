@@ -1709,72 +1709,7 @@ Say what the green means, because it is the previous slide's argument as a pictu
 Then the right-hand card, which is the step into SimIIR 3. Conversational search has no result page to scan, so the same loop needed a parallel set of components: an utterance strategy instead of a querying strategy, a decision maker for the conversational response instead of one for the result page, a conversation context instead of a search context, and stopping at the level of a response rather than a result. Keep the label CSRP as the framework writes it, and do not expand the acronym from the stage unless you have checked it.
 
 The point to land before the next slide: the framework does not simulate a user in one piece. It assembles one out of these components, which is why the component list on the next slide is as long as it is.
-→ next: the whole component list, and what version 3 added.
-
---
-
-<!-- .slide: class="smaller" -->
-
-## Conversational search needs its own searcher model
-
-
-<div class="grid-3-2 gap-lg">
-
-
-<div class="column">
-
-
-<div class="img-h-xl">
-
-![The two searcher models side by side, with the four points where the conversational loop departs from the classic one marked](/slides/_assets/ows/papers/searcher-models-annotated.png)
-
-</div>
-
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="card">
-
-### Same shape, four changes
-1. **A information need, not a query.** The searcher generates and issues an *information need* rather then a query.
-2. **An action with no counterpart.** It can **request a suggestion**. A result page cannot be asked for more.
-3. **Stopping changes its object.** Not "continue on this SERP" but *is the information need satisfied*: a judgement about the conversation, not about a page.
-4. **The unit consumed is an information space**, not a ranked document.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="slide-citation">
-
-Conversational searcher model after Azzopardi et al., *SimIIR 3*, SIGIR-AP 2024.
-
-</div>
-
-
-Notes:
-Goal: answer the obvious question about the previous slide. If a simulated searcher is a loop of decisions over a result page, what happens when there is no result page?
-
-Read the two panels as one shape. Both start the same way: examine the topic, then produce something to send to the system. On the left that is a query; on the right it is an information need. Both then examine what comes back, judge whether it is attractive, consume it if it is relevant, and decide whether to continue or stop.
-
-Then the differences, which are the interesting part.
-
-- **The unit changes.** Snippets and documents become information units, and "consume document" becomes "consume information space".
-- **A new action appears that has no counterpart in web search**: *request an info unit suggestion*. A conversational system can be asked for more, which a result page cannot, so the loop gains a branch the left-hand model does not have.
-- **The stopping question changes.** On the left it is "continue on this SERP" and "stop the session". On the right it is "is the information need satisfied", which is a judgement about the state of the conversation rather than about a page.
-
-The point for the framework: the decision structure is similar enough to share an architecture and different enough that the components cannot be reused unchanged. That is exactly why SimIIR 3 has two parallel component columns rather than one, which is the next slide.
-→ next: the whole component list, and what version 3 added.
+→ next: and what version 3 added on top of it.
 
 --
 
@@ -1783,7 +1718,7 @@ The point for the framework: the decision structure is similar enough to share a
 ## SimIIR 3.0 and what it contains
 
 
-<div class="img-h-lg">
+<div class="img-h-md">
 
 ![The SimIIR 3 framework. Green marks what 3.0 added: conversational and Markov users, cognitive states, pyTerrier retrieval and LLM-based variants](/slides/_assets/ows/papers/simiir3-framework.png)
 
@@ -1796,21 +1731,26 @@ The point for the framework: the decision structure is similar enough to share a
 
 <div class="column">
 
-**LLM-based variants.** One generic wrapper, so any model can drive the simulated user.
+**LLM-based variants.** One wrapper, so any model can drive the simulated user.
 
 </div>
 
 
 <div class="column">
 
-**A second searcher model, for conversation.** The same loop, with an utterance strategy instead of a query and stopping per response.
+**Added the Conversational Searcher Model**, same decision structure over new units:
+
+- query → **information need**
+- snippets → **information units**
+- continue? → **need satisfied?**
+- plus **request a suggestion**
 
 </div>
 
 
 <div class="column">
 
-**Explicit cognitive states.** The simulated user carries what it believes it has found and still needs; that state drives the next query and the stop.
+**Explicit cognitive states.** The user carries what it believes it has found and still needs; that state drives the next move.
 
 </div>
 
@@ -1821,13 +1761,15 @@ The point for the framework: the decision structure is similar enough to share a
 
 <div class="slide-citation">
 
-Azzopardi, Breuer, Engelmann, Kreutz, MacAvaney, Maxwell, Parry, Roegiest, Wang, Zerhoudi, *SimIIR 3: A framework for the simulation of interactive and conversational information retrieval*, SIGIR-AP 2024. Figure from the authors' talk.
+Azzopardi et al., *SimIIR 3*, SIGIR-AP 2024. Figure from the authors' talk.
 
 </div>
 
 
 Notes:
-This is the state of the art in one picture, and it is worth showing because the list is longer than people expect. Read the figure in three moves rather than box by box. On the left, what a simulation is configured from: topics, a retrieval system and now a conversational agent. In the middle, the searcher models that consume those configurations. On the right, the two columns of components a simulated user is assembled from, classic search on the blue side and conversation on the green. Green is the whole story of version 3: conversational users, Markov users, cognitive states, pyTerrier underneath and language-model variants of every component. Two things to stress. Language-model support is a wrapper, so the simulated user can be any model, which is what made the last two years of work possible at all. And the architecture keeps the parts that make a simulation checkable: a real retrieval toolkit underneath through pyTerrier, Markov models for the transitions, and an explicit cognitive state. Explain the cognitive state briefly, because it is the component people ask about. A classic simulated searcher is a transition machine: it queries, examines a result, judges it, and stops on a rule. A cognitive state adds a small represented mind between those steps, holding what the user believes they have found so far, what is still missing and how certain they are, updated after each result and used to choose the next query and the moment to stop. The value is not realism, it is inspectability: when a simulated session behaves oddly you can read the state that produced it, which is impossible with a prompt-only simulated user. Then the honest note, from the authors' own closing slide: their research directions are still questions, not answers — query generation quality, decision-making fidelity, behaviour modelling. As of late 2024 the framework's own authors were not claiming that language-model simulators were validated.
+This is the state of the art in one picture, and it is worth showing because the list is longer than people expect. Read the figure in three moves rather than box by box. On the left, what a simulation is configured from: topics, a retrieval system and now a conversational agent. In the middle, the searcher models that consume those configurations. On the right, the two columns of components a simulated user is assembled from, classic search on the blue side and conversation on the green. Green is the whole story of version 3: conversational users, Markov users, cognitive states, pyTerrier underneath and language-model variants of every component. Two things to stress. Language-model support is a wrapper, so the simulated user can be any model, which is what made the last two years of work possible at all. And the architecture keeps the parts that make a simulation checkable: a real retrieval toolkit underneath through pyTerrier, Markov models for the transitions, and an explicit cognitive state. Explain the cognitive state briefly, because it is the component people ask about. A classic simulated searcher is a transition machine: it queries, examines a result, judges it, and stops on a rule. A cognitive state adds a small represented mind between those steps, holding what the user believes they have found so far, what is still missing and how certain they are, updated after each result and used to choose the next query and the moment to stop. The value is not realism, it is inspectability: when a simulated session behaves oddly you can read the state that produced it, which is impossible with a prompt-only simulated user. On the conversational searcher model, since it now has to be carried in one caption: it is a second searcher model beside the classic one, not a modification of it. The shape is the same, examine, produce something to send, examine what comes back, judge, decide whether to go on. What changes is every unit inside that shape. The searcher issues an information need rather than a query. What comes back is information units rather than a ranked page of snippets. There is one action with no counterpart in web search, requesting a suggestion, because a conversational system can be asked for more and a result page cannot. And the stopping question changes its object: not whether to continue down this page, but whether the information need is satisfied, which is a judgement about the state of the conversation. The appendix has the two models drawn side by side with those four points marked, if the room wants to see it.
+
+Then the honest note, from the authors' own closing slide: their research directions are still questions, not answers — query generation quality, decision-making fidelity, behaviour modelling. As of late 2024 the framework's own authors were not claiming that language-model simulators were validated.
 Then set up the next slide, because the jump only works if you name the shared construct. The cognitive state was built so that a *simulated* user could be inspected: an explicit little model of what this searcher believes, needs and is uncertain about. PersonaRAG keeps that construct and changes its job. Same idea, same group, same word: a profile, a session context, an explicit state about the user, maintained while the search runs. In the simulator it exists so an experiment can be read afterwards; in PersonaRAG it exists so retrieval can be steered while the user is still searching. Be precise about the status of that link, because someone will check: PersonaRAG does not cite SimIIR and is not derived from it. What carries over is the construct, not a lineage.
 → next: the same user model, moved from the experiment into the pipeline.
 
@@ -3482,7 +3424,73 @@ The relevant document stays one. What grows is what the ranker has to reject.
 
 Notes:
 Explain the figure in one breath: the star is the relevant document, the rings are the corpus growing from ten thousand passages to the web, and the coloured dots are what competes with it: passages that look relevant, near-duplicates, other languages, contradictions. The web adds one more thing, cost. State this as a hypothesis; the next two slides are the evidence, and both were only possible because we could grow a corpus ourselves.
-Backup slide: what grows around the relevant document as a corpus scales.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+Backup slide: what grows around the relevant document as a corpus scales.
+
+--
+
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: the conversational searcher model, beside the classic one
+
+
+<div class="grid-3-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-xl">
+
+![The two searcher models side by side, with the four points where the conversational loop departs from the classic one marked](/slides/_assets/ows/papers/searcher-models-annotated.png)
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### Same shape, four changes
+1. **A information need, not a query.** The searcher generates and issues an *information need* rather then a query.
+2. **An action with no counterpart.** It can **request a suggestion**. A result page cannot be asked for more.
+3. **Stopping changes its object.** Not "continue on this SERP" but *is the information need satisfied*: a judgement about the conversation, not about a page.
+4. **The unit consumed is an information space**, not a ranked document.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Conversational searcher model after Azzopardi et al., *SimIIR 3*, SIGIR-AP 2024.
+
+</div>
+
+
+Notes:
+Goal: answer the obvious question about the previous slide. If a simulated searcher is a loop of decisions over a result page, what happens when there is no result page?
+
+Read the two panels as one shape. Both start the same way: examine the topic, then produce something to send to the system. On the left that is a query; on the right it is an information need. Both then examine what comes back, judge whether it is attractive, consume it if it is relevant, and decide whether to continue or stop.
+
+Then the differences, which are the interesting part.
+
+- **The unit changes.** Snippets and documents become information units, and "consume document" becomes "consume information space".
+- **A new action appears that has no counterpart in web search**: *request an info unit suggestion*. A conversational system can be asked for more, which a result page cannot, so the loop gains a branch the left-hand model does not have.
+- **The stopping question changes.** On the left it is "continue on this SERP" and "stop the session". On the right it is "is the information need satisfied", which is a judgement about the state of the conversation rather than about a page.
+
+The point for the framework: the decision structure is similar enough to share an architecture and different enough that the components cannot be reused unchanged. That is exactly why SimIIR 3 has two parallel component columns rather than one, which is the next slide.
+Backup slide: the two searcher models side by side, with the four departures marked.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 
