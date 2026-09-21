@@ -184,7 +184,17 @@ Build the figure up in four steps. First the plain picture: a user, an agent, an
 
 How did we come to understand web search users, and the needs of web search systems?
 
-Mostly from logs. What we could learn from them depended on who ran the system that produced them.
+
+
+<div class="c-important">
+
+We did learn mostly from query logs and obtaining them was hard. But a search session is richer than the query and the click it leaves behind. 
+
+The richest understanding came from operating a system itself, which allows to vary all variables (e.g. A/B-testing).
+
+</div>
+
+
 
 
 <div class="grid-2 gap-lg small">
@@ -197,7 +207,8 @@ Mostly from logs. What we could learn from them depended on who ran the system t
 
 ### A released web log records two kinds of event
 <span class="eyebrow">AOL 2006, released and withdrawn in three days</span>
-A query, and a click on a result. 36.4M queries, 657,426 users, 19.4M clicks — and the only results in the file are the ones that were clicked. Sessions are not marked. ORCAS in 2020 is thinner still: clicks alone, no users, no sessions.
+A query, and a click on a result. 36.4M queries, 657,426 users, 19.4M clicks — and the only results in the file are the ones that were clicked. Sessions are not marked. 
+
 
 </div>
 
@@ -223,12 +234,6 @@ Typing a query, selecting a facet, visiting a document, following a citation, ex
 </div>
 
 
-
-<div class="c-important">
-
-We did learn from query logs, and obtaining them was hard. But a search session is richer than the query and the click it leaves behind. The richer understanding came from a system our own community ran.
-
-</div>
 
 
 
@@ -439,12 +444,11 @@ At the model layer openness is a menu and a researcher can pick a level. Open-we
 | OpenAI · Anthropic search tools | ✓ | ✗ | ✗ | ✗ | ✗ |
 
 
-So what remains is that you have to trust the web search engine to return the right results and account for its uncertainty in an experimental setup.
 
 
 <div class="c-warning">
 
-Does true research sovereignty look like that? 
+So we do not have ability to inspect, reproduce, vary, operate and evaluate the whole information-access process, which means we lack **research sovereignty**.
 
 </div>
 
@@ -468,14 +472,7 @@ The facts, with sources. Everything below was checked against vendor documentati
 
 <!-- .slide: class="smaller" -->
 
-## Research sovereignty
-
-
-<div class="c-definition tight small">
-
-Methodological autonomy: the ability to inspect, reproduce, vary, operate and evaluate the whole information-access process.
-
-</div>
+## Research sovereignty 
 
 
 
@@ -548,7 +545,7 @@ the models and the datasets
 <div class="column">
 
 ![GitHub](/slides/_assets/ows/infra/github.png)
-the code · Microsoft since 2018
+the code 
 
 </div>
 
@@ -600,7 +597,7 @@ Every one of these was, at the time, infrastructure that somebody's research dep
 
 Openness of an artefact is not enough. 
 
-The infrastructure it lives on has to be a jointly managed public good: CERN for physics, and through CERN, Zenodo for everyone's data; EuroHPC for compute. **For the web there is no equivalent.**
+Research sovereignty requires a jointly managed public infrastructure.
 
 </div>
 
@@ -1279,56 +1276,15 @@ Goal: the abstract argument becomes something people can download this afternoon
 The exact figures, kept off the slide. 20,746,181 documents, roughly 70 GB in 500 Parquet files, with Jina v3 embeddings for the judged subsamples. The splits are `radboud-val` with 63,639 documents, which ships its qrels, and `radboud` with 90,852 and `jena-kassel` with 77,382, which keep theirs withheld. The crawl window is 1 March to 31 August 2025, and WOWS 2026 runs from 29 March to 2 April. The 2026 workshop proceedings are not published yet, so cite the collection and the workshop rather than a paper.
 
 Give it the numbers out loud, not on the slide. Six months of crawl, the Curlie-labelled English sub-collection, 20.7 million documents, subsampled per split so that judging stays feasible. The chain is the point: our own crawl, our own preprocessing, a slice chosen on purpose, topics and judgements produced inside IR teaching at three universities, and evaluation on infrastructure this community already runs — ChatNoir for search and TIRA for the submissions, both from Webis. Nobody had to sign a data agreement with a search engine. Say clearly what is withheld and why: the validation split ships with qrels so people can develop, the two test splits do not, which is what makes it a shared task rather than a dataset dump. Two caveats to keep honest. There is no paper for this collection, so cite the workshop repository. And the earlier WOWS editions are a different task: the 2025 edition ran WOWS-Eval, automated relevance-label transfer, on ClueWeb22 through TIRA, and its headline result was negative — cheap automatic judges correlated at most 0.427 with human labels. Do not merge the two editions into one story from the stage.
-→ next: what this part adds up to.
-
---
-
-## Does scale matter, if we can isolate the effect in a test collection?
-
-
-<div class="grid-figure gap">
-
-
-<div class="column">
-
-<div class="viz viz-lg" data-viz="ows/corpus-scale" data-steps="4"></div>
-
-</div>
-
-
-<div class="column small">
-
-
-<div class="hypothesis h2">
-
-**Scale is a scientific variable.** Corpus size and complexity change effectiveness, efficiency and robustness. A result on a small collection does not carry over to the web by itself.
-
-</div>
-
-
-
-<div class="card">
-
-The relevant document stays one. What grows is what the ranker has to reject.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Explain the figure in one breath: the star is the relevant document, the rings are the corpus growing from ten thousand passages to the web, and the coloured dots are what competes with it: passages that look relevant, near-duplicates, other languages, contradictions. The web adds one more thing, cost. State this as a hypothesis; the next two slides are the evidence, and both were only possible because we could grow a corpus ourselves.
-→ next: the evidence.
+→ next: and the other variable a collection can hold fixed, size.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## CoRECT: A Framework for Evaluating Embedding Compression Techniques at Scale
+## Does Scale Matter?
+
+### CoRECT: A Framework for Evaluating Embedding Compression Techniques at Scale
 
 
 <div class="grid-2-1 gap-lg">
@@ -1407,7 +1363,7 @@ How the corpus was built.
 - The distractor mining, from the paper: take the runs submitted to TREC DL 2023, discard the bottom 20 per cent by effectiveness, fuse the rest with Reciprocal Rank Fusion, and keep the top 100 irrelevant or unjudged documents per query. Each query gets exactly those 100 distractors plus its 10 relevant items; the rest of the corpus is random filler.
 - So the corpus grows by adding filler while the hard part of the task stays fixed. The decay on the slide is what filler alone does to a constant retrieval problem.
 
-→ next: and the same collection, served live.
+→ next: what this part adds up to.
 
 --
 
@@ -3482,7 +3438,51 @@ The verified detail, if asked.
 
 The right-hand column, said plainly. A live index is exactly what a temporal evaluation wants and exactly what breaks a fixed qrel file: the document you judged may have changed, moved or gone. Two lines of work are running. Temporal metadata carried with the judgements, in the spirit of LongEval, so a run can name the version of the world it was scored against. And export of both the slice and its qrels, so an experiment can leave the service and still be repeated. One honest exception stays: an inverse document frequency over a moving corpus cannot be snapshotted, and pretending otherwise would be worse than admitting it.
 
-Backup slide: what ChatNoir and OURRS each give an experiment today.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+Backup slide: what ChatNoir and OURRS each give an experiment today.
+
+--
+
+
+## Appendix: does scale matter, if the effect is isolated in a test collection?
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/corpus-scale" data-steps="4"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="hypothesis h2">
+
+**Scale is a scientific variable.** Corpus size and complexity change effectiveness, efficiency and robustness. A result on a small collection does not carry over to the web by itself.
+
+</div>
+
+
+
+<div class="card">
+
+The relevant document stays one. What grows is what the ranker has to reject.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Explain the figure in one breath: the star is the relevant document, the rings are the corpus growing from ten thousand passages to the web, and the coloured dots are what competes with it: passages that look relevant, near-duplicates, other languages, contradictions. The web adds one more thing, cost. State this as a hypothesis; the next two slides are the evidence, and both were only possible because we could grow a corpus ourselves.
+Backup slide: what grows around the relevant document as a corpus scales.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 
