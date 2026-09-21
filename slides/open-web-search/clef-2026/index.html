@@ -1279,7 +1279,7 @@ Goal: the abstract argument becomes something people can download this afternoon
 The exact figures, kept off the slide. 20,746,181 documents, roughly 70 GB in 500 Parquet files, with Jina v3 embeddings for the judged subsamples. The splits are `radboud-val` with 63,639 documents, which ships its qrels, and `radboud` with 90,852 and `jena-kassel` with 77,382, which keep theirs withheld. The crawl window is 1 March to 31 August 2025, and WOWS 2026 runs from 29 March to 2 April. The 2026 workshop proceedings are not published yet, so cite the collection and the workshop rather than a paper.
 
 Give it the numbers out loud, not on the slide. Six months of crawl, the Curlie-labelled English sub-collection, 20.7 million documents, subsampled per split so that judging stays feasible. The chain is the point: our own crawl, our own preprocessing, a slice chosen on purpose, topics and judgements produced inside IR teaching at three universities, and evaluation on infrastructure this community already runs — ChatNoir for search and TIRA for the submissions, both from Webis. Nobody had to sign a data agreement with a search engine. Say clearly what is withheld and why: the validation split ships with qrels so people can develop, the two test splits do not, which is what makes it a shared task rather than a dataset dump. Two caveats to keep honest. There is no paper for this collection, so cite the workshop repository. And the earlier WOWS editions are a different task: the 2025 edition ran WOWS-Eval, automated relevance-label transfer, on ClueWeb22 through TIRA, and its headline result was negative — cheap automatic judges correlated at most 0.427 with human labels. Do not merge the two editions into one story from the stage.
-→ next: and the same collection, served live.
+→ next: what this part adds up to.
 
 --
 
@@ -1408,134 +1408,6 @@ How the corpus was built.
 - So the corpus grows by adding filler while the hard part of the task stays fixed. The decay on the slide is what filler alone does to a constant retrieval problem.
 
 → next: and the same collection, served live.
-
---
-
-<!-- .slide: class="small" -->
-
-## Evaluation through an API a partner runs
-
-
-<div class="card">
-
-
-<div class="grid-4-1">
-
-
-<div class="column">
-
-**ChatNoir, run by Webis:** Frozen collections behind one research API: ClueWeb09, 12 and 22, MS MARCO, LongEval, and OWS-Curlie-2025 as its default index. Static corpora are what make a run citable years later. 
-
-</div>
-
-
-<div class="column">
-
-![The ChatNoir search interface, run by the Webis group](/slides/_assets/ows/screenshots/chatnoir.png)
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="card good">
-
-
-<div class="grid-4-1">
-
-
-<div class="column">
-
-**OURRS, run in Passau** The same idea but for a corpus that changes daily, with agents as first-class clients and to provide recent search results with some reproducibility guarantees. 
-
-</div>
-
-
-<div class="column">
-
-![OURRS searching one billion pages of the Open Web Index](/slides/_assets/ows/screenshots/ourrs.png)
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="c-positive">
-
-**Works today**
-- query a live corpus instead of hosting one
-- different search verticals: products, places, scholarly,...
-- agents give feedback, summaries and opinions 
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="c-warning">
-
-**Future Work**
-- published agent qrels carry no time stamp
-- more flexible ranking profiles
-- no clean export of a corpus slice with its judgements
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="slide-citation">
-
-ourrs.eu · chatnoir.eu. Index counts from ourrs.eu and cluster figures from the deployment, September 2026; refresh both on the day.
-
-</div>
-
-
-Notes:
-Goal: a research community can run its own search service, two of them already do, and the honest list of what that does and does not yet give an experiment.
-
-The two services.
-
-- **ChatNoir**, from Webis, is the one this room knows and the right model for reproducibility: its corpora are frozen, so a run against them is citable years later. It serves ClueWeb09, 12 and 22, MS MARCO, LongEval and OWS-Curlie-2025.
-- **OURRS** is aimed at what a frozen corpus cannot reach: a corpus rebuilt daily, and agents as the clients rather than an afterthought. Say three or four verticals, not eighteen: products, places, people and organisations, FAQs, search actions.
-- **MCP is the part to dwell on**, because it is the bridge into Topic 3. The channel that delivers a result can carry a judgement back, and AI opinions and summaries become searchable objects in their own right.
-
-The verified detail, if asked.
-
-- **Eighteen verticals**, read from the deployed application on 19 September 2026: All, My Results, Documents, AI Opinions, Multimedia, News, Scholarly, Products, Courses, Events, Places, FAQs, Conversations, Pages, Sites, Actions, Persons and Organisations, Artefacts.
-- **Six ranking profiles**, fixed: relevance, quality, authority, balanced, freshness by publication date and freshness by modification date, with quality as the default. That is the honest limit behind "no bring-your-own ranker".
-- **Four corpora on the same API**: `owi` for the rolling crawl, `owic25` for the Curlie collection, plus Wikipedia and MS MARCO v2.1 as static reference points. The front page states the live scale of `owi`: one billion web pages, 963.5 million entities and 32 million sites. Read it off the site on the morning of the talk, because it moves.
-- **The cluster numbers are reservations, not utilisation.** They are Kubernetes requests read from our own namespace; other namespaces are not visible, and actual consumption is not measured. Say "reserved".
-- **The capacity limit worth knowing.** The bulk tier is not uniform: ten nodes have 8 TiB disks and ten have 3 TiB, and Vespa spreads documents evenly, so the small disks set the ceiling. The corpus can roughly double before they fill, which is a 2x margin rather than the 5x the totals suggest.
-
-The right-hand column, said plainly. A live index is exactly what a temporal evaluation wants and exactly what breaks a fixed qrel file: the document you judged may have changed, moved or gone. Two lines of work are running. Temporal metadata carried with the judgements, in the spirit of LongEval, so a run can name the version of the world it was scored against. And export of both the slice and its qrels, so an experiment can leave the service and still be repeated. One honest exception stays: an inverse document frequency over a moving corpus cannot be snapshotted, and pretending otherwise would be worse than admitting it.
-
-→ next: what this part adds up to.
 
 --
 
@@ -3481,7 +3353,136 @@ How the collection was built.
 - Chunking recovers part of the loss, and the companion CIKM 2026 study finds no strategy that wins across models, corpus sizes and metrics.
 - Why it belongs in a talk about infrastructure: the experiment needs real crawled pages with their boilerplate, which an owned index supplies and a cleaned benchmark cannot.
 
-→ next: Topic 3, where the data does not exist unless we create it.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+→ next: Topic 3, where the data does not exist unless we create it.
+
+--
+
+
+<!-- .slide: class="small" -->
+
+## Appendix: evaluation through an API a partner runs
+
+
+<div class="card">
+
+
+<div class="grid-4-1">
+
+
+<div class="column">
+
+**ChatNoir, run by Webis:** Frozen collections behind one research API: ClueWeb09, 12 and 22, MS MARCO, LongEval, and OWS-Curlie-2025 as its default index. Static corpora are what make a run citable years later. 
+
+</div>
+
+
+<div class="column">
+
+![The ChatNoir search interface, run by the Webis group](/slides/_assets/ows/screenshots/chatnoir.png)
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="card good">
+
+
+<div class="grid-4-1">
+
+
+<div class="column">
+
+**OURRS, run in Passau** The same idea but for a corpus that changes daily, with agents as first-class clients and to provide recent search results with some reproducibility guarantees. 
+
+</div>
+
+
+<div class="column">
+
+![OURRS searching one billion pages of the Open Web Index](/slides/_assets/ows/screenshots/ourrs.png)
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-positive">
+
+**Works today**
+- query a live corpus instead of hosting one
+- different search verticals: products, places, scholarly,...
+- agents give feedback, summaries and opinions 
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**Future Work**
+- published agent qrels carry no time stamp
+- more flexible ranking profiles
+- no clean export of a corpus slice with its judgements
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+ourrs.eu · chatnoir.eu. Index counts from ourrs.eu and cluster figures from the deployment, September 2026; refresh both on the day.
+
+</div>
+
+
+Notes:
+Goal: a research community can run its own search service, two of them already do, and the honest list of what that does and does not yet give an experiment.
+
+The two services.
+
+- **ChatNoir**, from Webis, is the one this room knows and the right model for reproducibility: its corpora are frozen, so a run against them is citable years later. It serves ClueWeb09, 12 and 22, MS MARCO, LongEval and OWS-Curlie-2025.
+- **OURRS** is aimed at what a frozen corpus cannot reach: a corpus rebuilt daily, and agents as the clients rather than an afterthought. Say three or four verticals, not eighteen: products, places, people and organisations, FAQs, search actions.
+- **MCP is the part to dwell on**, because it is the bridge into Topic 3. The channel that delivers a result can carry a judgement back, and AI opinions and summaries become searchable objects in their own right.
+
+The verified detail, if asked.
+
+- **Eighteen verticals**, read from the deployed application on 19 September 2026: All, My Results, Documents, AI Opinions, Multimedia, News, Scholarly, Products, Courses, Events, Places, FAQs, Conversations, Pages, Sites, Actions, Persons and Organisations, Artefacts.
+- **Six ranking profiles**, fixed: relevance, quality, authority, balanced, freshness by publication date and freshness by modification date, with quality as the default. That is the honest limit behind "no bring-your-own ranker".
+- **Four corpora on the same API**: `owi` for the rolling crawl, `owic25` for the Curlie collection, plus Wikipedia and MS MARCO v2.1 as static reference points. The front page states the live scale of `owi`: one billion web pages, 963.5 million entities and 32 million sites. Read it off the site on the morning of the talk, because it moves.
+- **The cluster numbers are reservations, not utilisation.** They are Kubernetes requests read from our own namespace; other namespaces are not visible, and actual consumption is not measured. Say "reserved".
+- **The capacity limit worth knowing.** The bulk tier is not uniform: ten nodes have 8 TiB disks and ten have 3 TiB, and Vespa spreads documents evenly, so the small disks set the ceiling. The corpus can roughly double before they fill, which is a 2x margin rather than the 5x the totals suggest.
+
+The right-hand column, said plainly. A live index is exactly what a temporal evaluation wants and exactly what breaks a fixed qrel file: the document you judged may have changed, moved or gone. Two lines of work are running. Temporal metadata carried with the judgements, in the spirit of LongEval, so a run can name the version of the world it was scored against. And export of both the slice and its qrels, so an experiment can leave the service and still be repeated. One honest exception stays: an inverse document frequency over a moving corpus cannot be snapshotted, and pretending otherwise would be worse than admitting it.
+
+Backup slide: what ChatNoir and OURRS each give an experiment today.</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 
