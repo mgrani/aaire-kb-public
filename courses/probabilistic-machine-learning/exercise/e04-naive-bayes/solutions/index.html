@@ -1,0 +1,595 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 4 — Naive Bayes and the Generative Route — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 4
+## Naive Bayes and the Generative Route
+
+Probabilistic Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Accompanies Lecture 04. About 50 minutes: 4.A (15 min) counts parameters and
+derives the categorical MLE; 4.B (20 min) runs naive Bayes by hand, with and
+without smoothing; 4.C (15 min) derives the linear log-odds and compares naive
+Bayes with logistic regression in a short numpy task. Pen and paper except
+4.C.2. Every number in the solutions was recomputed.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 4.A The Generative Route
+
+--
+
+## Exercise 4.A.1: Counting Parameters
+
+A fraud classifier (two classes) uses four attributes: **payment** (card,
+invoice, wallet), **country** (domestic, EU, other), **new device** (yes/no)
+and **night** (yes/no).
+
+1. How many free numbers does the full generative model need — the class
+   prior and one joint $p(x \mid y)$ per class?
+2. How many does naive Bayes need?
+3. For $p$ yes/no attributes and $K$ classes, give both counts as formulas.
+4. From which $p$ on does the full joint need more than a million numbers
+   *per class*?
+
+
+--
+
+## Exercise 4.A.1: Counting Parameters — Solution
+
+
+<div class="fragment">
+
+**1. Full model.** Each class needs a table over $3 \cdot 3 \cdot 2 \cdot 2 = 36$
+value combinations, of which 35 are free (they sum to 1). Two classes give 70;
+the prior $P(\text{fraud})$ adds one: **71**.
+
+**2. Naive Bayes.** Per class one categorical per attribute:
+$(3-1) + (3-1) + (2-1) + (2-1) = 6$ free numbers. Two classes give 12, plus the
+prior: **13**.
+
+**3. Formulas.** Full: $K(2^p - 1) + (K - 1)$. Naive Bayes: $Kp + (K - 1)$.
+
+**4.** $2^{19} - 1 = 524{,}287$ and $2^{20} - 1 = 1{,}048{,}575$, so from
+**$p = 20$** on. The naive count grows linearly: 20 per class.
+
+</div>
+
+
+
+
+--
+
+## Exercise 4.A.2: Fitting Is Counting
+
+An attribute takes $k$ values. Within one class we observed it $n$ times, value
+$v$ exactly $n\_v$ times ($\sum\_v n\_v = n$). Model it as categorical with
+parameters $\theta\_1, \ldots, \theta\_k \geq 0$, $\sum\_v \theta\_v = 1$.
+
+1. Write down the log-likelihood $\ell(\theta)$ of the $n$ i.i.d. observations.
+2. For $k = 2$, substitute $\theta\_2 = 1 - \theta\_1$ and show that the MLE is
+   $\hat{\theta}\_1 = n\_1 / n$ — the $h/n$ of Lecture 03.
+3. For general $k$, maximise $\ell$ under the constraint $\sum\_v \theta\_v = 1$
+   (Lagrange multiplier) and show $\hat{\theta}\_v = n\_v / n$.
+4. Why can naive Bayes fit every attribute's table separately, while a full
+   joint $p(x \mid y)$ could not be fitted attribute by attribute?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.A.2: Fitting Is Counting — Solution
+
+
+<div class="fragment">
+
+**1.** Each observation of value $v$ contributes $\theta\_v$:
+$$
+\ell(\theta) = \sum\_{v=1}^{k} n\_v \log \theta\_v
+$$
+
+**2.** $\ell = n\_1 \log \theta\_1 + n\_2 \log(1 - \theta\_1)$. Setting
+$\ell'(\theta\_1) = n\_1/\theta\_1 - n\_2/(1 - \theta\_1) = 0$ gives
+$n\_1(1 - \theta\_1) = n\_2 \theta\_1$, so $\hat{\theta}\_1 = n\_1/(n\_1 + n\_2) = n\_1/n$.
+
+**3.** $L(\theta, \lambda) = \sum\_v n\_v \log \theta\_v - \lambda(\sum\_v \theta\_v - 1)$.
+From $\partial L / \partial \theta\_v = n\_v/\theta\_v - \lambda = 0$ we get
+$\theta\_v = n\_v/\lambda$; the constraint gives $\lambda = \sum\_v n\_v = n$, so
+$\hat{\theta}\_v = n\_v / n$ — the relative frequency.
+
+**4.** Under the naive assumption the log-likelihood of the table is a **sum**
+of one term $\sum\_v n(x\_j = v, y) \log \theta\_{jvy}$ per attribute and class; no
+parameter appears in two terms, so each term is maximised on its own — by
+counting. A full joint has one parameter per *combination* of values; its
+counts are counts of whole rows, and they cannot be split into per-attribute
+counts.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 4.B Naive Bayes by Hand
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.B.1: Twelve Transactions
+
+Flags: new device $D$, foreign IP $F$, night $N$, high amount $H$ (1 = yes).
+
+| # | $D$ | $F$ | $N$ | $H$ | fraud? | | # | $D$ | $F$ | $N$ | $H$ | fraud? |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 1 | 1 | 1 | 1 | yes | | 7 | 1 | 0 | 0 | 0 | no |
+| 2 | 1 | 1 | 0 | 1 | yes | | 8 | 0 | 0 | 0 | 0 | no |
+| 3 | 1 | 0 | 1 | 0 | yes | | 9 | 0 | 1 | 0 | 0 | no |
+| 4 | 0 | 1 | 1 | 1 | yes | | 10 | 0 | 0 | 0 | 0 | no |
+| 5 | 0 | 0 | 0 | 0 | no | | 11 | 1 | 0 | 1 | 0 | no |
+| 6 | 0 | 0 | 1 | 0 | no | | 12 | 0 | 0 | 0 | 0 | no |
+
+1. Estimate $P(\text{fraud})$ and $P(\text{flag} = 1 \mid \text{class})$ for all
+   four flags by counting.
+2. Compute $P(\text{fraud} \mid x)$ for $x\_1 = (D, F, N, H) = (1, 0, 0, 0)$.
+3. Do the same for $x\_2 = (0, 0, 0, 1)$. What goes wrong, and why?
+4. Repeat 2 and 3 with Laplace smoothing on the flags (keep the prior
+   unsmoothed). Which result changes a lot, which only a little?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.B.1: Twelve Transactions — Solution
+
+
+<div class="fragment">
+
+**1.** $P(\text{fraud}) = 4/12 = 1/3$. Among the 4 frauds, each flag occurs 3
+times: $3/4$ for $D, F, N, H$. Among the 8 honest: $D$ $2/8$, $F$ $1/8$,
+$N$ $2/8$, $H$ $0/8$.
+
+**2.** Fraud: $\frac{1}{3} \cdot \frac{3}{4} \cdot \frac{1}{4} \cdot \frac{1}{4} \cdot \frac{1}{4} = \frac{1}{256} \approx 0.0039$.
+Honest: $\frac{2}{3} \cdot \frac{2}{8} \cdot \frac{7}{8} \cdot \frac{6}{8} \cdot 1 = 0.1094$.
+$P(\text{fraud} \mid x\_1) = 0.0039 / (0.0039 + 0.1094) = 1/29 \approx 0.034$.
+
+**3.** Fraud: $\frac{1}{3} \cdot \frac{1}{4} \cdot \frac{1}{4} \cdot \frac{1}{4} \cdot \frac{3}{4} = \frac{1}{256}$.
+Honest: $\ldots \cdot P(H{=}1 \mid \text{honest}) = 0$. So
+$P(\text{fraud} \mid x\_2) = 1$: a transaction without any red flag except a high
+amount is **certain** fraud, because no honest high amount occurred in eight
+rows. One zero count vetoes the other three flags, which all speak for honest.
+
+**4.** Smoothed, $(\text{count} + 1)/(n + 2)$: fraud $4/6 = 2/3$ for every flag;
+honest $D$ $0.3$, $F$ $0.2$, $N$ $0.3$, $H$ $0.1$.
+$x\_1$: fraud $\frac{1}{3} \cdot \frac{2}{3} \cdot (\frac{1}{3})^3 = 0.0082$, honest
+$\frac{2}{3} \cdot 0.3 \cdot 0.8 \cdot 0.7 \cdot 0.9 = 0.1008$, so
+$P = 0.075$ (from 0.034).
+$x\_2$: fraud $0.0082$, honest $\frac{2}{3} \cdot 0.7 \cdot 0.8 \cdot 0.7 \cdot 0.1 = 0.0261$,
+so $P \approx 0.24$ (from 1). With 4 and 8 rows the prior of one pseudo-count
+per value is not small, so even $x\_1$ moves — smoothing matters most where the
+counts are smallest.
+
+</div>
+
+
+
+
+--
+
+## Exercise 4.B.2: Smoothing Is a Prior
+
+A yes/no flag was seen $h$ times among $n$ frauds.
+
+1. With a $\mathrm{Beta}(1, 1)$ prior on $\theta = P(\text{flag} \mid \text{fraud})$,
+   what is the posterior (Lecture 02)? Show that its **mean** is Laplace's
+   $(h + 1)/(n + 2)$.
+2. What is the posterior's **peak** for $h = 0$? What does that say about
+   "keep the peak"?
+3. "Add-$\alpha$" smoothing uses $(h + \alpha)/(n + 2\alpha)$. Which prior
+   belongs to it? Compute the estimate for $h = 0$, $n = 100$ and
+   $\alpha = 0.5, 1, 10$.
+4. A merchant category with $k = 10$ values; one category never occurred in
+   100 frauds. What does Laplace smoothing give, and which prior is behind it?
+
+
+--
+
+## Exercise 4.B.2: Smoothing Is a Prior — Solution
+
+
+<div class="fragment">
+
+**1.** Adding counts: $\mathrm{Beta}(1 + h,\ 1 + n - h)$, with mean
+$\frac{1 + h}{(1 + h) + (1 + n - h)} = \frac{h + 1}{n + 2}$.
+
+**2.** The mode of $\mathrm{Beta}(a, b)$ is $\frac{a - 1}{a + b - 2}$; here
+$\frac{h}{n} = 0$. Under a flat prior the peak *is* the MLE, so keeping the
+peak keeps the zero. Laplace smoothing silently switches to the mean.
+
+**3.** $\mathrm{Beta}(\alpha, \alpha)$: posterior $\mathrm{Beta}(\alpha + h, \alpha + n - h)$,
+mean $(h + \alpha)/(n + 2\alpha)$. For $h = 0$, $n = 100$:
+$\alpha = 0.5$: $0.5/101 \approx 0.0050$; $\alpha = 1$: $1/102 \approx 0.0098$;
+$\alpha = 10$: $10/120 \approx 0.083$. A larger $\alpha$ is a stronger belief
+that $\theta$ is near $1/2$ — worth $2\alpha$ imagined observations.
+
+**4.** $(0 + 1)/(100 + 10) = 1/110 \approx 0.0091$ — the posterior mean under a
+flat **Dirichlet**$(1, \ldots, 1)$, the Beta for more than two values.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 4.C Generative vs Discriminative
+
+--
+
+## Exercise 4.C.1: The Same Line
+
+Naive Bayes with yes/no flags, $\theta\_{jy} = P(x\_j = 1 \mid y)$, prior $\pi = P(y = 1)$.
+Lecture numbers: $\pi = 1/1000$; new device $0.6$ vs $0.1$; foreign IP $0.7$ vs
+$0.05$; night $0.5$ vs $0.2$ (fraud vs honest).
+
+1. Show that $\log \frac{P(y=1 \mid x)}{P(y=0 \mid x)} = w\_0 + \sum\_j w\_j x\_j$ and
+   give $w\_j$ and $w\_0$.
+2. Compute the three weights and $w\_0$, and check that a transaction with all
+   three flags gets $P(\text{fraud} \mid x) \approx 17.4\\%$.
+3. The foreign-IP flag is **missing**. Compare what naive Bayes should do with
+   plugging $x\_{\text{IP}} = 0$ into the linear form.
+4. Why can logistic regression, which has the same linear form, not do what
+   naive Bayes does in 3?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.C.1: The Same Line — Solution
+
+
+<div class="fragment">
+
+**1.** $\log p(x\_j \mid y) = x\_j \log \theta\_{jy} + (1 - x\_j) \log(1 - \theta\_{jy})$.
+Take the difference between the classes and sum over $j$:
+$$
+w\_j = \log \frac{\theta\_{j1}}{\theta\_{j0}} - \log \frac{1 - \theta\_{j1}}{1 - \theta\_{j0}},
+\qquad
+w\_0 = \log \frac{\pi}{1 - \pi} + \sum\_j \log \frac{1 - \theta\_{j1}}{1 - \theta\_{j0}}
+$$
+
+**2.** $w\_{\text{dev}} = \log 6 - \log \frac{0.4}{0.9} = 1.792 + 0.811 = 2.603$;
+$w\_{\text{IP}} = \log 14 - \log \frac{0.3}{0.95} = 2.639 + 1.153 = 3.792$;
+$w\_{\text{night}} = \log 2.5 - \log \frac{0.5}{0.8} = 0.916 + 0.470 = 1.386$.
+$w\_0 = \log \frac{1}{999} - 0.811 - 1.153 - 0.470 = -9.340$.
+All flags: $-9.340 + 7.781 = -1.560$, $\sigma(-1.560) = 0.174$ ✓ — the same
+$210/1{,}209$ as in the lecture.
+
+**3.** Missing: drop the IP factor entirely (it sums to 1 over both values),
+odds $6 \cdot 2.5 / 999 = 15/999$, $P \approx 1.5\\%$. Plugging in
+$x\_{\text{IP}} = 0$ instead claims "domestic IP observed": it keeps the factor
+$0.3/0.95$ (hidden in $w\_0$), odds $4.74/999$, $P \approx 0.47\\%$ — a third of
+the honest answer.
+
+**4.** Logistic regression models only $p(y \mid x)$; it has no
+$p(x\_{\text{IP}} \mid y)$ to sum over. Its $w\_0$ is not split into per-attribute
+pieces, so there is nothing to remove — it must be given some value of
+$x\_{\text{IP}}$ or be refitted without the feature.
+
+</div>
+
+
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.C.2: Counting Twice, in Code
+
+Complete the three marked lines (numpy only), then run the script.
+
+```python
+import numpy as np
+rng = np.random.default_rng(42)
+n = 5000
+y = (rng.random(n) < 0.3).astype(int)                       # 1 = fraud
+flag = lambda pf, ph: (rng.random(n) < np.where(y == 1, pf, ph)).astype(int)
+device = flag(0.6, 0.1)
+copy = np.where(rng.random(n) < 0.95, device, 1 - device)   # a near-copy
+night = flag(0.5, 0.2)
+X = np.column_stack([device, copy, night])
+
+def fit_nb(X, y, alpha=1.0):
+    prior = ...                    # (a) P(y = 1)
+    th1 = ...                      # (b) Laplace-smoothed P(x_j = 1 | y = 1)
+    th0 = ...                      #     and P(x_j = 1 | y = 0)
+    w = np.log(th1 / th0) - np.log((1 - th1) / (1 - th0))
+    w0 = np.log(prior / (1 - prior)) + np.log((1 - th1) / (1 - th0)).sum()
+    return w0, w
+
+def fit_lr(X, y, steps=5000, lr=0.5):   # gradient ascent, as in Lecture 03
+    Xb = np.column_stack([np.ones(len(X)), X]); w = np.zeros(Xb.shape[1])
+    for _ in range(steps):
+        w += lr * Xb.T @ (y - 1 / (1 + np.exp(-Xb @ w))) / len(y)
+    return w[0], w[1:]
+```
+
+1. Print $w\_0$, $w$ and $P(\text{fraud} \mid x = (1, 1, 1))$ for both models.
+2. Compare the weights of `device` and `copy`. Which model counts the device
+   twice, and which shares the credit?
+3. Which probability is closer to the fraction of frauds among the training
+   rows with $x = (1, 1, 1)$?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.C.2: Counting Twice, in Code — Solution
+
+
+<div class="fragment">
+
+```python
+prior = y.mean()
+th1 = (X[y == 1].sum(axis=0) + alpha) / ((y == 1).sum() + 2 * alpha)
+th0 = (X[y == 0].sum(axis=0) + alpha) / ((y == 0).sum() + 2 * alpha)
+```
+
+**1.** (numpy 2.x, seed 42)
+
+| model | $w\_0$ | $w\_{\text{device}}$ | $w\_{\text{copy}}$ | $w\_{\text{night}}$ | $P(\text{fraud} \mid 1, 1, 1)$ |
+|---|---|---|---|---|---|
+| naive Bayes | −2.80 | 2.60 | 2.17 | 1.35 | 0.965 |
+| logistic regression | −2.10 | 2.75 | −0.13 | 1.40 | 0.873 |
+
+**2.** Naive Bayes gives the copy almost the device's weight: the same evidence
+enters twice. Logistic regression fits all weights jointly, sees that the copy
+adds nothing once the device is known, and drives its weight to about 0.
+
+**3.** Among the 486 training rows with $x = (1, 1, 1)$, 88.5% are fraud; the
+true posterior of the generating model is $0.865$. Logistic regression (0.873)
+is close; naive Bayes (0.965) is **over-confident** — the double counting of
+Lecture 04, measured.
+
+</div>
+
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

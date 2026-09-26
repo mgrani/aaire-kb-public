@@ -6,6 +6,9 @@
 // params:
 //   prior:        [a, b]  — Beta(a, b) prior (default [1, 1])
 //   observations: number[] — flip sequence, 1 = heads, 0 = tails
+//   symbols:      [one, zero] — marks shown for 1 and 0 (default ['H', 'T'])
+//   names:        [one, zero] — words used in the caption (default heads/tails)
+//   xLabel:       axis label (default 'θ = P(heads)')
 //
 // Step 0 shows the prior; step i the posterior after the first i flips.
 
@@ -30,6 +33,8 @@ function betaCurve(a, b, n = 256) {
 export async function mount(el, { d3, params, steps }) {
   const [a0, b0] = params.prior ?? [1, 1]
   const obs = params.observations ?? []
+  const [sym1, sym0] = params.symbols ?? ['H', 'T']
+  const [name1, name0] = params.names ?? ['heads', 'tails']
   const W = 720
   const H = 400
   const M = { top: 56, right: 30, bottom: 52, left: 56 }
@@ -61,11 +66,12 @@ export async function mount(el, { d3, params, steps }) {
     .attr('text-anchor', 'end')
     .attr('fill', NAVY)
     .attr('font-size', 18)
-    .text('θ = P(heads)')
+    .text(params.xLabel ?? 'θ = P(heads)')
+  // Rotated along the left edge: at the top it collided with the caption.
   svg
     .append('text')
-    .attr('x', M.left)
-    .attr('y', M.top - 30)
+    .attr('transform', `translate(${M.left - 16},${(M.top + H - M.bottom) / 2}) rotate(-90)`)
+    .attr('text-anchor', 'middle')
     .attr('fill', NAVY)
     .attr('font-size', 18)
     .text('density')
@@ -98,7 +104,7 @@ export async function mount(el, { d3, params, steps }) {
       .attr('y', M.top + 4)
       .attr('fill', o === 1 ? TEAL : NAVY)
       .attr('font-weight', 'bold')
-      .text(o === 1 ? 'H' : 'T')
+      .text(o === 1 ? sym1 : sym0)
   })
 
   function render(step, animate) {
@@ -110,7 +116,7 @@ export async function mount(el, { d3, params, steps }) {
     const label =
       step === 0
         ? `Prior: Beta(${a0}, ${b0})`
-        : `After ${h} heads, ${t} tails: posterior Beta(${a0}+${h}, ${b0}+${t})`
+        : `After ${h} ${name1}, ${t} ${name0}: posterior Beta(${a0}+${h}, ${b0}+${t})`
     caption.text(label)
     obs.forEach((_, i) => seq.select(`.obs-${i}`).attr('opacity', i < step ? 1 : 0.15))
     const target = line(betaCurve(A, B))

@@ -17,7 +17,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..Dc0Ew082.css"></head><body><a class="deck-download" href="/slides/open-web-search/clef-2026/clef-2026.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..BQYpvfS-.css"></head><body><a class="deck-download" href="/slides/open-web-search/clef-2026/clef-2026.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 ## Beyond Open Models: Building Open Web Search Infrastructure for AI Agents
 
@@ -269,7 +269,7 @@ The bridge to the hypothesis, said plainly and then move straight on: obtaining 
 
 <!-- .slide: class="smaller" -->
 
-## One hypothesis, four topics
+## One hypothesis and four topics for today
 
 
 <div class="hypothesis">
@@ -3607,10 +3607,16 @@ Backup slide: the two searcher models side by side, with the four departures mar
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -3621,17 +3627,20 @@ Backup slide: the two searcher models side by side, with the four departures mar
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

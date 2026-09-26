@@ -1,0 +1,555 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 2 — Probability, Data and a Parameter — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 2
+## Probability, Data and a Parameter
+
+Probabilistic Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Accompanies Lecture 02. Pen and paper, one short Python task (2.C.4). 2.A.2
+previews naive Bayes (two flags assumed independent given the class); 2.C.3 is
+the full version of the lecture's Beta–Bernoulli exercise.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 2.A Conditioning and Bayes
+
+--
+
+## Exercise 2.A.1: Consequences of the Axioms
+
+Using only the three Kolmogorov axioms (and set algebra), show:
+
+1. $P(A \setminus B) = P(A) - P(A \cap B)$
+2. $P(A \cup B) \le P(A) + P(B)$
+3. If $A \subseteq B$, then $P(A) \le P(B)$.
+
+
+--
+
+## Exercise 2.A.1: Consequences of the Axioms — Solution
+
+
+<div class="fragment">
+
+1. $A = (A \setminus B) \cup (A \cap B)$, disjoint, so by Axiom III
+   $P(A) = P(A \setminus B) + P(A \cap B)$.
+2. $A \cup B = A \cup (B \setminus A)$, disjoint: $P(A \cup B) = P(A) +
+   P(B \setminus A) = P(A) + P(B) - P(A \cap B) \le P(A) + P(B)$, since
+   $P(A \cap B) \ge 0$ (Axiom I).
+3. $B = A \cup (B \setminus A)$, disjoint: $P(B) = P(A) + P(B \setminus A)
+   \ge P(A)$ by Axioms III and I.
+
+</div>
+
+
+
+
+--
+
+## Exercise 2.A.2: One Flag, Two Flags
+
+Fraud occurs in **0.2%** of transactions. A rule flags **95%** of frauds and
+**2%** of legitimate transactions.
+
+1. What fraction of flagged transactions is fraud?
+2. A second, different rule has the same rates. Assume the two rules err
+   **independently given the class**. A transaction is flagged by both. Now?
+3. When would the assumption in 2 be badly wrong — and in which direction would
+   the answer then be off?
+
+
+--
+
+## Exercise 2.A.2: One Flag, Two Flags — Solution
+
+
+<div class="fragment">
+
+1. $P(\text{flag}) = 0.002 \cdot 0.95 + 0.998 \cdot 0.02 = 0.02186$, so
+   $P(\text{fraud} \mid \text{flag}) = 0.0019 / 0.02186 \approx 8.7\\%$.
+2. In odds: prior odds $0.002/0.998 \approx 0.0020$; each flag multiplies them
+   by the likelihood ratio $0.95/0.02 = 47.5$. Two flags:
+   $0.0020 \cdot 47.5^2 \approx 4.52$, i.e. $P \approx 4.52/5.52 \approx 82\\%$.
+3. If both rules look at the same signal (say, both react to foreign IPs), the
+   second flag adds little new evidence, yet the formula counts it twice — the
+   answer is **too confident**. This is exactly the assumption naive Bayes makes.
+
+</div>
+
+
+
+
+--
+
+## Exercise 2.A.3: Independent Is Not Disjoint
+
+1. Show that two disjoint events $A, B$ with $P(A), P(B) > 0$ are never
+   independent.
+2. Flip two fair coins. Let $A$ = "first is heads", $B$ = "second is heads",
+   $C$ = "the coins agree". Show that $A, B, C$ are pairwise independent but not
+   mutually independent.
+
+
+--
+
+## Exercise 2.A.3: Independent Is Not Disjoint — Solution
+
+
+<div class="fragment">
+
+1. $P(A \cap B) = 0 \ne P(A)\\,P(B) > 0$.
+2. Each event has probability $\tfrac12$. $A \cap B = \\{HH\\}$,
+   $A \cap C = \\{HH\\}$, $B \cap C = \\{HH\\}$: each has probability
+   $\tfrac14 = \tfrac12 \cdot \tfrac12$ — pairwise independent. But
+   $A \cap B \cap C = \\{HH\\}$ has probability $\tfrac14 \ne \tfrac18$. Knowing
+   $A$ and $B$ determines $C$.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 2.B Random Variables and the Joint
+
+--
+
+## Exercise 2.B.1: App Use and Churn
+
+The joint distribution of $X$ (uses the app: 1/0) and $Y$ (churns: 1/0):
+
+| | $Y = 0$ | $Y = 1$ |
+|---|---|---|
+| $X = 0$ | 0.30 | 0.20 |
+| $X = 1$ | 0.40 | 0.10 |
+
+1. Compute $P(X = 1)$, $P(Y = 1)$, $P(Y = 1 \mid X = 1)$ and $P(Y = 1 \mid X = 0)$.
+2. Are $X$ and $Y$ independent? Compute $\mathrm{cov}(X, Y)$.
+3. Does the table show that the app *reduces* churn? What else could produce it?
+
+
+--
+
+## Exercise 2.B.1: App Use and Churn — Solution
+
+
+<div class="fragment">
+
+1. $P(X{=}1) = 0.5$, $P(Y{=}1) = 0.3$, $P(Y{=}1 \mid X{=}1) = 0.1/0.5 = 0.2$,
+   $P(Y{=}1 \mid X{=}0) = 0.2/0.5 = 0.4$.
+2. Not independent ($0.2 \ne 0.3$). $\mathrm{cov}(X,Y) = E[XY] - E[X]E[Y] =
+   0.10 - 0.5 \cdot 0.3 = -0.05$.
+3. No. A joint distribution shows association, not direction: loyal customers
+   may be the ones who install the app (the abduction exercise of Lecture 01).
+   Deciding needs an experiment or a model of the causes.
+
+</div>
+
+
+
+
+--
+
+## Exercise 2.B.2: Dependent, Yet Uncorrelated
+
+Let $X$ take the values $-1, 0, 1$ with probability $\tfrac13$ each, and
+$Y = X^2$.
+
+1. Compute $E[X]$, $E[Y]$ and $\mathrm{cov}(X, Y)$.
+2. Show that $X$ and $Y$ are not independent.
+3. What does this say about using correlation to screen features?
+
+
+--
+
+## Exercise 2.B.2: Dependent, Yet Uncorrelated — Solution
+
+
+<div class="fragment">
+
+1. $E[X] = 0$, $E[Y] = \tfrac23$, $E[XY] = E[X^3] = 0$, so $\mathrm{cov} = 0$.
+2. $P(Y = 0 \mid X = 0) = 1 \ne P(Y = 0) = \tfrac13$.
+3. A feature can determine the target completely and still have zero
+   correlation with it. Correlation screens only for (monotone) linear
+   association.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 2.C Data, Statistics and a Parameter
+
+--
+
+## Exercise 2.C.1: Scale and Model
+
+For each attribute of a customer table, give the scale and a first probabilistic
+model, and name one statistic that would be **invalid**:
+payment method (card / invoice / PayPal) · delivery rating (1–5 stars) ·
+number of orders last year · order value in € · has a newsletter subscription.
+
+
+--
+
+## Exercise 2.C.1: Scale and Model — Solution
+
+
+<div class="fragment">
+
+| attribute | scale | first model | invalid |
+|---|---|---|---|
+| payment method | nominal | categorical $(p\_1, p\_2, p\_3)$ | mean, median |
+| rating | ordinal | categorical (order unused) or ordinal model | mean (gaps unknown) — defensible only with care |
+| orders | ratio (count) | Poisson, or binomial with a maximum | — (all valid) |
+| order value | ratio, positive, skewed | log-normal | none, but the mean is outlier-sensitive |
+| newsletter | nominal, binary | Bernoulli$(p)$ | — (coded 0/1, the mean *is* $\hat p$) |
+
+</div>
+
+
+
+
+--
+
+## Exercise 2.C.2: How Precise Is a Conversion Rate?
+
+A campaign reached **400** users; **60** converted.
+
+1. Estimate the conversion rate and its standard error.
+2. Give an approximate 95% confidence interval and state correctly what the
+   95% refers to.
+3. How many users would give a half-width of $\pm 0.01$?
+
+
+--
+
+## Exercise 2.C.2: How Precise Is a Conversion Rate? — Solution
+
+
+<div class="fragment">
+
+1. $\hat p = 60/400 = 0.15$; $\mathrm{SE} = \sqrt{0.15 \cdot 0.85 / 400}
+   \approx 0.018$.
+2. $0.15 \pm 1.96 \cdot 0.018 \approx [0.115, 0.185]$. 95% of intervals built
+   **by this procedure** contain the true rate — not "95% probability that the
+   rate lies in this interval".
+3. $1.96 \sqrt{0.1275 / n} = 0.01 \Rightarrow n \approx 4{,}900$ — twelve times
+   the data for a 3.5 times narrower interval: precision costs $\sqrt{n}$.
+
+</div>
+
+
+
+
+--
+
+## Exercise 2.C.3: Two Analysts, One Campaign
+
+Same data: 60 of 400 converted. Analyst A uses a flat prior $\mathrm{Beta}(1,1)$;
+analyst B, from earlier campaigns, uses $\mathrm{Beta}(20, 80)$.
+
+1. Write down both posteriors and their means.
+2. How many "pseudo-observations" is B's prior worth? Why do the two analysts
+   nearly agree?
+3. The data arrived in two batches: 25 of the first 200, 35 of the second 200.
+   Show that updating twice gives the same posterior as updating once.
+4. What is A's probability that the next user converts?
+
+
+--
+
+## Exercise 2.C.3: Two Analysts, One Campaign — Solution
+
+
+<div class="fragment">
+
+1. A: $\mathrm{Beta}(61, 341)$, mean $61/402 \approx 0.152$.
+   B: $\mathrm{Beta}(80, 420)$, mean $80/500 = 0.160$.
+   95% credible intervals: A $[0.118, 0.188]$, B $[0.129, 0.193]$.
+2. $a + b = 100$ pseudo-observations against 400 real ones; B's prior mean 0.2 is
+   pulled almost all the way to the data's 0.15.
+3. A: $\mathrm{Beta}(1,1) \to \mathrm{Beta}(26, 176) \to \mathrm{Beta}(61, 341)$
+   — counts simply add, in any order.
+4. The posterior mean, $\approx 0.152$: averaging $\theta$ over the posterior.
+
+</div>
+
+
+
+
+--
+
+## Exercise 2.C.4: A Sampling Distribution by Simulation (Python)
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+samples = rng.exponential(scale=2.0, size=(1000, 25))   # 1000 samples, n = 25
+```
+
+1. Compute the mean of each sample and the standard deviation of those means.
+   Compare with $\sigma / \sqrt{n}$ (for this distribution $\sigma = 2$).
+2. The exponential is strongly skewed. Plot a histogram of the means — what
+   shape do you see, and which theorem predicts it?
+3. Repeat with $n = 100$. By what factor does the spread shrink?
+
+
+--
+
+## Exercise 2.C.4: A Sampling Distribution by Simulation — Solution
+
+
+<div class="fragment">
+
+```python
+means = samples.mean(axis=1)
+print(means.std(ddof=1), 2.0 / np.sqrt(25))   # ≈ 0.40 vs 0.40
+```
+
+1. About $0.40$ against $\sigma/\sqrt{n} = 2/5 = 0.40$.
+2. Close to a bell, slightly right-skewed — the central limit theorem, not yet
+   perfect at $n = 25$ for a skewed population.
+3. Four times the data, half the spread: about $0.20$.
+
+</div>
+
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

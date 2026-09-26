@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -11,447 +11,104 @@
 Prof. Dr. Michael Granitzer
 
 Notes:
-The closing lecture applies the course's programme — write the generative story,
-condition on data, read off answers — to three settings. The clustering units are reused from the data-science
-course purely as the hard-assignment contrast that motivates mixtures, so this
-lecture needs no prior clustering lecture.
+Reworked 2026-09-26 (docs/reviews/PML-L05-L07-REVIEW-2026-09.md §5.3). The
+closing lecture carries out Lecture 01's ideal — model the joint, condition on
+the data, read off answers — twice, and says honestly how far each gets.
+Module 1 is a three-slide k-means recap (the students know clustering) that ends
+on the question k-means cannot answer. Module 2: Gaussian mixtures and EM, a
+*partial* shortcut — a posterior over the hidden labels, a peak for the
+parameters. Module 3: Bayesian regression on Lecture 01's house prices, with
+the predictive variance split into a noise and a parameter term, in numbers —
+the promise of Lecture 01. Module 4 closes the course arc.
+
+---
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 07: from k-means to mixtures with EM (partial) and Bayesian regression (no shortcut), the two terms of the predictive variance, and the price in computation](/courses/probabilistic-machine-learning/figures/l07-argument-map.svg)
+
+</div>
+
+
+Notes:
+The end of the arc. k-means gives every point one label; a mixture makes the label a latent variable and EM conditions on it — but keeps only a peak for the parameters, so EM is a partial shortcut. Bayesian regression keeps the posterior over the weights, and its predictive variance splits into the noise term (aleatoric — Lecture 01's identical patients) and the parameter term (epistemic — Lecture 01's 600 m² villa). The takeaway row says why every other lecture took a shortcut: the ideal costs computation, and even it cannot see a wrong model family.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
 # Module 1
-## Hard Assignments First
+## Hard Assignments (Recap)
 
-> **Guiding Question:** k-means gives every point exactly one cluster. What is
-> lost for a point that sits between two?
 
---
+<div class="guiding-question">
 
-## Learning Without a Target
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Supervised
-A **target concept** is given: each example carries a label, and the objective
-is to reproduce it on new data.
-
-</div>
-
-
-<div class="card">
-
-### Unsupervised
-**No target concept.** The data carries no labels, and the objective must come
-from the structure itself.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-definition">
-
-**Cluster analysis** is the unsupervised classification of a set of objects
-into groups such that objects **within** a group are similar and objects in
-**different** groups are dissimilar.
-
-</div>
-
-
-Notes:
-The definition contains the whole difficulty: "similar" is not defined. Ask
-what a cluster of customers *is* — the answer depends on a distance the analyst
-chooses, which is the epistemic-modelling point (P3) in its sharpest form.
-
---
-
-## The Stages of a Cluster Analysis
-
-
-<div class="grid-4">
-
-
-<div class="card">
-
-### Represent
-Choose the attributes and their scaling.
-
-</div>
-
-
-<div class="card">
-
-### Measure
-Choose a distance or similarity.
-
-</div>
-
-
-<div class="card">
-
-### Group
-Run an algorithm that optimises some criterion.
-
-</div>
-
-
-<div class="card">
-
-### Interpret
-Decide whether the groups mean anything.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-warning">
-
-Every clustering algorithm **always returns clusters**, including on data that
-has none. The output is never evidence that structure exists.
-
-</div>
-
-
-
-<div class="takeaway">
-
-Clustering has no ground truth. The **representation and the distance encode
-what "similar" means** — the algorithm only optimises the criterion you handed
-it.
-
-</div>
-
-
-Notes:
-Stage 4 is the one that gets skipped. This is the unit to return to when
-evaluation appears at the end of the lecture: internal measures score the
-criterion, not the meaning.
-
---
-
-## What a Distance Must Satisfy
-
-
-<div class="c-definition">
-
-A **metric** $d$ satisfies, for all $\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3$:
-
-1. $d(\mathbf{x}_1, \mathbf{x}_2) \geq 0$ — non-negativity
-2. $d(\mathbf{x}_1, \mathbf{x}_1) = 0$ — identity
-3. $d(\mathbf{x}_1, \mathbf{x}_2) = d(\mathbf{x}_2, \mathbf{x}_1)$ — symmetry
-4. $d(\mathbf{x}_1, \mathbf{x}_3) \leq d(\mathbf{x}_1, \mathbf{x}_2) + d(\mathbf{x}_2, \mathbf{x}_3)$ — triangle inequality
-
-</div>
-
-
-The pairwise distances of $n$ objects form the **distance matrix**, which is
-what most clustering algorithms actually consume.
-
-Notes:
-Not every useful similarity is a metric — cosine similarity and many
-domain-specific scores violate the triangle inequality, and some algorithms
-depend on it. Worth naming so students check before assuming.
-
---
-
-## Numeric Attributes: the Minkowski Family
-
-$$
-d(\mathbf{x}_1, \mathbf{x}_2) = \Big(\sum_{i=1}^{p} |x_{1i} - x_{2i}|^{r}\Big)^{1/r}
-$$
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### $r = 1$
-**Manhattan** — sum of absolute differences. Robust to single large deviations.
-
-</div>
-
-
-<div class="card">
-
-### $r = 2$
-**Euclidean** — straight-line distance. The default.
-
-</div>
-
-
-<div class="card">
-
-### $r \to \infty$
-**Chebyshev** — the largest single-attribute difference dominates.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-warning">
-
-Minkowski distances are **not scale-invariant**. An attribute measured in
-metres and one in millimetres do not contribute equally — standardise first, or
-the unit of measurement chooses your clusters.
+**Guiding Question:** k-means gives every point exactly one cluster. What is
+lost for a point that sits between two?
 
 </div>
 
 
 --
 
-## Binary Attributes
-
-With $f_{11}$ the count of attributes present in both objects, $f_{00}$ absent
-in both, and $f_{01}, f_{10}$ present in exactly one:
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Simple Matching Coefficient
-$$\mathrm{SMC} = \frac{f_{11} + f_{00}}{f_{11} + f_{00} + f_{01} + f_{10}}$$
-Counts **shared absences** as agreement.
-
-</div>
-
-
-<div class="card">
-
-### Jaccard Coefficient
-$$J = \frac{f_{11}}{f_{11} + f_{01} + f_{10}}$$
-**Ignores** shared absences.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-insight">
-
-For sparse data the difference is decisive: two shopping baskets agree on
-thousands of products **neither** contains. SMC would call them nearly
-identical Jaccard would not.
-
-</div>
-
-
---
-
-## Mini-Exercise
-
-Two documents are represented by which of 10,000 words they contain. Document A
-has 30 words, document B has 35, and they share 20.
-
-1. Compute SMC and Jaccard.
-2. Which is the honest similarity here?
-
---
-
-## Mini-Exercise — Solution
-
-
-<div class="fragment">
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-**1.** $f_{11} = 20$, $f_{01} + f_{10} = 25$, $f_{00} = 9955$.
-
-$\mathrm{SMC} = \frac{9975}{10000} = 0.9975$ &nbsp;·&nbsp;
-$J = \frac{20}{45} \approx 0.44$
-
-</div>
-
-
-<div class="card">
-
-**2.** Jaccard. SMC reports 99.75% similarity for two documents that share
-fewer than half their words — the agreement is almost entirely about words
-neither uses.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="takeaway">
-
-The distance measure **is** the definition of similarity. Scale sensitivity and
-the treatment of shared absences change the clustering before any algorithm
-runs.
-
-</div>
-
-
---
-
-## The Idea
-
-Represent each cluster by one **exemplar** — a centroid — and assign every
-object to the nearest one. The quality criterion is the total squared distance
-to the assigned exemplar:
-
-$$
-\mathrm{SSE} = \sum_{j=1}^{k} \sum_{\mathbf{x} \in C_j} d(\mathbf{x}, \boldsymbol{\mu}_j)^2
-$$
-
-
-<div class="c-important">
-
-Minimising SSE over all assignments is **NP-hard**. k-means is a heuristic that
-finds a local optimum — which is why its result depends on where it starts.
-
-</div>
-
-
-Notes:
-Name the criterion before the algorithm: k-means is not "the clustering
-algorithm", it is a greedy optimiser of one particular objective. Different
-objective, different notion of cluster.
-
---
-
-## The Algorithm
-
-
-<div class="c-algorithm">
-
-**k-means (Lloyd)**
-
-1. Choose $k$ initial centroids.
-2. **Assign** each object to the nearest centroid.
-3. **Move** each centroid to the mean of its assigned objects.
-4. Repeat 2–3 until the assignment stops changing.
-
-</div>
-
+## k-Means in One Slide
+
+Minimise $\mathrm{SSE} = \sum\_{j} \sum\_{\mathbf{x} \in C\_j} \lVert \mathbf{x} - \boldsymbol{\mu}\_j \rVert^2$
+by alternating: **assign** each point to the nearest centroid, **move** each
+centroid to the mean of its points. SSE never increases — it stops in a local
+optimum that depends on the start.
 
 <div class="viz viz-lg" data-viz="ml/kmeans-steps" data-steps="6"
  data-params='{"k": 3}'></div>
 
 Notes:
-Stepped viz (P6): odd clicks assign, even clicks move. The centroids start
-deliberately badly. Ask before each assignment step which points will change
-colour — students track the boundary moving, which is the mechanism.
+Recap, not teaching: every student has run k-means. Odd clicks assign, even
+clicks move; three rounds. Two things to plant for Module 2. First, the loop
+alternates between "which cluster?" and "where is the cluster?" — EM will
+alternate between the same two questions. Second, each assignment is a hard
+yes/no: a point is 100% in one cluster even when it sits on the boundary.
 
 --
 
-## Properties
+## Where k-Means Fails
 
+| failure | what k-means assumes | fixed by a Gaussian mixture? |
+|---|---|---|
+| clusters of different spread | every cluster equally wide (distance only) | <span class="yes">✓</span> each component has its own variance |
+| elongated clusters | round clusters | <span class="yes">✓</span> each component has its own covariance |
+| clusters of different size | equal shares: the boundary lies halfway between centroids | <span class="yes">✓</span> mixing weights $\pi\_k$ |
+| a point between two clusters | one label per point | <span class="yes">✓</span> a probability per cluster |
+| rings, spirals | one blob per cluster | <span class="no">✗</span> still blobs — needs another representation |
+| how many clusters | $k$ is given | <span class="no">✗</span> still chosen — but by held-out likelihood |
 
-<div class="grid-3">
-
-
-<div class="card">
-
-### Fast
-$O(n k p)$ per iteration, and few iterations in practice — it scales where HAC
-does not.
-
-</div>
-
-
-<div class="card">
-
-### Converges
-SSE decreases at every step and cannot increase, so the procedure terminates.
-
-</div>
-
-
-<div class="card bad">
-
-### To a local optimum
-The result depends on initialisation. Standard practice: restart several times
-and keep the best SSE.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-**k-medoids** uses an actual data point as the exemplar instead of the mean. It
-is slower but works with any distance matrix — including where a "mean" is
-undefined.
-
-</div>
-
+Notes:
+A table: six failure modes compared on the same two columns. The point of the
+last column: a Gaussian mixture is not a better k-means across the board. It
+fixes everything that comes from "distance only, one label", and fixes nothing
+that comes from "clusters are blobs". Adapted from the Data Science unit's four
+failure modes (exemplar-based-failure-examples).
 
 --
 
-## Mini-Exercise
+## A Point Between Two Clusters
 
-1. Why must k-means terminate?
-2. Why is the mean the right update for the SSE criterion?
-3. What would change if you used the **median** instead?
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+A point sits exactly halfway between two centroids. k-means must answer
+"cluster 1" or "cluster 2". What **should** an algorithm say?
+
+</div>
+
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** Both steps can only decrease SSE, and there are finitely many
-assignments — so no assignment can repeat without the procedure having stopped.
-
-</div>
-
-
-<div class="card">
-
-**2.** The mean is exactly the point minimising the **sum of squared**
-distances to a set — the update solves its half of the objective optimally.
-
-</div>
-
-
-<div class="card">
-
-**3.** The median minimises the sum of **absolute** distances, so you would be
-optimising a different, more outlier-robust criterion (k-medians).
-
-</div>
-
-
-</div>
-
+"About half and half" — which needs the cluster label to be a **random
+variable** with a distribution, not a value.
 
 </div>
 
@@ -459,16 +116,18 @@ optimising a different, more outlier-robust criterion (k-medians).
 
 <div class="takeaway">
 
-k-means alternates **assign** and **move**, minimising SSE to a local optimum.
-The mean is not a convenience — it is the minimiser of the criterion, which is
-why changing the criterion changes the update.
+k-means minimises squared distance with **hard assignments**: fast, simple, and
+unable to say "I am not sure". The next module makes the label a latent
+variable — and k-means reappears as the limit where the doubt is removed.
 
 </div>
 
 
 Notes:
-Part 3 is the conceptual payoff and connects to the mean/median robustness
-discussion from Lecture 02. Same trade, third appearance.
+The Module 1 guiding question, now on the table. Let two or three answers come
+before the click; someone usually suggests "a probability" or "both". Stress
+that the lost information matters for decisions: an ambiguous case routed to a
+human needs to be *known* as ambiguous.
 
 ---
 
@@ -477,180 +136,288 @@ discussion from Lecture 02. Same trade, third appearance.
 # Module 2
 ## Mixture Models and EM
 
-> **Guiding Question:** If the cluster label were just another unobserved
-> variable, could we infer it the way we infer anything else?
+
+<div class="guiding-question">
+
+**Guiding Question:** If the cluster label were just another unobserved
+variable, could we infer it the way we infer anything else — and what would
+still be a guess?
+
+</div>
+
 
 --
 
-## Soft Clustering
-
-k-means assigns each point to exactly one cluster. But a point **between** two
-groups is not confidently in either — and the hard assignment throws that
-information away.
+## The Label as a Hidden Variable
 
 
-<div class="c-definition">
+<div class="grid-2">
 
-A **Gaussian mixture model** says each point was generated in two steps:
 
-1. pick a component $k$ with probability $\pi_k$,
-2. draw $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$.
+<div class="column">
+
+Thirty flats, described by their **price per m²**. The listing does not say
+which district a flat is in — suburbs or old town.
+
+A **Gaussian mixture** tells how such data arise:
+
+1. pick a component $z \in \lbrace 1, \dots, K\rbrace$ with probability $\pi\_z$,
+2. draw $x \sim \mathcal{N}(\mu\_z, \sigma\_z^2)$.
 
 $$
-p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
+p(x) = \sum\_{k=1}^{K} \pi\_k \mathcal{N}(x \mid \mu\_k, \sigma\_k^2)
 $$
 
 </div>
 
 
-The component that generated each point is a **latent variable** — never
-observed.
+<div class="column">
+
+![Plate diagram of a Gaussian mixture: pi points to the latent label z_i, which points to the observed x_i inside a plate over N; mu_k and Sigma_k inside a plate over K point to x_i](/courses/probabilistic-machine-learning/figures/l05-plate-gmm.svg)
+
+The plate of Lecture 05: $z\_i$ is **latent** — never observed.
+
+</div>
+
+
+</div>
+
 
 Notes:
-This is the course's programme in miniature: write the generative story, then
-condition. The latent variable is the formal version of "which cluster does this
-belong to", now a quantity with a posterior instead of a label.
+Model the joint, including what is hidden: the first of Lecture 01's three
+moves, done on purpose. The sum is marginalisation over z (Lecture 02). One
+dimension keeps the formulas readable; in d dimensions σ² becomes a covariance
+matrix Σ, exactly as in the plate. The district is a real latent variable:
+every listing has one, the data set just does not record it.
 
 --
 
-## Why This Needs a New Algorithm
+## Why There Is No Closed Form
 
-If we knew the assignments, fitting each Gaussian would be trivial. If we knew
-the Gaussians, computing the assignments would be trivial. **We know neither.**
+For one Gaussian, maximum likelihood is the sample mean and variance
+(Lecture 03). For a mixture, the log-likelihood is a **log of a sum**:
+
+$$
+\ell(\theta) = \sum\_{i=1}^{N} \log \sum\_{k=1}^{K} \pi\_k \mathcal{N}(x\_i \mid \mu\_k, \sigma\_k^2)
+$$
+
+The sum inside the log ties all components together; setting the gradient to
+zero gives no formula.
+
+
+<div class="q">
+
+If you **knew** each flat's district, how would you fit the two Gaussians? If
+you **knew** the two Gaussians, how would you find each flat's district?
+
+</div>
+
+
+
+<div class="fragment">
+
+Known labels: count, average and take the spread per district — maximum
+likelihood per group. Known Gaussians: Bayes' theorem per flat. **EM alternates
+the two.**
+
+</div>
+
+
+Notes:
+Math first (P5): the log of a sum is the whole difficulty. With labels, the log
+would sit directly on each π_k N(·) and split into separate, easy problems —
+that is why the two questions on the slide each have an easy answer. EM uses
+the second answer to fill in the first.
+
+--
+
+## The E-Step: Bayes for Every Point
+
+Given the current parameters, the **responsibility** of component $k$ for
+point $i$ is the posterior of the hidden label:
+
+$$
+\gamma\_{ik} = P(z\_i = k \mid x\_i) = \frac{\pi\_k \cdot \mathcal{N}(x\_i \mid \mu\_k, \sigma\_k^2)}{\sum\_{j} \pi\_j \mathcal{N}(x\_i \mid \mu\_j, \sigma\_j^2)}
+$$
+
+Prior (the share of component $k$) times likelihood (how well $k$ explains
+$x\_i$), normalised over the components.
+
+
+<div class="c-insight">
+
+The same computation as Lecture 02's disease test — once per data point. A flat
+halfway between the two districts gets about $0.5 / 0.5$.
+
+</div>
+
+
+Notes:
+Say the E-step out loud as Bayes' theorem. This is the part of EM that performs
+the ideal: the hidden label is conditioned on the data and kept as a whole
+distribution, not collapsed to a guess.
+
+--
+
+## The M-Step: Maximum Likelihood With Soft Counts
+
+$$
+N\_k = \sum\_{i} \gamma\_{ik}, \qquad \pi\_k = \frac{N\_k}{N}
+$$
+
+$$
+\mu\_k = \frac{1}{N\_k}\sum\_{i} \gamma\_{ik} x\_i, \qquad
+\sigma\_k^2 = \frac{1}{N\_k}\sum\_{i} \gamma\_{ik} (x\_i - \mu\_k)^2
+$$
 
 
 <div class="c-algorithm">
 
 **Expectation–Maximisation**
 
-**E-step.** Given the current parameters, compute the **responsibility** of
-component $k$ for point $i$ — the posterior over the latent variable:
-$$
-\gamma_{ik} = \frac{\pi_k \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)}
-{\sum_j \pi_j \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_j, \boldsymbol{\Sigma}_j)}
-$$
-
-**M-step.** Given the responsibilities, re-estimate each
-$\pi_k, \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k$ by weighted maximum
-likelihood.
-
-Repeat. The log-likelihood never decreases.
-
-</div>
-
-
-
-<div class="c-insight">
-
-The E-step is **Bayes' theorem**: prior $\pi_k$ times likelihood, normalised
-over components. Nothing new is being invented.
-
-</div>
-
-
---
-
-## The Relationship to k-Means
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### k-means
-Hard assignment; spherical, equal-sized clusters implied by the SSE criterion;
-one label per point.
-
-</div>
-
-
-<div class="card">
-
-### GMM with EM
-**Soft** assignment (responsibilities); each component has its own
-**covariance**, so clusters may be elongated and differently sized; a full
-density model.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-k-means is the limiting case of EM on a GMM with equal spherical covariances as
-the variance goes to zero — the responsibilities collapse to 0/1. The
-alternating structure is the same because it is the same idea.
-
-</div>
-
-
---
-
-## Mini-Exercise
-
-A point sits exactly between two fitted components.
-
-1. What does k-means report?
-2. What does the GMM report?
-3. Give a decision where the difference matters.
-
---
-
-## Mini-Exercise — Solution
-
-
-<div class="fragment">
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** One cluster label — arbitrary, and with no indication that it was close.
-
-</div>
-
-
-<div class="card">
-
-**2.** Responsibilities near $0.5/0.5$: an explicit statement of ambiguity.
-
-</div>
-
-
-<div class="card">
-
-**3.** Any decision where being wrong is costly — route the ambiguous case to a
-human, or defer. That requires knowing it was ambiguous.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="takeaway">
-
-A mixture model makes the cluster assignment a **latent variable with a
-posterior**. EM alternates inferring it and re-fitting the parameters — and
-k-means is what remains when the uncertainty is squeezed out.
+1. Start with a guess for $\pi\_k, \mu\_k, \sigma\_k$.
+2. **E-step:** compute every $\gamma\_{ik}$ (Bayes).
+3. **M-step:** refit $\pi\_k, \mu\_k, \sigma\_k$ — each point counts $\gamma\_{ik}$ times.
+4. Repeat until $\ell(\theta)$ stops rising — it never decreases.
 
 </div>
 
 
 Notes:
-Close on the recurring pattern: alternate between inferring what you cannot see
-and re-estimating what explains it. The same structure appears in HMMs, in topic
-models and in variational inference generally.
+The M-step is Lecture 03's maximum likelihood (share, mean, variance), with
+each point counted fractionally. With γ ∈ {0, 1} it would be exactly "fit each
+group separately". The monotone likelihood is EM's guarantee; like k-means, it
+reaches a local optimum that depends on the start.
+
+--
+
+## Watching EM
+
+<div class="viz viz-lg" data-viz="ml/em-steps" data-steps="6"></div>
+
+**Predict before the first click:** which flats will come out half-coloured —
+and does the flat at 3.5 k€/m² end up decided?
+
+Notes:
+Stepped viz (P6). Start: two Gaussians placed badly (μ = 2.2 and 3.4). Click 1:
+E-step — colour is responsibility (navy = component 1, teal = component 2).
+Click 2: M-step — the curves jump towards the data; the log-likelihood rises
+from −51.6 to −36.9. Clicks 3–4: a second round, small changes. Click 5: after
+60 iterations — π ≈ 0.48/0.52, μ ≈ 2.89 and 4.19, log-likelihood −36.52; the
+ringed flat at 3.5 has γ = 0.49/0.51. Click 6: the same flat with a hard label,
+as k-means would report it. Ask what was lost between clicks 5 and 6.
+
+--
+
+## EM and k-Means
+
+| | k-means | EM on a Gaussian mixture |
+|---|---|---|
+| assignment | hard: one cluster per point | soft: responsibilities $\gamma\_{ik}$ |
+| cluster shape | equal and round (distance only) | own variance (covariance) and weight |
+| objective | SSE | log-likelihood $\ell(\theta)$ |
+| output | labels and centroids | a density $p(x)$ and a posterior per point |
+
+
+<div class="c-note">
+
+k-means is the limit of EM with equal, spherical components whose variance
+shrinks to zero: the responsibilities collapse to 0 or 1, and the M-step
+becomes "move to the mean".
+
+</div>
+
+
+--
+
+## What EM Still Drops
+
+
+<div class="marks-yes">
+
+- **The hidden labels:** a full posterior per point — the ideal, carried out.
+
+</div>
+
+
+
+<div class="marks-no">
+
+- **The parameters:** $\pi\_k, \mu\_k, \sigma\_k$ are **one point estimate** —
+  Lecture 03's peak. The plate draws them as unknowns; EM gives them no error
+  bar.
+- **A peak that may not exist:** a component that shrinks onto one point has
+  $\sigma\_k \to 0$ and infinite likelihood. In practice: a floor on $\sigma\_k$,
+  or a prior (MAP).
+- **The number of components:** the training likelihood always rises with $K$.
+  Choose $K$ by the **held-out** log-likelihood (Lecture 06), not by an elbow.
+
+</div>
+
+
+
+<div class="c-important">
+
+EM is a **partial shortcut**: Bayes for what is hidden, a peak for the
+parameters. Keeping a posterior over $\pi, \mu, \sigma$ as well needs sampling
+or variational inference.
+
+</div>
+
+
+Notes:
+This slide places EM honestly on the course arc. Lecture 01's table called
+Lecture 07 "no shortcut"; for EM that is true of the labels only. The collapse
+is a real failure, not a curiosity: it is why every GMM library has a
+regularisation parameter on the covariance. The held-out log-likelihood is the
+log-loss of Lecture 06, now for a density.
+
+--
+
+## Mini-Exercise
+
+Component 1 has weight $\pi\_1 = 0.75$, component 2 has $\pi\_2 = 0.25$. For one
+flat, $\mathcal{N}(x \mid \mu\_1, \sigma\_1^2) = 0.2$ and
+$\mathcal{N}(x \mid \mu\_2, \sigma\_2^2) = 0.6$.
+
+
+<div class="q">
+
+What are its responsibilities?
+
+</div>
+
+
+
+<div class="fragment">
+
+$0.75 \cdot 0.2 = 0.15$ and $0.25 \cdot 0.6 = 0.15$, so $\gamma = 0.5 / 0.5$.
+The prior favours component 1 three to one, the likelihood favours component 2
+three to one — they cancel. Nearest-centroid assignment would ignore the
+weights.
+
+</div>
+
+
+Notes:
+Head arithmetic, one question. The transferable point: responsibilities are
+posteriors, so prior and likelihood both count — exactly Lecture 02's base-rate
+lesson, for a cluster label.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A mixture model makes the cluster label a **latent variable with a posterior**.
+EM alternates **Bayes for the labels** (E) and **weighted maximum likelihood
+for the parameters** (M): the posterior over what is hidden, a peak for the
+rest. k-means is what remains when the doubt is squeezed out.
+
+</div>
+
 
 ---
 
@@ -659,45 +426,50 @@ models and in variational inference generally.
 # Module 3
 ## Keeping the Uncertainty
 
-> **Guiding Question:** Your model predicts €2.1M for a house four times larger
-> than anything it was trained on. Should it say so?
+
+<div class="guiding-question">
+
+**Guiding Question:** Your model prices a 600 m² villa at €2.1M — five times
+larger than any flat it was trained on. Should it say how sure it is, and how
+much of its doubt could data remove?
+
+</div>
+
 
 --
 
 ## Keeping the Distribution
 
-MAP estimation put a prior on the weights and then **collapsed it to a single
-point**. The Bayesian treatment keeps the whole distribution:
+Lecture 01's house-price model: **20 flats of 40–120 m²**, and a question about
+a **600 m² villa**. The model and the plate of Lecture 05:
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
 
 $$
-p(\mathbf{w} \mid D) = \frac{p(D \mid \mathbf{w}) p(\mathbf{w})}{p(D)}
+y\_i = w\_0 + w\_1 x\_i + \varepsilon\_i, \qquad \varepsilon\_i \sim \mathcal{N}(0, \sigma^2)
 $$
 
 
-<div class="grid-3">
+<div class="marks-step">
 
-
-<div class="card">
-
-### Prior
-$p(\mathbf{w}) = \mathcal{N}(0, \tau^{2}\mathbf{I})$ — before any data, small
-weights are more plausible.
+- **Likelihood:** the Gaussian noise model of Lecture 03, $\sigma = 40$ k€.
+- **Prior:** $\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \mathbf{S}\_0)$ — intercept
+  within about ±1,000 k€, slope within about ±20 k€/m². Weak.
+- **Posterior:** Gaussian again — the prior is **conjugate**.
 
 </div>
 
 
-<div class="card">
-
-### Likelihood
-The Gaussian noise model from the linear-regression unit.
-
 </div>
 
 
-<div class="card">
+<div class="column">
 
-### Posterior
-Also Gaussian — the prior is **conjugate**, so the update has a closed form.
+![Plate diagram of Bayesian linear regression: tau feeds the weights w outside the plate; inside, x_i and w point to the observed y_i; sigma squared is fixed](/courses/probabilistic-machine-learning/figures/l05-plate-blr.svg)
 
 </div>
 
@@ -706,34 +478,21 @@ Also Gaussian — the prior is **conjugate**, so the update has a closed form.
 
 
 Notes:
-Nothing here is new machinery: it is Bayes' theorem with vectors. The
-conjugacy is a convenience that keeps the arithmetic closed-form; without it the
-same posterior would need sampling or approximation.
+Maximum likelihood (Lecture 03) kept the peak of p(w | D); MAP kept the peak of
+a posterior. Now the whole posterior is kept — Lecture 02's Beta posterior, for
+two parameters. S₀ = diag(500², 10²): ±2 prior sd is ±1,000 k€ for the
+intercept and ±20 k€/m² for the slope — generous enough that the data decide.
+σ is treated as known to keep the posterior Gaussian; with σ unknown the
+predictive distribution becomes a Student t, slightly wider.
 
 --
 
-## Watching the Posterior Concentrate
-
-<div class="viz viz-lg" data-viz="math/bayes-updating" data-steps="4"
- data-params='{"prior": [2, 2], "observations": [1, 1, 0, 1]}'></div>
-
-The same mechanism, shown for a single parameter: the prior is broad, each
-observation narrows it, and the posterior is what the next observation updates.
-
-Notes:
-Legitimate here — unlike in the introductory probability lecture, students now
-have distributions, priors and likelihoods, so a density over a parameter is
-readable rather than a forward reference. Ask what the curve would look like
-after a thousand observations, and what that says about epistemic uncertainty.
-
---
-
-## The Payoff: Predictions With Honest Error Bars
-
-Instead of one prediction, integrate over every plausible parameter setting:
+## Precision Adds Up
 
 $$
-p(y^{*} \mid \mathbf{x}^{*}, D) = \int p(y^{*} \mid \mathbf{x}^{*}, \mathbf{w}) p(\mathbf{w} \mid D) d\mathbf{w}
+\mathbf{S}\_N^{-1} = \mathbf{S}\_0^{-1} + \frac{1}{\sigma^2}\mathbf{X}^\top\mathbf{X},
+\qquad
+\mathbf{m}\_N = \frac{1}{\sigma^2}\mathbf{S}\_N \mathbf{X}^\top \mathbf{y}
 $$
 
 
@@ -742,51 +501,108 @@ $$
 
 <div class="card">
 
-### Near the data
-Many plausible weight vectors agree, so the **predictive interval is narrow**.
+### The update is adding
+Posterior precision = prior precision + data precision — Lecture 02's
+**adding counts**, for Gaussians. Every flat adds $\frac{1}{\sigma^2}\mathbf{x}\_i\mathbf{x}\_i^\top$.
 
 </div>
 
 
 <div class="card">
 
-### Far from the data
-Plausible weight vectors disagree wildly, so the **interval widens** — the model
-reports that it is extrapolating.
+### The centre is the ridge estimate
+$\mathbf{m}\_N$ is the MAP estimate — ridge regression. With this weak prior it
+is almost least squares: slope **3.496** vs **3.501** k€/m².
+
+</div>
+
 
 </div>
 
 
 
+<div class="c-insight">
+
+What is new is not $\mathbf{m}\_N$ but $\mathbf{S}\_N$: the slope is
+$3.50 \pm 0.37$ k€/m² (one sd) — and that uncertainty is multiplied by 600 m²
+at the villa.
+
 </div>
+
+
+Notes:
+Math first, then the reading. The first card is the Gaussian version of
+Beta(a + h, b + n − h): precisions add like counts. The second card answers the
+usual question "so Bayesian regression gives a different line?" — hardly: the
+centre is ridge, and a weak prior barely moves it. What changes is that the
+posterior also says how far every other line is from implausible. Intercept and
+slope are strongly negatively correlated (−0.96): lines pivot around the centre
+of the data, which the next slide shows.
+
+--
+
+## Watching the Band Form
+
+<div class="viz viz-lg" data-viz="ml/regression-band" data-steps="4"></div>
+
+**Predict before the last click:** ten villas of 550–650 m² join the data.
+Which part of the band shrinks — and which part cannot?
+
+Notes:
+Stepped viz (P6). On entry: the 20 flats and the question at 600 m². Click 1:
+keep the peak (Lecture 03) — least squares with the plug-in band ±2σ = ±80 k€,
+the same width everywhere. Click 2: fifteen lines drawn from the posterior —
+they agree on the flats and fan out at 600 m². Click 3: the predictive band
+(±2 sd) split into its two parts; the bars show the shares of the variance: at
+80 m² the noise is 95%, at 600 m² the parameter term is 96%. Click 4: ten
+villas — the parameter part collapses (at 600 m²: 191 → 13 k€), the noise part
+does not move. The dashed red lines are ±2σ around the mean: the noise alone.
+
+--
+
+## Two Terms of One Prediction
+
+$$
+p(y^{\*} \mid x^{\*}, D) = \mathcal{N}\big(\mathbf{m}\_N^\top \mathbf{x}^{\*},\enspace \eqc{\sigma^2} + \eqe{\mathbf{x}^{\*\top}\mathbf{S}\_N \mathbf{x}^{\*}}\big)
+$$
+
+<span class="eq-3">■ noise term — aleatoric, fixed</span> ·
+<span class="eq-5">■ parameter term — epistemic, shrinks with data</span>
+
+| query | mean | noise sd | parameter sd | total sd |
+|---|---|---|---|---|
+| 80 m² (inside the data) | 280 k€ | 40 | 9 | **41** |
+| 300 m² | 1,049 k€ | 40 | 81 | **90** |
+| 600 m² — the villa | 2,098 k€ | 40 | 191 | **195** |
+| 600 m², after ten villas | 2,100 k€ | 40 | 13 | **42** |
 
 
 <div class="c-important">
 
-This is **epistemic** uncertainty, made operational. A point estimate — MLE or
-MAP — extrapolates with exactly the same confidence it interpolates, which is
-the failure mode behind most confidently wrong predictions.
+Near the data the **noise** dominates, at the villa the **ignorance**. Ten
+villas remove the ignorance; the noise stays — Lecture 01's two examples.
 
 </div>
 
 
+Notes:
+The promise of Lecture 01 (sources-of-uncertainty: "a Bayesian one can report
+them separately"), paid with numbers. Variances add, not standard deviations:
+at 600 m², 40² + 191² = 1,600 + 36,419 ≈ 195². Hence a small term vanishes next
+to a large one — 9 k€ of parameter sd next to 40 k€ of noise changes the total
+by 1 k€. At 120 m², the edge of the data: parameter sd 17, total 44 k€. All
+numbers from σ = 40 k€ known and S₀ = diag(500², 10²); the
+flat-prior limit gives the same to one digit. A thousand more flats of 40–120 m²
+would shrink the parameter term at 600 m² only slowly, because it is driven by
+the distance from the data; the noise term would not move at all.
+
 --
 
-## Mini-Exercise
+## What the Posterior Cannot Know
 
-Two models are fitted to house prices for homes of 50–150 m². Both predict
-€2.1M for a 600 m² house.
-
-1. Model A is OLS. What does it report about that prediction?
-2. Model B is Bayesian. What would you expect it to report?
-3. Which one would you put in front of a client?
-
---
-
-## Mini-Exercise — Solution
-
-
-<div class="fragment">
+The band is uncertainty **within the linear model**. Suppose villas actually
+sell at 5,000 €/m²: the villa is worth **€3.0M** — far outside
+2,098 ± 2 · 195 k€, i.e. €1.71M to €2.49M.
 
 
 <div class="grid-3">
@@ -794,30 +610,224 @@ Two models are fitted to house prices for homes of 50–150 m². Both predict
 
 <div class="card">
 
-**1.** A point estimate with the **same** residual-based interval as anywhere
-else — no signal that 600 m² is far outside the data.
+### The world is noisy
+shows up in $\sigma^2$, the noise term — accept it, or measure new attributes
 
 </div>
 
 
 <div class="card">
 
-**2.** A very wide predictive interval: the training data barely constrains the
-slope that far out.
+### Too few data here
+shows up in $\mathbf{x}^{\*\top}\mathbf{S}\_N\mathbf{x}^{\*}$, the parameter term —
+collect data there
 
 </div>
 
 
-<div class="card">
+<div class="card bad">
 
-**3.** B — not because the number is better (it is the same) but because it
-tells the client not to rely on it.
+### The family is wrong
+shows up **nowhere** in the formula — check on held-out data where you predict;
+compare model families
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+A wide band is an honest "I don't know". A narrow band is not a proof — it can
+be confidently wrong if the straight line itself is wrong.
+
+</div>
+
+
+Notes:
+This is the third branch of Lecture 01's reasoning cycle ("noise, too little
+data, or the wrong model?"), now with the formula in hand: two of the three
+answers have a term, the third has none. Bayesian regression measures
+ignorance about w; it is silent about ignorance of the model. Only data at
+600 m² — or a richer model compared by held-out likelihood — can reveal it.
+
+--
+
+## Deciding With the Predictive Distribution
+
+A lender lends up to the value it is 97.5% sure the property exceeds: the
+mean minus two standard deviations.
+
+
+<div class="grid-3">
+
+
+<div class="stat-card evidence">
+
+### €198k
+an 80 m² flat: $280 - 2 \cdot 41$
+
+</div>
+
+
+<div class="stat-card caution">
+
+### €1.71M
+the villa today: $2{,}098 - 2 \cdot 195$
+
+</div>
+
+
+<div class="stat-card holds">
+
+### €2.02M
+after ten villa sales: $2{,}100 - 2 \cdot 42$
 
 </div>
 
 
 </div>
 
+
+
+<div class="c-insight">
+
+Ten comparable sales are worth about **€0.3M of credit**: buying data pays
+where the **parameter** term dominates. Near the data it buys nothing — the
+€40k noise stays.
+
+</div>
+
+
+Notes:
+Lecture 01's roadmap promised "keep uncertainty all the way to the decision".
+This is the simplest version: the decision reads a quantile of the predictive
+distribution, so both terms enter it. The same logic tells the lender where
+information is worth paying for: at 600 m², a few comparable sales change the
+decision by €0.3M; at 80 m², a thousand more flats would change it by almost
+nothing. A point estimate would lend €2.1M on the villa and be exposed to the
+whole €195k spread without knowing it.
+
+--
+
+## Mini-Exercise
+
+Model A (maximum likelihood with the plug-in noise of Lecture 03) and model B
+(Bayesian) both predict about **€2.1M** for the 600 m² villa. A reports
+**±80 k€**.
+
+
+<div class="q">
+
+What does B report — and which one do you show the lender?
+
+</div>
+
+
+
+<div class="fragment">
+
+B reports about **±390 k€** ($2 \cdot 195$): its parameter term is large this
+far from the data. Show **B** — not because its centre is better (both are
+≈ €2.1M) but because A claims the precision of an 80 m² flat for a house it has
+never seen anything like.
+
+</div>
+
+
+Notes:
+Two minutes; the numbers are on the previous slides. Two precise remarks for
+the discussion. (1) A's ±80 k€ is the plug-in interval N(ŵᵀx, σ̂²) of
+Lecture 03. The textbook frequentist prediction interval,
+s·t·√(1 + x*ᵀ(XᵀX)⁻¹x*), also widens with the distance from the data — here
+±410 k€ with the t quantile. The parameter term is not a Bayesian privilege;
+reading it as a probability about this villa is. (2) B's centre is the ridge
+estimate, practically least squares with this weak prior.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Bayesian regression keeps a **posterior over the weights** and predicts with a
+**predictive distribution** whose variance has two terms: the **noise** term
+(aleatoric) that no data removes, and the **parameter** term (epistemic) that
+grows off the data and shrinks where data is collected. What neither term
+covers is a wrong model family.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 4
+## Closing the Arc
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Seven lectures, one ideal, several shortcuts. Which
+questions can each method you know still answer — and what would it cost to
+answer the rest?
+
+</div>
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Shortcuts, Revisited
+
+Lecture 01's table, with what the course has learned about each row:
+
+| shortcut | what it dropped | bought back by | at the cost of |
+|---|---|---|---|
+| **Keep the peak** · 03 | how sure we are about the parameters | the posterior (Module 3) | a prior, an integral |
+| **Only $p(y \mid x)$** · 03–04 | every question about $x$ | a generative model | modelling $x$ |
+| **Assume it apart** · 04 | the dependences assumed away | a graph that draws them | more parameters |
+| **Graph the joint** · 05 | the edges not drawn | more edges | costlier inference |
+| **Keep the loss** · 06 | every probability | calibration, log-loss, error bars | held-out data |
+| **EM**, partial · 07 | how sure we are about $\pi, \mu, \sigma$ | priors, sampling or VI | computation |
+| **No shortcut** · 07 | nothing — within the model family | — | a prior; the family itself |
+
+
+<div class="c-insight">
+
+Every shortcut is a trade of an answer for computation or data. Knowing which
+one a method takes tells you which question it can no longer answer.
+
+</div>
+
+
+Notes:
+Close the arc with the table the course opened with (L01 roadmap), extended by
+two columns. Walk it top to bottom quickly — each row is one lecture's
+takeaway. Two rows need a sentence: EM is only partly the ideal (Module 2), and
+even Bayesian regression is exact only within its model family (Module 3,
+"what the posterior cannot know"). The last column is the honest reason why the
+shortcuts exist: the ideal is expensive.
+
+--
+
+## What Comes After
+
+
+<div class="marks-step">
+
+- **Gaussian processes** — Bayesian regression with infinitely many basis
+  functions: the two-term band of Module 3, without the straight line.
+- **Bayesian neural networks and deep ensembles** — the parameter term for
+  models with millions of weights, approximately.
+- **Sampling (MCMC) and variational inference** — conditioning on the data when
+  there is no closed form; EM is the special case that keeps a posterior only
+  for the hidden labels.
 
 </div>
 
@@ -825,13 +835,17 @@ tells the client not to rely on it.
 
 <div class="takeaway">
 
-Bayesian regression replaces a **best parameter** with a **distribution over
-parameters**, and a prediction with a **predictive distribution**. The interval
-widens where the data is thin — which is exactly where a point estimate is most
-dangerous.
+Model the joint, condition on the data, read off answers — and when you take a
+shortcut, **name it and know what it drops**. A prediction worth acting on says
+how sure it is, and why: noise, ignorance, or a model that may be wrong.
 
 </div>
 
+
+Notes:
+The outlook Lecture 01 promised ("and what comes after"). One line each; the
+point is that every one of them is the same programme with a different way of
+paying for the conditioning step. End on the course's one sentence.
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
@@ -996,10 +1010,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1010,17 +1030,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

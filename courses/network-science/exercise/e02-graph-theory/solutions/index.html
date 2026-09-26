@@ -137,7 +137,7 @@ The ARPANET had two distinct kinds of nodes: **universities/labs** and **routers
 
 ## Exercise 2.B.1: From Picture to Formal Notation
 
-Consider an undirected graph with five nodes $\{A, B, C, D, E\}$ and edges $A$–$B$, $A$–$C$, $B$–$C$, $B$–$D$, $D$–$E$.
+Consider an undirected graph with five nodes $\\{A, B, C, D, E\\}$ and edges $A$–$B$, $A$–$C$, $B$–$C$, $B$–$D$, $D$–$E$.
 
 
 <div class="grid-2 figure-60 small">
@@ -150,7 +150,7 @@ Consider an undirected graph with five nodes $\{A, B, C, D, E\}$ and edges $A$�
 2. Draw the adjacency matrix (nodes in alphabetical order).
 3. Write the adjacency list as a Python dictionary.
 4. Compute $|V|$ and $|E|$.
-5. What is the degree of each node? Verify the handshaking lemma: $\sum_{v \in V} \deg(v) = 2|E|$.
+5. What is the degree of each node? Verify the handshaking lemma: $\sum\_{v \in V} \deg(v) = 2|E|$.
 6. Now suppose $B$–$D$ becomes directed ($B \to D$). What changes?
 
 </div>
@@ -172,11 +172,11 @@ Consider an undirected graph with five nodes $\{A, B, C, D, E\}$ and edges $A$�
 
 **Solution:**
 
-**1.** $V = \{A, B, C, D, E\}$, $E = \{\{A,B\}, \{A,C\}, \{B,C\}, \{B,D\}, \{D,E\}\}$
+**1.** $V = \\{A, B, C, D, E\\}$, $E = \\{\\{A,B\\}, \\{A,C\\}, \\{B,C\\}, \\{B,D\\}, \\{D,E\\}\\}$
 
 **2. Adjacency matrix** (order $A, B, C, D, E$):
 
-$$M = \begin{pmatrix} 0&1&1&0&0 \\ 1&0&1&1&0 \\ 1&1&0&0&0 \\ 0&1&0&0&1 \\ 0&0&0&1&0 \end{pmatrix}$$
+$$M = \begin{pmatrix} 0&1&1&0&0 \\\ 1&0&1&1&0 \\\ 1&1&0&0&0 \\\ 0&1&0&0&1 \\\ 0&0&0&1&0 \end{pmatrix}$$
 
 **3. Adjacency list:**
 
@@ -338,7 +338,7 @@ plt.show()
 
 ## Exercise 2.C.1: Walks, Paths, and Cycles
 
-Consider the undirected graph with edges $\{A\text{–}B,\ B\text{–}C,\ C\text{–}D,\ D\text{–}A,\ A\text{–}C\}$.
+Consider the undirected graph with edges $\\{A\text{–}B,\ B\text{–}C,\ C\text{–}D,\ D\text{–}A,\ A\text{–}C\\}$.
 
 Classify each sequence as a **walk**, **path**, **cycle**, or **none** (edge doesn't exist). Justify each answer.
 
@@ -542,7 +542,7 @@ Run BFS starting from node $1$ on the following undirected graph:
 
 <div class="column">
 
-Edges: $\{1\text{–}2, 1\text{–}3, 2\text{–}4, 2\text{–}5, 3\text{–}6, 4\text{–}7, 5\text{–}7, 6\text{–}8\}$
+Edges: $\\{1\text{–}2, 1\text{–}3, 2\text{–}4, 2\text{–}5, 3\text{–}6, 4\text{–}7, 5\text{–}7, 6\text{–}8\\}$
 
 1. Fill in the BFS discovery table with layer and parent for each node.
 2. Draw the BFS tree.
@@ -665,7 +665,7 @@ print(f"Ecc(0): {max(d0.values())}, Ecc(33): {max(d33.values())}")
 
 <div class="column">
 
-Consider a directed graph with nodes $\{1,2,3,4,5,6\}$ and directed edges:
+Consider a directed graph with nodes $\\{1,2,3,4,5,6\\}$ and directed edges:
 $1 \to 2,\ 2 \to 3,\ 3 \to 1,\ 4 \to 3,\ 5 \to 6,\ 6 \to 5$.
 
 1. List all **weakly connected components** (ignoring direction).
@@ -693,19 +693,19 @@ $1 \to 2,\ 2 \to 3,\ 3 \to 1,\ 4 \to 3,\ 5 \to 6,\ 6 \to 5$.
 **Solution:**
 
 **1. Weakly connected components** (undirected view):
-- $\{1, 2, 3, 4\}$
-- $\{5, 6\}$
+- $\\{1, 2, 3, 4\\}$
+- $\\{5, 6\\}$
 
 **2. Strongly connected components** (directed paths):
-- $\{1, 2, 3\}$ — cycle $1 \to 2 \to 3 \to 1$
-- $\{4\}$ — reaches $\{1,2,3\}$ via $4 \to 3$ but no path back
-- $\{5, 6\}$ — cycle $5 \to 6 \to 5$
+- $\\{1, 2, 3\\}$ — cycle $1 \to 2 \to 3 \to 1$
+- $\\{4\\}$ — reaches $\\{1,2,3\\}$ via $4 \to 3$ but no path back
+- $\\{5, 6\\}$ — cycle $5 \to 6 \to 5$
 
 ![Directed graph components marked](/courses/network-science/figures/ex02-graph-components-marked.svg)
 
-**3. Node 4 as source:** Information flows out of 4 into $\{1,2,3\}$ but nothing flows back. Node 4 cannot receive information from 1, 2, or 3. It acts as a "broadcaster" influencing the main cluster without being influenced in return.
+**3. Node 4 as source:** Information flows out of 4 into $\\{1,2,3\\}$ but nothing flows back. Node 4 cannot receive information from 1, 2, or 3. It acts as a "broadcaster" influencing the main cluster without being influenced in return.
 
-**4. Removing $3 \to 1$:** The cycle breaks. Each of 1, 2, 3 becomes its own trivial SCC. Dependency flow: $\{1\} \to \{2\} \to \{3\}$ alongside $\{4\} \to \{3\}$. Node 3 becomes an absolute sink.
+**4. Removing $3 \to 1$:** The cycle breaks. Each of 1, 2, 3 becomes its own trivial SCC. Dependency flow: $\\{1\\} \to \\{2\\} \to \\{3\\}$ alongside $\\{4\\} \to \\{3\\}$. Node 3 becomes an absolute sink.
 
 
 

@@ -12,12 +12,17 @@ const RULE = '#c9d3de'
 
 const W = 760, H = 330
 
+// unique marker ids per instance: url(#id) resolves to the first match in the
+// document, which may sit on a hidden slide
+let instances = 0
+
 export async function mount(el, { d3, params, steps, isPrint }) {
+  const uid = `lp${++instances}`
   const kind = params.kind ?? 'supervised'
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
   const defs = svg.append('defs')
   for (const [id, c] of [['q-navy', NAVY], ['q-teal', TEAL], ['q-violet', VIOLET], ['q-green', GREEN]]) {
-    defs.append('marker').attr('id', id).attr('viewBox', '0 0 10 10').attr('refX', 9).attr('refY', 5)
+    defs.append('marker').attr('id', `${id}-${uid}`).attr('viewBox', '0 0 10 10').attr('refX', 9).attr('refY', 5)
       .attr('markerWidth', 7).attr('markerHeight', 7).attr('orient', 'auto-start-reverse')
       .append('path').attr('d', 'M0,0 L10,5 L0,10 z').attr('fill', c)
   }
@@ -31,13 +36,21 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       .attr('fill', fill).attr('stroke', colour).attr('stroke-width', 2)
     b.append('text').attr('x', w / 2).attr('y', sub ? h / 2 - 2 : h / 2 + 5).attr('text-anchor', 'middle')
       .attr('font-size', 14).attr('fill', INK).text(label)
-    if (sub) b.append('text').attr('x', w / 2).attr('y', h / 2 + 18).attr('text-anchor', 'middle')
-      .attr('font-size', 13).attr('font-style', 'italic').attr('fill', colour).text(sub)
+    if (sub) {
+      const t = b.append('text').attr('x', w / 2).attr('y', h / 2 + 18).attr('text-anchor', 'middle')
+        .attr('font-size', 13).attr('font-style', 'italic').attr('fill', colour)
+      // "h_Θ" → h with a subscript Θ (SVG text has no TeX)
+      const m = /^(\w)_(.+)$/.exec(sub)
+      if (m) {
+        t.append('tspan').text(m[1])
+        t.append('tspan').attr('dy', 4).attr('font-size', 11).text(m[2])
+      } else t.text(sub)
+    }
     return b
   }
   const arrow = (parent, x1, y1, x2, y2, colour, marker, label, dash) => {
     parent.append('path').attr('d', `M${x1},${y1} L${x2},${y2}`).attr('fill', 'none')
-      .attr('stroke', colour).attr('stroke-width', 2.2).attr('marker-end', `url(#${marker})`)
+      .attr('stroke', colour).attr('stroke-width', 2.2).attr('marker-end', `url(#${marker}-${uid})`)
       .attr('stroke-dasharray', dash ? '6 5' : null)
     if (label) parent.append('text').attr('x', (x1 + x2) / 2).attr('y', (y1 + y2) / 2 - 10)
       .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', colour).text(label)
@@ -56,8 +69,9 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         .attr('font-size', 15).attr('fill', GREEN).text('The learner is told the correct output for each case it sees.')
     } else if (kind === 'unsupervised') {
       box(g, 40, 110, 190, 74, 'observations', 'inputs x  —  no answers', TEAL, '#f6f8fa')
-      arrow(g, 234, 147, 296, 147, NAVY, 'q-navy', 'find structure')
-      box(g, 300, 160, 160, 60, 'model', 'h_Θ', NAVY)
+      arrow(g, 234, 147, 326, 147, NAVY, 'q-navy', 'find structure')
+      box(g, 330, 110, 150, 74, 'model', 'h_Θ', NAVY)
+      arrow(g, 484, 147, 536, 147, NAVY, 'q-navy', '')
       // scattered points forming two groups, to the right
       const pts = [[560,120],[585,132],[604,112],[578,152],[556,138],[672,190],[694,205],[712,182],[668,212],[690,168]]
       pts.forEach(([x,y],i)=> g.append('circle').attr('cx',x).attr('cy',y).attr('r',6)
@@ -72,13 +86,13 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       box(g, 470, 96, 200, 70, 'environment', 'e.g. the robot’s world', TEAL)
       arrow(g, 274, 118, 466, 118, NAVY, 'q-navy', 'action')
       g.append('path').attr('d', `M466,150 L274,150`).attr('fill','none').attr('stroke', VIOLET)
-        .attr('stroke-width',2.2).attr('marker-end','url(#q-violet)')
+        .attr('stroke-width',2.2).attr('marker-end',`url(#q-violet-${uid})`)
       g.append('text').attr('x', 370).attr('y', 172).attr('text-anchor','middle').attr('font-size',13)
         .attr('fill', VIOLET).text('new situation  +  reward')
       if (step >= 1) {
-        g.append('path').attr('d', `M180,170 C180,235 580,235 580,172`).attr('fill','none')
+        g.append('path').attr('d', `M580,170 C580,235 180,235 180,172`).attr('fill','none')
           .attr('stroke', GREEN).attr('stroke-width',2.2).attr('stroke-dasharray','6 5')
-          .attr('marker-end','url(#q-green)')
+          .attr('marker-end',`url(#q-green-${uid})`)
         g.append('text').attr('x', W/2).attr('y', 252).attr('text-anchor','middle')
           .attr('font-size',15).attr('fill', GREEN).text('the consequence changes what the agent does next')
       }

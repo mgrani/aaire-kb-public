@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 09: Node Representations and Graph Embeddings
@@ -136,9 +136,9 @@ For an undirected graph $G = (V, E)$ with adjacency $A$ and degree diagonal $D$:
 
 $$L = D - A \qquad \text{(combinatorial Laplacian)}$$
 
-$$L_{\text{sym}} = I - D^{-1/2} A D^{-1/2} \qquad \text{(normalised Laplacian)}$$
+$$L\_{\text{sym}} = I - D^{-1/2} A D^{-1/2} \qquad \text{(normalised Laplacian)}$$
 
-$L$ is symmetric positive semi-definite. Its eigenvalues satisfy $0 = \lambda_1 \leq \lambda_2 \leq \dots \leq \lambda_n$.
+$L$ is symmetric positive semi-definite. Its eigenvalues satisfy $0 = \lambda\_1 \leq \lambda\_2 \leq \dots \leq \lambda\_n$.
 
 </div>
 
@@ -161,9 +161,9 @@ The Laplacian was introduced in L04 for spectral clustering via the Fiedler vect
 
 <div class="c-definition">
 
-Let $v_2, v_3, \dots, v_{d+1}$ be the eigenvectors of $L$ for the $d$ smallest non-zero eigenvalues. Define
+Let $v\_2, v\_3, \dots, v\_{d+1}$ be the eigenvectors of $L$ for the $d$ smallest non-zero eigenvalues. Define
 
-$$z_v = \big( v_2(v), v_3(v), \dots, v_{d+1}(v) \big) \in \mathbb{R}^d$$
+$$z\_v = \big( v\_2(v), v\_3(v), \dots, v\_{d+1}(v) \big) \in \mathbb{R}^d$$
 
 Each node gets a $d$-dimensional embedding.
 
@@ -172,12 +172,12 @@ Each node gets a $d$-dimensional embedding.
 
 **Why this works.** The embedding is the solution to
 
-$$\min_Z \sum_{(u,v) \in E} \| z_u - z_v \|^2 \quad \text{s.t. } Z^\top D Z = I$$
+$$\min\_Z \sum\_{(u,v) \in E} \\| z\_u - z\_v \\|^2 \quad \text{s.t. } Z^\top D Z = I$$
 
 — connected nodes end up close, and the constraint prevents the trivial solution $z = 0$.
 
 Notes:
-The variational interpretation is important: Laplacian Eigenmaps is the *exact* solution to the most natural embedding objective — minimise squared distance between neighbours, under an orthogonality constraint. The first eigenvector $v_1$ is constant and uninformative (it corresponds to $\lambda = 0$); we start at $v_2$, the Fiedler vector. So $d$-dimensional embeddings use eigenvectors $v_2 \dots v_{d+1}$.
+The variational interpretation is important: Laplacian Eigenmaps is the *exact* solution to the most natural embedding objective — minimise squared distance between neighbours, under an orthogonality constraint. The first eigenvector $v\_1$ is constant and uninformative (it corresponds to $\lambda = 0$); we start at $v\_2$, the Fiedler vector. So $d$-dimensional embeddings use eigenvectors $v\_2 \dots v\_{d+1}$.
 
 --
 
@@ -203,7 +203,7 @@ Laplacian eigenmaps + k-means = **spectral clustering**.
 
 <div class="c-tip smaller">
 
-**Spectral gap.** The jump $\lambda_{k+1} - \lambda_k$ indicates the "natural" number of communities. A large gap means the graph has *exactly* $k$ clear clusters; a small gap means the partition is ambiguous.
+**Spectral gap.** The jump $\lambda\_{k+1} - \lambda\_k$ indicates the "natural" number of communities. A large gap means the graph has *exactly* $k$ clear clusters; a small gap means the partition is ambiguous.
 
 </div>
 
@@ -215,7 +215,7 @@ Laplacian eigenmaps + k-means = **spectral clustering**.
 
 
 Notes:
-This slide connects L04 (community detection) to L09 (representation). The Fiedler vector we used in L04 for the binary cut is the same $v_2$ we use today as the first coordinate of the embedding. Going from one eigenvector to $d$ eigenvectors generalises from binary to $k$-way clustering, and from clustering to *embedding* (a richer object that can feed any downstream task, not just clustering).
+This slide connects L04 (community detection) to L09 (representation). The Fiedler vector we used in L04 for the binary cut is the same $v\_2$ we use today as the first coordinate of the embedding. Going from one eigenvector to $d$ eigenvectors generalises from binary to $k$-way clustering, and from clustering to *embedding* (a richer object that can feed any downstream task, not just clustering).
 
 --
 
@@ -224,7 +224,7 @@ This slide connects L04 (community detection) to L09 (representation). The Fiedl
 
 <div class="c-note">
 
-For **signed networks** (L06, structural balance), the *signed Laplacian* $\bar L = \bar D - A$ (with $\bar d_i = \sum_j |A_{ij}|$) encodes enmity as well as friendship.
+For **signed networks** (L06, structural balance), the *signed Laplacian* $\bar L = \bar D - A$ (with $\bar d\_i = \sum\_j |A\_{ij}|$) encodes enmity as well as friendship.
 
 **Low eigenvectors of $\bar L$** embed nodes such that friends cluster and enemies separate — the continuous analogue of approximate structural balance.
 
@@ -285,17 +285,17 @@ You have a graph with 3 disconnected components of similar size.
 3. What does "spectral gap" mean for this graph?
 
 Notes:
-Give them 3 minutes. (1) $\lambda_1 = \lambda_2 = \lambda_3 = 0$. (2) They span the space of constant-per-component vectors — each indicator of a component is a linear combination of these three eigenvectors. (3) The spectral gap here is between $\lambda_3 = 0$ and $\lambda_4 > 0$. A large $\lambda_4$ means the three components are well-separated *and* internally well-connected; a small $\lambda_4$ means at least one component is itself close to disconnecting.
+Give them 3 minutes. (1) $\lambda\_1 = \lambda\_2 = \lambda\_3 = 0$. (2) They span the space of constant-per-component vectors — each indicator of a component is a linear combination of these three eigenvectors. (3) The spectral gap here is between $\lambda\_3 = 0$ and $\lambda\_4 > 0$. A large $\lambda\_4$ means the three components are well-separated *and* internally well-connected; a small $\lambda\_4$ means at least one component is itself close to disconnecting.
 
 --
 
 ## Quick Check — Solution
 
-**1.** $\lambda_1 = \lambda_2 = \lambda_3 = 0$ — the multiplicity of $\lambda = 0$ equals the number of connected components. <!-- .element: class="fragment" -->
+**1.** $\lambda\_1 = \lambda\_2 = \lambda\_3 = 0$ — the multiplicity of $\lambda = 0$ equals the number of connected components. <!-- .element: class="fragment" -->
 
 **2.** They span the space of piecewise-constant vectors (constant on each component). Any indicator vector of one component is a linear combination of them. <!-- .element: class="fragment" -->
 
-**3.** The gap is between $\lambda_3 = 0$ and $\lambda_4$. Large $\lambda_4$ → components are well-separated and internally well-knit. Small $\lambda_4$ → one component is close to splitting further. <!-- .element: class="fragment" -->
+**3.** The gap is between $\lambda\_3 = 0$ and $\lambda\_4$. Large $\lambda\_4$ → components are well-separated and internally well-knit. Small $\lambda\_4$ → one component is close to splitting further. <!-- .element: class="fragment" -->
 
 ---
 
@@ -322,8 +322,8 @@ DeepWalk (Perozzi et al. 2014) is the first scalable node-embedding method. Its 
 |---|---|
 | Vocabulary | Node set $V$ |
 | Corpus | Collection of random walks |
-| Sentence | One walk $v_1 v_2 \dots v_L$ |
-| Word | Node $v_i$ |
+| Sentence | One walk $v\_1 v\_2 \dots v\_L$ |
+| Word | Node $v\_i$ |
 | Context window | Walk window of size $c$ |
 | Skip-gram objective | Skip-gram objective |
 
@@ -364,13 +364,13 @@ The figure shows the entire pipeline in three panels — graph, skip-gram window
 
 <div class="c-definition">
 
-Given walks $\{W_i\}$ and window $c$, learn vectors $z_v \in \mathbb{R}^d$ maximising
+Given walks $\\{W\_i\\}$ and window $c$, learn vectors $z\_v \in \mathbb{R}^d$ maximising
 
-$$\mathcal{L} = \sum_i \sum_{t} \sum_{-c \leq j \leq c, j \neq 0} \log P(v_{t+j} \mid v_t)$$
+$$\mathcal{L} = \sum\_i \sum\_{t} \sum\_{-c \leq j \leq c, j \neq 0} \log P(v\_{t+j} \mid v\_t)$$
 
 with
 
-$$P(u \mid v) = \frac{\exp(z_u \cdot z_v)}{\sum_{u' \in V} \exp(z_{u'} \cdot z_v)}$$
+$$P(u \mid v) = \frac{\exp(z\_u \cdot z\_v)}{\sum\_{u' \in V} \exp(z\_{u'} \cdot z\_v)}$$
 
 </div>
 
@@ -378,7 +378,7 @@ $$P(u \mid v) = \frac{\exp(z_u \cdot z_v)}{\sum_{u' \in V} \exp(z_{u'} \cdot z_v
 Dense softmax over $|V|$ is too expensive → **negative sampling** approximates it by $k$ random non-context nodes per pair.
 
 Notes:
-Negative sampling turns the full softmax into a binary classification: distinguish true co-walk pairs from random "negative" pairs. Typical $k = 5$–$20$. Training is SGD with embeddings $z_v$ and a second set of "output" vectors for context nodes. After training, $z_v$ is the node embedding. This is exactly what word2vec does; the only difference is where the training pairs come from.
+Negative sampling turns the full softmax into a binary classification: distinguish true co-walk pairs from random "negative" pairs. Typical $k = 5$–$20$. Training is SGD with embeddings $z\_v$ and a second set of "output" vectors for context nodes. After training, $z\_v$ is the node embedding. This is exactly what word2vec does; the only difference is where the training pairs come from.
 
 --
 
@@ -496,7 +496,7 @@ This distinction (homophily vs. structural equivalence) is one of the most impor
 
 <div class="c-info smaller">
 
-Given previous node $t$ and current node $v$, the walk transitions to neighbour $x$ with probability $\propto \alpha(t, x) \cdot w_{vx}$, where $\alpha = 1/p$ if $d(t,x) = 0$ (going back), $\alpha = 1$ if $d(t,x) = 1$, $\alpha = 1/q$ if $d(t,x) = 2$. Small $p$ keeps the walk local (BFS-like, structural); small $q$ pushes it outward (DFS-like, community).
+Given previous node $t$ and current node $v$, the walk transitions to neighbour $x$ with probability $\propto \alpha(t, x) \cdot w\_{vx}$, where $\alpha = 1/p$ if $d(t,x) = 0$ (going back), $\alpha = 1$ if $d(t,x) = 1$, $\alpha = 1/q$ if $d(t,x) = 2$. Small $p$ keeps the walk local (BFS-like, structural); small $q$ pushes it outward (DFS-like, community).
 
 </div>
 
@@ -551,11 +551,11 @@ Graph Neural Networks (GNNs) are the modern answer to graph representation learn
 
 At each layer $l$, every node $v$ updates its representation by aggregating messages from its neighbours $\mathcal{N}(v)$:
 
-$$h_v^{(l+1)} = \text{UPDATE}\Big( h_v^{(l)},  \text{AGG}\big( \{ h_u^{(l)} : u \in \mathcal{N}(v) \} \big) \Big)$$
+$$h\_v^{(l+1)} = \text{UPDATE}\Big( h\_v^{(l)},  \text{AGG}\big( \\{ h\_u^{(l)} : u \in \mathcal{N}(v) \\} \big) \Big)$$
 
 - $\text{AGG}$ is a permutation-invariant function: sum, mean, max, or attention.
-- $\text{UPDATE}$ is usually a learnable linear transform + nonlinearity: $\sigma(W [h_v, m_v])$.
-- Initial features $h_v^{(0)}$ can be node attributes, one-hot IDs, or pretrained embeddings.
+- $\text{UPDATE}$ is usually a learnable linear transform + nonlinearity: $\sigma(W [h\_v, m\_v])$.
+- Initial features $h\_v^{(0)}$ can be node attributes, one-hot IDs, or pretrained embeddings.
 
 </div>
 
@@ -582,7 +582,7 @@ The message-passing formulation (Gilmer et al. 2017) is the unifying framework f
 
 <div class="c-info smaller">
 
-(1) Each neighbour sends its current state as a message. (2) AGG pools the messages into a single vector $m_v$. (3) UPDATE combines $m_v$ with the node's own previous state to produce $h_v^{(l+1)}$. Stacking layers extends the receptive field.
+(1) Each neighbour sends its current state as a message. (2) AGG pools the messages into a single vector $m\_v$. (3) UPDATE combines $m\_v$ with the node's own previous state to produce $h\_v^{(l+1)}$. Stacking layers extends the receptive field.
 
 </div>
 
@@ -599,7 +599,7 @@ The figure shows the three conceptual steps of a single GNN layer. Read left-to-
 
 - **GCN** (Kipf & Welling 2017) — AGG = normalised sum: $\tilde A = D^{-1/2}(A + I)D^{-1/2}$; UPDATE = $\sigma(\tilde A H W)$.
 - **GraphSAGE** (Hamilton et al. 2017) — AGG on a *sampled* subset of neighbours; scales to very large graphs; inductive by design.
-- **GAT** (Veličković et al. 2018) — AGG weighted by learned *attention* $\alpha_{uv}$.
+- **GAT** (Veličković et al. 2018) — AGG weighted by learned *attention* $\alpha\_{uv}$.
 - **GIN** (Xu et al. 2019) — AGG = sum; UPDATE = MLP. Provably as powerful as the Weisfeiler-Lehman graph isomorphism test.
 
 </div>
@@ -684,9 +684,9 @@ This module closes the L07–L09 arc. In L07 we met HNSW as a direct algorithmic
 
 <div class="c-note">
 
-1. **Build embeddings** — spectral, DeepWalk, node2vec, or a trained GNN produces $z_v \in \mathbb{R}^d$ for each node.
-2. **Build an index** — HNSW (L07) or similar ANN structure over $\{ z_v : v \in V \}$.
-3. **Query** — encode query $q$ as $z_q$, return top-$k$ nearest $z_v$ in $O(\log n)$.
+1. **Build embeddings** — spectral, DeepWalk, node2vec, or a trained GNN produces $z\_v \in \mathbb{R}^d$ for each node.
+2. **Build an index** — HNSW (L07) or similar ANN structure over $\\{ z\_v : v \in V \\}$.
+3. **Query** — encode query $q$ as $z\_q$, return top-$k$ nearest $z\_v$ in $O(\log n)$.
 4. **Use** — link prediction, recommendation, RAG retrieval, semantic search.
 
 </div>

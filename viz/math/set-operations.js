@@ -41,11 +41,13 @@ function layout(op, sets) {
       { label: 'A', x: -120, y: 0, r: 80 },
       { label: 'B', x: 120, y: 0, r: 90 },
     ]
+  // three sets: smaller circles so C clears the frame; labels sit outside
+  // the circles (lx, ly), away from the pairwise lenses
   if (sets === 3)
     return [
-      { label: 'A', x: -65, y: 35, r: 95 },
-      { label: 'B', x: 65, y: 35, r: 95 },
-      { label: 'C', x: 0, y: -75, r: 95 },
+      { label: 'A', x: -60, y: 40, r: 85, lx: -160, ly: 118 },
+      { label: 'B', x: 60, y: 40, r: 85, lx: 160, ly: 118 },
+      { label: 'C', x: 0, y: -60, r: 85, lx: 76, ly: -120 },
     ]
   return [
     { label: 'A', x: -65, y: 0, r: 100 },
@@ -53,11 +55,15 @@ function layout(op, sets) {
   ]
 }
 
+// Mask/clip ids must be unique across every instance on the page: url(#id)
+// resolves to the first element with that id, possibly on a hidden slide.
+let uid = 0
+
 export async function mount(el, { d3, params, steps }) {
   const sets = params.sets ?? 2
   const ops = params.ops ?? []
   const W = 720
-  const H = 400
+  const H = 460   // room for the formula above and the caption below Ω
   const RECT = { x: -320, y: -170, w: 640, h: 340 }
 
   const svg = d3
@@ -65,8 +71,6 @@ export async function mount(el, { d3, params, steps }) {
     .append('svg')
     .attr('viewBox', `${-W / 2} ${-H / 2} ${W} ${H}`)
     .attr('role', 'img')
-
-  let uid = 0
 
   function render(step) {
     svg.selectAll('*').remove()
@@ -121,17 +125,22 @@ export async function mount(el, { d3, params, steps }) {
         .attr('fill', FILL)
         .attr('mask', `url(#m${uid})`)
     } else if (op === 'AuB' || op === 'AuBuC') {
-      for (const c of circles) circleAttrs(highlight.append('circle'), c).attr('fill', FILL)
+      // only the named events (AuB with three circles must leave C out); one
+      // translucent group so overlaps are not darker than the rest
+      const members = circles.filter((c) => op.includes(c.label))
+      const g = highlight.append('g').attr('opacity', 0.45)
+      for (const c of members) circleAttrs(g.append('circle'), c).attr('fill', TEAL)
     } else if (op === 'AnB' || op === 'AnBnC') {
-      // Intersection via nested clip paths: fill the last circle, clipped
-      // by each of the others in turn.
+      // Intersection via nested clip paths: fill the last named circle,
+      // clipped by each of the others in turn.
+      const members = circles.filter((c) => op.includes(c.label))
       let group = highlight
-      for (const c of circles.slice(0, -1)) {
+      for (const c of members.slice(0, -1)) {
         const clip = defs.append('clipPath').attr('id', `c${++uid}`)
         circleAttrs(clip.append('circle'), c)
         group = group.append('g').attr('clip-path', `url(#c${uid})`)
       }
-      circleAttrs(group.append('circle'), circles[circles.length - 1]).attr('fill', FILL)
+      circleAttrs(group.append('circle'), members[members.length - 1]).attr('fill', FILL)
     }
 
     // Event outlines + labels
@@ -142,8 +151,9 @@ export async function mount(el, { d3, params, steps }) {
         .attr('stroke-width', 2.5)
       svg
         .append('text')
-        .attr('x', c.label === 'B' && op === 'subset' ? c.x : c.x - c.r * 0.55)
-        .attr('y', c.label === 'C' ? c.y - c.r - 10 : c.y - c.r * 0.55 - 8)
+        // default: just outside the circle's upper-left arc, not on the outline
+        .attr('x', c.lx ?? (c.label === 'B' && op === 'subset' ? c.x : c.x - c.r * 0.74))
+        .attr('y', c.ly ?? (c.label === 'B' && op === 'subset' ? c.y + 8 : c.y - c.r * 0.74 - 4))
         .attr('fill', TEAL)
         .attr('font-size', 22)
         .attr('font-style', 'italic')
@@ -155,7 +165,7 @@ export async function mount(el, { d3, params, steps }) {
     svg
       .append('text')
       .attr('x', 0)
-      .attr('y', H / 2 - 24)
+      .attr('y', H / 2 - 12)
       .attr('text-anchor', 'middle')
       .attr('fill', NAVY)
       .attr('font-size', 22)
@@ -163,7 +173,7 @@ export async function mount(el, { d3, params, steps }) {
     svg
       .append('text')
       .attr('x', 0)
-      .attr('y', -H / 2 + 32)
+      .attr('y', -H / 2 + 34)
       .attr('text-anchor', 'middle')
       .attr('fill', TEAL)
       .attr('font-size', 24)

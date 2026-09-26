@@ -1,0 +1,535 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 1 — Uncertainty, Decisions and Reasoning — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 1
+## Uncertainty, Decisions and Reasoning
+
+Probabilistic Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Accompanies Lecture 01. Pen and paper, one short Python task (1.A.3). The
+longer versions of the lecture's two-minute exercises live here: the three-
+applicant loan decision, and the save-or-change-the-theory diagnosis.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 1.A Decisions From Probabilities
+
+--
+
+## Exercise 1.A.1: Three Loan Applicants
+
+A loan model gives three applicants a **default probability** of $0.05$,
+$0.35$ and $0.45$. Accepting an applicant who defaults costs the bank
+**€8,000**; rejecting one who would have repaid costs **€500** in lost margin.
+
+1. Which applicants does the rule "reject if $p > 0.5$" reject?
+2. Compute the expected cost of *accepting* and of *rejecting* each applicant.
+   Which decision minimises it?
+3. Derive the break-even probability $p^{\*}$ in general, for a cost $c\_A$ of
+   accepting a defaulter and $c\_R$ of rejecting a good customer. Evaluate it here.
+4. How does $p^{\*}$ change if the bank's margin doubles? If the loan is ten
+   times larger (and the margin stays)? Explain the direction in one sentence
+   each.
+
+
+--
+
+## Exercise 1.A.1: Three Loan Applicants — Solution
+
+
+<div class="fragment">
+
+1. **Nobody** — all three are below 0.5.
+2. Accept: $p \cdot 8{,}000$; reject: $(1-p) \cdot 500$.
+
+| $p$ | accept | reject | decision |
+|---|---|---|---|
+| 0.05 | €400 | €475 | accept (just) |
+| 0.35 | €2,800 | €325 | reject |
+| 0.45 | €3,600 | €275 | reject |
+
+3. Reject when $p \\, c\_A > (1-p)\\, c\_R$, i.e. $p > p^{\*} = \dfrac{c\_R}{c\_R + c\_A}
+   = \dfrac{500}{8{,}500} \approx 0.059$.
+4. Margin doubled: $p^{\*} = 1{,}000/9{,}000 \approx 0.111$ — a lost customer
+   costs more, so the bank accepts more risk. Loan $\times 10$:
+   $p^{\*} = 500/80{,}500 \approx 0.006$ — a default costs more, so the bank
+   rejects almost everyone with any risk. The model output never changed.
+
+</div>
+
+
+
+
+--
+
+## Exercise 1.A.2: Allow, Block — or Ask a Human?
+
+A fraud model scores a transaction with probability $p$ of fraud. Three actions:
+
+- **allow**: if it is fraud, the bank loses **€900**;
+- **block**: if it is legitimate, an annoyed customer costs **€300**;
+- **review**: an analyst checks it for a flat **€60** and always decides
+  correctly.
+
+1. Write the expected cost of each action as a function of $p$.
+2. For which range of $p$ is each action optimal?
+3. Without a review option, where would the threshold between allow and block
+   be? What does the review option change?
+
+
+--
+
+## Exercise 1.A.2: Allow, Block — or Ask a Human? — Solution
+
+
+<div class="fragment">
+
+1. Allow: $900\\,p$. Block: $300\\,(1-p)$. Review: $60$.
+2. Allow beats review when $900\\,p < 60$, i.e. $p < 1/15 \approx 0.067$; block
+   beats review when $300\\,(1-p) < 60$, i.e. $p > 0.8$. So: **allow** for
+   $p < 0.067$, **review** for $0.067 < p < 0.8$, **block** for $p > 0.8$.
+3. Without review: allow $=$ block at $900\\,p = 300\\,(1-p)$, $p = 0.25$. With
+   review, the whole uncertain middle goes to a human — "defer deliberately"
+   from the lecture, with its range computed rather than guessed. A label
+   without a probability could not support this three-way policy at all.
+
+</div>
+
+
+
+
+--
+
+## Exercise 1.A.3: Choosing a Threshold From Data (Python)
+
+```python
+import numpy as np
+rng = np.random.default_rng(1)
+p = rng.beta(0.5, 6, size=10_000)        # model scores (assume calibrated)
+y = rng.random(10_000) < p               # true labels drawn from the scores
+c_A, c_R = 8_000, 500                    # costs as in 1.A.1
+```
+
+1. For thresholds $t \in \\{0, 0.01, \ldots, 1\\}$ ("reject if $p > t$"), compute
+   the **average realised cost** per applicant.
+2. Which $t$ minimises it? Compare with $p^{\*}$ from 1.A.1.
+3. What would happen to the best $t$ if the scores were systematically too low
+   (say `p_reported = p / 2`)?
+
+
+--
+
+## Exercise 1.A.3: Choosing a Threshold From Data — Solution
+
+
+<div class="fragment">
+
+```python
+ts = np.linspace(0, 1, 101)
+cost = [np.mean(np.where(p > t, (~y) * c_R, y * c_A)) for t in ts]
+print(ts[np.argmin(cost)])               # ≈ 0.05
+```
+
+2. The minimum lies at $t \approx 0.05$–$0.06$ (with this seed 0.05, and 0.06
+   within a fraction of a euro), next to the break-even $p^{\*} \approx 0.059$: with calibrated scores, the cost-optimal
+   threshold is the one computed from the costs alone.
+3. With `p_reported = p / 2` the best threshold on the *reported* scores halves
+   to about $0.03$ — the formula $p^{\*}$ is only right for calibrated scores.
+   This is why Lecture 03 asks when a score deserves to be read as a
+   probability.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 1.B Where Uncertainty Comes From
+
+--
+
+## Exercise 1.B.1: Noise or Ignorance?
+
+For each case, say whether the uncertainty is mainly **aleatoric** (in the
+problem), **epistemic** (in our knowledge), or both — and whether more data of
+the same kind would help.
+
+1. Predicting the outcome of a fair coin flip.
+2. A house-price model trained on flats of 40–120 m², asked about a 600 m² villa.
+3. A spam filter trained on English mail, applied to Finnish mail.
+4. Two customers with identical records; one churns, one does not.
+5. A clinical measurement with known device noise, taken once per patient.
+
+
+--
+
+## Exercise 1.B.1: Noise or Ignorance? — Solution
+
+
+<div class="fragment">
+
+1. **Aleatoric.** No amount of data predicts a fair flip.
+2. **Epistemic.** No data near 600 m²; villas in the training data would help.
+3. **Epistemic** — and a shift: the model has not seen the language. Finnish
+   training mail helps; more English mail does not.
+4. **Aleatoric relative to the recorded attributes.** More rows with the same
+   attributes do not help; *more attributes* might — "inherent" is always
+   relative to what is measured.
+5. **Aleatoric** for a single reading. Repeating the measurement reduces the
+   uncertainty about the patient's true value (the average's standard error
+   falls), not the device noise itself.
+
+</div>
+
+
+
+
+--
+
+## Exercise 1.B.2: One Pipeline, Many Uncertainties
+
+A bank trains a logistic-regression fraud model on last year's transactions.
+Labels come from chargebacks, which arrive up to 90 days after the transaction.
+The test set holds 2,000 recent transactions, of which **3** are fraud.
+
+Name **five** distinct places where uncertainty enters this system. For each,
+say which box of the learning system it lives in and propose one mitigation.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 1.B.2: One Pipeline, Many Uncertainties — Solution
+
+
+<div class="fragment">
+
+| source | box | mitigation |
+|---|---|---|
+| fraud looks legitimate (aleatoric) | world | route the grey zone to review (1.A.2) |
+| labels late and incomplete | data | label only after 90 days |
+| last year ≠ this year (drift) | data | monitor scores; retrain |
+| linear model misses interactions | model | compare with a richer model |
+| few frauds, loose parameters (epistemic) | parameters | more positives; regularise |
+| 3 test frauds: recall barely measurable | evaluation | more test frauds; report an interval |
+
+Any five count. The last is the one most often missed: with 3 frauds, a
+measured recall can only be 0, ⅓, ⅔ or 1.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 1.C Reasoning Under Uncertainty
+
+--
+
+## Exercise 1.C.1: Which Mode of Reasoning?
+
+Classify each step as **deduction**, **induction** or **abduction**.
+
+1. "All training examples with a foreign IP and a night-time purchase were
+   fraud, so such transactions are fraud."
+2. "The model's accuracy dropped last week; the most plausible explanation is
+   the new payment provider."
+3. "If the logistic model is correct, doubling feature $x\_1$ multiplies the
+   odds by $e^{w\_1 x\_1}$."
+4. "Customers who use the app churn less; perhaps loyal customers install the
+   app."
+5. "Gradient descent with this learning rate on this convex loss converges."
+
+
+--
+
+## Exercise 1.C.1: Which Mode of Reasoning? — Solution
+
+
+<div class="fragment">
+
+1. **Induction** — a regularity generalised from observed cases (and an
+   over-confident one).
+2. **Abduction** — the best available explanation of an observation.
+3. **Deduction** — follows from the model's definition; true *if* the model is.
+4. **Abduction** — one explanation of a correlation, with a rival (the app
+   causes loyalty) that the data alone cannot rule out.
+5. **Deduction** — a theorem about the algorithm, given its premises.
+
+</div>
+
+
+
+
+--
+
+## Exercise 1.C.2: Save the Model or Change It?
+
+A fraud model has been reliable for two years. After a new product launch, its
+recall on the new product's transactions falls from 0.8 to 0.4.
+
+1. Name the "save the theory" and the "change the theory" move in this setting.
+2. Design two cheap checks, in order, that would tell the moves apart.
+3. What evidence would make you abandon the current model family — and why
+   should one bad week not be enough?
+
+
+--
+
+## Exercise 1.C.2: Save the Model or Change It? — Solution
+
+
+<div class="fragment">
+
+1. **Save:** the model is right but has not seen the new product — collect and
+   label its transactions, retrain (epistemic). **Change:** fraud on the new
+   product follows patterns the features or the model family cannot express.
+2. First check that nothing trivial broke (a feature missing or mis-encoded for
+   the new product). Then add labelled examples and watch the learning curve on
+   the new product: if recall recovers, it was data; if it stays flat, it is the
+   model or noise (compare with a richer model or new features).
+3. A flat learning curve *and* a rival — new features or a model class — that
+   explains the new cases better on held-out data. One bad week is a small
+   sample: its recall has a wide interval, and after two good years the prior on
+   "the model is fine" is strong — Uranus before Mercury.
+
+</div>
+
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

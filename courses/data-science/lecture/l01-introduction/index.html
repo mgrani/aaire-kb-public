@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -12,7 +12,7 @@ Prof. Dr. Michael Granitzer
 
 Notes:
 Converted from LNKB-tex part-en-ds-chp1-introduction.tex. Examples and framing
-updated from the 2022 "big data" era to the current one the argumentative
+updated from the 2022 "big data" era to the current one; the argumentative
 spine (data does not speak for itself) is unchanged and is what the rest of the
 course rests on. No prerequisites.
 
@@ -32,10 +32,10 @@ course rests on. No prerequisites.
 
 | Year | Global datasphere | Per person on earth |
 |---|---|---|
-| 2002 | 5 exabytes of new information | — |
-| 2010 | ~1 zettabyte | a trillion gigabytes in total |
-| 2020 | ~40 zettabytes | ≈ 5,200 GB |
-| 2025 | ~175 zettabytes | ≈ 21,000 GB |
+| 2002 | 5 exabytes of new stored information (Lyman & Varian 2003) | ≈ 0.8 GB |
+| 2010 | ≈ 1.2 zettabytes (Gantz & Reinsel 2010) | ≈ 170 GB |
+| 2020 | ≈ 64 ZB; IDC's 2012 *forecast* had said 40 ZB (Gantz & Reinsel 2012) | ≈ 8,000 GB |
+| 2025 | ≈ 175 ZB — a 2018 *forecast* (Reinsel et al. 2018) | ≈ 21,000 GB |
 
 
 <div class="c-note">
@@ -49,8 +49,15 @@ capacity**. Since then, most data that is generated is never stored.
 Notes:
 The exact figures matter less than the two structural facts: growth is
 exponential, and generation outruns storage — so *selection* is unavoidable and
-someone is choosing. Ask who decides what gets kept that is a data-science
+someone is choosing. Ask who decides what gets kept; that is a data-science
 question before it is an engineering one.
+
+The rows are not one measure: 2002 counts newly *stored* information (Lyman &
+Varian, Berkeley), the later rows IDC's "digital universe" of data created or
+replicated. 2020's 64 ZB is IDC's later estimate; its 2012 forecast had said
+40 ZB, and 175 ZB for 2025 is still a forecast. Per person: 1.2 ZB / 6.9 bn ≈
+170 GB; 64 ZB / 7.8 bn ≈ 8,200 GB; 175 ZB / 8.1 bn ≈ 21,600 GB. The 2007
+crossover is IDC's claim (Gantz et al. 2008).
 
 --
 
@@ -212,11 +219,11 @@ uninformative observations. The takeaway is the bridge to Module 2.
 
 ## "The End of Theory"
 
-> With enough data, the numbers speak for themselves. Correlation supersedes
-> causation, and science can advance without coherent models or unified
-> theories.
+> With enough data, the numbers speak for themselves. […] Correlation
+> supersedes causation, and science can advance even without coherent models,
+> unified theories, or really any mechanistic explanation at all.
 
-**Chris Anderson, *Wired*, 2008.** The argument has returned, almost verbatim,
+**Chris Anderson, *Wired*, 2008** (Anderson 2008). The argument has returned, almost verbatim,
 in claims that sufficiently large models make domain theory unnecessary.
 
 **Is it right?**
@@ -243,7 +250,7 @@ Twenty-nine research teams received **the same dataset** and the same question:
 
 ### The result
 Odds ratios ranged from **0.89 to 2.93**. Twenty teams found a significant
-effect nine did not.
+effect; nine did not.
 
 </div>
 
@@ -251,8 +258,8 @@ effect nine did not.
 <div class="card bad">
 
 ### The reason
-No team made an error. They made **different defensible modelling choices** —
-which covariates, which exclusions, which model family.
+Not mistakes: the spread persisted among analyses peer-rated as sound.
+Teams made **different defensible choices** — covariates, exclusions, model.
 
 </div>
 
@@ -271,7 +278,7 @@ The data did not determine the answer. The **analysis** did. (Silberzahn et al. 
 Notes:
 The most important slide of the lecture. Emphasise that this is not a story
 about incompetence or fraud — it is what "researcher degrees of freedom" means.
-Ask what the honest reporting practice would be (pre-registration publishing
+Ask what the honest reporting practice would be (pre-registration; publishing
 the specification curve), and note that this is exactly what makes P3
 (epistemic modelling) a professional obligation rather than a philosophical
 nicety.
@@ -280,8 +287,9 @@ nicety.
 
 ## Correlation Is Not Causation
 
-Spurious correlations are easy to find and get **easier as datasets grow**:
-with enough variables, some pair will track another closely by chance alone.
+Spurious correlations are easy to find and get **easier as datasets grow
+wider**: with enough variables, some pair will track another closely by chance
+alone.
 
 
 <div class="grid-2">
@@ -289,7 +297,7 @@ with enough variables, some pair will track another closely by chance alone.
 
 <div class="card">
 
-### Why it happens
+### More columns: chance
 Testing many pairs makes an extreme correlation likely *somewhere*, even when
 every pair is independent.
 
@@ -298,9 +306,9 @@ every pair is independent.
 
 <div class="card">
 
-### Why more data does not fix it
-More rows shrink the confidence interval around a **meaningless** number. The
-estimate gets more precise, not more valid.
+### More rows: no cure for confounding
+A confounded correlation does not go away with more rows. The interval shrinks
+around a real but **non-causal** number: more precise, not more valid.
 
 </div>
 
@@ -309,15 +317,18 @@ estimate gets more precise, not more valid.
 
 
 Notes:
-The second box is the deep point and the one students miss: precision and
-validity are different axes. This returns in hypothesis testing, where a large
+The two boxes are different failures. Chance correlations grow with the
+number of *variables* and fade with more rows; a confounded correlation (ice
+cream and drownings, both driven by summer) survives any number of rows. The
+second box is the deep point and the one students miss: precision and validity
+are different axes. This returns in hypothesis testing, where a large
 n makes trivial effects "significant".
 
 --
 
 ## Summary Statistics Hide the Data
 
-Datasets whose **summary numbers agree exactly** — same averages, same spread,
+Datasets whose **summary numbers agree** to two decimal places — same averages, same spread,
 same strength of association — can look completely different when plotted: a
 dinosaur, a star, a set of lines (Matejka & Fitzmaurice 2017).
 
@@ -401,12 +412,15 @@ theory. This is the thread the whole course pulls on.
 
 ## A Definition
 
+> Data science is the study of the generalizable extraction of knowledge from
+> data. — Vasant Dhar (Dhar 2013)
+
 
 <div class="c-definition">
 
-**Data Science** researches and applies technologies, systems and algorithms to
-gain knowledge from potentially large, heterogeneous and dynamically changing
-data sets — for a particular domain. (Dhar 2013)
+**Course definition, after Dhar.** Data science researches and applies
+technologies, systems and algorithms to gain knowledge from potentially large,
+heterogeneous and dynamically changing data sets — for a particular domain.
 
 </div>
 
@@ -416,7 +430,9 @@ is no criterion for which patterns count as knowledge.
 
 Notes:
 Math-first equivalent for a definitional slide (P5): show it, then interrogate
-it. Ask which word could be deleted without loss (probably "large") and which
+it. Dhar's one line is quoted verbatim; the box is this course's working
+definition, which adds the domain. "Generalizable" in Dhar is the same demand as
+"valid" in the KDD criteria later in this lecture. Ask which word could be deleted without loss (probably "large") and which
 could not ("domain", "knowledge").
 
 --
@@ -424,7 +440,15 @@ could not ("domain", "knowledge").
 ## Neighbouring Fields
 
 
-<div class="grid-3">
+<div class="grid-2">
+
+
+<div class="card">
+
+### Statistics
+Inference from samples: what may be concluded, and with what uncertainty.
+
+</div>
 
 
 <div class="card">
@@ -451,7 +475,6 @@ The twin field: managing, organising and providing access to data.
 </div>
 
 
-
 </div>
 
 
@@ -466,7 +489,7 @@ tools fits.
 
 Notes:
 Students arrive with these words used interchangeably. The distinction that
-sticks: ML is a method, data engineering is an infrastructure, data science is
+sticks: statistics and ML are methods, data engineering is an infrastructure, data science is
 an inquiry.
 
 --
@@ -551,25 +574,22 @@ regression are predictive. Point forward to where each returns.
 
 | | From | To | What it guarantees |
 |---|---|---|---|
-| **Deduction** *(logic)* | premises | what **must** follow | certain — but adds no new content |
-| **Induction** *(statistics)* | observed patterns | a **regularity**, a hypothesis | nothing — content-adding, not guaranteed |
-| **Abduction** *(probability)* | observations | the **best available explanation** | nothing — only comparable against rivals |
+| **Deduction** | premises | what **must** follow | certain — but adds no new content |
+| **Induction** | observed patterns | a **regularity**, a hypothesis | nothing — content-adding, not guaranteed |
+| **Abduction** | an observation | the **best available explanation** | nothing — only comparable against rivals |
 
 Machine learning lives in the bottom two rows.
 
 Notes:
 Three modes, one criterion to compare them: what does each guarantee, and what
-does it buy? Deduction guarantees everything and discovers nothing induction
+does it buy? Deduction guarantees everything and discovers nothing; induction
 and abduction discover and guarantee nothing. Data science lives in the latter
-two, which is why validation is a permanent obligation.
+two, which is why validation is a permanent obligation. The next slides show the
+three modes taking turns on a real case.
 
 --
 
-## The Scientific Reasoning Cycle
-
-The three modes are not alternatives — they take turns.
-
-**Example: gravity.**
+## The Cycle, on a Real Case: Uranus
 
 
 <div class="grid-3">
@@ -577,78 +597,19 @@ The three modes are not alternatives — they take turns.
 
 <div class="card">
 
-### Deduction
-From the theory: all objects of equal mass fall at the same rate everywhere on
-earth.
+<span class="eyebrow">Deduction</span>
+
+Newton's laws plus the known planets give the orbit Uranus **must** follow.
 
 </div>
-
-
-<div class="card">
-
-### Induction
-Design an experiment, measure fall times at several locations, compute means
-and standard deviations.
-
-</div>
-
-
-<div class="card">
-
-### Abduction
-Times agree at one location but vary between locations. **Best explanation:**
-distance from earth's mass centre.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-insight">
-
-The cycle turns: the abduced explanation becomes the next theory to deduce
-from. A data-science project runs the same loop, usually several times.
-
-</div>
-
-
-Notes:
-Have students place a machine-learning project in the cycle: choosing a model
-family is deduction from assumptions, fitting is induction, and diagnosing why
-it fails on a subgroup is abduction. The loop is the honest picture of the
-workflow, unlike the tidy pipeline diagrams.
-
---
-
-## Mini-Exercise
-
-A dashboard shows that customers who use the mobile app churn **less** than
-those who do not.
-
-
-<div class="marks-num">
-
-- What would a purely **inductive** reading conclude?
-- Give two different **abductive** explanations.
-- What **deduction** would let you distinguish them?
-
-</div>
-
-
-
-<div class="fragment">
-
-
-<div class="grid-3">
 
 
 <div class="card">
 
 <span class="eyebrow">Induction</span>
 
-"App use reduces churn" — a regularity read straight off the data.
+Six decades of observed positions show a **systematic** deviation — larger than
+any measurement error.
 
 </div>
 
@@ -657,21 +618,23 @@ those who do not.
 
 <span class="eyebrow">Abduction</span>
 
-The app causes loyalty — *or* loyal customers install the app. Same
-correlation, opposite causal direction.
+Best explanation: an **unseen planet** further out, pulling on Uranus.
 
 </div>
 
 
-<div class="card">
-
-<span class="eyebrow">Deduction</span>
-
-If the app causes loyalty, randomly prompting a subgroup to install it should
-lower their churn — an experiment deduced from the hypothesis.
-
 </div>
 
+
+
+<div class="fragment">
+
+
+<div class="c-insight">
+
+The cycle turns: the abduced planet becomes a new premise. Le Verrier deduces
+where it must be; in 1846 Galle points a telescope there and finds **Neptune**,
+about a degree from the prediction.
 
 </div>
 
@@ -680,13 +643,182 @@ lower their churn — an experiment deduced from the hypothesis.
 
 
 Notes:
-Question and solution share a slide: the three prompts stay visible while the
-answers appear, so students can check each answer against the question that
-produced it. One click reveals all three.
+Uranus was discovered in 1781; by the 1840s its tables no longer matched the
+sky. The point of the slide is the last step: an explanation earns its keep by
+predicting something checkable — here, a position in the sky. A data-science
+project runs the same loop: choosing a model family is deduction from
+assumptions, fitting is induction, diagnosing why it fails on a subgroup is
+abduction. The success is famous. The next slide asks why it was not obvious.
 
-The exercise rehearses the whole cycle in a business setting and previews the
-correlation/causation problem. The key move is 3: a hypothesis earns its keep
-by predicting something checkable that its rival does not.
+--
+
+## An Anomaly Leaves Two Moves
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">Save the theory</span>
+
+### Add a hidden cause
+
+*The bet:* the theory is right; our picture of the world is incomplete.
+
+*If wrong:* we chase something that is not there.
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Change the theory</span>
+
+### Replace the premises
+
+*The bet:* the theory fails here, however well it worked elsewhere.
+
+*If wrong:* we throw away two centuries of correct predictions.
+
+</div>
+
+
+</div>
+
+
+
+<div class="q">
+
+1859: Mercury's orbit turns about **43″ per century** more than Newton allows.
+Which move would you make?
+
+</div>
+
+
+Notes:
+Collect votes before the next slide. After Neptune, almost everyone chooses
+"save the theory" — and that is the right answer *for 1859*: the same scientist
+had just been spectacularly vindicated by exactly that move. Make students
+commit; the next slide pays off only if they have.
+
+--
+
+## Same Move, Opposite Outcomes
+
+| anomaly | the move | what happened |
+|---|---|---|
+| **Uranus**, 1840s | a hidden planet | **Neptune** found, 1846 <span class="yes">✓</span> |
+| **Mercury**, 1859 | a hidden planet, "Vulcan" (Le Verrier again) | ? |
+
+
+<div class="fragment">
+
+Vulcan is **never found** <span class="no">✗</span> In 1915 **general
+relativity** explains the 43″ with no new planet — here, changing the theory was
+right.
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-important">
+
+Both decisions were **reasonable when they were made**. What separated them was
+evidence that did not exist yet.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Same scientist, same method, same kind of anomaly, opposite outcomes. Vulcan
+was searched for at eclipses for decades and a few sightings were claimed; none
+survived. Einstein's theory produced the 43″ per century as a consequence, with
+nothing adjusted to fit it — which is why it replaced Newton rather than merely
+patching him.
+
+--
+
+## Deciding Before the Evidence Is In
+
+
+<div class="marks-step">
+
+- **Trust earned.** After two centuries of success, absorbing one anomaly
+  *into* the theory was the rational first move.
+- **Evidence accumulates.** Every failed search made "a hidden planet" less
+  plausible — confidence moved step by step, not in one jump.
+- **Replace, don't just refute.** Newton fell when a rival explained *more*,
+  not at the first failure.
+- **Costs decide.** Chasing Vulcan forever and abandoning a good theory too
+  early are both expensive; which move to make depends on what being wrong
+  costs.
+
+</div>
+
+
+
+<div class="c-insight">
+
+A hidden planet is an **assumption added to save a pattern**. It is worth
+exactly as much as the check it survives.
+
+</div>
+
+
+Notes:
+The data-science translation: a model that fails on new data can be saved by an
+extra assumption ("that month was unusual", "the new customers are different")
+or replaced. Both are legitimate first moves; neither is knowledge until
+something checkable has been predicted and observed. This is the course's
+thread in its oldest form — name the assumption, then check it.
+
+--
+
+## Mini-Exercise
+
+A dashboard shows: customers who use the mobile app **churn less**. Besides
+"the app keeps customers", give **one other explanation** — and one experiment
+that tells the two apart.
+
+
+<div class="fragment">
+
+Loyal customers are the ones who **install** the app: same correlation, opposite
+direction. Experiment: prompt a **random** subgroup to install it. If the app
+causes loyalty, their churn drops; if loyalty causes the app, it does not.
+
+</div>
+
+
+Notes:
+Solution on the same slide, click-gated. The exercise runs the whole cycle in a
+business setting: induction reads the regularity off the dashboard, abduction
+supplies rival explanations, deduction turns one of them into a checkable
+prediction. The key move is the randomisation: a hypothesis earns its keep by
+predicting something its rival does not. This subscription business returns
+throughout the course.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A pattern is not a proof. Induction and abduction **propose**; deduction turns a
+proposal into a **checkable prediction**; only the check makes it knowledge. When
+a check fails, saving the theory with a hidden cause or changing it is a
+**decision made before the evidence is in**.
+
+</div>
+
 
 --
 
@@ -696,12 +828,12 @@ by predicting something checkable that its rival does not.
 <div class="c-definition">
 
 **Knowledge discovery in databases (KDD)** is the non-trivial process of
-identifying patterns in data that are
+identifying patterns in data that are (Fayyad et al. 1996)
 
-- **valid** — they hold beyond the sample,
+- **valid** — they hold on new data, beyond the sample,
 - **novel** — they were not already known,
-- **relevant** — they matter for a decision,
-- **interpretable** — they can be understood and acted upon.
+- **potentially useful** — they can support a decision or an action,
+- **ultimately understandable** — a person can make sense of them.
 
 </div>
 
@@ -715,21 +847,116 @@ large dataset offers fail at least one.
 </div>
 
 
+Notes:
+Use the four criteria as a checklist against a real finding — say, "customers
+who buy nappies buy beer". Valid? Maybe. Novel? Perhaps. Potentially useful?
+Only if it changes a decision. Ultimately understandable? Only with a
+mechanism. This is the antidote to pattern-hunting. The wording is Fayyad et
+al.'s; "ultimately" matters — the pattern need not be obvious at first sight,
+but someone must be able to understand it in the end.
+
+--
+
+## Five Steps from Data to Knowledge
+
+
+<div class="flow-row">
+
+
+<div class="stat-card evidence">
+
+### Select
+selection of target data
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Clean
+preprocessing
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Transform
+transformation
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Mine
+data mining → patterns
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Interpret
+interpretation / evaluation
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Fayyad et al. draw the five steps in a line, with arrows back from every step:
+evaluation routinely sends you back to an earlier one.
+
+</div>
+
+
 
 <div class="takeaway">
 
-Knowledge is a pattern that is **valid, novel, relevant and interpretable**.
-Data mining produces patterns only the four criteria turn one into knowledge —
-and most patterns fail at least one of them.
+Knowledge is a pattern that is **valid, novel, potentially useful and
+ultimately understandable**. Data mining is one step of five; it produces
+patterns, and only the four criteria turn one into knowledge.
 
 </div>
 
 
 Notes:
-Use the four criteria as a checklist against a real finding — say, "customers
-who buy nappies buy beer". Valid? Maybe. Novel? Perhaps. Relevant? Only if it
-changes a decision. Interpretable? Only with a mechanism. This is the antidote
-to pattern-hunting.
+The figure students will meet in every textbook, drawn as a flow so the next
+unit can walk through it step by step. Point out that "data mining" — the part
+most people mean by the field — is only the fourth box.
 
 ---
 
@@ -752,8 +979,9 @@ to pattern-hunting.
 <div class="card">
 
 ### Types of source
-- **Unstructured:** flat files, documents, text and multimedia
-- **Structured:** relational databases, XML, web APIs
+- **Structured:** relational databases, CSV tables
+- **Semi-structured:** XML, JSON, web APIs
+- **Unstructured:** documents, text, multimedia
 
 </div>
 
@@ -786,18 +1014,10 @@ installed it) — survivorship bias, before it has a name.
 
 --
 
-## Step 2 — Preprocessing
+## Steps 2–3 — Preprocessing and Transformation
 
 
-<div class="grid-4">
-
-
-<div class="card">
-
-### Selected
-manually or automatically, e.g. by crawling
-
-</div>
+<div class="grid-3">
 
 
 <div class="card">
@@ -819,7 +1039,7 @@ combined with other sources, resolving conflicts
 <div class="card">
 
 ### Transformed
-into a reusable representation for analysis
+features constructed or reduced into a representation for analysis
 
 </div>
 
@@ -830,20 +1050,22 @@ into a reusable representation for analysis
 
 <div class="c-note">
 
-This step routinely consumes most of a project's effort — and every choice in
-it is a modelling decision, not a clerical one.
+These steps routinely consume most of a project's effort — and every choice in
+them is a modelling decision, not a clerical one.
 
 </div>
 
 
 Notes:
 The "80% of the work" folklore is true but usually told as a complaint. Reframe
-it: preprocessing is where the representation α from the ML chapter is built,
-and the representation determines what can be learned at all.
+it: preprocessing and transformation build the representation — which Lecture
+04 will call α — and the representation determines what can be learned at all.
+Fayyad et al. count transformation as its own step (step 3); cleaning and
+integration are step 2.
 
 --
 
-## Steps 3–5 — Mining, Evaluation, Deployment
+## Steps 4–5 — Mining and Interpretation, then Deployment
 
 
 <div class="grid-3">
@@ -860,17 +1082,18 @@ task.
 
 <div class="card">
 
-### Evaluation
-Test the patterns against the four criteria: valid, novel, relevant,
-interpretable.
+### Interpretation / evaluation
+Test the patterns against the four criteria: valid, novel, potentially useful,
+ultimately understandable.
 
 </div>
 
 
 <div class="card">
 
-### Deployment
-Put the result where a decision is made, and monitor it there.
+### Then: deployment
+Not one of Fayyad's five steps (CRISP-DM adds it): put the result where a
+decision is made, and monitor it there.
 
 </div>
 
@@ -980,8 +1203,8 @@ model of the wrong quantity, or a correct analysis nobody can deploy.
 
 <div class="takeaway">
 
-The process is a **loop, not a pipeline**, and it spans three skill areas that
-nobody holds equally. The characteristic failures happen at the seams — a
+The work runs from a **question** to a result someone can **act on**, and it
+spans three skill areas that nobody holds equally. The characteristic failures happen at the seams — a
 flawless model of the wrong quantity, or a correct analysis nobody can deploy.
 
 </div>
@@ -999,8 +1222,8 @@ a colleague, which is also why the course insists on stating assumptions aloud.
 # Module 6
 ## Applications, and Their Failures
 
-> **Guiding Question:** What happens to a model's validity once the world can
-> see the model?
+> **Guiding Question:** What happens to a model's validity when the world it
+> measures changes — sometimes because of models?
 
 --
 
@@ -1022,8 +1245,10 @@ reporting.
 <div class="card bad">
 
 ### And then it failed
-It overestimated cases substantially, because search behaviour changed —
-partly *because of media coverage of the tool itself*.
+It overestimated flu levels — in 2012/13 by more than double. Causes named:
+overfitting to seasonal search terms, **changes to Google's own search** (e.g.
+suggested queries), and searches driven by media coverage of the flu season
+(Lazer et al. 2014).
 
 </div>
 
@@ -1034,16 +1259,21 @@ partly *because of media coverage of the tool itself*.
 
 <div class="c-important">
 
-A model that acts on the world **changes the world it measures**. Validity is
-not a property a model keeps once earned.
+The world a model measures **keeps changing** — sometimes because of other
+models. Validity is not a property a model keeps once earned.
 
 </div>
 
 
 Notes:
-The failure is more instructive than the success and belongs on the slide. It
-is the cleanest example of a feedback loop and previews model monitoring,
-distribution shift, and the KDD loop from the previous unit.
+The failure is more instructive than the success and belongs on the slide.
+Lazer et al. ("The Parable of Google Flu", Science 2014) call the two main
+causes *big data hubris* — fitting 50 million search terms to about a thousand
+data points picks up winter terms that merely co-vary with flu — and *algorithm
+dynamics*: Google kept changing its search engine, whose suggestions changed
+what people typed, i.e. one model altered the data another model relied on.
+It previews model monitoring, distribution shift, and the KDD loop from the
+previous unit.
 
 --
 
@@ -1109,7 +1339,7 @@ happened afterwards?
 
 <div class="takeaway">
 
-Applications show what is possible their failures show what must be checked.
+Applications show what is possible; their failures show what must be checked.
 Ask of every deployed model: what changed in the world because it exists?
 
 </div>
@@ -1122,12 +1352,188 @@ the lecture on scepticism sets the tone for the rest of the course.
 
 ---
 
+<!-- .slide: class="module-slide" -->
+
+# The Road Ahead
+
+> **Guiding Question:** Every lecture from here on brings a method. What should
+> you ask of each one before you believe its patterns?
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 01: from the data deluge to knowledge as a tested pattern, and the course arc](/courses/data-science/figures/l01-argument-map.svg)
+
+</div>
+
+
+Notes:
+A recap of the lecture, shown once the room has argued it. Read it top-left to
+bottom. There is more data, but not more insight. Twenty-nine teams, one
+dataset and different answers: the analysis decided, not the data. So theory
+is needed more, not less, because an unstated assumption gets automated at
+scale. Data science is defined by its question, not by its tools. A pattern
+found by induction is a guess until it is checked, and it is knowledge only if
+it passes the four criteria. The loop, not the pipeline, is the honest picture.
+
+Point at the strip: every later lecture introduces a method, and its map names
+the assumption that speaks for the data in it. The check follows in the same
+lecture. Every later lecture opens with its own map and the same strip.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Road Ahead: Name the Assumption, Then Check It
+
+| L | The assumption that speaks for the data | The check |
+|---|---|---|
+| **02** Chance has rules | a model of chance: outcomes, probabilities | would chance alone produce this? |
+| **03** Draw the dependences | a graph: a missing edge claims independence | does the data fit the factorisation? |
+| **04** Assume a form | a line, log-odds, independent attributes | error on unseen data, against a baseline |
+| **05** Learn the features | stacked units learn form and features | training vs validation error |
+| **06** Ask short questions | short trees first; a majority vote | pruning on held-out data |
+| **07** Look before you fit | a scale per column; why values are missing | plots, quality checks |
+| **08** Define similarity | a distance, a linkage, k | cluster validation |
+| **09** Beat the base rate | co-occurrence counts, thresholds | lift against independence |
+| **10** Choose what to keep | variance, distances or co-occurrence | explained variance, stress, biplot |
+
+
+<div class="c-insight">
+
+Knowing a method's assumption tells you where its patterns stop being knowledge.
+
+</div>
+
+
+Notes:
+Only now the detailed structure: every row is a method family the students will
+meet, read as the assumption it adds and the check that tells a pattern from
+knowledge. This is the course arc, "name the assumption, then check it", and
+the strip at the bottom of every argument map. Do not explain the rows; the
+words (independence, loss, lift, variance) are meant to be recognised when they
+return, not understood today.
+
+Return to this table at the start of every later lecture: each lecture's
+argument map has the same strip, with its own chip highlighted.
+
+--
+
+## The Lectures on the KDD Loop
+
+
+<div class="flow-row">
+
+
+<div class="stat-card evidence">
+
+### Select
+L07
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Preprocess
+L07
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Transform
+L07 · L10
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Mine
+L03–L06 · L08 · L09
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Interpret
+L02 · L04 · L08 · L09
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+The course does not walk the loop in order. Lecture 02 builds the language every
+check is written in, and Lectures 03–06 build models first, because judging data
+needs both. Lecture 07 then returns to the first steps, before the methods without
+labels (08–10).
+
+</div>
+
+
+Notes:
+Say the order problem out loud rather than hiding it. Interpretation is where
+each lecture's check lives: the test in Lecture 02, measuring performance in
+Lecture 04, cluster validation in Lecture 08, lift in Lecture 09. Lecture 07 is
+the moment the course turns back to the table itself; from Lecture 08 on there
+is no label, and looking at the data becomes the main check left.
+
+
+---
+
 <!-- .slide: class="credits-slide smaller" -->
 
 ## Image Credits & References
 
 - Dhar, Vasant (2013). Data science and prediction. *Communications of the ACM*.
+- Anderson, Chris (2008). The End of Theory: The Data Deluge Makes the Scientific Method Obsolete. *Wired*.
+- Fayyad, Usama and Piatetsky-Shapiro, Gregory and Smyth, Padhraic (1996). From Data Mining to Knowledge Discovery in Databases. *AI Magazine*.
+- Gantz, John and Reinsel, David (2010). The Digital Universe Decade -- Are You Ready?.
+- Gantz, John and Reinsel, David (2012). The Digital Universe in 2020: Big Data, Bigger Digital Shadows, and Biggest Growth in the Far East.
+- Lazer, David and Kennedy, Ryan and King, Gary and Vespignani, Alessandro (2014). The Parable of Google Flu: Traps in Big Data Analysis. *Science*.
+- Lyman, Peter and Varian, Hal R. (2003). How Much Information? 2003.
 - Matejka, Justin and Fitzmaurice, George (2017). Same stats, different graphs: generating datasets with varied appearance and identical statistics through simulated annealing. *Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems*.
+- Reinsel, David and Gantz, John and Rydning, John (2018). The Digitization of the World: From Edge to Core.
 - Silberzahn, Raphael and Uhlmann, Eric L and Martin, Daniel P and others (2018). Many analysts, one data set: making transparent how variations in analytic choices affect results. *Advances in Methods and Practices in Psychological Science*.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

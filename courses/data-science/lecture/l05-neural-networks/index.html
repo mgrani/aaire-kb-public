@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -16,6 +16,93 @@ on Lecture 04: the perceptron is the linear classifier again, the delta rule is
 LMS again, and the sigmoid is logistic regression's again — each returning with
 a new purpose. Structured as a sequence of failures and their fixes.
 
+--
+
+## Where We Left Off
+
+Lecture 04 fixed the form — a line, a log-odds line — and chose the features by
+hand. Today relaxes both: stack simple units until the form is flexible, and let
+the network build its own features.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Lecture 04
+a fixed form, hand-made features
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Today
+a learned form, learned features
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card caution">
+
+### The price
+capacity that also fits noise
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+The perceptron is Lecture 04's linear classifier, the delta rule is LMS, and the
+sigmoid is logistic regression's — each returns with a new job.
+
+</div>
+
+
+Notes:
+The lecture is a chain of failures and fixes. Keep the map on screen long
+enough to say "every box answers the box before it".
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 05: the perceptron, XOR, differentiable units, backpropagation, regularisation and learned features as a chain of failures and fixes](/courses/data-science/figures/l05-argument-map.svg)
+
+</div>
+
+
+Notes:
+Read it as failures and fixes: one hyperplane cannot do XOR, so add a hidden
+layer; a step function cannot be trained, so use a sigmoid; which weight is to
+blame is answered by backpropagation; capacity that fits noise is controlled by
+regularisation and dropout. The last module turns the network on its own
+input: an autoencoder learns features only because it is forced to compress.
+The strip: the assumption no longer sits in a fixed form, but in the
+architecture and the objective.
+
 ---
 
 <!-- .slide: class="module-slide" -->
@@ -23,8 +110,8 @@ a new purpose. Structured as a sequence of failures and their fixes.
 # Module 1
 ## Where the Metaphor Comes From
 
-> **Guiding Question:** A neuron switches a million times slower than a
-> transistor. Why is the brain the metaphor for artificial intelligence at all?
+> **Guiding Question:** The perceptron dates from 1958. What does the brain
+> metaphor buy — and why did the idea start to work only around 2012?
 
 --
 
@@ -36,8 +123,8 @@ a new purpose. Structured as a sequence of failures and their fixes.
 
 <div class="card">
 
-### $10^{11}$
-neurons in the human brain (counted)
+### ≈ 86 billion
+neurons in the human brain (estimated, not counted)
 
 </div>
 
@@ -52,8 +139,8 @@ synapses (estimated)
 
 <div class="card">
 
-### 100k–200k
-other neurons a single neuron's dendrites connect to
+### $10^3$–$10^4$
+synapses on a typical neuron — about $10^{14}$ / $10^{11}$
 
 </div>
 
@@ -73,6 +160,11 @@ A neuron receives signals through its dendrites, integrates them, and fires
 along its axon when the combined input passes a threshold.
 
 Notes:
+The neuron count is an estimate (Azevedo et al. 2009, ≈ 86 × 10⁹), not a
+census. Per-neuron connectivity follows from the two big numbers: 10¹⁴ synapses
+over ~10¹¹ neurons is ~10³; cortical neurons typically carry 10³–10⁴, and only
+special cells (cerebellar Purkinje cells, ~10⁵) reach far higher.
+
 The switching time is the number to dwell on: a neuron is a million times
 slower than a transistor, yet the brain recognises a face in ~0.1 s — about a
 hundred sequential steps. Whatever it does, it does in parallel and shallowly.
@@ -88,8 +180,8 @@ hundred sequential steps. Whatever it does, it does in parallel and shallowly.
 <div class="card good">
 
 ### Worth borrowing
-Many simple units, massively connected behaviour that emerges from weights
-rather than from rules learning by adjusting connection strengths.
+Many simple units, massively connected; behaviour that emerges from weights
+rather than from rules; learning by adjusting connection strengths.
 
 </div>
 
@@ -122,7 +214,27 @@ difference between an architecture inspired by something and a model of it.
 
 --
 
-## The Idea Is Old The Success Is Recent
+## Takeaway
+
+
+<div class="takeaway">
+
+The brain is the metaphor not for its speed — each neuron is a million times
+slower than a transistor — but for its **architecture**: many simple units,
+massively parallel, whose behaviour is learned by adjusting connection
+strengths. That is what artificial networks borrow, and all they borrow.
+
+</div>
+
+
+Notes:
+This answers the module's opening question directly. The next unit asks the
+follow-up: if the architecture is that old, why did it only start to work
+recently?
+
+--
+
+## The Idea Is Old; The Success Is Recent
 
 The perceptron dates from 1958, backpropagation from the 1980s. The methods in
 this lecture are decades old. **What changed in 2012?**
@@ -134,7 +246,7 @@ this lecture are decades old. **What changed in 2012?**
 <div class="card">
 
 ### More data
-Large labelled datasets that did not previously exist.
+Large labelled datasets that did not previously exist (ImageNet, 2009).
 
 </div>
 
@@ -150,11 +262,19 @@ GPUs able to run many passes over those datasets.
 <div class="card">
 
 ### Better practice
-Activation functions (ReLU), initialisation (Glorot), architectures (ResNet),
-regularisation (dropout, batch norm), optimisers (RMSProp, ADAM).
+Fixes available by 2012: ReLU activations, Glorot initialisation, dropout.
 
 </div>
 
+
+</div>
+
+
+
+<div class="c-note">
+
+**Followed** the breakthrough rather than enabling it: ADAM (2014), batch
+normalisation and residual networks (both 2015).
 
 </div>
 
@@ -163,7 +283,9 @@ Notes:
 The guiding question of the module. Emphasise that no single item is a
 breakthrough in theory — the third column is a list of engineering fixes to
 problems that had made deep networks untrainable, which the rest of the lecture
-will meet one by one.
+will meet one by one. Keep the chronology honest: AlexNet (2012) used ReLU,
+dropout, GPUs and ImageNet; ADAM, batch norm and ResNet came afterwards and are
+consequences of the success, not causes of it.
 
 --
 
@@ -183,47 +305,18 @@ not work" was both true and misleading.
 
 ## Mini-Exercise
 
-A colleague says: "Deep learning was invented in 2012."
-
-1. What is wrong with that claim?
-2. Which of the three columns above was the *binding* constraint before 2012?
-3. What would have to change for the next such jump?
-
---
-
-## Mini-Exercise — Solution
+A colleague says: "Deep learning was invented in 2012." What is wrong with the
+claim, and what did 2012 bring instead?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** The methods are decades old — perceptron 1958, backpropagation in the
-1980s. What arrived in 2012 was the ability to *train them at scale*.
-
-</div>
-
-
-<div class="card">
-
-**2.** Arguably all three, but data and compute were binding: the algorithmic
-fixes were largely developed once large models became runnable enough to
-diagnose.
-
-</div>
-
-
-<div class="card">
-
-**3.** Any of them again — a new data regime, cheaper compute, or a fix for a
-failure mode we currently work around rather than solve.
-
-</div>
-
+The methods are decades old — perceptron 1958, backpropagation in the 1980s.
+2012 brought the ability to **train them at scale**: data, GPUs and a few
+practical fixes came together.
 
 </div>
 
@@ -267,7 +360,7 @@ catalogue.
 A perceptron computes a weighted sum of its inputs and applies a **threshold**:
 
 $$
-h_{\mathbf{w}}(\mathbf{x}) = \mathrm{sign}\Big(w_0 + \sum_{j=1}^{p} w_j x_j\Big)
+h\_{\mathbf{w}}(\mathbf{x}) = \mathrm{sign}\Big(w\_0 + \sum\_{j=1}^{p} w\_j x\_j\Big)
 = \mathrm{sign}(\mathbf{w}^{\top}\mathbf{x})
 $$
 
@@ -278,7 +371,7 @@ $$
 <div class="card">
 
 ### Inputs
-$x_1, \ldots, x_p$, plus a constant $x_0 = 1$ carrying the bias $w_0$
+$x\_1, \ldots, x\_p$, plus a constant $x\_0 = 1$ carrying the bias $w\_0$
 
 </div>
 
@@ -286,7 +379,7 @@ $x_1, \ldots, x_p$, plus a constant $x_0 = 1$ carrying the bias $w_0$
 <div class="card">
 
 ### Weights
-$w_0, w_1, \ldots, w_p$ — **the hypothesis is exactly this vector**
+$w\_0, w\_1, \ldots, w\_p$ — **the hypothesis is exactly this vector**
 
 </div>
 
@@ -328,10 +421,10 @@ sentence — it turns an affine boundary into a linear one in p+1 dimensions.
 For each training example $(\mathbf{x}, y)$ with $y \in \lbrace -1, +1 \rbrace$:
 
 $$
-\Delta w_j = \eta \big(y - h_{\mathbf{w}}(\mathbf{x})\big) x_j
+\Delta w\_j = \eta \big(y - h\_{\mathbf{w}}(\mathbf{x})\big) x\_j
 $$
 
-Weights change **only when the example is misclassified** correctly classified
+Weights change **only when the example is misclassified**; correctly classified
 examples leave the hypothesis untouched.
 
 </div>
@@ -400,48 +493,21 @@ by asking for the maximum-margin one.
 
 ## Mini-Exercise
 
-A perceptron with $w_0 = -1.5$, $w_1 = 1$, $w_2 = 1$ receives binary inputs.
-
-1. What does it output for $(0,0)$, $(0,1)$, $(1,0)$, $(1,1)$?
-2. Which logical function is this?
-3. Which weights would give you OR instead?
-
---
-
-## Mini-Exercise — Solution
+A perceptron with $w\_0 = -1.5$ and $w\_1 = w\_2 = 1$ receives binary inputs.
+Which logical function does it compute — and which $w\_0$ turns it into OR?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Sums: $-1.5$, $-0.5$, $-0.5$, $+0.5$ → $-1, -1, -1, +1$
-
-</div>
-
-
-<div class="card">
-
-**2.** **AND** — it fires only when both inputs are 1.
+Sums $-1.5, -0.5, -0.5, +0.5$ for $(0,0), (0,1), (1,0), (1,1)$: only $(1,1)$
+fires, so it is **AND**. With $w\_0 = -0.5$ any single 1 clears the threshold:
+**OR**. The bias *is* the threshold, with its sign flipped.
 
 </div>
 
-
-<div class="card">
-
-**3.** $w_0 = -0.5$ with $w_1 = w_2 = 1$: any single 1 now clears the threshold.
-
-</div>
-
-
-</div>
-
-
-The bias $w_0$ *is* the threshold, with its sign flipped.
 
 </div>
 
@@ -484,7 +550,8 @@ the initial weights and the order of the examples.
 <div class="card">
 
 ### How long?
-"Finite" can be very large; the bound depends on the margin between the classes.
+"Finite" can be very large. The bound grows as the **margin** shrinks — the
+distance from the separating hyperplane to the nearest training point.
 
 </div>
 
@@ -501,18 +568,21 @@ The procedure oscillates forever. Real data usually is not separable.
 </div>
 
 
-<div class="c-warning">
+<div class="takeaway">
 
-Zero training error is not the objective — generalisation is. A hyperplane that
-grazes the training points may sit in the worst possible place for new ones.
+The theorem guarantees *a* separator on separable data — not which one, not how
+fast, not what happens otherwise. Zero training error is not the objective:
+a hyperplane with a tiny margin grazes the training points and may sit in the
+worst place for new ones.
 
 </div>
 
 
 Notes:
 Connect back to L04: this is the training-error trap in a new guise. The margin
-idea introduced here (distance to the nearest point) is the seed of SVMs and of
-why "any separator" is not good enough.
+defined here (distance to the nearest point) is the seed of SVMs and of why
+"any separator" is not good enough. For the curious: Novikoff's bound is at most
+(R/γ)² updates, with γ the margin and R the radius of the data.
 
 ---
 
@@ -531,14 +601,14 @@ why "any separator" is not good enough.
 You built AND and OR with a single perceptron. **Now build XOR:**
 output 1 when exactly one input is 1.
 
-| $x_1$ | $x_2$ | XOR |
+| $x\_1$ | $x\_2$ | XOR |
 |---|---|---|
 | 0 | 0 | 0 |
 | 0 | 1 | **1** |
 | 1 | 0 | **1** |
 | 1 | 1 | 0 |
 
-Try to find weights $w_0, w_1, w_2$. Take a minute.
+Try to find weights $w\_0, w\_1, w\_2$. Take a minute.
 
 Notes:
 Let them actually try (P1/P2). The failure is the lesson, and it lands only if
@@ -614,7 +684,7 @@ imply. Ask what the analogous over-reading might be today.
 ## The Fix: A Hidden Layer
 
 XOR **is** expressible with two layers — for instance as
-$(x_1 \lor x_2) \land \lnot(x_1 \land x_2)$: two perceptrons computing OR and
+$(x\_1 \lor x\_2) \land \lnot(x\_1 \land x\_2)$: two perceptrons computing OR and
 NAND, and a third computing AND of their outputs.
 
 
@@ -715,42 +785,19 @@ activation functions" — it was this failure being removed.
 
 ## Mini-Exercise
 
-1. Compute $\sigma(0)$, and $\sigma'(0)$ using the identity above.
-2. A neuron's weighted input is $z = 12$. What is $\sigma'(z)$ roughly, and
- what does that mean for its weight update?
-3. XOR needed a hidden layer. Why did it *also* need this change of activation?
-
---
-
-## Mini-Exercise — Solution
+$\sigma(0) = 0.5$ and $\sigma(12) \approx 0.99999$. Using
+$\sigma' = \sigma(1 - \sigma)$: how large is the gradient at $z = 0$, and at
+$z = 12$?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** $\sigma(0) = 0.5$, so $\sigma'(0) = 0.5 \times 0.5 = 0.25$ — the
-steepest the sigmoid ever gets.
-
-</div>
-
-
-<div class="card">
-
-**2.** $\sigma(12) \approx 0.999994$, so $\sigma' \approx 6 \times 10^{-6}$:
-the update is effectively zero. The neuron is **saturated** and stops learning.
-
-</div>
-
-
-<div class="card">
-
-**3.** The extra layer makes XOR *expressible* a differentiable activation
-makes the stack *trainable*. Expressiveness without a gradient is useless.
+$\sigma'(0) = 0.5 \times 0.5 = 0.25$, the steepest the sigmoid ever gets.
+$\sigma'(12) \approx 0.00001$: the update is effectively zero. The neuron is
+**saturated** and stops learning.
 
 </div>
 
@@ -758,21 +805,24 @@ makes the stack *trainable*. Expressiveness without a gradient is useless.
 </div>
 
 
-</div>
+--
 
+## Takeaway
 
 
 <div class="takeaway">
 
-The sigmoid buys differentiability — the precondition for training depth — at
-the price of saturating tails where learning stalls.
+The extra layer makes XOR *expressible*; the sigmoid makes the stack
+*trainable* — differentiability is the precondition for training depth. The
+price is saturating tails where learning stalls.
 
 </div>
 
 
 Notes:
-Part 3 is the module's whole argument in one answer, and it is worth writing on
-the board: expressible ≠ trainable.
+The takeaway is the module's whole argument in one line, and it is worth
+writing on the board: expressible ≠ trainable. (Exact: σ(12) = 0.999994,
+σ′(12) ≈ 6 × 10⁻⁶.)
 
 ---
 
@@ -795,8 +845,8 @@ the board: expressible ≠ trainable.
 <div class="card">
 
 ### Layer
-$L_i = \lbrace n_{1,i}, \ldots, n_{k,i} \rbrace$ — a set of neurons.
-$L_0$ is the input layer.
+$L\_i = \lbrace n\_{1,i}, \ldots, n\_{k,i} \rbrace$ — a set of neurons.
+$L\_0$ is the input layer.
 
 </div>
 
@@ -804,7 +854,7 @@ $L_0$ is the input layer.
 <div class="card">
 
 ### Fully connected
-Every neuron in $L_{i-1}$ feeds every neuron in $L_i$.
+Every neuron in $L\_{i-1}$ feeds every neuron in $L\_i$.
 
 </div>
 
@@ -812,8 +862,8 @@ Every neuron in $L_{i-1}$ feeds every neuron in $L_i$.
 <div class="card">
 
 ### Parameters
-$\mathbf{W}_i \in \mathbb{R}^{|L_i| \times |L_{i-1}|}$ — one row of weights per
-neuron.
+$\mathbf{W}\_i \in \mathbb{R}^{|L\_i| \times |L\_{i-1}|}$ — one row of weights per
+neuron — and a bias vector $\mathbf{b}\_i$, one bias per neuron.
 
 </div>
 
@@ -825,8 +875,8 @@ The forward pass is then a chain of matrix products with a non-linearity
 between them:
 
 $$
-\mathbf{a}_i = \sigma\big(\mathbf{W}_i \mathbf{a}_{i-1}\big),
-\qquad \mathbf{a}_0 = \mathbf{x}
+\mathbf{a}\_i = \sigma\big(\mathbf{W}\_i \mathbf{a}\_{i-1} + \mathbf{b}\_i\big),
+\qquad \mathbf{a}\_0 = \mathbf{x}
 $$
 
 Notes:
@@ -842,8 +892,9 @@ collapses.
 <div class="c-important">
 
 Without $\sigma$, a stack of layers is
-$\mathbf{W}_3\mathbf{W}_2\mathbf{W}_1\mathbf{x}$ — a **single matrix**, hence a
-single linear model. Depth without non-linearity buys nothing at all.
+$\mathbf{W}\_3\mathbf{W}\_2\mathbf{W}\_1\mathbf{x}$ (plus biases) — a **single
+matrix**, hence a single linear model. Depth without non-linearity buys nothing
+at all.
 
 </div>
 
@@ -866,28 +917,32 @@ function is a modelling decision, not a detail.
 
 ## Mini-Exercise
 
-A network has 4 inputs, one hidden layer of 5 neurons, and 3 outputs, fully
-connected, with a bias per neuron.
-
-How many parameters does it have?
-
---
-
-## Mini-Exercise — Solution
+A network has 4 inputs, one hidden layer of 5 neurons and 3 outputs, fully
+connected, with a bias per neuron. How many parameters does it have?
 
 
 <div class="fragment">
 
 $$
-\underbrace{(4 \times 5) + 5}_{\text{hidden layer}} +
-\underbrace{(5 \times 3) + 3}_{\text{output layer}} = 25 + 18 = 43
+\underbrace{(4 \times 5) + 5}\_{\text{hidden layer}} +
+\underbrace{(5 \times 3) + 3}\_{\text{output layer}} = 25 + 18 = 43
 $$
 
-Small networks have many parameters; the counts grow as the **product** of
-adjacent layer sizes, which is why parameter counts explode with width.
+
+<div class="c-insight">
+
+Counts grow with the **product** of adjacent layer sizes, which is why
+parameter counts explode with width.
 
 </div>
 
+
+</div>
+
+
+--
+
+## Takeaway
 
 
 <div class="takeaway">
@@ -910,7 +965,7 @@ fast, so the regularisation unit later is not optional bookkeeping.
 For weights $\mathbf{w}$ and training set $D$, the squared error
 
 $$
-E(\mathbf{w}) = \frac{1}{2}\sum_{(\mathbf{x},y) \in D}\big(y - h_{\mathbf{w}}(\mathbf{x})\big)^2
+E(\mathbf{w}) = \frac{1}{2}\sum\_{(\mathbf{x},y) \in D}\big(y - h\_{\mathbf{w}}(\mathbf{x})\big)^2
 $$
 
 is a **surface over the weight space**. Training means walking downhill on it.
@@ -958,7 +1013,7 @@ Noisier, far cheaper per step, and the noise can help escape poor regions.
 
 <div class="c-note">
 
-The **delta rule**, $\Delta w_j = \eta (y - \mathbf{w}^{\top}\mathbf{x}) x_j$,
+The **delta rule**, $\Delta w\_j = \eta (y - \mathbf{w}^{\top}\mathbf{x}) x\_j$,
 is incremental gradient descent on the squared error — the LMS rule from
 Lecture 04 under a new name.
 
@@ -967,53 +1022,26 @@ Lecture 04 under a new name.
 
 Notes:
 Three names for one thing (LMS, delta rule, incremental gradient descent) is a
-genuine source of confusion in the literature naming them together once saves
+genuine source of confusion in the literature; naming them together once saves
 students later grief. Modern practice sits between the two: mini-batches.
 
 --
 
 ## Mini-Exercise
 
-You are training on 1,000,000 examples and each pass over the data takes an
-hour.
-
-1. How many weight updates does **batch** gradient descent make per hour?
-2. How many does **incremental** make?
-3. Which would you start with, and what is the risk?
-
---
-
-## Mini-Exercise — Solution
+You train on 1,000,000 examples, and one pass over them takes an hour. How many
+weight updates per hour does **batch** gradient descent make — and how many
+does **incremental**?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** One.
-
-</div>
-
-
-<div class="card">
-
-**2.** One million — each on a noisy estimate of the true gradient.
-
-</div>
-
-
-<div class="card">
-
-**3.** Incremental (or mini-batch): progress per unit of computation is vastly
-higher. The risk is instability — the noisy steps can diverge if $\eta$ is too
-large.
-
-</div>
-
+Batch: **one**. Incremental: **one million**, each on a noisy estimate of the
+gradient. Progress per unit of computation is vastly higher — at the risk of
+instability if $\eta$ is too large.
 
 </div>
 
@@ -1023,7 +1051,7 @@ large.
 
 Notes:
 The arithmetic makes the case for stochastic methods far better than an
-assertion does. Part 3 links back to the learning-rate comparison in L04.
+assertion does. The risk links back to the learning-rate comparison in L04.
 
 --
 
@@ -1062,7 +1090,8 @@ field for a decade — the XOR fix was known, the training method was not.
 <div class="card">
 
 ### Output layer
-The error is computed directly against the target $y(\mathbf{x})$.
+The error is measured against the target, times the slope of the activation:
+$\delta\_o = (y - o) \sigma'(z\_o)$.
 
 </div>
 
@@ -1071,7 +1100,7 @@ The error is computed directly against the target $y(\mathbf{x})$.
 
 ### Hidden layers
 The error of a neuron is the **weighted sum of the errors of the neurons it
-feeds** — each scaled by the weight through which it contributed.
+feeds**, times its own slope: $\delta\_h = \sigma'(z\_h) \sum\_k w\_{hk} \delta\_k$.
 
 </div>
 
@@ -1107,8 +1136,8 @@ the derivation fades.
 &nbsp;&nbsp;**for each** $(\mathbf{x}, y) \in D$:
 &nbsp;&nbsp;&nbsp;&nbsp;**forward:** compute activations layer by layer up to the output
 &nbsp;&nbsp;&nbsp;&nbsp;**backward:** compute the output error, then propagate it to each earlier layer
-&nbsp;&nbsp;&nbsp;&nbsp;**update:** $w \leftarrow w - \eta \cdot (\text{error at the target neuron}) \cdot (\text{activation at the source neuron})$
-**until** convergence **or** $t > t_{\max}$
+&nbsp;&nbsp;&nbsp;&nbsp;**update:** $w \leftarrow w + \eta \cdot \delta\_{\text{target}} \cdot a\_{\text{source}}$
+**until** convergence **or** $t > t\_{\max}$
 
 </div>
 
@@ -1116,63 +1145,36 @@ the derivation fades.
 
 <div class="c-note">
 
-Both passes cost about the same as one forward pass. Training is therefore
-roughly three times the cost of inference — the fact behind every training-cost
+The backward pass costs about **twice** the forward pass, so one training step
+costs about **three** times inference — the fact behind every training-cost
 estimate you read.
 
 </div>
 
 
 Notes:
-The update rule has the same shape as LMS and the delta rule: error × input.
-Point that out — it is the third appearance of one pattern, and recognising it
-is worth more than the derivation.
+The update rule has the same shape as LMS and the delta rule: error × input,
+with a plus sign because δ is defined from y − o (δ = −∂E/∂z). Point that out —
+it is the third appearance of one pattern, and recognising it is worth more
+than the derivation.
 
 --
 
 ## Mini-Exercise
 
-A hidden neuron feeds two output neurons through weights $0.8$ and $-0.2$.
-On one example the output errors are $\delta_1 = 0.5$ and $\delta_2 = 1.0$.
-
-1. Which output does the hidden neuron get more blame from?
-2. Compute its propagated error (before the activation derivative).
-3. What happens to the update if this neuron's activation was near 0?
-
---
-
-## Mini-Exercise — Solution
+A hidden neuron feeds two outputs through weights $0.8$ and $-0.2$; their
+errors are $\delta\_1 = 0.5$ and $\delta\_2 = 1.0$. What is its propagated error,
+before the $\sigma'$ factor?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Output 1: the weight is four times larger in magnitude, so more of its
-error routes back here.
-
-</div>
-
-
-<div class="card">
-
-**2.** $0.8 \times 0.5 + (-0.2) \times 1.0 = 0.2$ — the negative weight
-partly cancels.
-
-</div>
-
-
-<div class="card">
-
-**3.** The update is proportional to the source activation, so a near-zero
-activation produces a near-zero update: that weight barely learns.
-
-</div>
-
+$0.8 \times 0.5 + (-0.2) \times 1.0 = 0.4 - 0.2 = 0.2$. Blame is weighted by
+**weight × error**: output 1 contributes more, and the negative weight partly
+cancels it.
 
 </div>
 
@@ -1181,9 +1183,10 @@ activation produces a near-zero update: that weight barely learns.
 
 
 Notes:
-Part 3 is the seed of the vanishing-gradient discussion and of why
-initialisation matters. Part 2's cancellation surprises students who expect
-blame to accumulate monotonically.
+The cancellation surprises students who expect blame to accumulate
+monotonically. Follow-up if time allows: multiply by σ′(z_h) ≤ 0.25, and note
+that the weight update also scales with the source activation — a near-zero
+activation barely learns, the seed of the vanishing-gradient discussion.
 
 --
 
@@ -1193,7 +1196,8 @@ blame to accumulate monotonically.
 <div class="takeaway">
 
 Backpropagation solves **credit assignment**: error flows backwards, weighted by
-the connections that carried the signal forward. It is the chain rule, applied
+the connections that carried the signal forward and scaled by each neuron's
+slope $\sigma'$. It is the chain rule, applied
 once per layer — no more and no less.
 
 </div>
@@ -1220,8 +1224,9 @@ once per layer — no more and no less.
 <div class="card bad">
 
 ### Local minima
-A point that is lowest in its neighbourhood but not globally:
-$E(\mathbf{w}_{\text{opt}}) \leq E(\mathbf{w}_{\text{local}})$.
+A point lowest in its neighbourhood, $E(\mathbf{w}\_{\text{local}}) \leq E(\mathbf{w})$
+for all $\mathbf{w}$ near it — yet not globally:
+$E(\mathbf{w}\_{\text{opt}}) < E(\mathbf{w}\_{\text{local}})$.
 
 In practice, large networks appear to have **many** local minima, most of them
 close in value to the best one — so this matters less than intuition suggests.
@@ -1252,7 +1257,7 @@ intuition changed.
 ## Momentum
 
 $$
-\Delta \mathbf{w}_t = -\eta \nabla E(\mathbf{w}_t) + \alpha \Delta \mathbf{w}_{t-1}
+\Delta \mathbf{w}\_t = -\eta \nabla E(\mathbf{w}\_t) + \alpha \Delta \mathbf{w}\_{t-1}
 $$
 
 Each step keeps a fraction $\alpha$ of the previous one: consistent directions
@@ -1283,10 +1288,10 @@ not (a genuinely bad minimum).
 <div class="card">
 
 ### AdaGrad
-One learning rate **per parameter**, scaled by the accumulated sum of squared
-gradients.
+One learning rate **per parameter**: $\eta$ divided by the square root of that
+parameter's accumulated squared gradients.
 
-Parameters with large gradients slow down quickly rarely-updated parameters
+Parameters with large gradients slow down quickly; rarely-updated parameters
 keep a large step size.
 
 </div>
@@ -1295,7 +1300,7 @@ keep a large step size.
 <div class="card">
 
 ### And its successors
-RMSProp replaces the ever-growing sum with a moving average **ADAM** combines
+RMSProp replaces the ever-growing sum with a moving average; **ADAM** combines
 that with momentum, and is the common default today.
 
 </div>
@@ -1333,7 +1338,7 @@ Notes:
 Stepped viz (P6): each click raises model capacity. Ask for a prediction before
 each step — training error falls monotonically (0.55 → 0.02), but test error
 bottoms out at degree 5 and then climbs. The gap between the two curves *is*
-overfitting, made visible. Polynomials stand in for network capacity the
+overfitting, made visible. Polynomials stand in for network capacity; the
 phenomenon is identical.
 
 --
@@ -1345,7 +1350,7 @@ phenomenon is identical.
 
 Add a penalty on the weights to the loss:
 $$
-E_{\text{reg}}(\mathbf{w}) = E(\mathbf{w}) + \lambda \lVert \mathbf{w} \rVert
+E\_{\text{reg}}(\mathbf{w}) = E(\mathbf{w}) + \lambda \Omega(\mathbf{w})
 $$
 where $\lambda$ controls how much the penalty counts.
 
@@ -1358,38 +1363,31 @@ where $\lambda$ controls how much the penalty counts.
 
 <div class="card">
 
-### $L_2$ — $\lVert \mathbf{w} \rVert_2$
-Penalises **peaky** weight vectors and prefers diffuse ones: every input to a
-neuron gets used a little. The default choice.
+### $L\_2$ — $\Omega = \lVert \mathbf{w} \rVert\_2^2 = \sum\_j w\_j^2$
+Penalises **peaky** weight vectors and prefers diffuse ones: every input gets
+used a little. The default choice.
 
 </div>
 
 
 <div class="card">
 
-### $L_1$ — $\lVert \mathbf{w} \rVert_1$
-Produces **sparse** weights (many exact zeros): a neuron uses only its most
-important inputs, so it acts as a feature selector.
+### $L\_1$ — $\Omega = \lVert \mathbf{w} \rVert\_1 = \sum\_j \lvert w\_j \rvert$
+Produces **sparse** weights (many exact zeros): a neuron keeps only its most
+important inputs — a feature selector.
 
 </div>
 
-
-
-</div>
-
-
-<div class="c-insight">
-
-A regulariser is a way of writing **background knowledge** into the objective —
-"prefer simple explanations", or "expect most inputs to be irrelevant". It is
-the inductive bias from Lecture 04, made explicit and tunable.
 
 </div>
 
 
 Notes:
-The insight box is the conceptual payoff and links three lectures: bias is not
-an accident to be minimised, it is a choice to be stated. λ is the dial between
+The conceptual payoff (stated in the takeaway) links three lectures: a
+regulariser writes background knowledge into the objective — "prefer simple
+explanations", "expect most inputs to be irrelevant". It is the inductive bias
+from Lecture 04, made explicit and tunable. Bias is not an accident to be
+minimised, it is a choice to be stated. λ is the dial between
 fitting the data and honouring the assumption.
 
 --
@@ -1439,46 +1437,19 @@ co-adaptation being broken deliberately.
 
 ## Mini-Exercise
 
-Your network reaches 99% training accuracy and 71% validation accuracy.
-
-1. What is the diagnosis?
-2. Name three different interventions.
-3. Which one would you try first, and why?
-
---
-
-## Mini-Exercise — Solution
+Your network reaches 99% training accuracy and 71% validation accuracy. What is
+the diagnosis, and which intervention would you try first?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Overfitting — a 28-point gap between training and validation.
-
-</div>
-
-
-<div class="card">
-
-**2.** More data stronger regularisation ($\lambda$, dropout) a smaller
-network early stopping.
-
-</div>
-
-
-<div class="card">
-
-**3.** More data if it is obtainable — it reduces variance without adding
-assumptions. Otherwise regularisation, because it is the cheapest to try and
-its effect is directly measurable.
-
-</div>
-
+**Overfitting** — a 28-point gap. More data if obtainable: it reduces variance
+without adding assumptions. Otherwise stronger regularisation ($\lambda$,
+dropout), a smaller network or early stopping — cheap to try, and the gap
+shows whether it worked.
 
 </div>
 
@@ -1487,8 +1458,8 @@ its effect is directly measurable.
 
 
 Notes:
-Part 3 rewards reasoning about cost and assumptions rather than reciting a
-list. Note that "smaller network" is the honest option students under-use.
+Reward reasoning about cost and assumptions rather than reciting a list. Note
+that "smaller network" is the honest option students under-use.
 
 --
 
@@ -1498,8 +1469,9 @@ list. Note that "smaller network" is the honest option students under-use.
 <div class="takeaway">
 
 Capacity that can fit the signal can also fit the noise. **Regularisation
-encodes what you believe about the unseen data** — and the gap between training
-and validation error is how you find out whether you believed correctly.
+is inductive bias made explicit**: it encodes what you believe about the unseen
+data — and the gap between training and validation error is how you find out
+whether you believed correctly.
 
 </div>
 
@@ -1570,8 +1542,8 @@ worth emphasising — it is the mechanism behind pretraining, and behind
 <div class="card">
 
 ### The bottleneck does the work
-A narrow hidden layer can be read as a **noisy compression** of the input: the
-network must discard whatever it can afford to lose.
+A narrow hidden layer is a **lossy compression** of the input: the network
+must discard whatever it can afford to lose.
 
 </div>
 
@@ -1587,6 +1559,15 @@ function** and has represented nothing.
 
 </div>
 
+
+Notes:
+The "too wide and it cheats" failure is the interesting one: an objective that
+is trivially satisfiable teaches nothing. Ask what the analogous failure is for
+a language model trained to copy its input.
+
+--
+
+## Two Refinements
 
 
 <div class="grid-2">
@@ -1604,14 +1585,14 @@ identity function is no longer a solution.
 <div class="card">
 
 ### Weight sharing
-Tie the decoder to the encoder, $\mathbf{W}_{1,2} = \mathbf{W}_{0,1}^{\top}$,
-halving the parameters.
+Tie the decoder to the encoder, $\mathbf{W}\_{1,2} = \mathbf{W}\_{0,1}^{\top}$,
+halving the weights to learn.
 
 </div>
 
 
-
 </div>
+
 
 
 <div class="c-note">
@@ -1622,52 +1603,69 @@ loss — the same substitution as in logistic regression.
 </div>
 
 
+--
+
+## How Would We Know It Worked?
+
+A low training reconstruction error proves little — the identity function has
+none. Two checks do:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Held-out reconstruction
+Reconstruction error on data the network never saw: the code must generalise,
+not memorise.
+
+</div>
+
+
+<div class="card">
+
+### Downstream use
+Train a simple model on the code, with few labels. If it beats the same model
+on the raw inputs, the representation has captured structure.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+A learned representation is judged like any model: on unseen data, and by what
+it lets us do — not by how well it fits its own training set.
+
+</div>
+
+
 Notes:
-The "too wide and it cheats" failure is the interesting one: an objective that
-is trivially satisfiable teaches nothing. Ask what the analogous failure is for
-a language model trained to copy its input.
+This answers the second half of the module's guiding question. The downstream
+test is how pretrained representations are evaluated in practice ("linear
+probing"). A quick visual check is also useful: nearest neighbours in code space
+should look similar to a human.
 
 --
 
 ## Mini-Exercise
 
-You train an autoencoder with a 784-dimensional input and a 784-neuron hidden
-layer. Reconstruction error goes to almost zero.
-
-1. Is this a good result?
-2. What has the network probably learned?
-3. Give two ways to fix the setup.
-
---
-
-## Mini-Exercise — Solution
+An autoencoder with 784 inputs and a 784-neuron hidden layer reaches almost zero
+reconstruction error. Is this a good result?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** No — near-zero error here is a warning sign, not a success.
-
-</div>
-
-
-<div class="card">
-
-**2.** The identity function: copy the input across. No compression, no
-representation.
-
-</div>
-
-
-<div class="card">
-
-**3.** Narrow the bottleneck or keep the width and corrupt the input
-(denoising), so copying no longer solves the task.
+No — a warning sign. With no bottleneck it has probably learned the **identity**:
+copy the input across, represent nothing. Narrow the bottleneck, or corrupt the
+input (denoising), so copying no longer solves the task.
 
 </div>
 
@@ -1675,22 +1673,24 @@ representation.
 </div>
 
 
-</div>
+--
 
+## Takeaway
 
 
 <div class="takeaway">
 
-An autoencoder learns a representation by being **forced to lose information**.
-Remove the constraint and it learns nothing — a reminder that the objective,
-not the architecture, decides what a model learns.
+An autoencoder learns a representation by being **forced to lose information**,
+and is judged on unseen data and downstream use. Remove the constraint and it
+learns nothing — the objective, not the architecture, decides what a model
+learns.
 
 </div>
 
 
 Notes:
 Close the lecture on the through-line: L04 chose the representation by hand
-(the function α) here the network learns it, and the quality of what it learns
+(the function α); here the network learns it, and the quality of what it learns
 is determined entirely by the pressure the objective puts on it.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
@@ -1855,10 +1855,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1869,17 +1875,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

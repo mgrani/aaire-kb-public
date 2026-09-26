@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -12,7 +12,98 @@ Prof. Dr. Michael Granitzer
 
 Notes:
 Converted from LNKB-tex part-en-ds-chp3-data.tex (two source units re-encoded
-from ISO-8859). Uses Lecture 02's quantiles and covariance throughout.
+from ISO-8859). Uses Lecture 02's quantiles and covariance throughout, and its
+random variables and joint distribution in the unit on data as random
+variables.
+
+--
+
+## Where We Left Off
+
+Three lectures fitted models to tables nobody questioned. Today steps back to
+KDD steps 1–2 from Lecture 01: what the columns are, whether they can be
+trusted, and what a plot shows that a summary hides.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Lecture 01
+data is never raw
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Lecture 02
+summaries can agree while the data differs (Anscombe)
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Today
+scale, quality, plots, preprocessing
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+From Lecture 08 on there is no label to check a model against — looking first
+stops being good practice and becomes the main check we have.
+
+</div>
+
+
+Notes:
+Name the order openly. Modelling came first because judging data needs the
+language (Lecture 02) and the models (Lectures 04–06); now the course runs the
+loop backwards, as the second roadmap slide of Lecture 01 showed. Attribute
+types were used informally in Lectures 04–06 (nominal attributes in naive Bayes
+and trees); today they get their names and their consequences.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 07: attribute scales, a table as a sample, data shape and quality, plots, and preprocessing as modelling](/courses/data-science/figures/l07-argument-map.svg)
+
+</div>
+
+
+Notes:
+The scale of measurement licenses a method: a mean of postcodes computes and
+means nothing. A table is a sample from a joint distribution, and "i.i.d." is a
+claim about how it was collected. Why values are missing decides how they may
+be filled. Plots show what summaries hide. Preprocessing is modelling: every
+aggregation, sample, scaling and reduction trades information for
+tractability. The takeaway is the lecture's arc chip.
 
 ---
 
@@ -121,7 +212,7 @@ ratios do not transfer.
 <div class="c-important">
 
 The attribute type determines which **statistics**, which **distance measures**
-and which **plots** are permissible. Every later chapter depends on it.
+and which **plots** are permissible. Every method in this course depends on it.
 
 </div>
 
@@ -130,58 +221,28 @@ and which **plots** are permissible. Every later chapter depends on it.
 
 ## Mini-Exercise
 
-Classify each attribute, and name one operation that would be invalid:
-
-1. Customer satisfaction on a five-point scale
-2. Year of birth
-3. Annual income
-4. Preferred payment method
-
---
-
-## Mini-Exercise — Solution
+A customer table records satisfaction (one to five stars) and year of birth.
+Which scale is each — and whose **mean** would you not report?
 
 
 <div class="fragment">
 
-
-<div class="grid-4">
-
-
-<div class="card">
-
-**1.** Ordinal. Averaging is questionable — the gaps between points are not
-known to be equal.
+Satisfaction is **ordinal**: its mean assumes equal gaps between the stars —
+report the median. Year of birth is **interval**: the mean year is fine, but
+ratios are not ("born twice as late" means nothing); differences such as age
+are fine.
 
 </div>
 
 
-<div class="card">
+Notes:
+Solution on the same slide, click-gated. The two columns come back when a table is
+read as a sample from a joint distribution; payment method (nominal: only
+counting) and income (ratio: a true zero) complete the set if there is time.
 
-**2.** Interval. "Twice the year" is meaningless differences (age) are fine.
+--
 
-</div>
-
-
-<div class="card">
-
-**3.** Ratio. All operations valid zero income is a real zero.
-
-</div>
-
-
-<div class="card">
-
-**4.** Nominal. Only counting and comparison for equality.
-
-</div>
-
-
-</div>
-
-
-</div>
-
+## Takeaway
 
 
 <div class="takeaway">
@@ -189,6 +250,148 @@ known to be equal.
 An attribute's **scale of measurement** licenses the operations you may perform
 on it. Choosing a statistic before checking the scale is the most common
 silent error in data analysis.
+
+</div>
+
+
+--
+
+## A Table Is a Sample From a Joint Distribution
+
+| customer | payment | satisfaction | born | income (k€) | returned? |
+|---|---|---|---|---|---|
+| 1 | card | 4 | 1987 | 52 | yes |
+| 2 | invoice | 2 | 1995 | 31 | no |
+| 3 | card | 5 | 1979 | 78 | no |
+| … | … | … | … | … | … |
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Each column is a random variable
+$X\_{\text{payment}}, X\_{\text{satisf.}}, \ldots$ — a function from customers to
+values, exactly as a random variable was defined.
+
+</div>
+
+
+<div class="card">
+
+### Each row is one draw
+The whole table is $n$ draws from one joint distribution
+$p(x\_1, \ldots, x\_d)$ that nobody has written down.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Satisfaction and year of birth are the columns of the attribute-type
+mini-exercise — deliberately. There they were classified by scale; here they
+become random variables. Say the
+sentence that makes the rest of the course possible: *a dataset is not the
+distribution, it is a sample from it.* Everything we compute from the table is
+therefore an estimate, and an estimate comes with an error.
+
+--
+
+## The Scale Suggests the Model
+
+| attribute | scale | a first model |
+|---|---|---|
+| returned? | nominal, two values | **Bernoulli**$(p)$ — one parameter |
+| payment | nominal, $k$ values | **categorical**$(p\_1, \ldots, p\_k)$, $\sum\_j p\_j = 1$ |
+| satisfaction | ordinal | categorical — the order is not used, or an ordinal model |
+| born | interval | normal, on a restricted range |
+| income | ratio, positive, skewed | log-normal, or normal on $\log$ income |
+
+
+<div class="c-warning">
+
+The scale limits the model as it limits the statistics: a normal distribution
+for ZIP codes is as meaningless as their mean.
+
+</div>
+
+
+Notes:
+Not a catalogue to memorise — a habit: before choosing a distribution, check what
+the scale permits. The categorical distribution is the Bernoulli with more than
+two values; it is the distribution naive Bayes uses for every nominal
+attribute. Satisfaction is the honest hard case: treating it as categorical
+throws the order away, treating it as numeric invents equal gaps.
+
+--
+
+## What "i.i.d." Claims
+
+The standard reading of a table rests on one assumption: the rows are
+**independent and identically distributed**.
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Independent
+One customer's row tells us nothing about another's.
+
+</div>
+
+
+<div class="card">
+
+### Identically distributed
+Every row comes from the **same** joint distribution.
+
+</div>
+
+
+</div>
+
+
+
+<div class="q">
+
+Which of these datasets break it: daily sales of one shop · two visits by the
+same customer · pixels of one image · a survey sent to a random sample?
+
+</div>
+
+
+
+<div class="fragment">
+
+Only the random survey is plausibly i.i.d. Time series, repeated measurements
+and spatial data all violate it — the arrangement *is* information.
+
+</div>
+
+
+Notes:
+The i.i.d. assumption is what turns "the table" into "a sample", and it is what
+lets a likelihood factorise into a product over rows — the step every fitting
+method takes. Link back to
+the shapes of data: record data is the case where i.i.d. is at least plausible;
+graphs, grids and time series are the cases where it is not.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A dataset is **$n$ draws from an unknown joint distribution**: columns are random
+variables, rows are draws, and the scale of each column suggests its model.
+Reading a table this way rests on an assumption — **i.i.d.** — that should be
+checked, not presumed.
 
 </div>
 
@@ -204,7 +407,7 @@ silent error in data analysis.
 <div class="card">
 
 ### Record data
-Objects × attributes — the familiar table. Rows are independent of each other.
+Objects × attributes — the familiar table. Rows are *treated as* independent.
 
 </div>
 
@@ -240,8 +443,10 @@ Position **and** time: monthly land temperatures, traffic movement, trajectories
 
 <div class="c-note">
 
-The shape decides which methods even apply. A table can be shuffled without
-loss a grid or a time series cannot — the arrangement *is* information.
+The shape decides which methods even apply. A table whose rows are treated as
+independent can be shuffled without loss; a grid or a time series cannot — the
+arrangement *is* information. Independence of rows is an assumption, not a
+property of the file.
 
 </div>
 
@@ -302,57 +507,24 @@ what is normal. Deleting outliers deletes evidence against that model.
 
 ## Mini-Exercise
 
-A sensor dataset has 8% missing temperature readings.
-
-1. Give two mechanisms that could produce them.
-2. For each, is deleting those rows acceptable?
-3. What would you need to know to decide?
-
---
-
-## Mini-Exercise — Solution
+A weather sensor misses 8% of its temperature readings, and it fails mostly
+**when it is very cold**. Is deleting the rows with missing values harmless?
 
 
-<div class="fragment">
+<div class="fragment c-insight">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** Random transmission dropouts — or the sensor failing **when it is very
-cold**.
-
-</div>
-
-
-<div class="card">
-
-**2.** Dropouts: deletion is roughly harmless. Cold-failure: deletion silently
-removes the coldest days and biases every statistic afterwards.
-
-</div>
-
-
-<div class="card">
-
-**3.** The **mechanism** — whether missingness depends on the unobserved value
-itself. The data alone cannot answer this domain knowledge must.
-
-</div>
-
-
-</div>
-
+No. Deletion removes the coldest days, so every statistic afterwards — the mean
+temperature first — is biased upwards. Had the gaps been random transmission
+dropouts, deletion would be roughly harmless. The file looks the same in both
+cases; only the **mechanism** differs.
 
 </div>
 
 
 
-<div class="takeaway">
+<div class="fragment takeaway">
 
-The shape of the data decides which methods apply the **reason** for a quality
+The shape of the data decides which methods apply; the **reason** for a quality
 problem decides how it may be handled. Neither is visible in the file.
 
 </div>
@@ -361,7 +533,66 @@ problem decides how it may be handled. Neither is visible in the file.
 Notes:
 This is Principle 3 in its most practical form: a preprocessing decision is a
 modelling assumption, and here an untestable one. Students should leave able to
-ask "why is this missing?" before "how do I impute it?".
+ask "why is this missing?" before "how do I impute it?". If time allows, ask
+what else could have told us about the mechanism (a thermometer next to it,
+the sensor's data sheet) — domain knowledge, not the data.
+
+--
+
+## The Churn Shop's Customer Table
+
+| customer | contract | satisfaction | tenure (months) | postcode | churned? |
+|---|---|---|---|---|---|
+| 1 | monthly | 4 | 3 | 94032 | yes |
+| 2 | yearly | — | 27 | 80331 | yes |
+| 3 | yearly | 5 | 41 | 94032 | no |
+| … | … | … | … | … | … |
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">Scales</span>
+
+Contract, postcode, churned: nominal. Satisfaction: ordinal. Tenure: ratio. The
+mean postcode computes — and means nothing.
+
+</div>
+
+
+<div class="card bad">
+
+<span class="eyebrow">Why is satisfaction missing?</span>
+
+Customers who left stop answering: 40 of 100 churners gave no rating, 45 of 900
+stayers. Drop those rows, and churn falls from **10%** to **6.6%**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The running example as a table: the same subscription business whose app users
+churn less (Lecture 01), whose gap was tested (Lecture 02) and predicted
+(Lectures 04 and 06). Every earlier lecture used this table without asking what
+its columns are.
+
+The missing ratings are the lecture's point in one number. Dropping the rows
+with a missing rating leaves 60 churners among 915 customers (60/915 ≈ 6.6%):
+the missingness depends on the outcome itself, so the cleaned table is no longer
+a sample of the customers. Ask what a plot would have shown first — the share of
+missing ratings split by churned yes/no.
+
 
 ---
 
@@ -462,7 +693,7 @@ A **visual summary of a distribution built from quartiles**:
 <div class="card">
 
 ### The box
-Spans $Q_1$ to $Q_3$ — the interquartile range, the middle half of the data.
+Spans $Q\_1$ to $Q\_3$ — the interquartile range, the middle half of the data.
 
 </div>
 
@@ -478,8 +709,9 @@ The **median** inside the box. Its position shows skew.
 <div class="card">
 
 ### The whiskers
-Minimum and maximum, or (Tukey) the most extreme points within
-$1.5 \times \mathrm{IQR}$. Points beyond them are drawn as **outliers**.
+(Tukey) Reach to the most extreme data points inside
+$[Q\_1 - 1.5 \cdot \mathrm{IQR},Q\_3 + 1.5 \cdot \mathrm{IQR}]$. Points
+outside are drawn singly as **outliers**.
 
 </div>
 
@@ -521,7 +753,7 @@ boxplot hides entirely.
 <div class="card bad">
 
 ### What it hides
-Everything depends on the **bin width**. Too wide and structure vanishes too
+Everything depends on the **bin width**. Too wide and structure vanishes; too
 narrow and noise looks like structure.
 
 </div>
@@ -543,55 +775,21 @@ look at one histogram before trusting a five-number summary.
 
 ## Mini-Exercise
 
-Two datasets have identical minimum, $Q_1$, median, $Q_3$ and maximum.
-
-1. Must they have the same histogram?
-2. Sketch two distributions with the same boxplot but a visibly different shape.
-3. What does this repeat from an earlier lecture?
-
---
-
-## Mini-Exercise — Solution
+Two datasets have the same minimum, $Q\_1$, median, $Q\_3$ and maximum — so the
+same boxplot. Must their histograms look alike?
 
 
-<div class="fragment">
+<div class="fragment c-insight">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** No. Quartiles fix five points the mass between them can be arranged
-freely.
-
-</div>
-
-
-<div class="card">
-
-**2.** A uniform spread versus two tight clusters at the ends of the box — same
-quartiles, opposite stories.
-
-</div>
-
-
-<div class="card">
-
-**3.** Anscombe's quartet: summaries agree, the data does not. The lesson is
-scale-free.
-
-</div>
-
-
-</div>
-
+No. The five numbers fix five points; the mass between them can be arranged
+freely — spread evenly inside the box, or piled into two clusters at its
+edges. Same quartiles, opposite stories: Anscombe's quartet again.
 
 </div>
 
 
 
-<div class="takeaway">
+<div class="fragment takeaway">
 
 A boxplot compares distributions compactly; a histogram shows their shape.
 **Neither alone is sufficient**, and the boxplot's outlier rule is a convention
@@ -599,6 +797,11 @@ you may overrule.
 
 </div>
 
+
+Notes:
+If there is a minute left, let one student sketch the two-cluster version on
+the board. Some tools draw the whiskers to the minimum and maximum instead of
+the Tukey fences; always check which convention a plot uses.
 
 --
 
@@ -651,7 +854,7 @@ Superimpose, or juxtapose in a **scatterplot matrix**.
 Notes:
 The four options are exhaustive and worth memorising — every high-dimensional
 visualization technique is one of them or a combination. Colour and size are
-channels with far lower precision than position use them for secondary
+channels with far lower precision than position; use them for secondary
 variables.
 
 --
@@ -662,10 +865,20 @@ Linear association, non-linear structure, clusters, outliers and
 heteroscedasticity — most of which no single correlation coefficient reports.
 
 
+<div class="c-definition">
+
+**Pearson correlation** $r = \dfrac{\mathrm{cov}(X, Y)}{s\_X s\_Y} \in [-1, 1]$:
+the covariance measured in units of the two standard deviations. It measures
+**linear** association only.
+
+</div>
+
+
+
 <div class="c-important">
 
 A correlation of 0 is consistent with a perfect parabola. The scatterplot shows
-it the coefficient does not.
+it; the coefficient does not.
 
 </div>
 
@@ -719,7 +932,7 @@ draw should earn its ink.
 
 
 Notes:
-Tufte's rule is a good design heuristic and an over-applied dogma note that
+Tufte's rule is a good design heuristic and an over-applied dogma; note that
 some redundancy aids reading under time pressure. The point students should keep
 is intentionality: each element defended, not each element removed.
 
@@ -763,13 +976,13 @@ ordered.
 
 <div class="column">
 
-Humans judge **angles** far more accurately than absolute slopes, so the shape
-of the plotting area changes what the reader concludes. The same series looks
+Readers compare trends by the **orientation** of the line segments, so the
+shape of the plotting area changes what they conclude. The same series looks
 flat in a wide frame and dramatic in a tall one.
 
-**Banking to 45°** chooses the aspect ratio so that the average line segment
-sits near 45 degrees — the angle at which slope differences are most
-discriminable.
+**Banking to 45°** chooses the aspect ratio so that the segments' average
+absolute orientation is 45°: differences in orientation are judged best near
+±45° (Cleveland et al. 1988).
 
 </div>
 
@@ -831,7 +1044,7 @@ overlaying fails.
 
 <div class="takeaway">
 
-A line asserts order and interpolation the **aspect ratio** decides what the
+A line asserts order and interpolation; the **aspect ratio** decides what the
 reader sees and stacking trades the readability of the parts for the
 readability of the whole.
 
@@ -850,8 +1063,8 @@ moves. Small multiples are the usual better answer.
 # Module 3
 ## Preprocessing
 
-> **Guiding Question:** Most of a project is spent before the model. What is
-> actually being decided in that time?
+> **Guiding Question:** Lecture 01 claimed that preprocessing is modelling.
+> Which choices made here change what a model can learn?
 
 --
 
@@ -867,7 +1080,7 @@ by store, by month, by price band.
 <div class="card good">
 
 ### Gains
-Fewer objects to process **less variation**, hence more stable estimates the
+Fewer objects to process; **less variation**, hence more stable estimates; the
 natural operation of a data warehouse.
 
 </div>
@@ -914,8 +1127,8 @@ that matters — a sufficiently large sample retains the overall structure.
 
 <div class="c-note">
 
-The sine-wave example: sample too sparsely and the reconstructed signal is not
-merely rougher, it is **wrong**.
+Sample a sine wave once per period and every sample has the same value: the
+reconstruction is a flat line — not merely rougher, but **wrong**.
 
 </div>
 
@@ -925,6 +1138,60 @@ merely rougher, it is **wrong**.
 
 </div>
 
+
+Notes:
+The sine example is aliasing: too sparse a sample does not blur a pattern, it
+produces a different one. The same holds for customer data sampled once a
+month when the behaviour of interest is weekly.
+
+--
+
+## Scaling and Encoding
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Scaling numeric attributes
+Min–max: $x' = \dfrac{x - \min}{\max - \min} \in [0, 1]$
+
+Standardisation: $z = \dfrac{x - \bar{x}}{s}$ — mean 0, standard deviation 1
+
+</div>
+
+
+<div class="card">
+
+### Encoding categorical attributes
+**Nominal** → one-hot: one 0/1 column per value, so no false order.
+
+**Ordinal** → ranks $1, 2, 3, \ldots$, which keep the order.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+Two customers differ by 1,000 € in income and 30 years in age. Unscaled, their
+distance is $\approx 1{,}000$: age is invisible. Standardised ($s = 10{,}000$ €
+and $15$ years) the differences are $0.1$ and $2$ — now age dominates.
+
+</div>
+
+
+Notes:
+Scaling is a modelling decision in the sense of this lecture: it decides which
+attribute a distance listens to. It matters for every distance-based method
+(clustering, nearest neighbours) and for PCA, which would otherwise find "the
+direction of income". Encoding nominal values as 1, 2, 3 invents an order and
+a distance between categories; one-hot avoids it at the cost of more columns.
+Exact numbers: √(1000² + 30²) ≈ 1000.4 and √(0.1² + 2²) ≈ 2.0.
 
 --
 
@@ -964,7 +1231,7 @@ methods.
 <div class="card">
 
 ### The response
-**Feature selection** keeps a subset **feature extraction** builds new
+**Feature selection** keeps a subset; **feature extraction** builds new
 combined dimensions.
 
 </div>
@@ -985,8 +1252,17 @@ one.
 
 Notes:
 Point forward: projections (PCA, MDS) are the formal treatment of feature
-extraction, and clustering suffers directly from the curse. This unit is the
+extraction, and clustering suffers directly from the curse — and from unscaled
+attributes. This unit is the
 motivation both later lectures rely on.
+
+---
+
+<!-- .slide: class="credits-slide smaller" -->
+
+## Image Credits & References
+
+- Cleveland, William S. and McGill, Marylyn E. and McGill, Robert (1988). The Shape Parameter of a Two-Variable Graph. *Journal of the American Statistical Association*.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

@@ -1,139 +1,149 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 04: Independence, Naive Bayes and Graphical Models</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 04: Naive Bayes and the Generative Route</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
-## Lecture 04: Independence, Naive Bayes and Graphical Models
+## Lecture 04: Naive Bayes and the Generative Route
 
 Prof. Dr. Michael Granitzer
 
 Notes:
-The user-requested arc: naive Bayes first, as a classifier that *works*, then
-the independence assumption it rests on, then the general framework that
-replaces the assumption with a modelling choice. All units reused from the
-data-science course.
+The lecture's place in the arc: after Lecture 03's two shortcuts (keep the
+peak; model only p(y | x)), the joint returns — and immediately forces the
+third shortcut, "assume it apart". Three modules: the generative route and its
+explosion; naive Bayes, read entirely through earlier lectures (fitting = MLE
+of a categorical, smoothing = the Beta posterior mean, double counting =
+over-confidence); and the explicit contrast with logistic regression — the
+same linear log-odds, fitted two ways.
+
+2026-09-26 (course plan N2): conditional independence properly and the
+graphical-models introduction moved to the start of Lecture 05. This lecture
+defines conditional independence only as far as naive Bayes needs it. Fraud is
+the running example throughout; the shared Data Science units
+(bayes-decision-making, bayes-learning, naive-bayes) are replaced in PML by
+three PML units and stay unchanged for Data Science.
+
+--
+
+## Where We Left Off
+
+Lecture 03 took two shortcuts and named what each drops:
+
+| Shortcut | Instead of the ideal | What is dropped |
+|---|---|---|
+| **Keep the peak** | the most probable parameter (MLE, MAP) | the spread: how sure we are |
+| **Only what you need** | model $p(y \mid x)$ directly — logistic regression | $p(x)$: every question about the inputs |
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Today the inputs come back. The **generative route** models how the data
+arises, class by class, and converts with Bayes:
+
+$$
+p(x, y) = p(y) \cdot p(x \mid y)
+$$
+
+</div>
+
+
+<div class="c-warning">
+
+<span class="eyebrow">The catch</span>
+
+$p(x \mid y)$ is a joint over every attribute — and it explodes. Paying for it
+is **shortcut 3: assume it apart**.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Return to the shortcut table of Lecture 01, as promised there. Two rows are done;
+today's row is "assume it apart". Say the plan out loud: Module 1 takes the
+generative route and hits the explosion; Module 2 pays with the naive
+independence assumption and reads every step of naive Bayes as something the
+students already know (MLE, the Beta posterior of L02); Module 3 puts naive
+Bayes and logistic regression side by side and shows they are the same linear
+model, fitted two ways.
+
+The fraud example of Lectures 01–02 returns as the running example: a base rate
+of 1 in 1,000 and a handful of yes/no red flags.
+
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 04: from the generative route through naive Bayes to the contrast with logistic regression](/courses/probabilistic-machine-learning/figures/l04-argument-map.svg)
+
+</div>
+
+
+Notes:
+The lecture on one page. Top row: the generative route, the explosion it
+causes, and naive Bayes as the payment. Middle row: the explicit contrast with
+logistic regression and the shortcut named with what it drops. Bottom row: the
+takeaway. Point at the strip: Lecture 04 is "assume it apart".
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## Bayes as a Classifier
+# The Generative Route
 
-> **Guiding Question:** The data tells us how attributes behave *given* the
-> class. We need the reverse. What does the conversion cost?
+
+<div class="guiding-question">
+
+**Guiding Question:** Logistic regression never asked what a fraudulent
+transaction *looks like*. What would it take to model that — and why does
+nobody do it in full?
+
+</div>
+
 
 --
 
-## Thinking With Uncertainty
+## Two Routes to the Same Posterior
 
-Bayes' theorem lets us update a **hypothesis** $H$ in the light of **data** $D$:
-
-$$
-P(H \mid D) = \frac{P(H) \cdot P(D \mid H)}{P(D)}
-$$
-
-This is the whole apparatus of evidence-based decision making in one line:
-a belief, a measurement of how well the belief explains what we saw, and a
-normalisation.
-
-Notes:
-Deliberate second pass over Bayes (P4/P5 decision rule: this is consolidation,
-so math first). The new element is the reading of H and D as hypothesis and
-data, which is the form used by every learning algorithm later in the course.
-
---
-
-## Example: Do I Have the Flu?
-
-You have a headache and a cough. From the literature:
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Likelihood
-90% of people with the flu show headache and coughing
-$$P(D \mid H) = 0.9$$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Prior
-5% of people currently have the flu
-$$P(H) = 0.05$$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Evidence
-headache and coughing occur in 20% of people
-$$P(D) = 0.2$$
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-**How likely is it that you have the flu?**
-
-
-<div class="fragment">
-
-$$
-P(H \mid D) = \frac{0.05 \cdot 0.9}{0.2} = 0.225
-$$
-
-</div>
-
-
-Notes:
-Ask for a guess first — most people say something close to 90%, repeating the
-base-rate error from the probability chapter. 22.5% is the answer.
-
---
-
-## Why So Low?
+A labelled table of transactions supports **both** routes to
+$P(\text{fraud} \mid x)$, where $x$ is the vector of red flags:
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="card">
+
+<span class="eyebrow">Discriminative — Lecture 03</span>
+
+### Model $p(y \mid x)$ directly
+
+Logistic regression: a score for each $x$. Nothing is said about how $x$
+arises.
+
+</div>
 
 
 <div class="card">
 
-### Few people have the flu
-The prior $P(H) = 0.05$ caps how far the evidence can carry us.
+<span class="eyebrow">Generative — today</span>
+
+### Model $p(y)$ and $p(x \mid y)$
+
+How does a *fraudulent* transaction look, and how an honest one? Then convert
+with Bayes.
 
 </div>
 
@@ -141,37 +151,168 @@ The prior $P(H) = 0.05$ caps how far the evidence can carry us.
 </div>
 
 
-<div class="column">
+$$
+\eqa{P(y \mid x)} = \frac{\eqb{p(x \mid y)} \cdot \eqc{P(y)}}{\eqd{\sum\_{y'} p(x \mid y') P(y')}}
+$$
+
+Notes:
+Math first on the second pass: the students know Bayes' theorem from L02; the
+only new thing is that the "hypothesis" is now a class and the "evidence" a
+whole attribute vector. The colour slots are those of L02 (posterior,
+likelihood, prior, normaliser).
+
+Correct a misconception before it forms: the generative route is not forced on
+us by the data. A labelled table estimates p(y | x) just as directly — Lecture
+03 did exactly that. The generative route is a *choice*: model each class
+separately, then convert.
+
+--
+
+## Why Model How Fraud Looks?
 
 
-<div class="card">
+<div class="q">
 
-### The symptoms are common
-$P(D) = 0.2$ means many people have these symptoms *without* the flu.
+Logistic regression already gives $P(\text{fraud} \mid x)$. What can a model of
+$p(x \mid y)$ do that it cannot?
 
 </div>
 
 
+
+<div class="fragment">
+
+
+<div class="marks-yes">
+
+- **Keep the prior explicit.** The 1 in 1,000 of Lecture 02 is a separate
+  factor: a new market with 1 in 200 changes $P(y)$, not the whole model.
+- **Handle a missing field.** An attribute nobody observed can be summed out of
+  $p(x \mid y)$.
+- **Notice the strange.** A transaction with tiny $p(x)$ under *both* classes
+  is unlike anything seen — a score alone cannot say so.
+
 </div>
 
 
 
+<div class="c-warning">
+
+The price: $p(x \mid y)$ is a **joint distribution over all attributes**, one
+per class.
+
 </div>
 
-
-<div class="c-insight">
-
-A symptom is informative to the degree that it is **rare in general** but
-**common under the hypothesis**. A likelihood alone tells you nothing.
 
 </div>
 
 
 Notes:
-Two reasons, both structural. This is the criterion that reappears as feature
-informativeness in classification: a feature that fires for everything carries
-no information. Connect it explicitly — it makes information gain feel
-inevitable later.
+Let the room answer before the click; students with an ML background usually
+name "missing values" and sometimes "the prior". The novelty point is the one
+they rarely name, and it is exactly what "only what you need" dropped in
+Lecture 03.
+
+Each of the three items returns in Module 3 as a concrete comparison. Here they
+only motivate paying the price on the next slide.
+
+--
+
+## The Joint Explodes
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### 30
+yes/no red flags per transaction
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card fails">
+
+### $2^{30} - 1$
+≈ 1.07 billion numbers for $p(x \mid \text{fraud})$ alone
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 100
+frauds among 100,000 transactions to estimate them
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+Almost every cell of the table is **empty**. Its count is 0, so its maximum
+likelihood estimate is 0 — every fraud that looks slightly new becomes
+"impossible".
+
+</div>
+
+
+Notes:
+The numbers: 2^30 − 1 = 1,073,741,823 free parameters per class (the cells of
+a joint over 30 binary variables, minus one because they sum to 1). With 100
+frauds, at most 100 cells are non-empty. Connect to Lecture 03's
+three-heads-in-three-flips: MLE on too little data gives extreme answers; here
+it gives zeros almost everywhere.
+
+The way out is not more data — no bank has a billion frauds. It is an
+assumption that makes the table small, which is Module 2.
+
+--
+
+## Mini-Exercise
+
+A fraud model uses only **three** yes/no flags.
+
+
+<div class="q">
+
+How many numbers does the generative model need — both classes and the class
+prior together?
+
+</div>
+
+
+
+<div class="fragment">
+
+**15.** Each class needs a full table over $2^3 = 8$ flag patterns: 7 free
+numbers (they sum to 1). Two classes give 14, and $P(\text{fraud})$ adds one.
+
+</div>
+
+
+Notes:
+Head arithmetic on purpose. If someone answers 16 or 17, the "minus one"
+(normalisation) is the point to make; it is the same count as the 2^n − 1 above.
+Keep the 15 on the board: Module 2 reduces it to 7.
 
 --
 
@@ -180,345 +321,28 @@ inevitable later.
 
 <div class="takeaway">
 
-Bayesian decision making weighs **prior × likelihood** against how ordinary the
-evidence is. Deciding under uncertainty means keeping all three numbers in
-view, not just the one the study reports.
+The generative route models **how the data arises** — $p(y)$ and $p(x \mid y)$ —
+and converts with Bayes. It keeps the prior explicit and can answer questions
+about $x$ itself, but it must pay for a **joint over all attributes**, which
+explodes.
 
 </div>
 
-
---
-
-## Two Directions of the Same Connection
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Observed connection
-$$A_1, \ldots, A_p \mid B$$
-
-*Given the class, how do the attributes behave?* — the standard situation, and
-the one data can answer directly.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Reversed connection
-$$B \mid A_1, \ldots, A_p$$
-
-*Given the attributes, which class?* — the diagnosis situation, and the one we
-actually need.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-important">
-
-$$
-P(B \mid A_1, \ldots, A_p) = \frac{P(B) \cdot P(A_1, \ldots, A_p \mid B)}{P(A_1, \ldots, A_p)}
-$$
-
-</div>
-
-
-Notes:
-This is the base-rate lesson turned into an algorithm: the data gives us the
-easy direction, Bayes converts it into the one we need. Ask which direction a
-labelled dataset supplies — attributes given class, by construction.
-
---
-
-## What the Classifier Needs
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Class priors
-$$P(\text{class} = y)$$
-How common is each class, before seeing any attribute?
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Attribute likelihoods
-$$P(\text{attribute} = v \mid \text{class} = y)$$
-How does each class distribute its attribute values?
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Given both, the posterior $P(\text{class} \mid \text{attributes})$ follows from
-Bayes — and the prediction is the class with the highest posterior.
-
-
-<div class="c-warning">
-
-Estimating $P(A_1, \ldots, A_p \mid B)$ requires the **joint** distribution of
-all attributes within each class: exponentially many parameters, and never
-enough data.
-
-</div>
-
-
-Notes:
-End the unit on the obstacle rather than the solution — the warning is exactly
-the parameter explosion from the graphical-models lecture, and naive Bayes is
-the crudest possible independence assumption applied to it.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Naive Bayes
-
-> **Guiding Question:** Its central assumption is almost always false, and it
-> classifies well anyway. How can both be true?
-
---
-
-## Generative and Discriminative Classifiers
+# Naive Bayes: Assume It Apart
 
 
-<div class="grid-2">
+<div class="guiding-question">
 
-
-<div class="card">
-
-### Generative
-Model the **joint** distribution $P(A, B)$ — how the data was produced — then
-derive $P(B \mid A)$.
-
-*Naive Bayes.*
+**Guiding Question:** Its central assumption is almost always false, and it
+classifies well anyway. How can both be true?
 
 </div>
 
-
-<div class="card">
-
-### Discriminative
-Model $P(B \mid A)$ **directly** — only the boundary between classes.
-
-*Logistic regression.*
-
-</div>
-
-
-</div>
-
-
-Notes:
-The distinction runs through the rest of machine learning. A generative model
-can be sampled from and can handle missing attributes a discriminative model
-spends all its capacity on the decision. Neither is universally better.
-
---
-
-## The Naive Assumption
-
-
-<div class="c-important">
-
-Assume the attributes are **conditionally independent given the class**:
-$$
-P(A_1, \ldots, A_p \mid B) = \prod_{j=1}^{p} P(A_j \mid B)
-$$
-
-</div>
-
-
-Exponentially many parameters collapse to $p$ per class — one distribution per
-attribute.
-
-
-<div class="c-note">
-
-The assumption is almost always false. Naive Bayes nonetheless classifies well,
-because ranking the classes correctly is easier than estimating their
-probabilities correctly.
-
-</div>
-
-
-Notes:
-Direct callback to conditional independence: this is the same move as a
-graphical model, taken to its extreme — a star-shaped network with the class at
-the centre. The note is the honest part: the probabilities are miscalibrated,
-the argmax often is not.
-
---
-
-## The Classifier
-
-$$
-P(B_i \mid A_1, \ldots, A_p) =
-\frac{P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
-{\sum_{i=1}^{k} P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
-$$
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Score each class
-prior × product of attribute likelihoods
-
-</div>
-
-
-<div class="card">
-
-### Normalise
-divide by the total over all classes — the theorem of total probability
-
-</div>
-
-
-<div class="card">
-
-### Predict
-the class with the largest posterior
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-tip">
-
-For prediction alone the denominator can be skipped — it is the same for every
-class. It is needed only when the probability itself is reported.
-
-</div>
-
-
-Notes:
-The three-step structure is the whole algorithm. Point out that the denominator
-is total probability, which the students proved in the probability lecture —
-nothing new is being introduced here, only assembled.
-
---
-
-## Example: Enjoy Sport?
-
-| Outlook | Temperature | Humidity | Wind | **EnjoySport** |
-|---|---|---|---|---|
-| sunny | hot | high | weak | no |
-| sunny | hot | high | strong | no |
-| overcast | hot | high | weak | yes |
-| rain | mild | high | weak | yes |
-| rain | cool | normal | weak | yes |
-| rain | cool | normal | strong | no |
-
-Estimate the priors and the per-attribute likelihoods by **counting**, then
-score a new day.
-
-Notes:
-Have the group compute P(yes) and P(sunny | yes) aloud — the estimation is pure
-counting, which is what makes the method so cheap. Then ask what happens for
-P(overcast | no): zero, which kills the entire product.
-
---
-
-## The Zero-Frequency Problem
-
-
-<div class="grid-2-1">
-
-
-<div class="column">
-
-If an attribute value never occurs with a class in the training data, its
-estimated likelihood is **zero** — and one zero factor drives the whole product
-to zero, whatever the other attributes say.
-
-**Laplace smoothing** adds a pseudo-count to every combination, so that unseen
-does not mean impossible.
-
-</div>
-
-
-<div class="card bad">
-
-### One missing count
-vetoes every other piece of evidence
-
-</div>
-
-
-</div>
-
-
-
-<div class="takeaway">
-
-Naive Bayes buys tractability with a **conditional independence assumption it
-knows to be false** — and works anyway, because classification needs the right
-argmax, not the right probability.
-
-</div>
-
-
-Notes:
-Close on the epistemic point (P3): a knowingly wrong assumption can still yield
-a useful model, provided you know which conclusions it does and does not
-support. Calibrated probabilities are exactly what it does not support.
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 3
-## Independence, Properly
-
-> **Guiding Question:** Naive Bayes assumed independence to survive. What does
-> the assumption actually claim — and when does conditioning create dependence
-> rather than remove it?
 
 --
 
@@ -527,31 +351,40 @@ support. Calibrated probabilities are exactly what it does not support.
 
 <div class="c-definition">
 
-**Definition.** Events $A$ and $B$ are **conditionally independent given $C$**
-(written $A \indep B \mid C$) iff
+**Definition.** $A$ and $B$ are **conditionally independent given $C$**,
+written $A \indep B \mid C$, iff
 $$
 P(A \cap B \mid C) = P(A \mid C) \cdot P(B \mid C)
-$$
-equivalently
-$$
+\quad\Longleftrightarrow\quad
 P(A \mid B \cap C) = P(A \mid C)
 $$
 
 </div>
 
 
-Reading: **once $C$ is known, $B$ carries no further information about $A$.**
+Reading: **once $C$ is known, $B$ tells us nothing more about $A$.**
+
+
+<div class="q">
+
+Among frauds only: does a new device make a foreign IP more likely?
+
+</div>
+
 
 Notes:
-Math first (P5), but immediately give the reading. The second form is the one
-used in practice: it says B becomes redundant in the presence of C.
+Math first, then the reading (P5). This is the definition naive Bayes rests on,
+so it comes before naive Bayes (the old order taught it a module later). The
+full treatment — a counted example, and the case where conditioning *creates*
+dependence — opens Lecture 05, where it becomes the language of graphs.
+
+Leave the question open. Most students will say "yes, account take-overs bring
+both" — which is exactly the dependence naive Bayes will assume away, and the
+subject of "Counting Evidence Twice" at the end of the module.
 
 --
 
-## Dependent, but Independent Given C
-
-Let $P(A) = \tfrac{8}{16}$, $P(B) = \tfrac{3}{16}$, $P(C) = \tfrac{4}{16}$ on a
-16-cell sample space.
+## The Naive Assumption
 
 
 <div class="grid-2">
@@ -559,18 +392,7 @@ Let $P(A) = \tfrac{8}{16}$, $P(B) = \tfrac{3}{16}$, $P(C) = \tfrac{4}{16}$ on a
 
 <div class="column">
 
-
-<div class="card bad">
-
-**Unconditionally dependent**
-
-$$P(A \cap B) = \tfrac{1}{16}$$
-$$P(A)\cdot P(B) = \tfrac{3}{32}$$
-
-$\tfrac{1}{16} \neq \tfrac{3}{32}$, so $A \nindep B$
-
-</div>
-
+![Naive Bayes as a graph: the class points to every attribute, no arrows between attributes](/courses/probabilistic-machine-learning/figures/l04-naive-bayes-star.svg)
 
 </div>
 
@@ -578,100 +400,365 @@ $\tfrac{1}{16} \neq \tfrac{3}{32}$, so $A \nindep B$
 <div class="column">
 
 
-<div class="card good">
+<div class="c-important">
 
-**Conditionally independent given $C$**
+Assume the attributes are **independent given the class**:
+$$
+p(x\_1, \ldots, x\_p \mid y) = \prod\_{j=1}^{p} p(x\_j \mid y)
+$$
 
-$$P(A \cap B \mid C) = \tfrac{1}{4}$$
-$$P(A \mid C)\cdot P(B \mid C) = \tfrac{2}{4}\cdot\tfrac{2}{4} = \tfrac{1}{4}$$
+</div>
 
-so $A \indep B \mid C$
+
+| flags | full joint, per class | naive |
+|---|---|---|
+| 3 | 7 | 3 |
+| 30 | 1,073,741,823 | 30 |
 
 </div>
 
 
 </div>
 
-
-</div>
-
-
-Also directly: $P(A \mid B \cap C) = \tfrac{1}{2} = P(A \mid C)$.
-
-Notes:
-The whole idea in one comparison. Conditioning on C *created* independence that
-did not exist before. Ask for a real example: ice-cream sales and drownings are
-dependent, but conditionally independent given the temperature.
-
---
-
-## Why This Matters
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Explaining away**
-
-A common cause $C$ can make two effects look related.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Model size**
-
-Conditional independence lets a joint distribution factorise into small pieces.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Later in the course**
-
-Naive Bayes assumes it. Graphical models are built from it.
-
-</div>
-
-
-</div>
-
-
-
-</div>
 
 
 <div class="c-warning">
 
-Conditional independence neither implies nor is implied by ordinary
-independence. Both directions can fail.
+**Shortcut 3 — assume it apart.** Dropped: every dependence *within* a class.
 
 </div>
 
 
 Notes:
-Flag forward links without using them: students only need to know that this
-definition is the hinge for models later. The warning box is worth a moment —
-students routinely assume one form gives the other.
+The graph is a preview of Lecture 05, where a missing arrow will be read as an
+independence claim: here *no* arrow joins two attributes, so every pair is
+claimed independent given the class. Naive Bayes is the most extreme picture
+that is still a model.
+
+The count: one Bernoulli per flag per class, p numbers instead of 2^p − 1. The
+mini-exercise of Module 1 (15 numbers for three flags) becomes 2 · 3 + 1 = 7.
+
+Name the shortcut as in the Lecture 01 table and say what it drops. The model
+still keeps p(y) and p(x | y), so it is still generative; it just refuses to
+see how attributes move together.
+
+--
+
+## Fitting Is Counting
+
+$$
+\hat{P}(y) = \frac{n(y)}{n}
+\qquad
+\hat{P}(x\_j = v \mid y) = \frac{n(x\_j = v,\ y)}{n(y)}
+$$
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Lecture 02
+Each attribute, within one class, is a **categorical** variable — for a
+yes/no flag, a Bernoulli.
+
+</div>
+
+
+<div class="card">
+
+### Lecture 03
+Its maximum likelihood estimate is the **relative frequency** — the same
+derivation as $h/n$ for the coin.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+Naive Bayes is fitted in one pass over the table, with no optimiser — and every
+number it uses is a **peak**. Shortcut 1 is taken as well.
+
+</div>
+
+
+Notes:
+Math first: show the two formulas and ask what principle produces them before
+revealing the cards verbally. The answer the course has prepared: the
+categorical distribution was introduced in L02 as "the distribution naive Bayes
+uses for every nominal attribute", and L03 derived that the MLE of a Bernoulli
+is h/n. Under the naive assumption the likelihood splits into one categorical
+per attribute and class, so each is maximised separately — by counting.
+
+This is worth a sentence: the independence assumption is what makes the MLE a
+closed-form count. Logistic regression has no closed form.
+
+--
+
+## The Classifier
+
+$$
+P(y \mid x\_1, \ldots, x\_p) = \frac{P(y) \prod\_{j} p(x\_j \mid y)}{\sum\_{y'} P(y') \prod\_{j} p(x\_j \mid y')}
+$$
+
+For two classes, divide the two posteriors — the normaliser cancels:
+
+$$
+\underbrace{\frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}}\_{\text{posterior odds}}
+= \underbrace{\frac{P(\text{fraud})}{P(\text{honest})}}\_{\text{prior odds}}
+\cdot \prod\_{j=1}^{p} \underbrace{\frac{p(x\_j \mid \text{fraud})}{p(x\_j \mid \text{honest})}}\_{\text{likelihood ratio } \mathrm{LR}\_j}
+$$
+
+
+<div class="c-note">
+
+Every observed attribute **multiplies the odds** by its likelihood ratio: above
+1 it speaks for fraud, below 1 against.
+
+</div>
+
+
+Notes:
+The first line is Bayes with the naive product, and the denominator is total
+probability — nothing new, only assembled. The odds form is what makes the
+method readable: each flag is one factor, and the order in which they arrive
+does not matter. Odds were introduced with Bayes in L02.
+
+--
+
+## Three Red Flags
+
+100,000 transactions, 100 of them fraud: prior odds $1 : 999$.
+
+| flag | among frauds | among honest | likelihood ratio |
+|---|---|---|---|
+| new device | 60% | 10% | 6 |
+| foreign IP | 70% | 5% | 14 |
+| night | 50% | 20% | 2.5 |
+
+
+<div class="q">
+
+A transaction shows all three flags. Is it more likely fraud than not?
+
+</div>
+
+
+
+<div class="fragment">
+
+$$
+\text{odds} = \frac{1}{999} \cdot 6 \cdot 14 \cdot 2.5 = \frac{210}{999}
+\quad\Longrightarrow\quad
+P(\text{fraud} \mid x) = \frac{210}{1{,}209} \approx 17\\%
+$$
+
+
+<div class="c-warning">
+
+Three red flags, each one strong — and still **mostly honest**. The base rate
+of Lecture 02, once more.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Let the room guess first; most will say "clearly fraud". The model here has
+exactly these three flags, all of them present, so only the three ratios
+enter. With a flag observed *absent* its factor would be (1 − 0.5)/(1 − 0.2) =
+0.625 for night, for example — worth mentioning if someone asks.
+
+Numbers: 0.6/0.1 = 6, 0.7/0.05 = 14, 0.5/0.2 = 2.5; 6 · 14 · 2.5 = 210;
+210/(210 + 999) = 0.1737.
+
+--
+
+## Evidence Adds Up
+
+<div class="viz viz-lg" data-viz="ml/gm-log-odds-staircase" data-steps="3"
+ data-params='{"prior": [1, 999], "factors": [{"lr": 6, "label": "new device"}, {"lr": 14, "label": "foreign IP"}, {"lr": 2.5, "label": "night"}]}'></div>
+
+**Predict before each click:** which flag moves the probability most?
+
+Notes:
+Stepped: one click per flag. On a log-odds axis every likelihood ratio is a
+step of fixed height, independent of where we start: log 6, log 14, log 2.5.
+So the evidence *adds*. Stop after the foreign IP (7.8%) and ask what the
+night flag will do; students tend to overestimate it because "night" sounds
+suspicious, but 2.5 is the weakest ratio.
+
+Plant the seed for Module 3: a sum of per-attribute contributions plus a
+starting value is a linear score — the form of logistic regression.
+
+--
+
+## One Zero Vetoes Everything
+
+A new flag: **payment to a crypto exchange**. Among the 100 frauds it never
+occurred.
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+$$
+\hat{P}(\text{crypto} \mid \text{fraud}) = \frac{0}{100} = 0
+$$
+
+A transaction with this flag gets posterior odds **exactly 0** — whatever the
+other thirty flags say. One unseen value vetoes all other evidence.
+
+</div>
+
+
+<div class="c-danger">
+
+<span class="eyebrow">Keep the peak, fails</span>
+
+"Not seen in 100 frauds" became "impossible for a fraud" — the three heads in
+three flips of Lecture 03, in a single cell.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The zero-frequency problem, in the course's language: an MLE on a small count
+is extreme. With 100 frauds, many plausible fraud patterns have count zero.
+Ask for a repair before the next slide — "add one" usually comes up. The next
+slide shows that "add one" is not a hack.
+
+--
+
+## Smoothing Is a Prior
+
+**Laplace smoothing** adds one pseudo-count to every value of attribute $j$
+($k\_j$ values):
+
+$$
+\hat{P}(x\_j = v \mid y) = \frac{n(x\_j = v,\ y) + 1}{n(y) + k\_j}
+$$
+
+For a yes/no flag ($k\_j = 2$) this is $\frac{h + 1}{n + 2}$ — the **posterior
+mean** $\frac{a + h}{a + b + n}$ of Lecture 02 under the flat prior
+$\mathrm{Beta}(1, 1)$. For $k\_j > 2$ values, the flat Dirichlet does the same.
+
+| count among 100 frauds | MLE (peak) | smoothed (mean) |
+|---|---|---|
+| 0 | 0 | $1/102 \approx 0.010$ |
+| 60 | 0.60 | $61/102 \approx 0.598$ |
+
+
+<div class="c-insight">
+
+Under the flat prior the peak of 0 of 100 is still 0. Smoothing quietly
+**leaves the peak for the mean** — exactly where the peak was wrong.
+
+</div>
+
+
+Notes:
+This is the most satisfying tie of the lecture: a folklore trick of naive
+Bayes is the posterior mean the students computed in L02 (after 3 of 10 with a
+flat prior: mean 4/12 = 0.33). The Dirichlet is the Beta for more than two
+values; it needs only the name here.
+
+The table shows why nobody notices the switch on well-populated cells (0.60 vs
+0.598) and why it matters on empty ones. Larger pseudo-counts mean a stronger
+prior, as in L02's "near a half" analyst.
+
+--
+
+## Counting Evidence Twice
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+![Naive Bayes with the dropped dependence between new device and foreign IP](/courses/probabilistic-machine-learning/figures/l04-naive-bayes-dropped.svg)
+
+</div>
+
+
+<div class="column">
+
+In an account take-over, a new device and a foreign IP **arrive together**.
+Suppose both appear on 55% of frauds and 4% of honest transactions:
+
+| | ratio for the pair | $P(\text{fraud})$ with night |
+|---|---|---|
+| naive Bayes | $6 \cdot 14 = 84$ | 17.4% |
+| the real pair | $0.55 / 0.04 \approx 14$ | 3.3% |
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+Correlated flags are **counted twice**, so naive Bayes is **over-confident**.
+Its ranking of transactions often survives; its probabilities do not.
+
+</div>
+
+
+Notes:
+Answer the question left open on the first slide. The dropped edge is drawn
+dashed: naive Bayes multiplies both ratios as if they were separate witnesses,
+though they largely report the same event. With the pair's own ratio 13.75,
+the posterior odds are 13.75 · 2.5/999 = 34.4/999, i.e. 3.3% instead of 17.4%.
+
+The consequence connects to Lecture 03's calibration: naive Bayes scores push
+towards 0 and 1 and are not calibrated. That argmax decisions often survive
+anyway is the classic explanation of why naive Bayes classifies well
+(Domingos & Pazzani, 1997) — the answer to the module's guiding question.
+
+--
+
+## Mini-Exercise
+
+A bug feeds the **foreign-IP** flag into the model twice.
+
+
+<div class="q">
+
+Does the fraud probability of our three-flag transaction go up, down, or stay
+— and what does that say about correlated attributes?
+
+</div>
+
+
+
+<div class="fragment">
+
+**Up — from 17% to about 75%.** The odds get a second factor 14:
+$2{,}940 : 999$. Naive Bayes cannot tell a copy from new evidence; a strongly
+correlated attribute is almost a copy.
+
+</div>
+
+
+Notes:
+One question, answerable qualitatively in seconds; the number is for checking
+(2940/3939 = 0.746). The bug is the extreme case of the previous slide: perfect
+correlation. Real feature sets contain near-copies all the time — the same
+information coded twice, derived features, one-hot groups.
 
 --
 
@@ -680,9 +767,10 @@ students routinely assume one form gives the other.
 
 <div class="takeaway">
 
-Conditioning can **create** independence as easily as it destroys it. "Given
-what I already know, does this extra fact still tell me anything?" is the
-question that makes large probabilistic models tractable.
+Naive Bayes **assumes the joint apart** — attributes independent given the
+class — and **keeps the peak** of every count; smoothed, it keeps the Beta
+posterior *mean* instead. It is cheap, needs little data and ranks well. Its
+probabilities are over-confident wherever attributes move together.
 
 </div>
 
@@ -691,71 +779,48 @@ question that makes large probabilistic models tractable.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## From Assumption to Model
+# Generative vs Discriminative
 
-> **Guiding Question:** Naive Bayes assumes *everything* is independent given
-> the class. What if we could state exactly which independences hold?
+
+<div class="guiding-question">
+
+**Guiding Question:** Naive Bayes and logistic regression see the same fraud
+table. Which would you trust with 50 labelled frauds — and which with 50,000?
+
+</div>
+
 
 --
 
-## The Problem: Joint Distributions Explode
+## The Same Line, Fitted Twice
 
-Consider a joint distribution $p(x_1, \ldots, x_n)$ over $n$ **binary** random
-variables. How many configurations are there?
+Take the logarithm of the naive-Bayes odds. For yes/no flags
+$x\_j \in \lbrace 0, 1 \rbrace$ with $\theta\_{jy} = P(x\_j = 1 \mid y)$:
+
+$$
+\log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)} = w\_0 + \sum\_{j=1}^{p} w\_j x\_j,
+\qquad
+w\_j = \log \frac{\theta\_{j1}}{\theta\_{j0}} - \log \frac{1 - \theta\_{j1}}{1 - \theta\_{j0}}
+$$
+
+
+<div class="q">
+
+Where have you seen a log-odds that is linear in $x$?
+
+</div>
+
 
 
 <div class="fragment">
 
-$$
-2^n \quad\text{states}, \quad 2^n - 1 \quad\text{free parameters}
-$$
 
+<div class="c-insight">
 
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Specification
-For large $n$, writing down all values is impossible.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Inference
-A single marginal $p(x_1)$ requires summing over $2^{n-1}$ states.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Chain rule?
-It rewrites the joint exactly — but does not reduce the number of values.
-
-</div>
-
-
-</div>
-
+**Logistic regression** (Lecture 03): $P(\text{fraud} \mid x) = \sigma(w\_0 + w^\top x)$.
+Same family of classifiers — naive Bayes sets the weights by **counting**, one
+attribute at a time; logistic regression by **maximising
+$\sum\_i \log p(y\_i \mid x\_i)$**, all weights jointly.
 
 </div>
 
@@ -764,346 +829,122 @@ It rewrites the joint exactly — but does not reduce the number of values.
 
 
 Notes:
-Guiding question of the module. 30 binary variables already exceed a billion
-parameters. Ask what would have to be true of the world for the table to be
-compressible — the answer is independence, which the students already have.
+Math first (P5). The derivation is two lines and belongs on the exercise sheet:
+log p(x_j | y) = x_j log θ_jy + (1 − x_j) log(1 − θ_jy), so each flag
+contributes a constant plus x_j times a weight; the constants and the log
+prior odds collect in w_0. With the fraud numbers, w for the new device is
+log 6 − log(0.4/0.9) ≈ 1.79 + 0.81 = 2.60.
+
+The consequence of "jointly": logistic regression sees that the new device
+and the foreign IP arrive together and splits the credit between them. Naive
+Bayes cannot; each weight is estimated as if its flag were alone. That is the
+double counting of Module 2, now visible in the weights.
 
 --
 
-## What a Graphical Model Is
+## Two Ways to a Classifier
 
-
-<div class="c-definition">
-
-**Definition (Graphical model).** A graphical model depicts the
-dependence and independence relations of a distribution using a graph $G$ as
-its underlying structure.
-
-</div>
-
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Modelling
-Describe the variables of a domain and their interactions — how
-$p(x_1, \ldots, x_n)$ **factorises**.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Inference
-Answer queries such as $p(x_1 \mid x_2 = a, \ldots)$ efficiently over that
-factorisation.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Usually one class of model is used for modelling and another for inference the
-latter is often compiled from the former.
+| | naive Bayes — generative | logistic regression — discriminative |
+|---|---|---|
+| models | $P(y)$ and $p(x \mid y)$ | $P(y \mid x)$ only |
+| fitted by | counting (joint likelihood) | iterative optimisation (conditional likelihood) |
+| correlated flags | counted twice | credit shared |
+| a missing field | drop its factor | needs a value |
+| an unusual $x$ | low $p(x)$: can be flagged | still a confident score |
+| a new base rate | change $P(y)$ | refit or correct the intercept |
+| drops | dependences between attributes | everything about $x$ |
 
 Notes:
-Two purposes, two different graph classes — worth stating now so that Markov
-networks later do not look like a competing formalism but a compilation target.
+A table because the two are compared along shared dimensions. Walk it row by
+row and let students predict each cell for logistic regression before
+showing it, if time allows. The last row is the course arc: each model is
+placed by what it drops. "Correct the intercept": in logistic regression the
+base rate sits inside w_0, so a new base rate shifts w_0 by the log of the
+ratio of prior odds — possible, but not visible in the model as a separate
+factor.
 
 --
 
-## How a Graph Can Help
-
-Probabilistic inference is summing and multiplying. Let every variable be a
-node, and read edges as interaction:
+## Few Data, Many Data
 
 
-<div class="grid-2">
+<div class="grid-2-1">
 
 
 <div class="column">
 
-
-<div class="card">
-
-### No edge
-$$f(a,b) = g(a)\cdot h(b)$$
-The variables are independent — the factor splits.
-
-</div>
-
+![Schematic learning curves: naive Bayes levels off early at a higher error, logistic regression later at a lower one](/courses/probabilistic-machine-learning/figures/l04-learning-curves.svg)
 
 </div>
 
 
 <div class="column">
 
+**Few labelled frauds:** naive Bayes. Its assumption acts like a strong prior —
+little to estimate, so it settles fast.
 
-<div class="card">
-
-### Edge
-$$f(a,b) \neq g(a)\cdot h(b)$$
-The variables are dependent — the factor does not split.
-
-</div>
-
+**Many labelled frauds:** logistic regression. It pays for fewer assumptions
+with data, and ends lower.
 
 </div>
 
 
 </div>
 
-
-Edge **direction** can encode further structure. The principle extends to any
-number of variables.
 
 
 <div class="c-note">
 
-Graphical models have limited expressive power: not every conditional
-independence statement can be drawn, and different graphs can represent the
-same distribution.
+Shown empirically and in theory by Ng & Jordan (2002). A wrong assumption costs
+accuracy in the limit and buys it early — the prior of Lecture 02, again.
 
 </div>
 
 
 Notes:
-The honest caveat matters — students should not believe the graph captures
-everything. "The graph is a picture of a factorisation" is the accurate slogan.
+The figure is schematic — say so. Ng & Jordan (NIPS 2002, "On discriminative vs.
+generative classifiers") show that naive Bayes approaches its asymptotic error
+with a number of examples logarithmic in the number of attributes, logistic
+regression with a number linear in it; the discriminative asymptote is never
+worse. On many real datasets the curves cross.
+
+Answer the module's guiding question: with 50 labelled frauds, trust naive
+Bayes' ranking; with 50,000, logistic regression. And the general point:
+an assumption is information. When it is roughly right it substitutes for
+data; when it is wrong it caps what data can do.
 
 --
 
-## Example: Why Is the Grass Wet?
+## Mini-Exercise
 
-Tracey leaves her house and sees that her grass is wet. **Was it rain, or did
-she leave the sprinkler on?** She notices her neighbour Jack's grass is also
-wet.
-
-
-<div class="grid-4">
+Our three-flag transaction arrives **without the IP field** — the logging
+failed.
 
 
-<div class="column">
+<div class="q">
 
-
-<div class="card">
-
-### $R$
-raining (1) or not (0)
+What does naive Bayes do with it — and what does logistic regression do?
 
 </div>
 
 
-</div>
 
+<div class="fragment">
 
-<div class="column">
-
-
-<div class="card">
-
-### $S$
-Tracey's sprinkler on (1) or off (0)
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### $J$
-Jack's grass wet (1) or dry (0)
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### $T$
-Tracey's grass wet (1) or dry (0)
-
-</div>
-
-
-</div>
-
+**Naive Bayes** drops the factor: $\sum\_v p(x\_{\text{IP}} = v \mid y) = 1$, so
+the odds become $6 \cdot 2.5 : 999$ — about **1.5%**. **Logistic regression**
+has no model of $x$: it needs *some* value for $x\_{\text{IP}}$, so someone must
+impute one, or train a second model without the field.
 
 </div>
 
 
 Notes:
-Barber's classic example. Ask students to predict, before any arithmetic,
-whether Jack's wet grass makes the sprinkler more or less likely — this sets up
-explaining away, and intuitions differ, which is the point.
-
---
-
-## Building the Model
-
-The full joint over four binary variables needs $2^4 - 1 = 15$ probabilities.
-The chain rule rewrites it but does not shrink it:
-
-$$
-p(T,J,R,S) = p(T \mid J,R,S) p(J \mid R,S) p(R \mid S) p(S)
-$$
-
-Now bring in **background knowledge** — assumptions of conditional independence:
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-Tracey's grass does not depend on Jack's
-$$p(T \mid J,R,S) = p(T \mid R,S)$$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-Jack's grass does not depend on Tracey's sprinkler
-$$p(J \mid R,S) = p(J \mid R)$$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-Rain is not influenced by the sprinkler
-$$p(R \mid S) = p(R)$$
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-important">
-
-$$
-p(T,J,R,S) = p(T \mid R,S) p(J \mid R) p(R) p(S)
-$$
-Only $4 + 2 + 1 + 1 = 8$ probabilities remain — and each one is a question a
-person can actually answer.
-
-</div>
-
-
-Notes:
-The heart of the module: the reduction is not mathematical trickery, it is
-domain knowledge written as conditional independence. The second half of the
-callout matters as much as the first — the factors are locally interpretable.
-
---
-
-## The Probability Tables
-
-| Factor | $p(\cdot)$ | $1 - p(\cdot)$ |
-|---|---|---|
-| $p(R=1)$ | 0.2 | 0.8 |
-| $p(S=1)$ | 0.1 | 0.9 |
-| $p(J=1 \mid R=0)$ | 0.2 | 0.8 |
-| $p(J=1 \mid R=1)$ | 1.0 | 0.0 |
-| $p(T=1 \mid R=1, S=0)$ | 1.0 | 0.0 |
-| $p(T=1 \mid R=1, S=1)$ | 1.0 | 0.0 |
-| $p(T=1 \mid R=0, S=1)$ | 0.9 | 0.1 |
-| $p(T=1 \mid R=0, S=0)$ | 0.0 | 1.0 |
-
-Missing edges in the graph are exactly the assumptions above the tables supply
-the numbers.
-
-Notes:
-Point out that the last row encodes "grass does not get wet by itself" and the
-1.0 entries encode "rain always wets grass" — modelling choices, visible and
-challengeable, which is the epistemic virtue of the approach (P3).
-
---
-
-## Inference: What Does the Evidence Say?
-
-<div class="viz viz-lg" data-viz="math/explaining-away" data-steps="2"></div>
-
-Notes:
-Stepped viz (P6). Step 1: wet grass raises P(sprinkler) from 10% to 33.8%.
-Step 2: Jack's grass is wet too — rain now explains the wetness, and the
-sprinkler falls to 16.0%: most of the way back, but still above the 10% prior,
-because the sprinkler remains a possible additional cause. Ask for the
-prediction before each click.
-Computed by exact enumeration of the factorised joint, i.e. marginalisation the
-students already know.
-
---
-
-## Explaining Away
-
-$$
-p(S=1 \mid T=1) = \frac{\sum_{J,R} p(T{=}1 \mid R,S{=}1) p(J \mid R) p(R) p(S{=}1)}
-{\sum_{J,R,S} p(T{=}1 \mid R,S) p(J \mid R) p(R) p(S)}
-$$
-
-
-<div class="c-insight">
-
-Two independent causes ($R$ and $S$) become **dependent once their common
-effect is observed**. Learning that rain occurred lowers the probability of the
-sprinkler, even though rain and sprinkler are unconditionally independent.
-
-</div>
-
-
-Notes:
-This is the conditional-independence unit returning with a vengeance:
-conditioning on a common effect *creates* dependence — the opposite of the
-common-cause case seen earlier. Name it "explaining away" it is the single
-most useful piece of vocabulary in this module.
+The generative advantage in its most practical form. Marginalising a missing
+attribute out of a product of per-attribute factors is summing one factor over
+its values, which gives 1. The number: 15/1014 ≈ 0.0148. Compare with 17% when
+the IP was present and foreign: the missing field matters, and naive Bayes
+reports that honestly instead of guessing it.
 
 --
 
@@ -1112,13 +953,27 @@ most useful piece of vocabulary in this module.
 
 <div class="takeaway">
 
-A graphical model turns **background knowledge into a factorisation**: missing
-edges are conditional independence assumptions, and each one removes
-parameters. The graph is a picture of how the joint splits — nothing more, and
-nothing less.
+Naive Bayes and logistic regression draw **the same kind of line**; they differ
+in what they model. The generative model pays with assumptions about $x$ and
+gets answers about $x$; the discriminative one pays with data.
 
 </div>
 
+
+| lecture | shortcut | what is dropped |
+|---|---|---|
+| 03 | keep the peak | how sure we are |
+| 03 | only $p(y \mid x)$ | every question about $x$ |
+| 04 | assume it apart | every dependence between attributes |
+
+Naive Bayes is a graph with one hub. **Lecture 05** draws the others — and
+keeps exactly the dependences we claim.
+
+Notes:
+Close the lecture on the arc. The table is the L01 shortcut table, now with
+three rows filled. The teaser: the star graph of Module 2 is the simplest
+graphical model; Lecture 05 lets the modeller choose which arrows to keep,
+so the assumption becomes a statement rather than a blanket.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
@@ -1282,10 +1137,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1296,17 +1157,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

@@ -1,0 +1,501 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 7 — Selected Probabilistic Algorithms — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 7
+## Selected Probabilistic Algorithms
+
+Probabilistic Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Five exercises, about 55 minutes: one EM iteration by hand (7.A.1), what EM
+still drops (7.A.2), Bayesian regression by hand in one parameter (7.B.1), the
+lecture's two-term table in numpy (7.B.2), and sorting uncertainty into the
+noise term, the parameter term, or neither (7.B.3). A calculator helps for
+7.A.1 and 7.B.1. Every number in the solutions was recomputed.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 7.A Mixtures and EM
+
+--
+
+## Exercise 7.A.1: One EM Iteration by Hand
+
+Four points $x = (0, 2, 3, 6)$, two Gaussian components with **fixed**
+$\sigma\_1 = \sigma\_2 = 1$, starting from $\pi = (0.5, 0.5)$ and
+$\mu = (1, 5)$.
+
+1. Show that the responsibility of component 2 is
+   $\gamma\_{i2} = 1/\big(1 + e^{12 - 4x\_i}\big)$ and evaluate it for the four
+   points.
+2. Do one M-step: compute $N\_1, N\_2$, the new $\pi$ and the new $\mu\_1, \mu\_2$.
+3. What does k-means (same start) do with the point $x = 3$ in its first
+   assignment step?
+
+
+--
+
+## Exercise 7.A.1: One EM Iteration by Hand — Solution
+
+
+<div class="fragment">
+
+**1.** With equal weights and variances, the normalising constants cancel:
+$\gamma\_{i2} = \frac{e^{-(x-5)^2/2}}{e^{-(x-1)^2/2} + e^{-(x-5)^2/2}} = \frac{1}{1 + e^{((x-5)^2 - (x-1)^2)/2}}$
+and $(x-5)^2 - (x-1)^2 = 24 - 8x$. Values: $x = 0$: $6 \cdot 10^{-6} \approx 0$;
+$x = 2$: $1/(1 + e^{4}) \approx 0.018$; $x = 3$: $0.5$; $x = 6$: $\approx 1$.
+
+**2.** $N\_1 = 1 + 0.982 + 0.5 + 0 \approx 2.48$, $N\_2 \approx 1.52$;
+$\pi \approx (0.62, 0.38)$.
+$\mu\_1 = (0 + 2 \cdot 0.982 + 3 \cdot 0.5)/2.48 \approx 1.40$,
+$\mu\_2 = (2 \cdot 0.018 + 3 \cdot 0.5 + 6)/1.52 \approx 4.96$.
+
+**3.** $x = 3$ is at distance 2 from both centroids: k-means must break the tie
+arbitrarily and gives it weight 1 in one mean and 0 in the other. EM gives it
+half to each — the honest answer.
+
+</div>
+
+
+
+
+--
+
+## Exercise 7.A.2: What EM Still Drops
+
+1. Take a Gaussian mixture with two components and at least two distinct data
+   points. Set $\mu\_1 = x\_1$ and let $\sigma\_1 \to 0$, keeping component 2 fixed
+   and wide. What happens to the likelihood — and why is that not a good model?
+   Why does k-means not have this problem?
+2. EM is run for $K = 1, \dots, 4$. The log-likelihoods are:
+
+   | $K$ | 1 | 2 | 3 | 4 |
+   |---|---|---|---|---|
+   | training | −412.3 | −371.8 | −365.1 | −360.4 |
+   | held-out | −208.9 | −186.5 | −188.2 | −191.7 |
+
+   Which $K$ do you choose, and why not the one with the best training value?
+3. In which sense is EM a *partial* shortcut? Name what it conditions on the
+   data and what it keeps as a point.
+
+
+--
+
+## Exercise 7.A.2: What EM Still Drops — Solution
+
+
+<div class="fragment">
+
+**1.** The term for $x\_1$ contains $\pi\_1 \mathcal{N}(x\_1 \mid x\_1, \sigma\_1^2) = \pi\_1/(\sqrt{2\pi}\sigma\_1) \to \infty$,
+while every other point keeps a finite, positive density from component 2. The
+likelihood is unbounded — its "maximum" is a spike on one data point, which
+predicts nothing. k-means has no variance to shrink: its objective (SSE) is
+bounded below by 0. Remedies: a floor on $\sigma\_k$, or a prior on it (MAP).
+
+**2.** $K = 2$: the held-out log-likelihood is highest there. The training value
+always rises with $K$, because a larger mixture contains the smaller one — it
+is the training-error trap of Lecture 06, for densities.
+
+**3.** It conditions the **hidden labels** on the data (the E-step is Bayes and
+keeps the whole distribution $\gamma\_{ik}$). It keeps the **parameters**
+$\pi, \mu, \sigma$ as a single maximum-likelihood point — Lecture 03's peak — with
+no statement of how sure it is about them.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 7.B Bayesian Regression
+
+--
+
+## Exercise 7.B.1: Bayesian Regression in One Parameter
+
+A price model **through the origin**: $y = w x + \varepsilon$,
+$\varepsilon \sim \mathcal{N}(0, 40^2)$, with $x$ the living area in units of
+100 m² and $y$ in k€. Prior $w \sim \mathcal{N}(0, 1000^2)$. Data:
+
+| $x$ | 0.6 | 0.8 | 1.0 | 1.2 |
+|---|---|---|---|---|
+| $y$ | 215 | 275 | 355 | 420 |
+
+1. Compute the posterior precision $1/s\_N^2 = 1/\tau^2 + \sum x\_i^2/\sigma^2$,
+   then $s\_N$ and $m\_N = s\_N^2 \sum x\_i y\_i/\sigma^2$.
+2. Give the predictive mean, noise sd, parameter sd and total sd at $x = 1$
+   (100 m²) and at $x = 6$ (the 600 m² villa).
+3. Four villas of 600 m² are added. Recompute the parameter sd and the total sd
+   at $x = 6$ (the posterior mean hardly moves).
+4. Instead, a thousand more flats of **100 m²** are added. In this model the
+   parameter sd at 600 m² falls to about 7.6 k€. Why — and why should that make
+   you suspicious, compared with the lecture's model with an intercept?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 7.B.1: Bayesian Regression in One Parameter — Solution
+
+
+<div class="fragment">
+
+**1.** $\sum x\_i^2 = 3.44$, $\sum x\_i y\_i = 1{,}208$. Precision
+$= 10^{-6} + 3.44/1{,}600 \approx 0.002151$, so $s\_N^2 \approx 465$,
+$s\_N \approx 21.6$ k€ per 100 m²; $m\_N \approx 465 \cdot 1{,}208/1{,}600 \approx 351$.
+
+**2.** Parameter variance $x^2 s\_N^2$. At $x = 1$: mean 351, noise 40,
+parameter 21.6, total $\sqrt{465 + 1{,}600} \approx 45$ k€. At $x = 6$: mean
+$\approx 2{,}106$, noise 40, parameter $6 \cdot 21.6 \approx 129$, total
+$\approx 135$ k€.
+
+**3.** $\sum x\_i^2 = 3.44 + 4 \cdot 36 = 147.44$, precision $\approx 0.0922$,
+$s\_N^2 \approx 10.9$. At $x = 6$: parameter sd $\approx 6 \cdot 3.3 \approx 19.8$,
+total $\sqrt{391 + 1{,}600} \approx 44.6$ k€. The noise term is untouched.
+
+**4.** Without an intercept, every line passes through the origin, so pinning
+down the slope at 100 m² pins it down everywhere: the model *assumes* that
+price is proportional to area all the way to 600 m². The small parameter term
+is bought by that assumption, not by data near the villa. With an intercept
+(Lecture 07), lines pivot around the data and the parameter term grows with the
+distance from it. A confident extrapolation is only as good as the model
+family — the term that no formula shows.
+
+</div>
+
+
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 7.B.2: The Two Terms in numpy
+
+Reproduce the lecture's table (σ = 40 k€, prior $\mathcal{N}(\mathbf{0}, \mathrm{diag}(500^2, 10^2))$).
+Fill in the three blanks.
+
+```python
+import numpy as np
+x = np.array([40, 44, 48, 53, 57, 61, 65, 69, 74, 78,
+              82, 86, 91, 95, 99, 103, 107, 112, 116, 120.])
+y = np.array([157, 207, 114, 241, 199, 188, 200, 204, 248, 294,
+              299, 314, 255, 272, 384, 379, 430, 415, 357, 443.])
+sigma, S0 = 40.0, np.diag([500.0**2, 10.0**2])
+
+def posterior(x, y):
+    X = np.c_[np.ones_like(x), x]
+    SN = ...                                   # (1) posterior covariance
+    mN = ...                                   # (2) posterior mean
+    return mN, SN
+
+mN, SN = posterior(x, y)
+for q in [80, 120, 300, 600]:
+    v = np.array([1.0, q])
+    param_var = ...                            # (3) parameter term
+    print(q, v @ mN, sigma, np.sqrt(param_var), np.sqrt(param_var + sigma**2))
+```
+
+Then add ten villas, `x_v = np.linspace(550, 650, 10).round()` with
+`y_v = [1900, 1984, 2014, 2056, 2133, 2068, 2133, 2148, 2239, 2325]`, and
+print the row for 600 m² again.
+
+
+--
+
+## Exercise 7.B.2: The Two Terms in numpy — Solution
+
+
+<div class="fragment">
+
+```python
+    SN = np.linalg.inv(np.linalg.inv(S0) + X.T @ X / sigma**2)   # (1)
+    mN = SN @ X.T @ y / sigma**2                                 # (2)
+    param_var = v @ SN @ v                                       # (3)
+```
+
+Output (rounded): 80 m²: mean 280, parameter sd 8.9, total 41.0 · 120 m²:
+420, 17.2, 43.5 · 300 m²: 1,049, 81.1, 90.5 · 600 m²: 2,098, 190.8, 195.0.
+With the ten villas, 600 m²: mean 2,100, parameter sd 12.6, total 41.9 — the
+numbers of the lecture's table.
+
+</div>
+
+
+
+
+--
+
+## Exercise 7.B.3: Which Term?
+
+For each situation, say whether the extra uncertainty shows up in the **noise
+term** $\sigma^2$, in the **parameter term** $\mathbf{x}^{\*\top}\mathbf{S}\_N\mathbf{x}^{\*}$,
+or in **neither** — and what would reduce it.
+
+1. Two flats with identical area sold a month apart for €310k and €370k.
+2. The model is asked about a 600 m² villa.
+3. The model is asked about a 600 m² villa, and villas actually sell at a luxury
+   premium of 5,000 €/m².
+4. The training data contain only 5 flats instead of 20, all of 40–120 m².
+5. A lender lends up to the mean minus two sd. Why does the lecture's lender
+   gain about €0.3M of credit on the villa from ten comparable sales, but
+   almost nothing on an 80 m² flat from a thousand more flats?
+
+
+--
+
+## Exercise 7.B.3: Which Term? — Solution
+
+
+<div class="fragment">
+
+1. **Noise** — aleatoric relative to the attributes. More flats do not help; a
+   new attribute (condition, floor, view) might.
+2. **Parameter** — far from the data the plausible lines disagree. Data near
+   600 m² reduces it.
+3. **Neither** — the band is uncertainty within the linear model; a wrong
+   family is invisible to it. Held-out data where you predict, or comparing
+   model families, can reveal it.
+4. **Parameter**, everywhere — fewer data, wider posterior. More data reduces it.
+5. At the villa the total sd is 195 k€, almost all parameter term; ten villas
+   cut it to 42 k€, so the lent amount rises from
+   2,098 − 390 ≈ €1.71M to 2,100 − 84 ≈ €2.02M (in k€: 1,708 and 2,016).
+   At 80 m² the total sd is already 41 k€, almost all noise; more flats cannot
+   go below 40 k€, so the loan moves by about €2k at most.
+
+</div>
+
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

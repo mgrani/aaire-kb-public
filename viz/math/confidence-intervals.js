@@ -25,7 +25,7 @@ const Z = { 0.8: 1.2816, 0.9: 1.6449, 0.95: 1.96, 0.99: 2.5758 }
 export async function mount(el, { d3, params, steps, isPrint }) {
   const W = 760
   const H = 430
-  const TOP = 54
+  const TOP = 70 // leaves room for the 'true μ' label below the caption
   const BOT = 372
   const mu = params.mu ?? 100
   const sigma = params.sigma ?? 15
@@ -47,7 +47,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   svg.append('g')
     .attr('transform', `translate(0,${BOT + 8})`).attr('color', NAVY)
-    .call(d3.axisBottom(x).ticks(7))
+    .call(d3.axisBottom(x).ticks(7)).attr('font-size', 14)
 
   const gRows = svg.append('g')
   const truth = svg.append('line')
@@ -125,7 +125,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     } else if (step === 3) {
       caption.attr('fill', NAVY).text('The percentage is a property of the procedure, not of one interval')
     } else if (step === 2) {
-      caption.attr('fill', NAVY).text('Twenty more samples, each with its own interval')
+      caption.attr('fill', NAVY).text('Twenty samples, each with its own interval')
     } else if (step === 1) {
       caption.attr('fill', NAVY).text('One sample, one interval. Does it contain μ?')
     } else {

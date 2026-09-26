@@ -1,0 +1,538 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 6 — Evaluation and Empirical Risk Minimisation — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 6
+## Evaluation and Empirical Risk Minimisation
+
+Probabilistic Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Six exercises, about 50 minutes, pen and paper; a calculator helps for 6.B.1
+and 6.C.2. They follow the lecture's order: measuring a rare class (6.A), error
+bars (6.B), decisions from scores and scoring probabilities (6.C), and ERM as
+the shortcut that drops probabilities (6.D). Every number in the solutions was
+recomputed (numpy/scipy).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 6.A Measuring a Rare Class
+
+--
+
+## Exercise 6.A.1: A New Fraud Model
+
+A new fraud model is tested on **200,000** transactions, one in 1,000 of them
+fraudulent. It flags **750** transactions, **150** of which are frauds.
+
+1. Fill in the confusion matrix (TP, FN, FP, TN).
+2. Compute the model's accuracy, recall and precision, and the accuracy of the
+   "always legitimate" baseline.
+3. A check costs €5, a missed fraud €500. Compute the total cost of the model,
+   of "always legitimate" and of "flag everything".
+4. The model is moved to a market where one transaction in **100** is
+   fraudulent. Its recall and its false-alarm rate stay the same. What is its
+   precision there?
+
+
+--
+
+## Exercise 6.A.1: A New Fraud Model — Solution
+
+
+<div class="fragment">
+
+**1.** 200 frauds, 199,800 legitimate: TP = 150, FN = 50, FP = 600,
+TN = 199,200.
+
+**2.** Accuracy $= (150 + 199{,}200)/200{,}000 = 0.99675$; baseline
+$199{,}800/200{,}000 = 0.999$ — the baseline "wins" again. Recall
+$= 150/200 = 0.75$, precision $= 150/750 = 0.20$.
+
+**3.** Model: 50 · €500 + 600 · €5 = €28,000. Always legitimate:
+200 · €500 = €100,000. Flag everything: 199,800 · €5 = €999,000.
+The model is by far the cheapest although its accuracy is the lowest of the two
+sensible options.
+
+**4.** False-alarm rate $600/199{,}800 \approx 0.3\\%$. In 200,000 transactions at
+1/100: 2,000 frauds, TP $= 0.75 \cdot 2{,}000 = 1{,}500$, FP
+$\approx 0.003 \cdot 198{,}000 \approx 595$. Precision
+$= 1{,}500/2{,}095 \approx 0.72$. Precision depends on the base rate, recall
+does not.
+
+</div>
+
+
+
+
+--
+
+## Exercise 6.A.2: The Bayes Error
+
+A single attribute $x$ takes three values:
+
+| $x$ | $P(x)$ | $P(y = 1 \mid x)$ |
+|---|---|---|
+| A | 0.5 | 0.1 |
+| B | 0.3 | 0.5 |
+| C | 0.2 | 0.8 |
+
+1. Which classifier has the smallest true error (0/1 loss)? Compute its error —
+   the Bayes error.
+2. What is the error of "always predict 0"?
+3. A team reports a test error of **0.20** on **100** test cases. Is that
+   evidence that their model beats the Bayes error? What if the same 0.20 came
+   from **10,000** test cases?
+4. Would more rows of the same data lower the Bayes error? What would?
+
+
+--
+
+## Exercise 6.A.2: The Bayes Error — Solution
+
+
+<div class="fragment">
+
+**1.** Predict the more probable label for each $x$: 0 for A, 1 for C, either
+for B. Error $= 0.5 \cdot 0.1 + 0.3 \cdot 0.5 + 0.2 \cdot 0.2 = 0.24$.
+
+**2.** $P(y = 1) = 0.05 + 0.15 + 0.16 = 0.36$.
+
+**3.** $\mathrm{SE} = \sqrt{0.2 \cdot 0.8/100} = 0.04$, so the test error is
+$0.20 \pm 0.08$ (±2 SE) — compatible with 0.24; no evidence of anything. On
+10,000 cases, $\mathrm{SE} = 0.004$ and $0.20 \pm 0.008$ excludes 0.24: no
+classifier can do that in expectation, so look for a **leak** (test cases seen
+in training, a feature that encodes the label) or a test set not drawn from
+the same distribution.
+
+**4.** No — the 0.24 is aleatoric relative to $x$. Only a **new attribute**
+that separates the cases inside B (and A, C) can lower it.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 6.B Numbers With Error Bars
+
+--
+
+## Exercise 6.B.1: Error Bars on a Recall
+
+On a test set of **50,000** transactions there are **50** frauds; model A
+catches **40** of them.
+
+1. Compute the recall, its standard error and a ±2 SE interval.
+2. With a flat prior, what is the Beta posterior for the recall? Give its mean.
+   (Its 95% credible interval is $[0.67, 0.89]$.)
+3. How many test frauds — and roughly how many transactions — are needed for an
+   error bar of ±0.02 (±2 SE) at a recall near 0.8?
+4. Model B catches 42 of the 50. The two models disagree on **5** frauds: B
+   caught 4 of them, A caught 1. If both models were equally good, each
+   disagreement would go either way with probability ½. How likely is a split
+   at least as lopsided as 4 : 1 in B's favour? Conclusion?
+
+
+--
+
+## Exercise 6.B.1: Error Bars on a Recall — Solution
+
+
+<div class="fragment">
+
+**1.** Recall $= 40/50 = 0.80$, $\mathrm{SE} = \sqrt{0.8 \cdot 0.2/50} \approx 0.057$,
+interval $\approx [0.69, 0.91]$.
+
+**2.** $\mathrm{Beta}(1 + 40, 1 + 10) = \mathrm{Beta}(41, 11)$, mean
+$41/52 \approx 0.79$ — pulled slightly towards 0.5 by the flat prior's one
+pseudo-catch and one pseudo-miss.
+
+**3.** $\mathrm{SE} = 0.01$: $0.16/n = 0.0001$, so $n = 1{,}600$ frauds, about
+**1.6 million** transactions at one in 1,000.
+
+**4.** $P(\text{4 or 5 of 5}) = (5 + 1)/32 \approx 0.19$. A split this lopsided
+happens about one time in five by chance: no evidence that B is better. Only the
+five disagreements carry information about the difference — the 45 frauds that
+both caught or both missed do not.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 6.C From Scores to Decisions
+
+--
+
+## Exercise 6.C.1: Thresholds From Costs
+
+A check costs €5 ($c\_{FP}$), a missed fraud €500 ($c\_{FN}$).
+
+1. Derive the threshold $p^{\*}$ above which checking is cheaper in expectation.
+2. The bank buys chargeback insurance, and a missed fraud now costs **€100**.
+   What is the new threshold?
+3. Four transactions have calibrated scores 0.002, 0.03, 0.09 and 0.4. Which
+   are checked under the old and under the new costs? Verify the 0.03 case with
+   expected costs.
+4. It turns out the model's scores are **twice** the true probabilities. What
+   goes wrong with the rule of part 1, and how do you repair it?
+
+
+--
+
+## Exercise 6.C.1: Thresholds From Costs — Solution
+
+
+<div class="fragment">
+
+**1.** Check iff $(1 - p) \cdot c\_{FP} < p \cdot c\_{FN}$, i.e.
+$p > p^{\*} = c\_{FP}/(c\_{FP} + c\_{FN}) = 5/505 \approx 0.0099$.
+
+**2.** $p^{\*} = 5/105 \approx 0.048$.
+
+**3.** Old costs: check 0.03, 0.09, 0.4; let 0.002 through. New costs: check
+0.09 and 0.4 only. For 0.03 under the new costs: letting through costs
+0.03 · €100 = €3, checking 0.97 · €5 = €4.85 — let it through. Under
+the old costs, letting through would cost €15.
+
+**4.** A score of 0.0099 means a true probability of about 0.005, so the rule
+checks transactions whose true $p$ is only half the break-even: too many
+checks. Either calibrate the scores (Lecture 03: reliability diagram on held-out
+data, then refit) or, equivalently here, apply the threshold $2p^{\*} \approx 0.02$
+to the raw score. The cost rule needs **calibrated** probabilities.
+
+</div>
+
+
+
+
+--
+
+## Exercise 6.C.2: Scoring Probabilities
+
+Five held-out transactions with outcomes $y = (1, 0, 0, 0, 1)$ (1 = fraud).
+
+| | $p\_1$ | $p\_2$ | $p\_3$ | $p\_4$ | $p\_5$ |
+|---|---|---|---|---|---|
+| model A | 0.8 | 0.1 | 0.2 | 0.1 | 0.6 |
+| model B | 0.99 | 0.01 | 0.01 | 0.01 | 0.4 |
+
+1. Compute each model's accuracy at the threshold 0.5.
+2. Compute each model's log-loss (natural logarithm) and Brier score.
+3. The three measures do not agree. What does each one reward?
+
+
+--
+
+## Exercise 6.C.2: Scoring Probabilities — Solution
+
+
+<div class="fragment">
+
+**1.** A: 5/5 = 1.0. B misses the last fraud ($0.4 < 0.5$): 4/5 = 0.8.
+
+**2.** Log-loss, A: $(0.223 + 0.105 + 0.223 + 0.105 + 0.511)/5 \approx 0.234$.
+B: $(4 \cdot 0.010 + 0.916)/5 \approx 0.191$. Brier, A:
+$(0.04 + 0.01 + 0.04 + 0.01 + 0.16)/5 = 0.052$; B:
+$(4 \cdot 0.0001 + 0.36)/5 \approx 0.072$.
+
+**3.** Accuracy rewards being on the right side of 0.5 and ignores how far —
+it prefers A. Log-loss rewards confident correct predictions strongly and is
+lenient to B's single moderate miss (0.4 on a fraud is not a confident error),
+so it prefers B. Brier is bounded and closer to a squared distance, so the one
+0.4 miss weighs more and it prefers A. Both log-loss and Brier are proper;
+with five cases, neither difference is meaningful — the error-bar lesson of
+6.B applies to these scores too.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 6.D The Shortcut: Keep the Loss
+
+--
+
+## Exercise 6.D.1: What Is ERM, and What Does It Drop?
+
+1. Show that the MAP estimate for linear regression with Gaussian noise
+   $\mathcal{N}(0, \sigma^2)$ and prior $\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \tau^2\mathbf{I})$
+   minimises $\frac{1}{n}\sum\_i (y\_i - \mathbf{w}^\top\mathbf{x}\_i)^2 + \lambda \lVert\mathbf{w}\rVert^2$.
+   Express $\lambda$ in $\sigma$, $\tau$ and $n$.
+2. Evaluate $\lambda$ for $\sigma = 40$, $\tau = 10$ and $n = 20$, then
+   $n = 2{,}000$. What happens to the prior?
+3. For each method, say whether it is ERM in the form
+   $\min\_h \frac{1}{n}\sum\_i L(h(\mathbf{x}\_i), y\_i)$, and whether its output is a
+   probability: logistic regression · linear SVM · naive Bayes (maximum
+   likelihood) · Bayesian linear regression.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 6.D.1: What Is ERM, and What Does It Drop? — Solution
+
+
+<div class="fragment">
+
+**1.** $-\log p(\mathbf{w} \mid D) = \frac{1}{2\sigma^2}\sum\_i (y\_i - \mathbf{w}^\top\mathbf{x}\_i)^2 + \frac{1}{2\tau^2}\lVert\mathbf{w}\rVert^2 + \text{const}$.
+Multiplying by $2\sigma^2/n$ does not move the minimum and gives the stated form
+with $\lambda = \sigma^2/(n\tau^2)$.
+
+**2.** $n = 20$: $\lambda = 1{,}600/2{,}000 = 0.8$. $n = 2{,}000$: $\lambda = 0.008$.
+The prior's weight falls like $1/n$ — Lecture 02's pseudo-counts being swamped
+by data.
+
+**3.**
+
+| method | ERM form? | output a probability? |
+|---|---|---|
+| logistic regression | yes, $L = -\log p(y \mid \mathbf{x})$ | yes |
+| linear SVM | yes, hinge loss (+ penalty) | **no** — a margin score |
+| naive Bayes | no — maximises $\log p(\mathbf{x}, y)$ | yes (often poorly calibrated) |
+| Bayesian linear regression | no — nothing is minimised | yes, a whole predictive distribution |
+
+</div>
+
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

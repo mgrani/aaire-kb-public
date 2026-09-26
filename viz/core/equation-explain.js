@@ -29,7 +29,6 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const n = labels.length
   // KaTeX renders asynchronously after Reveal is ready; wait for it.
   await waitFor(() => el.querySelector('.katex') && el.querySelector('.eq-1'))
-
   const scale = () => (window.Reveal?.getScale?.() ?? 1)
   const svg = d3.select(el).append('svg').attr('class', 'eq-annotations')
   const parts = []
@@ -38,33 +37,56 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     if (span) parts.push({ i, span, label: labels[i - 1], colour: `var(--eq-${i})` })
   }
 
+  const FS = 15
+  const ROW = 40 // a brace must not sit right under the previous row's label
+
   function layout() {
     svg.selectAll('*').remove()
     const s = scale()
     const box = el.getBoundingClientRect()
-    const rows = parts.map((p, k) => {
-      const r = p.span.getBoundingClientRect()
-      return { ...p, x: (r.left - box.left) / s, w: r.width / s, row: k % 2 }
-    })
-    const H = 70
-    svg.attr('viewBox', `0 0 ${box.width / s} ${H}`).attr('height', H)
+    const width = box.width / s
+    // Greedy row packing: a label goes on the first row where neither its
+    // brace nor its text overlaps anything already there. Text width is
+    // estimated (the slide may still be display:none when this runs).
+    const placed = []
+    const rows = parts
+      .map((p) => {
+        const r = p.span.getBoundingClientRect()
+        return { ...p, x: (r.left - box.left) / s, w: r.width / s }
+      })
+      .sort((a, b) => a.x - b.x)
+      .map((p) => {
+        const tw = FS * 0.55 * p.label.length
+        const cx = Math.min(Math.max(p.x + p.w / 2, tw / 2 + 2), width - tw / 2 - 2)
+        const lo = Math.min(p.x, cx - tw / 2) - 8
+        const hi = Math.max(p.x + p.w, cx + tw / 2) + 8
+        let row = 0
+        while (placed.some((q) => q.row === row && q.lo < hi && lo < q.hi)) row++
+        placed.push({ row, lo, hi })
+        return { ...p, cx, row }
+      })
+    const nRows = Math.max(1, ...rows.map((p) => p.row + 1))
+    const H = 10 + nRows * ROW
+    svg.attr('viewBox', `0 0 ${width} ${H}`).attr('height', H)
     for (const p of rows) {
-      const y = 6 + p.row * 30
+      const y = 6 + p.row * ROW
       const g = svg.append('g').attr('class', `eq-ann eq-ann-${p.i}`)
       // a flat brace: short verticals at the ends, a horizontal bar, a tick to the label
       g.append('path')
-        .attr('d', `M${p.x},${y} v6 H${p.x + p.w} v-6 M${p.x + p.w / 2},${y + 6} v8`)
+        .attr('d', `M${p.x},${y} v6 H${p.x + p.w} v-6 M${p.x + p.w / 2},${y + 6} v6`)
         .attr('fill', 'none').attr('stroke', p.colour).attr('stroke-width', 1.8)
       g.append('text')
-        .attr('x', p.x + p.w / 2).attr('y', y + 26)
-        .attr('text-anchor', 'middle').attr('font-size', 13)
+        .attr('x', p.cx).attr('y', y + 27)
+        .attr('text-anchor', 'middle').attr('font-size', FS)
         .attr('fill', p.colour).text(p.label)
     }
   }
 
   function render(step) {
     layout()
-    const all = step >= n || isPrint
+    // The last step still focuses the last part (every brace is visible by
+    // then); only print, or a step past the last part, shows all undimmed.
+    const all = step > n || isPrint
     el.classList.toggle('eq-focus', step > 0 && !all)
     parts.forEach((p) => {
       p.span.classList.toggle('eq-current', step === p.i && !all)

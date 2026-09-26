@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -14,6 +14,93 @@ Notes:
 Converted from LNKB-tex part-en-ds-chp9-visual-analytics-projections.tex. Builds
 on Lecture 02 (variance, covariance), Lecture 07 (curse of dimensionality) and
 Lecture 08 (distance matrices).
+
+--
+
+## Where We Left Off
+
+Lectures 08–09 found structure in more dimensions than anyone can look at.
+Today maps them into two — which requires deciding what to lose.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Lecture 07
+plot it
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Lectures 08–09
+too many dimensions to plot
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Today
+project: choose what to keep
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+This is the last lecture — and the last instance of Lecture 01's claim: no
+projection lets the data speak for itself.
+
+</div>
+
+
+Notes:
+Lecture 07's advice was "plot before you fit". With four attributes that is a
+scatterplot matrix; with forty it is impossible. A projection makes the plot
+possible again, at the price of a criterion for what the picture keeps. Every
+method today is a different criterion.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 10: projections that must lose information — random projections, PCA and what variance assumes, multidimensional scaling and latent semantic analysis](/courses/data-science/figures/l10-argument-map.svg)
+
+</div>
+
+
+Notes:
+Something must be lost; a projection is defined by what it keeps. Random
+projections keep distances without looking at the data: a guarantee without
+meaning. PCA keeps variance: powerful where variance is information,
+misleading where it is not. MDS keeps distances from similarities alone; LSA
+keeps co-occurrence. End on the bottom row and then on the whole strip: every
+lecture chose what to keep; the data never chose for us.
 
 ---
 
@@ -40,8 +127,9 @@ space — usually 2-D or 3-D, so that it can be plotted and reasoned about.
 
 ### Linear projections
 $$\mathbf{z} = \mathbf{P} \mathbf{x}$$
-A matrix $\mathbf{P}$ maps every point. Distances and angles are distorted in a
-predictable, global way the map is interpretable and invertible in structure.
+A matrix $\mathbf{P}$ maps every point. Distortion is global and predictable,
+and each new axis is a weighted sum of the old ones. A *reducing* $\mathbf{P}$ is
+not invertible: what it drops cannot be recovered.
 
 </div>
 
@@ -49,8 +137,9 @@ predictable, global way the map is interpretable and invertible in structure.
 <div class="card">
 
 ### Non-linear projections
-Preserve some **local** property — neighbourhoods, or pairwise distances —
-without a single global matrix. More faithful visually, harder to interpret.
+No single matrix. Methods such as **t-SNE** and **UMAP** keep **local
+neighbourhoods** — who is near whom — at the price of global distances. Often
+more faithful visually, harder to interpret.
 
 </div>
 
@@ -167,6 +256,19 @@ approximate distances need far fewer.
 
 
 
+<div class="c-note">
+
+With $d$ as in the lemma, such a random $\mathbf{R}$ meets the $1 \pm \epsilon$
+bound **with high probability** — the lemma's projection can simply be drawn.
+
+</div>
+
+
+--
+
+## Properties and Limits
+
+
 <div class="grid-2">
 
 
@@ -195,7 +297,7 @@ distances, not structure, and works best when $d$ is not too small.
 <div class="takeaway">
 
 Random projection preserves distances **with a guarantee and without looking at
-the data**. Use it when you need speed and a bound use PCA when you need
+the data**. Use it when you need speed and a bound; use PCA when you need
 meaning.
 
 </div>
@@ -215,69 +317,24 @@ meaning.
 
 ## Which Direction Matters?
 
-Consider a cloud of points that is stretched along one diagonal. Projecting onto
-the **short** axis collapses everything into a blob projecting onto the **long**
-axis keeps the points apart.
+A cloud stretched along a diagonal: projected onto the **short** axis it
+collapses into a blob; onto the **long** axis its points stay apart.
 
 
 <div class="c-important">
 
-**PCA's criterion:** keep the directions along which the data **varies most**.
-Variance is treated as information directions with little variance are treated
-as noise.
+**PCA's criterion:** the 1st component is the direction of **maximum
+variance**; each further one takes the most *remaining* variance, **orthogonal**
+to all before it.
 
 </div>
 
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### 1st component
-The direction of maximum variance.
-
-</div>
-
-
-<div class="card">
-
-### 2nd component
-The direction of maximum remaining variance, **orthogonal** to the first.
-
-</div>
-
-
-<div class="card">
-
-### and so on
-Each component orthogonal to all previous ones, each capturing less variance.
-
-</div>
-
-
-</div>
-
-
-Notes:
-Intuition first (P4). Ask whether "most variance" always means "most
-interesting" — it does not: for classification, the discriminating direction
-may have small variance. That caveat returns in the drawbacks slide.
-
---
-
-## What the Components Are
-
-The components are ordered, so keeping the first $m$ gives the **best possible
-$m$-dimensional linear approximation** in the least-squares sense.
 
 
 <div class="c-note">
 
-Equivalently: PCA finds the linear subspace minimising the total squared
-distance from the points to their projections. Maximising retained variance and
-minimising reconstruction error are the **same** criterion.
+The first $m$ components are the **best $m$-dimensional linear approximation**:
+most variance kept = least squared reconstruction error.
 
 </div>
 
@@ -285,11 +342,19 @@ minimising reconstruction error are the **same** criterion.
 
 <div class="takeaway">
 
-PCA orders directions by **variance** and keeps the top ones. Its assumption —
-that variance is information — is what makes it powerful and what makes it fail.
+PCA keeps the directions of highest **variance**. Its assumption — variance is
+information — makes it powerful, and makes it fail.
 
 </div>
 
+
+Notes:
+Intuition first (P4). The equivalence in the note is Pythagoras: for centred
+data, each point's squared length splits into the part kept by the projection
+and the part lost, so maximising one minimises the other. Ask whether "most
+variance" always means "most interesting" — it does not: for classification,
+the discriminating direction may have small variance. That caveat returns in the
+mini-exercise of the algorithm unit.
 
 --
 
@@ -348,46 +413,45 @@ from Lecture 02, where covariance was introduced.
 
 <div class="c-definition">
 
-The directions that diagonalise $\mathbf{C}$ are its **eigenvectors** the
+The directions that diagonalise $\mathbf{C}$ are its **eigenvectors**; the
 variance captured by each is the corresponding **eigenvalue**.
 
 Sorting eigenvectors by descending eigenvalue gives the principal components,
-and the projection matrix is the top $m$ of them.
+and the projection matrix $\mathbf{W}\_m$ holds the top $m$ of them.
 
 </div>
 
 
 
-<div class="grid-3">
+<div class="c-note">
 
-
-<div class="card">
-
-### Orthogonal
-Eigenvectors of a symmetric matrix are mutually orthogonal — the components are
-uncorrelated by construction.
+$\mathbf{C}$ is symmetric, so its eigenvectors are orthogonal: the components are
+**uncorrelated by construction**. The share of total variance in component $i$
+is its **explained variance** $\lambda\_i / \sum\_j \lambda\_j$.
 
 </div>
 
 
-<div class="card">
+Notes:
+The explained-variance ratio is the practical output students will actually use
+— it is what a scree plot shows and how "how many components?" gets answered.
 
-### Ordered
-$\lambda_1 \geq \lambda_2 \geq \ldots$ ranks the directions by variance.
+--
 
-</div>
+## A Two-Attribute Example
 
+Two attributes in the same unit, each with variance 2, covariance 1:
 
-<div class="card">
+$$
+\mathbf{C} = \begin{pmatrix} 2 & 1 \\\ 1 & 2 \end{pmatrix}, \qquad
+\mathbf{C}\begin{pmatrix} 1 \\\ 1 \end{pmatrix} = 3\begin{pmatrix} 1 \\\ 1 \end{pmatrix}, \qquad
+\mathbf{C}\begin{pmatrix} 1 \\\ -1 \end{pmatrix} = 1\begin{pmatrix} 1 \\\ -1 \end{pmatrix}
+$$
 
-### Explained variance
-$\lambda_i / \sum_j \lambda_j$ is the share of total variance in component $i$.
-
-</div>
-
-
-</div>
-
+| component | direction | eigenvalue | explained variance |
+|---|---|---|---|
+| PC1 | $(1, 1)/\sqrt{2}$ — "both together" | $\lambda\_1 = 3$ | $3/4 = 75\\%$ |
+| PC2 | $(1, -1)/\sqrt{2}$ — "one against the other" | $\lambda\_2 = 1$ | $1/4 = 25\\%$ |
 
 
 <div class="takeaway">
@@ -399,8 +463,12 @@ the directions, eigenvalues give their importance, and the top ones are kept.
 
 
 Notes:
-The explained-variance ratio is the practical output students will actually use
-— it is what a scree plot shows and how "how many components?" gets answered.
+Check by multiplication, no characteristic polynomial needed: C·(1,1) = (3,3),
+C·(1,−1) = (1,−1). The eigenvalues sum to the trace, 2 + 2 = 4, which is the
+total variance — that is why the shares are 3/4 and 1/4. Keeping only PC1 loses
+a quarter of the variance; the positive covariance is what tilts PC1 onto the
+diagonal. With covariance 0 both eigenvalues would be 2 and no direction would
+be preferred.
 
 --
 
@@ -409,11 +477,11 @@ The explained-variance ratio is the practical output students will actually use
 
 <div class="c-algorithm">
 
-1. **Centre** the data (and usually **standardise** it).
+1. **Centre** the data; **standardise** it if the units differ.
 2. Compute the covariance matrix $\mathbf{C}$.
 3. Compute its eigenvectors and eigenvalues.
-4. Sort by descending eigenvalue keep the top $m$.
-5. Project: $\mathbf{Z} = \mathbf{X} \mathbf{W}_m$.
+4. Sort by descending eigenvalue; keep the top $m$.
+5. Project: $\mathbf{Z} = \mathbf{X} \mathbf{W}\_m$.
 
 </div>
 
@@ -421,9 +489,10 @@ The explained-variance ratio is the practical output students will actually use
 
 <div class="c-warning">
 
-Step 1 is not optional. Without standardisation, an attribute measured in
-metres dominates one measured in kilometres purely through its **unit** — PCA
-would report the choice of unit as the principal direction.
+**Centring is not optional**: the covariance formula assumes it. **Standardising
+is a choice** — make it when units differ. Otherwise an attribute in metres
+dominates one in kilometres purely through its **unit**, and PCA reports the
+choice of unit as the principal direction.
 
 </div>
 
@@ -431,7 +500,9 @@ would report the choice of unit as the principal direction.
 Notes:
 Also known as the discrete Karhunen–Loève transform. The standardisation trap is
 the single most common practical error and worth stating as a rule: always ask
-what the units are before running PCA.
+what the units are before running PCA. When all attributes share a unit (pixel
+intensities, say), standardising can hurt: it inflates directions that are mostly
+noise.
 
 --
 
@@ -448,8 +519,8 @@ explained-variance threshold (80%, 95%).
 <div class="card good">
 
 ### Benefits
-Removes correlated and noisy directions speeds up downstream methods makes
-2-D visualisation possible components are uncorrelated by construction.
+Removes correlated and noisy directions; speeds up downstream methods; makes
+2-D visualisation possible; components are uncorrelated by construction.
 
 </div>
 
@@ -471,60 +542,33 @@ importance — which for classification can be false.
 
 ## Mini-Exercise
 
-You run PCA on the iris dataset and the first two components explain 96% of the
-variance.
+You run PCA on the standardised iris data; the first two components explain 96%
+of the variance.
 
-1. What does that number mean?
-2. Does it mean the two components are good features for classifying species?
-3. When could a **low-variance** direction be the important one?
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+Are these two components therefore good features for telling the species apart?
+
+</div>
+
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** A 2-D linear approximation reconstructs the data with only 4% of the
-total squared variation lost.
-
-</div>
-
-
-<div class="card">
-
-**2.** Not necessarily. PCA is **unsupervised** — it never saw the labels, and
-optimises reconstruction, not separability.
-
-</div>
-
-
-<div class="card">
-
-**3.** Whenever the classes differ along a direction with small spread — a thin
-but decisive offset. Discriminant analysis targets exactly that instead.
-
-</div>
-
-
-</div>
-
+**Not necessarily.** 96% says a 2-D picture loses only 4% of the variation. PCA
+never saw the labels: it optimises reconstruction, and the species may differ
+along a thin, low-variance direction.
 
 </div>
 
 
 
-<div class="takeaway">
+<div class="takeaway fragment">
 
 PCA is centre → covariance → eigendecomposition → keep the top components. It
-optimises **reconstruction**, not discrimination, and it must be standardised
-first.
+optimises **reconstruction**, not discrimination; centring is mandatory,
+standardising a choice made by the units.
 
 </div>
 
@@ -562,37 +606,6 @@ strongly.
 
 
 
-<div class="grid-3">
-
-
-<div class="card">
-
-### Arrows together
-Those attributes are positively correlated.
-
-</div>
-
-
-<div class="card">
-
-### Arrows opposed
-Negatively correlated.
-
-</div>
-
-
-<div class="card">
-
-### Arrows at 90°
-Roughly uncorrelated.
-
-</div>
-
-
-
-</div>
-
-
 <div class="c-tip">
 
 A biplot is how you recover interpretability after PCA has destroyed it: the
@@ -601,6 +614,23 @@ attributes.
 
 </div>
 
+
+Notes:
+Worth demonstrating on any two-component PCA: students can immediately name PC1
+("overall size") and PC2 ("shape") from the arrow pattern, which no eigenvalue
+table conveys.
+
+--
+
+## Reading the Arrows
+
+| arrows | the two attributes are |
+|---|---|
+| pointing together | positively correlated |
+| pointing in opposite directions | negatively correlated |
+| at about 90° | roughly uncorrelated |
+| long | well represented by the two components |
+| short | mostly outside the plotted plane — do not read its angles |
 
 
 <div class="takeaway">
@@ -612,9 +642,69 @@ into the projected space — points and variables read together.
 
 
 Notes:
-Worth demonstrating on any two-component PCA: students can immediately name PC1
-("overall size") and PC2 ("shape") from the arrow pattern, which no eigenvalue
-table conveys.
+The angle reading is exact only for the part of each attribute that lies in the
+plane of the first two components; on standardised data with most variance in
+two components it approximates the correlation well. A short arrow is the
+warning sign: that attribute lives mainly in the discarded components.
+
+--
+
+## The Churn Shop: What Does PC1 Mean?
+
+Four customer attributes: tenure, annual spend, app logins, support tickets.
+A biplot of the standardised table might show:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">The arrows</span>
+
+Tenure, spend and logins point **together** along PC1; tickets points the
+**other way**.
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">The reading</span>
+
+PC1 is something like **engagement**, and the customers who churned sit at its
+low end.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-warning">
+
+Unstandardised, spend in euros has by far the largest variance, and PC1 is
+simply **spend**. Standardising decides what PC1 can mean — Lecture 08's
+scaling choice again.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The running example, one last time; the arrow pattern is illustrative, not
+computed from a real table. The name "engagement" is our interpretation of the
+arrows, not something PCA found: the method only keeps the direction of largest
+variance. Ask whether PC1 is the direction that best separates churners from
+stayers — not necessarily: PCA never saw the churn label (variance is not
+discrimination, as the map says).
+
 
 ---
 
@@ -628,136 +718,18 @@ table conveys.
 
 --
 
-## The Problem With Matching Words
-
-A document is represented as a vector of term counts — the **term–document
-matrix**. Similarity is then the overlap of vocabulary, which fails twice:
-
-
-<div class="grid-2">
-
-
-<div class="card bad">
-
-### Synonymy
-"car" and "automobile" never match, though the documents are about the same
-thing.
-
-</div>
-
-
-<div class="card bad">
-
-### Polysemy
-"bank" matches across finance and rivers, though the documents are unrelated.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-important">
-
-The vocabulary is the wrong space. We want a space of **concepts**, in which
-related terms lie close together.
-
-</div>
-
-
-Notes:
-The two failures are the motivation for every embedding method that followed,
-right up to modern language models. Say so — students recognise the problem
-statement from tools they use.
-
---
-
-## The Approach
-
-
-<div class="c-definition">
-
-Apply a **singular value decomposition** to the term–document matrix
-$\mathbf{A}$:
-$$
-\mathbf{A} \approx \mathbf{U}_k \boldsymbol{\Sigma}_k \mathbf{V}_k^{\top}
-$$
-and keep the $k$ largest singular values. Documents and terms are both
-represented in the resulting $k$-dimensional **latent space**.
-
-</div>
-
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Dimension reduction
-Thousands of terms collapse to a few hundred latent dimensions.
-
-</div>
-
-
-<div class="card">
-
-### Synonyms merge
-Terms that co-occur with the same contexts end up close together.
-
-</div>
-
-
-<div class="card">
-
-### Noise drops
-Rare, idiosyncratic usage lives in the discarded small singular values.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-SVD is PCA's underlying machinery applied to a rectangular matrix — the same
-"keep the strongest directions" idea, on term–document data.
-
-</div>
-
-
-
-<div class="takeaway">
-
-LSA projects documents and terms into a shared **latent space** via SVD, so that
-similarity survives synonymy. It is dimensionality reduction used as a
-representation, not just as compression.
-
-</div>
-
-
-Notes:
-Connect forward honestly: modern embeddings solve the same problem with learned,
-non-linear, context-sensitive representations — but the objective LSA states is
-still recognisable in them.
-
---
-
 ## A Different Criterion
 
-PCA needs coordinates and preserves **variance**. MDS needs only a **distance
-matrix** and preserves **the distances themselves**.
+PCA needs coordinates and preserves **variance**. MDS needs only a
+**dissimilarity matrix** and preserves **the distances themselves**.
 
 
 <div class="c-definition">
 
-Given pairwise distances $d_{ij}$, find low-dimensional points
-$\mathbf{z}_1, \ldots, \mathbf{z}_n$ minimising the **stress**
+Given pairwise dissimilarities $d\_{ij}$, find low-dimensional points
+$\mathbf{z}\_1, \ldots, \mathbf{z}\_n$ minimising Kruskal's **stress-1**
 $$
-S = \sum_{i < j}\big(\lVert \mathbf{z}_i - \mathbf{z}_j \rVert - d_{ij}\big)^{2}
+S = \sqrt{\frac{\sum\_{i < j}\big(\lVert \mathbf{z}\_i - \mathbf{z}\_j \rVert - d\_{ij}\big)^{2}}{\sum\_{i < j} d\_{ij}^{2}}}
 $$
 
 </div>
@@ -767,16 +739,18 @@ $$
 <div class="c-insight">
 
 This is the projection method for objects that have **no coordinates at all** —
-only a similarity: documents, molecules, survey respondents, perceived
-similarity ratings.
+only a dissimilarity: documents, molecules, survey respondents, perceived
+similarity ratings turned into distances.
 
 </div>
 
 
 Notes:
-The distance-matrix-only requirement is the same property that made HAC
+The denominator makes stress-1 scale-free: measuring in metres or kilometres
+gives the same value, so it can be compared across datasets (rules of thumb
+read 0.05 as good, 0.2 as poor). The distance-matrix-only requirement is the same property that made HAC
 applicable to non-vector data. Point at that parallel — it is the second time
-this course uses "all I need is a similarity".
+this course uses "all I need is a (dis)similarity".
 
 --
 
@@ -839,7 +813,7 @@ positions** carry information. Rotations and reflections are equivalent.
 
 <div class="takeaway">
 
-MDS preserves **distances** rather than variance, works from a similarity matrix
+MDS preserves **distances** rather than variance, works from a dissimilarity matrix
 alone, and produces a map whose axes are meaningless but whose **neighbourhoods
 are faithful** — as far as the stress allows.
 
@@ -849,6 +823,129 @@ are faithful** — as far as the stress allows.
 Notes:
 The "axes mean nothing" warning matters because students read MDS plots like
 scatterplots. Insist that only the pattern of proximity may be interpreted.
+
+--
+
+## The Problem With Matching Words
+
+A document is represented as a vector of term counts — the **term–document
+matrix**. Similarity is then the overlap of vocabulary, which fails twice:
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### Synonymy
+"car" and "automobile" never match, though the documents are about the same
+thing.
+
+</div>
+
+
+<div class="card bad">
+
+### Polysemy
+"bank" matches across finance and rivers, though the documents are unrelated.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-important">
+
+The vocabulary is the wrong space. We want a space of **concepts**, in which
+related terms lie close together.
+
+</div>
+
+
+Notes:
+The two failures are the motivation for every embedding method that followed,
+right up to modern language models. Say so — students recognise the problem
+statement from tools they use.
+
+--
+
+## The Approach
+
+
+<div class="c-definition">
+
+Apply a **singular value decomposition** to the term–document matrix
+$\mathbf{A}$:
+$$
+\mathbf{A} \approx \mathbf{U}\_k \boldsymbol{\Sigma}\_k \mathbf{V}\_k^{\top}
+$$
+and keep the $k$ largest singular values. Documents and terms are both
+represented in the resulting $k$-dimensional **latent space**.
+
+</div>
+
+
+
+<div class="c-note">
+
+SVD is PCA's underlying machinery applied to a rectangular matrix — the same
+"keep the strongest directions" idea, on term–document data (usually without
+centring).
+
+</div>
+
+
+--
+
+## What the Latent Space Buys
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Dimension reduction
+Thousands of terms collapse to a few hundred latent dimensions.
+
+</div>
+
+
+<div class="card">
+
+### Synonyms merge
+Terms that co-occur with the same contexts end up close together.
+
+</div>
+
+
+<div class="card">
+
+### Noise drops
+Rare, idiosyncratic usage lives in the discarded small singular values.
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+LSA projects documents and terms into a shared **latent space** via SVD, so that
+similarity survives synonymy. It is dimensionality reduction used as a
+representation, not just as compression.
+
+</div>
+
+
+Notes:
+Connect forward honestly: modern embeddings solve the same problem with learned,
+non-linear, context-sensitive representations — but the objective LSA states is
+still recognisable in them.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

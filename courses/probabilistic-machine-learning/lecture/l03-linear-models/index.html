@@ -1,70 +1,224 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 03: Linear Models — Classical and Probabilistic</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 03: Linear Models — Keep the Peak, Model Only p(y | x)</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
-## Lecture 03: Linear Models — Classical and Probabilistic
+## Lecture 03: Linear Models — Keep the Peak, Model Only p(y | x)
 
 Prof. Dr. Michael Granitzer
 
 Notes:
-The spine of the course: every classical method is stated first in its usual
-form and then re-derived as maximum likelihood under a stated noise model.
-Reused units carry the classical account the three probabilistic units are new.
+One session. The lecture takes the first two shortcuts of the course on
+methods the students already know: keep the peak (maximum likelihood and MAP,
+Modules 1–2) and model only p(y | x) (discriminative, Module 3), and it answers
+Lecture 01's open question of when a score is a probability (Module 4).
+Running examples: Lecture 02's returning users (a coin), house prices for flats
+of 40–120 m² and the 600 m² villa of Lecture 01 (regression), and fraud with a
+base rate of 1 in 1,000 (classification).
+
+Classical linear regression is one recap slide (Module 2); the closed form, R²,
+basis functions, Gauss–Markov and gradient descent are in the backup after the
+last module.
+
+--
+
+## Where We Left Off
+
+
+<div class="grid-figure">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ml/posterior-readings"
+ data-params='{"posterior": [4, 8], "xLabel": "θ = P(user returns)", "title": "Lecture 02: 3 of 10 users, flat prior → Beta(4, 8)", "peakName": "peak h/n"}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+One posterior, three readings:
+
+- **peak** $0.30 = h/n$
+- **mean** $0.33$
+- **95% interval** $[0.11, 0.61]$
+
+
+<div class="c-insight">
+
+Today keeps only the **peak** — and you already know the methods that do.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Pick up the thread of Lecture 02 deliberately; the last slides there promised
+this. Show the posterior the students computed last week, fully read: the peak
+(navy) is what today's methods keep, the mean and the interval (amber) are what
+they drop. Then say the uncomfortable sentence: every model they have fitted by
+least squares or cross-entropy took this shortcut. The next slide names the two
+shortcuts of the lecture.
+
+--
+
+## Today: Two Shortcuts
+
+Lecture 01's table, rows 1 and 2 — methods you have used, read for what they drop:
+
+| shortcut | instead of the ideal | what is lost | where |
+|---|---|---|---|
+| **Keep the peak** | the most probable parameter — MLE or MAP | how sure we are about it | a coin · regression |
+| **Only $p(y \mid x)$** | model the label given the features, never the joint — *discriminative* | every question about $x$ | classification |
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Keep the peak
+on a coin
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Least squares
+is a likelihood
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Only p(y | x)
+classification
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### A score as p
+when is it one?
+
+</div>
+
+
+</div>
+
+
+Notes:
+The roadmap of the lecture in two forms: the two rows of the Lecture 01 table
+that today covers, and the four modules. Module 1 takes shortcut 1 where it can
+be drawn (the Beta posterior); Module 2 shows that least squares takes it, and
+what it costs far from the data; Module 3 takes shortcut 2 for classification;
+Module 4 answers Lecture 01's open question — when a score deserves the name
+probability.
+
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 03: keep the peak, least squares as a likelihood, classification with only p(y | x), and when a score is a probability](/courses/probabilistic-machine-learning/figures/l03-argument-map.svg)
+
+</div>
+
+
+Notes:
+Top row: shortcut 1 — the peak on a coin, least squares as a likelihood, and
+what keeping the peak drops. Middle row: logistic regression as the Bernoulli
+twin, calibration and priors, and what modelling only p(y | x) drops. Bottom:
+every loss so far is a likelihood. The strip marks Lecture 03's place in the
+arc. Return to the takeaway box at the end of the lecture.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## Linear Regression, Classically
+# Keep the Peak
 
-> **Guiding Question:** Why squared error — and what exactly does "linear"
-> forbid?
+
+<div class="guiding-question">
+
+**Guiding Question:** Last week's posterior gave a peak, a mean and an interval.
+What do we lose when we keep only the peak — and why does almost everyone do
+it?
+
+</div>
+
 
 --
 
-## The Task: Predicting Acceleration
+## The Likelihood, Read Along the Other Axis
+
+
+<div class="c-definition">
+
+The **likelihood** is the probability of the observed data, read as a function
+of the **parameter** with the data held fixed: $L(\theta) = p(D \mid \theta)$.
+The **maximum likelihood estimate** is its peak,
+$\hat{\theta}\_{\mathrm{ML}} = \arg\max\_{\theta} p(D \mid \theta)$.
+
+</div>
+
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="card">
+
+### Lecture 02, 3 of 10 users
+$$p(\theta \mid D) \propto \theta^{3}(1-\theta)^{7} \cdot 1$$
+With a **flat prior** the posterior *is* the normalised likelihood — so its peak
+$h/n = 0.3$ is the maximum likelihood estimate.
+
+</div>
 
 
 <div class="card">
 
-### The world
-$O$ — vehicles
-
-$Y = \mathbb{R}$ — time to accelerate to 100 km/h
-
-$\gamma(o)$ — the true acceleration time of vehicle $o$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### The model world
-$\alpha$ — measure wheels, horsepower, weight, torque
-
-$X$ — those four numbers, for every vehicle
-
-$h_\Theta$ — a linear function of them
-
-</div>
-
+### Not a distribution over $\theta$
+$$\int\_0^1 \theta^{3}(1-\theta)^{7} \mathrm{d}\theta = \frac{1}{1320}$$
+The likelihood is a probability over **data**. Read along $\theta$ it need not
+integrate to 1 — only the posterior does.
 
 </div>
 
@@ -73,185 +227,1089 @@ $h_\Theta$ — a linear function of them
 
 
 Notes:
-Deliberately mundane. The value is that every abstract symbol from the previous
-unit now has a concrete referent students can argue with — especially α, where
-"which four numbers" is a real modelling decision.
+Start from the curve the students drew last week, not from a new definition.
+The likelihood is the one ingredient of the posterior that the data supplies;
+maximum likelihood keeps that ingredient, drops the prior (or takes it flat) and
+then keeps only the highest point. The integral makes the warning concrete:
+1/1320 is B(4, 8), the Beta normaliser — the number the posterior divides by.
+The warning is the most common confusion of the course: "the likelihood of θ"
+is not "the probability of θ".
 
 --
 
-## The Data
+## Deriving $h/n$ Without a Posterior
 
-| wheels | horsepower | weight | torque | **acceleration time** |
-|---|---|---|---|---|
-| 4 | 150 | 1350 | 250 | 9.8 |
-| 4 | 320 | 1600 | 430 | 4.9 |
-| 6 | 95 | 2100 | 210 | 16.2 |
-| … | … | … | … | … |
+Lecture 02's i.i.d. assumption lets the likelihood factorise over rows; the
+logarithm turns the product into a sum without moving the peak:
 
-The last column is $y$ the rest is $\mathbf{x}$.
+$$
+\ell(\theta) = \log \prod\_{i=1}^{n} \theta^{y\_i}(1-\theta)^{1-y\_i}
+= h \log \theta + (n-h)\log(1-\theta)
+$$
 
-Notes:
-Ask which column is likely useless (wheels, in a passenger-car dataset) and
-what would happen if it were included anyway — an invitation to regularisation
-later.
-
---
-
-## The Remaining Two Pieces
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Loss function
-**Mean squared error** — the average of the squared differences between
-predicted and observed acceleration times.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Learning algorithm
-**LMS** — least mean squares, which adjusts the parameters to reduce that
-error.
-
-</div>
-
-
-</div>
-
-
-
-</div>
+$$
+\frac{d\ell}{d\theta} = \frac{h}{\theta} - \frac{n-h}{1-\theta} = 0
+\quad\Longrightarrow\quad
+\hat{\theta}\_{\mathrm{ML}} = \frac{h}{n}
+$$
 
 
 <div class="c-insight">
 
-Four choices — representation, model family, loss, optimiser — and the system
-is fully specified. Every method in this chapter is a different set of four.
-
-</div>
-
-
-
-<div class="takeaway">
-
-A learning problem becomes concrete the moment you can name its **task,
-experience and performance measure**, and its system becomes buildable the
-moment you can name its **representation, model, loss and optimiser**.
+Last week's peak, found by **setting a derivative to zero** — no prior, no
+normaliser, no integral. The recipe works unchanged for a million parameters,
+where nobody can draw the posterior.
 
 </div>
 
 
 Notes:
-Close by returning to the four-box map. This unit is the template students
-should apply when reading any paper: identify the four boxes before judging the
-result.
+Math first: show the two lines and ask what they compute before saying it. The
+three reasons for the logarithm (same arg max, no underflow, sums differentiate
+term by term) can be said in one breath; students have met them in earlier ML
+courses. The insight box answers the second half of the guiding question: the
+peak is taken because it turns inference (an integral) into optimisation (a
+derivative). That is also why every method they know is fitted by gradient
+descent.
 
 --
 
-## Fitting $h$ by Repeated Correction
+## The Peak Can Lie
+
+Three flips, **three heads**. Maximum likelihood: $\hat{\theta}\_{\mathrm{ML}} = 3/3 = 1$.
+
+<div class="viz viz-lg" data-viz="ml/posterior-readings" data-steps="2"
+ data-params='{"posterior": [4, 1], "prior": [1, 1], "xLabel": "θ = P(heads)", "title": "Flat prior (dashed), 3 heads: posterior Beta(4, 1)", "peakName": "peak (MLE)"}'></div>
 
 
-<div class="c-algorithm">
+<div class="q">
 
-**LMS (least mean squares)**
-
-Initialise the weights $w$.
-
-**repeat**
-&nbsp;&nbsp;pick a training example $(\mathbf{x}, y)$
-&nbsp;&nbsp;compute the prediction $h_w(\mathbf{x})$
-&nbsp;&nbsp;compute the error $ e = y - h_w(\mathbf{x})$
-&nbsp;&nbsp;update every weight: $ w_i \leftarrow w_i + \eta e x_i$
-**until** convergence on $D$
+Predict before the second click: where do the posterior mean and the 95%
+interval lie?
 
 </div>
 
 
 Notes:
-Read the update aloud in words: move each weight in the direction that would
-have reduced this example's error, in proportion to how much that feature
-contributed. That sentence is all of gradient descent, before any calculus.
+Click 1 marks the peak — exactly 1: the estimate rules tails out forever. Stop
+and ask where the mean and the interval are. Click 2: mean 0.8, 95% interval
+[0.40, 0.99]. The posterior, with the same flat prior as last week, says
+"probably above a half, possibly well below 1"; the peak says "never tails".
+Nothing was wrong with the data or the model — only with keeping one number.
+
+Numbers: Beta(4, 1) has density 4θ³, CDF θ⁴, so the 2.5% and 97.5% points are
+0.025^(1/4) = 0.398 and 0.975^(1/4) = 0.994.
 
 --
 
-## What the Update Rule Encodes
+## A Prior's Peak: MAP
+
+Keep the prior, and still take only the peak — the **maximum a posteriori**
+estimate. With a $\mathrm{Beta}(a, b)$ prior, the same derivative gives
+
+$$
+\hat{\theta}\_{\mathrm{MAP}} = \arg\max\_{\theta} p(D \mid \theta) p(\theta)
+= \frac{h + a - 1}{n + a + b - 2}
+$$
+
+| prior | data | MLE $h/n$ | MAP | posterior mean |
+|---|---|---|---|---|
+| $\mathrm{Beta}(1,1)$ flat | 3 of 3 | 1 | 1 | 0.80 |
+| $\mathrm{Beta}(2,2)$ | 3 of 3 | 1 | **0.80** | 0.71 |
+| $\mathrm{Beta}(2,2)$ | 8 of 10 (Lecture 02) | 0.80 | **0.75** | 0.71 |
 
 
-<div class="grid-3">
+<div class="c-note">
+
+The prior shifts the peak as if $a-1$ yeses and $b-1$ noes had been seen before
+the data — a **flat** prior shifts nothing. MAP pulls 3 of 3 back to 0.8 — and still
+reports one number.
+
+</div>
+
+
+Notes:
+The last row is the Lecture 02 mini-exercise (posterior Beta(10, 4)): students
+computed a MAP then without the name. Derivation for the curious: add
+(a − 1) log θ + (b − 1) log(1 − θ) to ℓ(θ) and set the derivative to zero. MAP is
+the bridge to Module 4, where a penalty on the weights turns out to be exactly
+this: a prior's peak. Note that the posterior mean (a + h)/(a + b + n) is a
+different point — the shortcut chooses the mode, and for a skewed posterior the
+two differ.
+
+--
+
+## Why Everyone Keeps the Peak
+
+
+<div class="grid-2-1">
 
 
 <div class="column">
 
-
-<div class="card">
-
-### Direction
-The sign of $e$ decides whether the prediction goes up or down.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Attribution
-The factor $x_i$ gives each feature credit proportional to its value.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Step size
-The learning rate $\eta$ trades speed against stability.
-
-</div>
-
-
-</div>
-
-
+| | the whole posterior | only the peak |
+|---|---|---|
+| **needs** | the normaliser $p(D)$ — an integral over $\theta$ | a derivative |
+| **in 1 dimension** | a Beta table | $h/n$ |
+| **in a million** | an integral nobody can compute exactly | gradient descent |
+| **costs** | computation | the **spread** |
 
 </div>
 
 
 <div class="c-note">
 
-Too large an $\eta$ oscillates or diverges too small an $\eta$ converges
-slowly. It is a hyperparameter — chosen, not learned.
+With **1,000 users** the posterior is $\mathrm{Beta}(301, 701)$: standard
+deviation $0.015$. The peak is nearly everything there is to know.
+
+</div>
+
 
 </div>
 
 
 Notes:
-Ask what happens with η far too large before showing it the prediction that
-"it overshoots and gets worse" is usually made correctly, which earns the
-hyperparameter concept. The visualisation in the optimisation unit shows it.
+The trade in one table: the posterior asks for an integral, the peak for a
+derivative. With plenty of data the posterior is so narrow (Lecture 02: [0.27,
+0.33]) that its peak is an excellent summary; with three flips it is not. The
+shortcut is not wrong, it is a bet that the spread does not matter — Module 2
+shows the place where it matters even with plenty of data: far from the data.
+
+--
+
+## Mini-Exercise
+
+Two analysts both report $\hat{\theta} = 0.3$. One saw **3 of 10** users return,
+the other **300 of 1,000**.
+
+
+<div class="q">
+
+What does the reported number hide — and which estimate would you bet on?
+
+</div>
+
+
+
+<div class="fragment">
+
+The **spread**. Lecture 02's posteriors: $[0.11, 0.61]$ after 10 users,
+$[0.27, 0.33]$ after 1,000 — the same peak, an interval nine times wider. Bet
+on the second; a point estimate cannot tell you to.
+
+</div>
+
+
+Notes:
+One minute to read, one to think. Everything needed is on last week's slide;
+the arithmetic is not the point. Standard deviations 0.13 and 0.015 (ratio
+about 9).
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+**Shortcut 1 — keep the peak.** Maximum likelihood (flat prior) and MAP (with a
+prior) keep the posterior's most probable point. It is cheap — a derivative
+instead of an integral — and harmless with plenty of data. It drops the
+**spread**: how sure we are about the parameter.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Least Squares Is a Likelihood
+
+
+<div class="guiding-question">
+
+**Guiding Question:** You have minimised squared error many times. What did
+that choice assume about the world — and what does it leave out?
+
+</div>
+
+
+--
+
+## Linear Regression in One Slide
+
+A price model for flats of **40–120 m²**, with $x\_0 = 1$ for the intercept —
+everything else is in the backup:
+
+| piece | recap |
+|---|---|
+| **model** | $\hat{y} = \mathbf{w}^{\top}\mathbf{x} = w\_0 + w\_1 x\_1 + \dots + w\_d x\_d$ |
+| **objective** | $\mathrm{RSS}(\mathbf{w}) = \sum\_{i=1}^{n} (y\_i - \mathbf{w}^{\top}\mathbf{x}\_i)^2$ |
+| **closed form** | normal equations: $\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}$ |
+| **iterative** | LMS, one example at a time: $\mathbf{w} \leftarrow \mathbf{w} + \eta (y\_i - \hat{y}\_i)\mathbf{x}\_i$ — error × feature |
+| **justified by** | Gauss–Markov: best *linear unbiased* estimator if the errors have mean zero, equal variance and no correlation |
+
+Notes:
+A recap, not a lesson: students have fitted this model in earlier courses. Say
+the one sentence that matters for later: LMS is gradient descent on RSS,
+example by example, and its update is error times feature — the same update
+returns for logistic regression in Module 3. The Gauss–Markov line is the
+classical justification; it says "best among linear unbiased estimators" and
+needs no distribution. Keep it in mind as the contrast for the next slides.
+The closed form for one feature, R², the geometry and learning rates are in the
+backup at the end of the deck.
+
+--
+
+## The Same Model, Told Differently
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Classical account
+Choose the line that **minimises squared error**:
+$$\hat{\mathbf{w}} = \arg\min\_{\mathbf{w}} \sum\_{i} (y\_i - \mathbf{w}^{\top}\mathbf{x}\_i)^2$$
+
+</div>
+
+
+<div class="card">
+
+### Probabilistic account
+State how a price **arises** for a given flat:
+$$y = \mathbf{w}^{\top}\mathbf{x} + \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, \sigma^{2})$$
+then keep the peak of the likelihood.
+
+</div>
+
+
+</div>
+
+
+
+<div class="q">
+
+Do the two accounts give the same $\hat{\mathbf{w}}$ — and if so, what did the
+classical account assume without saying it?
+
+</div>
+
+
+Notes:
+Question first (P1). Let students vote. Most will guess "same" without being
+able to say why; the next two slides give the picture and then the derivation.
+The second half of the question is the module's guiding question in small.
+
+--
+
+## A Distribution at Every $x$
+
+<div class="viz viz-lg" data-viz="ml/conditional-gaussian" data-steps="2"
+ data-params='{"view": "bells"}'></div>
+
+A **conditional distribution** $p(y \mid x) = \mathcal{N}(\mathbf{w}^{\top}\mathbf{x}, \sigma^2)$:
+one bell per $x$, **equally wide**. Nothing about how $x$ arises.
+
+Notes:
+Click 1: the fitted line, ŷ ≈ 1 + 3.44·x (k€, m²). Click 2: the bells at 50, 80
+and 110 m², each with σ̂ ≈ 16 k€. Read a bell aloud: "an 80 m² flat costs about
+276 k€, give or take 30". This is the picture that makes both later points of
+the lecture visible: the loss is the shape of the bell (next slide), and the
+model is only about y *given* x — there is no bell for x itself. That second
+point is shortcut 2, named in Module 3: the model never learns what a typical
+flat looks like, so it cannot tell that a villa is unusual.
+
+--
+
+## The Derivation
+
+With $p(y\_i \mid \mathbf{x}\_i, \mathbf{w}) = \mathcal{N}(y\_i \mid \mathbf{w}^{\top}\mathbf{x}\_i, \sigma^{2})$ and i.i.d. rows:
+
+$$
+\ell(\mathbf{w}) = \sum\_{i=1}^{n} \log \frac{1}{\sqrt{2\pi\sigma^{2}}}
+\exp\left(-\frac{(y\_i - \mathbf{w}^{\top}\mathbf{x}\_i)^{2}}{2\sigma^{2}}\right)
+= \underbrace{-\frac{n}{2}\log(2\pi\sigma^{2})}\_{\text{no } \mathbf{w}} - \frac{1}{2\sigma^{2}} \mathrm{RSS}(\mathbf{w})
+$$
+
+
+<div class="c-important">
+
+Maximising the Gaussian log-likelihood **is** minimising RSS:
+$\hat{\mathbf{w}}\_{\mathrm{ML}} = \hat{\mathbf{w}}\_{\mathrm{OLS}}$. Squared error is
+the exponent of the bell.
+
+</div>
+
+
+Notes:
+Walk the line slowly — the course's thesis becomes concrete here. The first
+term does not contain w, the factor 1/(2σ²) is positive, so the arg max over w
+is the arg min of RSS whatever σ is. Answer to the previous slide's vote: the
+same ŵ — and the classical account had assumed, without saying so, Gaussian
+noise of one fixed width.
+
+--
+
+## What Squared Error Assumed
+
+| the noise model says | squared error silently assumes | check on the residuals |
+|---|---|---|
+| $\varepsilon$ has mean 0 | the line is the right shape | no pattern against $x$ |
+| one $\sigma$ for every $x$ | **homoscedastic** noise | no fan shape |
+| rows independent | i.i.d. (Lecture 02) | no pattern in time or space |
+| $\varepsilon$ Gaussian | thin tails: large errors are rare | no heavy tails, few outliers |
+
+
+<div class="c-insight">
+
+Choosing a loss and choosing a noise model are **one decision**. Squared error
+⇔ Gaussian noise; absolute error ⇔ Laplace noise — heavier tails, so a large
+residual is less surprising and an outlier pulls the fit less.
+
+</div>
+
+
+Notes:
+Each row turns a property of the loss into a claim about the world, and every
+claim can be checked with a residual plot — that is what stating the model
+buys. The Laplace row answers a question students may bring from earlier
+courses ("why is L1 loss robust?") with a reason instead of a rule:
+−log of a Laplace density is |ε|/b plus a constant.
+
+--
+
+## The Peak of $\sigma^2$
+
+The same likelihood also has a peak in $\sigma^2$:
+
+$$
+\frac{\partial \ell}{\partial \sigma^{2}} = -\frac{n}{2\sigma^{2}} + \frac{\mathrm{RSS}}{2\sigma^{4}} = 0
+\quad\Longrightarrow\quad
+\hat{\sigma}^{2}\_{\mathrm{ML}} = \frac{\mathrm{RSS}}{n}
+$$
+
+
+<div class="q">
+
+Which of Lecture 02's two variances is this — and is it too small or too large?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-warning">
+
+The **$1/n$** one. The line was fitted to the same data, so residuals are
+smaller than the true errors: $\hat{\sigma}^2\_{\mathrm{ML}}$ is **biased low**.
+The unbiased version divides by $n - p$ for $p$ fitted weights. Houses: $n = 20$,
+$p = 2$, RSS $\approx 5{,}097$ → $\hat{\sigma} \approx 16.0$ instead of $16.8$ k€.
+
+</div>
+
+
+</div>
+
+
+Notes:
+A second, quiet cost of keeping the peak. Lecture 02 divided by n − 1 because one
+mean had been estimated; here p weights have been, so E[RSS] = (n − p)σ² and
+E[σ̂²_ML] = (n − p)/n · σ². With 20 flats that is 10% in the variance; with
+5 flats and 2 weights it would be 40%. Small or not, it always points the same
+way: the peak makes the model look less noisy than it is.
+
+--
+
+## The Villa Again
+
+<div class="viz viz-lg" data-viz="ml/conditional-gaussian" data-steps="2"
+ data-params='{"view": "villa"}'></div>
+
+
+<div class="q">
+
+The band is as narrow at the villa as at a flat. Is the model as sure?
+
+</div>
+
+
+
+<div class="fragment">
+
+No: $\pm 31$ k€ is only the noise $\hat{\sigma}$. The uncertainty about
+$\mathbf{w}$ — dropped with the peak — grows off the data: $\pm 153$ k€ at the
+villa (Lecture 07).
+
+</div>
+
+
+Notes:
+Step 0: the fit and the plug-in band ŷ ± 1.96·σ̂ = ± 31 k€. Click 1: the villa
+of Lecture 01 — predicted about 2,064 k€ ± 31 k€, the same half-width as for any
+flat. Ask the question before the second click. Click 2: the band that also
+counts the uncertainty about the two weights, 1.96·σ̂·√(1 + 1/n +
+(x − x̄)²/Σ(xᵢ − x̄)²): ± 32 k€ at 80 m², ± 153 k€ at 600 m². This is Lecture 01's
+epistemic uncertainty, made visible — and exactly the spread that Module 1 said
+the peak drops.
+
+One more honesty point, for the discussion: even the wide band trusts the
+straight line all the way to 600 m². Whether villas follow the price per m² of
+flats is a modelling question no band can answer.
+
+--
+
+## Mini-Exercise
+
+The residuals of your house-price model fan out: about $\pm 10$ k€ for 40 m²
+flats, $\pm 60$ k€ for 120 m² flats.
+
+
+<div class="q">
+
+Which assumption fails — and which output of the model can you no longer trust?
+
+</div>
+
+
+
+<div class="fragment">
+
+**One $\sigma$ for every $x$** (homoscedasticity). The line may still be fine,
+but the **band** is not: a single $\hat{\sigma}$ is too wide for small flats and
+too narrow for large ones.
+
+</div>
+
+
+Notes:
+One minute to read, one to think. Students with a statistics background may add
+that ŵ stays unbiased but is no longer the most efficient estimator (the
+Gauss–Markov condition "equal variance" fails) — correct, and worth one
+sentence. The fix, if asked: model σ as a function of x, which is again just
+stating a different noise model.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Least squares **is** maximum likelihood under Gaussian noise: the loss states
+the noise model, and the model is a distribution $p(y \mid x)$. It is also a
+**peak**: $\hat{\sigma}^2$ divides by $n$, and the band is as narrow at the villa
+as at a flat — the uncertainty about $\mathbf{w}$ was dropped.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Classification: Model Only p(y | x)
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Lecture 01's fraud model said 0.55. Where does such a
+number come from — and what does the model refuse to know?
+
+</div>
+
+
+--
+
+## Why Not Regress on 0/1?
+
+Code fraud as $y = 1$, legitimate as $y = 0$, and fit Module 2's line.
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### Squared error punishes being right
+A transaction far on the correct side has a large residual, so least squares
+drags the boundary towards cases it already classifies correctly.
+
+</div>
+
+
+<div class="card bad">
+
+### The output is not a probability
+$\mathbf{w}^{\top}\mathbf{x}$ can be $17$ or $-40$. The Gaussian bell of
+Module 2 puts mass on every real $y$ — for a label that is 0 or 1.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important">
+
+Keep the linear score, change what it models: the **log-odds**, and a noise
+model that produces 0s and 1s.
+
+</div>
+
+
+</div>
+
+
+Notes:
+A known failure, stated in the language of Module 2: the loss is wrong because
+the noise model is wrong. A Gaussian around wᵀx is a model of a real number;
+fraud is a yes/no outcome. Everything else in the module follows from replacing
+the Gaussian by the Bernoulli.
+
+--
+
+## Log-Odds Are Linear
+
+$$
+\ln \frac{P(y = 1 \mid \mathbf{x})}{1 - P(y = 1 \mid \mathbf{x})} = \mathbf{w}^{\top}\mathbf{x}
+\qquad\Longleftrightarrow\qquad
+P(y = 1 \mid \mathbf{x}) = \sigma(\mathbf{w}^{\top}\mathbf{x}) = \frac{1}{1 + e^{-\mathbf{w}^{\top}\mathbf{x}}}
+$$
+
+| read the weights as | fraud example |
+|---|---|
+| the intercept: the log-odds when every feature is 0 | no features at all: $w\_0 = \ln \frac{1}{999} \approx -6.9$, the base rate 1 in 1,000 |
+| a weight: what one unit of a feature **adds** to the log-odds | "new device" with $w = \ln 6 \approx 1.8$: odds $\times 6$ |
+| the boundary: where $\mathbf{w}^{\top}\mathbf{x} = 0$ | score $0.5$ — still a straight line |
+
+Notes:
+The sigmoid is not an arbitrary squashing function; it is the inverse of the
+logit. The reading of the intercept ties the model to Lecture 02: a fraud model
+with no features has its peak at the base rate (h/n again: 1 in 1,000, log-odds
+ln(1/999)). The weight reading is the one to
+stabilise: weights add log-odds, so they multiply odds — the same bookkeeping as
+likelihood ratios in Bayes' theorem, which Lecture 04 will exploit.
+
+--
+
+## Where Does Cross-Entropy Come From?
+
+$$
+L(\mathbf{w}) = -\sum\_{i=1}^{n} \Big[ y\_i \ln h\_i + (1-y\_i)\ln(1-h\_i) \Big],
+\qquad h\_i = \sigma(\mathbf{w}^{\top}\mathbf{x}\_i)
+$$
+
+
+<div class="q">
+
+You have minimised this loss many times. Which noise model does it state?
+
+</div>
+
+
+
+<div class="fragment">
+
+Given $\mathbf{x}$, the label is a **Bernoulli** draw with bias $h$:
+$P(y\_i \mid \mathbf{x}\_i, \mathbf{w}) = h\_i^{y\_i}(1-h\_i)^{1-y\_i}$. With i.i.d. rows,
+
+$$
+\ell(\mathbf{w}) = \sum\_{i=1}^{n} \Big[ y\_i \ln h\_i + (1-y\_i)\ln(1-h\_i) \Big] = -L(\mathbf{w})
+$$
+
+
+<div class="c-important">
+
+Cross-entropy **is** the Bernoulli negative log-likelihood — Module 1's coin,
+biased by $\mathbf{x}$. How $\mathbf{x}$ arises is never said.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Math first (P5): the loss on the screen, the question, then the reveal. It is
+the same derivation as h/n in Module 1, with θ replaced by h(x) for every row.
+Stress the last sentence: this is a *conditional* story, y given x. It is not a
+generative story — nothing in it could produce a transaction.
+
+--
+
+## The Same Update Again
+
+With $\sigma' = \sigma(1 - \sigma)$, the gradient of the log-likelihood is
+
+$$
+\frac{\partial \ell}{\partial \mathbf{w}} = \sum\_{i=1}^{n} (y\_i - h\_i)\mathbf{x}\_i
+$$
+
+| model | noise | loss | gradient of $\ell$ |
+|---|---|---|---|
+| linear regression | Gaussian | squared error | $\frac{1}{\sigma^2}\sum\_i (y\_i - \mathbf{w}^{\top}\mathbf{x}\_i)\mathbf{x}\_i$ |
+| logistic regression | Bernoulli | cross-entropy | $\sum\_i (y\_i - \sigma(\mathbf{w}^{\top}\mathbf{x}\_i))\mathbf{x}\_i$ |
+
+
+<div class="c-note">
+
+Error × feature — the LMS update with a sigmoid in the prediction; no closed
+form, so iterate. A fraud scored $0.01$ costs $-\ln 0.01 \approx 4.6$, scored
+$0.99$ only $0.01$: confident mistakes dominate.
+
+</div>
+
+
+Notes:
+One line of calculus: d/dw [y ln h + (1 − y) ln(1 − h)] = (y/h − (1 − y)/(1 − h))
+· h(1 − h) · x = (y − h) x. The table is the unification the lecture is after:
+two noise models, one form of update. The per-example version is exactly LMS
+with ŷ replaced by σ(wᵀx).
+
+--
+
+## When the Peak Runs Away
+
+<div class="viz viz-lg" data-viz="ml/logistic-runaway" data-steps="5"></div>
+
+
+<div class="q">
+
+Every fraud scores above every legitimate case. Where is the peak of the
+likelihood?
+
+</div>
+
+
+
+<div class="fragment">
+
+**Nowhere.** The likelihood keeps rising as the slope grows; the scores harden
+to 0 and 1 — three heads in three flips. A prior's peak (MAP) is finite.
+
+</div>
+
+
+Notes:
+Ask the question before the first click and let students guess. Clicks 1–4:
+the curve after 10, 100, 1,000 and 10,000 gradient steps — slope 1.4, 3.6, 8.3,
+17.8, log-likelihood −2.68, −1.04, −0.36, −0.06. It never stops; the optimiser
+is not broken, the peak does not exist. Click 5: a Gaussian prior N(0, 1) on the
+slope; MAP converges to slope 1.4 and stays there. In practice every library
+adds this prior by default — it is called regularisation, and Module 4 reads it
+as a prior. Separable data is common with many features (rare fraud, thousands
+of attributes), so this is not an exotic case.
+
+--
+
+## Shortcut 2: Model Only $p(y \mid \mathbf{x})$
+
+Linear and logistic regression are **discriminative**: a model of $y$ given
+$\mathbf{x}$, none of $\mathbf{x}$.
+
+
+<div class="grid-2">
+
+
+<div class="card bad">
+
+### What is dropped: $p(\mathbf{x})$
+- a transaction unlike any seen still gets a confident score
+- a missing field cannot be averaged out — it must be filled in
+- no way to simulate a plausible transaction
+
+</div>
+
+
+<div class="card good">
+
+### What is gained
+- no assumptions about how features are distributed — where, with hundreds
+  of features, most modelling errors hide
+- every parameter serves the decision
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Lecture 04 takes the other route: model the joint $p(\mathbf{x}, y)$ and
+condition — **generative**.
+
+</div>
+
+
+Notes:
+Name the shortcut explicitly and tie it to the L01 roadmap row "only what you
+need". The first dropped item is the villa of Module 2 in classification form:
+the model cannot know that an input is unusual, because it never modelled
+inputs. The gained column is not a consolation prize: for prediction with many
+features, discriminative models are usually more accurate — Lecture 04 makes
+the comparison with naive Bayes.
+
+--
+
+## Mini-Exercise
+
+Your fraud model scores **0.97** for a transfer 50 times larger than any in its
+training data.
+
+
+<div class="q">
+
+Should you trust the 0.97 — and could the model itself warn you?
+
+</div>
+
+
+
+<div class="fragment">
+
+Not blindly: the linear log-odds simply **extrapolate**, like the line at the
+villa. And no — the model has **no $p(\mathbf{x})$**, so nothing in it can see
+that the amount is unusual. That needs a model of $\mathbf{x}$ or a separate
+check.
+
+</div>
+
+
+Notes:
+One minute to read, one to think. The transfer is the classification twin of
+the 600 m² villa. Good follow-up if time allows: "which of Lecture 01's two
+kinds of uncertainty is this?" — epistemic; ten such transfers in the training
+data would help.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Logistic regression is Module 2 with Bernoulli noise: linear log-odds,
+cross-entropy as the negative log-likelihood, error × feature as the gradient.
+It **keeps the peak** — which runs away on separable data — and **models only
+$p(y \mid \mathbf{x})$**: it never learns what a normal transaction looks like.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# When Is a Score a Probability?
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Lecture 01 promised to say when a model's output earns the
+name "probability". When does it — and what breaks it?
+
+</div>
+
+
+--
+
+## When Is 0.7 a Probability?
+
+
+<div class="grid-figure">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ml/reliability-diagram" data-steps="2"
+ data-params='{"series": ["calibrated", "overconfident"]}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+
+<div class="c-definition">
+
+A score is **calibrated** if, among all cases scored $s$, a fraction $s$ is
+positive. A **reliability diagram** plots that fraction against $s$.
+
+</div>
+
+
+**Predict before click 2:** a model whose log-odds are twice too large — above
+or below the diagonal at high scores?
+
+</div>
+
+
+</div>
+
+
+Notes:
+Step 0: the diagonal. Click 1: a calibrated model — the points scatter around
+the diagonal, as bins of real data would. Ask for the prediction, then click 2:
+the over-confident model lies *below* the diagonal at high scores and *above* it
+at low ones — its 0.9 is really 0.75, its 0.1 really 0.25. Lecture 04 shows a
+model that is over-confident by construction (naive Bayes counting correlated
+evidence twice). Only a calibrated score can go into Lecture 01's cost
+threshold p* = 0.1; a 0.9 that means 0.75 moves every decision near the cut.
+
+--
+
+## What Maximum Likelihood Guarantees
+
+At the peak, the gradient for the intercept ($x\_0 = 1$) is zero:
+
+$$
+\sum\_{i=1}^{n} (y\_i - h\_i) = 0
+\quad\Longrightarrow\quad
+\frac{1}{n}\sum\_{i=1}^{n} h\_i = \frac{1}{n}\sum\_{i=1}^{n} y\_i
+$$
+
+
+<div class="q">
+
+What does this equation promise — and what does it not?
+
+</div>
+
+
+
+<div class="fragment">
+
+| promised | not promised |
+|---|---|
+| **average** score = training fraud rate: *calibration in the large* | each score right — needs log-odds truly linear in $\mathbf{x}$ |
+| on the **training** distribution | after a base-rate shift, or **rebalancing** |
+| | that it **separates**: the base rate for everyone is calibrated — and useless |
+
+</div>
+
+
+Notes:
+Math first: the equation is Module 3's gradient, read for the intercept only.
+It is a genuine guarantee, but a weak one: it holds on average and on the data
+the model was fitted to. Per-score calibration needs the model to be right
+(correctly specified), which a linear log-odds rarely is exactly; in practice
+logistic regression is often close, and that is why it has a reputation for
+"calibrated probabilities" — a reputation, not a theorem. Separation (ranking
+fraud above legitimate cases) is a different property, measured in Lecture 06.
+
+--
+
+## Rebalanced Training
+
+
+<div class="grid-figure">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ml/reliability-diagram" data-steps="1"
+ data-params='{"series": ["rebalanced"], "highlight": 0.9}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+Fraud is 1 in 1,000, so practitioners **undersample** legitimate cases to
+50/50. The model learns odds for a world where fraud is common.
+
+
+<div class="c-important">
+
+Bayes in odds form:
+$$
+\text{real odds} = \text{model odds} \times \frac{1/999}{1}
+$$
+Score $0.9$: odds $9 \to 9/999$, about **0.9%**.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The click shows the rebalanced model on real traffic: every point hugs the
+floor. A score of 0.9 means about 0.9% fraud (odds 9/999, probability
+9/1008 = 0.89%). The repair is Bayes' theorem from Lecture 02 in odds form:
+undersampling legitimate cases changes the prior, not p(x | y), so the model's
+odds are the likelihood ratio times the *training* prior odds; swap in the real
+prior odds. General form: real odds = model odds × (real prior odds) / (training
+prior odds); here (1/999) / 1. The base rate that made a "99% accurate" flag mean 9% in Lecture 02
+returns — and a threshold of 0.5 on the raw score would block almost only honest
+customers.
+
+--
+
+## Regularisation Is a Prior
+
+$$
+\min\_{\mathbf{w}} \mathrm{RSS}(\mathbf{w}) + \lambda \lVert \mathbf{w} \rVert^2
+$$
+
+
+<div class="q">
+
+You know this as ridge regression or weight decay. Which prior's peak is it?
+
+</div>
+
+
+
+<div class="fragment">
+
+MAP from Module 1 with $\mathbf{w} \sim \mathcal{N}(0, \tau^2 \mathbf{I})$:
+$\log p(\mathbf{w} \mid D) = -\frac{\mathrm{RSS}}{2\sigma^2} - \frac{\lVert \mathbf{w} \rVert^2}{2\tau^2} + \text{const}$,
+so $\lambda = \sigma^2 / \tau^2$.
+
+| penalty | prior on $\mathbf{w}$ | what its peak does |
+|---|---|---|
+| $\lambda \lVert \mathbf{w} \rVert^2$ | Gaussian | shrinks; keeps separable data finite |
+| $\lambda \lVert \mathbf{w} \rVert\_1$ | Laplace | exact zeros — a property of the **peak** (the kink at 0); the posterior mean has none |
+
+</div>
+
+
+Notes:
+Multiply the log-posterior by −2σ² to get the penalised objective; λ = σ²/τ²
+reads well: noisy data (large σ²) or a tight prior (small τ²) means more
+shrinkage. This is Lecture 02's Beta(2, 2) exercise one level up: the prior
+pulled the peak from 0.8 to 0.75, the Gaussian prior pulls weights towards 0.
+For logistic regression the same prior gives cross-entropy + ‖w‖²/(2τ²) — the
+finite peak of the runaway slide. The intercept is usually left unpenalised,
+so calibration in the large survives. L1: the Laplace log-density −|w|/b has a
+corner at 0, and at a corner the peak can sit exactly at 0 over a whole range
+of data; averaging over the posterior smooths the corner away.
+
+--
+
+## Mini-Exercise
+
+A fraud model trained on a **50/50** sample is used on real traffic, where
+fraud is **1 in 1,000**. It outputs **0.5** and **0.8**.
+
+
+<div class="q">
+
+What are the real fraud probabilities?
+
+</div>
+
+
+
+<div class="fragment">
+
+Multiply the odds by $1/999$. Score 0.5: odds $1 \to 1/999$, about **0.1%** —
+the base rate itself. Score 0.8: odds $4 \to 4/999$, about **0.4%**.
+
+</div>
+
+
+Notes:
+One minute to read, one to think; the odds 1 and 4 are chosen so that the
+arithmetic is trivial. The punchline of the first answer: a coin-flip score on
+balanced data means "nothing unusual" on real traffic. Exact values: 1/1000 =
+0.100% and 4/1003 = 0.399%.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A score is a probability when it is **calibrated** — checkable on a reliability
+diagram, not by accuracy. Maximum likelihood guarantees it only on average and
+only on the training distribution; **rebalancing** breaks it, and the prior odds
+repair it. **Regularisation is a prior**, and a penalised fit is a MAP estimate.
+
+</div>
+
+
+---
+
+## Every Loss So Far Is a Likelihood
+
+So far — Lecture 06 meets losses that are not.
+
+| you minimised | it is $-\log$ of | the fit is |
+|---|---|---|
+| squared error | Gaussian noise around $\mathbf{w}^{\top}\mathbf{x}$ | the peak (MLE) |
+| cross-entropy | Bernoulli labels with bias $\sigma(\mathbf{w}^{\top}\mathbf{x})$ | the peak (MLE) |
+| $+ \lambda \lVert \mathbf{w} \rVert^2$ | a Gaussian prior on $\mathbf{w}$ | a prior's peak (MAP) |
+| $+ \lambda \lVert \mathbf{w} \rVert\_1$ | a Laplace prior on $\mathbf{w}$ | a prior's peak (MAP) |
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Dropped: the spread
+how sure we are about $\mathbf{w}$ — **Lecture 07** keeps it
+
+</div>
+
+
+<div class="card">
+
+### Dropped: $p(\mathbf{x})$
+what a normal input looks like — **Lecture 04** models it
+
+</div>
+
+
+</div>
+
+
+Notes:
+The lecture in one table; point at the argument map's takeaway box. Read each
+row as a translation: a loss is a noise model, a penalty is a prior, a fitted
+model is a peak. Say "so far" out loud: the hinge loss and the 0/1 error are
+not negative log-likelihoods, and Lecture 06's shortcut (keep the loss) is
+exactly what remains when there is no probability model behind a loss. The two
+cards point forward: the villa's band (the spread, Lecture 07) and the unusual
+transfer (p(x), Lecture 04).
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Backup: Classical Regression
+
+
+<div class="guiding-question">
+
+For questions: the closed form, $R^2$, basis functions, Gauss–Markov and
+gradient descent — what students know from earlier courses.
+
+</div>
+
+
+Notes:
+Not presented in the session. Shared units from the Data Science course,
+included unchanged; Module 2's recap slide points here.
 
 --
 
@@ -296,13 +1354,12 @@ $Y = \mathbb{R}$, the target is a quantity.
 </div>
 
 
-The learning machinery is the same only the shape of $Y$ — and therefore the
+The learning machinery is the same; only the shape of $Y$ — and therefore the
 loss — changes.
 
 Notes:
 Keep the same running example across both to make the point that the task, not
-the data, decides which you are doing. The credit example returns in logistic
-regression, where a regression model is pressed into classification.
+the data, decides which you are doing.
 
 --
 
@@ -314,11 +1371,11 @@ regression, where a regression model is pressed into classification.
 **Linear regression** predicts the target as a weighted sum of the features:
 
 $$
-h_{\mathbf{w}}(\mathbf{x}) = w_0 + w_1 x_1 + \ldots + w_p x_p
+h\_{\mathbf{w}}(\mathbf{x}) = w\_0 + w\_1 x\_1 + \ldots + w\_p x\_p
 = \mathbf{w}^{\top}\mathbf{x}
 $$
 
-with $x_0 = 1$ absorbing the intercept.
+with $x\_0 = 1$ absorbing the intercept.
 
 </div>
 
@@ -326,18 +1383,17 @@ with $x_0 = 1$ absorbing the intercept.
 The hypothesis space is $\mathbb{R}^{p+1}$: one hypothesis per weight vector.
 
 Notes:
-Point back at the hypothesis-space unit — here it is a continuous space of
-finite dimension, which is why calculus rather than enumeration finds the
-optimum.
+Name it as a hypothesis space — here a continuous space of finite dimension,
+which is why calculus rather than enumeration finds the optimum.
 
 --
 
 ## The Objective: Residual Sum of Squares
 
 $$
-\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{R}^{p+1}} \mathrm{RSS}(\mathbf{w}),
+\hat{\mathbf{w}} = \arg\min\_{\mathbf{w} \in \mathbb{R}^{p+1}} \mathrm{RSS}(\mathbf{w}),
 \qquad
-\mathrm{RSS}(\mathbf{w}) = \sum_{i=1}^{n}\big(y_i - \mathbf{w}^{\top}\mathbf{x}_i\big)^2
+\mathrm{RSS}(\mathbf{w}) = \sum\_{i=1}^{n}\big(y\_i - \mathbf{w}^{\top}\mathbf{x}\_i\big)^2
 $$
 
 
@@ -369,7 +1425,7 @@ For a single feature the minimiser can be written down directly:
 <div class="card">
 
 ### Slope
-$$\hat{w}_1 = \frac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2}$$
+$$\hat{w}\_1 = \frac{\sum\_i (x\_i - \overline{x})(y\_i - \overline{y})}{\sum\_i (x\_i - \overline{x})^2}$$
 
 The covariance of $x$ and $y$ over the variance of $x$.
 
@@ -385,7 +1441,7 @@ The covariance of $x$ and $y$ over the variance of $x$.
 <div class="card">
 
 ### Intercept
-$$\hat{w}_0 = \overline{y} - \hat{w}_1 \overline{x}$$
+$$\hat{w}\_0 = \overline{y} - \hat{w}\_1 \overline{x}$$
 
 The fitted line passes through the point of means.
 
@@ -416,7 +1472,8 @@ $$
 \qquad
 R^2 = \frac{\mathrm{ESS}}{\mathrm{TSS}} = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}}
 $$
-where TSS is the total, ESS the explained and RSS the residual sum of squares.
+where TSS is the total, ESS the explained and RSS the residual sum of squares
+(the split holds for a least-squares fit with an intercept).
 
 </div>
 
@@ -435,9 +1492,9 @@ test $R^2$ and adjusted $R^2$ can and do fall.
 
 
 Notes:
-Connect to the baseline unit: R² = 0 is exactly the trivial-regression
-baseline. The warning is the regression counterpart of training error — and the
-motivation for the cross-validation the students already know.
+R² = 0 is exactly the trivial baseline that always predicts the mean. The
+warning is the regression counterpart of training error — and the reason a
+model is judged on data it was not fitted to.
 
 --
 
@@ -456,16 +1513,16 @@ invertible.
 <div class="c-note">
 
 Invertibility fails when features are linearly dependent or when $p > n$ —
-more unknowns than equations. Both are common in practice, and both are why
-regularisation exists.
+more unknowns than equations. Both are common in practice; regularisation is
+the standard remedy.
 
 </div>
 
 
 Notes:
-Do not derive the normal equations state them and spend the time on when they
-break. The p > n case is the modern one — genomics, text — and motivates the
-next chapters more than the algebra does.
+Do not derive the normal equations; state them and spend the time on when they
+break. The p > n case is the modern one — genomics, text — and motivates
+regularisation more than the algebra does.
 
 --
 
@@ -504,7 +1561,7 @@ features may be arbitrary transformations of the input.
 <div class="card">
 
 ### Plain
-$$h(\mathbf{x}) = w_0 + w_1 x$$
+$$h(\mathbf{x}) = w\_0 + w\_1 x$$
 a straight line
 
 </div>
@@ -519,7 +1576,7 @@ a straight line
 <div class="card">
 
 ### Polynomial
-$$h(\mathbf{x}) = w_0 + w_1 x + w_2 x^2$$
+$$h(\mathbf{x}) = w\_0 + w\_1 x + w\_2 x^2$$
 a curve — still a *linear model*
 
 </div>
@@ -534,7 +1591,7 @@ a curve — still a *linear model*
 <div class="card">
 
 ### Basis functions
-$$h(\mathbf{x}) = \sum_j w_j \phi_j(\mathbf{x})$$
+$$h(\mathbf{x}) = \sum\_j w\_j \phi\_j(\mathbf{x})$$
 any fixed feature map $\phi$
 
 </div>
@@ -546,11 +1603,21 @@ any fixed feature map $\phi$
 </div>
 
 
+
+<div class="c-note">
+
+What *linear* forbids: a transformation that has to be learned from the data.
+The feature map is fixed before fitting; only the weights are learned.
+
+</div>
+
+
 Notes:
 This is the slide that unlocks the rest: the same least-squares machinery fits
 curves, interactions and periodic patterns, as long as the transformation is
-chosen in advance. Ask what is *not* expressible — anything where the
-transformation itself must be learned, which is the neural-network module.
+chosen in advance. Ask what is *not* expressible before revealing the note —
+anything where the transformation itself must be learned, which is what neural
+networks do.
 
 --
 
@@ -581,7 +1648,7 @@ The closed-form solution and all statistical guarantees carry over unchanged.
 
 ### The catch
 The feature map is a **modelling decision**. Choose too rich a basis and the
-model overfits too poor and it underfits.
+model overfits; too poor and it underfits.
 
 </div>
 
@@ -595,15 +1662,31 @@ model overfits too poor and it underfits.
 
 <div class="c-insight">
 
-Increasing polynomial degree is a dial on the bias–variance axis you can watch
-turning.
+Increasing the polynomial degree turns a dial on the bias–variance axis.
 
 </div>
 
 
 Notes:
-Tie back to principles: the basis is the inductive bias made explicit. This is
+The basis is the inductive bias made explicit. This is
 the cleanest example in the course of choosing a hypothesis space deliberately.
+
+--
+
+## Turning the Capacity Dial
+
+Linear in the parameters, any basis in the features: a polynomial of degree $k$
+is still "linear regression" — and $k$ is a dial.
+
+<div class="viz viz-lg" data-viz="ml/bias-variance" data-steps="5"
+ data-params='{"degrees": [1, 2, 3, 5, 9, 14]}'></div>
+
+Notes:
+Backup, for questions about basis functions. Each click raises the degree:
+training error falls monotonically, test error bottoms out and climbs again.
+In today's language: every degree is fitted by keeping the peak; the penalty of
+Module 4 (a prior) is the other way to turn the dial down.
+
 
 --
 
@@ -662,7 +1745,7 @@ project onto only grew.
 
 **Gauss–Markov (informal).** Among all estimators that are
 
-- **linear** in the observed outputs $(y_1, \ldots, y_n)$, and
+- **linear** in the observed outputs $(y\_1, \ldots, y\_n)$, and
 - **unbiased**,
 
 the least-squares estimator has the **lowest variance**. It is the *Best Linear
@@ -718,8 +1801,9 @@ error. That is not a contradiction, it is a different criterion.
 <div class="card good">
 
 ### The payoff
-Minimising RSS yields optimal statistical properties under **very mild
-assumptions** — no normality needed, only uncorrelated errors of constant
+Minimising RSS yields optimal statistical properties under **mild
+assumptions** — no normality needed, only a correctly specified linear model,
+linearly independent features, and zero-mean, uncorrelated errors of constant
 variance.
 
 </div>
@@ -800,17 +1884,17 @@ solution does not exist, and extends to models with no closed form at all.
 
 <div class="c-note">
 
-The iterative rule is exactly the **LMS algorithm** from Module 2: the update
-$w_i \leftarrow w_i + \eta e x_i$ *is* a step along $-\nabla \mathrm{RSS}$,
-written per example instead of per dataset.
+The iterative rule is exactly the **LMS algorithm**: its update
+$w\_i \leftarrow w\_i + \eta e x\_i$ *is* a gradient step on RSS, taken per example
+instead of per dataset (the factor 2 is absorbed into $\eta$).
 
 </div>
 
 
 Notes:
 The right-hand column is the one that generalises: logistic regression and
-neural networks have no closed form, so the iterative method is the only one
-that survives the rest of the course. Make the LMS identification explicit —
+neural networks have no closed form, so the iterative method is the one that
+generalises. Make the LMS identification explicit —
 students otherwise carry two unconnected procedures.
 
 --
@@ -833,7 +1917,8 @@ and why they shrink as the minimum approaches, without η changing.
  data-params='{"eta": 0.9, "start": -2.6, "compare": 0.05}'></div>
 
 Teal: $\eta = 0.9$ — overshoots and oscillates across the minimum.
-Red: $\eta = 0.05$ — stable, but barely moves.
+Red: $\eta = 0.05$ — stable, but slow: after six steps it has covered about
+half the distance.
 
 
 <div class="c-warning">
@@ -856,919 +1941,12 @@ produce the same-looking loss curve over a short window.
 
 <div class="takeaway">
 
-Use the **closed form** when the matrix is small and well-conditioned use
-**gradient descent** when it is not — which, for everything after this unit, is
-always.
+Use the **closed form** when the matrix is small and well-conditioned; use
+**gradient descent** when it is not — and for most models beyond linear
+regression, no closed form exists at all.
 
 </div>
 
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 2
-## The Probabilistic Reading
-
-> **Guiding Question:** Least squares was justified after the fact. What if we
-> had stated how the data arose *first* — would we get the same estimator?
-
---
-
-## Turning a Model Into an Estimator
-
-We have a model with parameters $\theta$ and data $D$. The model assigns each
-possible dataset a probability.
-
-
-<div class="c-definition">
-
-The **likelihood** is that probability, read as a function of the **parameters**
-with the data held fixed:
-$$
-L(\theta) = p(D \mid \theta)
-$$
-The **maximum likelihood estimate** is
-$\hat{\theta}_{\mathrm{ML}} = \arg\max_{\theta} p(D \mid \theta)$.
-
-</div>
-
-
-
-<div class="c-warning">
-
-$p(D \mid \theta)$ is a probability over **data**, not over parameters. The
-likelihood is not a distribution over $\theta$ and does not integrate to 1.
-
-</div>
-
-
-Notes:
-The warning is the single most common confusion in the course. The likelihood is
-the same expression as the sampling distribution, read along the other axis.
-Bayesian methods later put an actual distribution on θ this is where the two
-approaches part.
-
---
-
-## Why the Logarithm
-
-Under the **i.i.d. assumption** — observations independent and identically
-distributed — the likelihood factorises:
-
-$$
-L(\theta) = \prod_{i=1}^{n} p(x_i \mid \theta)
-\qquad\Longrightarrow\qquad
-\ell(\theta) = \sum_{i=1}^{n} \log p(x_i \mid \theta)
-$$
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Same maximum
-$\log$ is monotone, so it does not move the arg max.
-
-</div>
-
-
-<div class="card">
-
-### Numerically safe
-A product of thousands of small probabilities underflows; a sum of logs does
-not.
-
-</div>
-
-
-<div class="card">
-
-### Differentiable sums
-Sums differentiate term by term — gradient methods apply directly.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-The i.i.d. assumption is doing real work here. Time series, spatial data and
-grouped data violate it, and the factorisation is then simply wrong.
-
-</div>
-
-
---
-
-## Example: A Biased Coin
-
-$n$ flips, $h$ heads, parameter $\theta = P(\text{heads})$:
-
-$$
-\ell(\theta) = h \log \theta + (n - h)\log(1 - \theta)
-\qquad
-\frac{d\ell}{d\theta} = \frac{h}{\theta} - \frac{n-h}{1-\theta} = 0
-\qquad
-\hat{\theta}_{\mathrm{ML}} = \frac{h}{n}
-$$
-
-
-<div class="c-insight">
-
-The estimator is the observed frequency — the answer intuition would have given.
-MLE **derives** it rather than assuming it, and the same derivation works where
-intuition has nothing to offer.
-
-</div>
-
-
---
-
-## Mini-Exercise
-
-You flip a coin **3 times** and see 3 heads.
-
-1. What is $\hat{\theta}_{\mathrm{ML}}$?
-2. Is that a reasonable belief about the coin?
-3. What is the estimator missing?
-
---
-
-## Mini-Exercise — Solution
-
-
-<div class="fragment">
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** $\hat{\theta} = 3/3 = 1$ — the coin never comes up tails.
-
-</div>
-
-
-<div class="card">
-
-**2.** No. Three flips is no basis for excluding tails entirely.
-
-</div>
-
-
-<div class="card">
-
-**3.** Any **prior** knowledge that coins are usually near-fair, and any account
-of its own **uncertainty**. MLE returns a single point and no error bars.
-
-</div>
-
-
-</div>
-
-
-Both gaps are what the Bayesian treatment later repairs.
-
-</div>
-
-
-
-<div class="takeaway">
-
-Maximum likelihood picks the parameters under which the observed data is most
-probable. It is the bridge from a **model of the world** to a **learning
-algorithm** — and it is blind to prior knowledge and to its own uncertainty.
-
-</div>
-
-
-Notes:
-The three-heads example is the hook for the whole Bayesian thread: students
-should feel MLE's failure before regularisation and priors are offered as the
-fix.
-
---
-
-## The Same Model, Told Differently
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Classical account
-Fit a line by **minimising squared error**:
-$$\hat{\mathbf{w}} = \arg\min_{\mathbf{w}} \sum_i (y_i - \mathbf{w}^{\top}\mathbf{x}_i)^2$$
-
-Justified after the fact by Gauss–Markov: it is the best linear unbiased
-estimator.
-
-</div>
-
-
-<div class="card">
-
-### Probabilistic account
-State how the data **arose**:
-$$y = \mathbf{w}^{\top}\mathbf{x} + \varepsilon,
-\qquad \varepsilon \sim \mathcal{N}(0, \sigma^{2})$$
-
-Then estimate $\mathbf{w}$ by maximum likelihood.
-
-</div>
-
-
-</div>
-
-
-**Do these give the same answer?**
-
-Notes:
-Question-first (P1) and the organising contrast of the lecture. Let students
-guess before the derivation. The answer — identical — is the point: least
-squares was a probabilistic model all along, with its assumptions unstated.
-
---
-
-## The Derivation
-
-The noise model says $p(y_i \mid \mathbf{x}_i, \mathbf{w}) =
-\mathcal{N}(y_i \mid \mathbf{w}^{\top}\mathbf{x}_i, \sigma^{2})$, so
-
-$$
-\ell(\mathbf{w}) = \sum_{i=1}^{n} \log \frac{1}{\sqrt{2\pi\sigma^{2}}}
-\exp\left(-\frac{(y_i - \mathbf{w}^{\top}\mathbf{x}_i)^{2}}{2\sigma^{2}}\right)
-= \text{const} - \frac{1}{2\sigma^{2}} \sum_{i=1}^{n} (y_i - \mathbf{w}^{\top}\mathbf{x}_i)^{2}
-$$
-
-
-<div class="c-important">
-
-Maximising the log-likelihood **is** minimising the residual sum of squares.
-The constant and the $1/2\sigma^{2}$ do not move the arg max.
-$$\hat{\mathbf{w}}_{\mathrm{ML}} = \hat{\mathbf{w}}_{\mathrm{OLS}}$$
-
-</div>
-
-
-Notes:
-Walk the two lines slowly — this is the moment the course's thesis becomes
-concrete. The squared term falls out of the *exponent of the Gaussian*: squared
-error is not a choice, it is what a Gaussian noise assumption implies.
-
---
-
-## What the Probabilistic View Adds
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### The assumptions become visible
-Additive noise, **zero mean**, **constant variance** (homoscedasticity),
-**independent** across observations, **Gaussian**.
-
-</div>
-
-
-<div class="card">
-
-### They become checkable
-Plot the residuals. Fanning out? Variance is not constant. Skewed? Not Gaussian.
-Patterned? Not independent.
-
-</div>
-
-
-<div class="card">
-
-### You get a distribution
-Not just $\hat{y}$ but $p(y \mid \mathbf{x})$ — a **predictive distribution**
-with an interval, not a point.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-insight">
-
-Choosing a loss and choosing a noise model are the **same decision**. Squared
-error ⇔ Gaussian noise absolute error ⇔ Laplace noise, which is why it is more
-robust to outliers.
-
-</div>
-
-
-Notes:
-The loss/noise correspondence is the transferable idea, and it explains the
-robustness result from the Gauss–Markov unit rather than merely asserting it:
-the Laplace distribution has heavier tails, so large residuals are less
-surprising and pull the fit less.
-
---
-
-## Mini-Exercise
-
-You fit a linear model to house prices. The residual plot shows the spread of
-errors **growing** with the predicted price.
-
-1. Which assumption is violated?
-2. Is $\hat{\mathbf{w}}$ still meaningful?
-3. What is definitely wrong?
-
---
-
-## Mini-Exercise — Solution
-
-
-<div class="fragment">
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** Homoscedasticity — the noise variance is not constant.
-
-</div>
-
-
-<div class="card">
-
-**2.** The point estimate remains unbiased it is just no longer the
-minimum-variance one.
-
-</div>
-
-
-<div class="card">
-
-**3.** Every **interval** and every **p-value**: they are computed from a single
-$\sigma$ that does not exist. Predictions are over-confident for expensive
-houses and under-confident for cheap ones.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="takeaway">
-
-Least squares **is** maximum likelihood under Gaussian noise. Stating the model
-probabilistically changes no estimate — it exposes the assumptions and buys you
-a predictive distribution.
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 3
-## From Regression to Classification
-
-> **Guiding Question:** A decision is a yes or a no. What goes wrong when we
-> fit a straight line to one?
-
---
-
-## Fitting a Line to Labels
-
-Encode the two classes as $y \in \lbrace -1, +1 \rbrace$, fit a linear model,
-and classify by the sign of the prediction:
-
-$$
-h(\mathbf{x}) = \mathrm{sign}\big(\mathbf{w}^{\top}\mathbf{x}\big)
-$$
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### One feature
-The **discrimination point** $x'$ satisfies
-$$w_0 + w_1 x' = 0$$
-Everything to one side is one class.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Two features
-The **discrimination line** satisfies
-$$w_0 + w_1 x_1 + w_2 x_2 = 0$$
-In $p$ dimensions it becomes a hyperplane.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The decision boundary is where the model output crosses zero — a level set. Say
-it once here it holds for logistic regression, SVMs and a neural network's
-final layer alike.
-
---
-
-## Where It Breaks
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### Squared loss punishes correctness
-A point far on the *correct* side has a large residual, so least squares drags
-the boundary toward it.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### The boundary shifts
-Adding well-classified points — or an outlier — moves the discrimination
-point, even when nothing was misclassified.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-warning">
-
-The output is also unbounded: $\mathbf{w}^{\top}\mathbf{x}$ can be 17 or −40,
-and neither is interpretable as a degree of belief.
-
-</div>
-
-
-Notes:
-Force the interpretation (P2): ask why "being very right" should ever count as
-error. Once students see that squared loss is the wrong loss for a decision,
-the sigmoid arrives as a fix rather than a formula.
-
---
-
-## Two Problems, One Fix
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### $\mathrm{sign}(\mathbf{w}^{\top}\mathbf{x})$ is not differentiable
-No gradient means no gradient descent — the optimisation machinery does not
-apply.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### The boundary is unstable
-Squared loss on $\pm 1$ labels lets well-classified points shift the
-discrimination point.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-important">
-
-Replace the hard threshold with the **logistic sigmoid**:
-$$
-h_\Theta(\mathbf{x}) = \mathrm{expit}\big(\mathbf{w}^{\top}\mathbf{x}\big)
-\approx P(y = 1 \mid \mathbf{x})
-$$
-
-</div>
-
-
-The output becomes a smooth, bounded quantity that can be read as a
-probability — and can be differentiated.
-
-Notes:
-Both problems have the same root: a decision is a step function, and steps have
-no useful derivative. Softening the step is the standard move; it returns as
-the activation function in neural networks.
-
---
-
-## Odds and Log-Odds
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Odds
-The ratio of favourable to remaining cases.
-
-*Rolling a six: odds 1 : 5.*
-
-</div>
-
-
-<div class="card">
-
-### Logit
-The **log-odds** of a probability $p$:
-$$\mathrm{logit}(p) = \ln \frac{p}{1-p}$$
-
-</div>
-
-
-<div class="card">
-
-### Range
-$p \in (0,1)$ maps to $(-\infty, +\infty)$ — exactly the range a linear model
-produces.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-important">
-
-**The modelling assumption:** the logit of the target is a linear combination
-of the features.
-$$
-\ln \frac{P(y=1 \mid \mathbf{x})}{1 - P(y=1 \mid \mathbf{x})} = \mathbf{w}^{\top}\mathbf{x}
-$$
-
-</div>
-
-
-Notes:
-This is the cleanest way in: we do not force a probability to be linear (it
-cannot be — it is bounded), we make its log-odds linear. The sigmoid is then
-not an arbitrary squashing function but the inverse of the logit.
-
---
-
-## The Model
-
-Inverting the logit gives the **logistic sigmoid**:
-
-$$
-h_\Theta(\mathbf{x}) = \mathrm{expit}(\mathbf{w}^{\top}\mathbf{x})
-= \frac{1}{1 + e^{-\mathbf{w}^{\top}\mathbf{x}}}
-$$
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Shape
-An S-curve: near-linear around 0, saturating towards 0 and 1 at the extremes.
-
-</div>
-
-
-<div class="card">
-
-### Reading
-$h_\Theta(\mathbf{x}) = P(y = 1 \mid \mathbf{x})$, and the decision boundary is
-still $\mathbf{w}^{\top}\mathbf{x} = 0$ — where the sigmoid passes $0.5$.
-
-</div>
-
-
-</div>
-
-
-Notes:
-The boundary is unchanged from linear regression for classification what
-changed is the *loss* and the interpretability of the output. Worth stating
-explicitly, since students often expect a curved boundary.
-
---
-
-## The Loss: Cross-Entropy
-
-
-<div class="c-definition">
-
-**Binary cross-entropy (log loss)**
-$$
-L(\Theta) = -\frac{1}{n}\sum_{i=1}^{n}
-\Big[ y_i \ln h_\Theta(\mathbf{x}_i) + (1 - y_i)\ln\big(1 - h_\Theta(\mathbf{x}_i)\big) \Big]
-$$
-
-For $|Y| > 2$ classes, the multiclass form sums over the classes with a softmax
-output.
-
-</div>
-
-
-Where does it come from? From the **likelihood**:
-$P(y_i = 1 \mid \mathbf{x}_i \Theta) = h_\Theta(\mathbf{x}_i)$ and
-$P(y_i = 0 \mid \mathbf{x}_i \Theta) = 1 - h_\Theta(\mathbf{x}_i)$.
-Maximising the likelihood of the data is minimising this loss.
-
-Notes:
-The derivation is one line and worth doing aloud: write the likelihood of one
-example as h^y (1−h)^(1−y), take the product over examples, take the log,
-negate. Maximum likelihood is the origin of the loss — not a separate idea.
-
---
-
-## Why It Fixes the Problem
-
-
-<div class="grid-2">
-
-
-<div class="card good">
-
-### Confident and correct
-Loss goes to zero — no penalty for being emphatically right.
-
-</div>
-
-
-<div class="card bad">
-
-### Confident and wrong
-Loss goes to infinity — exactly the errors we want punished.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-There is no closed-form solution the parameters are found by gradient descent
-on this loss.
-
-</div>
-
-
-Notes:
-Contrast directly with the squared-loss failure two units back: cross-entropy
-punishes confident mistakes and ignores confident successes, which is what a
-classification loss should do.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-Logistic regression is a **linear model of the log-odds**, trained by
-maximising likelihood. It keeps the linear decision boundary but produces a
-calibrated probability — and a loss that punishes the right kind of error.
-
-</div>
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 4
-## Logistic Regression, Probabilistically
-
-> **Guiding Question:** Cross-entropy was chosen because it punishes confident
-> mistakes. Where does it actually come from?
-
---
-
-## The Same Pattern Again
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Classical account
-Squash a linear score with a sigmoid, then minimise **cross-entropy** because it
-punishes confident mistakes.
-
-</div>
-
-
-<div class="card">
-
-### Probabilistic account
-State the generative story: the label is a **Bernoulli** draw,
-$$y \mid \mathbf{x} \sim \mathrm{Bernoulli}\big(\sigma(\mathbf{w}^{\top}\mathbf{x})\big)$$
-then maximise the likelihood.
-
-</div>
-
-
-</div>
-
-
---
-
-## The Derivation
-
-With $h_i = \sigma(\mathbf{w}^{\top}\mathbf{x}_i)$, one observation has
-probability $h_i^{y_i}(1-h_i)^{1-y_i}$, so
-
-$$
-\ell(\mathbf{w}) = \sum_{i=1}^{n}\Big[ y_i \log h_i + (1-y_i)\log(1-h_i)\Big]
-= - n \cdot \text{(cross-entropy)}
-$$
-
-
-<div class="c-important">
-
-Cross-entropy **is** the negative log-likelihood of a Bernoulli model. As with
-squared error and the Gaussian, the loss was never an independent choice.
-
-</div>
-
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Gaussian noise
-→ squared error → linear regression
-
-</div>
-
-
-<div class="card">
-
-### Bernoulli labels
-→ cross-entropy → logistic regression
-
-</div>
-
-
-</div>
-
-
-Notes:
-Two instances of one pattern, side by side. Ask what loss a **Poisson** model
-would imply for count data — the students can now derive it rather than look it
-up, which is the transferable skill.
-
---
-
-## What It Adds: Calibration
-
-The output is now a **claim about frequencies**: among all cases predicted at
-0.7, roughly 70% should be positive.
-
-
-<div class="grid-2">
-
-
-<div class="card good">
-
-### Calibrated
-A reliability plot — predicted probability against observed frequency — lies on
-the diagonal. The number can be fed into a cost-based decision.
-
-</div>
-
-
-<div class="card bad">
-
-### Miscalibrated
-Systematically over- or under-confident. Accuracy can still be high the
-probabilities are simply not usable as probabilities.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-Accuracy does not test calibration and calibration does not test accuracy. A
-model that outputs the base rate for everyone is perfectly calibrated and
-useless.
-
-</div>
-
-
---
-
-## Regularisation Is a Prior
-
-Adding an $L_2$ penalty to the loss:
-
-$$
-\arg\max_{\mathbf{w}} \underbrace{\log p(D \mid \mathbf{w})}_{\text{likelihood}}
- + \underbrace{\log p(\mathbf{w})}_{\text{prior}}
-\qquad\text{with}\qquad
-p(\mathbf{w}) = \mathcal{N}(0, \tau^{2}\mathbf{I})
-$$
-
-
-<div class="c-insight">
-
-$L_2$ regularisation is exactly a **zero-mean Gaussian prior** on the weights,
-and the regularised estimate is the **MAP** estimate. $L_1$ corresponds to a
-Laplace prior, whose peak at zero is why it produces sparsity.
-
-</div>
-
-
-
-<div class="takeaway">
-
-Cross-entropy is the Bernoulli negative log-likelihood **regularisation is a
-prior** and the probabilistic reading turns two heuristics into one principle —
-maximise likelihood, optionally times a prior.
-
-</div>
-
-
-Notes:
-This slide retires two pieces of folklore at once. Students who have met "L2
-shrinks weights" and "L1 gives sparsity" as facts now have the reason. It also
-sets up Bayesian linear regression, where the prior stays a distribution instead
-of collapsing to a point.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 
@@ -1932,10 +2110,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1946,17 +2130,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

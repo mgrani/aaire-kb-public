@@ -64,6 +64,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .attr('transform', `translate(0,${BEAM + 74})`)
     .attr('color', NAVY)
     .call(d3.axisBottom(x).ticks(6).tickFormat((d) => `${d}`))
+    .attr('font-size', 14)
 
   const gPts = svg.append('g')
   const gMarks = svg.append('g')
@@ -81,11 +82,16 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     const order = data.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v)
     const level = new Map()
     let prev = -Infinity
+    let prevI = -1
     let k = 0
+    const last = data.length - 1
     for (const p of order) {
-      k = x(p.v) - prev < 13 ? k + 1 : 0
+      // the movable point is drawn larger (r 10), so it needs a wider berth
+      const gap = p.i === last || prevI === last ? 17 : 13
+      k = x(p.v) - prev < gap ? k + 1 : 0
       level.set(p.i, k)
       prev = x(p.v)
+      prevI = p.i
     }
 
     gPts

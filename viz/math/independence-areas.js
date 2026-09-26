@@ -31,14 +31,30 @@ export async function mount(el, { d3, params, steps }) {
   const g = svg.append('g')
 
   g.append('rect').attr('x', x0).attr('y', y0).attr('width', S).attr('height', S).attr('fill', PALE)
+  // B is drawn column-wise, as on the conditional unit square: inside A it
+  // fills the top pAB/pA of the column, outside A the top (pB − pAB)/(1 − pA).
+  // Both heights are equal — B a straight band, A ∩ B a rectangle of area
+  // pA·pB — exactly when A and B are independent. The intersection therefore
+  // always stays inside A, and its area is always pAB.
+  const hIn = S * (pAB / pA)
+  const hOut = S * ((pB - pAB) / (1 - pA))
   const bandA = g.append('rect').attr('opacity', 0)
-  const bandB = g.append('rect').attr('opacity', 0)
+  const bandB = g.append('g').attr('opacity', 0)
+  bandB.append('rect').attr('x', x0).attr('y', y0).attr('width', S * pA).attr('height', hIn)
+  bandB.append('rect').attr('x', x0 + S * pA).attr('y', y0).attr('width', S * (1 - pA)).attr('height', hOut)
+  bandB.selectAll('rect').attr('fill', TEAL)
   const inter = g.append('rect').attr('opacity', 0)
   g.append('rect')
     .attr('x', x0).attr('y', y0).attr('width', S).attr('height', S)
     .attr('fill', 'none').attr('stroke', NAVY).attr('stroke-width', 2.5)
   g.append('text').attr('x', x0 - 10).attr('y', y0 - 12).attr('fill', NAVY)
     .attr('font-size', 20).attr('font-style', 'italic').text('Ω')
+  const labelA = g.append('text').attr('x', x0 + (S * pA) / 2).attr('y', y0 + S + 24)
+    .attr('text-anchor', 'middle').attr('font-size', 19).attr('font-style', 'italic')
+    .attr('fill', NAVY).text('A')
+  const labelB = g.append('text').attr('x', x0 - 10).attr('y', y0 + Math.min(hIn, hOut) / 2 + 7)
+    .attr('text-anchor', 'end').attr('font-size', 19).attr('font-style', 'italic')
+    .attr('fill', TEAL).text(nameB)
 
   const info = svg.append('g').attr('font-size', 19).attr('fill', NAVY)
   const lines = [0, 1, 2].map((i) =>
@@ -47,31 +63,29 @@ export async function mount(el, { d3, params, steps }) {
   const caption = svg.append('text').attr('x', W / 2).attr('y', 34)
     .attr('text-anchor', 'middle').attr('font-size', 21).attr('fill', NAVY)
 
-  // A occupies the left pA of the square; B the top pB.
-  // The intersection block is drawn with width pAB/pB inside B's strip, so its
-  // area is exactly pAB and the "is it a rectangle aligned with A?" question
-  // becomes visible.
+  const f = (v) => v.toFixed(2)
+
   function render(step) {
     bandA
       .attr('x', x0).attr('y', y0).attr('width', S * pA).attr('height', S)
       .attr('fill', NAVY).attr('opacity', step >= 1 ? 0.35 : 0)
-    bandB
-      .attr('x', x0).attr('y', y0).attr('width', S).attr('height', S * pB)
-      .attr('fill', TEAL).attr('opacity', step >= 2 ? 0.35 : 0)
+    labelA.attr('opacity', step >= 1 ? 1 : 0)
+    bandB.attr('opacity', step >= 2 ? 0.35 : 0)
+    labelB.attr('opacity', step >= 2 ? 1 : 0)
     inter
       .attr('x', x0).attr('y', y0)
-      .attr('width', S * (pAB / pB)).attr('height', S * pB)
+      .attr('width', S * pA).attr('height', hIn)
       .attr('fill', '#0d2a4a').attr('opacity', step >= 3 ? 0.85 : 0)
 
-    lines[0].text(step >= 1 ? `P(A) = ${pA}` : '')
-    lines[1].text(step >= 2 ? `P(${nameB}) = ${pB}` : '')
-    lines[2].text(step >= 3 ? `P(A ∩ ${nameB}) = ${pAB}` : '')
+    lines[0].text(step >= 1 ? `P(A) = ${f(pA)}` : '')
+    lines[1].text(step >= 2 ? `P(${nameB}) = ${f(pB)}` : '')
+    lines[2].text(step >= 3 ? `P(A ∩ ${nameB}) = ${f(pAB)}` : '')
 
     if (step >= 4) {
       caption.attr('fill', independent ? TEAL : '#b5322e').text(
         independent
-          ? `${pA} · ${pB} = ${(pA * pB).toFixed(2)} = P(A ∩ ${nameB})  →  independent`
-          : `${pA} · ${pB} = ${(pA * pB).toFixed(2)} ≠ ${pAB} = P(A ∩ ${nameB})  →  dependent`,
+          ? `${f(pA)} · ${f(pB)} = ${f(pA * pB)} = P(A ∩ ${nameB})  →  independent`
+          : `${f(pA)} · ${f(pB)} = ${f(pA * pB)} ≠ ${f(pAB)} = P(A ∩ ${nameB})  →  dependent`,
       )
     } else if (step === 3) {
       caption.attr('fill', NAVY).text(`Is P(A ∩ ${nameB}) equal to P(A) · P(${nameB})?`)

@@ -24,7 +24,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const H = 400
   const N = params.n ?? 150
   const seed = params.seed ?? 20260910
-  const PLOT = { l: 56, r: 24, t: 44, b: 44 }
+  const PLOT = { l: 56, r: 24, t: 62, b: 44 }
 
   const x = d3.scaleLinear().domain([-3.2, 3.2]).range([PLOT.l, W - PLOT.r])
   const y = d3.scaleLinear().domain([-3.2, 3.2]).range([H - PLOT.b, PLOT.t])
@@ -44,13 +44,13 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const gPts = svg.append('g')
   const gCross = svg.append('g')
   const readout = svg.append('text')
-    .attr('x', W - PLOT.r).attr('y', PLOT.t + 6).attr('text-anchor', 'end')
+    .attr('x', W - PLOT.r).attr('y', PLOT.t - 8).attr('text-anchor', 'end')
     .attr('font-size', 19).attr('fill', NAVY)
 
   svg.append('g').attr('transform', `translate(0,${H - PLOT.b})`).attr('color', NAVY)
-    .call(d3.axisBottom(x).ticks(5))
+    .call(d3.axisBottom(x).ticks(5)).attr('font-size', 14)
   svg.append('g').attr('transform', `translate(${PLOT.l},0)`).attr('color', NAVY)
-    .call(d3.axisLeft(y).ticks(5))
+    .call(d3.axisLeft(y).ticks(5)).attr('font-size', 14)
 
   // Standard normals via Box–Muller, seeded so the picture is reproducible.
   const base = (() => {
@@ -65,8 +65,10 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   function points(cfg) {
     if (cfg.relation === 'square') {
-      // Y = X² − 1, centred so E[Y] ≈ 0 and the symmetry is visible.
-      return base.map(([a]) => [a, Math.min(3.1, a * a - 1)])
+      // Y = X² − 1, centred so E[Y] ≈ 0 and the symmetry is visible. Not
+      // clamped: a clamp would flatten the parabola's arms into a line and
+      // bias the covariance; the few points above the plot are hidden instead.
+      return base.map(([a]) => [a, a * a - 1])
     }
     const rho = cfg.rho
     return base.map(([a, b]) => [a, rho * a + Math.sqrt(Math.max(0, 1 - rho * rho)) * b])
@@ -108,7 +110,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
     gPts.selectAll('circle').data(pts).join('circle')
       .attr('cx', (d) => x(d[0])).attr('cy', (d) => y(d[1]))
-      .attr('r', 3.2).attr('fill', TEAL).attr('opacity', 0.75)
+      .attr('r', 3.2).attr('fill', TEAL).attr('opacity', (d) => (d[1] > 3.2 ? 0 : 0.75))
 
     if (step >= 2) {
       gCross.append('line')

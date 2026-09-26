@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -11,10 +11,109 @@
 Prof. Dr. Michael Granitzer
 
 Notes:
-Converted from LNKB-tex part-en-ds-chp2-probability-and-statistics.tex.
-All twenty content units of the original chapter are included below, in the
-original order, as shared units from content/units/math/stochastic/ — the same
-units feed the probabilistic machine learning course.
+Converted from LNKB-tex part-en-ds-chp2-probability-and-statistics.tex. The
+content units of the original chapter are included below in the original order,
+as shared units from content/units/math/stochastic/ (the same units feed the
+probabilistic machine learning course), plus the Bernoulli/binomial split-off,
+sampling and estimation before the test, and course-local parts (module
+takeaways, the churn shop).
+
+Two sessions. Session 1 covers Modules 0–4 (orientation, events, counting, the
+axioms, conditioning and Bayes); session 2 covers Modules 5–7 (random
+variables, describing a sample, testing). The Module 5 slide marks the
+boundary.
+
+--
+
+## Where We Left Off
+
+Lecture 01 ended on a claim: data does not speak for itself — an assumption
+always speaks for it, and a pattern is knowledge only once it has been checked.
+Today builds the language in which both are written.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Assume
+Modules 1–5 — a model of chance: outcomes, probabilities, random variables, the joint
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Observe
+Module 6 — a sample, described, with its error
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Check
+Module 7 — would chance alone produce this?
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+The app users of Lecture 01 churn less. By the end of today you can say whether
+that difference is real — not yet *why* (that is Lecture 03).
+
+</div>
+
+
+Notes:
+Pick up the thread from the roadmap table of Lecture 01. Say which module equips
+which step. Say why the formal treatment comes first: every later check — a
+test, a validation error, lift — is a probability statement, so the language
+has to exist before the first check can be written down.
+
+The lecture spans two sessions; the Module 5 slide marks the boundary. Recall
+this three-card flow there.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 02: from outcomes and the axioms through conditioning and the joint to estimating from a sample and testing a difference](/courses/data-science/figures/l02-argument-map.svg)
+
+</div>
+
+
+Notes:
+The lecture on one page. Top row: the objects (outcomes, events), what makes a
+number a probability, and the one operation that matters, conditioning — with
+the trap it resolves: the 99% test that is right only 9% of the time. Middle
+row: from outcomes to quantities to the joint, then to a sample and the error
+of what we compute from it. Bottom row: the check, a test statistic against its
+distribution under "chance alone". Point at the strip: every later lecture
+writes its assumption and its check in this language.
 
 ---
 
@@ -88,7 +187,7 @@ Prediction, learning, evaluation
 </div>
 
 
-The arrow runs left to right: this module builds the vocabulary the rest of the
+The arrow runs left to right: this lecture builds the vocabulary the rest of the
 course spends its time using.
 
 Notes:
@@ -107,7 +206,7 @@ stated in its language.
 
 <div class="column">
 
-**In this module**
+**In this lecture**
 
 - sample spaces and events
 - counting outcomes
@@ -138,7 +237,7 @@ stated in its language.
 
 
 Notes:
-Set expectations: this is the one heavily formal module, and every item on the
+Set expectations: this is the one heavily formal lecture, and every item on the
 left has a named consumer on the right. If students ask "why do we need this",
 point at the right-hand column rather than defending rigour in the abstract.
 
@@ -153,7 +252,7 @@ point at the right-hand column rather than defending rigour in the abstract.
 <div class="column">
 
 
-<div class="c-red">
+<div class="card">
 
 **Red box**
 
@@ -168,11 +267,11 @@ point at the right-hand column rather than defending rigour in the abstract.
 <div class="column">
 
 
-<div class="c-blue">
+<div class="card">
 
 **Blue box**
 
-3 apples, 9 oranges
+3 apples, 1 orange
 
 </div>
 
@@ -197,13 +296,14 @@ answerable by counting, and that the second one feels harder than the first.
 
 ## The Counts, in One Grid
 
-Twenty picks, recorded as a table of counts — box across, fruit down:
+A hundred picks with the red box chosen 40% of the time, as a table of counts —
+box across, fruit down:
 
 | | $B = r$ | $B = b$ | **row total** |
 |---|---|---|---|
-| $F = a$ (apple) | 2 | 3 | **5** |
-| $F = o$ (orange) | 6 | 9 | **15** |
-| **column total** | **8** | **12** | **20** |
+| $F = a$ (apple) | 10 | 45 | **55** |
+| $F = o$ (orange) | 30 | 15 | **45** |
+| **column total** | **40** | **60** | **100** |
 
 
 <div class="grid-3">
@@ -218,7 +318,7 @@ Twenty picks, recorded as a table of counts — box across, fruit down:
 
 a single cell over the total
 
-$P(B=r, F=a) = \tfrac{2}{20}$
+$P(B=r, F=a) = \tfrac{10}{100}$
 
 </div>
 
@@ -235,7 +335,7 @@ $P(B=r, F=a) = \tfrac{2}{20}$
 
 a row or column total over the total
 
-$P(F=a) = \tfrac{5}{20}$
+$P(F=a) = \tfrac{55}{100}$
 
 </div>
 
@@ -252,7 +352,7 @@ $P(F=a) = \tfrac{5}{20}$
 
 a cell over its own row or column
 
-$P(F=a \mid B=r) = \tfrac{2}{8}$
+$P(F=a \mid B=r) = \tfrac{10}{40}$
 
 </div>
 
@@ -264,8 +364,10 @@ $P(F=a \mid B=r) = \tfrac{2}{8}$
 
 
 Notes:
-Everything on this slide is division of counts. Have students compute one of
-each kind before naming them. The names will be redefined formally later here
+The counts are what the boxes' contents would produce on average: of 40 red
+picks a quarter are apples, of 60 blue picks three quarters. Everything on this
+slide is division of counts. Have students compute one of
+each kind before naming them. The names will be redefined formally later; here
 they are labels for three ways of dividing the same table.
 
 --
@@ -283,7 +385,7 @@ they are labels for three ways of dividing the same table.
 
 **Sum rule**
 $$
-P(X) = \sum_Y P(X, Y)
+P(X) = \sum\_Y P(X, Y)
 $$
 Add along a row or column to remove a variable.
 
@@ -329,7 +431,7 @@ Combining the two rules and the symmetry $P(X,Y) = P(Y,X)$:
 
 $$
 P(Y \mid X) = \frac{P(X \mid Y) P(Y)}{P(X)},
-\qquad P(X) = \sum_Y P(X \mid Y) P(Y)
+\qquad P(X) = \sum\_Y P(X \mid Y) P(Y)
 $$
 
 **Which box did the orange come from?**
@@ -339,21 +441,37 @@ $$
 
 $$
 P(B = r \mid F = o) = \frac{P(F=o \mid B=r) P(B=r)}{P(F=o)}
-= \frac{\tfrac{6}{8}\cdot 0.4}{0.75 \cdot 0.4 + 0.75 \cdot 0.6} = 0.4
+= \frac{\tfrac{6}{8}\cdot 0.4}{\tfrac{6}{8} \cdot 0.4 + \tfrac{1}{4} \cdot 0.6} = \tfrac{2}{3}
 $$
 
-Here the fruit told us **nothing** about the box — both boxes have the same
-orange fraction. Evidence is only informative when the hypotheses predict
-different things.
+Before the pick: 40% red. After seeing an orange: 67% red. The orange is
+**evidence** — because the red box is full of oranges and the blue one is not.
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="q">
+
+And if the blue box held 3 apples and 9 oranges — the same orange share as the
+red one?
+
+</div>
+
 
 </div>
 
 
 Notes:
-The example is deliberately degenerate: identical ratios in both boxes make the
-posterior equal the prior. That is a stronger lesson than a numerical surprise —
-evidence updates belief only to the extent that hypotheses disagree. Change the
-red box to 1 apple / 7 oranges and rerun if the group wants to see movement.
+Bishop's numbers: the answer moves from 0.4 to 2/3, and the table on the
+previous slide confirms it (30 of 45 oranges came from red). Then the follow-up
+question: with 3 apples and 9 oranges in blue, both boxes are 75% oranges and
+the posterior is the prior, 0.4 — the fruit says nothing about the box. That is
+the deeper lesson: evidence updates belief only to the extent that the
+hypotheses predict different things.
 
 --
 
@@ -363,8 +481,8 @@ red box to 1 apple / 7 oranges and rerun if the group wants to see movement.
 <div class="takeaway">
 
 Two rules — **sum** to remove a variable, **product** to split a joint — generate
-joint, marginal, conditional probabilities and Bayes' theorem. The rest of this
-chapter makes them precise and extends them beyond counting.
+joint, marginal, conditional probabilities and Bayes' theorem. What follows
+makes them precise and extends them beyond counting.
 
 </div>
 
@@ -441,11 +559,11 @@ signal is the same distinction.
 <div class="c-definition">
 
 **Definition (Sample space, event space).**
-A set $\Omega = \lbrace \omega_1, \omega_2, \ldots, \omega_n\rbrace $ is the **sample
+A set $\Omega = \lbrace \omega\_1, \omega\_2, \ldots, \omega\_n\rbrace $ is the **sample
 space** of a random experiment if every outcome is associated with exactly one
 element $\omega \in \Omega$. The elements are called **outcomes**.
 
-Let $\Omega$ be finite. Every subset $A \subseteq \Omega$ is an **event** the
+Let $\Omega$ be finite. Every subset $A \subseteq \Omega$ is an **event**; the
 event $A$ **occurs** iff the observed outcome $\omega$ is a member of $A$.
 The set of all events, the power set $\mathcal{P}(\Omega)$, is the **event
 space**.
@@ -457,7 +575,7 @@ An outcome is a single result; an event is a *question you can ask* about the
 result.
 
 For infinite $\Omega$ — the drug dosage below — the event space is a suitable
-family of subsets rather than the full power set we return to this when
+family of subsets rather than the full power set; we return to this when
 continuous distributions appear.
 
 Notes:
@@ -606,8 +724,8 @@ $\lbrace 1\rbrace \quad \lbrace 2\rbrace \quad \lbrace 3\rbrace \quad \emptyset$
 </div>
 
 
-For $|\Omega| = n$ the event space has $2^n$ elements — which is exactly why the
-next unit is about counting.
+For $|\Omega| = n$ the event space has $2^n$ elements — far too many to list,
+which is why probability is done by counting, not by enumeration.
 
 Notes:
 The lattice diagram of the original is replaced by three inclusion levels;
@@ -675,7 +793,8 @@ you can point at.
 
 Notes:
 Bridge from sets to pictures before any formula (P4). The payoff of the
-diagram: probability laws become area arguments in the next unit.
+diagram: once probabilities are attached, probability laws become area
+arguments.
 
 --
 
@@ -688,7 +807,7 @@ diagram: probability laws become area arguments in the next unit.
 
 Notes:
 Stepped visualization (P6, tier 2), one click per event type: the event A;
-the complement Ā = Ω∖A the subset B ⊂ A disjoint events A ∩ B = ∅.
+the complement Ā = Ω∖A; the subset B ⊂ A; disjoint events A ∩ B = ∅.
 Predict-then-check on every click — students name the region first, the
 highlight confirms. Disjointness is the one to slow down on: it is a statement
 about events, not about probabilities.
@@ -749,6 +868,27 @@ Solution fragmented per the animation policy (solutions always click-gated).
 This replaces the last two TikZ slides of the original unit with an active
 task — same content, students draw instead of watch.
 
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+An event is a **subset** of the sample space, and combining statements about
+outcomes is set algebra: *or* is a union, *and* an intersection, *not* a
+complement. Choosing $\Omega$ decides which events exist at all.
+
+</div>
+
+
+Notes:
+Module 1 closes here (course-local slide: the Venn unit ends on its exercise).
+The point to carry into Module 3: a probability will be a number attached to
+each of these subsets, so the algebra of events is what the rules of
+probability are written in.
+
+
 ---
 
 <!-- .slide: class="module-slide" -->
@@ -776,7 +916,7 @@ $|\Omega|$ — often without enumerating them.
 Notes:
 Motivate combinatorics as the arithmetic of sample spaces, not as a separate
 topic. Flag the assumption doing the work here — "equally likely" — which the
-next unit replaces with an axiom system that does not need it.
+axiomatic definition of probability replaces with an axiom system that does not need it.
 
 --
 
@@ -786,11 +926,11 @@ next unit replaces with an axiom system that does not need it.
 <div class="c-definition">
 
 **Generalised basic principle of counting.** If an experiment consists of $r$
-stages, where stage $i$ has $n_i$ possible outcomes regardless of the earlier
+stages, where stage $i$ has $n\_i$ possible outcomes regardless of the earlier
 stages, then the whole experiment has
 
 $$
-n_1 \cdot n_2 \cdots n_r
+n\_1 \cdot n\_2 \cdots n\_r
 $$
 
 possible outcomes.
@@ -1055,7 +1195,7 @@ containing** $i$.
 
 **Binomial theorem.**
 $$
-(x+y)^n = \sum_{k=0}^{n} \binom{n}{k} x^k y^{n-k}
+(x+y)^n = \sum\_{k=0}^{n} \binom{n}{k} x^k y^{n-k}
 $$
 
 </div>
@@ -1074,7 +1214,7 @@ as there are ways to pick which k factors contribute x.
 A set with $n$ elements has
 
 $$
-\sum_{k=0}^{n} \binom{n}{k} = 2^n
+\sum\_{k=0}^{n} \binom{n}{k} = 2^n
 $$
 
 subsets — sum over all subset sizes.
@@ -1088,7 +1228,7 @@ choice, $n$ times, so $2 \cdot 2 \cdots 2 = 2^n$.
 </div>
 
 
-This is the size of the event space $\mathcal{P}(\Omega)$ from the previous unit.
+This is the size of the event space $\mathcal{P}(\Omega)$ from the sample-space unit.
 
 Notes:
 Close the loop with the sample-space unit: the 2^n we asserted there is now
@@ -1099,56 +1239,22 @@ pressure — the binary-choice one generalises better.
 
 ## Mini-Exercise
 
-A password consists of 4 characters from a 26-letter alphabet.
-
-1. How many passwords are there?
-2. How many with **no repeated letter**?
-3. How many **sets** of 4 distinct letters (order ignored)?
-
---
-
-## Mini-Exercise — Solution
+From 5 people, how many ways are there to pick a **chair and a deputy**? And
+how many ways to pick a **two-person committee**?
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="column">
-
-**1.** Ordered, with repetition
-$$26^4 = 456{,}976$$
-
-</div>
-
-
-<div class="column">
-
-**2.** Ordered, no repetition
-$$\frac{26!}{22!} = 358{,}800$$
-
-</div>
-
-
-<div class="column">
-
-**3.** Unordered, no repetition
-$$\binom{26}{4} = 14{,}950$$
-
-</div>
-
-
-</div>
-
+Chair and deputy: order matters, $5 \cdot 4 = 20$. Committee: each pair was
+counted twice (as $ab$ and $ba$), so $20 / 2! = 10 = \binom{5}{2}$.
 
 </div>
 
 
 Notes:
-Three of the four cases in one exercise ask which case is missing (unordered
-with repetition) and to invent a password-flavoured question for it.
+One point: the same selection, counted with and without order, differs by the
+factor $k!$ — over-count, then correct. Ask which cell of the four-case square
+each answer sits in.
 
 --
 
@@ -1295,12 +1401,12 @@ $$
 
 
 An experiment whose configuration and procedure make outcomes equiprobable —
-by definition or by construction — is a **Laplace experiment** its
+by definition or by construction — is a **Laplace experiment**; its
 probabilities need not be estimated, they are implied by the setup.
 
 Notes:
-This is the definition the counting unit was preparing. Emphasise that it is
-only usable under the Laplace assumption when that fails, probabilities must
+This is the definition that counting serves. Emphasise that it is
+only usable under the Laplace assumption; when that fails, probabilities must
 come from data.
 
 --
@@ -1330,6 +1436,8 @@ tension sit for a moment before the axioms arrive: students should feel why an
 axiomatic move is the honest way out, not a formal ritual.
 
 --
+
+<!-- .slide: class="smaller" -->
 
 ## The Kolmogorov Axioms
 
@@ -1387,7 +1495,7 @@ assignment must behave.
 **Beyond finite sample spaces.** When $\Omega$ is infinite, the event space is
 not the full power set but a **$\sigma$-algebra** of measurable sets, and
 Axiom III is required for **countably many** disjoint events. Everything we
-compute in this course is unaffected the construction belongs to measure
+compute in this course is unaffected; the construction belongs to measure
 theory.
 
 </div>
@@ -1448,7 +1556,7 @@ $$P(\emptyset) = 0$$
 <div class="column">
 
 $$A \subseteq B \Rightarrow P(A) \leq P(B)$$
-monotonicity *(Axioms I, II)*
+monotonicity *(Axioms I, III)*
 
 </div>
 
@@ -1464,8 +1572,8 @@ inclusion–exclusion *(Axiom III)*
 </div>
 
 
-For mutually exclusive $A_1, \ldots, A_p$:
-$P(A_1 \cup \ldots \cup A_p) = P(A_1) + \ldots + P(A_p)$.
+For mutually exclusive $A\_1, \ldots, A\_p$:
+$P(A\_1 \cup \ldots \cup A\_p) = P(A\_1) + \ldots + P(A\_p)$.
 
 Notes:
 2x2 grid of consequences. Have students justify inclusion–exclusion on the Venn
@@ -1601,7 +1709,7 @@ $$\frac{360}{990} = \frac{4}{11}$$
 $|\Omega| = \binom{11}{3} = 165$
 
 Favourable:
-$\underbrace{\binom{6}{1}}_{\text{the white}} \cdot \underbrace{\binom{5}{2}}_{\text{the blacks}} = 6 \cdot 10 = 60$
+$\underbrace{\binom{6}{1}}\_{\text{the white}} \cdot \underbrace{\binom{5}{2}}\_{\text{the blacks}} = 6 \cdot 10 = 60$
 
 $$\frac{60}{165} = \frac{4}{11}$$
 
@@ -1644,35 +1752,44 @@ case is a modelling choice about Ω, not a property of the problem.
 
 ## Mini-Exercise
 
-Five people are chosen from **10 couples** (20 individuals).
-
-What is the probability that the five chosen are **mutually unrelated** — no
-couple is fully represented?
-
---
-
-## Mini-Exercise — Solution
+The urn again, smaller: **2 white and 2 black** balls, two drawn. What is the
+probability of **one of each**? Count without order, then check with order.
 
 
 <div class="fragment">
 
-Choose 5 of the 10 couples, then one person from each:
-
-$$
-P(N) = \frac{\binom{10}{5} \cdot 2^5}{\binom{20}{5}}
- = \frac{252 \cdot 32}{15504}
- \approx 0.52
-$$
-
-Order is ignored consistently in numerator and denominator.
+Unordered: $\binom{4}{2} = 6$ pairs, $2 \cdot 2 = 4$ mixed, so $4/6 = 2/3$.
+Ordered: $4 \cdot 3 = 12$ draws, $2 \cdot 2 + 2 \cdot 2 = 8$ mixed, so
+$8/12 = 2/3$ — the same, because both sample spaces are equiprobable.
 
 </div>
 
 
 Notes:
-Solution fragmented. The structural insight: "choose the groups, then choose
-within each group" is the multiplication principle applied to combinations —
-a pattern that reappears in stratified sampling and in naive Bayes.
+One point: either counting works if it is used consistently. The common error
+to listen for is 4 favourable unordered pairs over 12 ordered draws (1/3).
+The earlier ten-couples problem ("five chosen from 10 couples, none a couple",
+$\binom{10}{5} 2^5 / \binom{20}{5} \approx 0.52$) belongs on the exercise sheet.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Laplace's formula — favourable over possible cases — is **one** probability
+measure, valid only in a sample space whose outcomes are equally likely. The
+formula is trivial; choosing that sample space is the work.
+
+</div>
+
+
+Notes:
+Module 3 closes here (course-local slide: the examples unit ends on its
+exercise). Connect back to the axioms: Laplace satisfies them, which is why it
+is a probability — not the other way round.
+
 
 ---
 
@@ -1701,7 +1818,7 @@ is the probability that both rolls sum to 8?
 <div class="column">
 
 - Before the first roll: $\Omega = \lbrace (1,1), (1,2), \ldots, (6,6)\rbrace $, $|\Omega| = 36$
-- After seeing the 3, only $\Omega_{red} = \lbrace (3,1), \ldots, (3,6)\rbrace $ remains
+- After seeing the 3, only $\Omega\_{red} = \lbrace (3,1), \ldots, (3,6)\rbrace $ remains
 - Outcomes like $(2,4)$ have become **impossible**
 
 </div>
@@ -1709,7 +1826,7 @@ is the probability that both rolls sum to 8?
 
 <div class="column">
 
-- The reduced space now carries all the probability: $P(\Omega_{red}) = 1$
+- The reduced space now carries all the probability: $P(\Omega\_{red}) = 1$
 - "Sum is 8" inside it: $E = \lbrace (3,5)\rbrace $
 
 $$P = \tfrac{1}{6}$$
@@ -1769,7 +1886,7 @@ the picture performs the formula rather than illustrating it.
 
 Then use the sliders. Two settings are worth doing live: drag P(B|A) and
 P(B|¬A) to the same value — the bar's split stops moving and P(A|B) = P(A),
-which is independence, met two units early and by accident. Then set
+which is independence, met before it has a name. Then set
 P(B|¬A) near zero: B becomes nearly conclusive evidence for A. Ask what has to
 be true of the two conditionals for evidence to be worth anything.
 
@@ -1826,7 +1943,7 @@ Same event $B$, two different pieces of information, two different answers.
 Notes:
 Force interpretation (P2). The information in (a) is stronger — it names *which*
 coin — so it eliminates more of the sample space. This is the classic
-"boy or girl" puzzle in disguise expect disagreement, which is the point.
+"boy or girl" puzzle in disguise; expect disagreement, which is the point.
 
 --
 
@@ -1835,11 +1952,11 @@ coin — so it eliminates more of the sample space. This is the classic
 
 <div class="c-definition">
 
-**Theorem (Total probability).** Let $B_1, \ldots, B_k$ be mutually exclusive
-with $\Omega = B_1 \cup \ldots \cup B_k$ and $P(B_i) > 0$. Then for any event
+**Theorem (Total probability).** Let $B\_1, \ldots, B\_k$ be mutually exclusive
+with $\Omega = B\_1 \cup \ldots \cup B\_k$ and $P(B\_i) > 0$. Then for any event
 $A$:
 $$
-P(A) = \sum_{i=1}^{k} P(B_i) \cdot P(A \mid B_i)
+P(A) = \sum\_{i=1}^{k} P(B\_i) \cdot P(A \mid B\_i)
 $$
 
 </div>
@@ -1848,9 +1965,9 @@ $$
 **Proof.** Decompose $A$ along the partition and use additivity:
 
 $$
-P(A) = P((B_1 \cup \ldots \cup B_k) \cap A)
- = \sum_{i=1}^{k} P(B_i \cap A)
- = \sum_{i=1}^{k} P(B_i) \cdot P(A \mid B_i)
+P(A) = P((B\_1 \cup \ldots \cup B\_k) \cap A)
+ = \sum\_{i=1}^{k} P(B\_i \cap A)
+ = \sum\_{i=1}^{k} P(B\_i) \cdot P(A \mid B\_i)
 $$
 
 Notes:
@@ -1930,14 +2047,14 @@ $$P(A \mid \overline{B}) \neq 1 - P(A \mid B)$$
 <div class="c-insight">
 
 Held fixed at $B$, the map $A \mapsto P(A \mid B)$ satisfies the Kolmogorov
-axioms — conditioning yields a **new probability measure** $P_B$.
+axioms — conditioning yields a **new probability measure** $P\_B$.
 
 </div>
 
 
 Notes:
 2x2 grid. The top-right box is already Bayes' theorem — flag it, then move on;
-the next unit gives it its name and its interpretation. The bottom two boxes are
+the Bayes unit gives it its name and its interpretation. The bottom two boxes are
 the most common exam mistake: you may complement the *event*, not the
 *condition*.
 
@@ -1946,9 +2063,9 @@ the most common exam mistake: you may complement the *event*, not the
 ## Chain Rule
 
 $$
-P(E_1 \cap E_2 \cap \ldots \cap E_n) =
-P(E_1) \cdot P(E_2 \mid E_1) \cdot P(E_3 \mid E_1 \cap E_2) \cdots
-P(E_n \mid E_1 \cap \ldots \cap E_{n-1})
+P(E\_1 \cap E\_2 \cap \ldots \cap E\_n) =
+P(E\_1) \cdot P(E\_2 \mid E\_1) \cdot P(E\_3 \mid E\_1 \cap E\_2) \cdots
+P(E\_n \mid E\_1 \cap \ldots \cap E\_{n-1})
 $$
 
 By successive application of the product rule.
@@ -2070,10 +2187,10 @@ that is exactly why joint distributions are needed.
 
 <div class="c-definition">
 
-Events $A_1, \ldots, A_n$ are (mutually) independent iff for **every** subset
-of indices $i_1, \ldots, i_l$:
+Events $A\_1, \ldots, A\_n$ are (mutually) independent iff for **every** subset
+of indices $i\_1, \ldots, i\_l$:
 $$
-P(A_{i_1} \cap \ldots \cap A_{i_l}) = P(A_{i_1}) \cdots P(A_{i_l})
+P(A\_{i\_1} \cap \ldots \cap A\_{i\_l}) = P(A\_{i\_1}) \cdots P(A\_{i\_l})
 $$
 
 </div>
@@ -2202,9 +2319,26 @@ dependent, but conditionally independent given the temperature.
 
 <div class="card">
 
-**Explaining away**
+**Common cause**
 
-A common cause $C$ can make two effects look related.
+A common cause $C$ can make two effects look related; given $C$, they are
+independent.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+**Common effect**
+
+Two independent causes become dependent once their common effect is observed
+— *explaining away*.
 
 </div>
 
@@ -2219,22 +2353,8 @@ A common cause $C$ can make two effects look related.
 
 **Model size**
 
-Conditional independence lets a joint distribution factorise into small pieces.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Later in the course**
-
-Naive Bayes assumes it. Graphical models are built from it.
+Conditional independence lets a joint distribution factorise into small pieces
+— naive Bayes and graphical models are built on it.
 
 </div>
 
@@ -2255,9 +2375,12 @@ independence. Both directions can fail.
 
 
 Notes:
-Flag forward links without using them: students only need to know that this
-definition is the hinge for models later. The warning box is worth a moment —
-students routinely assume one form gives the other.
+The first two cards are the two directions of the takeaway: conditioning on a
+common cause *removes* a dependence (ice cream and drownings, given the
+temperature); conditioning on a common effect *creates* one (a wet lawn: rain
+and the sprinkler, once you know the grass is wet, compete to explain it). Name
+the models that rest on the definition without developing them. The warning box
+is worth a moment — students routinely assume one form gives the other.
 
 --
 
@@ -2309,8 +2432,8 @@ explain yet — the next slide lets them count it themselves.
  data-params='{"population": 1000, "prevalence": 0.001, "sensitivity": 0.99, "specificity": 0.99}'></div>
 
 Notes:
-Stepped visualization (P6 tier 2), one click per step: the population the one
-sick person the ~10 false alarms among the 999 healthy restricting to the 11
+Stepped visualization (P6 tier 2), one click per step: the population; the one
+sick person; the ~10 false alarms among the 999 healthy; restricting to the 11
 positives. Ask before the last click: "of these 11 flagged people, how many are
 sick?" Everything here is counting and restriction of the sample space — no new
 machinery. This *is* conditioning, drawn.
@@ -2332,7 +2455,7 @@ $$
 P(A \mid B) = \frac{P(A\cap B)}{P(B)}
 $$
 
-The 11 positives are the new sample space $B$ the single sick person among
+The 11 positives are the new sample space $B$; the single sick person among
 them is $A \cap B$. The rarity of the disease survives the evidence because
 there were so many more healthy people to misclassify.
 
@@ -2423,13 +2546,13 @@ asking which step needed P(B) > 0 and which needed P(A) > 0.
 
 <div class="c-definition">
 
-**Theorem (Bayes, multiple events).** Let $A_i \in \mathcal{P}(\Omega)$ be
-mutually exclusive with $\Omega = A_1 \cup \ldots \cup A_k$ and $P(A_i) > 0$,
+**Theorem (Bayes, multiple events).** Let $A\_i \in \mathcal{P}(\Omega)$ be
+mutually exclusive with $\Omega = A\_1 \cup \ldots \cup A\_k$ and $P(A\_i) > 0$,
 and let $B$ be an event with $P(B) > 0$. Then
 
 $$
-P(A_i \mid B) = \frac{P(B \mid A_i)\cdot P(A_i)}{P(B)}
- = \frac{P(B \mid A_i)\cdot P(A_i)}{\sum_{j=1}^{k} P(B \mid A_j) \cdot P(A_j)}
+P(A\_i \mid B) = \frac{P(B \mid A\_i)\cdot P(A\_i)}{P(B)}
+ = \frac{P(B \mid A\_i)\cdot P(A\_i)}{\sum\_{j=1}^{k} P(B \mid A\_j) \cdot P(A\_j)}
 $$
 
 </div>
@@ -2451,7 +2574,7 @@ score every hypothesis by likelihood × prior, then normalise.
 As before, with the theorem of total probability supplying the denominator:
 
 $$
-P(B) = \sum_{j=1}^{k} P(B \mid A_j) \cdot P(A_j)
+P(B) = \sum\_{j=1}^{k} P(B \mid A\_j) \cdot P(A\_j)
 $$
 
 --
@@ -2470,10 +2593,10 @@ Estimate $P(\text{sick} \mid \text{positive})$ before computing it.
 
 <div class="fragment">
 
-Out of 1,000: 50 sick → ≈ 50 true positives 950 healthy → ≈ 10 false alarms.
+Out of 1,000: 50 sick → 49.5 true positives; 950 healthy → 9.5 false alarms.
 
 $$
-P(\text{sick} \mid \text{positive}) \approx \frac{50}{60} \approx 83\%
+P(\text{sick} \mid \text{positive}) = \frac{49.5}{49.5 + 9.5} = \frac{49.5}{59} \approx 84\\%
 $$
 
 **The test did not change. The prior did.** This is why screening decisions
@@ -2502,7 +2625,7 @@ against how plausible the hypothesis was to begin with.
 
 
 Notes:
-Stabilise both halves: the base-rate trap (9%) and the prior's power (83%).
+Stabilise both halves: the base-rate trap (9%) and the prior's power (84%).
 Both return in Bayesian decision making and graphical models.
 
 ---
@@ -2514,6 +2637,12 @@ Both return in Bayesian decision making and graphical models.
 
 > **Guiding Question:** We rarely care which outcome occurred, only what it was
 > worth. How do we move from outcomes to quantities?
+
+Notes:
+Session boundary: the second session starts here. Recall the three-card flow
+from the opening (assume → observe → check): Modules 1–4 built the model of
+chance for events; Modules 5–7 turn outcomes into quantities, describe a sample
+and check a difference.
 
 --
 
@@ -2640,7 +2769,7 @@ $X$ = number of heads
 
 **People**
 
-$\Omega = \lbrace \text{person}_1, \text{person}_2, \ldots\rbrace $
+$\Omega = \lbrace \text{person}\_1, \text{person}\_2, \ldots\rbrace $
 
 $X$ = height of the person
 
@@ -2651,9 +2780,9 @@ $X$ = height of the person
 
 **Two dice**
 
-$\Omega = \lbrace \langle n_1, n_2\rangle\rbrace $
+$\Omega = \lbrace \langle n\_1, n\_2\rangle\rbrace $
 
-$X(\omega) = n_1 + n_2$
+$X(\omega) = n\_1 + n\_2$
 
 </div>
 
@@ -2713,8 +2842,8 @@ Real-valued range, $E = \mathbb{R}$.
 </div>
 
 
-The distinction decides *how* we may describe the probabilities — the subject of
-the next two units.
+The distinction decides *how* we may describe the probabilities — with a mass
+function or with a density.
 
 Notes:
 Keep this light: the deep measure-theoretic reasons are out of scope. What
@@ -2785,7 +2914,7 @@ $p(a) > 0$ for at most countably many $a$
 
 <div class="column">
 
-$\sum_i p(a_i) = 1$
+$\sum\_i p(a\_i) = 1$
 
 </div>
 
@@ -2812,12 +2941,13 @@ properties are consequences, not new assumptions.
 <div class="viz" data-viz="math/distribution-explorer"
  data-params='{"kind": "dice-sum"}'></div>
 
-The triangular shape is the counting from earlier units, drawn: six of the
+The triangular shape is counting, drawn: six of the
 36 outcomes give 7, only one gives 2.
 
 Notes:
-Connect the picture to the Laplace count they already did. Ask why the shape is
-symmetric and peaked — more ways to make a middling sum. This is the first hint
+Connect the picture to the Laplace assumption: 36 equally likely outcomes,
+counted by sum. Ask why the shape is symmetric and peaked — more ways to make a
+middling sum. This is the first hint
 of why sums of random quantities concentrate.
 
 --
@@ -2829,7 +2959,7 @@ of why sums of random quantities concentrate.
 
 **Definition (Expected value).**
 $$
-E[X] = \sum_i a_i \cdot p(a_i)
+E[X] = \sum\_i a\_i \cdot p(a\_i)
 $$
 
 </div>
@@ -2843,7 +2973,7 @@ $$
 
 - Frequentist reading: the **average outcome** if the experiment were repeated
  infinitely often
-- The first moment: $\mu = E[X^1]$ the first *central* moment
+- The first moment: $\mu = E[X^1]$; the first *central* moment
  $E[X - E[X]]$ is always $0$
 
 </div>
@@ -2853,7 +2983,7 @@ $$
 
 For a real function $g$:
 $$
-E[g(X)] = \sum_i g(a_i) p(a_i)
+E[g(X)] = \sum\_i g(a\_i) p(a\_i)
 $$
 and for constants $a, b$:
 $$
@@ -2918,6 +3048,19 @@ worth a question: shifting data does not change its spread.
 
 --
 
+## Takeaway
+
+
+<div class="takeaway">
+
+A discrete distribution is a PMF; expectation and variance compress it into
+**where it sits** and **how much it spreads**.
+
+</div>
+
+
+--
+
 ## Bernoulli and Binomial
 
 
@@ -2961,13 +3104,14 @@ $$E[X] = np, \quad \mathrm{Var}(X) = np(1-p)$$
 </div>
 
 
-The binomial PMF is the counting formula times the probability of one specific
-sequence — combinatorics and independence in a single line.
+$\binom{n}{k} = \frac{n!}{k!\\,(n-k)!}$ counts the sequences with $k$ successes;
+the PMF multiplies it by the probability of one such sequence — combinatorics
+and independence in a single line.
 
 Notes:
-Point at where each earlier unit shows up: the binomial coefficient from
-counting, the product p^k(1−p)^(n−k) from independence. Nothing here is new
-machinery, which is exactly the message.
+Point at where each ingredient comes from: the binomial coefficient counts the
+ways to place k successes among n trials, the product p^k(1−p)^(n−k) comes from
+independence. Nothing here is new machinery, which is exactly the message.
 
 --
 
@@ -2982,39 +3126,39 @@ narrower — and what happens to its shape?
 Notes:
 Predict-then-check (P6). Two things happen at once: the spread in absolute terms
 grows (√n) while the shape becomes symmetric and bell-like. The second
-observation is the central limit theorem arriving early — name it only as an
-observation here the normal distribution is defined in the next unit.
+observation is the central limit theorem at work — a sum of many independent
+coin flips. Name it as an observation; the theorem itself is stated with the
+normal distribution.
 
 --
 
 ## Mini-Exercise
 
-A quiz has 10 questions with 4 options each. A student guesses every answer.
+A student guesses all **10** questions of a quiz, each with **4** options.
 
-1. Which distribution describes the number of correct answers?
-2. What is the expected number correct?
-3. Is passing (≥ 5 correct) likely?
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+How many correct answers should they expect — and is 5 or more likely?
+
+</div>
+
 
 
 <div class="fragment">
 
-1. $B(10, 0.25)$ — ten independent trials, constant success probability
-2. $E[X] = 10 \cdot 0.25 = 2.5$
-3. $P(X \geq 5) \approx 0.078$ — under 8%
-
-The independence assumption is what makes this a binomial ask when it would
-fail in a real exam.
+$B(10, 0.25)$: on average $10 \cdot 0.25 = 2.5$ correct. Five or more is
+twice the expectation — unlikely (about 8%).
 
 </div>
 
 
 Notes:
-Part 3 rewards recognising that the answer needs a sum over the tail, not one
-PMF value. The modelling caveat matters more than the arithmetic.
+Two minutes: the expectation is head arithmetic, the second half only asks for
+a judgement. If someone wants the exact tail, it is P(X ≥ 5) ≈ 0.078 — a sum over
+six PMF values, not one. The modelling point matters more than the number: the
+binomial needs independent guesses with a constant success probability; ask
+when that would fail in a real exam.
 
 --
 
@@ -3023,9 +3167,9 @@ PMF value. The modelling caveat matters more than the arithmetic.
 
 <div class="takeaway">
 
-A discrete distribution is a PMF expectation and variance compress it into
-**where it sits** and **how much it spreads**. Bernoulli and binomial are the
-counting units in probabilistic clothing.
+A yes/no attribute is a **Bernoulli** variable with one parameter $p$; counting
+the yeses in $n$ independent trials gives a **binomial**. Both are counting in
+probabilistic clothing — and $p$ is the number data will have to tell us.
 
 </div>
 
@@ -3040,8 +3184,8 @@ counting units in probabilistic clothing.
 **Definition (PDF).** A continuous random variable $X$ has a **probability
 density function** $f$ with
 $$
-P(b \leq X \leq c) = \int_b^c f(a) da,
-\qquad \int_{-\infty}^{\infty} f(a) da = 1
+P(b \leq X \leq c) = \int\_b^c f(a) da,
+\qquad \int\_{-\infty}^{\infty} f(a) da = 1
 $$
 
 </div>
@@ -3088,8 +3232,8 @@ constant in the density formula.
 <div class="column">
 
 **Discrete**
-$$E[X] = \sum_i a_i p(a_i)$$
-$$E[g(X)] = \sum_i g(a_i) p(a_i)$$
+$$E[X] = \sum\_i a\_i p(a\_i)$$
+$$E[g(X)] = \sum\_i g(a\_i) p(a\_i)$$
 
 </div>
 
@@ -3097,8 +3241,8 @@ $$E[g(X)] = \sum_i g(a_i) p(a_i)$$
 <div class="column">
 
 **Continuous**
-$$E[X] = \int_{-\infty}^{\infty} a f(a) da$$
-$$E[g(X)] = \int_{-\infty}^{\infty} g(a) f(a) da$$
+$$E[X] = \int\_{-\infty}^{\infty} a f(a) da$$
+$$E[g(X)] = \int\_{-\infty}^{\infty} g(a) f(a) da$$
 
 </div>
 
@@ -3177,7 +3321,7 @@ The peak falls as the curve widens — the area is always 1.
 Notes:
 Predict-then-check: ask what must happen to the height when the width grows.
 The constraint "total area = 1" is doing the work, and it is the same
-normalisation axiom from the beginning of the module.
+normalisation axiom that defined a probability measure.
 
 --
 
@@ -3186,20 +3330,21 @@ normalisation axiom from the beginning of the module.
 
 <div class="c-insight">
 
-The **central limit theorem**: under mild conditions, averages of many
-independent observations converge to a normal distribution — whatever the
+The **central limit theorem**: under mild conditions, the average of $n$
+independent observations is approximately normal for large $n$ — whatever the
 original distribution was.
 
 </div>
 
 
-This is why the normal is the default when the true distribution is unknown, and
-why the binomial started looking bell-shaped as $n$ grew in the previous unit.
+This is why the normal is the default when the true distribution is unknown —
+and why a sum of many independent coin flips, the binomial, looks bell-shaped.
 
 Notes:
-State the CLT, do not prove it. The callback to the binomial sweep is the point:
-students already saw it happen. This also sets up sampling and hypothesis
-testing at the end of the module.
+State the CLT, do not prove it. If the binomial sweep has already been shown,
+call back to it — students already saw it happen; if it comes later, it will
+confirm the theorem. This also sets up the sampling distribution of a mean,
+which every error bar computed from a sample rests on.
 
 --
 
@@ -3219,7 +3364,7 @@ testing at the end of the module.
 
 <div class="column">
 
-- **Beta** — values confined to a finite interval $[a,b]$
+- **Beta** — values in $[0,1]$, e.g. an unknown probability
 - **Dirichlet** — distributions *over* probabilities
 
 </div>
@@ -3239,8 +3384,8 @@ and the normal is the default shape because of the central limit theorem.
 
 
 Notes:
-The last two (Beta, Dirichlet) are named for recognition only — they return in
-the probabilistic machine learning course as priors over probabilities. That is
+The last two (Beta, Dirichlet) are named for recognition only — they return
+wherever a probability is itself unknown, as priors over probabilities. That is
 a legitimate forward *pointer*, not a forward dependency: nothing here uses them.
 
 --
@@ -3297,7 +3442,7 @@ of the course operates on joints.
 <div class="column">
 
 **Discrete** — joint PMF
-$$p_{X,Y}(a,b) = P(X = a, Y = b)$$
+$$p\_{X,Y}(a,b) = P(X = a, Y = b)$$
 
 </div>
 
@@ -3305,7 +3450,7 @@ $$p_{X,Y}(a,b) = P(X = a, Y = b)$$
 <div class="column">
 
 **Continuous** — joint PDF
-$$P((X,Y) \in R) = \iint_R f_{X,Y}(a,b) da db$$
+$$P((X,Y) \in R) = \iint\_R f\_{X,Y}(a,b) da db$$
 
 </div>
 
@@ -3318,14 +3463,14 @@ $$P((X,Y) \in R) = \iint_R f_{X,Y}(a,b) da db$$
 
 **Notational convention from here on.** We stop distinguishing discrete from
 continuous variables and simply write $p(a, b, c, \ldots)$ for the probability
-that $\lbrace X_1, X_2, X_3, \ldots\rbrace $ is in state $a, b, c, \ldots$
+that $\lbrace X\_1, X\_2, X\_3, \ldots\rbrace $ is in state $a, b, c, \ldots$
 
 </div>
 
 
 Notes:
 Flag the convention as a deliberate simplification, and say why it is safe: the
-rules (marginalise, condition, factorise) are identical only the mechanics of
+rules (marginalise, condition, factorise) are identical; only the mechanics of
 summing versus integrating differ.
 
 --
@@ -3336,9 +3481,9 @@ summing versus integrating differ.
 <div class="c-definition">
 
 **Marginalisation** eliminates a random variable by summing over all its states.
-For $p(x_1, \ldots, x_n)$, a **marginal** over a subset is
+For $p(x\_1, \ldots, x\_n)$, a **marginal** over a subset is
 $$
-p(x_1) = \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \ldots, x_n)
+p(x\_1) = \sum\_{x\_2} \cdots \sum\_{x\_n} p(x\_1, x\_2, \ldots, x\_n)
 $$
 
 </div>
@@ -3348,8 +3493,8 @@ $$
 
 Notes:
 Marginalisation is the total-probability theorem, applied to random variables —
-say so, since students met it three units ago. That continuity is worth more
-than the formula.
+say so, since students met the theorem with conditional probability. That
+continuity is worth more than the formula.
 
 --
 
@@ -3372,7 +3517,7 @@ The margins of the table *are* the marginals — which is where the name comes
 from.
 
 Notes:
-Have students read one cell aloud as a sentence ("7.5% of families have one boy
+Have students read one cell aloud as a sentence ("11.25% of families have one boy
 and two girls"). Then ask whether B and G are independent — they are not, since
 the family size couples them. Good preparation for covariance.
 
@@ -3484,7 +3629,7 @@ from the warning above, on screen, and it is the reason "uncorrelated" and
 
 <div class="takeaway">
 
-The joint distribution holds everything **marginalisation** sums a variable
+The joint distribution holds everything; **marginalisation** sums a variable
 away, **conditioning** restricts, and **covariance** summarises linear
 co-variation. Zero covariance is weaker than independence.
 
@@ -3538,8 +3683,8 @@ Its properties ($\mu$, $\sigma^2$) are the truth we cannot observe.
 
 The observations we actually have.
 
-Its properties ($\overline{x}$, $s^2$) are what we compute — estimates of the
-population's.
+Its properties ($\overline{x}$, $s^2$) are what we compute; estimates of the
+population's ($\overline{x}$, $\hat{\sigma}^2$) are built from them.
 
 </div>
 
@@ -3581,7 +3726,7 @@ sample mean, median
 ### Dispersion
 2nd central moment
 
-variance, standard deviation, IQR
+variance, standard deviation, interquartile range
 
 </div>
 
@@ -3591,7 +3736,7 @@ variance, standard deviation, IQR
 ### Shape
 3rd central moment
 
-skewness, quantiles
+skewness — or, without moments, quantiles
 
 </div>
 
@@ -3599,13 +3744,14 @@ skewness, quantiles
 </div>
 
 
-Univariate statistics describe one random variable **multivariate** statistics
-describe $X_1, \ldots, X_d$ together.
+Univariate statistics describe one random variable; **multivariate** statistics
+describe $X\_1, \ldots, X\_d$ together.
 
 Notes:
 The moment ordering gives a clean mental index: where is it, how spread, how
-lopsided. Each has a robust and a non-robust representative — a distinction the
-next units make concrete.
+lopsided. Each has a robust and a non-robust representative: the median against
+the mean for location, the interquartile range against the standard deviation
+for spread.
 
 --
 
@@ -3618,10 +3764,10 @@ next units make concrete.
 <div class="column">
 
 **Sample mean**
-$$\overline{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$$
+$$\overline{x} = \frac{1}{n}\sum\_{i=1}^{n} x\_i$$
 
 **Weighted mean**
-$$\overline{x}_w = \frac{\sum_i w_i x_i}{\sum_i w_i}$$
+$$\overline{x}\_w = \frac{\sum\_i w\_i x\_i}{\sum\_i w\_i}$$
 
 </div>
 
@@ -3629,10 +3775,10 @@ $$\overline{x}_w = \frac{\sum_i w_i x_i}{\sum_i w_i}$$
 <div class="column">
 
 **Geometric mean** — for rates and ratios
-$$\Big(\prod_i x_i\Big)^{1/n}$$
+$$\Big(\prod\_i x\_i\Big)^{1/n}$$
 
 **Harmonic mean** — for averaging rates
-$$\frac{n}{\sum_i 1/x_i}$$
+$$\frac{n}{\sum\_i 1/x\_i}$$
 
 </div>
 
@@ -3718,8 +3864,8 @@ requires. The mean is drawn as the fulcrum the beam balances on, so the drag is
 visibly a lever: one value far out has to be balanced by everything else.
 
 Drag it all the way and stop. The mean is now above six of the seven salaries —
-a "typical" value that almost nobody earns. The median has moved by one
-position. Then ask the political question: which number goes in the recruitment
+a "typical" value that almost nobody earns. The median has not moved at
+all — it is still 44 k€. Then ask the political question: which number goes in the recruitment
 advert, and which one in the union's press release?
 
 --
@@ -3741,7 +3887,7 @@ and which one describes a typical employee?
 Mean $\approx 73.9$, median $= 44$.
 
 The single large value pulls the mean above **every** salary except one. The
-median describes the typical employee the mean describes the payroll divided by
+median describes the typical employee; the mean describes the payroll divided by
 headcount. Both are correct — they answer different questions.
 
 </div>
@@ -3769,7 +3915,7 @@ centre.
 <div class="card">
 
 **Sample variance** — the variance *of the observed data*
-$$s^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \overline{x})^2$$
+$$s^2 = \frac{1}{n}\sum\_{i=1}^{n}(x\_i - \overline{x})^2$$
 
 **Standard deviation** $s = \sqrt{s^2}$, in the unit of the data.
 
@@ -3785,7 +3931,7 @@ $$s^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \overline{x})^2$$
 <div class="c-tip">
 
 Computable in **one pass** over the data, $O(n)$, using
-$$\sum x_i^2 \text{ and } \sum x_i$$
+$$\sum x\_i^2 \text{ and } \sum x\_i$$
 — which matters when the data does not fit in memory.
 
 </div>
@@ -3813,7 +3959,7 @@ population. If the true mean $\mu$ is unknown, we must estimate it — and using
 $\overline{x}$ in its place makes the deviations systematically too small.
 
 $$
-\hat{\sigma}^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \overline{x})^2
+\hat{\sigma}^2 = \frac{1}{n-1}\sum\_{i=1}^{n}(x\_i - \overline{x})^2
 $$
 
 </div>
@@ -3825,11 +3971,14 @@ $$
 Dividing by $n-1$ compensates: one degree of freedom was spent estimating the
 mean from the same data.
 
+Naming is not uniform: many textbooks, and pandas, call the $n-1$ version $s^2$;
+NumPy's `var` divides by $n$ unless told otherwise.
+
 </div>
 
 
 Notes:
-Do not derive the correction give the intuition. A good probe: with n = 1, the
+Do not derive the correction; give the intuition. A good probe: with n = 1, the
 sample variance is 0 (the point equals its own mean) — clearly not an estimate
 of population spread, and the corrected formula refuses to answer at all.
 
@@ -3840,7 +3989,7 @@ of population spread, and the corrected formula refuses to answer at all.
 
 <div class="takeaway">
 
-$s^2$ describes **the sample** $\hat{\sigma}^2$ estimates **the population**.
+$s^2$ describes **the sample**; $\hat{\sigma}^2$ estimates **the population**.
 The $n-1$ is not a convention — it is the price of having estimated the mean
 from the same data.
 
@@ -3879,7 +4028,7 @@ $q = 100$
 ### Quartiles
 $q = 4$
 
-$Q_1$ = 25th, $Q_2$ = 50th (= median), $Q_3$ = 75th percentile
+$Q\_1$ = 25th, $Q\_2$ = 50th (= median), $Q\_3$ = 75th percentile
 
 </div>
 
@@ -3887,7 +4036,7 @@ $Q_1$ = 25th, $Q_2$ = 50th (= median), $Q_3$ = 75th percentile
 <div class="column">
 
 ### IQR
-$$\mathrm{IQR} = Q_3 - Q_1$$
+$$\mathrm{IQR} = Q\_3 - Q\_1$$
 
 the middle half of the data
 
@@ -3911,7 +4060,8 @@ symmetry, no sensitivity to tails. The boxplot is their standard graphical form
 <div class="viz viz-lg" data-viz="math/anscombe-quartet" data-steps="5"></div>
 
 Notes:
-Stepped reveal (P6): one dataset per click, then the shared regression line.
+Stepped reveal (P6): one dataset per click, then the shared regression line
+and the shared statistics.
 All four have the same mean, variance, correlation and least-squares line.
 Ask after the fourth click, before revealing: "these four have identical
 summary statistics — what does that tell you about summary statistics?"
@@ -3948,7 +4098,7 @@ varies at all.
 
 **Plot first, summarise second.**
 
-Visual inspection is not a soft alternative to statistics it is how you find
+Visual inspection is not a soft alternative to statistics; it is how you find
 out which statistics are meaningful.
 
 </div>
@@ -3973,6 +4123,441 @@ Notes:
 This is the bridge to the data-exploration chapter, where visual analytics gets
 its own treatment. Stabilise the lesson as a working rule, not a slogan: every
 summary answers one question and is silent about the rest.
+
+--
+
+## You Computed a Number. Which Number Did You Want?
+
+Seven salaries gave a sample mean of $\overline{x} = 73.9$ k€.
+
+
+<div class="q">
+
+What is the probability that the population mean $\mu$ is exactly 73.9 k€?
+
+</div>
+
+
+
+<div class="fragment">
+
+Zero. $\overline{x}$ is not $\mu$ — it is one **estimate** of it, computed from
+the seven people who happened to be in the sample.
+
+The honest question is not *what is $\mu$* but **how far from $\mu$ can this
+number be?**
+
+</div>
+
+
+Notes:
+Open on the gap, not on a definition (P1, P4). Most students will answer with a
+number or hedge; the point is that the question is malformed. Everything in this
+unit exists to replace "μ = 73.9" with "μ = 73.9 ± something", and to say where
+the something comes from.
+
+--
+
+## Estimator and Estimate
+
+
+<div class="c-definition">
+
+**Definition.** An **estimator** is a function of the sample —
+$\hat{\theta} = g(X\_1, \ldots, X\_n)$ — used to approximate an unknown quantity
+$\theta$ of the population. The number it takes on for one particular sample is
+an **estimate**.
+
+</div>
+
+
+The sample is random, so the estimator is a **function of random variables**:
+$\hat{\theta}$ is itself a random variable, with a distribution of its own.
+
+
+<div class="c-note">
+
+$\overline{x}$, $s^2$ and $\hat{\sigma}^2$ from descriptive statistics are all
+estimators. We used them without saying what kind of object they are.
+
+</div>
+
+
+Notes:
+Math first (P5) — this is a second pass over objects the students already
+compute. The load-bearing sentence is the middle one: a statistic inherits
+randomness from the sample. Everything else follows from taking that seriously.
+
+--
+
+## An Estimator Has a Distribution
+
+<div class="viz viz-lg" data-viz="math/sampling-distribution" data-steps="4"
+ data-params='{"shape": "uniform", "n": 5}'></div>
+
+**Predict first:** after a thousand samples, what shape will the lower picture
+have — and how wide?
+
+Notes:
+Stepped visualization (P6 tier 2 with tier-3 controls). One click per step: draw
+one sample; record its mean; fifty samples; a thousand, with the normal curve
+and the standard error. Both pictures share the x-axis, so "the means are more
+tightly packed than the population" is something students see rather than
+something we assert. Collect predictions before the third click — the common
+guess is that the spread stays the same.
+
+--
+
+## Three Things the Picture Shows
+
+
+<div class="marks-step">
+
+- The means pile up **around $\mu$** — the estimator is not systematically off
+- The pile is **narrower than the population** — averaging cancels noise
+- The pile is **bell-shaped**, even though the population was not
+
+</div>
+
+
+
+<div class="c-definition">
+
+**Definition (Sampling distribution).** The distribution of an estimator
+$\hat{\theta}$ over all possible samples of size $n$.
+$\hat{\theta}$ is **unbiased** if $E[\hat{\theta}] = \theta$.
+
+</div>
+
+
+Notes:
+The three observations are, in order: unbiasedness, the standard error, and the
+central limit theorem — named on the next slides. Naming them here would be
+faster and worse. Ask which of the three would still hold for the *median*
+(the first two do; the third does too, but that needs a different argument).
+
+--
+
+## Use the Widget: Change the Population
+
+Set the population to **skewed** and then to **bimodal**, keeping $n = 5$.
+
+
+<div class="q">
+
+Which of the three observations survive a population that is not symmetric?
+
+</div>
+
+
+
+<div class="fragment">
+
+All three. The shape of the sampling distribution stops depending on the shape
+of the population as soon as $n$ is more than a handful — which is why one
+formula can cover cases we never inspect.
+
+</div>
+
+
+Notes:
+Tier-3 exploration, with the prediction committed first as the policy requires.
+The bimodal population is the persuasive one: two separate humps, and the means
+of five draws still form a single bell. Push n to 2 to show where it breaks
+down — the claim is asymptotic, not magic.
+
+--
+
+## Standard Error
+
+
+<div class="c-definition">
+
+**Definition (Standard error).** The standard deviation of an estimator's
+sampling distribution. For the sample mean of independent draws:
+$$
+\mathrm{SE}(\overline{X}) = \frac{\sigma}{\sqrt{n}}
+$$
+
+</div>
+
+
+It is measured in the unit of the data and answers "how far off is a typical
+estimate", where $\sigma$ answers "how far apart are typical *observations*".
+
+
+<div class="c-warning">
+
+$\sigma$ and $\mathrm{SE}$ are different quantities. More data does nothing to
+$\sigma$ — the world stays as variable as it was — and shrinks $\mathrm{SE}$.
+
+</div>
+
+
+Notes:
+The warning is the most valuable line in the unit: σ is the variability of the
+world (aleatoric uncertainty), SE is our ignorance about the estimate (epistemic
+uncertainty) — the two words return at the end of the unit. Ask which one a weather
+forecast's "±3 °C" refers to; the answer is usually both, mixed.
+
+--
+
+## Precision Costs Data
+
+| Multiply the data by… | …and the standard error is multiplied by |
+|---|---|
+| 2 | 0.71 |
+| **4** | **½** |
+| 25 | ⅕ |
+| **100** | **⅒** |
+
+The $\sqrt{n}$ is why the last digit of an estimate is so expensive: halving the
+error costs four times the data, and a tenfold improvement costs a hundredfold.
+
+Notes:
+The economics of data collection in one line, and a sanity check students can
+apply to any claim about "more data". Ask what this implies for an A/B test that
+wants to detect a 0.1% difference. It also foreshadows why we later care about
+better *models* rather than only bigger *samples*.
+
+--
+
+## Two Theorems We Have Already Seen Happen
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="c-insight">
+
+**Law of large numbers**
+
+$\overline{X}\_n \to \mu$ as $n \to \infty$.
+
+The estimate converges on the truth — the pile keeps narrowing.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-insight">
+
+**Central limit theorem**
+
+$\overline{X}\_n$ is approximately
+$N(\mu, \sigma^2/n)$ for large $n$.
+
+And we know the *shape* of what is left.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+The first says the error goes away; the second says how much of it is left after
+$n$ observations. Only the second lets us put a number on our ignorance.
+
+Notes:
+Deliberate spiral (P7): the CLT was stated in the continuous-distributions unit
+and was visible in the binomial sweep. Here it acquires a job. Emphasise the
+division of labour between the two theorems — students routinely quote the LLN
+where they need the CLT.
+
+--
+
+## From a Number to an Interval
+
+If $\overline{X} \approx N(\mu, \sigma^2/n)$, then for 95% of samples
+$\overline{X}$ lands within $1.96\thinsp\mathrm{SE}$ of $\mu$ — and therefore $\mu$
+lands within $1.96\thinsp\mathrm{SE}$ of $\overline{X}$.
+
+<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
+ data-params='{"labels": ["the estimate — our best single guess", "how confident we insist on being", "how noisy the estimate is"]}'>
+
+$$
+\eqa{\overline{x}} \pm \eqb{1.96} \cdot \eqc{\frac{\sigma}{\sqrt{n}}}
+$$
+
+</div>
+
+Notes:
+Math-first-then-meaning (P5), legitimate because the picture came first. Walk the
+three parts and ask what each one would have to do to make the interval wider.
+σ is treated as known here; the correction for an estimated σ (the t
+distribution) is a refinement, not a different idea.
+
+--
+
+## What Does "95% Confident" Mean?
+
+<div class="viz viz-lg" data-viz="math/confidence-intervals" data-steps="4"
+ data-params='{"mu": 100, "sigma": 15, "n": 10, "level": 0.95}'></div>
+
+Notes:
+Stepped, then manipulable. One interval; twenty; sixty with the coverage tally;
+then the invitation to change the level and n. Ask before the third click how
+many of sixty intervals should miss. The red rows are the whole argument: the
+misses look exactly like the hits from the inside.
+
+--
+
+## The Sentence Almost Everyone Gets Wrong
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="card muted">
+
+<span class="eyebrow">What it does not mean</span>
+
+"There is a 95% probability that $\mu$ lies in **this** interval."
+
+$\mu$ is a fixed number. It is either in this interval or it is not — there is
+no probability left to have.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-important">
+
+<span class="eyebrow">What it means</span>
+
+"95% of the intervals produced **by this procedure** contain $\mu$."
+
+The probability is a property of the recipe, evaluated before the data is seen.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+This is the distinction the picture just made — the rows are the procedure, one
+row is your data. Expect resistance: the wrong reading is the useful-sounding
+one. Note also that a Bayesian credible interval *does* license the first
+sentence, at the price of requiring a prior — a forward pointer, not a
+dependency.
+
+--
+
+## Where This Leaves Us
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+Two kinds of uncertainty meet in one formula. We can now measure one of them.
+
+
+<div class="marks-step">
+
+- $\sigma$ — how variable the world is. **Aleatoric.** Unchanged by data.
+- $\mathrm{SE} = \sigma/\sqrt{n}$ — how badly we know our own estimate.
+ **Epistemic.** Shrinks with data.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note">
+
+"More data helps" was a slogan.
+
+It is now a rate: $1/\sqrt{n}$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+If the course has already named the two kinds of uncertainty, close that loop
+here; if not, the two bullets introduce the words. This is the slide to point back to
+whenever a later lecture claims a model is uncertain "because it has not seen
+enough" — that claim has a magnitude, and this is where it comes from.
+
+--
+
+## Mini-Exercise
+
+A shop timed $n = 100$ customers at a counter: $\overline{x} = 180$ s, and past
+records give $\sigma = 60$ s. What is the standard error — and how many
+customers would halve it?
+
+
+<div class="fragment">
+
+$\mathrm{SE} = 60/\sqrt{100} = 6$ s, so the 95% interval is about
+$180 \pm 12$ s. Halving the SE needs twice the $\sqrt{n}$ — **four times the
+data**, $n = 400$. $\sigma = 60$ s does not change: customers stay as variable
+as they were; only our knowledge of their average improves.
+
+</div>
+
+
+Notes:
+Solution on the same slide, click-gated. The second part is the one that
+transfers: the √n law is the answer to nearly every "how much data do we need"
+question a student will be asked. The interval is 180 ± 1.96 · 6 ≈ [168, 192] s.
+If time allows, ask what would change if σ had to be estimated too.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A statistic is a **random variable**. Its distribution over repeated samples is
+the sampling distribution; its spread is the **standard error**, $\sigma/\sqrt{n}$.
+A confidence interval reports that spread — and its percentage describes the
+**procedure**, not the one interval in front of you.
+
+</div>
+
+
+Notes:
+Stabilise three things: statistic-as-random-variable, the 1/√n rate, and the
+procedure reading of confidence. All three return whenever a measured number —
+an accuracy, an error rate — is reported with an error bar, and a Bayesian
+treatment gives the same question a different, more directly stated answer.
 
 ---
 
@@ -3999,7 +4584,7 @@ summary answers one question and is silent about the rest.
 
 **Experiment A** — baseline model
 
-accuracy measured over $n_A$ runs
+accuracy measured over $n\_A$ runs
 
 </div>
 
@@ -4014,7 +4599,7 @@ accuracy measured over $n_A$ runs
 
 **Experiment B** — new architecture
 
-accuracy measured over $n_B$ runs
+accuracy measured over $n\_B$ runs
 
 </div>
 
@@ -4030,16 +4615,16 @@ accuracy measured over $n_B$ runs
 
 <div class="c-note">
 
-$H_0$: the two means are equal — $\mu_A = \mu_B$
+$H\_0$: the two means are equal — $\mu\_A = \mu\_B$
 <br>
-$H_1$: they differ — $\mu_A \neq \mu_B$
+$H\_1$: they differ — $\mu\_A \neq \mu\_B$
 
 </div>
 
 
 Notes:
 Guiding question of the module, in the students' own working context. Every one
-of them has compared two model runs almost none has asked whether the
+of them has compared two model runs; almost none has asked whether the
 difference survives resampling. Keep the example running through the unit.
 
 --
@@ -4049,13 +4634,13 @@ difference survives resampling. Keep the example running through the unit.
 
 <div class="c-insight">
 
-Compare what we **observed** with what $H_0$ **predicts**. If the disagreement
-is large enough to be implausible under $H_0$, reject $H_0$.
+Compare what we **observed** with what $H\_0$ **predicts**. If the disagreement
+is large enough to be implausible under $H\_0$, reject $H\_0$.
 
 </div>
 
 
-We never prove $H_1$. We only measure how badly $H_0$ fails to explain the data.
+We never prove $H\_1$. We only measure how badly $H\_0$ fails to explain the data.
 
 Notes:
 The asymmetry is the hardest idea in the unit. "Fail to reject" is not
@@ -4071,13 +4656,13 @@ The asymmetry is the hardest idea in the unit. "Fail to reject" is not
 
 <div class="column">
 
-A **test statistic** $T = T(X_1, \ldots, X_n)$ compresses the data so that its
-distribution **under $H_0$** is known.
+A **test statistic** $T = T(X\_1, \ldots, X\_n)$ compresses the data so that its
+distribution **under $H\_0$** is known.
 
-The **p-value** is the probability, under $H_0$, of observing a statistic at
+The **p-value** is the probability, under $H\_0$, of observing a statistic at
 least as extreme as the one we got.
 
-Small p-value → the data is surprising under $H_0$.
+Small p-value → the data is surprising under $H\_0$.
 
 </div>
 
@@ -4087,9 +4672,10 @@ Small p-value → the data is surprising under $H_0$.
 
 <div class="c-warning">
 
-The p-value is **not** the probability that $H_0$ is true.
+The p-value is **not** the probability that $H\_0$ is true.
 
-It is $P(\text{data} \mid H_0)$, not $P(H_0 \mid \text{data})$.
+It is $P(|T| \ge |t\_{\text{obs}}| \mid H\_0)$ — a tail probability of the
+statistic — not $P(H\_0 \mid \text{data})$.
 
 </div>
 
@@ -4112,7 +4698,7 @@ consequences. Make that link explicit — students remember it.
 <div class="viz viz-lg" data-viz="math/distribution-explorer" data-steps="1"
  data-params='{"kind": "normal", "mu": 0, "sigma": 1, "shade": [1.96, 4]}'></div>
 
-Under $H_0$ the statistic follows a known distribution. The shaded tail carries
+Under $H\_0$ the statistic follows a known distribution. The shaded tail carries
 probability $\alpha/2$: if $T$ lands there, we reject.
 
 Notes:
@@ -4135,7 +4721,7 @@ discovery.
 
 **Type I error** — false alarm
 
-Reject $H_0$ when it is true.
+Reject $H\_0$ when it is true.
 
 Probability $\alpha$ (we choose it).
 
@@ -4152,12 +4738,9 @@ Probability $\alpha$ (we choose it).
 
 **Type II error** — miss
 
-Fail to reject $H_0$ when $H_1$ holds.
+Fail to reject $H\_0$ when $H\_1$ holds.
 
-Probability $\beta$ **power** $= 1 - \beta$.
-
-</div>
-
+Probability $\beta$; **power** $= 1 - \beta$.
 
 </div>
 
@@ -4165,31 +4748,42 @@ Probability $\beta$ **power** $= 1 - \beta$.
 </div>
 
 
-Lowering $\alpha$ raises $\beta$ for a fixed sample size. More data is the only
-way to improve both.
+</div>
+
+
+Lowering $\alpha$ raises $\beta$ for a fixed design. To improve both: more
+data, less noise, or a **paired** design that cancels shared noise.
 
 Notes:
 The trade-off is the practical content of the slide. In an ML context: a strict
 α means real improvements get dismissed; a lax α means noise gets published.
 Power analysis answers "how many runs do I need", which is the question people
-actually have.
+actually have. The paired design is the cheap one in ML: evaluate both models on
+the same seeds and test splits, and the split-to-split noise cancels in the
+differences.
 
 --
 
-## Which Test?
+## One Sample: $z$ or $t$?
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="card">
+
+### Known variance — $z$-test
+$$Z = \frac{\overline{X} - \mu\_0}{\sigma/\sqrt{n}}$$
+Reject (two-sided) if $|Z| > z\_{1-\alpha/2}$.
+
+</div>
 
 
 <div class="card">
 
-**One sample, known variance** — $z$-test
-$$Z = \frac{\overline{X} - \mu_0}{\sigma/\sqrt{n}}$$
-Reject (two-sided) if $|Z| > z_{1-\alpha/2}$.
+### Unknown variance — $t$-test
+$$T = \frac{\overline{X} - \mu\_0}{s/\sqrt{n}}$$
+$s$ estimated from the data → **heavier tails** ($t$ with $n-1$ d.f.).
 
 </div>
 
@@ -4197,58 +4791,46 @@ Reject (two-sided) if $|Z| > z_{1-\alpha/2}$.
 </div>
 
 
-<div class="column">
 
+<div class="c-note">
 
-<div class="card">
-
-**One sample, unknown variance** — $t$-test
-$$T = \frac{\overline{X} - \mu_0}{S/\sqrt{n}}$$
-Same standardised distance, estimated denominator → **heavier tails**.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Two samples, equal variances** — pooled $t$
-
-Use when variance homogeneity is credible (same pipeline, same noise).
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Two samples, unequal variances** — Welch's $t$
-
-**The default for ML A/B**: different randomness induces different variances.
-
-</div>
-
-
-</div>
-
+$\sigma/\sqrt{n}$ is the **standard error**: the standard deviation of the
+sample mean $\overline{X}$. $s = \sqrt{s^2}$ is the sample standard deviation.
+Both statistics measure the distance from $\mu\_0$ in standard errors.
 
 </div>
 
 
 Notes:
-2x2 grid as a decision table. The single most useful takeaway for their own
-work is the bottom right: use Welch by default, because the equal-variance
-assumption is rarely justified across architectures.
+The only difference between the two is the denominator. Plugging in an estimate
+$s$ for $\sigma$ adds uncertainty, which the $t$ distribution's heavier tails
+pay for; with $n \ge 30$ the two are practically the same.
+
+--
+
+## Two Samples: Which $t$?
+
+| Situation | Test | Statistic |
+|---|---|---|
+| independent runs, equal variances credible | pooled $t$ | $\frac{\overline{X}\_B - \overline{X}\_A}{s\_p \sqrt{1/n\_A + 1/n\_B}}$ |
+| independent runs, variances may differ | **Welch's $t$** | $\frac{\overline{X}\_B - \overline{X}\_A}{\sqrt{s\_A^2/n\_A + s\_B^2/n\_B}}$ |
+| both models on the **same** seeds or splits | **paired $t$** | $t$-test on the differences $d\_i = x\_{B,i} - x\_{A,i}$ |
+
+
+<div class="c-tip">
+
+Welch is the default for independent runs. When both models can be run on the
+same splits, pair them: the shared noise cancels in $d\_i$.
+
+</div>
+
+
+Notes:
+A table because the three tests differ along the same dimensions. Welch by
+default because the equal-variance assumption is rarely justified across
+architectures. The paired test is the one ML comparisons usually need and
+rarely use: a cross-validation comparison evaluates both models on the same
+folds, so the fold results are not independent samples.
 
 --
 
@@ -4270,7 +4852,7 @@ freedom.
 
 <div class="column">
 
-**Two variances**, $F = S_A^2 / S_B^2$.
+**Two variances**, $F = s\_A^2 / s\_B^2$.
 
 If the variances differ, **do not pool** — go back to Welch's $t$ for the means.
 
@@ -4286,53 +4868,68 @@ accurate on average but wildly less stable across seeds is a different product.
 
 --
 
-## Back to the A/B Question
+## Back to the A/B Question — Worked
+
+Ten runs each. A: mean accuracy 80 %, $s\_A = 2$. B: mean 82 %, $s\_B = 1$.
+
+$$
+t = \frac{82 - 80}{\sqrt{4/10 + 1/10}} = \frac{2}{0.71} \approx 2.83
+$$
+
+
+<div class="fragment">
+
+Welch's degrees of freedom ≈ 13; the critical value $t\_{0.975} \approx 2.16$.
+Since $2.83 > 2.16$, **reject $H\_0$** at $\alpha = 0.05$ ($p \approx 0.014$).
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Paired on the same ten seeds, with differences of mean 2 and $s\_d = 0.5$:
+$t = 2 / (0.5/\sqrt{10}) \approx 12.6$. Pairing buys far more power than more
+runs.
+
+</div>
+
+
+Notes:
+The numbers are chosen so the standard error is $\sqrt{0.5} \approx 0.71$.
+Welch's d.f.: $0.25 / ((0.16 + 0.01)/9) \approx 13.2$. The paired numbers are
+hypothetical — the point is that the per-seed differences vary far less than
+either model's accuracies do, because a hard seed is hard for both.
+
+--
+
+## The Recommendation
 
 
 <div class="grid-3">
 
 
-<div class="column">
+<div class="card">
+
+### Default
+Welch's two-sample $t$ on the mean difference — or paired $t$ if both ran on
+the same splits
+
+</div>
 
 
 <div class="card">
 
-**Default**
-
-Welch's two-sample $t$ on the mean difference
-
-</div>
-
+### Care about stability
+$F$-test on $s\_A^2 / s\_B^2$
 
 </div>
-
-
-<div class="column">
 
 
 <div class="card">
 
-**Care about stability**
-
-$F$-test on $S_A^2 / S_B^2$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Normality dubious**
-
+### Normality dubious
 Permutation (randomisation) test on the mean difference
-
-</div>
-
 
 </div>
 
@@ -4345,7 +4942,8 @@ Permutation (randomisation) test on the mean difference
 
 Hypothesis testing compares data to a model through a statistic whose null
 distribution is known. Known vs. unknown variance changes that distribution
-($z$ vs. $t$) unequal variances change the test (Welch, not pooled).
+($z$ vs. $t$); the design changes the test (Welch for independent runs, paired
+for shared splits).
 
 </div>
 
@@ -4355,6 +4953,59 @@ Close by returning to the opening question with a concrete recommendation — th
 module started with a decision they have to make, and ends with the decision
 rule. Mention that the permutation test needs no distributional assumption at
 all, which is why it is a good fallback when in doubt.
+
+--
+
+## The Churn Shop: Is the Difference Real?
+
+Lecture 01's dashboard, with counts. Over one year:
+
+| | customers | churned | rate |
+|---|---|---|---|
+| **app users** | 400 | 40 | 10% |
+| **no app** | 400 | 60 | 15% |
+
+$H\_0$: both groups churn at the same rate. Pooled rate $\hat{p} = 100/800 = 0.125$.
+
+
+<div class="fragment">
+
+$$
+z = \frac{0.15 - 0.10}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{400} + \frac{1}{400}\right)}}
+  = \frac{0.05}{0.023} \approx 2.1 \qquad p \approx 0.03
+$$
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-insight">
+
+Chance alone would rarely produce a gap this large: at $\alpha = 0.05$ the
+difference is **real**. Whether the app *causes* it is a different question —
+Lecture 03 draws both answers.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The running example of the course (a subscription business, introduced in the
+Lecture 01 reasoning-cycle exercise), now with numbers. The statistic is the
+z-test of this lecture applied to two proportions: a proportion is the mean of a
+Bernoulli variable, so its standard error is √(p(1−p)/n), and under H₀ both
+groups share one p, estimated from all 800 customers. Exact values: SE ≈ 0.0234,
+z ≈ 2.14, two-sided p ≈ 0.033.
+
+Say the limit clearly: the test says the gap is unlikely under "no
+difference"; it says nothing about which way the arrow points. Loyal customers
+may simply be the ones who install the app.
+
 
 ---
 
@@ -4526,10 +5177,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -4540,17 +5197,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

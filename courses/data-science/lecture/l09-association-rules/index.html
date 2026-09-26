@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -13,7 +13,93 @@ Prof. Dr. Michael Granitzer
 Notes:
 Converted from LNKB-tex part-en-ds-chp7-association-rule-mining.tex. This is the
 probability chapter applied to counting: support is a joint probability,
-confidence a conditional one, and lift a test of independence.
+confidence a conditional one, and lift a comparison with independence.
+
+--
+
+## Where We Left Off
+
+Lecture 08 grouped *objects* by similarity. Today groups *items* by
+co-occurrence — and every measure is a probability from Lecture 02 in disguise.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Support
+a joint probability
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Confidence
+a conditional one
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Lift
+a comparison with independence
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+The base-rate trap from Lecture 02 returns: a rule can hold 80% of the time and
+say nothing.
+
+</div>
+
+
+Notes:
+Recall the three Lecture 02 objects before any itemset appears: P(A, B),
+P(B | A) and the independence condition P(A, B) = P(A) P(B). The whole lecture
+is these three, estimated by counting baskets — plus a search problem that
+counting alone cannot solve.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 09: itemsets and support, the exponential search space and A-Priori, and rules judged by confidence and lift](/courses/data-science/figures/l09-argument-map.svg)
+
+</div>
+
+
+Notes:
+Counting is easy; the search space is not: 2ᵈ candidate itemsets. A-Priori's
+single structural fact, that infrequent sets have no frequent supersets, prunes
+most of it without touching the data. Rules are then judged, and confidence
+alone rewards popular items. Lift divides out the base rate. Point at the
+strip: "beat the base rate" is the check.
 
 ---
 
@@ -22,8 +108,8 @@ confidence a conditional one, and lift a test of independence.
 # Module 1
 ## Itemsets and Their Search Space
 
-> **Guiding Question:** Ten thousand products give $2^{10000}$ candidate
-> itemsets. How can this problem possibly be solvable?
+> **Guiding Question:** Counting how often items occur together is easy. Why
+> does it become hard with ten thousand products?
 
 --
 
@@ -40,7 +126,7 @@ symptoms — which **items appear together** more often than chance, and which
 <div class="card">
 
 ### Support
-$$P(A \cap B) > \sigma$$
+$$P(A \cap B) \geq \sigma\_{\min}$$
 How often do these items occur in the same transaction?
 
 </div>
@@ -49,8 +135,8 @@ How often do these items occur in the same transaction?
 <div class="card">
 
 ### Confidence
-$$P(A \mid B) > \gamma$$
-Given $B$ is in the transaction, how often is $A$ too?
+$$P(B \mid A) \geq \gamma$$
+Given $A$ is in the transaction, how often is $B$ too?
 
 </div>
 
@@ -69,6 +155,10 @@ transactions.
 
 
 Notes:
+Two symbols to keep apart: $\sigma(\cdot)$ is the support *function*,
+$\sigma\_{\min}$ the *threshold* it is compared against. The events on this slide
+are "the basket contains $A$" and "the basket contains $B$".
+
 Say the connection explicitly — this whole chapter is the probability material
 applied to a counting problem. Nothing new is being defined, only named for a
 new context.
@@ -83,9 +173,19 @@ new context.
 Let $I$ be a set of **items** and $X$ a set of **transactions**, each
 $x \subseteq I$.
 
-- An **itemset** is any $A \subseteq I$ a **$k$-itemset** has $|A| = k$.
+- An **itemset** is any $A \subseteq I$; a **$k$-itemset** has $|A| = k$.
 - Its **support** is $\sigma(A) = \frac{|\lbrace x \in X : A \subseteq x \rbrace|}{|X|}$.
-- $A$ is **frequent** if $\sigma(A) \geq \sigma_{\min}$.
+- $A$ is **frequent** if $\sigma(A) \geq \sigma\_{\min}$.
+
+</div>
+
+
+
+<div class="c-warning">
+
+$\sigma(A \cup B)$ counts baskets that contain **all** items of $A$ **and**
+of $B$. A union of *itemsets* is an intersection of *events*:
+$\sigma(A \cup B) = P(A \cap B)$, not "A or B".
 
 </div>
 
@@ -163,12 +263,12 @@ items cannot make a set more common".
 
 $L^1$ = all frequent 1-itemsets.
 
-**for** $k = 2$ $L^{k-1} \neq \emptyset$ $k{+}{+}$:
+**for** $k = 2$; $L^{k-1} \neq \emptyset$; $k{+}{+}$:
 &nbsp;&nbsp;**generate** candidates
-$C_k = \lbrace a \cup b \mid a \in L^{k-1}, b \in L^1, b \not\subseteq a \rbrace$
+$C\_k = \lbrace a \cup b \mid a \in L^{k-1}, b \in L^1, b \not\subseteq a \rbrace$
 &nbsp;&nbsp;**prune** any candidate having an infrequent subset
 &nbsp;&nbsp;**count** the support of the survivors in one pass over the transactions
-&nbsp;&nbsp;$L^k = \lbrace c \in C_k \mid \sigma(c) \geq \sigma_{\min} \rbrace$
+&nbsp;&nbsp;$L^k = \lbrace c \in C\_k \mid \sigma(c) \geq \sigma\_{\min} \rbrace$
 
 </div>
 
@@ -233,63 +333,38 @@ containing no frequent itemset), partitioning and sampling.
 </div>
 
 
---
-
-## Mini-Exercise
-
-$\lbrace \text{bread}, \text{milk} \rbrace$ has support $0.18$, and
-$\sigma_{\min} = 0.22$.
-
-1. Is $\lbrace \text{bread}, \text{milk} \rbrace$ frequent?
-2. What can you say about $\lbrace \text{bread}, \text{milk}, \text{eggs} \rbrace$?
-3. How many database passes did answering 2 require?
-
---
-
-## Mini-Exercise — Solution
-
-
-<div class="fragment">
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** No — $0.18 < 0.22$.
-
-</div>
-
-
-<div class="card">
-
-**2.** It is **infrequent**, necessarily: its support cannot exceed that of any
-subset.
-
-</div>
-
-
-<div class="card">
-
-**3.** **None.** The conclusion follows from the property alone. That is exactly
-where the savings come from.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
 
 <div class="takeaway">
 
 A-Priori turns one structural fact — **infrequent sets have no frequent
 supersets** — into a level-wise search that prunes most of an exponential space
 without touching the data.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+$\lbrace \text{bread}, \text{milk} \rbrace$ has support $0.18$, and
+$\sigma\_{\min} = 0.22$.
+
+
+<div class="q">
+
+What do you know about $\lbrace \text{bread}, \text{milk}, \text{eggs} \rbrace$
+— and how many database passes did it take to know it?
+
+</div>
+
+
+
+<div class="fragment">
+
+It is **infrequent**: adding eggs cannot raise the support above $0.18$. And it
+took **no pass at all** — the property alone decides. That is where A-Priori's
+savings come from.
 
 </div>
 
@@ -322,7 +397,7 @@ $$
 
 
 Every frequent itemset $F$ is split in all possible ways into $A$ and
-$B = F \setminus A$ rules meeting the confidence threshold are kept.
+$B = F \setminus A$; rules meeting the confidence threshold are kept.
 
 
 <div class="c-note">
@@ -358,108 +433,77 @@ $$
 
 
 
-<div class="grid-3">
-
-
-<div class="card">
-
-### lift > 1
-$A$ makes $B$ **more** likely — a positive association.
-
-</div>
-
-
-<div class="card">
-
-### lift = 1
-$A$ and $B$ are **independent** — the rule carries no information.
-
-</div>
-
-
-<div class="card bad">
-
-### lift < 1
-$A$ makes $B$ **less** likely — the rule holds in reverse.
-
-</div>
-
-
-
-</div>
-
-
 <div class="c-insight">
 
-Lift is the independence test from Lecture 02 written as a ratio: it compares
-the joint probability against the product of the marginals.
+Lift compares the joint probability against the product of the marginals — the
+**definition of independence** from Lecture 02, written as a ratio. It is
+symmetric: $\mathrm{lift}(A \Rightarrow B) = \mathrm{lift}(B \Rightarrow A)$.
 
 </div>
 
 
 Notes:
 This is the payoff of teaching independence properly. Confidence measures a
-conditional probability lift measures the *departure from independence*, which
-is what "association" was supposed to mean all along.
+conditional probability; lift measures the *departure from independence*, which
+is what "association" was supposed to mean all along. The symmetry follows
+directly from the second form: swapping A and B changes nothing.
+
+--
+
+## Reading Lift
+
+| lift | meaning |
+|---|---|
+| $> 1$ | **positive association**: $A$ and $B$ co-occur more often than independence predicts |
+| $= 1$ | **independent**: the rule carries no information |
+| $< 1$ | **negative association**: $A$ and $B$ co-occur less often than independence predicts |
+
+
+<div class="c-warning">
+
+Lift is a ratio, not a test. On a rule with low support it rests on a handful
+of baskets, and a lift of 1.5 can be chance. Before acting, check it for
+**significance** — the hypothesis tests of Lecture 02 apply.
+
+</div>
+
+
+Notes:
+Because lift is symmetric, a lift below 1 does not mean "the rule holds in
+reverse"; it means the two items avoid each other. The significance point is
+the hook back to hypothesis testing: 20 baskets out of 1,000 are a small sample.
 
 --
 
 ## Mini-Exercise
 
-A retailer reports: $\text{nappies} \Rightarrow \text{beer}$, support 0.02,
-confidence 0.60. Beer appears in 55% of all transactions.
+A retailer reports $\text{nappies} \Rightarrow \text{beer}$ with support
+0.02 and confidence 0.60; beer is in 50% of all baskets.
 
-1. Compute the lift.
-2. Is the rule actionable?
-3. What would make it more convincing?
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+What is the lift — and why is the rule still a weak basis for action?
+
+</div>
+
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** $\mathrm{lift} = 0.60 / 0.55 \approx 1.09$ — barely above 1.
-
-</div>
-
-
-<div class="card">
-
-**2.** Hardly. A 9% relative increase over the base rate, on 2% of
-transactions, is a weak effect on a small slice.
-
-</div>
-
-
-<div class="card">
-
-**3.** A higher lift, a larger support, and evidence that it **persists** —
-across stores, seasons and time. And a mechanism: a rule with no explanation is
-a correlation.
-
-</div>
-
-
-</div>
-
+$\mathrm{lift} = 0.60 / 0.50 = 1.2$: beer is 20% more likely with nappies. But
+the rule covers only 2% of baskets, so the effect may be chance — test it, and
+check that it persists.
 
 </div>
 
 
 
-<div class="takeaway">
+<div class="takeaway fragment">
 
 Confidence alone rewards **popular** consequents. **Lift** corrects for the base
 rate by comparing against independence — the same correction Bayes' theorem
-makes for priors.
+makes for priors. Low support calls for a significance check.
 
 </div>
 
@@ -468,6 +512,44 @@ Notes:
 Close by connecting all three: support = joint, confidence = conditional,
 lift = departure from independence. Three probability concepts, one application
 — and the base-rate trap in a third guise.
+
+--
+
+## The Churn Shop's Baskets
+
+The shop delivers grocery boxes. Of **100** boxes, **80** contain milk, **20**
+contain cereal, **16** contain both.
+
+
+<div class="q">
+
+The rule $\text{cereal} \Rightarrow \text{milk}$ holds with confidence 80%. Is it
+worth a "customers who order cereal also order milk" banner?
+
+</div>
+
+
+
+<div class="fragment">
+
+$$
+\mathrm{conf} = \frac{16}{20} = 0.8 \qquad
+\mathrm{lift} = \frac{0.8}{0.8} = 1.0
+$$
+
+No: milk is in 80% of **all** boxes. Cereal buyers take milk exactly as often as
+everyone else — the rule restates the base rate.
+
+</div>
+
+
+Notes:
+The running example once more, now as baskets. Lift 1 means P(milk | cereal) =
+P(milk): the two items are independent in this data, and the 80% was the
+popularity of milk. The banner would change nothing. Contrast with the
+exercise before: lift 1.2 was a real, if small, association. The check of the
+course arc, in its plainest form: compare with what chance alone predicts.
+
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

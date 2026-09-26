@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -12,8 +12,104 @@ Prof. Dr. Michael Granitzer
 
 Notes:
 Converted from LNKB-tex part-en-ds-chp4-machine-learning.tex. Builds on
-Lecture 02 (probability, expectation, sampling) and Lecture 03 (conditional
-independence, which naive Bayes pushes to its extreme).
+Lecture 02 (probability, expectation, sampling and the standard error) and
+Lecture 03 (Bayes for a decision, and conditional independence, which naive
+Bayes pushes to its extreme). Maximum likelihood is introduced in Module 4,
+before logistic regression uses it.
+
+Two sessions. Session 1 covers Modules 1–3 (the learning problem, inductive
+bias, linear regression with LMS); session 2 covers Modules 4–6
+(classification, naive Bayes, measuring performance). The Module 4 slide marks
+the boundary.
+
+--
+
+## Where We Left Off
+
+In Lectures 02–03 *we* wrote the model down: the probabilities, the graph. From
+today the machine chooses the model from data — and it can only do that
+because we restrict what it may choose.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Write the model
+Lectures 02–03
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Learn it from data
+Modules 1–5 — a form, a loss, an optimiser
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Check it on unseen data
+Module 6
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+The base-rate trap of Lecture 02 returns in Module 6: a model with 99.9%
+accuracy that never detects a single case.
+
+</div>
+
+
+Notes:
+Module 2 (inductive bias) is the hinge of the lecture and the arc's name for
+it: every model after it is "a form someone chose". Say that out loud when
+logistic regression and naive Bayes arrive. The lecture spans two sessions; the
+Module 4 slide marks the boundary.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 04: the learning problem, inductive bias, linear and logistic regression, naive Bayes, and measuring performance](/courses/data-science/figures/l04-argument-map.svg)
+
+</div>
+
+
+Notes:
+What a learning problem is, and why it cannot be solved without a bias:
+infinitely many rules fit the data. Then three forms, each an assumption — a
+line, with squared error justified by Gauss–Markov; a sigmoid on log-odds,
+fitted by maximum likelihood; attributes independent given the class (naive
+Bayes), which is false and works because only the argmax has to be right.
+Module 6 is the check, and it has its own trap. The bottom row is the lecture
+in one sentence.
 
 ---
 
@@ -99,8 +195,8 @@ action was any good?
 
 
 Notes:
-Step 1 draws action and consequence; step 2 closes the loop back into the
-agent's behaviour. Only now name the vocabulary: **agent**, **environment**,
+Action and consequence are already drawn; click 1 closes the loop back into
+the agent's behaviour, click 2 states that the learner must act to find out. Only now name the vocabulary: **agent**, **environment**,
 **action**, **reward**.
 
 The point that distinguishes this from supervised learning: the feedback says
@@ -440,7 +536,7 @@ real-world objects.
 <div class="c-important">
 
 $$
-γ(o) \;\rightsquigarrow\; h_Θ\big(α(o)\big) \;\equiv\; h_Θ(x)
+γ(o) \quad \rightsquigarrow \quad h\_Θ\big(α(o)\big) \quad \equiv \quad h\_Θ(x)
 $$
 
 </div>
@@ -468,7 +564,7 @@ the **representation** — what we chose to measure
 
 <div class="card">
 
-### $h_Θ$
+### $h\_Θ$
 the **model** — our approximation, with parameters $Θ$
 
 </div>
@@ -482,10 +578,10 @@ process inside it.
 
 Notes:
 Two clicks: first the measurement — the **model-formation function $α$** turns
-an object into features $x = α(o)$ — then the model $h_Θ$ and its prediction.
+an object into features $x = α(o)$ — then the model $h\_Θ$ and its prediction.
 
 Be precise about the notation, because it is easy to garble: $γ$ is the real
-process, **$α$ is the representation**, $h_Θ$ is the model and $Θ$ are its
+process, **$α$ is the representation**, $h\_Θ$ is the model and $Θ$ are its
 parameters. $α$ is *not* the parameters.
 
 The relation on the fragment is the heart of the module: two worlds, and a
@@ -496,13 +592,13 @@ failures are failures of $α$ — the features did not carry what $γ$ depends o
 
 ## Closing the Loop
 
-<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="4"
-     data-params='{"mode": "build"}'></div>
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="2"
+     data-params='{"mode": "build", "stage": 2}'></div>
 
 Notes:
-Two more clicks complete the figure. Click 3 adds the **loss**, which is the
+Two more clicks complete the figure. Click 1 adds the **loss**, which is the
 first thing on the slide that compares the model world with the real one: it
-needs $ŷ$ *and* the outcome $y$ we actually wanted. Click 4 adds the
+needs $ŷ$ *and* the outcome $y$ we actually wanted. Click 2 adds the
 **optimiser**, which changes the **parameters $Θ$** — and the loop closes.
 
 Read it aloud once as a sentence: measure the situation, predict, compare with
@@ -517,7 +613,7 @@ differently.
 <div class="flow-row">
 
 
-<div class="stat-card s-teal">
+<div class="stat-card evidence">
 
 ### Data
 what we measure
@@ -532,10 +628,10 @@ what we measure
 </div>
 
 
-<div class="stat-card s-navy">
+<div class="stat-card concept">
 
 ### Model
-$h_Θ$ — what it may express
+$h\_Θ$ — what it may express
 
 </div>
 
@@ -547,7 +643,7 @@ $h_Θ$ — what it may express
 </div>
 
 
-<div class="stat-card s-orange">
+<div class="stat-card caution">
 
 ### Loss
 what counts as wrong
@@ -562,7 +658,7 @@ what counts as wrong
 </div>
 
 
-<div class="stat-card s-violet">
+<div class="stat-card insight">
 
 ### Optimiser
 how $Θ$ is searched
@@ -649,7 +745,7 @@ $\alpha$ — measure wheels, horsepower, weight, torque
 
 $X$ — those four numbers, for every vehicle
 
-$h_\Theta$ — a linear function of them
+$h\_\Theta$ — a linear function of them
 
 </div>
 
@@ -661,9 +757,10 @@ $h_\Theta$ — a linear function of them
 
 
 Notes:
-Deliberately mundane. The value is that every abstract symbol from the previous
-unit now has a concrete referent students can argue with — especially α, where
-"which four numbers" is a real modelling decision.
+Deliberately mundane. The value is that every abstract symbol of the learning
+system — γ the real process, α the representation (what we measure), h the
+model — now has a concrete referent students can argue with, especially α,
+where "which four numbers" is a real modelling decision.
 
 --
 
@@ -676,7 +773,7 @@ unit now has a concrete referent students can argue with — especially α, wher
 | 6 | 95 | 2100 | 210 | 16.2 |
 | … | … | … | … | … |
 
-The last column is $y$ the rest is $\mathbf{x}$.
+The last column is $y$; the rest is $\mathbf{x}$.
 
 Notes:
 Ask which column is likely useless (wheels, in a passenger-car dataset) and
@@ -725,20 +822,12 @@ error.
 </div>
 
 
-<div class="c-insight">
-
-Four choices — representation, model family, loss, optimiser — and the system
-is fully specified. Every method in this chapter is a different set of four.
-
-</div>
-
-
 
 <div class="takeaway">
 
 A learning problem becomes concrete the moment you can name its **task,
 experience and performance measure**, and its system becomes buildable the
-moment you can name its **representation, model, loss and optimiser**.
+moment you can name its four choices: **data, model, loss and optimiser**.
 
 </div>
 
@@ -753,27 +842,33 @@ result.
 ## Designing the Learning Problem
 
 Before any model is chosen, four things have to be decided — and each of them
-is a claim about the world.
+is a claim about the world. First, what the system is for:
+
+| Decide | Ask |
+|---|---|
+| **The task** | What should the system predict or decide? What is one unit of prediction? What counts as success? |
+| **The target** | What is $γ$, in words a domain expert would accept? Is the label we have the thing we care about, or a proxy for it? |
+
+
+<div class="c-warning">
+
+A proxy label is the most consequential choice here: "was diagnosed" is not
+"had the disease", "was clicked" is not "was good".
+
+</div>
+
+
+Notes:
+The proxy question is the one with the most consequences in practice: "did the
+patient have a disease" versus "was the patient diagnosed", "is this content
+good" versus "was it clicked".
+
+--
+
+## Designing the Learning Problem — Data
 
 
 <div class="grid-2">
-
-
-<div class="card">
-
-<span class="eyebrow">The task</span>
-
-
-<div class="marks-ask">
-
-- What should the system predict or decide?
-- What is one unit of prediction?
-- What counts as success?
-
-</div>
-
-
-</div>
 
 
 <div class="card">
@@ -810,30 +905,13 @@ is a claim about the world.
 </div>
 
 
-<div class="card">
-
-<span class="eyebrow">The target</span>
-
-
-<div class="marks-ask">
-
-- What is $γ$, in words a domain expert would accept?
-- Is the label we have the thing we care about, or a proxy for it?
-
-</div>
-
-
-</div>
-
-
 </div>
 
 
 Notes:
 Every box is a modelling decision that the mathematics will later take for
-granted. The proxy question in the last box is the one with the most
-consequences in practice: "did the patient have a disease" versus "was the
-patient diagnosed", "is this content good" versus "was it clicked".
+granted. The sampling question returns in evaluation: a model is only tested
+on the population its examples were drawn from.
 
 --
 
@@ -938,10 +1016,31 @@ or two of them and makes them precise.
 
 
 Notes:
-Close the module by pointing at the questions rather than at topics — the
-roadmap on the next slide then reads as answers to them. The last box is
-deliberately the one that returns to Lecture 01's opening: a prediction exists
-to support a decision.
+Close the module by pointing at the questions rather than at topics — the rest
+of this lecture and the lectures after it then read as answers to them. The
+last box is deliberately the one that matters most: a prediction exists to
+support a decision, and its errors have costs.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Before any model is fitted, the design questions are answered — what one
+prediction is, which data stands for the world, what counts as success. Each
+answer is an **assumption**; together they decide whether any model can succeed.
+
+</div>
+
+
+Notes:
+Module 1 closes here (course-local slide). The module's units each end on their
+own point; this slide names what they share, in the words of the course arc:
+the design questions are the first assumptions of every learning project, made
+before the inductive bias of Module 2 enters.
+
 
 ---
 
@@ -962,7 +1061,7 @@ to support a decision.
 
 The **hypothesis space** $\mathcal{H}$ is the set of all functions the model
 family can express — every possible value of the parameters $\Theta$.
-Learning is the search for the best $h_\Theta \in \mathcal{H}$.
+Learning is the search for the best $h\_\Theta \in \mathcal{H}$.
 
 </div>
 
@@ -1077,8 +1176,8 @@ assumptions about unseen data**.
 <div class="card">
 
 ### Bias
-The tendency to favour particular outcomes regardless of the data — the
-*stubborn learner*.
+Systematic error: averaged over many training sets, the model still misses
+the truth, because its assumptions rule it out — the *stubborn learner*.
 
 High bias → robust to noise, but misses real structure → **underfitting**.
 
@@ -1094,7 +1193,8 @@ High bias → robust to noise, but misses real structure → **underfitting**.
 <div class="card">
 
 ### Variance
-The tendency to follow irregularities in the data.
+How much the learned model changes from one training set to the next — it
+follows irregularities of the particular sample.
 
 High variance → captures patterns, but also noise → **overfitting**.
 
@@ -1117,7 +1217,7 @@ particular algorithms — it is a property of inductive inference.
 
 
 Notes:
-Do not give the decomposition formula here the intuition carries the chapter.
+Do not give the decomposition formula here; the intuition carries the chapter.
 Ask which of the two a very deep decision tree suffers from, and which a
 constant predictor has — the extremes make the axis concrete before any model
 does.
@@ -1135,99 +1235,6 @@ bias–variance axis, and no model escapes it.
 
 </div>
 
-
---
-
-## Fitting $h$ by Repeated Correction
-
-
-<div class="c-algorithm">
-
-**LMS (least mean squares)**
-
-Initialise the weights $w$.
-
-**repeat**
-&nbsp;&nbsp;pick a training example $(\mathbf{x}, y)$
-&nbsp;&nbsp;compute the prediction $h_w(\mathbf{x})$
-&nbsp;&nbsp;compute the error $ e = y - h_w(\mathbf{x})$
-&nbsp;&nbsp;update every weight: $ w_i \leftarrow w_i + \eta e x_i$
-**until** convergence on $D$
-
-</div>
-
-
-Notes:
-Read the update aloud in words: move each weight in the direction that would
-have reduced this example's error, in proportion to how much that feature
-contributed. That sentence is all of gradient descent, before any calculus.
-
---
-
-## What the Update Rule Encodes
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Direction
-The sign of $e$ decides whether the prediction goes up or down.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Attribution
-The factor $x_i$ gives each feature credit proportional to its value.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Step size
-The learning rate $\eta$ trades speed against stability.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-Too large an $\eta$ oscillates or diverges too small an $\eta$ converges
-slowly. It is a hyperparameter — chosen, not learned.
-
-</div>
-
-
-Notes:
-Ask what happens with η far too large before showing it the prediction that
-"it overshoots and gets worse" is usually made correctly, which earns the
-hyperparameter concept. The visualisation in the optimisation unit shows it.
 
 ---
 
@@ -1282,13 +1289,12 @@ $Y = \mathbb{R}$, the target is a quantity.
 </div>
 
 
-The learning machinery is the same only the shape of $Y$ — and therefore the
+The learning machinery is the same; only the shape of $Y$ — and therefore the
 loss — changes.
 
 Notes:
 Keep the same running example across both to make the point that the task, not
-the data, decides which you are doing. The credit example returns in logistic
-regression, where a regression model is pressed into classification.
+the data, decides which you are doing.
 
 --
 
@@ -1300,11 +1306,11 @@ regression, where a regression model is pressed into classification.
 **Linear regression** predicts the target as a weighted sum of the features:
 
 $$
-h_{\mathbf{w}}(\mathbf{x}) = w_0 + w_1 x_1 + \ldots + w_p x_p
+h\_{\mathbf{w}}(\mathbf{x}) = w\_0 + w\_1 x\_1 + \ldots + w\_p x\_p
 = \mathbf{w}^{\top}\mathbf{x}
 $$
 
-with $x_0 = 1$ absorbing the intercept.
+with $x\_0 = 1$ absorbing the intercept.
 
 </div>
 
@@ -1312,18 +1318,17 @@ with $x_0 = 1$ absorbing the intercept.
 The hypothesis space is $\mathbb{R}^{p+1}$: one hypothesis per weight vector.
 
 Notes:
-Point back at the hypothesis-space unit — here it is a continuous space of
-finite dimension, which is why calculus rather than enumeration finds the
-optimum.
+Name it as a hypothesis space — here a continuous space of finite dimension,
+which is why calculus rather than enumeration finds the optimum.
 
 --
 
 ## The Objective: Residual Sum of Squares
 
 $$
-\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{R}^{p+1}} \mathrm{RSS}(\mathbf{w}),
+\hat{\mathbf{w}} = \arg\min\_{\mathbf{w} \in \mathbb{R}^{p+1}} \mathrm{RSS}(\mathbf{w}),
 \qquad
-\mathrm{RSS}(\mathbf{w}) = \sum_{i=1}^{n}\big(y_i - \mathbf{w}^{\top}\mathbf{x}_i\big)^2
+\mathrm{RSS}(\mathbf{w}) = \sum\_{i=1}^{n}\big(y\_i - \mathbf{w}^{\top}\mathbf{x}\_i\big)^2
 $$
 
 
@@ -1355,7 +1360,7 @@ For a single feature the minimiser can be written down directly:
 <div class="card">
 
 ### Slope
-$$\hat{w}_1 = \frac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2}$$
+$$\hat{w}\_1 = \frac{\sum\_i (x\_i - \overline{x})(y\_i - \overline{y})}{\sum\_i (x\_i - \overline{x})^2}$$
 
 The covariance of $x$ and $y$ over the variance of $x$.
 
@@ -1371,7 +1376,7 @@ The covariance of $x$ and $y$ over the variance of $x$.
 <div class="card">
 
 ### Intercept
-$$\hat{w}_0 = \overline{y} - \hat{w}_1 \overline{x}$$
+$$\hat{w}\_0 = \overline{y} - \hat{w}\_1 \overline{x}$$
 
 The fitted line passes through the point of means.
 
@@ -1402,7 +1407,8 @@ $$
 \qquad
 R^2 = \frac{\mathrm{ESS}}{\mathrm{TSS}} = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}}
 $$
-where TSS is the total, ESS the explained and RSS the residual sum of squares.
+where TSS is the total, ESS the explained and RSS the residual sum of squares
+(the split holds for a least-squares fit with an intercept).
 
 </div>
 
@@ -1421,9 +1427,9 @@ test $R^2$ and adjusted $R^2$ can and do fall.
 
 
 Notes:
-Connect to the baseline unit: R² = 0 is exactly the trivial-regression
-baseline. The warning is the regression counterpart of training error — and the
-motivation for the cross-validation the students already know.
+R² = 0 is exactly the trivial baseline that always predicts the mean. The
+warning is the regression counterpart of training error — and the reason a
+model is judged on data it was not fitted to.
 
 --
 
@@ -1442,16 +1448,16 @@ invertible.
 <div class="c-note">
 
 Invertibility fails when features are linearly dependent or when $p > n$ —
-more unknowns than equations. Both are common in practice, and both are why
-regularisation exists.
+more unknowns than equations. Both are common in practice; regularisation is
+the standard remedy.
 
 </div>
 
 
 Notes:
-Do not derive the normal equations state them and spend the time on when they
-break. The p > n case is the modern one — genomics, text — and motivates the
-next chapters more than the algebra does.
+Do not derive the normal equations; state them and spend the time on when they
+break. The p > n case is the modern one — genomics, text — and motivates
+regularisation more than the algebra does.
 
 --
 
@@ -1490,7 +1496,7 @@ features may be arbitrary transformations of the input.
 <div class="card">
 
 ### Plain
-$$h(\mathbf{x}) = w_0 + w_1 x$$
+$$h(\mathbf{x}) = w\_0 + w\_1 x$$
 a straight line
 
 </div>
@@ -1505,7 +1511,7 @@ a straight line
 <div class="card">
 
 ### Polynomial
-$$h(\mathbf{x}) = w_0 + w_1 x + w_2 x^2$$
+$$h(\mathbf{x}) = w\_0 + w\_1 x + w\_2 x^2$$
 a curve — still a *linear model*
 
 </div>
@@ -1520,7 +1526,7 @@ a curve — still a *linear model*
 <div class="card">
 
 ### Basis functions
-$$h(\mathbf{x}) = \sum_j w_j \phi_j(\mathbf{x})$$
+$$h(\mathbf{x}) = \sum\_j w\_j \phi\_j(\mathbf{x})$$
 any fixed feature map $\phi$
 
 </div>
@@ -1532,11 +1538,21 @@ any fixed feature map $\phi$
 </div>
 
 
+
+<div class="c-note">
+
+What *linear* forbids: a transformation that has to be learned from the data.
+The feature map is fixed before fitting; only the weights are learned.
+
+</div>
+
+
 Notes:
 This is the slide that unlocks the rest: the same least-squares machinery fits
 curves, interactions and periodic patterns, as long as the transformation is
-chosen in advance. Ask what is *not* expressible — anything where the
-transformation itself must be learned, which is the neural-network module.
+chosen in advance. Ask what is *not* expressible before revealing the note —
+anything where the transformation itself must be learned, which is what neural
+networks do.
 
 --
 
@@ -1567,7 +1583,7 @@ The closed-form solution and all statistical guarantees carry over unchanged.
 
 ### The catch
 The feature map is a **modelling decision**. Choose too rich a basis and the
-model overfits too poor and it underfits.
+model overfits; too poor and it underfits.
 
 </div>
 
@@ -1581,14 +1597,13 @@ model overfits too poor and it underfits.
 
 <div class="c-insight">
 
-Increasing polynomial degree is a dial on the bias–variance axis you can watch
-turning.
+Increasing the polynomial degree turns a dial on the bias–variance axis.
 
 </div>
 
 
 Notes:
-Tie back to principles: the basis is the inductive bias made explicit. This is
+The basis is the inductive bias made explicit. This is
 the cleanest example in the course of choosing a hypothesis space deliberately.
 
 --
@@ -1648,7 +1663,7 @@ project onto only grew.
 
 **Gauss–Markov (informal).** Among all estimators that are
 
-- **linear** in the observed outputs $(y_1, \ldots, y_n)$, and
+- **linear** in the observed outputs $(y\_1, \ldots, y\_n)$, and
 - **unbiased**,
 
 the least-squares estimator has the **lowest variance**. It is the *Best Linear
@@ -1704,8 +1719,9 @@ error. That is not a contradiction, it is a different criterion.
 <div class="card good">
 
 ### The payoff
-Minimising RSS yields optimal statistical properties under **very mild
-assumptions** — no normality needed, only uncorrelated errors of constant
+Minimising RSS yields optimal statistical properties under **mild
+assumptions** — no normality needed, only a correctly specified linear model,
+linearly independent features, and zero-mean, uncorrelated errors of constant
 variance.
 
 </div>
@@ -1737,6 +1753,96 @@ Notes:
 Close the loop with the robustness discussion from descriptive statistics: mean
 versus median reappears here as squared versus absolute loss. Same trade-off,
 new context — exactly the spiral the pedagogic concept asks for.
+
+--
+
+## Fitting $h$ by Repeated Correction
+
+
+<div class="c-algorithm">
+
+**LMS (least mean squares)**
+
+1. Initialise the weights $w$.
+2. Pick a training example $(\mathbf{x}, y)$ from the training set $D$.
+3. Compute the prediction $h\_w(\mathbf{x})$ and the error $e = y - h\_w(\mathbf{x})$.
+4. Update every weight: $w\_i \leftarrow w\_i + \eta e x\_i$.
+5. Repeat 2–4 until the error on $D$ stops decreasing.
+
+</div>
+
+
+Notes:
+Read the update aloud in words: move each weight in the direction that would
+have reduced this example's error, in proportion to how much that feature
+contributed. That sentence is all of gradient descent, before any calculus.
+
+--
+
+## What the Update Rule Encodes
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Direction
+The sign of $e$ decides whether the prediction goes up or down.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Attribution
+The factor $x\_i$ gives each feature credit proportional to its value.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Step size
+The learning rate $\eta$ trades speed against stability.
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+Too large an $\eta$ oscillates or diverges; too small an $\eta$ converges
+slowly. It is a hyperparameter — chosen, not learned.
+
+</div>
+
+
+Notes:
+Ask what happens with η far too large before showing it; the prediction that
+"it overshoots and gets worse" is usually made correctly, which earns the
+hyperparameter concept. The visualisation in the optimisation unit shows it.
 
 --
 
@@ -1786,17 +1892,17 @@ solution does not exist, and extends to models with no closed form at all.
 
 <div class="c-note">
 
-The iterative rule is exactly the **LMS algorithm** from Module 2: the update
-$w_i \leftarrow w_i + \eta e x_i$ *is* a step along $-\nabla \mathrm{RSS}$,
-written per example instead of per dataset.
+The iterative rule is exactly the **LMS algorithm**: its update
+$w\_i \leftarrow w\_i + \eta e x\_i$ *is* a gradient step on RSS, taken per example
+instead of per dataset (the factor 2 is absorbed into $\eta$).
 
 </div>
 
 
 Notes:
 The right-hand column is the one that generalises: logistic regression and
-neural networks have no closed form, so the iterative method is the only one
-that survives the rest of the course. Make the LMS identification explicit —
+neural networks have no closed form, so the iterative method is the one that
+generalises. Make the LMS identification explicit —
 students otherwise carry two unconnected procedures.
 
 --
@@ -1819,7 +1925,8 @@ and why they shrink as the minimum approaches, without η changing.
  data-params='{"eta": 0.9, "start": -2.6, "compare": 0.05}'></div>
 
 Teal: $\eta = 0.9$ — overshoots and oscillates across the minimum.
-Red: $\eta = 0.05$ — stable, but barely moves.
+Red: $\eta = 0.05$ — stable, but slow: after six steps it has covered about
+half the distance.
 
 
 <div class="c-warning">
@@ -1842,9 +1949,9 @@ produce the same-looking loss curve over a short window.
 
 <div class="takeaway">
 
-Use the **closed form** when the matrix is small and well-conditioned use
-**gradient descent** when it is not — which, for everything after this unit, is
-always.
+Use the **closed form** when the matrix is small and well-conditioned; use
+**gradient descent** when it is not — and for most models beyond linear
+regression, no closed form exists at all.
 
 </div>
 
@@ -1858,6 +1965,11 @@ always.
 
 > **Guiding Question:** A decision is a yes or a no. What goes wrong when we
 > fit a straight line to one?
+
+Notes:
+Session boundary: the second session starts here. Recall the three-card flow
+from the opening: Modules 1–3 chose a form and fitted it; Modules 4–5 bring two
+more forms for decisions; Module 6 checks them on unseen data.
 
 --
 
@@ -1881,7 +1993,7 @@ $$
 
 ### One feature
 The **discrimination point** $x'$ satisfies
-$$w_0 + w_1 x' = 0$$
+$$w\_0 + w\_1 x' = 0$$
 Everything to one side is one class.
 
 </div>
@@ -1897,7 +2009,7 @@ Everything to one side is one class.
 
 ### Two features
 The **discrimination line** satisfies
-$$w_0 + w_1 x_1 + w_2 x_2 = 0$$
+$$w\_0 + w\_1 x\_1 + w\_2 x\_2 = 0$$
 In $p$ dimensions it becomes a hyperplane.
 
 </div>
@@ -1911,7 +2023,7 @@ In $p$ dimensions it becomes a hyperplane.
 
 Notes:
 The decision boundary is where the model output crosses zero — a level set. Say
-it once here it holds for logistic regression, SVMs and a neural network's
+it once here; it holds for logistic regression, SVMs and a neural network's
 final layer alike.
 
 --
@@ -2015,7 +2127,7 @@ discrimination point.
 
 Replace the hard threshold with the **logistic sigmoid**:
 $$
-h_\Theta(\mathbf{x}) = \mathrm{expit}\big(\mathbf{w}^{\top}\mathbf{x}\big)
+h\_\Theta(\mathbf{x}) = \mathrm{expit}\big(\mathbf{w}^{\top}\mathbf{x}\big)
 \approx P(y = 1 \mid \mathbf{x})
 $$
 
@@ -2029,6 +2141,159 @@ Notes:
 Both problems have the same root: a decision is a step function, and steps have
 no useful derivative. Softening the step is the standard move; it returns as
 the activation function in neural networks.
+
+--
+
+## Turning a Model Into an Estimator
+
+We have a model with parameters $\theta$ and data $D$. The model assigns each
+possible dataset a probability.
+
+
+<div class="c-definition">
+
+The **likelihood** is that probability, read as a function of the **parameters**
+with the data held fixed:
+$$
+L(\theta) = p(D \mid \theta)
+$$
+The **maximum likelihood estimate** is
+$\hat{\theta}\_{\mathrm{ML}} = \arg\max\_{\theta} p(D \mid \theta)$.
+
+</div>
+
+
+
+<div class="c-warning">
+
+$p(D \mid \theta)$ is a probability over **data**, not over parameters. The
+likelihood is not a distribution over $\theta$ and does not integrate to 1.
+
+</div>
+
+
+Notes:
+The warning is the single most common confusion in the course. The likelihood is
+the same expression as the sampling distribution, read along the other axis.
+A Bayesian treatment puts an actual distribution on θ (a posterior, such as the
+Beta posterior for a coin); with a flat prior, maximum likelihood keeps only its
+peak. This is where the two approaches part.
+
+--
+
+## Why the Logarithm
+
+Under the **i.i.d. assumption** — observations independent and identically
+distributed — the likelihood factorises:
+
+$$
+L(\theta) = \prod\_{i=1}^{n} p(x\_i \mid \theta)
+\qquad\Longrightarrow\qquad
+\ell(\theta) = \sum\_{i=1}^{n} \log p(x\_i \mid \theta)
+$$
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+### Same maximum
+$\log$ is monotone, so it does not move the arg max.
+
+</div>
+
+
+<div class="card">
+
+### Numerically safe
+A product of thousands of small probabilities underflows; a sum of logs does
+not.
+
+</div>
+
+
+<div class="card">
+
+### Differentiable sums
+Sums differentiate term by term — gradient methods apply directly.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The i.i.d. assumption is doing real work here. Time series, spatial data and
+grouped data violate it, and the factorisation is then simply wrong.
+
+</div>
+
+
+--
+
+## Example: A Biased Coin
+
+$n$ flips, $h$ heads, parameter $\theta = P(\text{heads})$:
+
+$$
+\ell(\theta) = h \log \theta + (n - h)\log(1 - \theta)
+\qquad
+\frac{d\ell}{d\theta} = \frac{h}{\theta} - \frac{n-h}{1-\theta} = 0
+\qquad
+\hat{\theta}\_{\mathrm{ML}} = \frac{h}{n}
+$$
+
+
+<div class="c-insight">
+
+The estimator is the observed frequency — the answer intuition would have given.
+MLE **derives** it rather than assuming it, and the same derivation works where
+intuition has nothing to offer.
+
+</div>
+
+
+--
+
+## Mini-Exercise
+
+You flip a coin **3 times** and see 3 heads. What is $\hat{\theta}\_{\mathrm{ML}}$
+— and would you bet that this coin never shows tails?
+
+
+<div class="fragment">
+
+$\hat{\theta}\_{\mathrm{ML}} = 3/3 = 1$: the estimate rules tails out. Three
+flips are no basis for that. The estimator uses no **prior** knowledge (coins
+are usually near-fair) and reports no **uncertainty** — a single point, no
+error bar. A prior and a posterior close both gaps.
+
+</div>
+
+
+Notes:
+Solution on the same slide, click-gated. The three-heads example is the hook
+for the whole Bayesian thread: students should feel MLE's failure before
+regularisation and priors are offered as the fix. With a flat prior the
+posterior is Beta(4, 1): its peak is still 1, but its mean is 0.8.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Maximum likelihood picks the parameters under which the observed data is most
+probable. It is the bridge from a **model of the world** to a **learning
+algorithm** — and it is blind to prior knowledge and to its own uncertainty.
+
+</div>
+
 
 --
 
@@ -2093,7 +2358,7 @@ not an arbitrary squashing function but the inverse of the logit.
 Inverting the logit gives the **logistic sigmoid**:
 
 $$
-h_\Theta(\mathbf{x}) = \mathrm{expit}(\mathbf{w}^{\top}\mathbf{x})
+h\_\Theta(\mathbf{x}) = \mathrm{expit}(\mathbf{w}^{\top}\mathbf{x})
 = \frac{1}{1 + e^{-\mathbf{w}^{\top}\mathbf{x}}}
 $$
 
@@ -2112,7 +2377,7 @@ An S-curve: near-linear around 0, saturating towards 0 and 1 at the extremes.
 <div class="card">
 
 ### Reading
-$h_\Theta(\mathbf{x}) = P(y = 1 \mid \mathbf{x})$, and the decision boundary is
+$h\_\Theta(\mathbf{x}) = P(y = 1 \mid \mathbf{x})$, and the decision boundary is
 still $\mathbf{w}^{\top}\mathbf{x} = 0$ — where the sigmoid passes $0.5$.
 
 </div>
@@ -2122,7 +2387,7 @@ still $\mathbf{w}^{\top}\mathbf{x} = 0$ — where the sigmoid passes $0.5$.
 
 
 Notes:
-The boundary is unchanged from linear regression for classification what
+The boundary is unchanged from linear regression for classification; what
 changed is the *loss* and the interpretability of the output. Worth stating
 explicitly, since students often expect a curved boundary.
 
@@ -2135,8 +2400,8 @@ explicitly, since students often expect a curved boundary.
 
 **Binary cross-entropy (log loss)**
 $$
-L(\Theta) = -\frac{1}{n}\sum_{i=1}^{n}
-\Big[ y_i \ln h_\Theta(\mathbf{x}_i) + (1 - y_i)\ln\big(1 - h_\Theta(\mathbf{x}_i)\big) \Big]
+L(\Theta) = -\frac{1}{n}\sum\_{i=1}^{n}
+\Big[ y\_i \ln h\_\Theta(\mathbf{x}\_i) + (1 - y\_i)\ln\big(1 - h\_\Theta(\mathbf{x}\_i)\big) \Big]
 $$
 
 For $|Y| > 2$ classes, the multiclass form sums over the classes with a softmax
@@ -2145,9 +2410,9 @@ output.
 </div>
 
 
-Where does it come from? From the **likelihood**:
-$P(y_i = 1 \mid \mathbf{x}_i \Theta) = h_\Theta(\mathbf{x}_i)$ and
-$P(y_i = 0 \mid \mathbf{x}_i \Theta) = 1 - h_\Theta(\mathbf{x}_i)$.
+Where does it come from? From the **likelihood**, with the labels now coded as $y\_i \in \\{0, 1\\}$:
+$P(y\_i = 1 \mid \mathbf{x}\_i; \Theta) = h\_\Theta(\mathbf{x}\_i)$ and
+$P(y\_i = 0 \mid \mathbf{x}\_i; \Theta) = 1 - h\_\Theta(\mathbf{x}\_i)$.
 Maximising the likelihood of the data is minimising this loss.
 
 Notes:
@@ -2185,14 +2450,15 @@ Loss goes to infinity — exactly the errors we want punished.
 
 <div class="c-note">
 
-There is no closed-form solution the parameters are found by gradient descent
+There is no closed-form solution; the parameters are found by gradient descent
 on this loss.
 
 </div>
 
 
 Notes:
-Contrast directly with the squared-loss failure two units back: cross-entropy
+Contrast directly with the squared-loss failure of regression for
+classification: cross-entropy
 punishes confident mistakes and ignores confident successes, which is what a
 classification loss should do.
 
@@ -2205,7 +2471,8 @@ classification loss should do.
 
 Logistic regression is a **linear model of the log-odds**, trained by
 maximising likelihood. It keeps the linear decision boundary but produces a
-calibrated probability — and a loss that punishes the right kind of error.
+probability — one whose calibration can be checked — and a loss that punishes
+the right kind of error.
 
 </div>
 
@@ -2222,167 +2489,6 @@ calibrated probability — and a loss that punishes the right kind of error.
 
 --
 
-## Thinking With Uncertainty
-
-Bayes' theorem lets us update a **hypothesis** $H$ in the light of **data** $D$:
-
-$$
-P(H \mid D) = \frac{P(H) \cdot P(D \mid H)}{P(D)}
-$$
-
-This is the whole apparatus of evidence-based decision making in one line:
-a belief, a measurement of how well the belief explains what we saw, and a
-normalisation.
-
-Notes:
-Deliberate second pass over Bayes (P4/P5 decision rule: this is consolidation,
-so math first). The new element is the reading of H and D as hypothesis and
-data, which is the form used by every learning algorithm later in the course.
-
---
-
-## Example: Do I Have the Flu?
-
-You have a headache and a cough. From the literature:
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Likelihood
-90% of people with the flu show headache and coughing
-$$P(D \mid H) = 0.9$$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Prior
-5% of people currently have the flu
-$$P(H) = 0.05$$
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Evidence
-headache and coughing occur in 20% of people
-$$P(D) = 0.2$$
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-**How likely is it that you have the flu?**
-
-
-<div class="fragment">
-
-$$
-P(H \mid D) = \frac{0.05 \cdot 0.9}{0.2} = 0.225
-$$
-
-</div>
-
-
-Notes:
-Ask for a guess first — most people say something close to 90%, repeating the
-base-rate error from the probability chapter. 22.5% is the answer.
-
---
-
-## Why So Low?
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Few people have the flu
-The prior $P(H) = 0.05$ caps how far the evidence can carry us.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### The symptoms are common
-$P(D) = 0.2$ means many people have these symptoms *without* the flu.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-insight">
-
-A symptom is informative to the degree that it is **rare in general** but
-**common under the hypothesis**. A likelihood alone tells you nothing.
-
-</div>
-
-
-Notes:
-Two reasons, both structural. This is the criterion that reappears as feature
-informativeness in classification: a feature that fires for everything carries
-no information. Connect it explicitly — it makes information gain feel
-inevitable later.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-Bayesian decision making weighs **prior × likelihood** against how ordinary the
-evidence is. Deciding under uncertainty means keeping all three numbers in
-view, not just the one the study reports.
-
-</div>
-
-
---
-
 ## Two Directions of the Same Connection
 
 
@@ -2395,10 +2501,10 @@ view, not just the one the study reports.
 <div class="card">
 
 ### Observed connection
-$$A_1, \ldots, A_p \mid B$$
+$$A\_1, \ldots, A\_p \mid B$$
 
-*Given the class, how do the attributes behave?* — the standard situation, and
-the one data can answer directly.
+*Given the class, how do the attributes behave?* — the **generative**
+direction: modelled class by class.
 
 </div>
 
@@ -2412,7 +2518,7 @@ the one data can answer directly.
 <div class="card">
 
 ### Reversed connection
-$$B \mid A_1, \ldots, A_p$$
+$$B \mid A\_1, \ldots, A\_p$$
 
 *Given the attributes, which class?* — the diagnosis situation, and the one we
 actually need.
@@ -2430,16 +2536,19 @@ actually need.
 <div class="c-important">
 
 $$
-P(B \mid A_1, \ldots, A_p) = \frac{P(B) \cdot P(A_1, \ldots, A_p \mid B)}{P(A_1, \ldots, A_p)}
+P(B \mid A\_1, \ldots, A\_p) = \frac{P(B) \cdot P(A\_1, \ldots, A\_p \mid B)}{P(A\_1, \ldots, A\_p)}
 $$
 
 </div>
 
 
 Notes:
-This is the base-rate lesson turned into an algorithm: the data gives us the
-easy direction, Bayes converts it into the one we need. Ask which direction a
-labelled dataset supplies — attributes given class, by construction.
+This is the base-rate lesson turned into an algorithm. A labelled table
+supports both directions: the discriminative route (logistic regression)
+models class given attributes directly; the generative route models attributes
+given class, one class at a time, and converts with Bayes — keeping the class
+prior explicit. Ask what the generative route buys: the prior can be changed
+without refitting, and the per-class model can be factorised.
 
 --
 
@@ -2488,7 +2597,7 @@ Bayes — and the prediction is the class with the highest posterior.
 
 <div class="c-warning">
 
-Estimating $P(A_1, \ldots, A_p \mid B)$ requires the **joint** distribution of
+Estimating $P(A\_1, \ldots, A\_p \mid B)$ requires the **joint** distribution of
 all attributes within each class: exponentially many parameters, and never
 enough data.
 
@@ -2496,9 +2605,9 @@ enough data.
 
 
 Notes:
-End the unit on the obstacle rather than the solution — the warning is exactly
-the parameter explosion from the graphical-models lecture, and naive Bayes is
-the crudest possible independence assumption applied to it.
+End the unit on the obstacle rather than the solution — the warning is the
+parameter explosion of a joint distribution, and naive Bayes is the crudest
+possible independence assumption applied to it.
 
 --
 
@@ -2534,7 +2643,7 @@ Model $P(B \mid A)$ **directly** — only the boundary between classes.
 
 Notes:
 The distinction runs through the rest of machine learning. A generative model
-can be sampled from and can handle missing attributes a discriminative model
+can be sampled from and can handle missing attributes; a discriminative model
 spends all its capacity on the decision. Neither is universally better.
 
 --
@@ -2546,14 +2655,15 @@ spends all its capacity on the decision. Neither is universally better.
 
 Assume the attributes are **conditionally independent given the class**:
 $$
-P(A_1, \ldots, A_p \mid B) = \prod_{j=1}^{p} P(A_j \mid B)
+P(A\_1, \ldots, A\_p \mid B) = \prod\_{j=1}^{p} P(A\_j \mid B)
 $$
 
 </div>
 
 
-Exponentially many parameters collapse to $p$ per class — one distribution per
-attribute.
+The full joint needs $2^p - 1$ parameters per class for $p$ binary attributes;
+under the assumption it needs one distribution per attribute — $p$ numbers per
+class.
 
 
 <div class="c-note">
@@ -2566,9 +2676,8 @@ probabilities correctly.
 
 
 Notes:
-Direct callback to conditional independence: this is the same move as a
-graphical model, taken to its extreme — a star-shaped network with the class at
-the centre. The note is the honest part: the probabilities are miscalibrated,
+This is conditional independence used as a modelling assumption, taken to its
+extreme — drawn as a graph, a star with the class at the centre. The note is the honest part: the probabilities are miscalibrated,
 the argmax often is not.
 
 --
@@ -2576,9 +2685,9 @@ the argmax often is not.
 ## The Classifier
 
 $$
-P(B_i \mid A_1, \ldots, A_p) =
-\frac{P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
-{\sum_{i=1}^{k} P(B_i) \cdot \prod_{j=1}^{p} P(A_j \mid B_i)}
+P(B\_i \mid A\_1, \ldots, A\_p) =
+\frac{P(B\_i) \cdot \prod\_{j=1}^{p} P(A\_j \mid B\_i)}
+{\sum\_{l=1}^{k} P(B\_l) \cdot \prod\_{j=1}^{p} P(A\_j \mid B\_l)}
 $$
 
 
@@ -2628,6 +2737,8 @@ nothing new is being introduced here, only assembled.
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Example: Enjoy Sport?
 
 | Outlook | Temperature | Humidity | Wind | **EnjoySport** |
@@ -2640,12 +2751,28 @@ nothing new is being introduced here, only assembled.
 | rain | cool | normal | strong | no |
 
 Estimate the priors and the per-attribute likelihoods by **counting**, then
-score a new day.
+score a new day: rain, hot, high, weak.
+
+
+<div class="fragment">
+
+$$
+\text{yes: } \tfrac{1}{2} \cdot \tfrac{2}{3} \cdot \tfrac{1}{3} \cdot \tfrac{2}{3} \cdot 1 \approx 0.074
+\qquad
+\text{no: } \tfrac{1}{2} \cdot \tfrac{1}{3} \cdot \tfrac{2}{3} \cdot \tfrac{2}{3} \cdot \tfrac{1}{3} \approx 0.025
+$$
+$P(\text{yes} \mid \text{day}) = 0.074 / (0.074 + 0.025) = 0.75$ — predict **yes**.
+
+</div>
+
 
 Notes:
-Have the group compute P(yes) and P(sunny | yes) aloud — the estimation is pure
-counting, which is what makes the method so cheap. Then ask what happens for
-P(overcast | no): zero, which kills the entire product.
+Have the group compute P(yes) = 3/6 and P(rain | yes) = 2/3 aloud — the
+estimation is pure counting, which is what makes the method so cheap. Then
+score the day before revealing the fragment: the factors are P(rain), P(hot),
+P(high), P(weak) given each class, times the prior. Exact values: 2/27 for yes,
+2/81 for no, so P(yes | day) = 3/4. Then ask what happens for a day that is
+overcast: P(overcast | no) = 0, which kills the entire product.
 
 --
 
@@ -2662,7 +2789,11 @@ estimated likelihood is **zero** — and one zero factor drives the whole produc
 to zero, whatever the other attributes say.
 
 **Laplace smoothing** adds a pseudo-count to every combination, so that unseen
-does not mean impossible.
+does not mean impossible:
+$$
+\hat{P}(A\_j = v \mid B) = \frac{n(v, B) + 1}{n(B) + k\_j}
+$$
+with $k\_j$ the number of values of attribute $A\_j$.
 
 </div>
 
@@ -2689,6 +2820,7 @@ argmax, not the right probability.
 
 
 Notes:
+With the formula, P(overcast | no) = (0 + 1)/(3 + 3) = 1/6 instead of 0.
 Close on the epistemic point (P3): a knowingly wrong assumption can still yield
 a useful model, provided you know which conclusions it does and does not
 support. Calibrated probabilities are exactly what it does not support.
@@ -2711,148 +2843,85 @@ support. Calibrated probabilities are exactly what it does not support.
 <div class="c-definition">
 
 The **true misclassification rate** of a hypothesis $h$ is the probability that
-it errs on a randomly drawn object:
+it errs on a randomly drawn example $(X, Y) \sim p$:
 
 $$
-\mathrm{err}^*(h) = P\big(h(\mathbf{x}) \neq y(\mathbf{x})\big)
+\mathrm{err}^\*(h) = P\big(h(X) \neq Y\big)
 $$
 
 </div>
 
 
-It is defined over the **whole distribution of objects** — which we cannot
-observe.
+It is defined over the **whole distribution of examples** — which we cannot
+observe. Since the same $\mathbf{x}$ can come with different labels, even the
+best possible $h$ errs sometimes: that floor is the **Bayes error**.
 
 Notes:
 Deliberately parallel to the population/sample distinction from the statistics
 module: err* is a population quantity. Students who see the analogy will not be
-surprised by cross-validation.
+surprised by cross-validation. The label is a random variable, not a function of
+x: two identical-looking cases can end differently, so no amount of data pushes
+err* below the Bayes error.
 
 --
 
 ## What We Can Measure
 
-We estimate $\mathrm{err}^*(h)$ by the error on a set of examples
-$D_s \subseteq D$ whose true labels are known:
+We estimate $\mathrm{err}^\*(h)$ by the error on a set of examples
+$D\_s \subseteq D$ whose true labels are known:
 
 $$
-\mathrm{err}(h, D_s) = \frac{1}{|D_s|} \sum_{\mathbf{x} \in D_s}
-\mathbb{1}\big[h(\mathbf{x}) \neq y(\mathbf{x})\big]
+\mathrm{err}(h, D\_s) = \frac{1}{|D\_s|} \sum\_{(\mathbf{x}, y) \in D\_s}
+\mathbb{1}\big[h(\mathbf{x}) \neq y\big]
 $$
 
 
 <div class="c-warning">
 
-The estimate is only as good as the sample. Which examples land in $D_s$ — and
+The estimate is only as good as the sample. Which examples land in $D\_s$ — and
 whether $h$ has seen them before — decides whether the number means anything.
 
 </div>
 
 
 Notes:
-Everything in the next unit follows from that warning. Ask what happens if D_s
-is the data the model was fitted on the answer motivates hold-out estimation
+Hold-out estimation follows from that warning. Ask what happens if D_s
+is the data the model was fitted on; the answer motivates hold-out estimation
 without needing to be told.
 
 --
 
-## Training Error Is Not an Estimate
+## Training Error Is Not an Honest Estimate
 
-When the evaluation set equals the training set, $D_{tr} = D$, the resulting
+When the evaluation set equals the training set, $D\_{tr} = D$, the resulting
 number measures how well the model **memorised**, not how well it will
 generalise.
 
 
 <div class="c-warning">
 
-Training error is a lower bound on the true error, and an arbitrarily bad one.
-A model with enough capacity can drive it to zero while learning nothing.
+Training error is optimistically biased — typically below the true error, often
+far below. A model with enough capacity can drive it to zero while learning
+nothing.
 
 </div>
 
 
 Notes:
-Connect straight to the bias–variance unit: training error falls monotonically
-with capacity, which is exactly why it cannot be the criterion for choosing
+Connect to the bias–variance trade-off: training error falls monotonically with
+capacity, which is exactly why it cannot be the criterion for choosing
 capacity.
 
 --
 
 ## Four Estimation Schemes
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Hold-out (2-fold)
-Split $D$ into a training and a test part, $D_{tr} \subset D$. Fit on one,
-evaluate on the other.
-
-*Simple, but wastes data and depends on the split.*
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### $k$-fold cross-validation
-Partition $D$ into $k$ folds; each fold serves once as the test set. Average
-the $k$ errors.
-
-*Uses all data for both roles $k$ = 5 or 10 is customary.*
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Leave-one-out ($n$-fold)
-$k = n$: every example is a test set of size one.
-
-*Nearly unbiased, expensive, and high variance.*
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Bootstrapping
-Resample $D$ with replacement to build training sets evaluate on the examples
-left out.
-
-*Useful when $D$ is small.*
-
-</div>
-
-
-</div>
-
-
-</div>
-
+| Scheme | How | Trade-off |
+|---|---|---|
+| **Hold-out** | split $D$ once into a training and a test part; fit on one, evaluate on the other | simple, but wastes data and depends on the split |
+| **$k$-fold cross-validation** | partition $D$ into $k$ folds; each fold serves once as the test set; average the $k$ errors | uses all data for both roles; $k$ = 5 or 10 is customary |
+| **Leave-one-out** | $k = n$: every example is a test set of size one | nearly unbiased, expensive, high variance |
+| **Bootstrapping** | resample $D$ with replacement to build training sets; evaluate on the examples left out | useful when $D$ is small |
 
 Notes:
 Ask which scheme a Kaggle-style leaderboard implements, and what repeatedly
@@ -2877,8 +2946,8 @@ the objective becomes expected cost rather than error rate.
 
 
 Notes:
-This is the hinge into precision and recall in two units' time. Ask the group
-to set the two costs for a spam filter and then for a cancer screen the ratios
+This is the hinge into precision and recall. Ask the group
+to set the two costs for a spam filter and then for a cancer screen; the ratios
 they choose differ by orders of magnitude, and both are defensible.
 
 --
@@ -2999,20 +3068,20 @@ Always predict *healthy*.
 <div class="c-insight">
 
 On imbalanced data the majority baseline is nearly unbeatable by accuracy, and
-completely useless. The metric, not the model, is the problem.
+completely useless. The metric hides that the model is useless.
 
 </div>
 
 
 Notes:
 The same base-rate structure as the Bayes unit, now as an evaluation trap. This
-is the motivation for precision and recall, which follow immediately.
+is the motivation for precision and recall.
 
 --
 
 ## Why the Error Rate Is Not Enough
 
-For multiclass classification $h_\Theta : X \to Y$ with
+For multiclass classification $h\_\Theta : X \to Y$ with
 $Y \subseteq \lbrace 1, \ldots, N \rbrace$, the plain error rate:
 
 
@@ -3072,7 +3141,7 @@ classes, and type of error. Each one motivates a different part of what follows.
 
 ## The Confusion Matrix
 
-Rows are true classes, columns are predictions cell $(i,j)$ counts the
+Rows are true classes, columns are predictions; cell $(i,j)$ counts the
 examples of class $i$ that $h$ assigned to $j$. The diagonal is correct, and
 every off-diagonal cell names a specific confusion.
 
@@ -3096,68 +3165,10 @@ not just the score.
 
 For a class $j$, every prediction falls into one of four cells:
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card good">
-
-### $TP_j$ — true positives
-Assigned to $j$ **and** truly in $j$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### $FP_j$ — false positives
-Assigned to $j$ but **not** in $j$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### $FN_j$ — false negatives
-**Not** assigned to $j$ but truly in $j$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card good">
-
-### $TN_j$ — true negatives
-Not assigned to $j$ and not in $j$.
-
-</div>
-
-
-</div>
-
-
-
-</div>
+| | truly in $j$ | not in $j$ |
+|---|---|---|
+| **assigned to $j$** | $TP\_j$ — true positives | $FP\_j$ — false positives |
+| **not assigned to $j$** | $FN\_j$ — false negatives | $TN\_j$ — true negatives |
 
 
 <div class="c-tip">
@@ -3187,7 +3198,7 @@ moving on.
 <div class="card">
 
 ### Recall — completeness
-$$\mathrm{rec}_j = \frac{TP_j}{TP_j + FN_j}$$
+$$\mathrm{rec}\_j = \frac{TP\_j}{TP\_j + FN\_j}$$
 
 Of everything that truly belongs to $j$, what fraction did $h$ find?
 
@@ -3203,7 +3214,7 @@ Of everything that truly belongs to $j$, what fraction did $h$ find?
 <div class="card">
 
 ### Precision — exactness
-$$\mathrm{prec}_j = \frac{TP_j}{TP_j + FP_j}$$
+$$\mathrm{prec}\_j = \frac{TP\_j}{TP\_j + FP\_j}$$
 
 When $h$ says $j$, how often is it right?
 
@@ -3226,6 +3237,9 @@ error as swapping the conditionals in Bayes' theorem.
 </div>
 
 
+One number that is high only if both are: their harmonic mean,
+$F\_1 = \frac{2 \cdot \mathrm{prec}\_j \cdot \mathrm{rec}\_j}{\mathrm{prec}\_j + \mathrm{rec}\_j}$.
+
 Notes:
 The link to Bayes is the payoff of teaching probability first: precision and
 recall are P(correct | predicted) and P(found | true). Ask which one a search
@@ -3235,54 +3249,15 @@ engine optimises and which one a screening programme optimises.
 
 ## Mini-Exercise
 
-A spam filter processes 1,000 emails, 100 of which are spam. It flags 80
-emails, of which 60 are genuinely spam.
-
-Compute precision and recall. Which one would you rather improve, and why?
-
---
-
-## Mini-Exercise — Solution
+A spam filter flags 80 of 1,000 emails; 60 of them are spam, out of 100 spam
+emails in total. What are precision and recall — and which would you rather
+improve?
 
 
 <div class="fragment">
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Precision** $= 60/80 = 0.75$
-
-A quarter of flagged mail is legitimate.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Recall** $= 60/100 = 0.60$
-
-Forty spam messages still arrive.
-
-</div>
-
-
-</div>
-
-
-</div>
-
+- **Precision** $= 60/80 = 0.75$: a quarter of flagged mail is legitimate.
+- **Recall** $= 60/100 = 0.60$: forty spam messages still arrive.
 
 For a spam filter, **precision** usually matters more: a lost legitimate email
 costs far more than a spam message that slips through. The cost matrix decides,
@@ -3292,9 +3267,11 @@ not the metric.
 
 
 Notes:
-The final sentence is the one to stabilise — the choice between precision and
-recall is a statement about costs, which is why the cost-matrix slide came
-earlier.
+Solution on the same slide, click-gated. The final sentence is the one to
+stabilise — the choice between precision and recall is a statement about costs,
+which is why the cost-matrix slide came earlier. If there is time, contrast
+with the summary numbers: F1 = 0.67, while accuracy is (60 + 880)/1000 = 0.94 —
+the number that looks best says least.
 
 --
 
@@ -3303,11 +3280,64 @@ earlier.
 
 <div class="takeaway">
 
-The confusion matrix shows **which** errors occur precision and recall split
+The confusion matrix shows **which** errors occur; precision and recall split
 "being wrong" into **being imprecise** and **being incomplete**. Which one you
 optimise is a decision about costs, not about mathematics.
 
 </div>
+
+
+--
+
+## The Churn Shop: Accuracy or Recall?
+
+Of **1,000** customers, **30** will churn in the next quarter (3%). Two models:
+
+| | flags | churners caught | accuracy | recall | precision |
+|---|---|---|---|---|---|
+| **"nobody churns"** | 0 | 0 of 30 | 97.0% | 0% | — |
+| **churn alert** | 60 | 24 of 30 | 95.8% | 80% | 40% |
+
+
+<div class="fragment">
+
+
+<div class="c-warning">
+
+The useless model wins on accuracy. At a 3% base rate, accuracy mostly counts
+the customers who were never at risk.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-insight">
+
+Which model is better depends on the **costs**: a retention call for 60
+customers against 24 kept.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The running example of the course, with the base rate of Lecture 02's trap.
+Recompute with the students: the alert makes 36 false alarms and misses 6
+churners, so it gets 24 + 934 = 958 of 1,000 right; the constant model gets the
+970 non-churners right. Recall 24/30, precision 24/60.
+
+The last line previews the decision view: if a retention call costs little and
+a lost customer much, 36 unnecessary calls are cheap. Logistic regression and
+naive Bayes both produce scores; the threshold that turns a score into "call"
+is chosen by these costs, not by accuracy.
 
 
 --
@@ -3318,7 +3348,7 @@ optimise is a decision about costs, not about mathematics.
 <div class="c-definition">
 
 $$
-\mathrm{MSE} = \frac{1}{n}\sum_{i=1}^{n}\big(h(\mathbf{x}_i) - y_i\big)^2
+\mathrm{MSE} = \frac{1}{n}\sum\_{i=1}^{n}\big(h(\mathbf{x}\_i) - y\_i\big)^2
 \qquad
 \mathrm{RMSE} = \sqrt{\mathrm{MSE}}
 $$
@@ -3336,7 +3366,7 @@ $$
 <div class="card">
 
 ### MSE
-Average quadratic loss always non-negative, lower is better.
+Average quadratic loss; always non-negative, lower is better.
 
 Unit is the **square** of the target's unit — hard to interpret directly.
 
@@ -3386,9 +3416,9 @@ are disproportionately costly.
 <div class="card">
 
 ### MAE
-$$\frac{1}{n}\sum_i \big| h(\mathbf{x}_i) - y_i \big|$$
+$$\frac{1}{n}\sum\_i \big| h(\mathbf{x}\_i) - y\_i \big|$$
 
-Easier to interpret than RMSE treats all errors proportionally.
+Easier to interpret than RMSE; treats all errors proportionally.
 
 </div>
 
@@ -3403,7 +3433,7 @@ Easier to interpret than RMSE treats all errors proportionally.
 
 ### Mean error
 Drop the absolute value to keep the **direction** — reveals systematic over- or
-under-prediction.
+under-prediction; errors of opposite sign cancel.
 
 </div>
 
@@ -3417,9 +3447,10 @@ under-prediction.
 <div class="card">
 
 ### Mean relative error
-$$\frac{1}{n}\sum_i \frac{|h(\mathbf{x}_i) - y_i|}{|y_i|}$$
+$$\frac{1}{n}\sum\_i \frac{|h(\mathbf{x}\_i) - y\_i|}{|y\_i|}$$
 
-The average error *per unit of target* — comparable across scales.
+The average error *per unit of target* — comparable across scales, undefined
+where $y\_i = 0$.
 
 </div>
 
@@ -3451,8 +3482,8 @@ forecasting and pricing.
 
 <div class="takeaway">
 
-Squared measures punish large errors and lose the unit absolute measures stay
-interpretable signed measures expose bias. Report the one whose **unit and
+Squared measures punish large errors and lose the unit; absolute measures stay
+interpretable; signed measures expose bias. Report the one whose **unit and
 failure mode** match the decision the prediction feeds.
 
 </div>
@@ -3620,10 +3651,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -3634,17 +3671,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

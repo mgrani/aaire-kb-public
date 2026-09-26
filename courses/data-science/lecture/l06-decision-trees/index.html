@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -13,9 +13,96 @@ Prof. Dr. Michael Granitzer
 Notes:
 Converted from LNKB-tex part-en-ds-chp5-decision-tree-learning.tex. Builds on
 Lecture 04 (hypothesis space, inductive bias, bias–variance, cross-validation)
-and Lecture 02 (entropy is built from the probability material). The arc runs
-from the most interpretable model in the course to a committee that gives that
-interpretability up.
+and Lecture 02 (probabilities of class labels; entropy itself is introduced
+here, in Module 2). The arc runs from the most interpretable model in the course
+to a committee that gives that interpretability up.
+
+--
+
+## Where We Left Off
+
+Lectures 04–05 gave us models that predict and cannot explain themselves — a
+few hundred weights, or millions. Today: a model you can read aloud, and what it
+costs to keep it readable.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Lecture 05
+accurate, opaque
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Modules 1–4
+one tree: readable, unstable
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### Module 5
+a forest: stable, opaque again
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+"Ultimately understandable" was one of Lecture 01's four criteria for knowledge.
+This lecture is the first to trade it away on purpose.
+
+</div>
+
+
+Notes:
+Name the trade at the start so that the students watch for it: every module
+until the forest buys readability; Module 5 sells it for stability and
+accuracy. The churn tree at the end of the lecture makes the trade concrete.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 06: trees as readable hypotheses, choosing splits, greedy construction, pruning, and ensembles that trade readability for stability](/courses/data-science/figures/l06-argument-map.svg)
+
+</div>
+
+
+Notes:
+A tree is a sequence of questions; the only real decision is the next split,
+which information gain scores. ID3's greed carries a bias: short trees, and
+attributes with many values win. Growing to purity memorises, so prune, and
+judge the pruning on unseen data. The instability of a single tree becomes the
+raw material of bagging and random forests. The bottom row states the trade
+the students must be able to name.
 
 ---
 
@@ -56,7 +143,8 @@ to be explained.
 Notes:
 Interpretability is the selling point and should be named early. Ask what
 "explaining" a linear model with 200 weights would look like by comparison —
-this is the accountability thread from Lecture 01 returning.
+this is Lecture 01's KDD criterion "ultimately understandable" returning, and
+the failures in its applications module show why it matters.
 
 --
 
@@ -71,7 +159,7 @@ this is the accountability thread from Lecture 01 returning.
 ### Construction *(recursive)*
 If the data is pure enough, make a leaf.
 Otherwise: choose a **split criterion**, decompose $D$ into
-$D_1, \ldots, D_s$, and recurse on each part.
+$D\_1, \ldots, D\_s$, and recurse on each part.
 
 </div>
 
@@ -135,44 +223,19 @@ many equally relevant features; and — as we will see — stability.
 
 ## Mini-Exercise
 
-Using the four examples above, write down **by hand** a decision tree that
-classifies all of them correctly.
-
-1. Can you do it with a single test?
-2. How many different correct trees can you find?
-3. Which of them would you trust on a new day, and why?
-
---
-
-## Mini-Exercise — Solution
+Find a tree with a **single test** that classifies the four EnjoySport
+examples from the first slide correctly. Is it the only one?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Yes — splitting on `Sky` alone separates them: sunny → yes, rainy → no.
-
-</div>
-
-
-<div class="card">
-
-**2.** Several. `Temperature` (warm/cold) also separates them perfectly, as do
-combinations that test both.
-
-</div>
-
-
-<div class="card">
-
-**3.** Undecidable from four examples. Perfect training accuracy does not
-choose between competing hypotheses — this is the inductive-bias problem, and
-the next module gives it a criterion.
+`Sky` works (sunny → yes, rainy → no) — and so does `Temperature` (warm → yes,
+cold → no). Both separate the data perfectly; even the next module's split
+criterion scores them equally (0.811 bits each). The data cannot choose: the learner's **inductive
+bias**, not the examples, breaks the tie.
 
 </div>
 
@@ -180,8 +243,11 @@ the next module gives it a criterion.
 </div>
 
 
-</div>
-
+Notes:
+Expect Sky first. Ask for a second answer before revealing — someone finds
+Temperature. Humidity fails (example 2 is high and yes, example 3 is high and
+no), and Wind is constant. The tie survives the next module's criterion, which
+is the point: every learner needs a preference beyond the data.
 
 --
 
@@ -242,65 +308,44 @@ it is what we ultimately care about.
 
 --
 
-## Entropy
+## Entropy and Gini
 
 
 <div class="c-definition">
 
-For a node with class probabilities $P(A_1), \ldots, P(A_k)$:
+For a node with class probabilities $P(A\_1), \ldots, P(A\_k)$:
 $$
-H(\mathcal{A}) = -\sum_{i=1}^{k} P(A_i) \log_2 P(A_i)
+H(\mathcal{A}) = -\sum\_{i=1}^{k} P(A\_i) \log\_2 P(A\_i)
+\qquad
+G(\mathcal{A}) = 1 - \sum\_{i=1}^{k} P(A\_i)^2
 $$
-measured in **bits** — the average number of yes/no questions needed to
-identify the class of an example in that node.
+**Entropy** $H$ is measured in bits — the average number of yes/no questions
+needed to identify an example's class. **Gini impurity** $G$ is the probability
+that two examples drawn at random from the node belong to different classes.
 
 </div>
 
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Pure node
-$H = 0$ — no question needed
-
-</div>
-
-
-<div class="card">
-
-### Two classes, 50/50
-$H = 1$ bit — one question needed
-
-</div>
-
-
-<div class="card">
-
-### $k$ equal classes
-$H = \log_2 k$ bits
-
-</div>
-
-
-</div>
-
+| | Pure node | Two classes, 50/50 | $k$ equal classes |
+|---|---|---|---|
+| Entropy $H$ | 0 | 1 bit | $\log\_2 k$ bits |
+| Gini $G$ | 0 | 0.5 | $1 - 1/k$ |
 
 Notes:
 The "questions needed" reading makes entropy concrete and is worth more than
 the formula. It also makes the next slide's subtraction obviously meaningful:
-information gain is *questions saved*.
+information gain is *questions saved*. Gini is the curve from the previous
+slide's second step; CART uses it because it needs no logarithm and ranks
+splits almost exactly as entropy does.
 
 --
 
 ## Conditional Entropy and Information Gain
 
-After splitting on an attribute $\mathcal{B}$ with outcomes $B_1, \ldots, B_s$:
+After splitting on an attribute $\mathcal{B}$ with outcomes $B\_1, \ldots, B\_s$:
 
 $$
-H(\mathcal{A} \mid \mathcal{B}) = \sum_{j=1}^{s} P(B_j) \cdot H(\mathcal{A} \mid B_j)
+H(\mathcal{A} \mid \mathcal{B}) = \sum\_{j=1}^{s} P(B\_j) \cdot H(\mathcal{A} \mid B\_j)
 $$
 
 — the impurity of each part, weighted by how much data lands in it.
@@ -324,44 +369,30 @@ formulas as decisions rather than as notation.
 
 --
 
-## Mini-Exercise
+<!-- .slide: class="smaller" -->
 
-A node holds 8 examples: 4 "yes", 4 "no". An attribute splits it into
-[3 yes, 1 no] and [1 yes, 3 no].
+## Worked Example: The Root of PlayTennis
 
-1. What is the entropy before the split?
-2. What is the conditional entropy after it?
-3. What is the information gain?
+Quinlan's 14 weather days: 9 yes, 5 no, so
+$H = -\tfrac{9}{14}\log\_2\tfrac{9}{14} - \tfrac{5}{14}\log\_2\tfrac{5}{14} = 0.940$ bits.
+Counts are (yes, no) per value.
 
---
-
-## Mini-Exercise — Solution
+| Attribute | Split | $H(\mathcal{A} \mid \mathcal{B})$ | Gain |
+|---|---|---|---|
+| **Outlook** | sunny (2, 3) · overcast (4, 0) · rain (3, 2) | 0.694 | **0.247** |
+| Humidity | high (3, 4) · normal (6, 1) | 0.788 | 0.152 |
+| Wind | weak (6, 2) · strong (3, 3) | 0.892 | 0.048 |
+| Temperature | hot (2, 2) · mild (4, 2) · cool (3, 1) | 0.911 | 0.029 |
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** $H = 1$ bit — a perfectly even mix.
-
-</div>
-
-
-<div class="card">
-
-**2.** Each part has $H = -\tfrac{3}{4}\log_2\tfrac{3}{4} - \tfrac{1}{4}\log_2\tfrac{1}{4} \approx 0.811$;
-both hold half the data, so $H(\mathcal{A} \mid \mathcal{B}) \approx 0.811$.
-
-</div>
-
-
-<div class="card">
-
-**3.** $\mathrm{Gain} \approx 1 - 0.811 = 0.189$ bits.
+Outlook wins the root although two of its branches are *more* mixed than the
+root (0.971 vs 0.940 bits): its overcast branch is **pure**, so 4 of the 14
+days need no further question.
 
 </div>
 
@@ -369,7 +400,34 @@ both hold half the data, so $H(\mathcal{A} \mid \mathcal{B}) \approx 0.811$.
 </div>
 
 
-A split that leaves both branches 3:1 removes less than a fifth of a bit.
+Notes:
+Recomputed: sunny and rain branches each have H = 0.971, so
+H(A | Outlook) = (5/14 + 5/14) · 0.971 = 0.694. Mitchell's textbook prints
+0.246 and 0.151 because it rounds the intermediate entropies; exact values
+are 0.2467 and 0.1518. Ask before the fragment why Outlook wins with two
+mixed branches — the pure overcast branch is the answer. Gini agrees: the
+root has G = 0.459 and Outlook again gives the largest reduction (0.116).
+
+--
+
+## Mini-Exercise
+
+A node holds 4 yes and 4 no. A split yields [3 yes, 1 no] and
+[1 yes, 3 no]; a 3:1 node has entropy 0.811. What is the information gain?
+
+
+<div class="fragment">
+
+
+<div class="c-insight">
+
+Before: $H = 1$ bit. After: both halves hold half the data and have
+$H = 0.811$, so $H(\mathcal{A} \mid \mathcal{B}) = 0.811$.
+$\mathrm{Gain} = 1 - 0.811 = 0.189$ bits — a split that "looks decent"
+removes less than a fifth of a bit.
+
+</div>
+
 
 </div>
 
@@ -414,9 +472,10 @@ misclassification error is too flat to choose between splits.
 
 1. If all examples share one class → return a leaf with that class.
 2. If $A$ is empty → return a leaf with the majority class.
-3. Otherwise choose $A^{*} \in A$ with the highest **information gain**.
-4. For each value $a$ of $A^{*}$: add the subtree
- **ID3**($D_a$, $A \setminus \lbrace A^{*} \rbrace$, target).
+3. Otherwise choose $A^{\*} \in A$ with the highest **information gain**.
+4. For each value $a$ of $A^{\*}$: if $D\_a$ is empty, add a leaf with the
+ majority class of $D$; otherwise add the subtree
+ **ID3**($D\_a$, $A \setminus \lbrace A^{\*} \rbrace$, target).
 
 </div>
 
@@ -461,8 +520,10 @@ therefore **shorter trees**. It stops at the first tree that fits.
 
 <div class="c-warning">
 
-Is a preference for short trees justified? It is Occam's razor as an
-algorithm — a genuine assumption about the world, not a mathematical necessity.
+Two assumptions, not facts. **Short trees generalise** — Occam's razor as an
+algorithm. And **a useful attribute shows gain on its own**: for
+$y = x\_1 \text{ XOR } x\_2$ on balanced data, each attribute alone has gain 0,
+yet together they decide $y$ — greedy search cannot see it.
 
 </div>
 
@@ -471,7 +532,10 @@ Notes:
 Force the interpretation (P2, P3): ask why a shorter tree should generalise
 better. There is an argument (fewer short trees exist, so fitting the data by
 accident is less likely) but it is not airtight, and students should see it as
-a defensible choice rather than a fact.
+a defensible choice rather than a fact. The XOR case answers the guiding
+question: greedy search assumes that attributes which matter jointly also
+matter one at a time. Pruning returns to this (a weak split can enable a
+strong one beneath it).
 
 --
 
@@ -484,7 +548,7 @@ a defensible choice rather than a fact.
 <div class="card">
 
 ### What differs
-**Binary** splits only **Gini** impurity instead of entropy handles
+**Binary** splits only; **Gini** impurity instead of entropy; handles
 **regression** by splitting on variance reduction and predicting the mean in
 each leaf.
 
@@ -506,9 +570,10 @@ different set of choices inside the same skeleton.
 
 <div class="c-note">
 
-Binary splits avoid a defect of multi-way splits: an attribute with many values
+Binary splits reduce a defect of multi-way splits: an attribute with many values
 (an ID number, in the extreme) achieves high information gain by fragmenting
-the data into pure singletons that generalise to nothing.
+the data into pure singletons. C4.5 corrects for it with the **gain ratio**,
+the gain divided by the entropy of the split itself.
 
 </div>
 
@@ -522,59 +587,32 @@ a theme students will meet in evaluation and in production systems.
 
 ## Mini-Exercise
 
-Your dataset includes a `customer_id` column, unique for every row.
-
-1. What information gain does splitting on it achieve?
-2. What does the resulting tree look like?
-3. What does it predict for a new customer?
-
---
-
-## Mini-Exercise — Solution
+Your dataset has a `customer_id` column, unique for every row. What
+information gain does a split on it achieve — and what does the resulting
+tree predict for a new customer?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Maximal — every branch holds one example, so every leaf is pure and the
-conditional entropy is 0.
-
-</div>
-
-
-<div class="card">
-
-**2.** A root with one branch per training example: a lookup table, one level
-deep.
+The **maximum possible**: every branch holds one example, every leaf is pure,
+so the gain equals the root's entropy. And for a new customer — nothing: their
+id matches no branch. Perfect purity, zero generalisation; hence gain ratio,
+or binary splits.
 
 </div>
 
-
-<div class="card">
-
-**3.** Nothing useful — a new customer's id matches no branch. Perfect training
-purity, zero generalisation.
-
-</div>
-
-
-</div>
-
-
-This is why gain must be corrected for the number of values (gain ratio), or
-splits restricted to binary (CART).
 
 </div>
 
 
 Notes:
 The cleanest overfitting example in the course, and it arrives before pruning
-is introduced, which motivates the next module.
+is introduced, which motivates the next module. If asked: the tree is a
+lookup table, one level deep; ID3 would send the unseen id to no branch at
+all, so an implementation has to fall back on the root's majority class.
 
 --
 
@@ -597,8 +635,9 @@ idea. Both can be fooled by an attribute with too many values.
 # Module 4
 ## Overfitting and Pruning
 
-> **Guiding Question:** A tree can achieve 100% training accuracy on any
-> dataset. Why is that a symptom rather than an achievement?
+> **Guiding Question:** A tree can reach 100% training accuracy on any dataset
+> without contradictory examples. Why is that a symptom rather than an
+> achievement?
 
 --
 
@@ -690,47 +729,19 @@ with cross-validation is preferred in practice.
 
 ## Mini-Exercise
 
-A tree has 100% training accuracy with 340 leaves. After pruning it has 41
-leaves, 94% training accuracy and 89% validation accuracy — up from 78%.
-
-1. What did the 299 removed leaves contain?
-2. Why did training accuracy fall?
-3. Was pruning worth it?
-
---
-
-## Mini-Exercise — Solution
+A tree with 340 leaves scores 100% on training data, 78% on validation.
+Pruned to 41 leaves it scores 94% and 89%. Training accuracy fell by six
+points — did pruning fail?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Mostly noise — splits that separated individual training examples
-without capturing structure that recurs.
-
-</div>
-
-
-<div class="card">
-
-**2.** Because those examples are now misclassified. That is the intended
-outcome, not a regression.
-
-</div>
-
-
-<div class="card">
-
-**3.** Yes: +11 points on unseen data, and a tree small enough to read. Both
-axes improved.
-
-</div>
-
+No. The 299 removed leaves fitted noise — examples that are now misclassified,
+as intended. Unseen data gained **11 points**, and the tree became small enough
+to read. Training accuracy was never the objective.
 
 </div>
 
@@ -739,8 +750,8 @@ axes improved.
 
 
 Notes:
-Part 2 is where students hesitate — accepting worse training performance feels
-like failure. Naming it as the point of the exercise reinforces that training
+Students hesitate here — accepting worse training performance feels like
+failure. Naming it as the point of the exercise reinforces that training
 error was never the objective.
 
 --
@@ -768,7 +779,9 @@ generalisation**, and the trade must be judged on data the tree never saw.
 
 --
 
-## Unstable Learners
+## Why One Learner Falls Short
+
+Three reasons, after Dietterich (2000):
 
 
 <div class="grid-3">
@@ -776,26 +789,27 @@ generalisation**, and the trade must be judged on data the tree never saw.
 
 <div class="card">
 
-### High variance
-Many parameters, so small changes in the training data produce very different
-models.
+### Statistical
+Too little data for the hypothesis space: many hypotheses fit equally well, and
+small changes in the data pick a very different one.
 
 </div>
 
 
 <div class="card">
 
-### Runtime limits
+### Computational
 The learner cannot search its hypothesis space exhaustively and settles for a
-heuristic path.
+heuristic path — a local optimum.
 
 </div>
 
 
 <div class="card">
 
-### Insufficient capacity
-The model family is too simple to express the target at all.
+### Representational
+The model family cannot express the target at all; a combination of models
+may.
 
 </div>
 
@@ -806,7 +820,7 @@ The model family is too simple to express the target at all.
 
 <div class="c-important">
 
-**Decision trees are the textbook unstable learner**: change a handful of
+**Decision trees are the textbook unstable learner** (the statistical reason): change a handful of
 examples and a different attribute wins at the root, producing a completely
 different tree.
 
@@ -814,7 +828,8 @@ different tree.
 
 
 Notes:
-Instability is the property that makes ensembles work, so it must be understood
+The first reason is what "unstable learner" means: high variance. Instability
+is the property that makes ensembles work, so it must be understood
 as a fact about trees before bagging looks like anything other than a trick.
 Ask why a greedy root choice makes the whole tree fragile.
 
@@ -847,6 +862,7 @@ by majority vote for classification, by averaging for regression.
 
 ### Boosting
 Train weak learners in sequence, each focusing on the previous one's mistakes.
+*Named here; not developed in this course.*
 
 </div>
 
@@ -865,16 +881,20 @@ Bagging plus randomised attribute selection at every split.
 
 <div class="takeaway">
 
-Ensembles exploit instability: **many different wrong models, averaged, are
-right more often than any one of them**.
+Ensembles exploit instability: **many different models, each better than
+chance and wrong in partly independent ways, are right together more often
+than any one of them**.
 
 </div>
 
 
 Notes:
-The takeaway is counterintuitive enough to state plainly. The condition for it
-to hold — errors must be at least partly independent — is what the next two
-units engineer deliberately.
+The takeaway is counterintuitive enough to state plainly, and both conditions
+matter: a committee of worse-than-chance voters gets *worse* with size, and a
+committee of identical voters does not change. Partial independence is what
+the next two units engineer deliberately. Boosting (AdaBoost, gradient
+boosting) is left to the literature; mention that it reduces bias rather than
+variance.
 
 --
 
@@ -913,7 +933,7 @@ The learner never changes. Only the data it sees does.
 
 
 Notes:
-Bootstrapping was introduced in Lecture 04 as an error-estimation scheme here
+Bootstrapping was introduced in Lecture 04 as an error-estimation scheme; here
 the same resampling produces model diversity. Same tool, different job — worth
 naming as the spiral it is.
 
@@ -962,46 +982,20 @@ without a separate hold-out.
 
 ## Mini-Exercise
 
-You bag 100 trees. Each individually achieves 70% accuracy.
-
-1. Under what condition would the ensemble beat 70%?
-2. What happens if all 100 trees are identical?
-3. Does bagging reduce bias, variance, or both?
-
---
-
-## Mini-Exercise — Solution
+You bag 100 trees, each 70% accurate, and take a majority vote. What accuracy
+does the vote reach if all 100 trees are identical — and if their errors are
+independent?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Their **errors must be at least partly independent** — different trees
-must be wrong about different examples for the vote to correct them.
-
-</div>
-
-
-<div class="card">
-
-**2.** Nothing improves: 100 copies of one model vote unanimously and reproduce
-its 70%.
-
-</div>
-
-
-<div class="card">
-
-**3.** Mainly **variance**. Averaging does not fix a systematic error every
-model shares.
-
-</div>
-
+Identical: **70%** — a hundred copies vote unanimously. Independent: the vote
+is wrong only if 50 or more trees err at once, which happens with probability
+$2.2 \times 10^{-5}$ — about **99.998%**. Both conditions matter: each tree
+better than chance (> 50%), and errors that are not shared.
 
 </div>
 
@@ -1010,8 +1004,14 @@ model shares.
 
 
 Notes:
-Part 2 is the crux and motivates random forests directly: bootstrap samples
-alone may not decorrelate trees enough, especially when one attribute dominates.
+Exact: P(Bin(100, 0.7) ≥ 51) = 0.99998. Real bootstrap trees sit between the
+two extremes, far closer to the identical case, which is why bagging helps
+less than the independent number suggests. With 45%-accurate independent trees
+the same vote falls to 13% (a tie counted as an error) and to 0 as the
+committee grows — "better than chance" is not decoration. Bagging
+reduces mainly variance: averaging does not fix an error every tree shares.
+The identical case motivates random forests directly: bootstrap samples alone
+may not decorrelate trees enough, especially when one attribute dominates.
 
 --
 
@@ -1057,8 +1057,8 @@ while the computation of 100 near-identical trees is largely wasted.
 
 
 Notes:
-This is the direct answer to part 2 of the previous mini-exercise. Resampling
-alone does not guarantee diversity the dominant attribute defeats it.
+This answers the identical-trees case of the bagging mini-exercise. Resampling
+alone does not guarantee diversity; the dominant attribute defeats it.
 
 --
 
@@ -1073,7 +1073,7 @@ For each of $T$ trees:
 
 1. Draw a bootstrap sample from $D$.
 2. Grow a tree — but **at every node**, choose the split from a random subset
- $A' \subset A$ of $m_A$ attributes rather than from all of them.
+ $A' \subset A$ of $m\_A$ attributes rather than from all of them.
 3. Do not prune.
 
 Combine by majority vote (classification) or average (regression).
@@ -1107,7 +1107,7 @@ tolerated because averaging handles the variance.
 <div class="card good">
 
 ### Gained
-Strong accuracy with almost no tuning out-of-bag error for free a usable
+Strong accuracy with almost no tuning; out-of-bag error for free; a usable
 attribute-importance measure.
 
 </div>
@@ -1137,60 +1137,39 @@ sampling, this correlation structure.
 
 Notes:
 The warning matters because attribute importance is routinely over-read in
-practice, including in published work. It connects back to Lecture 01's
-correlation/causation module.
+practice, including in published work. It connects back to the "Correlation
+Is Not Causation" slide in Lecture 01.
 
 --
 
 ## Mini-Exercise
 
-You must choose between a single pruned decision tree (86% accuracy) and a
-random forest (91%) for:
-
-1. an internal churn-prediction model,
-2. an automated loan-refusal system that must be justified to applicants.
-
-Which do you choose in each case?
-
---
-
-## Mini-Exercise — Solution
+A pruned tree reaches 86% accuracy, a random forest 91%. Which do you deploy
+for an internal churn model — and which for automated loan refusals that must
+be justified to applicants?
 
 
 <div class="fragment">
 
 
-<div class="grid-2">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** The **forest**: five accuracy points matter and nobody needs the model
-explained.
-
-</div>
-
-
-<div class="card">
-
-**2.** The **tree** — or a forest plus a documented, auditable process. A
-refusal that cannot be explained may be neither acceptable nor lawful.
+Churn: the **forest** — five points matter and nobody needs the model
+explained. Loans: the **tree**, or a forest inside a documented, auditable
+process; a refusal that cannot be explained may be neither acceptable nor
+lawful. The best model fits the **decision**, not the leaderboard.
 
 </div>
 
-
-</div>
-
-
-The best model is the one that fits the **decision**, not the leaderboard.
 
 </div>
 
 
 Notes:
-Close the lecture on this (P2, and the accountability thread from L01): model
+Close the lecture on this (P2, and Lecture 01's KDD criterion "ultimately
+understandable", whose failures its applications module showed): model
 selection is a decision about consequences, not only about a metric. Expect
-disagreement on case 2 and let it run — that is the exercise working.
+disagreement on the loan case and let it run — that is the exercise working.
 
 --
 
@@ -1204,6 +1183,70 @@ each split, turning unstable trees into a stable committee — at the cost of th
 one thing a single tree was best at: being readable.
 
 </div>
+
+
+--
+
+## The Churn Shop: A Tree You Can Read Aloud
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">One tree</span>
+
+
+<div class="marks-step">
+
+- Contract **monthly**?
+- No **app login** for 30 days?
+- Then: **likely to churn** — call them.
+
+</div>
+
+
+The retention team can check every step against what they know.
+
+</div>
+
+
+<div class="card muted">
+
+<span class="eyebrow">A forest of 500 trees</span>
+
+Usually more accurate, and stable when a few customers change.
+
+Its answer is a vote. Asked *why* this customer, it has no sentence to offer.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+The same data, two answers to Lecture 01's criteria: the tree is
+**understandable** and fragile, the forest is accurate and unreadable. Say
+which one you chose, and why.
+
+</div>
+
+
+Notes:
+The running example, now as a model. The tree is illustrative, not fitted: the
+point is its form — a path of questions a person can read out and dispute
+("monthly contracts churn more — we knew that; the app login is new"). A forest
+built on the same customers would typically predict churn better, but its
+answer is a majority over hundreds of such paths.
+
+Link to the decision the shop actually faces: if the retention team must
+explain the call to the customer, or check the model against their own
+knowledge, readability is worth some accuracy. If the list is only used to
+schedule calls, it may not be.
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
@@ -1368,10 +1411,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1382,17 +1431,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

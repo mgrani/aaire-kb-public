@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -14,6 +14,94 @@ Notes:
 Converted from LNKB-tex part-en-ds-chp6-clustering.tex. Builds on Lecture 07
 (attribute types decide permissible distances) and Lecture 04 (the evaluation
 module reuses precision and recall).
+
+--
+
+## Where We Left Off
+
+Lecture 07 ended with a representation: typed, cleaned, scaled attributes.
+Today we ask that data for groups, with no label to check against — so the only
+definition of "group" is the one we hand the algorithm.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Lectures 04–06
+labels to learn from
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Today
+no labels
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### The assumption
+a distance, and a shape of cluster
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Precision and recall from Lecture 04 return in Module 5 — but only where labels
+happen to exist.
+
+</div>
+
+
+Notes:
+Say what changes: in Lectures 04–06 an error on unseen data could tell a good
+model from a bad one. Here every algorithm returns groups, and the check has to
+come from somewhere else. The churn shop's customers are the example: a
+segmentation is only as meaningful as the distance behind it.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 08: learning without labels, distances, hierarchical, k-means and density-based clustering, and validation without ground truth](/courses/data-science/figures/l08-argument-map.svg)
+
+</div>
+
+
+Notes:
+With no target, the distance defines similarity, so scaling changes the
+clusters before any algorithm runs. Three families, three definitions of
+"cluster": a hierarchy, with the linkage as a second choice; compactness around
+a centre (k-means: always k clusters, always an answer); density (DBSCAN:
+arbitrary shapes, and the right to say "noise"). Validation checks consistency
+with the distance you chose, not truth. That is the takeaway.
 
 ---
 
@@ -132,9 +220,8 @@ it.
 
 
 Notes:
-Stage 4 is the one that gets skipped. This is the unit to return to when
-evaluation appears at the end of the lecture: internal measures score the
-criterion, not the meaning.
+Stage 4 is the one that gets skipped. Return to it whenever a clustering is
+scored: internal measures score the criterion, not the meaning.
 
 --
 
@@ -143,12 +230,12 @@ criterion, not the meaning.
 
 <div class="c-definition">
 
-A **metric** $d$ satisfies, for all $\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3$:
+A **metric** $d$ satisfies, for all $\mathbf{x}\_1, \mathbf{x}\_2, \mathbf{x}\_3$:
 
-1. $d(\mathbf{x}_1, \mathbf{x}_2) \geq 0$ — non-negativity
-2. $d(\mathbf{x}_1, \mathbf{x}_1) = 0$ — identity
-3. $d(\mathbf{x}_1, \mathbf{x}_2) = d(\mathbf{x}_2, \mathbf{x}_1)$ — symmetry
-4. $d(\mathbf{x}_1, \mathbf{x}_3) \leq d(\mathbf{x}_1, \mathbf{x}_2) + d(\mathbf{x}_2, \mathbf{x}_3)$ — triangle inequality
+1. $d(\mathbf{x}\_1, \mathbf{x}\_2) \geq 0$ — non-negativity
+2. $d(\mathbf{x}\_1, \mathbf{x}\_2) = 0 \Leftrightarrow \mathbf{x}\_1 = \mathbf{x}\_2$ — identity
+3. $d(\mathbf{x}\_1, \mathbf{x}\_2) = d(\mathbf{x}\_2, \mathbf{x}\_1)$ — symmetry
+4. $d(\mathbf{x}\_1, \mathbf{x}\_3) \leq d(\mathbf{x}\_1, \mathbf{x}\_2) + d(\mathbf{x}\_2, \mathbf{x}\_3)$ — triangle inequality
 
 </div>
 
@@ -166,7 +253,7 @@ depend on it. Worth naming so students check before assuming.
 ## Numeric Attributes: the Minkowski Family
 
 $$
-d(\mathbf{x}_1, \mathbf{x}_2) = \Big(\sum_{i=1}^{p} |x_{1i} - x_{2i}|^{r}\Big)^{1/r}
+d(\mathbf{x}\_1, \mathbf{x}\_2) = \Big(\sum\_{i=1}^{p} |x\_{1i} - x\_{2i}|^{r}\Big)^{1/r}
 $$
 
 
@@ -214,8 +301,8 @@ the unit of measurement chooses your clusters.
 
 ## Binary Attributes
 
-With $f_{11}$ the count of attributes present in both objects, $f_{00}$ absent
-in both, and $f_{01}, f_{10}$ present in exactly one:
+With $f\_{11}$ the count of attributes present in both objects, $f\_{00}$ absent
+in both, and $f\_{01}, f\_{10}$ present in exactly one:
 
 
 <div class="grid-2">
@@ -224,7 +311,7 @@ in both, and $f_{01}, f_{10}$ present in exactly one:
 <div class="card">
 
 ### Simple Matching Coefficient
-$$\mathrm{SMC} = \frac{f_{11} + f_{00}}{f_{11} + f_{00} + f_{01} + f_{10}}$$
+$$\mathrm{SMC} = \frac{f\_{11} + f\_{00}}{f\_{11} + f\_{00} + f\_{01} + f\_{10}}$$
 Counts **shared absences** as agreement.
 
 </div>
@@ -233,7 +320,7 @@ Counts **shared absences** as agreement.
 <div class="card">
 
 ### Jaccard Coefficient
-$$J = \frac{f_{11}}{f_{11} + f_{01} + f_{10}}$$
+$$J = \frac{f\_{11}}{f\_{11} + f\_{01} + f\_{10}}$$
 **Ignores** shared absences.
 
 </div>
@@ -247,7 +334,7 @@ $$J = \frac{f_{11}}{f_{11} + f_{01} + f_{10}}$$
 
 For sparse data the difference is decisive: two shopping baskets agree on
 thousands of products **neither** contains. SMC would call them nearly
-identical Jaccard would not.
+identical; Jaccard would not.
 
 </div>
 
@@ -256,41 +343,18 @@ identical Jaccard would not.
 
 ## Mini-Exercise
 
-Two documents are represented by which of 10,000 words they contain. Document A
-has 30 words, document B has 35, and they share 20.
-
-1. Compute SMC and Jaccard.
-2. Which is the honest similarity here?
-
---
-
-## Mini-Exercise — Solution
+Two documents over a 10,000-word vocabulary: A contains 30 words, B 35, and they
+share 20. SMC comes out at 0.9975. What is Jaccard — and which of the two is the
+honest similarity?
 
 
 <div class="fragment">
 
 
-<div class="grid-2">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** $f_{11} = 20$, $f_{01} + f_{10} = 25$, $f_{00} = 9955$.
-
-$\mathrm{SMC} = \frac{9975}{10000} = 0.9975$ &nbsp;·&nbsp;
-$J = \frac{20}{45} \approx 0.44$
-
-</div>
-
-
-<div class="card">
-
-**2.** Jaccard. SMC reports 99.75% similarity for two documents that share
-fewer than half their words — the agreement is almost entirely about words
-neither uses.
-
-</div>
-
+$J = \frac{20}{20 + 10 + 15} = \frac{20}{45} \approx 0.44$. Jaccard is honest: SMC's
+99.75% comes almost entirely from the 9,955 words **neither** document uses.
 
 </div>
 
@@ -306,6 +370,75 @@ the treatment of shared absences change the clustering before any algorithm
 runs.
 
 </div>
+
+
+--
+
+## The Churn Shop: Segmenting Customers
+
+| | age (years) | spend (€/year) |
+|---|---|---|
+| **A** | 25 | 1,000 |
+| **B** | 65 | 1,050 |
+| **C** | 26 | 1,400 |
+
+
+<div class="fragment">
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">Raw units</span>
+
+$d(A,B) \approx 64$, $d(A,C) \approx 400$: **A groups with B**, the
+65-year-old. Spend decides.
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Scaled: age ÷ 15, spend ÷ 1,000</span>
+
+$d(A,B) \approx 2.7$, $d(A,C) \approx 0.4$: **A groups with C**. Age
+counts.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-important">
+
+Same customers, opposite segments: the units were a choice.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Euclidean distances, recompute on the board: raw, d(A,B) = √(40² + 50²) ≈ 64 and
+d(A,C) = √(1² + 400²) ≈ 400. Scaled (divide age by 15 and spend by 1,000,
+roughly their standard deviations in a customer base): d(A,B) = √(2.67² +
+0.05²) ≈ 2.67 and d(A,C) = √(0.067² + 0.4²) ≈ 0.41.
+
+This is the scaling step from Lecture 07's preprocessing, now with a
+consequence. Neither answer is "correct": the scaled one says age and spend
+should count about equally, which is itself an assumption about what makes two
+customers similar.
 
 
 --
@@ -338,7 +471,7 @@ a criterion. Requires $k$.
 
 ### Density-based
 Clusters are **dense regions** separated by sparse ones. Finds arbitrary shapes
-and marks noise requires density parameters instead of $k$.
+and marks noise; requires density parameters instead of $k$.
 
 </div>
 
@@ -388,11 +521,11 @@ density. Each family's failure case is exactly its assumption being violated.
 
 **HAC**
 
-Start with every object as its own cluster: $\mathcal{C} = \lbrace \lbrace x_1 \rbrace, \ldots, \lbrace x_n \rbrace \rbrace$.
+Start with every object as its own cluster: $\mathcal{C} = \lbrace \lbrace x\_1 \rbrace, \ldots, \lbrace x\_n \rbrace \rbrace$.
 
 **while** $|\mathcal{C}| > 1$:
 &nbsp;&nbsp;find the closest pair
-$\lbrace C, C' \rbrace = \arg\min_{C_i \neq C_j} d_{\mathcal{C}}(C_i, C_j)$
+$\lbrace C, C' \rbrace = \arg\min\_{C\_i \neq C\_j} d\_{\mathcal{C}}(C\_i, C\_j)$
 &nbsp;&nbsp;replace them by their union $C \cup C'$
 
 </div>
@@ -419,7 +552,7 @@ survives despite its cost.
 
 ## The Linkage Criterion
 
-The object distance $d$ is given $d_{\mathcal{C}}$ — the distance between
+The object distance $d$ is given; $d\_{\mathcal{C}}$ — the distance between
 **clusters** — must still be defined, and it changes everything.
 
 
@@ -471,66 +604,28 @@ Compact, similarly-sized clusters; the common default.
 
 Notes:
 Same data, same distance, four different dendrograms. Have students predict
-which criterion produces long thin clusters before the chaining unit shows it.
+which criterion produces long thin clusters before the chaining slide shows it.
 
 --
 
 ## Mini-Exercise
 
-Four points on a line at positions 0, 1, 5, 6.
-
-1. Which pair merges first, and at what height?
-2. Under **single link**, what is the distance between clusters $\lbrace 0,1 \rbrace$ and $\lbrace 5,6 \rbrace$?
-3. Under **complete link**?
-
---
-
-## Mini-Exercise — Solution
+Four points on a line at 0, 1, 5, 6. The first merges give $\lbrace 0,1 \rbrace$
+and $\lbrace 5,6 \rbrace$ at height 1. At what height do these two clusters merge
+under **single link**, and under **complete link**?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Both $\lbrace 0,1 \rbrace$ and $\lbrace 5,6 \rbrace$ are at distance 1 —
-the first merge is a tie at height 1.
+Single link: $d(1,5) = 4$, the closest cross-pair. Complete link: $d(0,6) = 6$,
+the farthest. Same clusters, different heights: the linkage rescales the
+dendrogram and so moves where a cut lands.
 
 </div>
 
-
-<div class="card">
-
-**2.** Single link: $d(1,5) = 4$ — the closest cross-pair.
-
-</div>
-
-
-<div class="card">
-
-**3.** Complete link: $d(0,6) = 6$ — the farthest cross-pair.
-
-</div>
-
-
-</div>
-
-
-Same clusters, different heights: the linkage criterion rescales the dendrogram
-and therefore changes where a cut lands.
-
-</div>
-
-
-
-<div class="takeaway">
-
-HAC merges the closest pair repeatedly and returns a **dendrogram**, not a
-clustering. The **linkage criterion** is a second modelling decision, as
-consequential as the distance itself.
 
 </div>
 
@@ -540,8 +635,8 @@ consequential as the distance itself.
 ## Single Link's Characteristic Failure
 
 Single link merges on the **closest pair only**, so a thin bridge of points
-between two dense groups is enough to join them: each intermediate point is
-close to the next, and the chain propagates.
+between two dense groups joins them: each point is close to the next, and the
+chain propagates.
 
 
 <div class="grid-2">
@@ -550,8 +645,8 @@ close to the next, and the chain propagates.
 <div class="card good">
 
 ### The same property, useful
-Elongated and curved clusters are found correctly — single link follows the
-shape of the data rather than imposing a compact one.
+Elongated and curved clusters are found: single link follows the shape of the
+data instead of imposing a compact one.
 
 </div>
 
@@ -559,45 +654,35 @@ shape of the data rather than imposing a compact one.
 <div class="card bad">
 
 ### The same property, harmful
-A handful of noise points lying between two well-separated groups merges them.
-The result is one long cluster nobody wanted.
+A few noise points between two well-separated groups merge them into one long
+cluster nobody wanted.
 
 </div>
 
 
-
 </div>
+
 
 
 <div class="c-insight">
 
-This is one property seen from two sides, not a bug. Single link is a
-**transitive** notion of similarity: near-of-near counts as near.
-
-</div>
-
-
-
-<div class="takeaway">
-
-Chaining is what "closest pair" means when noise fills the gap. Choose single
-link when clusters may be elongated, and avoid it when the data is noisy.
+One property seen from two sides, not a bug: single link is **transitive** —
+near-of-near counts as near. This is the **chaining effect**.
 
 </div>
 
 
 Notes:
 Ask which real domains have genuinely chain-shaped clusters — road networks,
-river systems, gene sequences. In those cases chaining is the desired behaviour,
-which is the point.
+river systems, gene sequences. There chaining is the desired behaviour. Choose
+single link when clusters may be elongated; avoid it when the data is noisy.
 
 --
 
 ## Merges Are Irrevocable
 
-HAC is **greedy**: it takes the locally closest pair at every step and never
-reconsiders. Two objects placed in the same cluster early can never be
-separated later, however the data develops.
+HAC is **greedy**: it takes the locally closest pair and never reconsiders. Two
+objects merged early can never be separated later.
 
 
 <div class="grid-2">
@@ -606,8 +691,8 @@ separated later, however the data develops.
 <div class="card bad">
 
 ### The consequence
-The dendrogram's structure is **nested by construction** — but the nesting may
-not reflect the data. An early mistake is inherited by every later level.
+The dendrogram is **nested by construction**, whether or not the data is. An
+early mistake is inherited by every later level.
 
 </div>
 
@@ -615,40 +700,28 @@ not reflect the data. An early mistake is inherited by every later level.
 <div class="card">
 
 ### The comparison
-The same defect as ID3's greedy splitting, in the opposite direction: one grows
-a tree top-down, the other bottom-up, and neither backtracks.
+ID3's greedy splitting, in the opposite direction: one grows a tree top-down,
+the other bottom-up, and neither backtracks.
 
 </div>
 
 
-
 </div>
+
 
 
 <div class="c-note">
 
-With some linkage criteria (notably centroid linkage) the merge heights can even
-**decrease** — an *inversion* — producing a dendrogram that cannot be read as a
-hierarchy at all. Single, complete, average and Ward linkage are monotonic and
-avoid this.
-
-</div>
-
-
-
-<div class="takeaway">
-
-Hierarchical clustering imposes a hierarchy whether or not the data has one, and
-its greedy merges are **irrevocable**. Read a dendrogram as one possible
-history, not as the structure of the data.
+Centroid linkage can even produce **inversions** — a later merge at a *lower*
+height. Single, complete, average and Ward linkage are monotonic.
 
 </div>
 
 
 Notes:
 The parallel to ID3 is worth drawing explicitly — students have just met greedy
-non-backtracking search in the decision-tree lecture, and recognising the same
-trade in a different family is exactly the spiral the pedagogic concept wants.
+non-backtracking search in the decision-tree lecture. Read a dendrogram as one
+possible history of merges, not as the structure of the data.
 
 --
 
@@ -661,9 +734,8 @@ trade in a different family is exactly the spiral the pedagogic concept wants.
 <div class="card good">
 
 ### Strengths
-No $k$ required; run a **whole family** of clusterings in one dendrogram;
-works from a distance matrix alone, so any similarity measure will do —
-including on objects with no vector representation.
+No $k$ required; a **whole family** of clusterings in one dendrogram; runs on a
+distance matrix alone, so objects need no vector representation.
 
 </div>
 
@@ -671,21 +743,11 @@ including on objects with no vector representation.
 <div class="card bad">
 
 ### Weaknesses
-Cost: $O(n^2)$ memory for the distance matrix and $O(n^2 \log n)$ or worse in
-time, so it does not scale to large $n$. Greedy, irrevocable merges. And the
-result depends strongly on the linkage criterion.
+$O(n^2)$ memory for the distance matrix and $O(n^2 \log n)$ time or worse, so
+it does not scale. Greedy, irrevocable merges. Strong dependence on the linkage.
 
 </div>
 
-
-
-</div>
-
-
-<div class="c-important">
-
-Use HAC when $n$ is moderate, when you want to **inspect** the structure rather
-than commit to a $k$, or when your objects only admit a pairwise similarity.
 
 </div>
 
@@ -693,16 +755,20 @@ than commit to a $k$, or when your objects only admit a pairwise similarity.
 
 <div class="takeaway">
 
-Hierarchical clustering trades **scalability for insight**: it is expensive and
-greedy, but it hands you the whole hierarchy and asks nothing about $k$.
+HAC returns a **dendrogram**, not a clustering, and the **linkage** is a
+modelling decision as consequential as the distance. It trades **scalability for
+insight**: greedy and $O(n^2)$, but it shows the whole hierarchy without a $k$.
 
 </div>
 
 
 Notes:
-The "distance matrix alone" property is the underrated one: strings, graphs and
-sequences can be clustered this way without ever being embedded in a vector
-space — which partitional methods require.
+Use HAC when n is moderate, when you want to inspect the structure rather than
+commit to a k, or when the objects only admit pairwise dissimilarities. The
+"distance matrix alone" property is the underrated one: strings, graphs and
+sequences can be clustered without a vector embedding. k-means needs means, so
+it needs a vector space; k-medoids does not — it too works from a distance
+matrix, but it still asks for k.
 
 ---
 
@@ -723,7 +789,7 @@ object to the nearest one. The quality criterion is the total squared distance
 to the assigned exemplar:
 
 $$
-\mathrm{SSE} = \sum_{j=1}^{k} \sum_{\mathbf{x} \in C_j} d(\mathbf{x}, \boldsymbol{\mu}_j)^2
+\mathrm{SSE} = \sum\_{j=1}^{k} \sum\_{\mathbf{x} \in C\_j} d(\mathbf{x}, \boldsymbol{\mu}\_j)^2
 $$
 
 
@@ -776,8 +842,8 @@ colour — students track the boundary moving, which is the mechanism.
 <div class="card">
 
 ### Fast
-$O(n k p)$ per iteration, and few iterations in practice — it scales where HAC
-does not.
+$O(n k p)$ per iteration, and few iterations in practice — it never needs the
+full distance matrix.
 
 </div>
 
@@ -785,7 +851,8 @@ does not.
 <div class="card">
 
 ### Converges
-SSE decreases at every step and cannot increase, so the procedure terminates.
+SSE never increases, and there are finitely many assignments, so the procedure
+terminates.
 
 </div>
 
@@ -816,50 +883,30 @@ undefined.
 
 ## Mini-Exercise
 
-1. Why must k-means terminate?
-2. Why is the mean the right update for the SSE criterion?
-3. What would change if you used the **median** instead?
-
---
-
-## Mini-Exercise — Solution
+k-means moves each centroid to the **mean** of its objects. Why the mean — and
+what would change with the **median**?
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** Both steps can only decrease SSE, and there are finitely many
-assignments — so no assignment can repeat without the procedure having stopped.
+The mean is exactly the point minimising the **sum of squared** distances to a
+set, so the move step solves its half of the SSE objective optimally. The
+median minimises the sum of **absolute** distances: you would be optimising a
+different, more outlier-robust criterion (k-medians).
 
 </div>
 
 
-<div class="card">
+Notes:
+Solution on the same slide, click-gated. The median half is the conceptual
+payoff and connects to the mean/median robustness discussion from descriptive
+statistics — same trade, again. If someone asks why k-means must stop: neither
+step can increase SSE, and the assignment changes only when SSE strictly
+drops, so no assignment repeats among finitely many.
 
-**2.** The mean is exactly the point minimising the **sum of squared**
-distances to a set — the update solves its half of the objective optimally.
+--
 
-</div>
-
-
-<div class="card">
-
-**3.** The median minimises the sum of **absolute** distances, so you would be
-optimising a different, more outlier-robust criterion (k-medians).
-
-</div>
-
-
-</div>
-
-
-</div>
-
+## Takeaway
 
 
 <div class="takeaway">
@@ -870,10 +917,6 @@ why changing the criterion changes the update.
 
 </div>
 
-
-Notes:
-Part 3 is the conceptual payoff and connects to the mean/median robustness
-discussion from Lecture 02. Same trade, third appearance.
 
 --
 
@@ -946,7 +989,7 @@ Scale or transform features so the clusters *become* globular.
 <div class="card">
 
 ### Change the algorithm
-Density-based methods for arbitrary shapes k-medoids for outlier robustness.
+Density-based methods for arbitrary shapes; k-medoids for outlier robustness.
 
 </div>
 
@@ -1077,7 +1120,7 @@ cluster". Ask why k-means cannot do that.
 <div class="card good">
 
 ### Strengths
-Finds **arbitrarily shaped** clusters identifies noise explicitly $k$ is not
+Finds **arbitrarily shaped** clusters; identifies noise explicitly; $k$ is not
 required.
 
 </div>
@@ -1086,7 +1129,7 @@ required.
 <div class="card bad">
 
 ### Weaknesses
-Two parameters that interact and are hard to set and it struggles when clusters
+Two parameters that interact and are hard to set; it struggles when clusters
 have **very different densities**, since one $\varepsilon$ must serve all.
 
 </div>
@@ -1099,47 +1142,19 @@ have **very different densities**, since one $\varepsilon$ must serve all.
 
 ## Mini-Exercise
 
-You run DBSCAN and get one giant cluster plus a handful of noise points. Then
-you halve $\varepsilon$ and get 40 tiny clusters and mostly noise.
-
-1. What does the first result tell you?
-2. And the second?
-3. How would you choose $\varepsilon$ more systematically?
-
---
-
-## Mini-Exercise — Solution
+DBSCAN returns one giant cluster plus a few noise points. You halve
+$\varepsilon$ and get 40 tiny clusters and mostly noise. What went wrong in each
+run?
 
 
 <div class="fragment">
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** $\varepsilon$ is too large: every dense region is reachable from every
-other, so the whole dataset connects into one component.
-
-</div>
-
-
-<div class="card">
-
-**2.** Too small: almost no point reaches $\mathit{minPts}$ neighbours, so
-nearly everything is noise.
-
-</div>
-
-
-<div class="card">
-
-**3.** Plot the sorted distance to each point's $k$-th nearest neighbour and
-look for the **elbow** — the distance at which the curve rises sharply.
-
-</div>
-
+First run: $\varepsilon$ too large — every dense region reaches the next, so all
+connect into one. Second: too small — few points reach $\mathit{minPts}$
+neighbours, so nearly everything is noise. $\varepsilon$ sets the density scale.
 
 </div>
 
@@ -1158,8 +1173,9 @@ parameters and an assumption of uniform density.
 
 
 Notes:
-Part 3 previews the elbow heuristic that returns in the evaluation unit for
-choosing k. Same visual device, different quantity.
+If there is time: a systematic choice plots each point's sorted distance to its
+k-th nearest neighbour and takes the elbow, where the curve rises sharply. It
+previews the elbow heuristic that returns in the evaluation module for choosing k.
 
 ---
 
@@ -1255,7 +1271,7 @@ Given known classes, treat each **cluster** as a prediction of a **class**:
 <div class="card">
 
 ### Recall of class $i$ in cluster $j$
-$$\mathrm{rec}(i,j) = \frac{n_{ij}}{n_i}$$
+$$\mathrm{rec}(i,j) = \frac{n\_{ij}}{n\_i}$$
 the share of class $i$ that landed in cluster $j$
 
 </div>
@@ -1264,7 +1280,7 @@ the share of class $i$ that landed in cluster $j$
 <div class="card">
 
 ### Precision of class $i$ in cluster $j$
-$$\mathrm{prec}(i,j) = \frac{n_{ij}}{n_j}$$
+$$\mathrm{prec}(i,j) = \frac{n\_{ij}}{n\_j}$$
 the share of cluster $j$ that belongs to class $i$
 
 </div>
@@ -1274,10 +1290,10 @@ the share of cluster $j$ that belongs to class $i$
 
 
 $$
-F_1(i,j) = \frac{2 \cdot \mathrm{prec}(i,j) \cdot \mathrm{rec}(i,j)}{\mathrm{prec}(i,j) + \mathrm{rec}(i,j)}
+F\_1(i,j) = \frac{2 \cdot \mathrm{prec}(i,j) \cdot \mathrm{rec}(i,j)}{\mathrm{prec}(i,j) + \mathrm{rec}(i,j)}
 $$
 
-Each class is matched to the cluster maximising its $F_1$, and the overall score
+Each class is matched to the cluster maximising its $F\_1$, and the overall score
 averages these, weighted by class size.
 
 Notes:
@@ -1315,7 +1331,7 @@ clustering is arguably *right* but the score punishes it.
 <div class="card">
 
 ### Merging two classes
-One cluster containing both scores high recall, low precision. $F_1$ punishes
+One cluster containing both scores high recall, low precision. $F\_1$ punishes
 this too — as it should.
 
 </div>
@@ -1326,38 +1342,45 @@ this too — as it should.
 
 --
 
-## Mini-Exercise
+## Purity — The Simplest Matching
 
-100 objects in 2 true classes (50/50). A clustering produces three clusters:
-[50 of class A], [25 of class B], [25 of class B].
+Give every cluster the label of its **majority class** and count the hits:
 
-1. Compute precision and recall for class A, and for class B in its best cluster.
-2. Is this clustering "wrong"?
+$$
+\mathrm{purity} = \frac{1}{n} \sum\_{j} \max\_{i} n\_{ij}
+$$
+
+
+<div class="c-warning">
+
+Purity only looks at precision. Splitting every class into many small clusters
+never lowers it — with $k = n$ singletons, purity is 1. It needs the recall side,
+which $F\_1$ supplies.
+
+</div>
+
+
+Notes:
+Purity is the one number practitioners quote most often, so students should
+know its blind spot: it is the external analogue of SSE falling with k.
 
 --
 
-## Mini-Exercise — Solution
+## Mini-Exercise
+
+100 objects, classes A and B (50 each). The clustering returns three pure
+clusters: [50 A], [25 B], [25 B]. What is class B's $F\_1$ — and is the
+clustering wrong?
 
 
 <div class="fragment">
 
 
-<div class="grid-2">
+<div class="c-insight">
 
-
-<div class="card">
-
-**1.** Class A: precision 1.0, recall 1.0 → $F_1 = 1$.
-Class B, best cluster: precision 1.0, recall 0.5 → $F_1 \approx 0.67$.
-
-</div>
-
-
-<div class="card">
-
-**2.** Not necessarily. Every cluster is **pure** class B was merely split.
-If B genuinely has two sub-types, the clustering found real structure the label
-set does not record.
+Best cluster for B: precision 1, recall 0.5, so $F\_1 = \frac{2 \cdot 0.5}{1.5} \approx 0.67$
+(purity is still 1). Not necessarily wrong: B was split, and if B has two
+sub-types, the clustering found structure the labels do not record.
 
 </div>
 
@@ -1365,8 +1388,8 @@ set does not record.
 </div>
 
 
-</div>
 
+<div class="fragment">
 
 
 <div class="takeaway">
@@ -1378,10 +1401,13 @@ the structure in the data.
 </div>
 
 
+</div>
+
+
 Notes:
-Part 2 is the interpretive point (P2): external validation assumes the labels
-are the truth. When clustering is used for discovery, disagreeing with the
-labels may be the finding.
+The interpretive point (P2): external validation assumes the labels are the
+truth. When clustering is used for discovery, disagreeing with the labels may be
+the finding. For the weighted overall F1: A scores 1, B 0.67, so 0.83.
 
 --
 
@@ -1394,7 +1420,7 @@ labels may be the finding.
 <div class="card">
 
 ### Proximity matrix
-The actual pairwise distances (or similarities) between objects.
+The pairwise **similarities** between objects: high for close pairs.
 
 </div>
 
@@ -1412,8 +1438,17 @@ cluster, 0 otherwise.
 
 
 A good clustering makes the two agree: pairs in the same cluster should be
-close, pairs in different clusters far. Their **correlation** measures that
-agreement in one number.
+similar, pairs in different clusters not. Their **correlation** measures that
+agreement in one number, and good means **close to +1**.
+
+
+<div class="c-warning">
+
+With a **distance** matrix instead, the sign flips: good means strongly
+**negative** correlation (same cluster ↔ small distance).
+
+</div>
+
 
 Notes:
 The trick is worth naming: an arbitrary clustering is turned into a matrix so
@@ -1431,7 +1466,7 @@ graph comparison and in kernel methods.
 <div class="card good">
 
 ### High correlation
-The distance structure and the cluster structure agree — the partition follows
+The similarity structure and the cluster structure agree — the partition follows
 the geometry.
 
 </div>
@@ -1453,7 +1488,7 @@ structure is not evidence of real groups.
 <div class="c-tip">
 
 Visual variant: sort the proximity matrix by cluster and display it. Genuine
-clusters appear as dark blocks along the diagonal — and the absence of blocks
+clusters appear as high-similarity blocks along the diagonal — and the absence of blocks
 is as informative as their presence.
 
 </div>
@@ -1510,36 +1545,22 @@ $$
 s = \frac{b - a}{\max(a, b)} \in [-1, 1]
 $$
 
+| Value | Reading |
+|---|---|
+| $s \approx 1$ | well inside its cluster, far from the others |
+| $s \approx 0$ | on the boundary between two clusters |
+| $s < 0$ | closer to another cluster than to its own — probably misassigned |
 
-<div class="grid-3">
+Example: $a = 1$, $b = 4$ gives $s = 3/4 = 0.75$; swap them and $s = -0.75$.
 
+Notes:
+The per-object nature is what makes the silhouette useful in practice: it
+localises the problem to specific points and specific clusters, where SSE gives
+one global number that cannot be diagnosed.
 
-<div class="card">
+--
 
-### $s \approx 1$
-Well inside its cluster, far from the others.
-
-</div>
-
-
-<div class="card">
-
-### $s \approx 0$
-On the boundary between two clusters.
-
-</div>
-
-
-<div class="card bad">
-
-### $s < 0$
-Closer to another cluster than to its own — probably misassigned.
-
-</div>
-
-
-
-</div>
+## Reading the Silhouette
 
 
 <div class="c-tip">
@@ -1547,6 +1568,15 @@ Closer to another cluster than to its own — probably misassigned.
 Average the silhouette over all objects for one score — but **plot the
 distribution** too. A good average can hide a cluster whose members are all
 near zero.
+
+</div>
+
+
+
+<div class="c-note">
+
+Unlike SSE, the average silhouette does not simply improve with $k$: it peaks
+where clusters are both tight and well separated, so it can select $k$.
 
 </div>
 
@@ -1561,11 +1591,6 @@ informative than its mean.
 </div>
 
 
-Notes:
-The per-object nature is what makes the silhouette useful in practice: it
-localises the problem to specific points and specific clusters, where SSE gives
-one global number that cannot be diagnosed.
-
 --
 
 ## Worst Separation over Worst Cohesion
@@ -1574,7 +1599,7 @@ one global number that cannot be diagnosed.
 <div class="c-definition">
 
 $$
-D = \frac{\min_{i \neq j} \delta(C_i, C_j)}{\max_{k} \Delta(C_k)}
+D = \frac{\min\_{i \neq j} \delta(C\_i, C\_j)}{\max\_{k} \Delta(C\_k)}
 $$
 where $\delta$ is the distance between two clusters and $\Delta$ the diameter of
 a cluster. **Higher is better.**
@@ -1723,9 +1748,9 @@ Often decisive: how many segments can the business actually act on?
 
 <div class="takeaway">
 
-No internal criterion selects $k$ on its own, because they all improve with $k$.
-The elbow is a **heuristic reading** of a trade-off the silhouette and the gap
-statistic formalise it, and the domain frequently overrules both.
+**SSE alone cannot select $k$**: it always improves with $k$. The elbow is a
+**heuristic reading** of that trade-off; criteria with a genuine optimum over $k$
+(silhouette, Dunn, gap statistic) formalise it, and the domain often overrules them all.
 
 </div>
 
@@ -1897,10 +1922,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1911,17 +1942,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

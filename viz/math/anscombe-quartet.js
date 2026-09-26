@@ -21,9 +21,16 @@ export async function mount(el, { d3, steps }) {
   const ch = (H - 46) / 2
   const M = { top: 14, right: 16, bottom: 30, left: 38 }
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+  // one extra row below the grid for the shared statistics (last step)
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H + 28}`).attr('role', 'img')
   const caption = svg.append('text').attr('x', W / 2).attr('y', H - 8)
     .attr('text-anchor', 'middle').attr('font-size', 19).attr('fill', NAVY)
+  // values computed from DATA (sample variance, n − 1); identical to the
+  // precision shown for all four sets
+  const stats = svg.append('text').attr('x', W / 2).attr('y', H + 20)
+    .attr('text-anchor', 'middle').attr('font-size', 16).attr('fill', TEAL)
+    .text('all four:  x̄ = 9,  s²ₓ = 11,  ȳ = 7.50,  s²ᵧ ≈ 4.12,  r ≈ 0.82,  ŷ = 3.00 + 0.500·x')
+    .attr('opacity', 0)
 
   const panels = DATA.map((d, i) => {
     const gx = (i % 2) * cw
@@ -32,11 +39,12 @@ export async function mount(el, { d3, steps }) {
     const x = d3.scaleLinear([2, 20], [M.left, cw - M.right])
     const y = d3.scaleLinear([2, 14], [ch - M.bottom, M.top])
     g.append('g').attr('transform', `translate(0,${ch - M.bottom})`)
-      .call(d3.axisBottom(x).ticks(4)).attr('color', '#9aa5b1')
+      .call(d3.axisBottom(x).ticks(4)).attr('color', '#9aa5b1').attr('font-size', 12)
     g.append('g').attr('transform', `translate(${M.left},0)`)
-      .call(d3.axisLeft(y).ticks(4)).attr('color', '#9aa5b1')
-    g.append('text').attr('x', cw - M.right).attr('y', M.top + 12)
-      .attr('text-anchor', 'end').attr('fill', NAVY).attr('font-size', 16)
+      .call(d3.axisLeft(y).ticks(4)).attr('color', '#9aa5b1').attr('font-size', 12)
+    // top-left: the regression line ends in the top-right corner
+    g.append('text').attr('x', M.left + 10).attr('y', M.top + 12)
+      .attr('text-anchor', 'start').attr('fill', NAVY).attr('font-size', 16)
       .attr('font-weight', 'bold').text(d.name)
     // shared least-squares line y = 3 + 0.5x
     const line = g.append('line')
@@ -54,6 +62,7 @@ export async function mount(el, { d3, steps }) {
       p.dots.transition().duration(250).attr('opacity', step > i ? 0.85 : 0)
       p.line.transition().duration(250).attr('opacity', step >= 5 ? 1 : 0)
     })
+    stats.transition().duration(250).attr('opacity', step >= 5 ? 1 : 0)
     caption.text(
       step >= 5 ? 'Same mean, same variance, same correlation, same regression line — different data'
       : step >= 4 ? 'Four datasets. Now compare their summary statistics…'

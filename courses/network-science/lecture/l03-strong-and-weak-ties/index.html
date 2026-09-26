@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 # Network Science
 ## Lecture 03: Strong and Weak Ties
@@ -335,7 +335,7 @@ Graph theory's default edge is binary: either present or absent. We now extend i
 <div class="c-definition">
 
 **Edge labeling.** A graph $G = (V, E)$ together with a function
-$$\ell : E \to \{\mathrm{Strong}, \mathrm{Weak}\}$$
+$$\ell : E \to \\{\mathrm{Strong}, \mathrm{Weak}\\}$$
 assigning a *type* to every edge. We write $S(v)$ for the set of strong neighbors of $v$ under $\ell$.
 
 </div>
@@ -353,7 +353,7 @@ This is the crucial definitional step. Instead of saying "some ties are stronger
 
 <div class="c-definition">
 
-**Strong Triadic Closure (STC).** A labeling $\ell$ of $G$ satisfies STC if, for every node $v$ and every pair $u_1, u_2 \in S(v)$ of strong neighbors of $v$, the edge $(u_1, u_2)$ exists in $E$ — *with any label* (Strong or Weak). STC constrains which pairs must be **connected**, not how the closing edge is labeled.
+**Strong Triadic Closure (STC).** A labeling $\ell$ of $G$ satisfies STC if, for every node $v$ and every pair $u\_1, u\_2 \in S(v)$ of strong neighbors of $v$, the edge $(u\_1, u\_2)$ exists in $E$ — *with any label* (Strong or Weak). STC constrains which pairs must be **connected**, not how the closing edge is labeled.
 
 </div>
 
@@ -397,7 +397,7 @@ In real data we observe the graph $G$ but not the labeling $\ell$. Given $G$, we
 
 <div class="c-definition">
 
-**MaxSTC.** Given $G = (V, E)$, find a labeling $\ell$ satisfying STC that maximizes $|\{e \in E : \ell(e) = \mathrm{Strong}\}|$.
+**MaxSTC.** Given $G = (V, E)$, find a labeling $\ell$ satisfying STC that maximizes $|\\{e \in E : \ell(e) = \mathrm{Strong}\\}|$.
 
 </div>
 
@@ -543,16 +543,16 @@ Now the clustering coefficient finally has a reason to exist. It is not an arbit
 
 <div class="c-definition small">
 
-**Local clustering coefficient.** For a node $i$ with degree $k_i$:
+**Local clustering coefficient.** For a node $i$ with degree $k\_i$:
 
 $$
-C_i = \frac{\text{edges among } i\text{'s neighbors}}{\binom{k_i}{2}}
+C\_i = \frac{\text{edges among } i\text{'s neighbors}}{\binom{k\_i}{2}}
 $$
 
-$C_i \in [0, 1]$.
+$C\_i \in [0, 1]$.
 
-- $C_i = 1$: all possible neighbor-neighbor ties exist
-- $C_i = 0$: no neighbor-neighbor ties exist
+- $C\_i = 1$: all possible neighbor-neighbor ties exist
+- $C\_i = 0$: no neighbor-neighbor ties exist
 
 </div>
 
@@ -560,7 +560,7 @@ $C_i \in [0, 1]$.
 
 <div class="c-info small">
 
-**Heuristic link to STC.** If $v$ has many strong ties, those endpoints must be mutually connected. A high $C_v$ therefore signals a neighborhood that *could* be labeled mostly strong.
+**Heuristic link to STC.** If $v$ has many strong ties, those endpoints must be mutually connected. A high $C\_v$ therefore signals a neighborhood that *could* be labeled mostly strong.
 
 </div>
 
@@ -665,9 +665,9 @@ Clustering coefficient and neighborhood overlap exist because MaxSTC is intracta
 
 Node $B$ has 4 neighbors: $A, C, D, E$. Among $B$'s neighbors, exactly 2 edges exist (green): $(A,C)$ and $(C,D)$.
 
-1. Compute $C_B$.
+1. Compute $C\_B$.
 2. Under STC, what is the maximum number of strong ties $B$ can have?
-3. What does $C_B$ tell you about $B$'s structural role that STC alone does not?
+3. What does $C\_B$ tell you about $B$'s structural role that STC alone does not?
 
 </div>
 
@@ -690,18 +690,18 @@ Node $B$ has 4 neighbors: $A, C, D, E$. Among $B$'s neighbors, exactly 2 edges e
 
 ### Quick Check — Solution
 
-**1.** $\binom{4}{2} = 6$ possible edges, $2$ actual $\Rightarrow C_B = 1/3$.
+**1.** $\binom{4}{2} = 6$ possible edges, $2$ actual $\Rightarrow C\_B = 1/3$.
 
 **2.** Maximum strong ties from $B$ is **2**. The only pairs of $B$'s neighbors connected by an edge are $(A, C)$ and $(C, D)$; a third strong tie would force a currently missing edge (e.g. $A$–$D$), violating STC.
 
-**3.** The clustering coefficient is a *continuous* structural measurement — $C_B = 1/3$ tells us $B$ sits in a moderately sparse neighborhood, suggesting a potential brokerage position between the sub-clusters $\{A, C\}$ and $\{D\}$. STC by itself gives only a hard upper bound on the number of strong ties but no information about the *shape* of the neighborhood. The heuristic sacrifices exactness for expressive power.
+**3.** The clustering coefficient is a *continuous* structural measurement — $C\_B = 1/3$ tells us $B$ sits in a moderately sparse neighborhood, suggesting a potential brokerage position between the sub-clusters $\\{A, C\\}$ and $\\{D\\}$. STC by itself gives only a hard upper bound on the number of strong ties but no information about the *shape* of the neighborhood. The heuristic sacrifices exactness for expressive power.
 
 
 </div>
 
 
 Notes:
-(1) $C_B = 2/6 = 1/3$. (2) For a pair of $B$'s neighbors to both receive strong labels from $B$, they must be connected. The pairs $(A,C)$ and $(C,D)$ are connected. So $B$ can make strong ties to $\{A, C\}$ or to $\{C, D\}$ — three strong ties would require all pairs among the selected triple to exist, which they don't. Max strong ties from $B$ = 2. (3) The clustering coefficient gives a continuous ranking — $B$ sits in a moderately sparse neighborhood — while STC only tells us a hard upper bound on the number of strong ties. The heuristic gives more nuance at the cost of exactness.
+(1) $C\_B = 2/6 = 1/3$. (2) For a pair of $B$'s neighbors to both receive strong labels from $B$, they must be connected. The pairs $(A,C)$ and $(C,D)$ are connected. So $B$ can make strong ties to $\\{A, C\\}$ or to $\\{C, D\\}$ — three strong ties would require all pairs among the selected triple to exist, which they don't. Max strong ties from $B$ = 2. (3) The clustering coefficient gives a continuous ranking — $B$ sits in a moderately sparse neighborhood — while STC only tells us a hard upper bound on the number of strong ties. The heuristic gives more nuance at the cost of exactness.
 
 ---
 
@@ -891,7 +891,7 @@ $A$–$C$ and $B$–$D$ are labeled **Strong**. The edge $A$–$B$ is the only l
 
 ### Quick Check — Solution
 
-**1.** Yes. $N(A)=\{B,C\}$ and $N(B)=\{A,D\}$, so $A$ and $B$ have no common neighbor.
+**1.** Yes. $N(A)=\\{B,C\\}$ and $N(B)=\\{A,D\\}$, so $A$ and $B$ have no common neighbor.
 
 **2.** No. If $A$–$B$ were Strong, then STC at $A$ would require $B$–$C$, and STC at $B$ would require $A$–$D$. Both are missing. Therefore, any STC-satisfying labeling that keeps $A$–$C$ and $B$–$D$ strong must label the local bridge $A$–$B$ as **Weak**.
 
@@ -1015,7 +1015,7 @@ The operationalization matters. Call duration is not tie strength in the sociolo
 
 <div class="c-info">
 
-$\langle O\rangle$ is the **average neighborhood overlap** of edges in a tie-strength bin. $P_{\mathrm{cum}}(w)$ is the **cumulative tie-strength percentile**: values near 0 are the weakest call-duration ties, values near 1 are the strongest.
+$\langle O\rangle$ is the **average neighborhood overlap** of edges in a tie-strength bin. $P\_{\mathrm{cum}}(w)$ is the **cumulative tie-strength percentile**: values near 0 are the weakest call-duration ties, values near 1 are the strongest.
 
 </div>
 
@@ -1069,7 +1069,7 @@ This plot is the empirical heart of the lecture. The fact that the relationship 
 
 <div class="c-info small">
 
-**Axis notation:** $f$ is the fraction of removed edges. $R_{\mathrm{GC}}$ is the fraction of all nodes still in the giant connected component. $\sum_s s^2 n_s / N$ summarizes fragmentation outside the giant component: $n_s$ is the number of components of size $s$, and peaks mark the point where the network breaks apart.
+**Axis notation:** $f$ is the fraction of removed edges. $R\_{\mathrm{GC}}$ is the fraction of all nodes still in the giant connected component. $\sum\_s s^2 n\_s / N$ summarizes fragmentation outside the giant component: $n\_s$ is the number of components of size $s$, and peaks mark the point where the network breaks apart.
 
 </div>
 
@@ -1110,7 +1110,7 @@ This plot is the empirical heart of the lecture. The fact that the relationship 
 Notes:
 This is the knockout test. If weak ties were sociologically marginal *and* structurally redundant, removing them would have little effect. The opposite happens. The weak ties are the connective tissue — exactly the role the theorem assigns them. Together with the overlap plot, this gives two independent empirical confirmations of the theoretical prediction: one correlational (overlap vs. strength), one causal-by-removal (structural impact of deleting weak ties).
 
-The lower panels use $\sum_s s^2 n_s / N$ as a fragmentation signal, where $n_s$ is the number of connected components of size $s$ outside the giant component and $N$ is the total number of nodes. Intuitively, this is the expected finite-component size reached by following a random node, up to the exact convention used for excluding the giant component. The $s^2$ appears because components are weighted by both how many such components exist and how many nodes they contain: a component of size $s$ contributes $s$ possible starting nodes, and each such start lands in a component of size $s$, giving $s \cdot s = s^2$. This makes a few large fragments count much more than many isolated singletons. The value is nonnegative; with this normalization it can be larger than 1 and, in the extreme case where all nodes outside the giant component form one large finite component, it is on the order of $N$. In practice we read it comparatively: it peaks near the percolation point, when the giant component has just broken and large finite fragments appear.
+The lower panels use $\sum\_s s^2 n\_s / N$ as a fragmentation signal, where $n\_s$ is the number of connected components of size $s$ outside the giant component and $N$ is the total number of nodes. Intuitively, this is the expected finite-component size reached by following a random node, up to the exact convention used for excluding the giant component. The $s^2$ appears because components are weighted by both how many such components exist and how many nodes they contain: a component of size $s$ contributes $s$ possible starting nodes, and each such start lands in a component of size $s$, giving $s \cdot s = s^2$. This makes a few large fragments count much more than many isolated singletons. The value is nonnegative; with this normalization it can be larger than 1 and, in the extreme case where all nodes outside the giant component form one large finite component, it is on the order of $N$. In practice we read it comparatively: it peaks near the percolation point, when the giant component has just broken and large finite fragments appear.
 
 --
 

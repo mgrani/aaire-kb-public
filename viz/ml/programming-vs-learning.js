@@ -11,7 +11,7 @@ const VIOLET = '#7c3aed'
 const INK = '#3a3a3a'
 const RULE = '#c9d3de'
 
-const W = 900, H = 430
+const W = 1010, H = 345
 const BW = 168, BH = 46
 
 const ROWS = {
@@ -27,11 +27,16 @@ const ROWS = {
   },
 }
 
+// unique marker ids per instance: url(#id) resolves to the first match in the
+// document, which may sit on a hidden slide
+let instances = 0
+
 export async function mount(el, { d3, steps, isPrint }) {
+  const uid = `pvl${++instances}`
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
   const defs = svg.append('defs')
   for (const [id, c] of [['p-navy', NAVY], ['p-teal', TEAL], ['p-violet', VIOLET]]) {
-    defs.append('marker').attr('id', id).attr('viewBox', '0 0 10 10').attr('refX', 9).attr('refY', 5)
+    defs.append('marker').attr('id', `${id}-${uid}`).attr('viewBox', '0 0 10 10').attr('refX', 9).attr('refY', 5)
       .attr('markerWidth', 7).attr('markerHeight', 7).attr('orient', 'auto-start-reverse')
       .append('path').attr('d', 'M0,0 L10,5 L0,10 z').attr('fill', c)
   }
@@ -53,7 +58,7 @@ export async function mount(el, { d3, steps, isPrint }) {
       if (i < row.boxes.length - 1) {
         g.append('path').attr('d', `M${x + BW + 3},${row.y + BH / 2} L${x + BW + 28},${row.y + BH / 2}`)
           .attr('stroke', row.colour).attr('stroke-width', 2.2)
-          .attr('marker-end', `url(#${key === 'prog' ? 'p-navy' : 'p-teal'})`)
+          .attr('marker-end', `url(#${key === 'prog' ? 'p-navy' : 'p-teal'}-${uid})`)
       }
     })
     g.append('text').attr('x', 26).attr('y', row.y + BH + 24).attr('font-size', 14)
@@ -63,7 +68,9 @@ export async function mount(el, { d3, steps, isPrint }) {
 
   // both pipelines feed the same destination
   const goal = svg.append('g')
-  const gx = 26 + 4 * (BW + 34) - 10
+  // right of the last box, with room for the connector curves; W is sized so
+  // the goal box ends inside the viewBox
+  const gx = 26 + 3 * (BW + 34) + BW + 44
   goal.append('rect').attr('x', gx).attr('y', 158).attr('width', 150).attr('height', 78).attr('rx', 5)
     .attr('fill', '#f5f3ff').attr('stroke', VIOLET).attr('stroke-width', 2.4)
   goal.append('text').attr('x', gx + 75).attr('y', 188).attr('text-anchor', 'middle')
@@ -77,7 +84,7 @@ export async function mount(el, { d3, steps, isPrint }) {
     goal.append('path')
       .attr('d', `M${sx + 3},${row.y + BH / 2} C${sx + 40},${row.y + BH / 2} ${gx - 40},197 ${gx - 3},197`)
       .attr('fill', 'none').attr('stroke', VIOLET).attr('stroke-width', 2)
-      .attr('stroke-dasharray', '5 4').attr('marker-end', 'url(#p-violet)')
+      .attr('stroke-dasharray', '5 4').attr('marker-end', `url(#p-violet-${uid})`)
   }
 
   const caption = svg.append('text').attr('x', W / 2).attr('y', 30).attr('text-anchor', 'middle')

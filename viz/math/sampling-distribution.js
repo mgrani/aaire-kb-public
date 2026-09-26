@@ -52,9 +52,11 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const [LO, HI] = [0.5, 6.5]
 
   // Panel bands, all sharing the horizontal scale.
-  const POP = { top: 44, h: 88 } // the population
-  const SAMPLE = { top: 146, h: 34 } // the n values just drawn
-  const DIST = { top: 224, h: 148 } // the distribution of the mean
+  // Gaps sized for the labels between bands: μ above the population (clear of
+  // the title), x̄ above the sample strip (clear of the population bars).
+  const POP = { top: 50, h: 84 } // the population
+  const SAMPLE = { top: 160, h: 34 } // the n values just drawn
+  const DIST = { top: 222, h: 150 } // the distribution of the mean
 
   const x = d3.scaleLinear().domain([LO, HI]).range([M.left, W - M.right])
 
@@ -68,7 +70,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const title = svg
     .append('text')
     .attr('x', W / 2)
-    .attr('y', 24)
+    .attr('y', 22)
     .attr('text-anchor', 'middle')
     .attr('font-size', 20)
     .attr('fill', NAVY)
@@ -175,8 +177,11 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       .attr('width', W - M.right - M.left).attr('height', SAMPLE.h)
       .attr('fill', PALE).attr('stroke', RULE)
 
-    // Values are integers, so identical draws are stacked rather than hidden.
+    // Values are integers, so identical draws are stacked rather than hidden;
+    // the pitch tightens for large n so a stack stays inside the strip.
     const seen = new Map()
+    const tallest = Math.max(...VALUES.map((v) => lastSample.filter((d) => d === v).length))
+    const pitch = Math.min(8, (SAMPLE.h - 12) / Math.max(1, tallest - 1))
     gSample
       .selectAll('circle')
       .data(lastSample)
@@ -185,9 +190,9 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       .attr('cy', (v) => {
         const k = seen.get(v) ?? 0
         seen.set(v, k + 1)
-        return SAMPLE.top + SAMPLE.h - 8 - k * 8
+        return SAMPLE.top + SAMPLE.h - 8 - k * pitch
       })
-      .attr('r', 4.5)
+      .attr('r', Math.min(4.5, Math.max(2, pitch * 0.6 + 1)))
       .attr('fill', TEAL)
 
     const m = means.at(-1)
@@ -270,7 +275,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     sampleLabel.text(step >= 3 ? 'last sample' : 'one sample')
     renderSample(step >= 1)
     renderDist(step >= 2, step >= 4)
-    gAxis.call(d3.axisBottom(x).tickValues(VALUES).tickFormat(d3.format('d')))
+    gAxis.call(d3.axisBottom(x).tickValues(VALUES).tickFormat(d3.format('d'))).attr('font-size', 13)
 
     const se = pop.sd / Math.sqrt(cfg.n)
     title.text(

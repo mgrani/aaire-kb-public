@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -14,6 +14,94 @@ Notes:
 Converted from LNKB-tex part-en-ds-chpM1-graphical-models.tex. Prerequisite:
 Lecture 02 (probability theory) — in particular conditional independence, the
 chain rule and marginalisation, all of which this lecture uses continuously.
+
+--
+
+## Where We Left Off
+
+Lecture 02 gave us conditioning and Bayes for a handful of events. Real
+questions involve dozens of variables at once — and the assumption that makes
+them affordable says *which variables do not depend on each other*.
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Lecture 02
+Bayes for two events
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Today
+one joint distribution over many variables
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card insight">
+
+### The assumption
+a graph: every missing edge an independence claim
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Lecture 01's churn puzzle — does the app keep customers, or do loyal customers
+install the app? — is a question about arrows. Module 3 draws both answers.
+
+</div>
+
+
+Notes:
+Module 1 (flu, 22.5%) is the second pass through Bayes. Keep it short and use
+it to show that the evidence term P(D) enters — the quantity a network later
+computes for us. The churn graph slide closes Module 3.
+
+--
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 03: Bayes for a decision, the exploding joint, graphs as independence assumptions, belief and Markov networks, and the cost of inference](/courses/data-science/figures/l03-argument-map.svg)
+
+</div>
+
+
+Notes:
+The flu example shows Bayes serving a decision. The joint then explodes: 30
+binary variables already need about 10⁹ numbers. The graph is the way out:
+background knowledge, drawn as missing edges, removes parameters. Belief
+networks make it concrete; d-separation reads independence off the picture;
+Markov networks drop the direction. The last row is the catch: writing the
+joint down is not the same as being able to query it. Point at the strip: the
+assumption this lecture adds is the graph itself.
 
 ---
 
@@ -42,7 +130,7 @@ normalisation.
 Notes:
 Deliberate second pass over Bayes (P4/P5 decision rule: this is consolidation,
 so math first). The new element is the reading of H and D as hypothesis and
-data, which is the form used by every learning algorithm later in the course.
+data, which is the form in which learning algorithms use Bayes.
 
 --
 
@@ -169,8 +257,8 @@ A symptom is informative to the degree that it is **rare in general** but
 Notes:
 Two reasons, both structural. This is the criterion that reappears as feature
 informativeness in classification: a feature that fires for everything carries
-no information. Connect it explicitly — it makes information gain feel
-inevitable later.
+no information. Connect it explicitly — it is the idea behind information-based
+feature scores such as information gain.
 
 --
 
@@ -200,7 +288,7 @@ view, not just the one the study reports.
 
 ## The Problem: Joint Distributions Explode
 
-Consider a joint distribution $p(x_1, \ldots, x_n)$ over $n$ **binary** random
+Consider a joint distribution $p(x\_1, \ldots, x\_n)$ over $n$ **binary** random
 variables. How many configurations are there?
 
 
@@ -234,7 +322,7 @@ For large $n$, writing down all values is impossible.
 <div class="card">
 
 ### Inference
-A single marginal $p(x_1)$ requires summing over $2^{n-1}$ states.
+A single marginal $p(x\_1)$ requires summing over $2^{n-1}$ states.
 
 </div>
 
@@ -292,7 +380,7 @@ its underlying structure.
 
 ### Modelling
 Describe the variables of a domain and their interactions — how
-$p(x_1, \ldots, x_n)$ **factorises**.
+$p(x\_1, \ldots, x\_n)$ **factorises**.
 
 </div>
 
@@ -306,7 +394,7 @@ $p(x_1, \ldots, x_n)$ **factorises**.
 <div class="card">
 
 ### Inference
-Answer queries such as $p(x_1 \mid x_2 = a, \ldots)$ efficiently over that
+Answer queries such as $p(x\_1 \mid x\_2 = a, \ldots)$ efficiently over that
 factorisation.
 
 </div>
@@ -318,7 +406,7 @@ factorisation.
 </div>
 
 
-Usually one class of model is used for modelling and another for inference the
+Usually one class of model is used for modelling and another for inference; the
 latter is often compiled from the former.
 
 Notes:
@@ -556,7 +644,7 @@ callout matters as much as the first — the factors are locally interpretable.
 | $p(T=1 \mid R=0, S=1)$ | 0.9 | 0.1 |
 | $p(T=1 \mid R=0, S=0)$ | 0.0 | 1.0 |
 
-Missing edges in the graph are exactly the assumptions above the tables supply
+Missing edges in the graph are exactly the assumptions above; the tables supply
 the numbers.
 
 Notes:
@@ -584,24 +672,27 @@ students already know.
 ## Explaining Away
 
 $$
-p(S=1 \mid T=1) = \frac{\sum_{J,R} p(T{=}1 \mid R,S{=}1) p(J \mid R) p(R) p(S{=}1)}
-{\sum_{J,R,S} p(T{=}1 \mid R,S) p(J \mid R) p(R) p(S)}
+p(S=1 \mid T=1, J=1) = \frac{\sum\_{R} p(T{=}1 \mid R,S{=}1) p(J{=}1 \mid R) p(R) p(S{=}1)}
+{\sum\_{R,S} p(T{=}1 \mid R,S) p(J{=}1 \mid R) p(R) p(S)} = \frac{0.0344}{0.2144} \approx 0.16
 $$
 
 
 <div class="c-insight">
 
 Two independent causes ($R$ and $S$) become **dependent once their common
-effect is observed**. Learning that rain occurred lowers the probability of the
-sprinkler, even though rain and sprinkler are unconditionally independent.
+effect is observed**. Evidence for rain — Jack's wet grass — lowers the
+probability of the sprinkler from 0.34 to 0.16, even though rain and sprinkler
+are unconditionally independent.
 
 </div>
 
 
 Notes:
-This is the conditional-independence unit returning with a vengeance:
+The formula is the second click of the viz, written out: the numerator keeps
+S = 1 (0.02 with rain, 0.0144 without), the denominator adds S = 0 (0.18 with
+rain, 0 without). This is the conditional-independence unit returning with a vengeance:
 conditioning on a common effect *creates* dependence — the opposite of the
-common-cause case seen earlier. Name it "explaining away" it is the single
+common-cause case seen earlier. Name it "explaining away"; it is the single
 most useful piece of vocabulary in this module.
 
 --
@@ -640,10 +731,10 @@ nothing less.
 random variables, in which the joint distribution factorises as
 
 $$
-p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p\big(x_i \mid \mathrm{pa}(x_i)\big)
+p(x\_1, \ldots, x\_n) = \prod\_{i=1}^{n} p\big(x\_i \mid \mathrm{pa}(x\_i)\big)
 $$
 
-where $\mathrm{pa}(x_i)$ are the parents of $x_i$ in the graph.
+where $\mathrm{pa}(x\_i)$ are the parents of $x\_i$ in the graph.
 
 </div>
 
@@ -651,10 +742,23 @@ where $\mathrm{pa}(x_i)$ are the parents of $x_i$ in the graph.
 Each node carries one conditional probability table given its parents. The
 wet-grass model was exactly this.
 
+
+<div class="c-important">
+
+**What the graph claims:** each variable is independent of its non-descendants
+given its parents. A *missing* arrow is an independence claim; an arrow only
+permits a dependence.
+
+</div>
+
+
 Notes:
 Math first (P5) — the students have already built one of these by hand, so the
 general form should read as a summary rather than a novelty. Stress "acyclic":
-cycles would make the factorisation ill-defined.
+cycles would make the factorisation ill-defined. The box is the local Markov
+property: it is what the factorisation means, read off the picture. In wet grass,
+Jack's lawn has only rain as a parent, so once rain is known the sprinkler tells
+us nothing more about it.
 
 --
 
@@ -684,9 +788,7 @@ Choose variables, edges and tables that encode the domain.
 <div class="card">
 
 ### Inference
-Compute posteriors given evidence.
-
-Exact **and** approximate inference are **NP-hard** in general.
+Compute posteriors given evidence — at a cost set by the graph's shape.
 
 </div>
 
@@ -712,8 +814,9 @@ Estimate the tables — and possibly the structure — from data.
 
 
 Notes:
-The NP-hardness is worth dwelling on: tractability depends on the *shape* of
-the network, not on its size alone. Trees are easy, dense graphs are not.
+Say only that tractability depends on the *shape* of the network, not on its
+size alone: trees are easy, dense graphs are not. How hard inference is in
+general comes with inference itself.
 
 --
 
@@ -766,12 +869,12 @@ an expert can estimate 4 numbers reliably and 64 numbers not at all.
 
 <div class="column">
 
-When many causes $x_1, \ldots, x_k$ can each independently trigger an effect
+When many causes $x\_1, \ldots, x\_k$ can each independently trigger an effect
 $y$, a **noisy OR** models the effect as "each cause fires with its own
 probability, and the effect occurs if any of them fires":
 
 $$
-p(y = 0 \mid x_1, \ldots, x_k) = \prod_{i : x_i = 1} (1 - \lambda_i)
+p(y = 0 \mid x\_1, \ldots, x\_k) = \prod\_{i : x\_i = 1} (1 - \lambda\_i)
 $$
 
 $k$ parameters instead of $2^k$.
@@ -817,7 +920,7 @@ model choice stays a modelling decision.
 ### Uncertain (soft) evidence
 The state of $x$ is itself uncertain, expressed as a distribution
 $\tilde{x}$. Infer by summing over the states:
-$$p(y \mid \tilde{x}) = \sum_x p(y \mid x) p(x \mid \tilde{x})$$
+$$p(y \mid \tilde{x}) = \sum\_x p(y \mid x) p(x \mid \tilde{x})$$
 
 *We look at the grass without touching it: $p(T{=}1 \mid \tilde{T}) = 0.8$.*
 
@@ -833,8 +936,9 @@ $$p(y \mid \tilde{x}) = \sum_x p(y \mid x) p(x \mid \tilde{x})$$
 <div class="card">
 
 ### Unreliable evidence
-The evidence is not trusted and is **replaced** by our own estimate:
-$$p(y \mid x) \rightarrow p(h \mid x)$$
+The report is kept, but its table is **replaced** by our own judgement of how
+reliable it is:
+$$p(x \mid \mathrm{pa}(x)) \rightarrow \tilde{p}(x \mid \mathrm{pa}(x))$$
 
 *Jack says his grass is wet, but Jack is in a bad mood and did not check.*
 
@@ -851,8 +955,8 @@ Both are drawn with a **dashed** edge.
 
 Notes:
 The distinction is subtle and worth a moment: uncertain evidence keeps the
-observation and softens it unreliable evidence discards it and substitutes a
-judgement. Students who conflate them will model rumours as noise.
+observation and softens it; unreliable evidence keeps the report but replaces
+the model of how the report arises with a judgement. Students who conflate them will model rumours as noise.
 
 --
 
@@ -945,80 +1049,32 @@ creates it. The wet-grass example is exactly a collider at T.
 
 ## Mini-Exercise
 
-For each pair, decide whether observing the middle variable makes the outer two
-*more* or *less* related:
+Rain and the sprinkler are independent: rain → wet grass ← sprinkler. Your
+grass is **wet**, and you learn that it **rained**.
 
-1. rain → wet grass → slippery pavement, observing wet grass
-2. temperature → ice-cream sales, temperature → drownings, observing temperature
-3. rain → wet grass ← sprinkler, observing wet grass
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+Does that change how likely it is that the sprinkler was on?
+
+</div>
+
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-**1. Chain**
-
-Independent given wet grass — the pavement only cares that the ground is wet.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**2. Fork**
-
-Independent given temperature — the classic spurious correlation dissolves.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-**3. Collider**
-
-*Dependent* given wet grass — learning it rained lowers belief in the sprinkler.
-
-</div>
-
-
-</div>
-
-
-</div>
-
+**Yes — it drops.** Rain already explains the wet grass. Observing the common
+effect made two independent causes dependent: *explaining away*, the collider
+case. On a chain or a fork, observing the middle does the opposite.
 
 </div>
 
 
 Notes:
-Solution fragmented per the animation policy. Case 3 is the one that surprises;
-if the group is quick, ask what happens when you condition on a *descendant* of
-the collider (the same dependence appears — which is why d-separation mentions
-descendants).
+Two minutes, one question, and the one case that surprises. If the group is
+quick, ask what happens when you condition on a *descendant* of the collider —
+say, a wet doormat instead of the grass. The same dependence appears, which is
+why d-separation mentions descendants.
 
 --
 
@@ -1033,7 +1089,7 @@ A path between $X$ and $Y$ is **blocked** by a set $Z$ if it contains either
 - a collider whose middle node — and all of its descendants — are **not in** $Z$.
 
 If every path from $X$ to $Y$ is blocked by $Z$, then $X$ and $Y$ are
-**d-separated** given $Z$, and $X \indep Y \mid Z$.
+**d-separated** given $Z$, and ${X \indep Y \mid Z}$.
 
 </div>
 
@@ -1068,6 +1124,72 @@ d-separation is that rule applied to every path.
 </div>
 
 
+--
+
+## The Churn Shop, Drawn
+
+App users churn less (Lecture 02: the gap is real). Two graphs explain it:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+<span class="eyebrow">Fork</span>
+
+### app ← loyalty → churn
+
+Loyal customers install the app *and* stay. The graph claims
+$\text{app} \indep \text{churn} \mid \text{loyalty}$.
+
+</div>
+
+
+<div class="card">
+
+<span class="eyebrow">Direct edge</span>
+
+### app → churn ← loyalty
+
+The app itself keeps customers. App and churn stay dependent **given**
+loyalty.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="c-insight">
+
+The graphs disagree on one checkable claim. Compare app users and non-users
+**of equal loyalty** (say, the same tenure): equal churn favours the fork, a
+remaining gap the direct edge.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The running example (Lecture 01's reasoning-cycle exercise, Lecture 02's test).
+Both graphs produce the same marginal correlation; they differ in one
+conditional independence, which is exactly what a missing edge claims. Reading
+it off: in the fork, loyalty is the middle node, and observing it blocks the
+path; in the second graph there is a direct edge, which nothing blocks.
+
+Say the limits. Tenure is only a proxy for loyalty, so the check is weaker than
+the randomised prompt deduced in Lecture 01 — an unmeasured common cause can
+still be at work. The graph makes the assumption explicit; the data can then
+contradict it.
+
+
 ---
 
 <!-- .slide: class="module-slide" -->
@@ -1090,11 +1212,11 @@ joint distribution factorises over the **cliques** $c \in \mathcal{C}$ of the
 graph:
 
 $$
-p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{c \in \mathcal{C}} \phi_c(x_c),
-\qquad Z = \sum_{x} \prod_{c} \phi_c(x_c)
+p(x\_1, \ldots, x\_n) = \frac{1}{Z} \prod\_{c \in \mathcal{C}} \phi\_c(x\_c),
+\qquad Z = \sum\_{x} \prod\_{c} \phi\_c(x\_c)
 $$
 
-The $\phi_c \geq 0$ are **potentials** — arbitrary non-negative functions, not
+The $\phi\_c \geq 0$ are **potentials** — arbitrary non-negative functions, not
 probabilities. $Z$ is the normalising **partition function**.
 
 </div>
@@ -1122,7 +1244,7 @@ cost lives.
 
 ### Belief network
 Directed, acyclic. Factors are conditional probabilities. Natural for
-**causal or generative** stories conditioning on a collider creates
+**causal or generative** stories; conditioning on a collider creates
 dependence.
 
 </div>
@@ -1152,7 +1274,7 @@ Undirected. Factors are potentials with a global $Z$. Natural for
 Notes:
 Neither subsumes the other: some independence patterns are expressible only in
 one. Give the standard examples if time permits (a collider is not expressible
-undirected a 4-cycle is not expressible directed).
+undirected; a 4-cycle is not expressible directed).
 
 --
 
@@ -1221,7 +1343,7 @@ For a **directed** model the same question is answered by converting the graph:
 <div class="card">
 
 ### 1. Ancestral graph
-Keep $X \cup Y \cup Z$ and their ancestors delete all other nodes and their
+Keep $X \cup Y \cup Z$ and their ancestors; delete all other nodes and their
 edges.
 
 </div>
@@ -1250,7 +1372,7 @@ Connect any two nodes that share a child, then drop all arrow heads.
 <div class="card">
 
 ### 3. Separation
-Remove the links neighbouring $Z$. If no path joins $X$ to $Y$, then
+Remove the nodes in $Z$ and their edges. If no path joins $X$ to $Y$, then
 $X \indep Y \mid Z$.
 
 </div>
@@ -1281,7 +1403,7 @@ so they are no longer separable. This procedure is equivalent to d-separation.
 <div class="card">
 
 ### Boltzmann machine
-A pairwise Markov network over binary units with weights on the edges the
+A pairwise Markov network over binary units with weights on the edges; the
 restricted variant (RBM) allows edges only between a visible and a hidden
 layer.
 
@@ -1311,8 +1433,8 @@ neighbours and with the noisy observation. Inference denoises the image.
 
 Notes:
 The image example is the most intuitive Markov network there is — smoothness as
-a potential. It also previews the energy-based view used for neural networks
-later.
+a potential. The Boltzmann machine is the bridge to energy-based neural
+networks, a pointer beyond this material rather than a dependency.
 
 --
 
@@ -1427,10 +1549,11 @@ Discover which dependencies exist at all.
 </div>
 
 
-The three get progressively harder — and progressively more interesting.
+With complete data, learning the parameters is the easiest of the three — it is
+counting. Learning the structure is the hardest.
 
 Notes:
-Structure learning is where causal discovery lives flag it as an open research
+Structure learning is where causal discovery lives; flag it as an open research
 area rather than a solved technique, since students will meet confident claims
 about it.
 
@@ -1441,8 +1564,9 @@ about it.
 
 <div class="c-warning">
 
-Both exact and approximate inference in belief networks are **NP-hard**.
-Whether a particular model is tractable depends on its structure.
+Exact inference in belief networks is **NP-hard**, and so is approximate
+inference with a guaranteed error bound. Whether a particular model is
+tractable depends on its structure.
 
 </div>
 
@@ -1475,7 +1599,7 @@ Efficient when the graph is a tree or has low treewidth.
 ### Approximate inference
 Sampling (MCMC, importance sampling) and variational methods.
 
-Trade a guarantee for tractability.
+Trade the guarantee for tractability.
 
 </div>
 
@@ -1487,7 +1611,7 @@ Trade a guarantee for tractability.
 
 
 Notes:
-The practical rule: structure decides. A chain or tree is linear a dense graph
+The practical rule: structure decides. A chain or tree is linear; a dense graph
 is hopeless. This is why modelling and inference are not separable concerns —
 a model you cannot query is not a model.
 
@@ -1514,8 +1638,8 @@ which is another argument for keeping tables small.
 
 Notes:
 Connect back to divorcing and noisy OR: parameter reduction is also a
-statistical necessity, not only a storage convenience. This also foreshadows
-smoothing in naive Bayes.
+statistical necessity, not only a storage convenience. The empty row is the
+same zero-count problem that Laplace smoothing repairs in naive Bayes.
 
 --
 
@@ -1524,7 +1648,7 @@ smoothing in naive Bayes.
 
 <div class="takeaway">
 
-Graphical models make the joint distribution **writable** whether they make it
+Graphical models make the joint distribution **writable**; whether they make it
 **queryable** depends on the graph's structure. Parameters come from counting
 where data is complete, and from iterating where it is not.
 
@@ -1693,10 +1817,16 @@ const tocProgressConfig = {};
           // the picture has made its point). Carriers are appended at the end
           // of the section, so without explicit indices Reveal would run the
           // author's fragments first. Give the visualization steps the leading
-          // indices and push any un-indexed author fragments behind them.
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
           const authored = [...slide.querySelectorAll(".fragment")]
-            .filter((f) => !f.classList.contains("viz-step") && !f.hasAttribute("data-fragment-index"));
-          authored.forEach((f, k) => f.setAttribute("data-fragment-index", String(steps + k)));
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
 
           for (let i = 1; i <= steps; i++) {
             const s = document.createElement("span");
@@ -1707,17 +1837,20 @@ const tocProgressConfig = {};
             s.setAttribute("aria-hidden", "true");
             slide.appendChild(s);
           }
-          const onFragment = (offset) => (event) => {
-            const frags = event.fragments ?? [event.fragment];
-            for (const f of frags) {
-              if (f?.dataset?.vizFor !== id) continue;
-              instance.setStep(parseInt(f.dataset.vizStep, 10) + offset);
-              return;
-            }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
           };
-          Reveal.on("fragmentshown", onFragment(0));
-          Reveal.on("fragmenthidden", onFragment(-1));
-          instance.setStep(0);
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
         } else {
           // Print/PDF (and stepless live decks): show the complete state.
           instance.setStep(steps);

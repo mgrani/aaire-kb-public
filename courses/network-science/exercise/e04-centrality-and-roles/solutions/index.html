@@ -23,9 +23,9 @@ Dr. Jelena Mitrovic
 
 ## Exercise 4.A.1: Centrality by Hand
 
-Consider the graph with nodes $\{A,B,C,D,E,F\}$ and edges $A$–$B$, $A$–$C$, $B$–$C$, $B$–$D$, $D$–$E$, $D$–$F$, $E$–$F$.
+Consider the graph with nodes $\\{A,B,C,D,E,F\\}$ and edges $A$–$B$, $A$–$C$, $B$–$C$, $B$–$D$, $D$–$E$, $D$–$F$, $E$–$F$.
 
-1. Compute **degree centrality** $C_d(v) = \deg(v)/(|V|-1)$ for all nodes.
+1. Compute **degree centrality** $C\_d(v) = \deg(v)/(|V|-1)$ for all nodes.
 2. Identify the shortest paths between all node pairs. Which node lies on the most shortest paths between other nodes? (Compute betweenness centrality by inspection.)
 3. Which node has the highest degree centrality? Which has the highest betweenness centrality? Are they the same node?
 4. Interpret: what structural role does the node with the highest betweenness play in this network?
@@ -37,7 +37,7 @@ Consider the graph with nodes $\{A,B,C,D,E,F\}$ and edges $A$–$B$, $A$–$C$, 
 
 **1. Degree centrality** ($|V|-1 = 5$):
 
-| Node | Degree | $C_d$ |
+| Node | Degree | $C\_d$ |
 |------|--------|--------|
 | A    | 2      | 2/5    |
 | B    | 3      | 3/5    |
@@ -48,12 +48,12 @@ Consider the graph with nodes $\{A,B,C,D,E,F\}$ and edges $A$–$B$, $A$–$C$, 
 
 **2. Betweenness — by inspection:**
 
-The graph has two triangle-like clusters: $\{A,B,C\}$ on the left and $\{D,E,F\}$ on the right, joined by edge $B$–$D$. Every shortest path from any node in $\{A,C\}$ to any node in $\{D,E,F\}$ must pass through $B$ then $D$. By symmetry, $B$ and $D$ have the same betweenness: each lies on 6 shortest paths between other node pairs (normalised betweenness $= 0.6$).
+The graph has two triangle-like clusters: $\\{A,B,C\\}$ on the left and $\\{D,E,F\\}$ on the right, joined by edge $B$–$D$. Every shortest path from any node in $\\{A,C\\}$ to any node in $\\{D,E,F\\}$ must pass through $B$ then $D$. By symmetry, $B$ and $D$ have the same betweenness: each lies on 6 shortest paths between other node pairs (normalised betweenness $= 0.6$).
 
 **3. Highest degree centrality:** $B$ and $D$ are tied at $3/5$.
 **Highest betweenness:** $B$ and $D$ are also tied. They are the two endpoints of the bridge edge between the two triangles.
 
-**4. Structural role of $B$ and $D$:** Both are **broker** or **bridge** nodes. They sit on the unique paths connecting the left cluster $\{A,B,C\}$ to the right cluster $\{D,E,F\}$. Removing either one would disconnect the two groups. High betweenness with moderate degree is the signature of a structural bridge.
+**4. Structural role of $B$ and $D$:** Both are **broker** or **bridge** nodes. They sit on the unique paths connecting the left cluster $\\{A,B,C\\}$ to the right cluster $\\{D,E,F\\}$. Removing either one would disconnect the two groups. High betweenness with moderate degree is the signature of a structural bridge.
 
 
 
@@ -146,25 +146,25 @@ print(most_disagreeing, ranks[most_disagreeing])
 
 ## Exercise 4.B.1: Embedded vs. Broker
 
-Consider a graph with two triangles $\{1,2,3\}$ and $\{4,5,6\}$, plus node $7$ connected only to nodes $3$ and $4$. There is no direct edge $3$–$4$.
+Consider a graph with two triangles $\\{1,2,3\\}$ and $\\{4,5,6\\}$, plus node $7$ connected only to nodes $3$ and $4$. There is no direct edge $3$–$4$.
 
 1. Is node $1$ **embedded** or a **broker**? What evidence supports your answer?
-2. Is node $7$ **embedded** or a **broker**? What is its clustering coefficient $C_7$?
+2. Is node $7$ **embedded** or a **broker**? What is its clustering coefficient $C\_7$?
 3. If edge $3$–$4$ is added, what happens to node $7$'s structural role?
-4. Burt (1992) argues brokers gain "information advantage." What unique information could node $7$ access that nodes in $\{1,2,3\}$ cannot?
+4. Burt (1992) argues brokers gain "information advantage." What unique information could node $7$ access that nodes in $\\{1,2,3\\}$ cannot?
 
 
 --
 
 **Solution:**
 
-**1. Node 1 — embedded:** Node $1$ is surrounded by the closed triangle $\{1,2,3\}$ where edges $1$–$2$, $1$–$3$, $2$–$3$ all exist. Its neighbours are mutually connected. Clustering coefficient $C_1 = 1$. Node $1$ cannot reach $\{4,5,6\}$ without going through $3$, $7$, and $4$, so it has no direct brokerage opportunity.
+**1. Node 1 — embedded:** Node $1$ is surrounded by the closed triangle $\\{1,2,3\\}$ where edges $1$–$2$, $1$–$3$, $2$–$3$ all exist. Its neighbours are mutually connected. Clustering coefficient $C\_1 = 1$. Node $1$ cannot reach $\\{4,5,6\\}$ without going through $3$, $7$, and $4$, so it has no direct brokerage opportunity.
 
-**2. Node 7 — broker:** Node $7$ connects to $3$ and $4$, which are the two contact points for the two triangles. Are $3$ and $4$ connected? No. So $C_7 = 0$ (the one possible edge between $7$'s two neighbours is absent). Node $7$ bridges a structural hole: it is the only route between the $\{1,2,3\}$ cluster and the $\{4,5,6\}$ cluster.
+**2. Node 7 — broker:** Node $7$ connects to $3$ and $4$, which are the two contact points for the two triangles. Are $3$ and $4$ connected? No. So $C\_7 = 0$ (the one possible edge between $7$'s two neighbours is absent). Node $7$ bridges a structural hole: it is the only route between the $\\{1,2,3\\}$ cluster and the $\\{4,5,6\\}$ cluster.
 
-**3. If $3$–$4$ is added:** Node $7$ would no longer be the only route between the two triangles. Its clustering coefficient becomes $C_7 = 1$ because its two neighbours are now connected, and its brokerage role becomes weaker because the graph has a direct alternative path between the two groups.
+**3. If $3$–$4$ is added:** Node $7$ would no longer be the only route between the two triangles. Its clustering coefficient becomes $C\_7 = 1$ because its two neighbours are now connected, and its brokerage role becomes weaker because the graph has a direct alternative path between the two groups.
 
-**4. Information advantage:** Node $7$ can learn about jobs, ideas, and events in the $\{4,5,6\}$ cluster that are invisible to $\{1,2,3\}$ (and vice versa), because information circulates within dense clusters but rarely crosses to the other side without a broker. This is Burt's "structural hole" argument: the gap between the two triangles is the structural hole, and $7$ bridges it.
+**4. Information advantage:** Node $7$ can learn about jobs, ideas, and events in the $\\{4,5,6\\}$ cluster that are invisible to $\\{1,2,3\\}$ (and vice versa), because information circulates within dense clusters but rarely crosses to the other side without a broker. This is Burt's "structural hole" argument: the gap between the two triangles is the structural hole, and $7$ bridges it.
 
 
 
@@ -210,7 +210,7 @@ for n in top_brokers:
 **Interpretation:**
 
 - **Metric contrast:** Clustering coefficient is a local density measure (neighbours connected?), while betweenness is a global routing measure (on shortest paths?).
-- **Brokerage signature:** Node 7 has high betweenness because all shortest paths between the two triangles pass through it, and $C_7 = 0$ because its two neighbours are not directly connected.
+- **Brokerage signature:** Node 7 has high betweenness because all shortest paths between the two triangles pass through it, and $C\_7 = 0$ because its two neighbours are not directly connected.
 - **Pure bridges:** High betweenness with low clustering indicates a bridge-like position: the node connects otherwise separate parts of the graph rather than sitting inside one dense neighbourhood.
 
 

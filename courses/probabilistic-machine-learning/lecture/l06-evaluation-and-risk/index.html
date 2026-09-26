@@ -2,7 +2,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.CLP_37Xp.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.DCFLBqUg.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -11,9 +11,36 @@
 Prof. Dr. Michael Granitzer
 
 Notes:
-Evaluation units reused verbatim from the data-science course the ERM unit is
-new and placed last, so it arrives as the theory that explains the practice the
-students have just been taught rather than as an abstraction preceding it.
+Reworked 2026-09-26 (docs/reviews/PML-L05-L07-REVIEW-2026-09.md §5.2). The
+lecture evaluates probabilities, not only decisions, and it names its shortcut.
+It stays on Lecture 02's fraud model throughout: Module 1 shows that the useful
+flag loses to "always legitimate" on accuracy and that the Bayes error is the
+aleatoric floor of Lecture 01; Module 2 puts error bars on metrics (Lecture 02's
+SE and Beta posterior); Module 3 turns calibrated scores into decisions with
+Lecture 01's cost threshold and scores the probabilities themselves; Module 4
+names what training minimised all along — the empirical risk — and what that
+shortcut drops.
+
+Practice first, theory last: the students do evaluation before they are told
+that training was ERM, so the theory arrives as an explanation. The Data
+Science evaluation units (measuring-performance-*) are no longer included; CV
+schemes and precision/recall are recapped in one slide each, because the
+students have taken ML courses before.
+
+---
+
+## Argument Map
+
+
+<div class="img-h-xl">
+
+![Argument map for Lecture 06: from measuring a rare class to error bars, cost thresholds and ERM as the shortcut that keeps the loss and drops the probabilities](/courses/probabilistic-machine-learning/figures/l06-argument-map.svg)
+
+</div>
+
+
+Notes:
+Read it top-left to bottom. Module 1: on fraud, accuracy rewards the model that catches nothing, and even the best model has a floor (the Bayes error). Module 2: every metric is an estimate, and for a rare class its error bar is set by the rare cases. Module 3: a calibrated probability plus the costs gives the decision, and the probabilities themselves can be scored. Module 4 names the shortcut in the strip: training minimised an average loss on the sample; unless that loss was a negative log-probability, the probabilities were dropped — which is why Modules 2 and 3 had to buy them back.
 
 ---
 
@@ -22,8 +49,15 @@ students have just been taught rather than as an abstraction preceding it.
 # Module 1
 ## What Are We Measuring?
 
-> **Guiding Question:** A model reports 99.9% accuracy and has never detected a
-> single case. What should we have measured instead?
+
+<div class="guiding-question">
+
+**Guiding Question:** A fraud model reports 99.9% accuracy and has never caught
+a single fraud. What should we have measured instead — and how low could the
+error of the best model be?
+
+</div>
+
 
 --
 
@@ -32,266 +66,83 @@ students have just been taught rather than as an abstraction preceding it.
 
 <div class="c-definition">
 
-The **true misclassification rate** of a hypothesis $h$ is the probability that
-it errs on a randomly drawn object:
-
+The **true error** of a classifier $h$ is the probability that it errs on a
+fresh example drawn from the world:
 $$
-\mathrm{err}^*(h) = P\big(h(\mathbf{x}) \neq y(\mathbf{x})\big)
+\mathrm{err}^{\*}(h) = P\big(h(X) \neq Y\big), \qquad (X, Y) \sim p
 $$
-
-</div>
-
-
-It is defined over the **whole distribution of objects** — which we cannot
-observe.
-
-Notes:
-Deliberately parallel to the population/sample distinction from the statistics
-module: err* is a population quantity. Students who see the analogy will not be
-surprised by cross-validation.
-
---
-
-## What We Can Measure
-
-We estimate $\mathrm{err}^*(h)$ by the error on a set of examples
-$D_s \subseteq D$ whose true labels are known:
-
+The **Bayes error** is the smallest true error any classifier can reach:
 $$
-\mathrm{err}(h, D_s) = \frac{1}{|D_s|} \sum_{\mathbf{x} \in D_s}
-\mathbb{1}\big[h(\mathbf{x}) \neq y(\mathbf{x})\big]
+\min\_h \mathrm{err}^{\*}(h) = \mathbb{E}\_X\Big[\min\big(p(y{=}1 \mid X),\enspace 1 - p(y{=}1 \mid X)\big)\Big]
 $$
 
-
-<div class="c-warning">
-
-The estimate is only as good as the sample. Which examples land in $D_s$ — and
-whether $h$ has seen them before — decides whether the number means anything.
-
 </div>
 
 
-Notes:
-Everything in the next unit follows from that warning. Ask what happens if D_s
-is the data the model was fitted on the answer motivates hold-out estimation
-without needing to be told.
 
---
+<div class="q">
 
-## A Number Alone Means Nothing
-
-"95% accuracy" is not a result until you know what a trivial method achieves.
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Trivial classification
-Always predict the **majority class**.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Trivial regression
-Always predict a **central tendency** — the mean or median of $y$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Random guessing
-Draw a label from the marginal distribution $p(y)$.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Insist on the habit: report the baseline next to the model, always. This is the
-cheapest defence against self-deception in the whole course.
-
---
-
-## Example: Why Accuracy Deceives
-
-A screening test for a disease affecting **1 in 1,000** people.
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### The "model"
-Always predict *healthy*.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### Its accuracy
-**99.9%** — and it has never detected a single case.
-
-</div>
-
+A transaction type is fraudulent 55% of the time. Could a better model push
+its error below 45%?
 
 </div>
 
 
 
-</div>
+<div class="fragment">
 
 
 <div class="c-insight">
 
-On imbalanced data the majority baseline is nearly unbeatable by accuracy, and
-completely useless. The metric, not the model, is the problem.
+No — only **new attributes** can. The Bayes error is aleatoric uncertainty
+(Lecture 01's identical patients) written as an error rate: the floor that no
+amount of data removes.
+
+</div>
+
 
 </div>
 
 
 Notes:
-The same base-rate structure as the Bayes unit, now as an evaluation trap. This
-is the motivation for precision and recall, which follow immediately.
+Math first (P5): let the room read the second formula before interpreting it.
+The best rule predicts the more probable label for every x, and on each x it is
+wrong with the probability of the less probable one; averaging over x gives the
+formula. Y is a random variable, not a function of x — that is the whole point.
+The 0.55 is Lecture 01's opening score. Push the nuance from Lecture 01 again:
+the floor is relative to the attributes; a new attribute (the device, the
+location) can lower it, more rows of the same attributes cannot.
 
----
-
-<!-- .slide: class="module-slide" -->
-
-# Module 2
-## Estimating Error Honestly
-
-> **Guiding Question:** Every error number comes from a sample. Which sampling
-> schemes give a number you may quote?
+What we can compute is the error on a sample — the rest of the lecture is about
+how much that number can be trusted, and whether it was the right number.
 
 --
 
-## Training Error Is Not an Estimate
+## Lecture 02's Flag, Evaluated
 
-When the evaluation set equals the training set, $D_{tr} = D$, the resulting
-number measures how well the model **memorised**, not how well it will
-generalise.
+| per 100,000 transactions, 100 frauds | always "legitimate" | Lecture 02's flag |
+|---|---|---|
+| frauds caught · honest customers flagged | 0 · 0 | 99 · 999 |
+| **accuracy** | **99.9%** | **99.0%** |
+| recall $P(\text{flag} \mid \text{fraud})$ | 0% | 99% |
+| precision $P(\text{fraud} \mid \text{flag})$ | — | 9% |
+
+
+<div class="q">
+
+Which model would you deploy — and which one does accuracy recommend?
+
+</div>
+
+
+
+<div class="fragment">
 
 
 <div class="c-warning">
 
-Training error is a lower bound on the true error, and an arbitrarily bad one.
-A model with enough capacity can drive it to zero while learning nothing.
-
-</div>
-
-
-Notes:
-Connect straight to the bias–variance unit: training error falls monotonically
-with capacity, which is exactly why it cannot be the criterion for choosing
-capacity.
-
---
-
-## Four Estimation Schemes
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Hold-out (2-fold)
-Split $D$ into a training and a test part, $D_{tr} \subset D$. Fit on one,
-evaluate on the other.
-
-*Simple, but wastes data and depends on the split.*
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### $k$-fold cross-validation
-Partition $D$ into $k$ folds; each fold serves once as the test set. Average
-the $k$ errors.
-
-*Uses all data for both roles $k$ = 5 or 10 is customary.*
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Leave-one-out ($n$-fold)
-$k = n$: every example is a test set of size one.
-
-*Nearly unbiased, expensive, and high variance.*
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Bootstrapping
-Resample $D$ with replacement to build training sets evaluate on the examples
-left out.
-
-*Useful when $D$ is small.*
-
-</div>
-
+By accuracy, the model that catches **nothing** wins. On a rare class,
+accuracy counts the majority and hides that a model is useless.
 
 </div>
 
@@ -300,31 +151,76 @@ left out.
 
 
 Notes:
-Ask which scheme a Kaggle-style leaderboard implements, and what repeatedly
-consulting a fixed test set does to its status as an estimate — the test set
-becomes training data for the modeller.
+This is the payoff of Lecture 02's promise ("Lecture 06 opens with exactly that
+model"). The numbers are the same table: 99 + 98,901 correct gives 99.0%, and
+99,900 correct gives 99.9%. Let the room vote before the click. Then name the
+two rows below accuracy as what students already know as recall and precision —
+and point out that Lecture 02 computed them as two conditionals of Bayes'
+theorem: P(flag | fraud) = 0.99 and P(fraud | flag) = 99/1,098.
 
 --
 
-## Misclassification Costs
+## What to Report Instead
 
-Not every error costs the same. A missed diagnosis and a false alarm have
-different consequences, so counting errors equally is itself a modelling
-assumption.
+
+<div class="marks-step">
+
+- **A baseline** next to every number: always-majority for classification,
+  the mean for regression. "99.9%" is not a result until you know that doing
+  nothing scores 99.9%.
+- **Measures that condition on the rare class**: recall conditions on the
+  truth, precision on the decision — the two directions of Bayes' theorem that
+  Lecture 02 warned not to swap.
+- **The costs**: which of the two mistakes the application pays for. Module 3
+  turns them into a threshold.
+
+</div>
+
 
 
 <div class="c-note">
 
-A **cost matrix** assigns a cost to each (true class, predicted class) pair;
-the objective becomes expected cost rather than error rate.
+Precision depends on the base rate, recall does not: the same flag has
+precision 9% at 1 in 1,000 and about 50% at 1 in 100.
 
 </div>
 
 
 Notes:
-This is the hinge into precision and recall in two units' time. Ask the group
-to set the two costs for a spam filter and then for a cancer screen the ratios
-they choose differ by orders of magnitude, and both are defensible.
+A list, not cards: these are three habits, not three contrasting positions. The
+last line checks whether Lecture 02 landed: at prevalence 1/100, the flag
+catches 990 of 1,000 frauds and flags 990 of 99,000 honest customers, so
+precision is 990/1,980 = 0.5. Recall stays 0.99. That is why precision is the
+number that surprises people when a model moves to a new market.
+
+--
+
+## Mini-Exercise
+
+A model flags **every** transaction as fraud (one in 1,000 is fraudulent).
+
+
+<div class="q">
+
+What are its recall and its precision?
+
+</div>
+
+
+
+<div class="fragment">
+
+Recall **100%** — it catches every fraud. Precision **0.1%** — the base rate.
+(Accuracy: 0.1%.) Recall alone can be bought by flagging everything; that is
+why it is always reported together with precision, or with the costs.
+
+</div>
+
+
+Notes:
+One minute to read, one to think. The mirror image of the always-legitimate
+model: that one maximises accuracy, this one maximises recall. Neither number
+alone says anything about usefulness.
 
 --
 
@@ -333,9 +229,210 @@ they choose differ by orders of magnitude, and both are defensible.
 
 <div class="takeaway">
 
-An error number is meaningless without the sampling scheme that produced it.
-**Never evaluate on data the model was fitted on**, and state the cost model
-when errors are not interchangeable.
+We want the **true error**, whose floor — the **Bayes error** — is aleatoric
+uncertainty that no data removes. On a rare class, accuracy measures the
+majority: report a **baseline** and measures that condition on the rare class.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Module 2
+## Numbers With Error Bars
+
+
+<div class="guiding-question">
+
+**Guiding Question:** The test set says recall 0.90. Would you promise the bank
+that the model catches 90% of next month's frauds?
+
+</div>
+
+
+--
+
+## Where an Error Number Comes From
+
+| estimate | how | what it is |
+|---|---|---|
+| **training error** | evaluate on the data the model was fitted on | optimistically biased — on average below the true error of the fitted model, often far below |
+| **hold-out** | split once; fit on one part, evaluate on the other | an unbiased estimate of $\mathrm{err}^{\*}$ — for **one** split, with a sampling error |
+| **$k$-fold cross-validation** | each of $k$ folds serves once as the test set; average | uses every example for testing once; still an estimate from a sample |
+
+
+<div class="c-warning">
+
+A test set that is consulted for choices — which model, which threshold —
+becomes training data. Keep one set that is looked at once.
+
+</div>
+
+
+Notes:
+Recap for ML-experienced students: one slide, the three schemes they know, with
+the two statements that are often said wrongly. Training error is not a *lower
+bound* on the true error (for a given sample it can be above it); it is biased
+in expectation for the model it selected. Hold-out is one split, not "2-fold".
+The warning is the leaderboard effect. The rest of the module asks the question
+none of the three rows answers: how precise is the number?
+
+--
+
+## A Metric Is a Proportion
+
+Accuracy on $n$ test cases is the mean of $n$ yes/no indicators — a Bernoulli
+sample (Lecture 02). Its standard error is $\sigma/\sqrt{n}$ with
+$\sigma^2 = p(1-p)$:
+
+$$
+\mathrm{SE}(\hat{p}) = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}
+$$
+
+A test set of **10,000** transactions, one in 1,000 fraudulent:
+
+
+<div class="grid-2">
+
+
+<div class="stat-card evidence">
+
+### 0.990 ± 0.002
+accuracy: $n = 10{,}000$, $\mathrm{SE} \approx 0.001$
+
+</div>
+
+
+<div class="stat-card caution">
+
+### 0.90 ± 0.19
+recall, 9 of 10 frauds caught: $n = 10$, $\mathrm{SE} \approx 0.095$
+
+</div>
+
+
+</div>
+
+
+
+<div class="q">
+
+Same test set, same model — why is one error bar a hundred times wider?
+
+</div>
+
+
+
+<div class="fragment">
+
+Recall is a proportion **of the frauds**, and there are only ten of them. The
+error bar is set by the rare class, not by the size of the test set.
+
+</div>
+
+
+Notes:
+Both numbers are ±1.96 SE, rounded. SE(accuracy) = √(0.99 · 0.01 / 10,000) ≈
+0.001; SE(recall) = √(0.9 · 0.1 / 10) ≈ 0.095, so the 95% interval is
+[0.71, 1.09] — it runs past 1. That is the normal approximation breaking at
+n = 10 (Lecture 02 noted the same for 3 of 10 users) and the reason for the next
+slide.
+
+--
+
+## Recall as an Unknown Parameter
+
+<div class="viz viz-lg" data-viz="math/bayes-updating" data-steps="10"
+ data-params='{"prior": [1, 1], "observations": [1, 1, 1, 0, 1, 1, 1, 1, 1, 1], "symbols": ["✓", "✗"], "names": ["caught", "missed"], "xLabel": "θ = recall = P(flag | fraud)"}'></div>
+
+After 9 caught and 1 missed, with a flat prior: $\mathrm{Beta}(10, 2)$ — mean
+**0.83**, 95% credible interval **[0.59, 0.98]**.
+
+Notes:
+The Beta–Bernoulli model of Lecture 02 with "user returns" replaced by "fraud
+caught": each test fraud is one observation of the recall. Click through; the
+curve narrows slowly because there are only ten observations. The credible
+interval stays inside [0, 1] by construction and says what everyone wanted to
+say: the recall is probably somewhere between 0.6 and 0.98. The posterior mean
+0.83 sits below the observed 0.9 because the flat prior counts one catch and one
+miss (Lecture 02's pseudo-counts). With 100 test frauds, 90 caught, the interval
+would be [0.83, 0.94].
+
+--
+
+## The Rare Class Sets the Test Size
+
+Recall near 0.9, so $\mathrm{SE} = \sqrt{0.09/n\_{\text{fraud}}}$; at one fraud in
+1,000 transactions:
+
+| frauds in the test set | transactions | SE of recall | error bar (±2 SE) |
+|---|---|---|---|
+| 10 | 10,000 | 0.095 | ±0.19 |
+| 100 | 100,000 | 0.030 | ±0.06 |
+| 400 | 400,000 | 0.015 | ±0.03 |
+| 1,000 | 1,000,000 | 0.0095 | ±0.02 |
+
+
+<div class="c-warning">
+
+Model B catches 10 of the 10 test frauds, model A catches 9. That is **one
+fraud** of difference — well inside either error bar. Compare two models on the
+**same** test cases and look at the cases where they disagree.
+
+</div>
+
+
+Notes:
+The 1/√n law of Lecture 02 ("precision costs data"), now with a price tag in
+transactions: halving the error bar needs four times the frauds, and every fraud
+costs a thousand transactions. This is why fraud teams evaluate on months of
+data. The paired comparison is the honest way to compare two models: cases both
+get right or both get wrong carry no information about which is better; only
+the disagreements do. If A and B disagree on a single fraud, there is nothing to
+conclude.
+
+--
+
+## Mini-Exercise
+
+Recall is near 0.9, so $\mathrm{SE} = \sqrt{0.09/n}$ for $n$ test frauds.
+
+
+<div class="q">
+
+How many frauds does the test set need for $\mathrm{SE} = 0.03$ — and how many
+transactions is that?
+
+</div>
+
+
+
+<div class="fragment">
+
+$0.09/n = 0.0009$, so $n = 100$ frauds — about **100,000 transactions** at one in
+1,000. For $\mathrm{SE} = 0.015$ it would be four times as many.
+
+</div>
+
+
+Notes:
+Head arithmetic: 0.03² = 0.0009. The second sentence is the transfer: the
+square-root law again. Students who reach for 1.96 have understood the next
+step; the question is only about the SE.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Every metric is an **estimate from a sample** and needs an **error bar**: a
+standard error, or a Beta posterior when the counts are small. For a rare class
+the error bar is set by the number of **rare cases**, not by the size of the
+test set.
 
 </div>
 
@@ -345,298 +442,194 @@ when errors are not interchangeable.
 <!-- .slide: class="module-slide" -->
 
 # Module 3
-## Which Kind of Wrong?
+## From Scores to Decisions
 
-> **Guiding Question:** Being imprecise and being incomplete are different
-> failures. Which one does your application care about?
+
+<div class="guiding-question">
+
+**Guiding Question:** The model says p(fraud) = 0.09. Check the transaction or
+let it through — and who decides where the line is?
+
+</div>
+
 
 --
 
-## Why the Error Rate Is Not Enough
+## Two Mistakes, Two Prices
 
-For multiclass classification $h_\Theta : X \to Y$ with
-$Y \subseteq \lbrace 1, \ldots, N \rbrace$, the plain error rate:
+| | transaction is fraud | transaction is legitimate |
+|---|---|---|
+| **check it** (a text to the customer) | 0 | €5 ($c\_{FP}$) |
+| **let it through** | €500 ($c\_{FN}$) | 0 |
+
+The model says $p = p(\text{fraud} \mid \mathbf{x})$. Expected cost of checking:
+$(1-p) \cdot c\_{FP}$; of letting it through: $p \cdot c\_{FN}$.
 
 
-<div class="grid-3">
+<div class="q">
 
-
-<div class="column">
-
-
-<div class="card bad">
-
-### Fails on imbalance
-The majority baseline scores high while detecting nothing.
+At which $p$ does checking become the cheaper action?
 
 </div>
 
 
-</div>
 
+<div class="fragment">
 
-<div class="column">
-
-
-<div class="card bad">
-
-### Hides the distribution
-Which classes the errors fall on stays invisible.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### Hides the kind of error
-Missing assignments and imprecise assignments count the same.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-Three distinct failures, deliberately separated: imbalance, distribution across
-classes, and type of error. Each one motivates a different part of what follows.
-
---
-
-## The Confusion Matrix
-
-Rows are true classes, columns are predictions cell $(i,j)$ counts the
-examples of class $i$ that $h$ assigned to $j$. The diagonal is correct, and
-every off-diagonal cell names a specific confusion.
-
-
-<div class="c-note">
-
-The matrix is the raw material: every measure below is a ratio of its cells.
-Read it before reading any summary number.
-
-</div>
-
-
-Notes:
-On a well-known dataset the off-diagonal structure is often interpretable —
-which two classes get confused tells you something about the representation,
-not just the score.
-
---
-
-## Four Counts, Per Class
-
-For a class $j$, every prediction falls into one of four cells:
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card good">
-
-### $TP_j$ — true positives
-Assigned to $j$ **and** truly in $j$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### $FP_j$ — false positives
-Assigned to $j$ but **not** in $j$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card bad">
-
-### $FN_j$ — false negatives
-**Not** assigned to $j$ but truly in $j$.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card good">
-
-### $TN_j$ — true negatives
-Not assigned to $j$ and not in $j$.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-tip">
-
-Read the letters as **decision then correctness**: P/N is what $h$ decided,
-T/F is whether that decision was right.
-
-</div>
-
-
-Notes:
-The mnemonic in the tip box removes nearly all of the confusion students have
-with these four terms. Have them classify a concrete example aloud before
-moving on.
-
---
-
-## Precision and Recall
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Recall — completeness
-$$\mathrm{rec}_j = \frac{TP_j}{TP_j + FN_j}$$
-
-Of everything that truly belongs to $j$, what fraction did $h$ find?
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Precision — exactness
-$$\mathrm{prec}_j = \frac{TP_j}{TP_j + FP_j}$$
-
-When $h$ says $j$, how often is it right?
-
-</div>
-
-
-</div>
-
-
-
-</div>
+$$
+p > p^{\*} = \frac{c\_{FP}}{c\_{FP} + c\_{FN}} = \frac{5}{505} \approx 0.01
+$$
 
 
 <div class="c-insight">
 
-Both are **conditional probabilities with different conditions** — recall
-conditions on the truth, precision on the prediction. Swapping them is the same
-error as swapping the conditionals in Bayes' theorem.
+Lecture 01's loan threshold, for fraud. Lecture 02's flagged transaction (9%
+fraud) is worth checking: 9% is nine times the break-even.
+
+</div>
+
 
 </div>
 
 
 Notes:
-The link to Bayes is the payoff of teaching probability first: precision and
-recall are P(correct | predicted) and P(found | true). Ask which one a search
-engine optimises and which one a screening programme optimises.
+Math first, then the question. The derivation is one line: check iff
+(1 − p)·c_FP < p·c_FN. Students have seen it in Lecture 01 (€1,000 against
+€9,000, p* = 0.1). The 9% precision that looked damning in Lecture 02 now looks
+different: precision is not the criterion; expected cost is. Correct outcomes
+cost 0 here; a checked fraud could cost €5 as well, which changes p* only
+marginally — say so if asked.
+
+--
+
+## Sweeping the Threshold
+
+<div class="viz viz-lg" data-viz="ml/threshold-tradeoff" data-steps="4"
+ data-params='{"cFP": 5, "cFN": 500, "cFN2": 1000}'></div>
+
+**Predict before the last click:** a missed fraud now costs €1,000. Does the
+best threshold move left or right — and does recall go up or down?
+
+Notes:
+Stepped viz (P6). A calibrated model on 100,000 transactions, one in 1,000
+fraudulent. On entry: the two costs — checking honest customers falls as the
+threshold rises, missed frauds rise. Click 1: their sum. Click 2: the minimum,
+at t* ≈ 0.01, exactly c_FP/(c_FP + c_FN) (€2,881: recall 97%, precision 29%).
+Click 3: Lecture 02's flag is this model at t = 0.001 (recall 99%, precision
+9%, €5,515); the default t = 0.5 catches only 80% and costs €10,062 — three
+and a half times the optimum. Click 4: c_FN = €1,000 moves t* to 0.005 (recall
+98%, €4,280). Say it out loud: precision and recall are not properties of a
+model but of a model plus a threshold, and the costs choose the point. The
+threshold rule works only if the score is **calibrated** — Lecture 03's
+condition.
+
+--
+
+## Scoring the Probabilities Themselves
+
+A threshold uses the score once. To evaluate the **probabilities**, score every
+prediction on held-out data:
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Log-loss
+$$
+\text{log-loss} = -\frac{1}{n}\sum\_{i=1}^{n} \log p\_{\text{model}}(y\_i \mid \mathbf{x}\_i)
+$$
+the held-out negative log-likelihood — Lecture 03's cross-entropy, on test data
+
+</div>
+
+
+<div class="card">
+
+### Brier score
+$$
+\text{Brier} = \frac{1}{n}\sum\_{i=1}^{n} \big(p\_i - y\_i\big)^2
+$$
+squared error of the probability against the 0/1 outcome
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+Both scores are **proper**: in expectation they are best when the model reports
+the true probability. Accuracy is not — it cannot tell 0.51 from 0.99.
+
+</div>
+
+
+Notes:
+Log-loss is the one the course has used all along: maximum likelihood (Lecture
+03) minimised it on the training data; here it is measured on data the model
+has not seen. "Proper" is the property that matters: a model cannot improve its
+expected score by reporting anything other than what it believes — which is
+exactly the incentive a decision-maker needs from a probability.
+
+--
+
+## What the Scores Punish
+
+| the model said $p = 0.09$, and the transaction was… | log-loss term | Brier term |
+|---|---|---|
+| fraud | 2.41 | 0.83 |
+| legitimate | 0.09 | 0.008 |
+| fraud, but the model had said $p = 0.001$ | **6.91** | 0.998 |
+
+
+<div class="c-insight">
+
+Log-loss punishes **confident errors** without limit — $p = 0$ on a fraud costs
+infinity; Brier is bounded by 1. Whether "0.09" comes true 9% of the time is
+Lecture 03's **reliability diagram**, now drawn on held-out data.
+
+</div>
+
+
+Notes:
+The numbers: −ln 0.09 = 2.41, −ln 0.91 = 0.094; (0.91)² = 0.83, (0.09)² = 0.008;
+−ln 0.001 = 6.91, (0.999)² = 0.998. That is also why the always-legitimate
+model, right 99.9% of the time, is exposed at once when it states its certainty
+as a probability: one fraud at p = 0 and its log-loss is infinite. Refer to the
+reliability diagram of Lecture 03 rather than redrawing it: the new point is
+only that it must be drawn on data the model has not seen.
 
 --
 
 ## Mini-Exercise
 
-A spam filter processes 1,000 emails, 100 of which are spam. It flags 80
-emails, of which 60 are genuinely spam.
+Checking costs €5, a missed fraud €500. The model says $p = 0.02$.
 
-Compute precision and recall. Which one would you rather improve, and why?
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+Check the transaction or let it through?
+
+</div>
+
 
 
 <div class="fragment">
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Precision** $= 60/80 = 0.75$
-
-A quarter of flagged mail is legitimate.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-**Recall** $= 60/100 = 0.60$
-
-Forty spam messages still arrive.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-For a spam filter, **precision** usually matters more: a lost legitimate email
-costs far more than a spam message that slips through. The cost matrix decides,
-not the metric.
+**Check.** Letting it through costs 0.02 · €500 = €10 in expectation;
+checking costs 0.98 · €5 ≈ €4.90. Equivalently, $0.02 > p^{\*} \approx 0.01$.
 
 </div>
 
 
 Notes:
-The final sentence is the one to stabilise — the choice between precision and
-recall is a statement about costs, which is why the cost-matrix slide came
-earlier.
+Two minutes, head arithmetic. A 2% fraud probability sounds negligible; at a
+100:1 cost ratio it is twice the break-even. The same reversal as the loan
+exercise of Lecture 01.
 
 --
 
@@ -645,157 +638,10 @@ earlier.
 
 <div class="takeaway">
 
-The confusion matrix shows **which** errors occur precision and recall split
-"being wrong" into **being imprecise** and **being incomplete**. Which one you
-optimise is a decision about costs, not about mathematics.
-
-</div>
-
-
---
-
-## Squared Error
-
-
-<div class="c-definition">
-
-$$
-\mathrm{MSE} = \frac{1}{n}\sum_{i=1}^{n}\big(h(\mathbf{x}_i) - y_i\big)^2
-\qquad
-\mathrm{RMSE} = \sqrt{\mathrm{MSE}}
-$$
-
-</div>
-
-
-
-<div class="grid-2">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### MSE
-Average quadratic loss always non-negative, lower is better.
-
-Unit is the **square** of the target's unit — hard to interpret directly.
-
-Large errors are penalised disproportionately.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### RMSE
-Same ordering as MSE, but back in the **target's own unit** — which is why it
-is the one usually reported.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The quadratic penalty is a modelling choice with consequences: it makes the fit
-sensitive to outliers, which connects back to robustness in descriptive
-statistics. Ask when that sensitivity is desirable — when large errors really
-are disproportionately costly.
-
---
-
-## Absolute and Relative Error
-
-
-<div class="grid-3">
-
-
-<div class="column">
-
-
-<div class="card">
-
-### MAE
-$$\frac{1}{n}\sum_i \big| h(\mathbf{x}_i) - y_i \big|$$
-
-Easier to interpret than RMSE treats all errors proportionally.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Mean error
-Drop the absolute value to keep the **direction** — reveals systematic over- or
-under-prediction.
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="card">
-
-### Mean relative error
-$$\frac{1}{n}\sum_i \frac{|h(\mathbf{x}_i) - y_i|}{|y_i|}$$
-
-The average error *per unit of target* — comparable across scales.
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-Normalised RMSE variants aim to make errors comparable between datasets, but
-are hard to interpret. Prefer a measure whose unit you can name.
-
-</div>
-
-
-Notes:
-The mean error (with sign) is underused and worth highlighting: a model can
-have excellent RMSE and still be biased in one direction, which matters for
-forecasting and pricing.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-Squared measures punish large errors and lose the unit absolute measures stay
-interpretable signed measures expose bias. Report the one whose **unit and
-failure mode** match the decision the prediction feeds.
+A **calibrated probability** plus the **costs** gives the decision:
+act when $p > c\_{FP}/(c\_{FP} + c\_{FN})$. Precision and recall move along one
+curve as the threshold moves; **log-loss** and the **Brier score** evaluate the
+probabilities themselves.
 
 </div>
 
@@ -805,11 +651,17 @@ failure mode** match the decision the prediction feeds.
 <!-- .slide: class="module-slide" -->
 
 # Module 4
-## Empirical Risk Minimisation
+## Keep the Loss: Empirical Risk Minimisation
 
-> **Guiding Question:** Every method in this course minimises something on the
-> training data. What is the quantity we actually wanted — and what does the
-> substitution cost?
+
+<div class="guiding-question">
+
+**Guiding Question:** Every model you trained minimised something on the
+training data. What did we actually want — and what did the substitution throw
+away?
+
+</div>
+
 
 --
 
@@ -818,94 +670,14 @@ failure mode** match the decision the prediction feeds.
 
 <div class="c-definition">
 
-The **risk** of a hypothesis $h$ under loss $L$ and the true data distribution
-$p(\mathbf{x}, y)$:
+The **risk** of a hypothesis $h$ under a loss $L$ is its expected loss on the
+world:
 $$
-R(h) = \mathbb{E}_{(\mathbf{x},y) \sim p}\big[L\big(h(\mathbf{x}), y\big)\big]
+R(h) = \mathbb{E}\_{(\mathbf{x},y) \sim p}\big[L\big(h(\mathbf{x}), y\big)\big]
 $$
 
 </div>
 
-
-This is the quantity that matters — expected loss on data we have not seen. It
-is also **uncomputable**: $p$ is unknown.
-
-Notes:
-Math first (P5). Everything in the lecture follows from the gap between what we
-want (an expectation under p) and what we can measure (an average over a
-sample). Students have met this as population versus sample; here it is named.
-
---
-
-## What We Can Compute
-
-
-<div class="c-definition">
-
-The **empirical risk** — the average loss on the training sample:
-$$
-\hat{R}(h) = \frac{1}{n}\sum_{i=1}^{n} L\big(h(\mathbf{x}_i), y_i\big)
-$$
-**Empirical risk minimisation (ERM)** chooses
-$\hat{h} = \arg\min_{h \in \mathcal{H}} \hat{R}(h)$.
-
-</div>
-
-
-
-<div class="c-important">
-
-Nearly every method in this course is ERM with a particular loss and hypothesis
-space — including maximum likelihood, which is ERM with the **negative
-log-likelihood** as the loss.
-
-</div>
-
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Squared loss
-linear regression
-
-</div>
-
-
-<div class="card">
-
-### Cross-entropy
-logistic regression, neural networks
-
-</div>
-
-
-<div class="card">
-
-### 0/1 loss
-what we usually care about, and rarely optimise — it has no useful gradient
-
-</div>
-
-
-</div>
-
-
-Notes:
-The unification is the payoff of the lecture: one principle, many algorithms.
-The 0/1 remark explains why surrogate losses exist at all — a recurring theme
-from the perceptron onwards.
-
---
-
-## The Generalisation Gap
-
-$$
-R(h) = \underbrace{\hat{R}(h)}_{\text{measurable}} +
-\underbrace{\big(R(h) - \hat{R}(h)\big)}_{\text{generalisation gap}}
-$$
 
 
 <div class="grid-2">
@@ -913,133 +685,218 @@ $$
 
 <div class="card">
 
-### Why the gap opens
-$\hat{h}$ was **chosen using the same data** that then measures it. The
-minimum of a noisy objective is optimistically biased.
+### 0/1 loss
+$R(h) = \mathrm{err}^{\*}(h)$ — the true error of Module 1
 
 </div>
 
 
 <div class="card">
 
-### What controls it
-The **capacity** of $\mathcal{H}$ and the sample size $n$. Richer hypothesis
-spaces fit the noise better and generalise worse for a given $n$.
+### Cost matrix
+$R(h)$ = the expected cost of Module 3
 
 </div>
 
 
+</div>
+
+
+It is the quantity that matters — and **uncomputable**: $p$ is unknown.
+
+Notes:
+Math first (P5). Everything measured in Modules 1–3 was a risk under some loss:
+the error rate under 0/1 loss, the expected cost under the fraud cost matrix.
+The gap between what we want (an expectation under p) and what we can compute
+(an average over a sample) is the whole module.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## What Training Computes Instead
+
+
+<div class="c-definition">
+
+The **empirical risk** is the average loss on the training sample, and
+**empirical risk minimisation (ERM)** picks its minimiser:
+$$
+\hat{R}(h) = \frac{1}{n}\sum\_{i=1}^{n} L\big(h(\mathbf{x}\_i), y\_i\big), \qquad
+\hat{h} = \arg\min\_{h \in \mathcal{H}} \hat{R}(h)
+$$
 
 </div>
+
+
+| loss | trained model | is $h(\mathbf{x})$ a probability? |
+|---|---|---|
+| squared error | linear regression | the mean of a Gaussian — **yes** (Lecture 03) |
+| cross-entropy $-\log p(y \mid \mathbf{x})$ | logistic regression, most neural nets | **yes** — this is maximum likelihood for $p(y \mid \mathbf{x})$ |
+| hinge $\max(0, 1 - y \cdot h(\mathbf{x}))$ | support vector machine | **no** — a distance to the margin |
+| 0/1 | what we care about; no useful gradient | **no** — only a label |
+
+Notes:
+A table, because the rows are compared on shared dimensions. The last column is
+the one the lecture needs: ERM is a general recipe, and only some losses keep a
+probability behind the number. Correct the tempting overstatement explicitly:
+"nearly every method is ERM" is false in this course. The Beta posterior
+(Lecture 02), inference in a Bayesian network (Lecture 05) and Bayesian
+regression (Lecture 07) condition on data; nothing is minimised.
+
+--
+
+## Keep the Loss, Drop the Probabilities
+
+
+<div class="grid-1-2">
+
+
+<div class="card muted">
+
+<span class="eyebrow">What ERM with a hinge or 0/1 loss returns</span>
+
+### a score: 2.3
+
+large means "more fraud-like" — nothing more
+
+</div>
+
+
+<div class="c-important">
+
+<span class="eyebrow">What it can no longer do</span>
+
+- apply the cost threshold $p > c\_{FP}/(c\_{FP} + c\_{FN})$ of Module 3
+- be scored by log-loss or Brier, or drawn in a reliability diagram
+- put an error bar on its own confidence
+
+To use it for a decision, **buy the probabilities back**: fit
+$p = \sigma(a \cdot \text{score} + b)$ on held-out data (Platt scaling) — a
+logistic regression on the score, i.e. calibration.
+
+</div>
+
+
+</div>
+
 
 
 <div class="c-insight">
 
-This is the bias–variance trade-off stated in terms of risk — and the reason
-training error is not an estimate of anything.
+Not every method is ERM: maximum likelihood for $p(y \mid \mathbf{x})$ is ERM
+with loss $-\log p$; generative maximum likelihood (naive Bayes) scores
+$\log p(\mathbf{x}, y)$, and Bayesian methods minimise nothing.
 
 </div>
 
+
+Notes:
+The slide that links Modules 3 and 4. Ask first: "the SVM says 2.3 — check the
+transaction?" Nobody can answer without knowing what 2.3 means in probability,
+which is exactly what was dropped. Platt scaling is one line of Lecture 03:
+logistic regression with the score as the only feature, fitted on data the SVM
+did not train on. Even cross-entropy models are often miscalibrated after
+heavy training, so the reliability check of Module 3 applies to them too.
 
 --
 
-## Structural Risk Minimisation
+## The Generalisation Gap
 
-Rather than minimising empirical risk alone, minimise it **plus a complexity
-penalty**:
+<div class="viz viz-lg" data-viz="ml/bias-variance" data-steps="5"
+ data-params='{"degrees": [1, 2, 3, 5, 9, 14]}'></div>
+
+$R(\hat{h}) = \hat{R}(\hat{h}) + \big(R(\hat{h}) - \hat{R}(\hat{h})\big)$: the
+gap opens because $\hat{h}$ was **chosen on the data that then measures it**,
+and it tends to grow with the capacity of $\mathcal{H}$.
+
+Notes:
+Stepped viz: each click raises the polynomial degree on the same twelve
+training points. Training error falls every time; test error falls, bottoms out,
+then climbs. Two precise statements to add. (1) Training error is an unbiased
+estimate of R(h) for a fixed h chosen without that data — it is biased only for
+the h it selected. (2) A richer H widens the gap but can lower the risk: the
+excess risk over the best possible splits into approximation error (H too
+poor — falls with capacity) and estimation error (too little data to find the
+best h in H — grows with capacity). That split, not the gap, is the risk
+version of bias–variance.
+
+--
+
+## Structural Risk Minimisation — and the Prior Inside It
+
+Minimise the empirical risk **plus** a complexity penalty:
 
 $$
-\hat{h} = \arg\min_{h \in \mathcal{H}} \hat{R}(h) + \lambda \Omega(h)
+\hat{h} = \arg\min\_{h \in \mathcal{H}} \hat{R}(h) + \lambda \Omega(h)
+$$
+
+With the loss $-\log p(y \mid \mathbf{x}, \mathbf{w})$, the MAP estimate of
+Lecture 03 has exactly this form:
+
+$$
+\frac{1}{n}\sum\_{i=1}^{n} -\log p(y\_i \mid \mathbf{x}\_i, \mathbf{w}) \enspace \underbrace{-\frac{1}{n}\log p(\mathbf{w})}\_{\lambda \Omega(\mathbf{w})}
 $$
 
 
-<div class="grid-3">
+<div class="c-insight">
 
-
-<div class="card">
-
-### $\Omega$ as capacity control
-Restrict effective capacity so the gap stays small.
+The $\frac{1}{n}$ is the point: the prior's weight **fades as data grows** — the
+pseudo-counts of Lecture 02's Beta prior. A Gaussian prior
+$\mathcal{N}(0, \tau^2 \mathbf{I})$ gives $\lambda \Omega(\mathbf{w}) = \lVert\mathbf{w}\rVert^2/(2n\tau^2)$.
 
 </div>
 
 
-<div class="card">
-
-### $\Omega$ as a prior
-The MAP reading: $\lambda\Omega(h) = -\log p(h)$.
-
-</div>
-
-
-<div class="card">
-
-### Same equation
-Regularisation, priors and capacity control are three descriptions of one term.
-
-</div>
-
-
-</div>
-
+Notes:
+Divide the negative log-posterior by n to put it on the scale of an average
+loss; the prior term picks up the 1/n. Penalty, capacity control and prior are
+three readings of one term. But note what even MAP keeps: a single peak. The
+regulariser controls the gap; it does not bring back how sure the model is —
+that needs the whole posterior (Lecture 07).
 
 --
 
 ## Mini-Exercise
 
-A model has training error 0.02 and test error 0.19.
+A linear SVM gives a transaction the score **2.3**. The fraud team checks every
+transaction with $p > 0.01$.
 
-1. Which quantity is $R(h)$ better estimated by?
-2. Why is the training error not simply "a bit optimistic"?
-3. Give two ways to shrink the gap, one changing $\mathcal{H}$ and one not.
 
---
+<div class="q">
 
-## Mini-Exercise — Solution
+Can they apply their rule to this transaction?
+
+</div>
+
 
 
 <div class="fragment">
 
-
-<div class="grid-3">
-
-
-<div class="card">
-
-**1.** The **test** error, 0.19 — measured on data not used to choose $h$.
+**Not directly.** 2.3 is a distance to the margin, not a probability — the hinge
+loss dropped it. First calibrate on held-out data,
+$p = \sigma(a \cdot 2.3 + b)$, then compare that $p$ with 0.01.
 
 </div>
 
 
-<div class="card">
+Notes:
+One question, the module's one point. Some students will answer "2.3 > 0.01,
+check": that is the confusion the slide is for. Others will say "the score is
+positive, so fraud": that is the SVM's own 0/1 decision, which uses the
+threshold 0 — and assumes equal costs.
 
-**2.** Because $h$ was selected **to minimise** the training error. The
-selection itself introduces the bias the more hypotheses were compared, the
-larger it is.
+--
 
-</div>
-
-
-<div class="card">
-
-**3.** Change $\mathcal{H}$: regularise, or use a smaller model. Leave
-$\mathcal{H}$: collect more data.
-
-</div>
-
-
-</div>
-
-
-</div>
-
+## Takeaway
 
 
 <div class="takeaway">
 
-We want **risk** and can only measure **empirical risk**. ERM minimises the
-proxy the **generalisation gap** is the price, and every regulariser — read as
-a penalty or as a prior — is an attempt to control it.
+Training minimises the **empirical risk** because the **risk** is out of reach.
+ERM keeps the **loss** and — unless the loss is a negative log-probability —
+drops the **probabilities**. Regularisers (penalties or priors) control the
+gap; error bars measure it; calibration buys the probabilities back.
 
 </div>
 
@@ -1167,7 +1024,97 @@ const tocProgressConfig = {};
           }
         }
       });
-    })();</script><script>(function(){const MIN_FREE = 120;
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
+          };
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
 
   (() => {
     const SLIDE_H = 720;

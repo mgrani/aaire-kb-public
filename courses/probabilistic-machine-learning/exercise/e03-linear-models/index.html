@@ -1,0 +1,383 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 3 — Keep the Peak, Model Only p(y | x)</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+
+# Exercise Sheet 3
+## Keep the Peak, Model Only p(y | x)
+
+Probabilistic Machine Learning
+
+Prof. Dr. Michael Granitzer
+
+Notes:
+Accompanies Lecture 03. About 55 minutes: pen and paper, plus one short Python
+task (3.B.2, numpy only). 3.A.1 is the long version of the lecture's MAP slide
+and 3-of-3 example, 3.A.2 of the villa slide, 3.B.2 of the runaway slide, 3.C.1
+of the rebalancing mini-exercise. 3.A.1 part 3 previews Laplace smoothing
+(Lecture 04).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 3.A Keep the Peak
+
+--
+
+## Exercise 3.A.1: Peak, Mean and a Prior's Peak
+
+Returning users, $\theta = P(\text{user returns})$, prior $\mathrm{Beta}(a, b)$,
+$h$ of $n$ users return.
+
+1. Maximise $\log p(D \mid \theta) + \log p(\theta)$ and show
+   $\hat{\theta}\_{\mathrm{MAP}} = \frac{h + a - 1}{n + a + b - 2}$.
+2. **0 of 4** users return. Give the MLE, the MAP under $\mathrm{Beta}(2, 2)$ and
+   the posterior mean under $\mathrm{Beta}(2, 2)$. Which one would you report to
+   a product manager, and why?
+3. The posterior mean under a flat prior is $\frac{h + 1}{n + 2}$. Under which
+   prior is the **MAP** equal to it?
+4. After 3 of 3 with a flat prior the posterior is $\mathrm{Beta}(4, 1)$, with
+   density $4\theta^3$. Compute its central 95% interval.
+
+
+
+--
+
+## Exercise 3.A.2: Four Flats and a Villa
+
+Model $y = w\_0 + w\_1 x + \varepsilon$, $\varepsilon \sim \mathcal{N}(0, \sigma^2)$
+i.i.d.; $x$ in m², $y$ in k€.
+
+| $x$ | 40 | 60 | 80 | 100 |
+|---|---|---|---|---|
+| $y$ | 150 | 200 | 280 | 330 |
+
+1. Write down $\ell(w\_0, w\_1, \sigma^2)$ and show that for **every** $\sigma^2$ the
+   maximum over $(w\_0, w\_1)$ is the least-squares fit.
+2. Compute $\hat{w}\_1 = S\_{xy}/S\_{xx}$ and $\hat{w}\_0 = \bar{y} - \hat{w}\_1\bar{x}$,
+   the residuals and the RSS.
+3. Compute $\hat{\sigma}^2\_{\mathrm{ML}} = \mathrm{RSS}/n$ and the unbiased
+   $\mathrm{RSS}/(n - 2)$. By which factor does the ML version underestimate
+   $\sigma^2$ on average?
+4. Give the plug-in 95% band $\hat{y} \pm 1.96\hat{\sigma}\_{\mathrm{ML}}$ at 80 m²
+   and at 600 m². Then use the half-width that counts the uncertainty about
+   $\mathbf{w}$, $1.96\hat{\sigma} \sqrt{1 + \frac{1}{n} + \frac{(x - \bar{x})^2}{S\_{xx}}}$.
+   What do you conclude?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 3.B Classification: Only p(y | x)
+
+--
+
+## Exercise 3.B.1: Cross-Entropy and Its Gradient
+
+$h\_i = \sigma(\mathbf{w}^{\top}\mathbf{x}\_i)$ with $\sigma(z) = 1/(1 + e^{-z})$ and
+$\ell(\mathbf{w}) = \sum\_i [y\_i \ln h\_i + (1 - y\_i)\ln(1 - h\_i)]$.
+
+1. Show $\sigma'(z) = \sigma(z)(1 - \sigma(z))$.
+2. Show $\frac{\partial \ell}{\partial \mathbf{w}} = \sum\_i (y\_i - h\_i)\mathbf{x}\_i$.
+3. Six transactions, $\mathbf{x} = (1, \text{new device})$: new device —
+   fraud, fraud, legitimate; known device — fraud, legitimate, legitimate.
+   Compute the gradient at $\mathbf{w} = 0$.
+4. Set both components of the gradient to zero: which scores does the MLE give
+   to new and to known devices? Give $\hat{w}\_0$, $\hat{w}\_1$ and read $\hat{w}\_1$
+   as an odds ratio.
+
+
+
+--
+
+## Exercise 3.B.2: The Peak That Runs Away (Python)
+
+```python
+import numpy as np
+x = np.array([-2.0, -1.5, -1.1, -0.6, -0.3, 0.2, 0.6, 1.0, 1.4, 1.9])
+y = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+sigma = lambda z: 1 / (1 + np.exp(-z))
+
+def fit(tau2=None, steps=10_000, eta=0.05):
+    w0 = w1 = 0.0
+    for t in range(1, steps + 1):
+        h = sigma(w0 + w1 * x)
+        g0 = ___                      # gradient for the intercept
+        g1 = ___                      # gradient for the slope
+        if tau2 is not None:
+            g1 -= ___                 # log-prior N(0, tau2) on the slope
+        w0, w1 = w0 + eta * g0, w1 + eta * g1
+        if t in (10, 100, 1_000, 10_000):
+            h = sigma(w0 + w1 * x)
+            print(t, round(w1, 2), np.sum(y * np.log(h) + (1 - y) * np.log(1 - h)))
+```
+
+1. Fill in the blanks and run `fit()`. What happens to the slope, the
+   log-likelihood and the scores? Why will it never stop?
+2. Run `fit(tau2=1)` and `fit(tau2=100, steps=100_000)`. Explain the difference
+   with the MAP formula of the lecture.
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 3.C When Is a Score a Probability?
+
+--
+
+## Exercise 3.C.1: The Rebalanced Fraud Model
+
+A model is trained on a 50/50 sample; on real traffic fraud is **1 in 1,000**.
+Undersampling kept every fraud and a random share of legitimate cases.
+
+1. Use Bayes' theorem in odds form to show: real odds = model odds ×
+   $\frac{1/999}{1}$. Which assumption about $p(\mathbf{x} \mid y)$ do you need?
+2. Convert the scores $0.5$, $0.9$ and $0.99$ into real fraud probabilities.
+3. Blocking a legitimate card costs **€10**, missing a fraud **€500**. Above
+   which real probability should a card be blocked, and which **raw score** is
+   that?
+
+
+
+--
+
+## Exercise 3.C.2: Weight Decay Is a Prior
+
+1. With $y\_i = \mathbf{w}^{\top}\mathbf{x}\_i + \varepsilon\_i$,
+   $\varepsilon\_i \sim \mathcal{N}(0, \sigma^2)$ and a prior
+   $\mathbf{w} \sim \mathcal{N}(0, \tau^2 \mathbf{I})$, show that the MAP
+   minimises $\mathrm{RSS}(\mathbf{w}) + \lambda \lVert \mathbf{w} \rVert^2$ with
+   $\lambda = \sigma^2/\tau^2$.
+2. One weight, no intercept, $y = wx + \varepsilon$. Show
+   $\hat{w}\_{\mathrm{MAP}} = \frac{\sum\_i x\_i y\_i}{\sum\_i x\_i^2 + \lambda}$.
+3. Data $(x, y) = (1, 2), (3, 7)$, $\sigma^2 = 1$, $\tau^2 = 0.1$. Compute the
+   MLE and the MAP. What happens as $\tau^2 \to \infty$ and as $\tau^2 \to 0$?
+
+
+</textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
+const tocProgressConfig = {};
+
+
+      const plugins = [
+        window.RevealMarkdown,
+        window.RevealMath?.KaTeX,
+        window.RevealNotes,
+        window.RevealHighlight,
+        window.RevealSearch,
+        window.RevealZoom,
+        window.RevealMenu,
+      ].filter(Boolean);
+      if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") plugins.push(window.RevealTocProgress);
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+          // Live plugin settings panel. Content is a small HTML form
+          // that calls plugin APIs directly. The panel is only useful
+          // when at least one configurable plugin is enabled, but
+          // reveal.js-menu happily ignores panels whose controls do
+          // nothing.
+          custom: [
+            {
+              title: "Settings",
+              icon: '<span style="font-size: 1.1em;">&#9881;</span>',
+              content: `
+                <h2>Deck settings</h2>
+                <p style="font-size: 0.8em; color: #888; margin-top: 0;">
+                  Changes are saved in this browser.
+                </p>
+                <ul class="slide-menu-items" style="list-style: none; padding: 0;">
+                  ${enableTocProgress ? `
+                  <li class="slide-menu-item" style="padding: 0.4em 0.6em;">
+                    <label style="cursor: pointer; display: flex; gap: 0.5em; align-items: center;">
+                      <input
+                        type="checkbox"
+                        id="toc-progress-visible-toggle"
+                        style="transform: scale(1.2);"
+                      />
+                      <span>Show module progress strip</span>
+                    </label>
+                  </li>
+                  ` : ''}
+                </ul>
+              `,
+            },
+          ],
+        },
+        tocProgress: {
+          position: "bottom",
+          hideOnOverview: true,
+          ...tocProgressConfig,
+        },
+        plugins,
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+
+        // Wire the custom menu panel controls to plugin APIs. The
+        // menu panel HTML is injected synchronously by reveal.js-menu
+        // during init, so by the time this promise resolves the
+        // checkbox exists in the DOM.
+        if (enableTocProgress && typeof window.RevealTocProgress !== "undefined") {
+          const cb = document.getElementById("toc-progress-visible-toggle");
+          if (cb) {
+            cb.checked = !window.RevealTocProgress.isHidden();
+            cb.addEventListener("change", (e) => {
+              window.RevealTocProgress.setHidden(!e.target.checked);
+            });
+          }
+        }
+      });
+    })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

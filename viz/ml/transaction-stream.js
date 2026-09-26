@@ -7,7 +7,7 @@
 // params:
 //   mode:  "labels" (default) — stamp fraud / ok, then isolate the flagged ones
 //          "scores"           — same batch, flagged cases carry a probability
-//   steps: 3 in both modes (arrive → label → isolate/quantify)
+//   steps: 2 in both modes (arrive → label → isolate/quantify); print shows the last
 
 const NAVY = '#164374'
 const TEAL = '#0083A1'

@@ -27,19 +27,23 @@ function pmf(kind, prm) {
   return []
 }
 
-function pdf(kind, prm) {
+function density(kind, prm) {
   const { mu = 0, sigma = 1, a = 0, b = 1 } = prm
-  const lo = kind === 'uniform' ? a - (b - a) * 0.4 : mu - 4 * sigma
-  const hi = kind === 'uniform' ? b + (b - a) * 0.4 : mu + 4 * sigma
-  const pts = []
-  for (let i = 0; i <= 240; i++) {
-    const x = lo + ((hi - lo) * i) / 240
-    let y
-    if (kind === 'uniform') y = x >= a && x <= b ? 1 / (b - a) : 0
-    else y = Math.exp(-((x - mu) ** 2) / (2 * sigma * sigma)) / (sigma * Math.sqrt(2 * Math.PI))
-    pts.push([x, y])
-  }
-  return pts
+  if (kind === 'uniform') return (x) => (x >= a && x <= b ? 1 / (b - a) : 0)
+  return (x) => Math.exp(-((x - mu) ** 2) / (2 * sigma * sigma)) / (sigma * Math.sqrt(2 * Math.PI))
+}
+
+function pdfRange(kind, prm) {
+  const { mu = 0, sigma = 1, a = 0, b = 1 } = prm
+  return kind === 'uniform' ? [a - (b - a) * 0.4, b + (b - a) * 0.4] : [mu - 4 * sigma, mu + 4 * sigma]
+}
+
+function sample(f, lo, hi, n = 240) {
+  return Array.from({ length: n + 1 }, (_, i) => { const x = lo + ((hi - lo) * i) / n; return [x, f(x)] })
+}
+
+function pdf(kind, prm, range = pdfRange(kind, prm)) {
+  return sample(density(kind, prm), range[0], range[1])
 }
 
 export async function mount(el, { d3, params, steps }) {
@@ -66,19 +70,37 @@ export async function mount(el, { d3, params, steps }) {
     return prm
   }
 
+  // A sweep keeps ONE frame for all its steps. Rescaling the axes per step
+  // would hide exactly what the sweep is meant to show: a normal density
+  // rescaled to μ ± 4σ looks identical for every σ, and a binomial drawn on
+  // 0…n hides that its absolute spread grows with √n.
+  const all = sweep?.values?.length ? sweep.values.map((_, i) => paramsAt(i)) : null
+  const frame = !all ? null : discrete
+    ? {
+        xs: [...new Set(all.flatMap((q) => pmf(kind, q).map((d) => d[0])))].sort((u, v) => u - v),
+        ymax: d3.max(all, (q) => d3.max(pmf(kind, q), (d) => d[1])),
+      }
+    : {
+        range: [d3.min(all, (q) => pdfRange(kind, q)[0]), d3.max(all, (q) => pdfRange(kind, q)[1])],
+        ymax: d3.max(all, (q) => d3.max(pdf(kind, q), (d) => d[1])),
+      }
+
   function render(step) {
     const prm = paramsAt(step)
     plot.selectAll('*').remove()
 
     if (discrete) {
       const data = pmf(kind, prm)
-      const x = d3.scaleBand(data.map((d) => d[0]), [M.left, W - M.right]).padding(0.15)
-      const y = d3.scaleLinear([0, d3.max(data, (d) => d[1]) * 1.15], [H - M.bottom, M.top])
+      const xs = frame ? frame.xs : data.map((d) => d[0])
+      const x = d3.scaleBand(xs, [M.left, W - M.right]).padding(0.15)
+      const y = d3.scaleLinear([0, (frame ? frame.ymax : d3.max(data, (d) => d[1])) * 1.15], [H - M.bottom, M.top])
       plot.selectAll('rect').data(data).join('rect')
         .attr('x', (d) => x(d[0])).attr('width', x.bandwidth())
         .attr('y', (d) => y(d[1])).attr('height', (d) => y(0) - y(d[1]))
         .attr('fill', TEAL).attr('opacity', 0.85)
-      xAxis.call(d3.axisBottom(x).tickValues(x.domain().filter((_, i) => data.length <= 14 || i % 2 === 0)))
+      // at most ~13 labelled ticks, on round values (1, 2, 5, 10 …)
+      const every = xs.length <= 14 ? 1 : [2, 5, 10, 20, 50].find((k) => xs.length / k <= 13) ?? 100
+      xAxis.call(d3.axisBottom(x).tickValues(xs.filter((v) => v % every === 0)))
       yAxis.call(d3.axisLeft(y).ticks(4))
       caption.text(
         kind === 'binomial' ? `Binomial B(n = ${prm.n}, p = ${prm.p}) — probability mass`
@@ -87,14 +109,23 @@ export async function mount(el, { d3, params, steps }) {
         : 'Sum of two dice — probability mass',
       )
     } else {
-      const data = pdf(kind, prm)
+      const data = pdf(kind, prm, frame ? frame.range : undefined)
       const x = d3.scaleLinear(d3.extent(data, (d) => d[0]), [M.left, W - M.right])
-      const y = d3.scaleLinear([0, d3.max(data, (d) => d[1]) * 1.2], [H - M.bottom, M.top])
+      const y = d3.scaleLinear([0, (frame ? frame.ymax : d3.max(data, (d) => d[1])) * 1.2], [H - M.bottom, M.top])
       const area = d3.area().x((d) => x(d[0])).y0(y(0)).y1((d) => y(d[1]))
       if (params.shade) {
+        // sampled on [lo, hi] itself, so the shaded edge sits exactly on lo/hi
         const [lo, hi] = params.shade
-        plot.append('path').datum(data.filter((d) => d[0] >= lo && d[0] <= hi))
+        const f = density(kind, prm)
+        const pts = sample(f, lo, hi, 400)
+        const mass = d3.sum(pts.slice(1), (d, i) => ((d[1] + pts[i][1]) / 2) * (d[0] - pts[i][0]))
+        plot.append('path').datum(pts)
           .attr('d', area).attr('fill', TEAL).attr('opacity', step >= 1 ? 0.35 : 0)
+        plot.append('text')
+          .attr('x', x((lo + Math.min(hi, x.domain()[1])) / 2)).attr('y', y(d3.max(pts, (d) => d[1])) - 12)
+          .attr('text-anchor', 'middle').attr('font-size', 17).attr('fill', TEAL)
+          .attr('opacity', step >= 1 ? 1 : 0)
+          .text(`area ≈ ${mass.toFixed(3)}`)
       }
       plot.append('path').datum(data)
         .attr('d', d3.line().x((d) => x(d[0])).y((d) => y(d[1])))

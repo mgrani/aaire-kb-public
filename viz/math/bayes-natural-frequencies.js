@@ -23,6 +23,7 @@ export async function mount(el, { d3, params, steps }) {
   const truePos = Math.round(sick * (params.sensitivity ?? 0.99)) || 1
   const falsePos = Math.round((N - sick) * (1 - (params.specificity ?? 0.99)))
   const positives = truePos + falsePos
+  const flagRate = Math.round(100 * (1 - (params.specificity ?? 0.99)))
 
   const cols = 40
   const rows = Math.ceil(N / cols)
@@ -32,7 +33,7 @@ export async function mount(el, { d3, params, steps }) {
   const dy = 13
   const gridW = cols * dx
   const x0 = (W - gridW) / 2 + dx / 2
-  const y0 = 78
+  const y0 = 86
 
   // Sick people first in reading order, then the false positives, so the
   // groups stay visually contiguous and countable.
@@ -70,8 +71,10 @@ export async function mount(el, { d3, params, steps }) {
   const STATES = [
     { caption: `${N.toLocaleString()} people`, result: '' },
     { caption: `About ${sick} in ${N.toLocaleString()} is actually sick`, result: 'prior' },
-    { caption: `The test also flags ~1% of the ${(N - sick).toLocaleString()} healthy people`, result: 'flag' },
-    { caption: `${positives} people test positive — only ${truePos} of them is sick`, result: 'restrict' },
+    { caption: `The test also flags ~${flagRate}% of the ${(N - sick).toLocaleString()} healthy people`, result: 'flag' },
+    // step 3 must not give the answer away: the notes ask the room
+    // "how many of these are sick?" before the last click
+    { caption: 'Keep only the people who tested positive', result: 'restrict' },
     { caption: 'Restricting to the positives is exactly the conditioning step', result: 'answer' },
   ]
 
@@ -99,7 +102,7 @@ export async function mount(el, { d3, params, steps }) {
     if (s.result === 'answer') {
       result.text(`P(sick | positive) = ${truePos}/${positives} ≈ ${Math.round((100 * truePos) / positives)}%`)
     } else if (s.result === 'restrict') {
-      result.text(`${truePos} sick + ${falsePos} healthy = ${positives} positive tests`)
+      result.text(`${positives} positive tests — how many of them are sick?`)
     } else if (s.result === 'flag') {
       result.text(`≈ ${falsePos} false alarms`)
     } else if (s.result === 'prior') {

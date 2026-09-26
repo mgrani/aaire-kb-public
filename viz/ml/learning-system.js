@@ -11,7 +11,8 @@
 //         "inference"   — the trained model on unseen input; training parts recede
 //         "uncertainty" — the finished figure, with one source of uncertainty
 //                         highlighted per step
-//   stage: starting stage for "build" (default 0)
+//   stage: starting stage for "build" (default 0); steps count on from it, so
+//          stage 2 with data-steps="2" resumes the build at the loss
 
 const NAVY = '#164374'
 const TEAL = '#0083A1'
@@ -23,6 +24,11 @@ const INK = '#3a3a3a'
 const DIM = 0.16
 
 const W = 980, H = 500
+
+// Marker ids must be unique per mounted instance: a deck mounts this figure
+// several times, and url(#id) resolves to the first element with that id —
+// which sits on a hidden (display:none) slide, so the arrowheads vanish.
+let instances = 0
 
 // stage at which each element appears
 const NODES = [
@@ -70,13 +76,16 @@ const UNCERTAINTY = [
 
 export async function mount(el, { d3, params, steps, isPrint }) {
   const mode = params.mode ?? 'build'
+  const stage0 = params.stage ?? 0
+  const uid = `ls${++instances}`
+  const mk = (id) => `url(#${id}-${uid})`
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
   const byId = Object.fromEntries(NODES.map((n) => [n.id, n]))
 
   // arrowheads
   const defs = svg.append('defs')
   for (const [id, colour] of [['a-navy', NAVY], ['a-teal', TEAL], ['a-dim', RULE], ['a-violet', VIOLET]]) {
-    defs.append('marker').attr('id', id).attr('viewBox', '0 0 10 10')
+    defs.append('marker').attr('id', `${id}-${uid}`).attr('viewBox', '0 0 10 10')
       .attr('refX', 9).attr('refY', 5).attr('markerWidth', 7).attr('markerHeight', 7)
       .attr('orient', 'auto-start-reverse')
       .append('path').attr('d', 'M0,0 L10,5 L0,10 z').attr('fill', colour)
@@ -128,7 +137,10 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       const a = byId[e.from], b = byId[e.to]
       const mx = (a.x + a.w / 2 + b.x + b.w / 2) / 2
       const my = (a.y + a.h / 2 + b.y + b.h / 2) / 2
-      d3.select(this).attr('x', mx).attr('y', my - 9).text(e.label)
+      // a vertical edge gets its label beside the line, not across it
+      const vertical = Math.abs(a.x + a.w / 2 - (b.x + b.w / 2)) < 2
+      d3.select(this).attr('x', vertical ? mx + 10 : mx).attr('y', vertical ? my + 4 : my - 9)
+        .attr('text-anchor', vertical ? 'start' : 'middle').text(e.label)
     })
 
   const nodes = nodeLayer.selectAll('g').data(NODES).join('g')
@@ -163,19 +175,22 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   function render(step) {
     if (mode === 'build') {
-      const stage = isPrint ? 4 : step
+      // params.stage offsets the steps, so a later slide can resume the build
+      // (print too: a slide with data-steps="0" shows only the real world)
+      const stage = Math.min(stage0 + step, 4)
       nodes.attr('opacity', (n) => (n.at <= stage ? 1 : 0))
         .select('rect').attr('stroke', stroke)
       edges.attr('opacity', (e) => (e.at <= stage ? 1 : 0))
       edges.select('path')
         .attr('stroke', (e) => (e.at >= 3 ? VIOLET : NAVY))
-        .attr('marker-end', (e) => `url(#${e.at >= 3 ? 'a-violet' : 'a-navy'})`)
+        .attr('marker-end', (e) => mk(e.at >= 3 ? 'a-violet' : 'a-navy'))
       realZone.attr('opacity', 1); realLabel.attr('opacity', 1)
       modelZone.attr('opacity', stage >= 1 ? 1 : 0); modelLabel.attr('opacity', stage >= 1 ? 1 : 0)
       caption.text(BUILD_CAPTIONS[Math.min(stage, BUILD_CAPTIONS.length - 1)])
       badge.attr('opacity', 0)
     } else if (mode === 'inference') {
-      const on = ['o', 'x', 'model', 'yhat']
+      // Θ stays: the model still uses its (now fixed) parameters
+      const on = ['o', 'x', 'model', 'yhat', 'theta']
       const live = isPrint || step >= 1
       nodes.attr('opacity', (n) => (!live ? 1 : on.includes(n.id) ? 1 : DIM))
         .select('rect').attr('stroke', stroke)
@@ -183,7 +198,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         if (!live) return 1
         return on.includes(e.from) && on.includes(e.to) ? 1 : DIM
       })
-      edges.select('path').attr('stroke', NAVY).attr('marker-end', 'url(#a-navy)')
+      edges.select('path').attr('stroke', NAVY).attr('marker-end', mk('a-navy'))
       caption.text(live
         ? 'Inference: a new, unseen situation follows one path — the training machinery is gone'
         : 'Training used every box; using the model does not')
@@ -197,12 +212,14 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         .attr('stroke', (n) => (cur && cur.ids.includes(n.id) ? '#d97706' : stroke(n)))
         .attr('stroke-width', (n) => (cur && cur.ids.includes(n.id) ? 3.5 : 2))
       edges.attr('opacity', cur ? 0.25 : 1)
+      edges.select('path').attr('stroke', (e) => (e.at >= 3 ? VIOLET : NAVY))
+        .attr('marker-end', (e) => mk(e.at >= 3 ? 'a-violet' : 'a-navy'))
       caption.text(cur ? cur.title : 'Uncertainty is not only in the prediction')
       badge.attr('opacity', cur ? 1 : 0)
       badgeText.text(cur ? cur.text : '')
     }
   }
 
-  render(isPrint ? (mode === 'build' ? 4 : mode === 'inference' ? 1 : UNCERTAINTY.length) : steps)
+  render(isPrint && mode !== 'build' ? (mode === 'inference' ? 1 : UNCERTAINTY.length) : steps)
   return { setStep: (i) => render(i) }
 }

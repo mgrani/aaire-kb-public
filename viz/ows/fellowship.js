@@ -18,7 +18,12 @@ const WHITE = '#ffffff'
 
 const ACTIONS = ['decompose', 'search', 'reformulate', 'extract', 'synthesise', 'verify', 'finish']
 
+// Marker ids must be unique per mounted instance: url(#id) resolves to the
+// first element with that id, which may sit on a hidden slide.
+let instances = 0
+
 export async function mount(el, { d3, params, steps, isPrint }) {
+  const arrowId = `fw-arrow-${++instances}`
   const cfg = Object.assign({ actions: ACTIONS }, params)
   const W = 1000, H = 430
 
@@ -26,7 +31,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .attr('aria-label', 'A large teacher model produces search trajectories; accepted ones are labelled with seven retrieval actions and used to train a small student model that then drives the loop')
     .attr('font-family', 'Arial, Helvetica, sans-serif')
 
-  svg.append('defs').append('marker').attr('id', 'fw-arrow').attr('viewBox', '0 0 10 10')
+  svg.append('defs').append('marker').attr('id', arrowId).attr('viewBox', '0 0 10 10')
     .attr('refX', 9).attr('refY', 5).attr('markerWidth', 7).attr('markerHeight', 7)
     .attr('orient', 'auto-start-reverse')
     .append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z').attr('fill', SOFT)
@@ -37,7 +42,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   const arrow = (g, x1, y1, x2, y2) =>
     g.append('path').attr('d', `M ${x1} ${y1} L ${x2} ${y2}`).attr('stroke', SOFT)
-      .attr('stroke-width', 1.6).attr('fill', 'none').attr('marker-end', 'url(#fw-arrow)')
+      .attr('stroke-width', 1.6).attr('fill', 'none').attr('marker-end', `url(#${arrowId})`)
 
   const stage = (g, x, y, w, h, colour, title, big, small) => {
     g.append('rect').attr('x', x).attr('y', y).attr('width', w).attr('height', h).attr('rx', 9)

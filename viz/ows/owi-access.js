@@ -23,7 +23,12 @@ const DEFAULTS = {
   strip: 'NoDocsNoDict reads the postings and nothing else: most queries 5–10 s, a full topic set in 10–15 min, 45 s with the storage 650 km away.',
 }
 
+// Marker ids must be unique per mounted instance: url(#id) resolves to the
+// first element with that id, which may sit on a hidden slide.
+let instances = 0
+
 export async function mount(el, { d3, params, steps, isPrint }) {
+  const arrowId = `oa-arrow-${++instances}`
   const cfg = Object.assign({}, DEFAULTS, params)
   const W = 1000, H = 372
 
@@ -43,7 +48,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       .attr('font-weight', weight).attr('text-anchor', anchor)
       .attr('font-family', family || 'Arial, Helvetica, sans-serif').text(t)
 
-  svg.append('defs').append('marker').attr('id', 'oa-arrow').attr('viewBox', '0 0 10 10')
+  svg.append('defs').append('marker').attr('id', arrowId).attr('viewBox', '0 0 10 10')
     .attr('refX', 9).attr('refY', 5).attr('markerWidth', 6).attr('markerHeight', 6)
     .attr('orient', 'auto-start-reverse')
     .append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z').attr('fill', SOFT)
@@ -57,7 +62,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   // ── route 1: pull a partition ──────────────────────────────────────────────
   const gPull = svg.append('g')
   gPull.append('path').attr('d', 'M 240 48 L 240 74').attr('stroke', SOFT).attr('stroke-width', 1.4)
-    .attr('fill', 'none').attr('marker-end', 'url(#oa-arrow)')
+    .attr('fill', 'none').attr('marker-end', `url(#${arrowId})`)
   gPull.append('rect').attr('x', 140).attr('y', 76).attr('width', 200).attr('height', 24).attr('rx', 12).attr('fill', TEAL)
   label(gPull, 240, 93, '1 · pull the partition', 13, WHITE, 700, 'middle')
 
@@ -76,7 +81,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   // ── route 2: query it where it lies ────────────────────────────────────────
   const gQuery = svg.append('g')
   gQuery.append('path').attr('d', 'M 760 48 L 760 74').attr('stroke', SOFT).attr('stroke-width', 1.4)
-    .attr('fill', 'none').attr('marker-end', 'url(#oa-arrow)')
+    .attr('fill', 'none').attr('marker-end', `url(#${arrowId})`)
   gQuery.append('rect').attr('x', 640).attr('y', 76).attr('width', 240).attr('height', 24).attr('rx', 12).attr('fill', VIOLET)
   label(gQuery, 760, 93, '2 · query it where it lies', 13, WHITE, 700, 'middle')
 
@@ -103,7 +108,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   label(gQuery, 550, 279, 'DuckDB, on your side · BM25 written as SQL', 13, VIOLET, 700)
   label(gQuery, 550, 294, 'reads only the postings a query touches; the ranking is yours to change', 11.5, SOFT)
   gQuery.append('path').attr('d', 'M 760 262 L 760 250').attr('stroke', SOFT).attr('stroke-width', 1.4)
-    .attr('fill', 'none').attr('marker-end', 'url(#oa-arrow)')
+    .attr('fill', 'none').attr('marker-end', `url(#${arrowId})`)
 
   // ── the timing strip ───────────────────────────────────────────────────────
   const gStrip = svg.append('g')
