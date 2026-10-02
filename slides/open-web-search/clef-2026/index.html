@@ -17,7 +17,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..BQYpvfS-.css"></head><body><a class="deck-download" href="/slides/open-web-search/clef-2026/clef-2026.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..Cyi0QiMY.css"></head><body><a class="deck-download" href="/slides/open-web-search/clef-2026/clef-2026.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 ## Beyond Open Models: Building Open Web Search Infrastructure for AI Agents
 
@@ -52,6 +52,7 @@ Open-source language models are becoming increasingly capable and accessible. Ye
 
 
 ---
+
 
 <!-- .slide: class="smaller" -->
 
@@ -153,7 +154,6 @@ Semrush clickstream analysis, Apr 2026 · Chatterji et al., *How People Use Chat
 Notes:
 Open on the provocation the room has heard all year: search is dead, the chat box replaced it. Show the box. Then show what is behind the box: web search is one of the tools, switched on by default in most assistants. Then the numbers, all verified. Semrush measured on more than a billion clickstream lines that ChatGPT enabled web search on about a third of its queries in February 2026, down from 46 percent in late 2024. OpenAI's own usage study says information seeking grew from 14 to 24 percent of usage in a year and calls it a very close substitute for web search. On BrowseComp-Plus, GPT-5 and o3 issue between 20 and 26 search calls per question. The interface changed; the search engine underneath did not go away, it got busier, and its user is now a machine.
 → next: what that system looks like when you take it apart.
-
 --
 
 <!-- .slide: class="smaller" -->
@@ -468,6 +468,7 @@ The facts, with sources. Everything below was checked against vendor documentati
 
 → next: what is actually underneath all of them.
 
+
 --
 
 <!-- .slide: class="smaller" -->
@@ -572,7 +573,6 @@ Photographs: J. Herzog CC BY-SA 3.0 · ITER Organization CC BY 2.0 · NASA/MSFC/
 Notes:
 Do not rush this slide; it is the emotional turn of the first topic and it works by comparison. Define research sovereignty once, as methodological autonomy, and use it exactly that way for the rest of the talk. Then spend most of the time on the top row, because everyone in the room already accepts it. Particle physics did not ask a company for an accelerator, it built one with twenty-five member states. Fusion is the same argument at a larger scale: thirty-five nations, one reactor, because the thing is too expensive and too long-lived for any single owner. Webb is three space agencies flying one telescope, and the reason it counts here is the archive: the observations become public data that anybody can re-analyse, which is what makes the instrument a scientific instrument rather than a product. Copernicus is the same idea for the climate, with a free and open data policy written into the programme. Say the shared property out loud: in each case the community that depends on the instrument also owns and operates it, and the data is a public good by design. Then drop to the second row and let it land without commentary. The instruments our field depends on are the web index and the ranking, the social record, the model and dataset hub, and the place the code lives. Every one of them is a company. Nobody chose this and nobody is being accused of anything; it is simply where the field ended up. End on the question, and pause on it.
 → next: here is what did go wrong.
-
 --
 
 ## What could go wrong
@@ -615,6 +615,7 @@ This is the answer to the question on the previous slide, and the timeline is de
 
 **The GPT-4 entry, quoted rather than characterised.** The technical report says it itself: "Given both the competitive landscape and the safety implications of large-scale models like GPT-4, this report contains no further details about the architecture (including model size), hardware, training compute, dataset construction, training method, or similar." Read the first three words of the reason aloud, because they are the same reason the Archive Query Log paper gives for query logs: competition. Use this entry rather than the organisation's shift from non-profit lab to company. Every other stop on this timeline is a resource researchers used being withdrawn, priced or bought, and the disclosure decision fits that pattern while the corporate history does not. It is also their own sentence, so nobody can argue with the characterisation. And it connects back two slides: openness at the model layer was shown as a menu, and this is the moment the top of that menu closed. Lead with GitHub rather than with Hugging Face, because it makes the point without anyone having to take a position on a deal from this month. In 2018 Microsoft bought the place where research software lives, for 7.5 billion dollars, and the announcement promised that GitHub "will operate independently to provide an open platform for all developers". That is word for word the commitment NVIDIA and Hugging Face are making now about the place where models and datasets live. Be fair about both: there is no reason to doubt either intent. The risk is structural: one owner, one jurisdiction, one business model, and a community with no fallback. The Twitter case has numbers: after the paywall the number of Twitter-based studies dropped by 13 percent and about 60 percent of surveyed projects stalled or pivoted. This is the argument for building the substrate rather than renting it, not a geopolitical claim. Then be concrete about what a jointly managed public good looks like, because the audience will ask for examples beyond CERN. Zenodo is the best one for this room: it runs on CERN, it is funded by CERN, OpenAIRE and the European Union, and it describes itself as a viable and concrete alternative to commercial services. EuroHPC is the compute example, and it is the machine our own index runs on. If someone wants the general form, it is the European Research Infrastructure Consortium, the legal instrument behind ELIXIR, CLARIN and DARIAH; check the list before naming them from the stage. Then land the last line: none of these covers the web itself, which is the gap the next slide is about.
 → next: so we built it.
+
 
 --
 
@@ -869,7 +870,6 @@ Goal: show that this is a running service with its own front door, not a promise
 
 The screenshots were taken on 21 September 2026; take them again on the day if any number is going to be spoken aloud.
 → next: and the two ways to get at the data itself.
-
 --
 
 <!-- .slide: class="smaller" -->
@@ -893,6 +893,7 @@ The screenshots were taken on 21 September 2026; take them again on the day if a
 Notes:
 Two ways in. The first is the surprising one: the index is published as compressed Parquet files on ordinary object storage, and a client runs BM25 over them with DuckDB, reading only the postings a query touches. There is no search service in between and no institution has to host a copy, and because the ranking runs on your side the retrieval model, the snapshot and the sub-collection are all yours to change. Walk the file listing in one breath: every schema in the paper removes one join, and the leanest removes both. The dictionary maps terms to ids and holds document frequency, and it can go because Parquet already encodes repeated values and because document frequency is just the number of postings you downloaded — which also means two indexes merge by union instead of by rewriting term ids. Document lengths can go because the ranking stores impact scores instead of term frequencies; `docs` is still joined at the end, for the metadata of the top results only, which skips most of the file. Then the numbers: five to ten seconds for most queries with the leanest schema, a whole TREC Web Track topic set in ten to fifteen minutes, everything inside 45 seconds with the storage 650 kilometres away. Scaling is gentle, ten times the collection costs about three times the time and only one and a half times the transfer, and the generic format is not a tax, because the Parquet index came out smaller than the dedicated one, 18 GiB against 21 on ClueWeb09-B. owilix is the frame around both routes, and the download route is the one people reach for first: it behaves like a package manager over the index, with git-style pull, build and push; the slicing is the point, because most experiments start from a partition by language, topic or site list rather than from everything. Say the line here: an API lets researchers query someone else's experiment, bulk access lets researchers define their own.
 → next: the hosted service.
+
 
 --
 
@@ -991,8 +992,9 @@ Notes:
 OURRS, two Rs. There is no paper; give the URL and the measurement date. Play thirty seconds. Then the research angle, which is the reason it exists: an agent cannot search a shard on disk, it needs a service it can call repeatedly. Snapshot id in every response, configurable ranking, corpus isolation so that ranking statistics do not leak between experiments, one API for people, applications and agents, and logging by design. Say "early prototype" out loud, and say that it is self-hostable, so a lab can run its own instrumented instance.
 → next: what this community already does well, and what it needs.
 
-
 --
+
+<!-- .slide: class="smaller" -->
 
 ## Where the OWI goes next
 
@@ -1061,8 +1063,6 @@ starting with misinformation and disinformation detection.
 Hendriksen, Hiemstra, Lin, de Vries, *Geese Belong in (Data) Lakes: An Index Lake for Anserini*, CIKM 2026.
 
 </div>
-
-
 
 <!-- .slide: class="smaller" 
 
@@ -2344,6 +2344,7 @@ Two more findings if they are asked for. Participation is grotesquely unequal: t
 The lesson to carry into the rest of the topic: collaboration among agents needs a purpose, and the purpose comes from a task, from retrieval, and from the people the work is for.
 → next: what a purposeful shared structure looks like.
 
+
 --
 
 <!-- .slide: class="smaller" -->
@@ -2418,7 +2419,6 @@ The pooling line connects back to Topic 3: one group's agents produce too few cl
 
 Retake the screenshot on the talk day; the opinion count moves.
 → next: and does any of it actually help retrieval?
-
 --
 
 <!-- .slide: class="smaller" -->
@@ -2640,6 +2640,7 @@ Not one of the four could be tested without operating the system. Models may bec
 Notes:
 One sentence each, with the strongest evidence from the talk: the landscape for the first, the CoRECT chart for the second, the trace corpus and the agent-user problem for the third, the agent social network for the fourth. Then close the loop with the opening hypothesis: every one of these is a claim we could only test because we built the thing and ran it. Then the closing line, and stop.
 
+
 --
 
 ## Let's build this together
@@ -2696,7 +2697,6 @@ The OpenWebSearch.EU consortium; the Passau Data Science group: S. Zerhoudi, M. 
 
 Notes:
 Leave the slide up during questions, and say the last line out loud rather than letting it sit there: there is a community page, it is open to anyone in the room, and joining it is the cheapest way to stay attached to the index after the talk.
-
 --
 
 <!-- .slide: class="credits-slide" -->
@@ -3502,6 +3502,7 @@ Backup slide: the two searcher models side by side, with the four departures mar
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 
+      function startDeck() {
       Reveal.initialize({
         // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
         // wrap a part of a formula in a colour slot; trust:true is required
@@ -3568,6 +3569,50 @@ Backup slide: the two searcher models side by side, with the four departures mar
         });
         Reveal.sync();
       });
+      }
+
+      // Protected decks (see _lib/protect.ts): decrypt the markdown with the
+      // passphrase, put it where RevealMarkdown reads it, then start. The
+      // passphrase is remembered for this tab only, so reloads and print view
+      // do not ask again.
+      async function decryptDeck(box, pass) {
+        const bytes = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+        const subtle = window.crypto.subtle;
+        const base = await subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+        const key = await subtle.deriveKey(
+          { name: "PBKDF2", salt: bytes(box.salt), iterations: box.iterations, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+        const plain = await subtle.decrypt({ name: "AES-GCM", iv: bytes(box.iv) }, key, bytes(box.ct));
+        return new TextDecoder().decode(plain);
+      }
+
+      function unlockDeck(box) {
+        const form = document.getElementById("deck-lock");
+        const input = document.getElementById("deck-pass");
+        const error = form.querySelector(".deck-lock-error");
+        const storeKey = `deck-pass:${window.location.pathname}`;
+        const open = async (pass, remembered) => {
+          try {
+            const markdown = await decryptDeck(box, pass);
+            document.querySelector(".reveal textarea[data-template]").textContent = markdown;
+            try { sessionStorage.setItem(storeKey, pass); } catch (e) {}
+            form.remove();
+            startDeck();
+          } catch (e) {
+            try { sessionStorage.removeItem(storeKey); } catch (e2) {}
+            if (!remembered) { error.hidden = false; input.select(); }
+          }
+        };
+        form.addEventListener("submit", (event) => { event.preventDefault(); open(input.value, false); });
+        let saved = null;
+        try { saved = sessionStorage.getItem(storeKey); } catch (e) {}
+        if (saved) open(saved, true);
+        else input.focus();
+      }
+
+      const cipherEl = document.getElementById("deck-cipher");
+      if (cipherEl) unlockDeck(JSON.parse(cipherEl.textContent));
+      else startDeck();
     </script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
 
     (() => {

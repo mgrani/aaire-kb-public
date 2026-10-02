@@ -17,7 +17,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..BQYpvfS-.css"></head><body><a class="deck-download" href="/slides/open-web-search/research/research.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..Cyi0QiMY.css"></head><body><a class="deck-download" href="/slides/open-web-search/research/research.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 ## The European Open Web Index — Current State and Perspective
 
@@ -2575,6 +2575,7 @@ OpenWebSearch.eu proves that a European open web index is technically feasible, 
 
       const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
 
+      function startDeck() {
       Reveal.initialize({
         // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
         // wrap a part of a formula in a colour slot; trust:true is required
@@ -2641,6 +2642,50 @@ OpenWebSearch.eu proves that a European open web index is technically feasible, 
         });
         Reveal.sync();
       });
+      }
+
+      // Protected decks (see _lib/protect.ts): decrypt the markdown with the
+      // passphrase, put it where RevealMarkdown reads it, then start. The
+      // passphrase is remembered for this tab only, so reloads and print view
+      // do not ask again.
+      async function decryptDeck(box, pass) {
+        const bytes = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+        const subtle = window.crypto.subtle;
+        const base = await subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+        const key = await subtle.deriveKey(
+          { name: "PBKDF2", salt: bytes(box.salt), iterations: box.iterations, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+        const plain = await subtle.decrypt({ name: "AES-GCM", iv: bytes(box.iv) }, key, bytes(box.ct));
+        return new TextDecoder().decode(plain);
+      }
+
+      function unlockDeck(box) {
+        const form = document.getElementById("deck-lock");
+        const input = document.getElementById("deck-pass");
+        const error = form.querySelector(".deck-lock-error");
+        const storeKey = `deck-pass:${window.location.pathname}`;
+        const open = async (pass, remembered) => {
+          try {
+            const markdown = await decryptDeck(box, pass);
+            document.querySelector(".reveal textarea[data-template]").textContent = markdown;
+            try { sessionStorage.setItem(storeKey, pass); } catch (e) {}
+            form.remove();
+            startDeck();
+          } catch (e) {
+            try { sessionStorage.removeItem(storeKey); } catch (e2) {}
+            if (!remembered) { error.hidden = false; input.select(); }
+          }
+        };
+        form.addEventListener("submit", (event) => { event.preventDefault(); open(input.value, false); });
+        let saved = null;
+        try { saved = sessionStorage.getItem(storeKey); } catch (e) {}
+        if (saved) open(saved, true);
+        else input.focus();
+      }
+
+      const cipherEl = document.getElementById("deck-cipher");
+      if (cipherEl) unlockDeck(JSON.parse(cipherEl.textContent));
+      else startDeck();
     </script><script>(function(){const MIN_FREE = 120;
 
   (() => {
