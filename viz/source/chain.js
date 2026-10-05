@@ -2,12 +2,12 @@
 //
 // Sources (Open Web Index crawl, social-media crawlers, user contributions)
 // feed actor and content analysis; the enriched items land in the search index
-// and the SOURCE analytics engine; the SOURCE harness puts an AI (LLM) agent,
+// and the SOURCE campaign analysis; the SOURCE harness puts an AI (LLM) agent,
 // DISARM/DISRUPT and the Alliance4Europe community around it and reaches into
 // social media directly; analysts work with it, and what they find flows back
 // as contributions. The last stage shows which institutions work where, as logos.
 //
-// stages: 0 sources · 1 analysis, index and analytics engine · 2 the harness and
+// stages: 0 sources · 1 analysis, index and campaign analysis · 2 the harness and
 //         the platforms it reads · 3 analysts and the loop · 4 institutions and
 //         the infrastructure underneath
 // params:
@@ -52,12 +52,12 @@ const BOXES = [
   { col: 'analysis', y: 50, h: 130, title: 'Actor analysis', sub: ['who posts it, who copies', 'it, how it spreads'], who: ['passau', 'kassel'] },
   { col: 'analysis', y: 195, h: 130, title: 'Content analysis', sub: ['AI-generated? manipulative?', 'factually wrong?'], who: ['kassel'] },
   { col: 'index', y: 50, h: 130, title: 'Search index', sub: ['web pages and posts,', 'analysis attached;', 'ourrs.eu'], who: ['passau'] },
-  { col: 'index', y: 195, h: 130, title: ['SOURCE analytics', 'engine'], sub: ['patterns, networks and', 'trends across the index'], who: ['passau'] },
+  { col: 'index', y: 195, h: 130, title: ['SOURCE campaign', 'analysis'], sub: ['patterns, networks and', 'trends across the index'], who: ['passau'] },
   { col: 'people', y: 40, h: 110, title: 'Social media', sub: ['Bluesky · Telegram', 'X · TikTok · …'], id: 'platforms' },
   { col: 'people', y: 175, h: 155, title: 'Analysts', sub: ['fact-checkers,', 'OSINT researchers,', 'journalists,', 'civil society'], id: 'analysts', stage: 3 },
 ]
 
-const HARNESS_ITEMS = ['AI / LLM agent', 'Automated social-media analysis', 'DISARM / DISRUPT framework', 'Alliance4Europe community']
+const HARNESS_ITEMS = ['YOARS collaboration platform', 'AI / LLM agent', 'Automated social-media analysis', 'DISARM / DISRUPT framework', 'Alliance4Europe community']
 
 export async function mount(el, { d3, params, steps, isPrint }) {
   const arrowId = `sc-arrow-${++instances}`
@@ -66,7 +66,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const W = 1100, H = 440
 
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', 'The SOURCE chain: web, social media and user contributions feed actor and content analysis, the search index and the SOURCE analytics engine; the SOURCE harness with its AI agent reads social media and supports the analysts, whose findings flow back as contributions')
+    .attr('aria-label', 'The SOURCE chain: web, social media and user contributions feed actor and content analysis, the search index and the SOURCE campaign analysis; the SOURCE harness with its AI agent and the YOARS collaboration platform reads social media and supports the analysts, whose findings flow back as contributions')
     .attr('font-family', 'Arial, Helvetica, sans-serif')
 
   svg.append('defs').append('marker').attr('id', arrowId).attr('viewBox', '0 0 10 10')
@@ -133,9 +133,9 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     text(g, c.x + 14, 81, 'an AI research assistant for', 13, '#c8d6e6')
     text(g, c.x + 14, 97, 'analysts · research prototype', 13, '#c8d6e6')
     HARNESS_ITEMS.forEach((t, i) => {
-      const y = 108 + i * 44
-      g.append('rect').attr('x', c.x + 12).attr('y', y).attr('width', c.w - 24).attr('height', 36).attr('rx', 6).attr('fill', WHITE)
-      text(g, c.x + 20, y + 23, t, 12.5, NAVY, 700)
+      const y = 106 + i * 36
+      g.append('rect').attr('x', c.x + 12).attr('y', y).attr('width', c.w - 24).attr('height', 30).attr('rx', 6).attr('fill', WHITE)
+      text(g, c.x + 20, y + 20, t, 12.5, NAVY, 700)
     })
     const strip = g.append('g')
     strip.append('rect').attr('x', c.x + 12).attr('y', 290).attr('width', c.w - 24).attr('height', 30).attr('rx', 6).attr('fill', WHITE)
