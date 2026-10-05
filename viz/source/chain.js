@@ -54,7 +54,7 @@ const BOXES = [
   { col: 'analysis', y: 40, h: 105, title: 'Actor analysis', sub: ['who posts it, who copies', 'it, how it spreads'], who: ['passau', 'kassel'] },
   { col: 'analysis', y: 165, h: 105, title: 'Content analysis', sub: ['AI-generated? manipulative?', 'factually wrong?'], who: ['kassel'] },
   { col: 'analysis', y: 290, h: 105, title: 'Indexing', sub: ['web pages and social-media', 'posts, analysis attached'], who: ['passau'] },
-  { col: 'index', y: 40, h: 105, title: ['Reverse image', 'search'], sub: ['a separate service'], dashed: true },
+  { col: 'index', y: 40, h: 105, title: ['Reverse image', 'search'], sub: ['separate service,', 'fed by the indexer'], dashed: true },
   { col: 'index', y: 165, h: 105, title: ['SOURCE campaign', 'analysis'], sub: ['across the index'], who: ['passau'] },
   { col: 'index', y: 290, h: 105, title: 'OURRS search', sub: ['web and social posts', 'ourrs.eu'], who: ['passau'] },
   { col: 'people', y: 40, h: 125, title: 'Social media', sub: ['Bluesky · Telegram', 'X · TikTok · …'], id: 'platforms' },
@@ -70,7 +70,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const W = 1100, H = 505
 
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', 'The SOURCE chain: web, social media and user contributions feed actor and content analysis; the web and social-media items are then indexed into the OURRS search service, which the campaign analysis reads; reverse image search is a separate service; the SOURCE harness with its AI agent and the YOARS collaboration platform reads social media and supports the analysts, whose findings flow back as contributions')
+    .attr('aria-label', 'The SOURCE chain: web, social media and user contributions feed actor and content analysis; the web and social-media items are then indexed into the OURRS search service, which the campaign analysis reads; reverse image search is a separate service fed by the indexer and used by the harness; the SOURCE harness with its AI agent and the YOARS collaboration platform reads social media and supports the analysts, whose findings flow back as contributions')
     .attr('font-family', 'Arial, Helvetica, sans-serif')
 
   svg.append('defs').append('marker').attr('id', arrowId).attr('viewBox', '0 0 10 10')
@@ -155,6 +155,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   arrow(gA1, 'M 205 342 C 222 342, 222 235, 238 235')
   arrow(gA1, 'M 337 270 L 337 288')
   arrow(gA1, 'M 435 342 L 468 342')
+  arrow(gA1, 'M 435 310 L 452 310 L 452 70 L 468 70') // the indexer feeds reverse image search
   arrow(gA1, 'M 557 290 L 557 272', true)
   const gA2 = svg.append('g') // search and services → harness, harness ↔ platforms
   ;[92, 217, 342].forEach((y) => arrow(gA2, `M 645 ${y} L 678 ${y}`))
