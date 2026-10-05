@@ -1,9 +1,10 @@
 // The SOURCE chain: from the open web to the analyst, and back.
 //
-// Sources (Open Web Index crawl, social-media crawlers, user contributions)
-// feed actor and content analysis; web and social-media items (not user
-// contributions) are then indexed into the OURRS search service, which the
-// SOURCE campaign analysis reads; reverse image search is a separate service;
+// Open Web Index feeds indexing; social-media crawlers feed indexing and content
+// analysis. Indexing and content analysis feed each other.
+// Content analysis and social-media crawlers feed actor analysis, which feeds
+// SOURCE campaign analysis. Indexing feeds campaign analysis, OURRS search and
+// reverse image search. User contributions feed only actor analysis;
 // the SOURCE harness puts an AI (LLM) agent,
 // DISARM/DISRUPT and the Alliance4Europe community around it and reaches into
 // social media directly; analysts work with it, and what they find flows back
@@ -51,12 +52,12 @@ const BOXES = [
   { col: 'sources', y: 40, h: 105, title: 'Open Web Index', sub: ['crawls the web, daily'], who: ['passau', 'lrz', 'osf'] },
   { col: 'sources', y: 165, h: 105, title: 'Social-media crawlers', sub: ['Bluesky · Telegram · …'], who: ['passau'] },
   { col: 'sources', y: 290, h: 105, title: 'User contributions', sub: ['tips, links, findings', 'not indexed'], who: ['osf'], id: 'contrib' },
-  { col: 'analysis', y: 40, h: 105, title: 'Actor analysis', sub: ['who posts it, who copies', 'it, how it spreads'], who: ['passau', 'kassel'] },
+  { col: 'analysis', y: 40, h: 105, title: 'Indexing', sub: ['web pages and social-media', 'posts, analysis attached'], who: ['passau'] },
   { col: 'analysis', y: 165, h: 105, title: 'Content analysis', sub: ['AI-generated? manipulative?', 'factually wrong?'], who: ['kassel'] },
-  { col: 'analysis', y: 290, h: 105, title: 'Indexing', sub: ['web pages and social-media', 'posts, analysis attached'], who: ['passau'] },
+  { col: 'analysis', y: 290, h: 105, title: 'Actor analysis', sub: ['who posts it, who copies', 'it, how it spreads'], who: ['passau', 'kassel'] },
   { col: 'index', y: 40, h: 105, title: ['Reverse image', 'search'], sub: ['separate service,', 'fed by the indexer'], dashed: true },
-  { col: 'index', y: 165, h: 105, title: ['SOURCE campaign', 'analysis'], sub: ['across the index'], who: ['passau'] },
-  { col: 'index', y: 290, h: 105, title: 'OURRS search', sub: ['web and social posts', 'ourrs.eu'], who: ['passau'] },
+  { col: 'index', y: 165, h: 105, title: 'OURRS search', sub: ['web and social posts', 'ourrs.eu'], who: ['passau'] },
+  { col: 'index', y: 290, h: 105, title: ['SOURCE campaign', 'analysis'], sub: ['indexed content and actors'], who: ['passau'] },
   { col: 'people', y: 40, h: 125, title: 'Social media', sub: ['Bluesky · Telegram', 'X · TikTok · …'], id: 'platforms' },
   { col: 'people', y: 190, h: 205, title: 'Analysts', sub: ['fact-checkers,', 'OSINT researchers,', 'journalists,', 'civil society'], id: 'analysts', stage: 3 },
 ]
@@ -70,7 +71,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const W = 1100, H = 505
 
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', 'The SOURCE chain: web, social media and user contributions feed actor and content analysis; the web and social-media items are then indexed into the OURRS search service, which the campaign analysis reads; reverse image search is a separate service fed by the indexer and used by the harness; the SOURCE harness with its AI agent and the YOARS collaboration platform reads social media and supports the analysts, whose findings flow back as contributions')
+    .attr('aria-label', 'The SOURCE chain: the Open Web Index feeds indexing; social-media crawlers feed indexing, content analysis and actor analysis; indexing and content analysis feed each other; content analysis feeds actor analysis; user contributions feed only actor analysis; actor analysis feeds SOURCE campaign analysis; indexing feeds campaign analysis, OURRS search and reverse image search; the SOURCE harness reads these services and social media and supports analysts, whose findings flow back as contributions')
     .attr('font-family', 'Arial, Helvetica, sans-serif')
 
   svg.append('defs').append('marker').attr('id', arrowId).attr('viewBox', '0 0 10 10')
@@ -149,14 +150,19 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   }
 
   // ── flow arrows ────────────────────────────────────────────────────────────
-  const gA1 = svg.append('g') // sources → analysis → indexing (contributions are analysed, not indexed)
-  arrow(gA1, 'M 205 92 C 222 92, 222 155, 238 155')
-  arrow(gA1, 'M 205 217 C 222 217, 222 155, 238 155')
-  arrow(gA1, 'M 205 342 C 222 342, 222 235, 238 235')
-  arrow(gA1, 'M 337 270 L 337 288')
-  arrow(gA1, 'M 435 342 L 468 342')
-  arrow(gA1, 'M 435 310 L 452 310 L 452 70 L 468 70') // the indexer feeds reverse image search
-  arrow(gA1, 'M 557 290 L 557 272', true)
+  const gA1 = svg.append('g') // sources → indexing/content → actors; indexing and actors → services
+  arrow(gA1, 'M 205 75 L 238 75') // Open Web Index → indexing
+  arrow(gA1, 'M 205 185 C 228 185, 228 115, 238 115') // social-media crawlers → indexing
+  arrow(gA1, 'M 205 217 L 238 217') // social-media crawlers → content analysis
+  arrow(gA1, 'M 205 250 C 222 250, 222 310, 238 310') // social-media crawlers → actor analysis
+  arrow(gA1, 'M 205 342 L 238 342') // user contributions → actor analysis only
+  arrow(gA1, 'M 322 165 L 322 147') // content analysis → indexing (up)
+  arrow(gA1, 'M 352 145 L 352 163') // indexing → content analysis (down)
+  arrow(gA1, 'M 337 270 L 337 288') // content analysis → actor analysis
+  arrow(gA1, 'M 435 75 L 468 75') // indexing → reverse image search
+  arrow(gA1, 'M 435 105 L 459 105 L 459 217 L 468 217') // indexing → OURRS search
+  arrow(gA1, 'M 435 130 L 448 130 L 448 310 L 468 310') // indexing → campaign analysis
+  arrow(gA1, 'M 435 360 L 468 360') // actor analysis → campaign analysis
   const gA2 = svg.append('g') // search and services → harness, harness ↔ platforms
   ;[92, 217, 342].forEach((y) => arrow(gA2, `M 645 ${y} L 678 ${y}`))
   arrow(gA2, 'M 917 102 L 948 102', true)
