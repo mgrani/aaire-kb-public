@@ -20,6 +20,10 @@
 //   state:   { corpus, index, ranking, api: "open" | "closed" | "unknown" } —
 //            pills on the back-end layers (stage >= 1).
 //   caption: false hides the caption under the columns.
+//   endpoints: true draws the opened retrieval column (stage >= 1) as many
+//            search endpoints instead of one back-end: local ones on the
+//            user's device, remote services the agent is given, and web
+//            search, with OURRS over the Open Web Index among them.
 // steps: 4 — step i draws stage i.
 
 const NAVY = '#164374'
@@ -55,6 +59,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const focus = params.focus == null ? null : new Set([].concat(params.focus))
   const state = Object.assign({ corpus: 'unknown', index: 'unknown', ranking: 'unknown', api: 'unknown' }, params.state ?? {})
   const showCaption = params.caption !== false
+  const endpoints = params.endpoints === true
   const fixedStage = Number.isFinite(params.stage) ? Math.max(0, Math.min(3, params.stage)) : null
 
   const svg = d3.select(el).append('svg')
@@ -161,26 +166,55 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   // ---- retrieval: the four layers (stage 1) -------------------------------
   const s1 = layer(1, 'retrieval')
-  box(s1, BE.x, BE.y, BE.w, BE.h, { fill: SURFACE })
-  label(s1, BE.x + BE.w / 2, BE.y + 26, 'web search back-end', { size: 16 })
-  const LAYERS = [
-    { key: 'api', text: 'API', sub: 'what an agent can call' },
-    { key: 'ranking', text: 'ranking', sub: 'which results come first' },
-    { key: 'index', text: 'index', sub: 'what is retrievable, and how' },
-    { key: 'corpus', text: 'corpus', sub: 'what was crawled, and when' },
-  ]
-  const LH = 52, LGAP = 10, LY0 = BE.y + 42
-  LAYERS.forEach((b, i) => {
-    const y = LY0 + i * (LH + LGAP)
-    box(s1, BE.x + 16, y, BE.w - 32, LH, { fill: WHITE, stroke: TEAL, sw: 1.5, rx: 6 })
-    label(s1, BE.x + 32, y + 22, b.text, { size: 14, anchor: 'start', fill: TEAL })
-    label(s1, BE.x + 32, y + 39, b.sub, { size: 11, weight: 400, anchor: 'start', fill: INK_SOFT })
-    pill(s1, BE.x + BE.w - 28, y + 26, state[b.key])
-  })
+  if (endpoints) drawEndpoints(s1)
+  else {
+    box(s1, BE.x, BE.y, BE.w, BE.h, { fill: SURFACE })
+    label(s1, BE.x + BE.w / 2, BE.y + 26, 'web search back-end', { size: 16 })
+    const LAYERS = [
+      { key: 'api', text: 'API', sub: 'what an agent can call' },
+      { key: 'ranking', text: 'ranking', sub: 'which results come first' },
+      { key: 'index', text: 'index', sub: 'what is retrievable, and how' },
+      { key: 'corpus', text: 'corpus', sub: 'what was crawled, and when' },
+    ]
+    const LH = 52, LGAP = 10, LY0 = BE.y + 42
+    LAYERS.forEach((b, i) => {
+      const y = LY0 + i * (LH + LGAP)
+      box(s1, BE.x + 16, y, BE.w - 32, LH, { fill: WHITE, stroke: TEAL, sw: 1.5, rx: 6 })
+      label(s1, BE.x + 32, y + 22, b.text, { size: 14, anchor: 'start', fill: TEAL })
+      label(s1, BE.x + 32, y + 39, b.sub, { size: 11, weight: 400, anchor: 'start', fill: INK_SOFT })
+      pill(s1, BE.x + BE.w - 28, y + 26, state[b.key])
+    })
+  }
   box(s1, WEB.x, WEB.y, WEB.w, WEB.h, { fill: SURFACE2, stroke: INK_SOFT, sw: 1.2, rx: 6 })
   label(s1, WEB.x + WEB.w / 2, WEB.y + 20, 'the web', { size: 14, fill: INK_SOFT })
   label(s1, WEB.x + WEB.w / 2, WEB.y + 36, 'dynamic · multilingual · duplicated · contradictory', { size: 11, weight: 400, fill: INK_SOFT })
   arrow(s1, `M${WEB.x + WEB.w / 2},${WEB.y - 2} L${WEB.x + WEB.w / 2},${BE.y + BE.h + 2}`, { sw: 1.5 })
+
+  // many endpoints instead of one back-end: grouped by where they run, the
+  // web ones nearest the web they index
+  function drawEndpoints(g) {
+    box(g, BE.x, BE.y, BE.w, BE.h, { fill: SURFACE })
+    label(g, BE.x + BE.w / 2, BE.y + 26, 'many search endpoints', { size: 16 })
+    const GROUPS = [
+      { tag: 'local', sub: 'on the user’s device', apis: [['my files', null], ['my code', null]] },
+      { tag: 'remote', sub: 'services the agent is given', apis: [['a library', null], ['a company index', null]] },
+      { tag: 'web', sub: 'open and commercial', apis: [['OURRS · OWI', 'open'], ['web search API', 'closed']] },
+    ]
+    const GH = 76, GGAP = 8, GY0 = BE.y + 42, CW = (BE.w - 32 - 36) / 2
+    GROUPS.forEach((grp, i) => {
+      const y = GY0 + i * (GH + GGAP)
+      box(g, BE.x + 16, y, BE.w - 32, GH, { fill: WHITE, stroke: TEAL, sw: 1.5, rx: 6 })
+      label(g, BE.x + 30, y + 20, grp.tag, { size: 14, anchor: 'start', fill: TEAL })
+      label(g, BE.x + 88, y + 20, grp.sub, { size: 11, weight: 400, anchor: 'start', fill: INK_SOFT })
+      grp.apis.forEach(([name, openness], j) => {
+        const x = BE.x + 28 + j * (CW + 12)
+        const stroke = openness === 'open' ? GREEN : openness === 'closed' ? RED : NAVY
+        box(g, x, y + 32, CW, 32, { fill: WHITE, stroke, sw: 1.2, rx: 5 })
+        label(g, x + 10, y + 53, 'API', { size: 10, weight: 700, anchor: 'start', fill: stroke })
+        label(g, x + 36, y + 53, name, { size: 12, weight: 600, anchor: 'start' })
+      })
+    })
+  }
 
   // ---- interaction: the loop (stage 2) ------------------------------------
   const s2 = layer(2, 'interaction')

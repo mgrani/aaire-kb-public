@@ -1399,6 +1399,7 @@ This closes Topics 1 and 2 together, so say so: we asked what it takes to evalua
 Notes:
 This part lets the loop run. The agent plans, searches, reads, reformulates and decides when to stop; the human steers and asks back. Every step leaves data behind, and the question is who gets it.
 
+
 --
 
 <!-- .slide: class="smaller" -->
@@ -1466,7 +1467,6 @@ Neither number is wrong. They measure different things, and only one of them is 
 Notes:
 Open the part with this, before any history, because it makes the case in one screen. Same query, same system: the generated summary answers it correctly, and the document that supports the answer sits at rank sixteen. Run the standard measure over that result list and it is a failure, because nDCG@10 never sees rank sixteen. Ask the person and it is a success. Say clearly what this is and is not: it is not an argument that ranking stopped mattering, and it is certainly not an argument against offline evaluation. It is an argument that the thing we are measuring and the thing the user experienced have come apart, and that we cannot tell how far apart without watching people use the system. That is what the rest of this part is about.
 → next: and this is not the first time we have needed that data.
-
 --
 
 <!-- .slide: class="smaller" -->
@@ -1815,6 +1815,7 @@ Notes:
 This is the turn the whole simulation arc was building towards, so give it its own slide. The five agents are the same constructs a user simulator needs — who the user is, what this session is about, what they have asked before, what they would rank highly, how they reacted — but here they run while the query is being answered rather than in an experiment afterwards. The global message pool is the mechanism worth pointing at: the agents do not call each other, they write into a shared state that the retrieval and the generation both read, which is why the same design scales to more agents. Quote the WebQuestions number but say the baseline out loud: the generator is GPT-3.5, not a frontier model, and each dataset is 500 sampled questions. The TriviaQA row is the honest one and it is better to volunteer it, because the no-retrieval model wins there and the authors themselves suspect training-data contamination. Then the line on the slide, and be careful how you say it. PersonaRAG is not motivated by user simulation and does not cite it: the paper's own framing is that RAG fails to personalise, and its related work is on personalisation and multi-agent systems. So do not claim a lineage from SimIIR to PersonaRAG, because anyone who opens the paper will not find one. What is defensible, and what the slide says, is convergence: the five constructs PersonaRAG needs are the same ones a user simulator needs, and the same group arrived at both. If challenged, concede the provenance point immediately and keep the observation, which is the interesting half anyway: modelling the user pays off on both sides of the experiment.
 → next: and then the thing being simulated changed.
 
+
 --
 
 <!-- .slide: class="smaller" -->
@@ -1904,9 +1905,6 @@ The numbers behind the behavioural finding, if asked: GPT-4o retrieved 31.7 per 
 Keep the both-roles observation for the spoken line if it lands: the same trajectory is the experiment and the product, because the agent stands in for the user and works for the user at once.
 
 → next: and what those traces are worth.
-
---
-
 
 --
 
@@ -2153,6 +2151,7 @@ This is the constructive end of Topic 3 and the concrete ask, and it closes the 
 Notes:
 This part adds agents that delegate and verify, people who work with several of them, and a shared knowledge store that agents write and read. It is the least settled part of the talk, and it says so.
 
+
 --
 
 ## The ecosystem is a graph, not a pipeline
@@ -2195,7 +2194,6 @@ A layer above retrieval would have to carry what the edges need: persistent work
 Notes:
 Step the graph: one person and one system and a single query; then agent to agent, where one delegates and another verifies; then the shared knowledge every agent can read and write; then the human edges, person to person and person to somebody else's agent. The unit of study is the network, and a query is one edge in it. Do not name the platform we are building; describe what such a layer has to provide. Mention local-first retrieval as the other end of the design space: the retrieval layer can sit on the user's own device and still join the ecosystem.
 → next: whether any of this works without a purpose.
-
 --
 
 <!-- .slide: class="smaller" -->

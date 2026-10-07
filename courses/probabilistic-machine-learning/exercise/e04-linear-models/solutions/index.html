@@ -1,51 +1,34 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 3 — Keep the Peak, Model Only p(y | x)</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 4 — Linear Models: Least Squares, Logistic Regression and Calibrated Scores — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
     </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
-# Exercise Sheet 3
-## Keep the Peak, Model Only p(y | x)
+# Exercise Sheet 4
+## Linear Models: Least Squares, Logistic Regression and Calibrated Scores
 
 Probabilistic Machine Learning
 
 Prof. Dr. Michael Granitzer
 
 Notes:
-Accompanies Lecture 03. About 55 minutes: pen and paper, plus one short Python
-task (3.B.2, numpy only). 3.A.1 is the long version of the lecture's MAP slide
-and 3-of-3 example, 3.A.2 of the villa slide, 3.B.2 of the runaway slide, 3.C.1
-of the rebalancing mini-exercise. 3.A.1 part 3 previews Laplace smoothing
-(Lecture 04).
+Accompanies Lecture 04. About 85 minutes, to be split over two sessions if
+needed: 4.A (10 min) is the villa slide of the least-squares module; 4.B
+(20 min) the cross-entropy and runaway-peak slides, with one short Python task
+(4.B.2, numpy only); 4.C (25 min) derives the linear log-odds of naive Bayes
+(Lecture 03) and compares it with logistic regression in a second numpy task
+(4.C.2); 4.D (30 min) is the rebalancing mini-exercise and weight decay as a
+prior. Pen and paper except 4.B.2 and 4.C.2.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# 3.A Keep the Peak
+# 4.A Least Squares Is a Likelihood
 
 --
 
-## Exercise 3.A.1: Peak, Mean and a Prior's Peak
-
-Returning users, $\theta = P(\text{user returns})$, prior $\mathrm{Beta}(a, b)$,
-$h$ of $n$ users return.
-
-1. Maximise $\log p(D \mid \theta) + \log p(\theta)$ and show
-   $\hat{\theta}\_{\mathrm{MAP}} = \frac{h + a - 1}{n + a + b - 2}$.
-2. **0 of 4** users return. Give the MLE, the MAP under $\mathrm{Beta}(2, 2)$ and
-   the posterior mean under $\mathrm{Beta}(2, 2)$. Which one would you report to
-   a product manager, and why?
-3. The posterior mean under a flat prior is $\frac{h + 1}{n + 2}$. Under which
-   prior is the **MAP** equal to it?
-4. After 3 of 3 with a flat prior the posterior is $\mathrm{Beta}(4, 1)$, with
-   density $4\theta^3$. Compute its central 95% interval.
-
-
-
---
-
-## Exercise 3.A.2: Four Flats and a Villa
+## Exercise 4.A.1: Four Flats and a Villa
 
 Model $y = w\_0 + w\_1 x + \varepsilon$, $\varepsilon \sim \mathcal{N}(0, \sigma^2)$
 i.i.d.; $x$ in m², $y$ in k€.
@@ -67,16 +50,43 @@ i.i.d.; $x$ in m², $y$ in k€.
    What do you conclude?
 
 
+--
+
+## Exercise 4.A.1: Four Flats and a Villa — Solution
+
+
+<div class="fragment">
+
+1. $\ell = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum\_i (y\_i - w\_0 - w\_1 x\_i)^2$.
+   The first term has no $w$, and $\frac{1}{2\sigma^2} > 0$, so the arg max over
+   $w$ is the arg min of the RSS, whatever $\sigma^2$ is.
+2. $\bar{x} = 70$, $\bar{y} = 240$, $S\_{xx} = 2000$, $S\_{xy} = 6200$:
+   $\hat{w}\_1 = 3.1$ k€ per m², $\hat{w}\_0 = 240 - 217 = 23$.
+   Fitted $147, 209, 271, 333$; residuals $3, -9, 9, -3$; $\mathrm{RSS} = 180$.
+3. $\hat{\sigma}^2\_{\mathrm{ML}} = 45$ ($\hat{\sigma} \approx 6.7$);
+   $\mathrm{RSS}/2 = 90$ ($\approx 9.5$). Since $E[\mathrm{RSS}] = (n - 2)\sigma^2$,
+   the ML version is on average $\frac{n-2}{n} = \frac{1}{2}$ of $\sigma^2$ —
+   with 4 points and 2 weights, half the noise disappears into the fit.
+4. Plug-in: $271 \pm 13$ at 80 m², $1883 \pm 13$ at 600 m². With the
+   uncertainty about $\mathbf{w}$: factor $\sqrt{1.3} \approx 1.14$ at 80 m²
+   ($\pm 15$), $\sqrt{141.7} \approx 11.9$ at 600 m² ($\pm 157$). The plug-in band
+   is as narrow at the villa as at a flat; the honest one is twelve times wider —
+   and even that one trusts the straight line out to 600 m².
+
+</div>
+
+
+
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# 3.B Classification: Only p(y | x)
+# 4.B Classification: Only p(y | x)
 
 --
 
-## Exercise 3.B.1: Cross-Entropy and Its Gradient
+## Exercise 4.B.1: Cross-Entropy and Its Gradient
 
 $h\_i = \sigma(\mathbf{w}^{\top}\mathbf{x}\_i)$ with $\sigma(z) = 1/(1 + e^{-z})$ and
 $\ell(\mathbf{w}) = \sum\_i [y\_i \ln h\_i + (1 - y\_i)\ln(1 - h\_i)]$.
@@ -91,10 +101,34 @@ $\ell(\mathbf{w}) = \sum\_i [y\_i \ln h\_i + (1 - y\_i)\ln(1 - h\_i)]$.
    as an odds ratio.
 
 
+--
+
+## Exercise 4.B.1: Cross-Entropy and Its Gradient — Solution
+
+
+<div class="fragment">
+
+1. $\sigma'(z) = \frac{e^{-z}}{(1 + e^{-z})^2} = \frac{1}{1 + e^{-z}} \cdot \frac{e^{-z}}{1 + e^{-z}} = \sigma(z)(1 - \sigma(z))$.
+2. $\frac{\partial}{\partial \mathbf{w}}[y \ln h + (1 - y)\ln(1 - h)] = \left(\frac{y}{h} - \frac{1 - y}{1 - h}\right) h(1 - h)\mathbf{x} = (y - h)\mathbf{x}$;
+   sum over $i$. Error × feature, as in LMS.
+3. At $\mathbf{w} = 0$ every $h\_i = 0.5$. Intercept:
+   $\sum\_i (y\_i - 0.5) = 3 - 3 = 0$. Slope: only new devices count,
+   $0.5 + 0.5 - 0.5 = 0.5$. Gradient $(0, 0.5)$: raise the weight of "new device".
+4. Slope component: $\sum\_{\text{new}} (y\_i - h\_{\text{new}}) = 2 - 3h\_{\text{new}} = 0$,
+   so $h\_{\text{new}} = 2/3$; then the intercept component gives
+   $h\_{\text{known}} = 1/3$ — each group's observed fraud rate.
+   $\hat{w}\_0 = \ln\frac{1/3}{2/3} = \ln\frac{1}{2} \approx -0.69$,
+   $\hat{w}\_1 = \ln 2 - \ln\frac{1}{2} = \ln 4 \approx 1.39$: a new device
+   multiplies the odds of fraud by 4.
+
+</div>
+
+
+
 
 --
 
-## Exercise 3.B.2: The Peak That Runs Away (Python)
+## Exercise 4.B.2: The Peak That Runs Away (Python)
 
 ```python
 import numpy as np
@@ -122,16 +156,183 @@ def fit(tau2=None, steps=10_000, eta=0.05):
    with the MAP formula of the lecture.
 
 
+--
+
+## Exercise 4.B.2: The Peak That Runs Away — Solution
+
+
+<div class="fragment">
+
+```python
+g0 = np.sum(y - h)
+g1 = np.sum((y - h) * x)
+g1 -= w1 / tau2
+```
+
+1. Slope $1.37 \to 3.64 \to 8.32 \to 17.76$; log-likelihood
+   $-2.68 \to -1.04 \to -0.36 \to -0.06$. The data are separable, so scaling up
+   the weights always raises the likelihood towards 0: the scores approach
+   exactly 0 and 1 and the peak does not exist — three heads in three flips.
+2. $\tau^2 = 1$: slope $1.43$ from about 100 steps on, log-likelihood $-2.54$. The
+   log-prior $-w\_1^2/(2\tau^2)$ outgrows the vanishing gain in likelihood, so a
+   finite MAP exists. $\tau^2 = 100$: a weaker prior, slope $7.83$ — finite, but
+   steep. $\lambda = 1/\tau^2$ decides how far the peak is allowed to run.
+
+</div>
+
+
+
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# 3.C When Is a Score a Probability?
+# 4.C Generative vs Discriminative
 
 --
 
-## Exercise 3.C.1: The Rebalanced Fraud Model
+## Exercise 4.C.1: The Same Line
+
+Naive Bayes with yes/no flags, $\theta\_{jy} = P(x\_j = 1 \mid y)$, prior $\pi = P(y = 1)$.
+Lecture numbers: $\pi = 1/1000$; new device $0.6$ vs $0.1$; foreign IP $0.7$ vs
+$0.05$; night $0.5$ vs $0.2$ (fraud vs honest).
+
+1. Show that $\log \frac{P(y=1 \mid x)}{P(y=0 \mid x)} = w\_0 + \sum\_j w\_j x\_j$ and
+   give $w\_j$ and $w\_0$.
+2. Compute the three weights and $w\_0$, and check that a transaction with all
+   three flags gets $P(\text{fraud} \mid x) \approx 17.4\\%$.
+3. The foreign-IP flag is **missing**. Compare what naive Bayes should do with
+   plugging $x\_{\text{IP}} = 0$ into the linear form.
+4. Why can logistic regression, which has the same linear form, not do what
+   naive Bayes does in 3?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.C.1: The Same Line — Solution
+
+
+<div class="fragment">
+
+**1.** $\log p(x\_j \mid y) = x\_j \log \theta\_{jy} + (1 - x\_j) \log(1 - \theta\_{jy})$.
+Take the difference between the classes and sum over $j$:
+$$
+w\_j = \log \frac{\theta\_{j1}}{\theta\_{j0}} - \log \frac{1 - \theta\_{j1}}{1 - \theta\_{j0}},
+\qquad
+w\_0 = \log \frac{\pi}{1 - \pi} + \sum\_j \log \frac{1 - \theta\_{j1}}{1 - \theta\_{j0}}
+$$
+
+**2.** $w\_{\text{dev}} = \log 6 - \log \frac{0.4}{0.9} = 1.792 + 0.811 = 2.603$;
+$w\_{\text{IP}} = \log 14 - \log \frac{0.3}{0.95} = 2.639 + 1.153 = 3.792$;
+$w\_{\text{night}} = \log 2.5 - \log \frac{0.5}{0.8} = 0.916 + 0.470 = 1.386$.
+$w\_0 = \log \frac{1}{999} - 0.811 - 1.153 - 0.470 = -9.340$.
+All flags: $-9.340 + 7.781 = -1.560$, $\sigma(-1.560) = 0.174$ ✓ — the same
+$210/1{,}209$ as in the lecture.
+
+**3.** Missing: drop the IP factor entirely (it sums to 1 over both values),
+odds $6 \cdot 2.5 / 999 = 15/999$, $P \approx 1.5\\%$. Plugging in
+$x\_{\text{IP}} = 0$ instead claims "domestic IP observed": it keeps the factor
+$0.3/0.95$ (hidden in $w\_0$), odds $4.74/999$, $P \approx 0.47\\%$ — a third of
+the honest answer.
+
+**4.** Logistic regression models only $p(y \mid x)$; it has no
+$p(x\_{\text{IP}} \mid y)$ to sum over. Its $w\_0$ is not split into per-attribute
+pieces, so there is nothing to remove — it must be given some value of
+$x\_{\text{IP}}$ or be refitted without the feature.
+
+</div>
+
+
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.C.2: Counting Twice, in Code
+
+Complete the three marked lines (numpy only), then run the script.
+
+```python
+import numpy as np
+rng = np.random.default_rng(42)
+n = 5000
+y = (rng.random(n) < 0.3).astype(int)                       # 1 = fraud
+flag = lambda pf, ph: (rng.random(n) < np.where(y == 1, pf, ph)).astype(int)
+device = flag(0.6, 0.1)
+copy = np.where(rng.random(n) < 0.95, device, 1 - device)   # a near-copy
+night = flag(0.5, 0.2)
+X = np.column_stack([device, copy, night])
+
+def fit_nb(X, y, alpha=1.0):
+    prior = ...                    # (a) P(y = 1)
+    th1 = ...                      # (b) Laplace-smoothed P(x_j = 1 | y = 1)
+    th0 = ...                      #     and P(x_j = 1 | y = 0)
+    w = np.log(th1 / th0) - np.log((1 - th1) / (1 - th0))
+    w0 = np.log(prior / (1 - prior)) + np.log((1 - th1) / (1 - th0)).sum()
+    return w0, w
+
+def fit_lr(X, y, steps=5000, lr=0.5):   # gradient ascent, as in the lecture
+    Xb = np.column_stack([np.ones(len(X)), X]); w = np.zeros(Xb.shape[1])
+    for _ in range(steps):
+        w += lr * Xb.T @ (y - 1 / (1 + np.exp(-Xb @ w))) / len(y)
+    return w[0], w[1:]
+```
+
+1. Print $w\_0$, $w$ and $P(\text{fraud} \mid x = (1, 1, 1))$ for both models.
+2. Compare the weights of `device` and `copy`. Which model counts the device
+   twice, and which shares the credit?
+3. Which probability is closer to the fraction of frauds among the training
+   rows with $x = (1, 1, 1)$?
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Exercise 4.C.2: Counting Twice, in Code — Solution
+
+
+<div class="fragment">
+
+```python
+prior = y.mean()
+th1 = (X[y == 1].sum(axis=0) + alpha) / ((y == 1).sum() + 2 * alpha)
+th0 = (X[y == 0].sum(axis=0) + alpha) / ((y == 0).sum() + 2 * alpha)
+```
+
+**1.** (numpy 2.x, seed 42)
+
+| model | $w\_0$ | $w\_{\text{device}}$ | $w\_{\text{copy}}$ | $w\_{\text{night}}$ | $P(\text{fraud} \mid 1, 1, 1)$ |
+|---|---|---|---|---|---|
+| naive Bayes | −2.80 | 2.60 | 2.17 | 1.35 | 0.965 |
+| logistic regression | −2.10 | 2.75 | −0.13 | 1.40 | 0.873 |
+
+**2.** Naive Bayes gives the copy almost the device's weight: the same evidence
+enters twice. Logistic regression fits all weights jointly, sees that the copy
+adds nothing once the device is known, and drives its weight to about 0.
+
+**3.** Among the 486 training rows with $x = (1, 1, 1)$, 88.5% are fraud; the
+true posterior of the generating model is $0.865$. Logistic regression (0.873)
+is close; naive Bayes (0.965) is **over-confident** — the double counting of
+Lecture 03, measured.
+
+</div>
+
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 4.D When Is a Score a Probability?
+
+--
+
+## Exercise 4.D.1: The Rebalanced Fraud Model
 
 A model is trained on a 50/50 sample; on real traffic fraud is **1 in 1,000**.
 Undersampling kept every fraud and a random share of legitimate cases.
@@ -144,10 +345,32 @@ Undersampling kept every fraud and a random share of legitimate cases.
    that?
 
 
+--
+
+## Exercise 4.D.1: The Rebalanced Fraud Model — Solution
+
+
+<div class="fragment">
+
+1. Posterior odds = $\frac{p(\mathbf{x} \mid \text{fraud})}{p(\mathbf{x} \mid \text{legit})}$ × prior odds.
+   Sampling that depends only on $y$ leaves $p(\mathbf{x} \mid y)$ unchanged, so
+   the likelihood ratio is the same in both worlds; only the prior odds change,
+   from $1$ (training) to $1/999$ (real).
+2. $0.5$: odds $1/999$, $p = 0.10\\%$. $0.9$: odds $9/999$, $p = 9/1008 \approx 0.89\\%$.
+   $0.99$: odds $99/999$, $p = 99/1098 \approx 9.0\\%$.
+3. Block if $500p > 10(1 - p)$, i.e. $p > \frac{10}{510} \approx 1.96\\%$
+   (real odds $> 0.02$). Raw odds $> 0.02 \cdot 999 = 19.98$, raw score
+   $> 19.98/20.98 \approx 0.95$. A threshold of 0.5 on the raw score would block
+   cards whose real risk is 0.1%.
+
+</div>
+
+
+
 
 --
 
-## Exercise 3.C.2: Weight Decay Is a Prior
+## Exercise 4.D.2: Weight Decay Is a Prior
 
 1. With $y\_i = \mathbf{w}^{\top}\mathbf{x}\_i + \varepsilon\_i$,
    $\varepsilon\_i \sim \mathcal{N}(0, \sigma^2)$ and a prior
@@ -158,6 +381,27 @@ Undersampling kept every fraud and a random share of legitimate cases.
    $\hat{w}\_{\mathrm{MAP}} = \frac{\sum\_i x\_i y\_i}{\sum\_i x\_i^2 + \lambda}$.
 3. Data $(x, y) = (1, 2), (3, 7)$, $\sigma^2 = 1$, $\tau^2 = 0.1$. Compute the
    MLE and the MAP. What happens as $\tau^2 \to \infty$ and as $\tau^2 \to 0$?
+
+
+--
+
+## Exercise 4.D.2: Weight Decay Is a Prior — Solution
+
+
+<div class="fragment">
+
+1. $\log p(\mathbf{w} \mid D) = -\frac{\mathrm{RSS}(\mathbf{w})}{2\sigma^2} - \frac{\lVert \mathbf{w} \rVert^2}{2\tau^2} + \text{const}$.
+   Multiplying by $-2\sigma^2$ turns the maximum into the minimum of
+   $\mathrm{RSS} + \frac{\sigma^2}{\tau^2}\lVert \mathbf{w} \rVert^2$.
+2. The derivative of $\sum\_i (y\_i - w x\_i)^2 + \lambda w^2$ is
+   $-2\sum\_i x\_i y\_i + 2w\sum\_i x\_i^2 + 2\lambda w$; zero at the formula.
+3. $\sum x\_i y\_i = 23$, $\sum x\_i^2 = 10$, $\lambda = 10$. MLE $23/10 = 2.3$;
+   MAP $23/20 = 1.15$. $\tau^2 \to \infty$: $\lambda \to 0$, the MLE (a flat
+   prior). $\tau^2 \to 0$: $\lambda \to \infty$, $\hat{w} \to 0$ — the prior
+   overrules two data points, as a strong Beta prior did in Lecture 02.
+
+</div>
+
 
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;

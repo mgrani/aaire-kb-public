@@ -39,12 +39,142 @@ Coordinator OpenWebSearch.EU
 
 
 Notes:
-Four parts: the Open Web Index in a nutshell and where it goes, the transition (search is dead, long live search), YOARS, and what it is used for: three use cases (coding, disinformation, AI opinions). The YOARS details are in the annex for questions.
+Four parts: search is dead, long live search; the Open Web Index and OUR²S in a nutshell; optimising search for agents (is it good, usage data through simulated agents, small models, many endpoints instead of one, AI Opinions); and human–agent collaboration (the ecosystem as a graph, YOARS, and YOARS in use). The YOARS details are in the annex for questions.
+---
+<!-- .slide: class="module-slide" -->
+
+## 1 · Is search dead?
+
+<span class="eyebrow">And what will happen with the 10 blue links?</span>
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Search is dead<span class="fragment" data-fragment-index="1"> — long live search</span>
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![The box where people type now](/slides/_assets/ows/chat-bar.png)
+
+</div>
+
+
+<div class="fragment" data-fragment-index="0">
+
+
+<div class="img-h-sm">
+
+![Search the web is one of the tools behind it](/slides/_assets/ows/chat-tools-menu.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+"Search the web" sits behind the box, switched on by default in most assistants.
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<div class="column small">
+
+<div class="fragment" data-fragment-index="1">
+
+
+<div class="stat-card evidence">
+
+### 34.5%
+of ChatGPT queries switched on web search in February 2026
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 14% → 24%
+of ChatGPT usage is "seeking information" in one year, "a very close substitute for web search"
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 20–26
+search calls per question by a deep-research agent
+
+</div>
+
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="fragment" data-fragment-index="2">
+
+
+<div class="pull-quote">
+
+The box where people type changed. What answers them is still a search engine, queried more often, by something that is not a person.
+
+</div>
+
+
+</div>
+
+
+<div class="slide-citation">
+
+Semrush clickstream analysis, Apr 2026 · Chatterji et al., *How People Use ChatGPT*, NBER 2025 · Chen et al., *BrowseComp-Plus*, 2025 (GPT-5, o3).
+
+</div>
+
+
+Notes:
+Open on the provocation the room has heard all year: search is dead, the chat box replaced it. Show the box. Then show what is behind the box: web search is one of the tools, switched on by default in most assistants. Then the numbers, all verified. Semrush measured on more than a billion clickstream lines that ChatGPT enabled web search on about a third of its queries in February 2026, down from 46 percent in late 2024. OpenAI's own usage study says information seeking grew from 14 to 24 percent of usage in a year and calls it a very close substitute for web search. On BrowseComp-Plus, GPT-5 and o3 issue between 20 and 26 search calls per question. The interface changed; the search engine underneath did not go away, it got busier, and its user is now a machine.
+→ next: what that system looks like when you take it apart.
+--
+
+## The new kind of search
+
+<div class="viz viz-lg" data-viz="ows/system-view" data-params='{"stage": 3, "endpoints": true, "caption": false}'></div>
+
+
+<div class="pull-quote fade-in">
+
+<span class="eyebrow">The 10 blue links are dead, but </span>
+(i) we still need an open search system not only open models and 
+
+(ii) look beyond the invididual agents and humans
+
+</div>
+
+
+Notes:
+The pivot of the talk, drawn as the CLEF system view: a person asks an agent, the agent searches an index through an API, and what comes back leaves usage data behind. Other agents and other people join, and share what they find: that is the collaboration column. A person typing a query and reading ten links is becoming the exception; agents search many times per question, collect what they find, and increasingly publish it. If we leave this layer to whoever builds it first, we get the same lock-in we had with web search. Open models are not enough: the search system under them has to be open too.
+
 ---
 
 <!-- .slide: class="module-slide" -->
 
-## 1 · The Open Web Index in a nutshell
+## 2 · The Open Web Index in a nutshell
 
 <span class="eyebrow">An open index of the web, and a search engine on top</span>
 
@@ -431,6 +561,204 @@ The Open Web Index Research Retrieval System - OURRS: an early web search protot
 Notes:
 OURRS, two Rs. There is no paper; give the URL and the measurement date. Play thirty seconds. Then the research angle, which is the reason it exists: an agent cannot search a shard on disk, it needs a service it can call repeatedly. Snapshot id in every response, configurable ranking, corpus isolation so that ranking statistics do not leak between experiments, one API for people, applications and agents, and logging by design. Say "early prototype" out loud, and say that it is self-hostable, so a lab can run its own instrumented instance.
 → next: what this community already does well, and what it needs.
+---
+
+<!-- .slide: class="module-slide" -->
+
+## 3 · Optimising search for agents
+
+<span class="eyebrow">We have a search engine. But is it any good?</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 2, "focus": "interaction", "endpoints": true, "caption": false}'></div>
+
+Notes:
+OUR²S runs and agents use it. The fair question is whether it is any good, and for agents the usual answer, a test collection and nDCG, no longer settles it. The loop in the middle of the figure is what has to be judged, and the usage data it leaves behind is what we would need to judge it.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## A good summary overcomes a bad ranking
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-lg">
+
+![OURRS answering a CLEF query: the summary is right, the relevant document is at rank 16](/slides/_assets/ows/screenshots/ourrs-search-clef.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+ourrs.eu: the generated summary answers the question; the document it rests on is ranked 16th.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="c-danger">
+
+### What the measure says
+The relevant document is at rank 16. **nDCG@10 scores this as a miss.**
+
+</div>
+
+
+
+<div class="c-positive">
+
+### What the user says
+The answer was right, it arrived first, and the evidence was one click away.
+
+</div>
+
+
+
+<div class="c-insight">
+
+Neither number is wrong. They measure different things, and only one of them is what the person came for.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Open the part with this, before any history, because it makes the case in one screen. Same query, same system: the generated summary answers it correctly, and the document that supports the answer sits at rank sixteen. Run the standard measure over that result list and it is a failure, because nDCG@10 never sees rank sixteen. Ask the person and it is a success. Say clearly what this is and is not: it is not an argument that ranking stopped mattering, and it is certainly not an argument against offline evaluation. It is an argument that the thing we are measuring and the thing the user experienced have come apart, and that we cannot tell how far apart without watching people use the system. That is what the rest of this part is about.
+→ next: and this is not the first time we have needed that data.
+--
+
+## To know whether it is good, we need usage data
+
+
+<div class="q-list">
+
+Which queries do agents send, and how many per question?
+
+Which results do they read, and which do they cite in the answer?
+
+When is an answer good enough to stop searching?
+
+</div>
+
+
+
+<div class="c-important">
+
+Agents leave no clicks, and nobody publishes their logs. So we generate the usage data ourselves: we simulate the agents.
+
+</div>
+
+
+Notes:
+The previous slide showed that the measure and the experience have come apart. The way to bring them back together has always been usage data: query logs, clicks, sessions. For agents the questions are the same, but the data does not exist in the open. Commercial engines see it and keep it, and agents do not click, so even the classic signal is gone. That is why the next step is simulation: if we cannot observe agents searching, we run them and record every step.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## AgentSim: we simulate agents now, because agents search
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+![AgentSim: grounded corpora and corpus-aware seeding feed a configurable retrieval and reasoning workflow, whose traces are validated and written to an agent-trace corpus](/slides/_assets/ows/papers/agentsim-workflow.png)
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### The run
+- 1,000 seed queries per corpus, chosen to cover it
+- MS MARCO, Quasar-T, CausalQA, via ChatNoir
+- GPT-4o, Mistral Large, DeepSeek-V3
+- Up to seven retrieval–reasoning cycles
+
+</div>
+
+
+
+<div class="card good">
+
+### What came out
+- **103,567** trace steps from 21,000 trajectories
+- **199,968** documents from queries
+- every answer grounded in a cited document
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important small">
+
+SimIIR simulated the person at the keyboard. What searches now is an agent, so the unit of simulation is a whole trajectory. Every step records the documents it used, so the trace can be checked rather than believed.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Granitzer, Mitrović, *AgentSim: A Platform for Verifiable Agent-Trace Simulation*, SIGIR 2026, Fig. 1 (CC BY 4.0).
+
+</div>
+
+
+Notes:
+Goal: the object of simulation moved from the user to the agent, because the agent is what searches now, and agent traces can be produced cheaply and verified.
+
+Reading the figure, left to right.
+
+- **1 and 2, the inputs.** Grounded corpora with questions, and corpus-aware seeding: cluster the corpus and draw seed queries that cover it, instead of sampling at random. Random seeds revisit the same regions; corpus-aware seeding reaches cluster coverage of 1.00 against 0.97 to 0.99 for random, with near-zero document redundancy.
+- **3, the middle box, is AgentSim itself.** A configurable RAG workflow, built visually or from the command line, running the cycle the figure shows: search with query reformulation, retrieve, rerank, summarise, and round again. That loop is the difference from SimIIR, whose searcher queries, examines a result, judges it and stops.
+- **4, the validation loop, and the trace excerpt on the right.** This is what the line under the figure means by checking a trace. A step is not only text: it records the query, the answer, and the documents the agent actually retrieved and used at that point. So a checker can take the claim a step makes and the documents it named, and ask whether one follows from the other, without a person reading it. That is the difference between inspecting a simulated session and verifying one. The result of doing that: of 1,385 substantive answers all were grounded in their cited documents, mean token coverage 0.872, and 83.3 per cent of 6,125 atomic claims were fully supported under an entailment check.
+
+**What the 199,968 documents are**, since it is an easy question to get wrong. They are not generated and they are not a new corpus. They are the distinct documents the agents actually retrieved, through ChatNoir, out of the three existing collections that form the environment: MS MARCO, Quasar-T and CausalQA. The paper is explicit that it builds on those resources rather than replacing them, using their queries as starting points and their document collections as the environment. So the number is a coverage measure: how much of the corpus the simulation genuinely touched, which is the thing corpus-aware seeding is designed to maximise.
+
+**What else came out of it besides a pile of traces**, because "why do these exist" is the fair question. Four things.
+- **The platform**, with the two mechanisms that are the methodological contribution: corpus-aware seeding and active validation.
+- **Training data that demonstrably works.** Distilling the traces into small models: Qwen 2.5 0.5B raised its abstain-detection F1 from 0.362 to 0.815, matching a base model three times its size, and every model size learned to abstain when the evidence was insufficient, recall above 0.88. That is the answer to what the traces are for.
+- **Behavioural findings about the models themselves**, which no static benchmark shows: the three analysts explore very differently, six of nine pairwise comparisons significant with effect sizes up to Cohen's d 1.59.
+- **Verifiability as a property of the dataset.** The authors note that no existing reasoning-trace dataset reports token-level grounding verification against source documents.
+
+The cost, since it is the argument. Roughly 20 million API tokens, 200 to 300 dollars for the whole corpus, about 0.14 dollars per simulation, 58 steps on average.
+
+The numbers behind the behavioural finding, if asked: GPT-4o retrieved 31.7 per cent more unique documents than DeepSeek-V3 on MS MARCO and 176 per cent more on CausalQA, while DeepSeek-V3 falls back on keyword reformulation in 23.3 per cent of cases against 8.1 for GPT-4o.
+
+Keep the both-roles observation for the spoken line if it lands: the same trajectory is the experiment and the product, because the agent stands in for the user and works for the user at once.
+
+→ next: and what those traces are worth.
 
 --
 
@@ -500,148 +828,180 @@ Goal: one minute. Traces are training data, and the capability they teach can be
 - **Why it belongs here.** It closes the cost argument: if traces can be made cheaply and verified, the capability they teach does not have to be rented from a frontier model.
 
 → next: and yet none of it tells us who asked.
----
+--
 
-<!-- .slide: class="module-slide" -->
+## We have agent traces, not human usage data
 
-## 2 · Is search dead?
 
-<span class="eyebrow">And what will happen with the 10 blue links?</span>
+<div class="pull-quote">
 
+<span class="yes">✓</span> **Agent traces:** we can generate them at scale.
+
+<span class="no">✗</span> **Human usage data:** stays with whoever runs the assistant.
+
+</div>
+
+
+Notes:
+Fifteen seconds. Concede the win: agent traces are no longer the bottleneck, and the previous slide shows they are useful. Then the gap: how a person works with an agent, what they ask, correct and stop trusting, is visible only to the operator of the assistant, and no volume of traces recovers it.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Search is dead<span class="fragment" data-fragment-index="1"> — long live search</span>
+## Given we have Agents, Why a single search endpoint?
 
 
-<div class="grid-2 gap-lg">
+<div class="grid-figure gap">
 
 
 <div class="column">
 
-
-<div class="img-h-sm">
-
-![The box where people type now](/slides/_assets/ows/chat-bar.png)
-
-</div>
-
-
-<div class="fragment" data-fragment-index="0">
-
-
-<div class="img-h-sm">
-
-![Search the web is one of the tools behind it](/slides/_assets/ows/chat-tools-menu.png)
-
-</div>
-
-
-<div class="figure-credit">
-
-"Search the web" sits behind the box, switched on by default in most assistants.
-
-</div>
-
-
-</div>
+<div class="viz viz-lg" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "endpoints": true, "caption": false}'></div>
 
 </div>
 
 
 <div class="column small">
 
-<div class="fragment" data-fragment-index="1">
+- A search engine is **one API**: one index, one ranking, the same for everyone.
+- An agent is not bound to one. It can call **local, remote and web endpoints**, choose per question and merge what comes back.
+- Small models trained on agent traces make a **local endpoint** cheap.
 
 
-<div class="stat-card evidence">
+<div class="hypothesis">
 
-### 34.5%
-of ChatGPT queries switched on web search in February 2026
-
-</div>
-
-
-<div class="stat-card evidence">
-
-### 14% → 24%
-of ChatGPT usage is "seeking information" in one year, "a very close substitute for web search"
+The new kind of search is **many endpoints, chosen and combined by agents**, with an open web index as one of them.
 
 </div>
 
 
-<div class="stat-card evidence">
 
-### 20–26
-search calls per question by a deep-research agent
+<div class="q-list">
+
+Which endpoint for which question, and how do we evaluate the mix?
 
 </div>
 
 
 </div>
 
-</div>
-
-
-</div>
-
-
-<div class="fragment" data-fragment-index="2">
-
-
-<div class="pull-quote">
-
-The box where people type changed. What answers them is still a search engine, queried more often, by something that is not a person.
-
-</div>
-
-
-</div>
-
-
-<div class="slide-citation">
-
-Semrush clickstream analysis, Apr 2026 · Chatterji et al., *How People Use ChatGPT*, NBER 2025 · Chen et al., *BrowseComp-Plus*, 2025 (GPT-5, o3).
 
 </div>
 
 
 Notes:
-Open on the provocation the room has heard all year: search is dead, the chat box replaced it. Show the box. Then show what is behind the box: web search is one of the tools, switched on by default in most assistants. Then the numbers, all verified. Semrush measured on more than a billion clickstream lines that ChatGPT enabled web search on about a third of its queries in February 2026, down from 46 percent in late 2024. OpenAI's own usage study says information seeking grew from 14 to 24 percent of usage in a year and calls it a very close substitute for web search. On BrowseComp-Plus, GPT-5 and o3 issue between 20 and 26 search calls per question. The interface changed; the search engine underneath did not go away, it got busier, and its user is now a machine.
-→ next: what that system looks like when you take it apart.
+This questions our own design. OUR²S, like every web search engine, is built around the idea of one API in front of one index. Agents break that assumption: a coding agent already searches the user's files, the documentation of a library and the web in one task, and decides itself which to ask. The small retrieval models of the previous slide push in the same direction, because they make it cheap to run an endpoint on the user's own device. What stays is the need for an open web index, as one endpoint among many, and a new evaluation question: not how good one ranking is, but how well an agent chooses and combines several. Then the step to the next slide: if agents search many endpoints anyway, they can also write to a shared one.
+
+
 --
 
-## The new kind of search
+<!-- .slide: class="smaller" -->
 
-<div class="viz viz-lg" data-viz="ows/system-view" data-params='{"stage": 3, "caption": false}'></div>
+## AI Opinions: agents build a shared search memory
 
 
-<div class="pull-quote">
+<div class="grid-2-1 gap-lg">
 
-The 10 blue links are dead, but we still need an open search system, not only open models.
+
+<div class="column">
+
+
+<div class="img-h-xl">
+
+![The AI Opinions vertical of OURRS for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
+
+</div>
+
+
+
+</div>
+
+
+<div class="column small">
+
+**Agent-to-agent collaboration for indexing the web**
+
+- agents search web documents and publish summaries with **sources and model provenance**
+- other agents can reuse, challenge or update those summaries
+- OURRS makes them searchable: a **shared cache of search summaries**
+
+
+<div class="c-insight">
+
+One agent's search can become the next agent's starting point.
+
+</div>
+
+
+</div>
+
 
 </div>
 
 
 Notes:
-The pivot of the talk, drawn as the CLEF system view: a person asks an agent, the agent searches an index through an API, and what comes back leaves usage data behind. Other agents and other people join, and share what they find: that is the collaboration column. A person typing a query and reading ten links is becoming the exception; agents search many times per question, collect what they find, and increasingly publish it. If we leave this layer to whoever builds it first, we get the same lock-in we had with web search. Open models are not enough: the search system under them has to be open too.
+The third use case connects agent collaboration back to the index. An agent searches web documents, summarises what it finds and publishes the summary with its sources. Indexing those summaries makes the work available to other agents: they can retrieve it, inspect the evidence and contribute a correction or a newer summary. This is a shared cache of search summaries, alongside the underlying web index.
 
+The screenshot shows the OURRS AI Opinions vertical for the query *passau*, September 2026. Point out the model names, cited documents, epistemic tags and the Contradicting / Superseding filters. These are model-authored opinions; a cached summary still needs its evidence checked.
+
+The intended collaboration is agent-to-agent: share the work of indexing and maintaining this derived search layer. Generation, critique and review are the design direction; governance, validity and refresh remain questions to evaluate. YOARS offers a message layer for coordinating that work; this screenshot demonstrates the searchable artefacts, not a completed YOARS integration.
 ---
 
 <!-- .slide: class="module-slide" -->
 
-## 3 · YOARS: Your Open Agent Relay System
+## 4 · Human–agent collaboration
 
-<span class="eyebrow">Thinking about future collaboration spaces between humans and agents.</span>
+<span class="eyebrow">People and agents working together, with each other and with us</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 3, "focus": "collaboration", "endpoints": true, "caption": false}'></div>
+
+Notes:
+AI Opinions was agents collaborating through a shared index. This part widens the view: many agents, many people, and the question of where they meet and under which rules.
 
 
+--
+
+## The ecosystem is a graph, not a pipeline
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/interaction-topology" data-steps="4"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="hypothesis h4">
+
+**Search is becoming an information ecosystem.** People, agents, retrieval services and shared knowledge all communicate. It has to be evaluated as an evolving system, not as one model producing one answer.
+
+</div>
+
+
+
+<div class="c-note">
+
+A layer above retrieval would have to carry what the edges need: persistent workspaces, delegation, verification, and knowledge units with provenance that outlive a single run.
+
+</div>
+
+
+</div>
+
+
+</div>
 
 
 Notes:
-The name says what it is. Your: every agent connects with its own credential. Open: the contract is an open API. Agent Relay: it relays, it does not orchestrate, schedule or decide. The relay is not about search: it is where people and agents work together, and search is one of the things they do there.
-
+Step the graph: one person and one system and a single query; then agent to agent, where one delegates and another verifies; then the shared knowledge every agent can read and write; then the human edges, person to person and person to somebody else's agent. The unit of study is the network, and a query is one edge in it. Do not name the platform we are building; describe what such a layer has to provide. Mention local-first retrieval as the other end of the design space: the retrieval layer can sit on the user's own device and still join the ecosystem.
+→ next: whether any of this works without a purpose.
 --
 
 <!-- .slide: class="smaller" -->
@@ -651,7 +1011,7 @@ The name says what it is. Your: every agent connects with its own credential. Op
 
 <div class="pull-quote">
 
-Agents will become the interface between humans and information and to processes; the Web will become their medium. 
+<span class="eyebrow">Hypothesis</span> Agents will become the interface between humans and information and processes; the Web will become their medium. 
 
 </div>
 
@@ -668,7 +1028,7 @@ How do we keep control of agents that act for us, interact with them, and trust 
 
 <div class="card">
 
-<span class="eyebrow">Collaboration</span>
+<span class="eyebrow">Second Question: Collaboration</span>
 How do agents, and the people behind them, work together, with each other and with us?
 
 </div>
@@ -735,15 +1095,9 @@ First prototype runs at the University of Passau, not yet public but hopefully s
 
 
 Notes:
+The name says what it is. Your: every agent connects with its own credential. Open: the contract is an open API. Agent Relay: it relays, it does not orchestrate, schedule or decide. The relay is not about search: it is where people and agents work together, and search is one of the things they do there.
+
 Build the figure in three steps. Participants: humans on the left through the web console or a chat app, agents on the right, each owned by a human. Rooms and messages: every message says who it is for and what kind it is; the relay routes it under the room's policy and never reads the content to decide anything. Coordination and underneath: goals, proposals, votes and receipts on top; identity, OURRS search over the Open Web Index and a shared git workspace below. Then the four points on the right. Everything runs on the Passau cluster (development and full); the public names (yoars.org) come after the security review. Details are in the annex.
-
----
-
-<!-- .slide: class="module-slide" -->
-
-## 4 · YOARS in use
-
-<span class="eyebrow">Three use cases</span>
 
 --
 
@@ -753,12 +1107,12 @@ Build the figure in three steps. Participants: humans on the left through the we
 
 Notes:
 The first user of YOARS is the team building it. Build the figure in three clicks.
-- **Participants.** One human operator decides and approves; a second human is a member. Two coordinator agents (Claude Code) run on the operator's laptop: they plan, split the work into packages, verify and report, and own no code. Six lane agents, one per component (relay, relay-assist, console, harnesses, git service, Matrix bridge), each in its own container; all run Claude through our harness, except the harness lane, which runs on Pi. A deployment agent rolls releases out. Independent verifiers are short-lived sub-agents that a coordinator spawns.
-- **The room.** One development room holds the goals (one per package), requests, progress, answers and reviews. A git project per room holds specs and long reviews, so messages stay short and point to commits.
+- **Participants.** Two humans: the owner decides and approves, a member joins. Two coordinator agents (Claude Code) run on the owner's laptop: they plan, split the work into packages, verify and report, and own no code. Six room agents, one per component (relay, relay-assist, console, harnesses, git service, Matrix bridge), all in the cloud, each in its own container; all run Claude through our harness, except the harnesses agent, which runs on Pi. A deployment agent rolls releases out. Independent verifiers are short-lived sub-agents that a coordinator spawns.
+- **The room.** One development room on the YOARS relay holds the goals (one per package), requests, progress, answers and reviews. A git project per room holds specs and long reviews, so messages stay short and point to commits.
 - **Artefacts.** One git repository per component, plus a meta repository that pins the accepted versions; CI runs on every push.
-- **The release path.** Test-first tagged release by the lane, independent verification, a human go, the deployment agent rolls to dev, a check, then full, then pin.
+- **The release path.** Not a component but an enforced process, the same for every change: test-first tagged release by the room agent, independent verification, a human go, the deployment agent rolls to dev, a check, then full, then pin.
 
-One example, to say aloud: the operator decides to sandbox the agents' tools. A coordinator opens a goal and requests it from the harness lane. The lane builds it test-first, the verifier finds a gap, it goes back to the lane, is fixed and re-verified, the goal closes, and the human gives the go for rollout. The attack experiments (annex) used the same setting: teams of agents building software together.
+One example, to say aloud: the owner decides to sandbox the agents' tools. A coordinator opens a goal and requests it from the harnesses agent. The agent builds it test-first, the verifier finds a gap, it goes back to the agent, is fixed and re-verified, the goal closes, and the human gives the go for rollout. The attack experiments (annex) used the same setting: teams of agents building software together.
 
 --
 
@@ -816,72 +1170,78 @@ At least that would be the idea. More about the idea in the workshop this aftern
 Notes:
 Only briefly. SOURCE (Passau, Kassel, Open Search Foundation, LRZ, Alliance4Europe) builds an early-warning platform against disinformation on top of the Open Web Index; the harness is its analyst-facing prototype. The link to this talk: it joins a YOARS room as an executor. Research prototype; its use has to be agreed with the analyst community. Point to the workshop this afternoon for the demonstration.
 
-
---
-
-<!-- .slide: class="smaller" -->
-
-## AI Opinions: agents build a shared search memory
-
-
-<div class="grid-2-1 gap-lg">
-
-
-<div class="column">
-
-
-<div class="img-h-xl">
-
-![The AI Opinions vertical of OURRS for the query "passau"](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
-
-</div>
-
-
-
-</div>
-
-
-<div class="column small">
-
-**Agent-to-agent collaboration for indexing the web**
-
-- agents search web documents and publish summaries with **sources and model provenance**
-- other agents can reuse, challenge or update those summaries
-- OURRS makes them searchable: a **shared cache of search summaries**
-
-
-<div class="c-insight">
-
-One agent's search can become the next agent's starting point.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The third use case connects agent collaboration back to the index. An agent searches web documents, summarises what it finds and publishes the summary with its sources. Indexing those summaries makes the work available to other agents: they can retrieve it, inspect the evidence and contribute a correction or a newer summary. This is a shared cache of search summaries, alongside the underlying web index.
-
-The screenshot shows the OURRS AI Opinions vertical for the query *passau*, September 2026. Point out the model names, cited documents, epistemic tags and the Contradicting / Superseding filters. These are model-authored opinions; a cached summary still needs its evidence checked.
-
-The intended collaboration is agent-to-agent: share the work of indexing and maintaining this derived search layer. Generation, critique and review are the design direction; governance, validity and refresh remain questions to evaluate. YOARS offers a message layer for coordinating that work; this screenshot demonstrates the searchable artefacts, not a completed YOARS integration.
 ---
 
-## Open infrastructure for agentic information access
+## Open infrastructure for agentic search
 
-- **OWI:** an open web index, scaling up and out with community contributions.
-- **OUR²S:** search over that index, for people and agents.
-- **YOARS:** a shared space where humans and agents communicate and collaborate.
-- **In use:** developing software together, analysing disinformation, and sharing cached search summaries through AI Opinions.
+
+<div class="flow-row small">
+
+
+<div class="stat-card evidence">
+
+<span class="eyebrow">Data</span>
+### OWI
+an open index of the web, growing with community contributions
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+<span class="eyebrow">Access</span>
+### OUR²S
+search over that index, one endpoint among many an agent can call
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+<span class="eyebrow">Evaluation</span>
+### Agent traces
+simulated agents stand in for missing usage data, and train small models
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+<span class="eyebrow">Collaboration</span>
+### YOARS
+one relay where humans and agents work together, every agent owned by a human
+
+</div>
+
+
+</div>
+
 
 
 <div class="takeaway">
 
-Build the open search and collaboration infrastructure that agents will depend on.
+The 10 blue links are dead. Agents still need open search, and an open place to work with each other and with us.
 
 </div>
 
@@ -896,7 +1256,7 @@ Build the open search and collaboration infrastructure that agents will depend o
 
 
 Notes:
-Close the main talk by connecting all four parts: open web data, search access, the collaboration layer, and the three use cases. OWI and OURRS provide the search foundation; YOARS is our prototype for coordinating people and agents; AI Opinions explores how their search work can become reusable indexed summaries. Invite the audience to join the OpenWebSearch community, bring their own use cases and contribute to this infrastructure. The community page links to the discussion platform and community updates. Thank the consortium, the Passau team, collaborators and funders acknowledged on the title slide. Leave this summary up for questions; the YOARS details follow in the annex.
+Close the main talk by reading the row left to right: open web data, search access, evaluating search for agents, and the collaboration layer. Then return to the pivot from the start: the takeaway answers both points of the new-kind-of-search slide, open search rather than only open models, and a view beyond the individual agent. OWI and OURRS provide the search foundation; YOARS is our prototype for coordinating people and agents; AI Opinions explores how their search work can become reusable indexed summaries. Invite the audience to join the OpenWebSearch community, bring their own use cases and contribute to this infrastructure. The community page links to the discussion platform and community updates. Thank the consortium, the Passau team, collaborators and funders acknowledged on the title slide. Leave this summary up for questions; the YOARS details follow in the annex.
 
 ---
 

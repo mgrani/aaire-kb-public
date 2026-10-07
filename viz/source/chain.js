@@ -8,11 +8,10 @@
 // the SOURCE harness puts an AI (LLM) agent,
 // DISARM/DISRUPT and the Alliance4Europe community around it and reaches into
 // social media directly; analysts work with it, and what they find flows back
-// as contributions. The last stage shows which institutions work where, as logos.
+// as contributions. The last stage shows the infrastructure underneath.
 //
 // stages: 0 sources · 1 analysis, indexing, search and services · 2 the harness and
-//         the platforms it reads · 3 analysts and the loop · 4 institutions and
-//         the infrastructure underneath
+//         the platforms it reads · 3 analysts and the loop · 4 infrastructure
 // params:
 //   stage:  0–4, drawn when the slide has no data-steps (a section slide)
 //   focus:  a column key or a list of them ('sources', 'analysis', 'index',
@@ -26,17 +25,6 @@ const SURFACE = '#f6f8fa'
 const WHITE = '#ffffff'
 const DIM = 0.18
 
-// Logos live in the shared slide assets; resolve them against this module's
-// own URL (<base>viz/source/chain.js) so the figure works under any site base.
-const LOGOS = {
-  passau: { file: 'logo-passau.png', ratio: 944 / 381 },
-  kassel: { file: 'logo-kassel.svg', ratio: 199.194 / 39.927 },
-  osf: { file: 'logo-osf.png', ratio: 353 / 100 },
-  lrz: { file: 'logo-lrz.jpg', ratio: 1 },
-  a4e: { file: 'logo-a4e.png', ratio: 1656 / 901 },
-}
-const logoUrl = (key) => new URL(`../../slides/_assets/source/${LOGOS[key].file}`, import.meta.url).href
-
 let instances = 0
 
 // x, width and the stage at which a column appears
@@ -49,16 +37,16 @@ const COLS = {
 }
 
 const BOXES = [
-  { col: 'sources', y: 40, h: 105, title: 'Open Web Index', sub: ['crawls the web, daily'], who: ['passau', 'lrz', 'osf'] },
-  { col: 'sources', y: 165, h: 105, title: 'Social-media crawlers', sub: ['Bluesky · Telegram · …'], who: ['passau'] },
-  { col: 'sources', y: 290, h: 105, title: 'User contributions', sub: ['tips, links, findings', 'not indexed'], who: ['osf'], id: 'contrib' },
-  { col: 'analysis', y: 40, h: 105, title: 'Indexing', sub: ['web pages and social-media', 'posts, analysis attached'], who: ['passau'] },
-  { col: 'analysis', y: 165, h: 105, title: 'Content analysis', sub: ['AI-generated? manipulative?', 'factually wrong?'], who: ['kassel'] },
-  { col: 'analysis', y: 290, h: 105, title: 'Actor analysis', sub: ['who posts it, who copies', 'it, how it spreads'], who: ['passau', 'kassel'] },
+  { col: 'sources', y: 40, h: 105, title: 'Open Web Index', sub: ['crawls the web, daily'] },
+  { col: 'sources', y: 165, h: 105, title: 'Social-media crawlers', sub: ['Bluesky, Telegram, …'] },
+  { col: 'sources', y: 290, h: 105, title: 'User contributions', sub: ['tips, links, findings', 'not indexed'], id: 'contrib' },
+  { col: 'analysis', y: 40, h: 105, title: 'Indexing', sub: ['web pages and social-media', 'posts, analysis attached'] },
+  { col: 'analysis', y: 165, h: 105, title: 'Content analysis', sub: ['AI-generated? manipulative?', 'factually wrong?'] },
+  { col: 'analysis', y: 290, h: 105, title: 'Actor analysis', sub: ['who posts it, who copies', 'it, how it spreads'] },
   { col: 'index', y: 40, h: 105, title: ['Reverse image', 'search'], sub: ['separate service,', 'fed by the indexer'], dashed: true },
-  { col: 'index', y: 165, h: 105, title: 'OURRS search', sub: ['web and social posts', 'ourrs.eu'], who: ['passau'] },
-  { col: 'index', y: 290, h: 105, title: ['SOURCE campaign', 'analysis'], sub: ['indexed content and actors'], who: ['passau'] },
-  { col: 'people', y: 40, h: 125, title: 'Social media', sub: ['Bluesky · Telegram', 'X · TikTok · …'], id: 'platforms' },
+  { col: 'index', y: 165, h: 105, title: 'OURRS search', sub: ['web and social posts', 'ourrs.eu'] },
+  { col: 'index', y: 290, h: 105, title: ['SOURCE campaign', 'analysis'], sub: ['indexed content and actors'] },
+  { col: 'people', y: 40, h: 125, title: 'Social media', sub: ['Bluesky, Telegram,', 'X, TikTok, …'], id: 'platforms' },
   { col: 'people', y: 190, h: 205, title: 'Analysts', sub: ['fact-checkers,', 'OSINT researchers,', 'journalists,', 'civil society'], id: 'analysts', stage: 3 },
 ]
 
@@ -90,21 +78,6 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     return p
   }
 
-  // a row of institution logos, left-aligned at (x, y), h high
-  const logoRows = []
-  const logos = (g, x, y, keys, h = 20) => {
-    const row = g.append('g')
-    let cx = x
-    keys.forEach((k) => {
-      const w = h * LOGOS[k].ratio
-      row.append('image').attr('href', logoUrl(k)).attr('x', cx).attr('y', y)
-        .attr('width', w).attr('height', h).attr('preserveAspectRatio', 'xMinYMid meet')
-      cx += w + 8
-    })
-    logoRows.push(row)
-    return row
-  }
-
   // ── column headers ─────────────────────────────────────────────────────────
   const groups = {}
   for (const [key, c] of Object.entries(COLS)) {
@@ -126,7 +99,6 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     titles.forEach((t, i) => text(g, c.x + 12, b.y + 24 + i * 19, t, 16, NAVY, 700))
     const top = b.y + 45 + (titles.length - 1) * 19
     b.sub.forEach((s, i) => text(g, c.x + 12, top + i * 18, s, 13.5, SOFT))
-    if (b.who) logos(g, c.x + 12, b.y + b.h - 28, b.who)
     if (b.id) anchors[b.id] = { x: c.x, y: b.y, w: c.w, h: b.h }
   }
 
@@ -143,18 +115,14 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       g.append('rect').attr('x', c.x + 12).attr('y', y).attr('width', c.w - 24).attr('height', 30).attr('rx', 6).attr('fill', WHITE)
       text(g, c.x + 20, y + 20, t, 12.5, NAVY, 700)
     })
-    const strip = g.append('g')
-    strip.append('rect').attr('x', c.x + 12).attr('y', 352).attr('width', c.w - 24).attr('height', 30).attr('rx', 6).attr('fill', WHITE)
-    logoRows.push(strip)
-    logos(g, c.x + 20, 357, ['passau', 'kassel', 'a4e'])
   }
 
   // ── flow arrows ────────────────────────────────────────────────────────────
   const gA1 = svg.append('g') // sources → indexing/content → actors; indexing and actors → services
   arrow(gA1, 'M 205 75 L 238 75') // Open Web Index → indexing
-  arrow(gA1, 'M 205 185 C 228 185, 228 115, 238 115') // social-media crawlers → indexing
+  arrow(gA1, 'M 205 185 C 216 185, 212 115, 224 115 L 238 115') // social-media crawlers → indexing
   arrow(gA1, 'M 205 217 L 238 217') // social-media crawlers → content analysis
-  arrow(gA1, 'M 205 250 C 222 250, 222 310, 238 310') // social-media crawlers → actor analysis
+  arrow(gA1, 'M 205 250 C 216 250, 212 310, 224 310 L 238 310') // social-media crawlers → actor analysis
   arrow(gA1, 'M 205 342 L 238 342') // user contributions → actor analysis only
   arrow(gA1, 'M 322 165 L 322 147') // content analysis → indexing (up)
   arrow(gA1, 'M 352 145 L 352 163') // indexing → content analysis (down)
@@ -182,7 +150,6 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   gInfra.append('rect').attr('x', 10).attr('y', 447).attr('width', W - 20).attr('height', 44).attr('rx', 8)
     .attr('fill', '#eef4f6').attr('stroke', TEAL).attr('stroke-width', 1.2)
   text(gInfra, 26, 474, 'Infrastructure: compute, cloud and storage for the SOURCE database, on the OpenWebSearch.eu federation', 14, NAVY, 600)
-  logos(gInfra, W - 50, 453, ['lrz'], 32)
 
   let last = null
   function render(step) {
@@ -196,7 +163,6 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     t(gA3).attr('opacity', s >= 3 ? (focus ? DIM : 1) : 0)
     t(gLoop).attr('opacity', s >= 3 ? (focus ? DIM : 1) : 0)
     t(gInfra).attr('opacity', s >= 4 ? (focus ? DIM : 1) : 0)
-    logoRows.forEach((r) => t(r).attr('opacity', s >= 4 ? 1 : 0))
     last = s
   }
   render(0)

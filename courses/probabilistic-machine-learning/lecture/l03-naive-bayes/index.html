@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 04: Naive Bayes and the Generative Route</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 03: Keep the Peak, the Generative Route and Naive Bayes</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
@@ -6,59 +6,64 @@
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
-## Lecture 04: Naive Bayes and the Generative Route
+## Lecture 03: Keep the Peak, the Generative Route and Naive Bayes
 
 Prof. Dr. Michael Granitzer
 
 Notes:
-The lecture's place in the arc: after Lecture 03's two shortcuts (keep the
-peak; model only p(y | x)), the joint returns — and immediately forces the
-third shortcut, "assume it apart". Three modules: the generative route and its
-explosion; naive Bayes, read entirely through earlier lectures (fitting = MLE
-of a categorical, smoothing = the Beta posterior mean, double counting =
-over-confidence); and the explicit contrast with logistic regression — the
-same linear log-odds, fitted two ways.
+One session. The first classifier of the course is built straight from
+probability, and two shortcuts are named on the way. Three modules: keep the
+peak (maximum likelihood and MAP on the Beta–Bernoulli coin of Lecture 02 — the
+tool that fitting needs, and the first thing a point estimate drops); the
+generative route and its explosion; and naive Bayes, read entirely through
+earlier material (fitting = MLE of a categorical, smoothing = the Beta
+posterior mean, double counting = over-confidence). Lecture 04 then shows that
+the linear and logistic regression the students know are the same story told
+for a conditional distribution — and sets logistic regression against naive
+Bayes.
 
 2026-09-26 (course plan N2): conditional independence properly and the
 graphical-models introduction moved to the start of Lecture 05. This lecture
 defines conditional independence only as far as naive Bayes needs it. Fraud is
 the running example throughout; the shared Data Science units
 (bayes-decision-making, bayes-learning, naive-bayes) are replaced in PML by
-three PML units and stay unchanged for Data Science.
+PML units and stay unchanged for Data Science.
+
+2026-10-06: Lectures 03 and 04 swapped, so the course starts classification
+with a probabilistically motivated classifier. Keep-the-peak moved in here from
+the old Lecture 03; the comparison with logistic regression moved to Lecture 04.
 
 --
 
 ## Where We Left Off
 
-Lecture 03 took two shortcuts and named what each drops:
 
-| Shortcut | Instead of the ideal | What is dropped |
-|---|---|---|
-| **Keep the peak** | the most probable parameter (MLE, MAP) | the spread: how sure we are |
-| **Only what you need** | model $p(y \mid x)$ directly — logistic regression | $p(x)$: every question about the inputs |
-
-
-<div class="grid-2-1">
+<div class="grid-figure">
 
 
 <div class="column">
 
-Today the inputs come back. The **generative route** models how the data
-arises, class by class, and converts with Bayes:
-
-$$
-p(x, y) = p(y) \cdot p(x \mid y)
-$$
+<div class="viz viz-lg" data-viz="ml/posterior-readings"
+ data-params='{"posterior": [4, 8], "xLabel": "θ = P(user returns)", "title": "Lecture 02: 3 of 10 users, flat prior → Beta(4, 8)", "peakName": "peak h/n"}'></div>
 
 </div>
 
 
-<div class="c-warning">
+<div class="column middle">
 
-<span class="eyebrow">The catch</span>
+One posterior, three readings:
 
-$p(x \mid y)$ is a joint over every attribute — and it explodes. Paying for it
-is **shortcut 3: assume it apart**.
+- **peak** $0.30 = h/n$
+- **mean** $0.33$
+- **95% interval** $[0.11, 0.61]$
+
+
+<div class="c-insight">
+
+Today keeps only the **peak** — and then asks what a classifier built on probability looks like.
+
+</div>
+
 
 </div>
 
@@ -67,16 +72,82 @@ is **shortcut 3: assume it apart**.
 
 
 Notes:
-Return to the shortcut table of Lecture 01, as promised there. Two rows are done;
-today's row is "assume it apart". Say the plan out loud: Module 1 takes the
-generative route and hits the explosion; Module 2 pays with the naive
-independence assumption and reads every step of naive Bayes as something the
-students already know (MLE, the Beta posterior of L02); Module 3 puts naive
-Bayes and logistic regression side by side and shows they are the same linear
-model, fitted two ways.
+Pick up the thread of Lecture 02 deliberately; the last slides there promised
+this. Show the posterior the students computed last week, fully read: the peak
+(navy) is what today's methods keep, the mean and the interval (amber) are what
+they drop. Then say the uncomfortable sentence: every model they have fitted by
+least squares or cross-entropy took this shortcut — Lecture 04 returns to those. The next slide names the two
+shortcuts of the lecture.
 
-The fraud example of Lectures 01–02 returns as the running example: a base rate
-of 1 in 1,000 and a handful of yes/no red flags.
+--
+
+## Today: Keep the Peak, Assume It Apart
+
+Lecture 01's table, rows 1 and 3 — and the first classifier built straight from probability:
+
+| shortcut | instead of the ideal | what is lost | where |
+|---|---|---|---|
+| **Keep the peak** | the most probable parameter — MLE or MAP | how sure we are about it | a coin · every count |
+| **Assume it apart** | factorise the joint by independence | the dependences assumed away | naive Bayes |
+
+
+<div class="flow-row">
+
+
+<div class="stat-card concept">
+
+### Keep the peak
+on a coin
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### The generative route
+a classifier from Bayes
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Naive Bayes
+assume it apart
+
+</div>
+
+
+</div>
+
+
+Notes:
+The roadmap of the lecture in two forms: the two rows of the Lecture 01 table
+that today covers, and the three modules. Module 1 takes shortcut 1 where it can
+be drawn (the Beta posterior) and gives the tool, maximum likelihood, that
+fitting needs; Module 2 builds a classifier directly from Bayes' theorem and
+meets the explosion of the joint; Module 3 pays for it with the naive assumption
+and reads every step of naive Bayes as something already known (MLE, the Beta
+posterior mean, over-confidence). Lecture 04 then asks how the classifiers the
+students know from earlier courses — linear and logistic regression — look in
+this light.
+
+Fraud is the running example: a base rate of 1 in 1,000 and a handful of yes/no
+red flags.
 
 
 --
@@ -86,16 +157,269 @@ of 1 in 1,000 and a handful of yes/no red flags.
 
 <div class="img-h-xl">
 
-![Argument map for Lecture 04: from the generative route through naive Bayes to the contrast with logistic regression](/courses/probabilistic-machine-learning/figures/l04-argument-map.svg)
+![Argument map for Lecture 03: keep the peak, the generative route, naive Bayes and what assuming it apart drops](/courses/probabilistic-machine-learning/figures/l03-argument-map.svg)
 
 </div>
 
 
 Notes:
-The lecture on one page. Top row: the generative route, the explosion it
-causes, and naive Bayes as the payment. Middle row: the explicit contrast with
-logistic regression and the shortcut named with what it drops. Bottom row: the
-takeaway. Point at the strip: Lecture 04 is "assume it apart".
+The lecture on one page. Top row: keep the peak on a coin (and what it drops),
+the generative route, and the explosion of the joint it causes. Bottom row:
+naive Bayes as the payment, the shortcut named with what it drops, and the
+takeaway. Point at the strip: Lecture 03 is "keep the peak" and "assume it
+apart".
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Keep the Peak
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Last week's posterior gave a peak, a mean and an interval.
+What do we lose when we keep only the peak — and why does almost everyone do
+it?
+
+</div>
+
+
+--
+
+## The Likelihood, Read Along the Other Axis
+
+
+<div class="c-definition">
+
+The **likelihood** is the probability of the observed data, read as a function
+of the **parameter** with the data held fixed: $L(\theta) = p(D \mid \theta)$.
+The **maximum likelihood estimate** is its peak,
+$\hat{\theta}\_{\mathrm{ML}} = \arg\max\_{\theta} p(D \mid \theta)$.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Lecture 02, 3 of 10 users
+$$p(\theta \mid D) \propto \theta^{3}(1-\theta)^{7} \cdot 1$$
+With a **flat prior** the posterior *is* the normalised likelihood — so its peak
+$h/n = 0.3$ is the maximum likelihood estimate.
+
+</div>
+
+
+<div class="card">
+
+### Not a distribution over $\theta$
+$$\int\_0^1 \theta^{3}(1-\theta)^{7} \mathrm{d}\theta = \frac{1}{1320}$$
+The likelihood is a probability over **data**. Read along $\theta$ it need not
+integrate to 1 — only the posterior does.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Start from the curve the students drew last week, not from a new definition.
+The likelihood is the one ingredient of the posterior that the data supplies;
+maximum likelihood keeps that ingredient, drops the prior (or takes it flat) and
+then keeps only the highest point. The integral makes the warning concrete:
+1/1320 is B(4, 8), the Beta normaliser — the number the posterior divides by.
+The warning is the most common confusion of the course: "the likelihood of θ"
+is not "the probability of θ".
+
+--
+
+## Deriving $h/n$ Without a Posterior
+
+Lecture 02's i.i.d. assumption lets the likelihood factorise over rows; the
+logarithm turns the product into a sum without moving the peak:
+
+$$
+\ell(\theta) = \log \prod\_{i=1}^{n} \theta^{y\_i}(1-\theta)^{1-y\_i}
+= h \log \theta + (n-h)\log(1-\theta)
+$$
+
+$$
+\frac{d\ell}{d\theta} = \frac{h}{\theta} - \frac{n-h}{1-\theta} = 0
+\quad\Longrightarrow\quad
+\hat{\theta}\_{\mathrm{ML}} = \frac{h}{n}
+$$
+
+
+<div class="c-insight">
+
+Last week's peak, found by **setting a derivative to zero** — no prior, no
+normaliser, no integral. The recipe works unchanged for a million parameters,
+where nobody can draw the posterior.
+
+</div>
+
+
+Notes:
+Math first: show the two lines and ask what they compute before saying it. The
+three reasons for the logarithm (same arg max, no underflow, sums differentiate
+term by term) can be said in one breath; students have met them in earlier ML
+courses. The insight box answers the second half of the guiding question: the
+peak is taken because it turns inference (an integral) into optimisation (a
+derivative). That is also why every method they know is fitted by gradient
+descent.
+
+--
+
+## The Peak Can Lie
+
+Three flips, **three heads**. Maximum likelihood: $\hat{\theta}\_{\mathrm{ML}} = 3/3 = 1$.
+
+<div class="viz viz-lg" data-viz="ml/posterior-readings" data-steps="2"
+ data-params='{"posterior": [4, 1], "prior": [1, 1], "xLabel": "θ = P(heads)", "title": "Flat prior (dashed), 3 heads: posterior Beta(4, 1)", "peakName": "peak (MLE)"}'></div>
+
+
+<div class="q">
+
+Predict before the second click: where do the posterior mean and the 95%
+interval lie?
+
+</div>
+
+
+Notes:
+Click 1 marks the peak — exactly 1: the estimate rules tails out forever. Stop
+and ask where the mean and the interval are. Click 2: mean 0.8, 95% interval
+[0.40, 0.99]. The posterior, with the same flat prior as last week, says
+"probably above a half, possibly well below 1"; the peak says "never tails".
+Nothing was wrong with the data or the model — only with keeping one number.
+
+Numbers: Beta(4, 1) has density 4θ³, CDF θ⁴, so the 2.5% and 97.5% points are
+0.025^(1/4) = 0.398 and 0.975^(1/4) = 0.994.
+
+--
+
+## A Prior's Peak: MAP
+
+Keep the prior, and still take only the peak — the **maximum a posteriori**
+estimate. With a $\mathrm{Beta}(a, b)$ prior, the same derivative gives
+
+$$
+\hat{\theta}\_{\mathrm{MAP}} = \arg\max\_{\theta} p(D \mid \theta) p(\theta)
+= \frac{h + a - 1}{n + a + b - 2}
+$$
+
+| prior | data | MLE $h/n$ | MAP | posterior mean |
+|---|---|---|---|---|
+| $\mathrm{Beta}(1,1)$ flat | 3 of 3 | 1 | 1 | 0.80 |
+| $\mathrm{Beta}(2,2)$ | 3 of 3 | 1 | **0.80** | 0.71 |
+| $\mathrm{Beta}(2,2)$ | 8 of 10 (Lecture 02) | 0.80 | **0.75** | 0.71 |
+
+
+<div class="c-note">
+
+The prior shifts the peak as if $a-1$ yeses and $b-1$ noes had been seen before
+the data — a **flat** prior shifts nothing. MAP pulls 3 of 3 back to 0.8 — and still
+reports one number.
+
+</div>
+
+
+Notes:
+The last row is the Lecture 02 mini-exercise (posterior Beta(10, 4)): students
+computed a MAP then without the name. Derivation for the curious: add
+(a − 1) log θ + (b − 1) log(1 − θ) to ℓ(θ) and set the derivative to zero. MAP is
+the bridge to Module 4, where a penalty on the weights turns out to be exactly
+this: a prior's peak. Note that the posterior mean (a + h)/(a + b + n) is a
+different point — the shortcut chooses the mode, and for a skewed posterior the
+two differ.
+
+--
+
+## Why Everyone Keeps the Peak
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+| | the whole posterior | only the peak |
+|---|---|---|
+| **needs** | the normaliser $p(D)$ — an integral over $\theta$ | a derivative |
+| **in 1 dimension** | a Beta table | $h/n$ |
+| **in a million** | an integral nobody can compute exactly | gradient descent |
+| **costs** | computation | the **spread** |
+
+</div>
+
+
+<div class="c-note">
+
+With **1,000 users** the posterior is $\mathrm{Beta}(301, 701)$: standard
+deviation $0.015$. The peak is nearly everything there is to know.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The trade in one table: the posterior asks for an integral, the peak for a
+derivative. With plenty of data the posterior is so narrow (Lecture 02: [0.27,
+0.33]) that its peak is an excellent summary; with three flips it is not. The
+shortcut is not wrong, it is a bet that the spread does not matter — Module 2
+shows the place where it matters even with plenty of data: far from the data.
+
+--
+
+## Mini-Exercise
+
+Two analysts both report $\hat{\theta} = 0.3$. One saw **3 of 10** users return,
+the other **300 of 1,000**.
+
+
+<div class="q">
+
+What does the reported number hide — and which estimate would you bet on?
+
+</div>
+
+
+
+<div class="fragment">
+
+The **spread**. Lecture 02's posteriors: $[0.11, 0.61]$ after 10 users,
+$[0.27, 0.33]$ after 1,000 — the same peak, an interval nine times wider. Bet
+on the second; a point estimate cannot tell you to.
+
+</div>
+
+
+Notes:
+One minute to read, one to think. Everything needed is on last week's slide;
+the arithmetic is not the point. Standard deviations 0.13 and 0.015 (ratio
+about 9).
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+**Shortcut 1 — keep the peak.** Maximum likelihood (flat prior) and MAP (with a
+prior) keep the posterior's most probable point. It is cheap — a derivative
+instead of an integral — and harmless with plenty of data. It drops the
+**spread**: how sure we are about the parameter.
+
+</div>
+
 
 ---
 
@@ -106,9 +430,9 @@ takeaway. Point at the strip: Lecture 04 is "assume it apart".
 
 <div class="guiding-question">
 
-**Guiding Question:** Logistic regression never asked what a fraudulent
-transaction *looks like*. What would it take to model that — and why does
-nobody do it in full?
+**Guiding Question:** A classifier needs $P(\text{fraud} \mid x)$. Bayes'
+theorem builds it from how fraud *looks* — what would it take to model that, and
+why does nobody do it in full?
 
 </div>
 
@@ -126,12 +450,12 @@ $P(\text{fraud} \mid x)$, where $x$ is the vector of red flags:
 
 <div class="card">
 
-<span class="eyebrow">Discriminative — Lecture 03</span>
+<span class="eyebrow">Discriminative — Lecture 04</span>
 
 ### Model $p(y \mid x)$ directly
 
-Logistic regression: a score for each $x$. Nothing is said about how $x$
-arises.
+A score for each $x$, as logistic regression will give (Lecture 04). Nothing
+is said about how $x$ arises.
 
 </div>
 
@@ -173,8 +497,9 @@ separately, then convert.
 
 <div class="q">
 
-Logistic regression already gives $P(\text{fraud} \mid x)$. What can a model of
-$p(x \mid y)$ do that it cannot?
+A discriminative model — logistic regression, the next lecture — gives
+$P(\text{fraud} \mid x)$ directly. What can a model of $p(x \mid y)$ do that it
+cannot?
 
 </div>
 
@@ -210,10 +535,10 @@ per class.
 Notes:
 Let the room answer before the click; students with an ML background usually
 name "missing values" and sometimes "the prior". The novelty point is the one
-they rarely name, and it is exactly what "only what you need" dropped in
-Lecture 03.
+they rarely name, and it is exactly what the discriminative route (Lecture 04)
+will drop.
 
-Each of the three items returns in Module 3 as a concrete comparison. Here they
+Each of the three items returns in Lecture 04 as a concrete comparison. Here they
 only motivate paying the price on the next slide.
 
 --
@@ -278,12 +603,12 @@ likelihood estimate is 0 — every fraud that looks slightly new becomes
 Notes:
 The numbers: 2^30 − 1 = 1,073,741,823 free parameters per class (the cells of
 a joint over 30 binary variables, minus one because they sum to 1). With 100
-frauds, at most 100 cells are non-empty. Connect to Lecture 03's
+frauds, at most 100 cells are non-empty. Connect to Module 1's
 three-heads-in-three-flips: MLE on too little data gives extreme answers; here
 it gives zeros almost everywhere.
 
 The way out is not more data — no bank has a billion frauds. It is an
-assumption that makes the table small, which is Module 2.
+assumption that makes the table small, which is Module 3.
 
 --
 
@@ -312,7 +637,7 @@ numbers (they sum to 1). Two classes give 14, and $P(\text{fraud})$ adds one.
 Notes:
 Head arithmetic on purpose. If someone answers 16 or 17, the "minus one"
 (normalisation) is the point to make; it is the same count as the 2^n − 1 above.
-Keep the 15 on the board: Module 2 reduces it to 7.
+Keep the 15 on the board: Module 3 reduces it to 7.
 
 --
 
@@ -392,7 +717,7 @@ subject of "Counting Evidence Twice" at the end of the module.
 
 <div class="column">
 
-![Naive Bayes as a graph: the class points to every attribute, no arrows between attributes](/courses/probabilistic-machine-learning/figures/l04-naive-bayes-star.svg)
+![Naive Bayes as a graph: the class points to every attribute, no arrows between attributes](/courses/probabilistic-machine-learning/figures/l03-naive-bayes-star.svg)
 
 </div>
 
@@ -467,7 +792,7 @@ yes/no flag, a Bernoulli.
 
 <div class="card">
 
-### Lecture 03
+### Module 1 today
 Its maximum likelihood estimate is the **relative frequency** — the same
 derivation as $h/n$ for the coin.
 
@@ -490,7 +815,7 @@ Notes:
 Math first: show the two formulas and ask what principle produces them before
 revealing the cards verbally. The answer the course has prepared: the
 categorical distribution was introduced in L02 as "the distribution naive Bayes
-uses for every nominal attribute", and L03 derived that the MLE of a Bernoulli
+uses for every nominal attribute", and Module 1 derived that the MLE of a Bernoulli
 is h/n. Under the naive assumption the likelihood splits into one categorical
 per attribute and class, so each is maximised separately — by counting.
 
@@ -594,8 +919,8 @@ So the evidence *adds*. Stop after the foreign IP (7.8%) and ask what the
 night flag will do; students tend to overestimate it because "night" sounds
 suspicious, but 2.5 is the weakest ratio.
 
-Plant the seed for Module 3: a sum of per-attribute contributions plus a
-starting value is a linear score — the form of logistic regression.
+Plant the seed for Lecture 04: a sum of per-attribute contributions plus a
+starting value is a linear score — the form of logistic regression (Lecture 04).
 
 --
 
@@ -625,7 +950,7 @@ other thirty flags say. One unseen value vetoes all other evidence.
 <span class="eyebrow">Keep the peak, fails</span>
 
 "Not seen in 100 frauds" became "impossible for a fraud" — the three heads in
-three flips of Lecture 03, in a single cell.
+three flips of Module 1, in a single cell.
 
 </div>
 
@@ -688,7 +1013,7 @@ prior, as in L02's "near a half" analyst.
 
 <div class="column">
 
-![Naive Bayes with the dropped dependence between new device and foreign IP](/courses/probabilistic-machine-learning/figures/l04-naive-bayes-dropped.svg)
+![Naive Bayes with the dropped dependence between new device and foreign IP](/courses/probabilistic-machine-learning/figures/l03-naive-bayes-dropped.svg)
 
 </div>
 
@@ -724,7 +1049,7 @@ dashed: naive Bayes multiplies both ratios as if they were separate witnesses,
 though they largely report the same event. With the pair's own ratio 13.75,
 the posterior odds are 13.75 · 2.5/999 = 34.4/999, i.e. 3.3% instead of 17.4%.
 
-The consequence connects to Lecture 03's calibration: naive Bayes scores push
+The consequence connects to calibration (Lecture 04): naive Bayes scores push
 towards 0 and 1 and are not calibrated. That argmax decisions often survive
 anyway is the classic explanation of why naive Bayes classifies well
 (Domingos & Pazzani, 1997) — the answer to the module's guiding question.
@@ -774,206 +1099,6 @@ probabilities are over-confident wherever attributes move together.
 
 </div>
 
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# Generative vs Discriminative
-
-
-<div class="guiding-question">
-
-**Guiding Question:** Naive Bayes and logistic regression see the same fraud
-table. Which would you trust with 50 labelled frauds — and which with 50,000?
-
-</div>
-
-
---
-
-## The Same Line, Fitted Twice
-
-Take the logarithm of the naive-Bayes odds. For yes/no flags
-$x\_j \in \lbrace 0, 1 \rbrace$ with $\theta\_{jy} = P(x\_j = 1 \mid y)$:
-
-$$
-\log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)} = w\_0 + \sum\_{j=1}^{p} w\_j x\_j,
-\qquad
-w\_j = \log \frac{\theta\_{j1}}{\theta\_{j0}} - \log \frac{1 - \theta\_{j1}}{1 - \theta\_{j0}}
-$$
-
-
-<div class="q">
-
-Where have you seen a log-odds that is linear in $x$?
-
-</div>
-
-
-
-<div class="fragment">
-
-
-<div class="c-insight">
-
-**Logistic regression** (Lecture 03): $P(\text{fraud} \mid x) = \sigma(w\_0 + w^\top x)$.
-Same family of classifiers — naive Bayes sets the weights by **counting**, one
-attribute at a time; logistic regression by **maximising
-$\sum\_i \log p(y\_i \mid x\_i)$**, all weights jointly.
-
-</div>
-
-
-</div>
-
-
-Notes:
-Math first (P5). The derivation is two lines and belongs on the exercise sheet:
-log p(x_j | y) = x_j log θ_jy + (1 − x_j) log(1 − θ_jy), so each flag
-contributes a constant plus x_j times a weight; the constants and the log
-prior odds collect in w_0. With the fraud numbers, w for the new device is
-log 6 − log(0.4/0.9) ≈ 1.79 + 0.81 = 2.60.
-
-The consequence of "jointly": logistic regression sees that the new device
-and the foreign IP arrive together and splits the credit between them. Naive
-Bayes cannot; each weight is estimated as if its flag were alone. That is the
-double counting of Module 2, now visible in the weights.
-
---
-
-## Two Ways to a Classifier
-
-| | naive Bayes — generative | logistic regression — discriminative |
-|---|---|---|
-| models | $P(y)$ and $p(x \mid y)$ | $P(y \mid x)$ only |
-| fitted by | counting (joint likelihood) | iterative optimisation (conditional likelihood) |
-| correlated flags | counted twice | credit shared |
-| a missing field | drop its factor | needs a value |
-| an unusual $x$ | low $p(x)$: can be flagged | still a confident score |
-| a new base rate | change $P(y)$ | refit or correct the intercept |
-| drops | dependences between attributes | everything about $x$ |
-
-Notes:
-A table because the two are compared along shared dimensions. Walk it row by
-row and let students predict each cell for logistic regression before
-showing it, if time allows. The last row is the course arc: each model is
-placed by what it drops. "Correct the intercept": in logistic regression the
-base rate sits inside w_0, so a new base rate shifts w_0 by the log of the
-ratio of prior odds — possible, but not visible in the model as a separate
-factor.
-
---
-
-## Few Data, Many Data
-
-
-<div class="grid-2-1">
-
-
-<div class="column">
-
-![Schematic learning curves: naive Bayes levels off early at a higher error, logistic regression later at a lower one](/courses/probabilistic-machine-learning/figures/l04-learning-curves.svg)
-
-</div>
-
-
-<div class="column">
-
-**Few labelled frauds:** naive Bayes. Its assumption acts like a strong prior —
-little to estimate, so it settles fast.
-
-**Many labelled frauds:** logistic regression. It pays for fewer assumptions
-with data, and ends lower.
-
-</div>
-
-
-</div>
-
-
-
-<div class="c-note">
-
-Shown empirically and in theory by Ng & Jordan (2002). A wrong assumption costs
-accuracy in the limit and buys it early — the prior of Lecture 02, again.
-
-</div>
-
-
-Notes:
-The figure is schematic — say so. Ng & Jordan (NIPS 2002, "On discriminative vs.
-generative classifiers") show that naive Bayes approaches its asymptotic error
-with a number of examples logarithmic in the number of attributes, logistic
-regression with a number linear in it; the discriminative asymptote is never
-worse. On many real datasets the curves cross.
-
-Answer the module's guiding question: with 50 labelled frauds, trust naive
-Bayes' ranking; with 50,000, logistic regression. And the general point:
-an assumption is information. When it is roughly right it substitutes for
-data; when it is wrong it caps what data can do.
-
---
-
-## Mini-Exercise
-
-Our three-flag transaction arrives **without the IP field** — the logging
-failed.
-
-
-<div class="q">
-
-What does naive Bayes do with it — and what does logistic regression do?
-
-</div>
-
-
-
-<div class="fragment">
-
-**Naive Bayes** drops the factor: $\sum\_v p(x\_{\text{IP}} = v \mid y) = 1$, so
-the odds become $6 \cdot 2.5 : 999$ — about **1.5%**. **Logistic regression**
-has no model of $x$: it needs *some* value for $x\_{\text{IP}}$, so someone must
-impute one, or train a second model without the field.
-
-</div>
-
-
-Notes:
-The generative advantage in its most practical form. Marginalising a missing
-attribute out of a product of per-attribute factors is summing one factor over
-its values, which gives 1. The number: 15/1014 ≈ 0.0148. Compare with 17% when
-the IP was present and foreign: the missing field matters, and naive Bayes
-reports that honestly instead of guessing it.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-Naive Bayes and logistic regression draw **the same kind of line**; they differ
-in what they model. The generative model pays with assumptions about $x$ and
-gets answers about $x$; the discriminative one pays with data.
-
-</div>
-
-
-| lecture | shortcut | what is dropped |
-|---|---|---|
-| 03 | keep the peak | how sure we are |
-| 03 | only $p(y \mid x)$ | every question about $x$ |
-| 04 | assume it apart | every dependence between attributes |
-
-Naive Bayes is a graph with one hub. **Lecture 05** draws the others — and
-keeps exactly the dependences we claim.
-
-Notes:
-Close the lecture on the arc. The table is the L01 shortcut table, now with
-three rows filled. The teaser: the star graph of Module 2 is the simplest
-graphical model; Lecture 05 lets the modeller choose which arrows to keep,
-so the assumption becomes a statement rather than a blanket.
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
 

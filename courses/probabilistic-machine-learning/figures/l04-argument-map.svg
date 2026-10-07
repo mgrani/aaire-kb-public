@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
   <title id="title">Lecture 04 argument map</title>
-  <desc id="desc">The generative route to a classifier, the explosion of the class-conditional joint, naive Bayes as the payment, and naive Bayes against logistic regression: the same linear log-odds fitted two ways.</desc>
+  <desc id="desc">Classical linear regression, least squares read as a Gaussian likelihood, logistic regression as the Bernoulli twin that models only p(y given x), the comparison with naive Bayes, and when a score is a probability.</desc>
   <defs>
     <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="12" refY="6.5" orient="auto">
       <path d="M0,0 L13,6.5 L0,13 Z" fill="#64748b"/>
@@ -21,55 +21,65 @@
   <text x="50" y="46" class="arclabel" style="font-size:15px">Lecture 04 · argument map</text>
   <path d="M358 134 H406" class="arrow"/>
   <path d="M714 134 H762" class="arrow"/>
-  <path d="M916 196 C916 217 496 217 496 238" class="arrow"/>
-  <path d="M536 300 H584" class="arrow"/>
-  <path d="M827 362 C827 383 827 383 827 404" class="arrow"/>
+  <path d="M916 196 C916 217 204 217 204 238" class="arrow"/>
+  <path d="M358 300 H406" class="arrow"/>
+  <path d="M916 196 C916 217 916 217 916 238" class="arrow"/>
+  <path d="M916 362 C916 383 916 383 916 404" class="arrow"/>
+  <path d="M560 362 C560 383 560 383 560 404" class="arrow"/>
   <g transform="translate(50 72)">
     <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#164374">MODULE 1 · GENERATIVE</text>
-    <text x="18" y="48" class="head">The generative route</text>
-    <text x="18" y="73" class="text">p(y) · p(x | y), then Bayes</text>
-    <text x="18" y="93" class="small">the 1/1000 prior stays explicit</text>
-    <text x="18" y="111" class="small">questions about x become possible</text>
+    <text x="18" y="24" class="tag" fill="#164374">MODULE 1 · CLASSICAL</text>
+    <text x="18" y="48" class="head">Classical regression</text>
+    <text x="18" y="73" class="text">minimise squared error</text>
+    <text x="18" y="93" class="small">closed form · LMS · Gauss–Markov</text>
+    <text x="18" y="111" class="small">no distribution assumed</text>
   </g>
   <g transform="translate(406 72)">
-    <rect width="308" height="124" rx="12" fill="#fff1f1" stroke="#dc2626" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#dc2626">THE PROBLEM</text>
-    <text x="18" y="48" class="head">The joint explodes</text>
-    <text x="18" y="73" class="text">2³⁰ − 1 numbers per class</text>
-    <text x="18" y="93" class="small">for 30 yes/no flags</text>
-    <text x="18" y="111" class="small">100 frauds to fill them</text>
+    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
+    <text x="18" y="24" class="tag" fill="#164374">MODULE 2 · REGRESSION</text>
+    <text x="18" y="48" class="head">Least squares is a likelihood</text>
+    <text x="18" y="73" class="text">Gaussian noise ⇒ squared error</text>
+    <text x="18" y="93" class="small">σ̂² divides by n: biased low</text>
+    <text x="18" y="111" class="small">same band width at the villa</text>
   </g>
   <g transform="translate(762 72)">
     <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#164374">MODULE 2 · ASSUME IT APART</text>
-    <text x="18" y="48" class="head">Naive Bayes</text>
-    <text x="18" y="73" class="text">flags independent given the class</text>
-    <text x="18" y="93" class="small">fitting = counting = MLE</text>
-    <text x="18" y="111" class="small">+1 smoothing = L02 posterior mean</text>
+    <text x="18" y="24" class="tag" fill="#164374">MODULE 3 · CLASSIFICATION</text>
+    <text x="18" y="48" class="head">Logistic regression</text>
+    <text x="18" y="73" class="text">Bernoulli labels ⇒ cross-entropy</text>
+    <text x="18" y="93" class="small">gradient: error × feature, as LMS</text>
+    <text x="18" y="111" class="small">separable data: the peak runs away</text>
   </g>
   <g transform="translate(50 238)">
-    <rect width="486" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#164374">MODULE 3 · EXPLICIT</text>
+    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
+    <text x="18" y="24" class="tag" fill="#164374">MODULE 4 · COMPARED</text>
     <text x="18" y="48" class="head">Generative vs discriminative</text>
     <text x="18" y="73" class="text">NB and LR: the same linear log-odds</text>
     <text x="18" y="93" class="small">NB: few data, missing fields</text>
     <text x="18" y="111" class="small">LR: more data, lower error</text>
   </g>
-  <g transform="translate(584 238)">
-    <rect width="486" height="124" rx="12" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
+  <g transform="translate(406 238)">
+    <rect width="308" height="124" rx="12" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#d97706">WHAT IS DROPPED</text>
-    <text x="18" y="48" class="head">Shortcut 3: assume it apart</text>
-    <text x="18" y="73" class="text">dropped: dependences between flags</text>
-    <text x="18" y="93" class="small">correlated evidence counted twice</text>
-    <text x="18" y="111" class="small">probabilities over-confident</text>
+    <text x="18" y="48" class="head">Shortcut 3: only p(y | x)</text>
+    <text x="18" y="73" class="text">discriminative: x never modelled</text>
+    <text x="18" y="93" class="small">no warning for unusual inputs</text>
+    <text x="18" y="111" class="small">the villa, in classification form</text>
+  </g>
+  <g transform="translate(762 238)">
+    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
+    <text x="18" y="24" class="tag" fill="#164374">MODULE 5 · CALIBRATION</text>
+    <text x="18" y="48" class="head">When a score is a probability</text>
+    <text x="18" y="73" class="text">MLE: calibrated only on average</text>
+    <text x="18" y="93" class="small">rebalanced: fix with prior odds</text>
+    <text x="18" y="111" class="small">weight decay = Gaussian prior (MAP)</text>
   </g>
   <g transform="translate(50 404)">
     <rect width="1020" height="124" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#7c3aed">TAKEAWAY</text>
-    <text x="18" y="48" class="head">Assume it apart — but say what you assumed</text>
-    <text x="18" y="73" class="text">an assumption makes the joint affordable; it also decides which answers stay trustworthy</text>
-    <text x="18" y="93" class="small">L03: x never modelled · L04: all attributes apart given the class · L05: exactly the independences you claim</text>
+    <text x="18" y="48" class="head">Every loss so far is a likelihood</text>
+    <text x="18" y="73" class="text">the loss states the noise model, the penalty is a prior, the fit is a peak</text>
+    <text x="18" y="93" class="small">squared ↔ Gaussian · cross-entropy ↔ Bernoulli · weight decay ↔ prior · L06: losses that are not</text>
   </g>
   <line x1="50" y1="540" x2="1070" y2="540" stroke="#e2e8f0" stroke-width="1.5"/>
   <text x="50" y="582" class="arclabel">Course arc</text>
@@ -82,10 +92,10 @@
   <text x="359" y="600" text-anchor="middle" class="arcname" fill="#64748b">The language</text>
   <rect x="428" y="560" width="122" height="52" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
   <text x="489" y="581" text-anchor="middle" class="arcnum" fill="#64748b">L03</text>
-  <text x="489" y="600" text-anchor="middle" class="arcname" fill="#64748b">Keep the peak</text>
+  <text x="489" y="600" text-anchor="middle" class="arcname" fill="#64748b">Peak · apart</text>
   <rect x="558" y="560" width="122" height="52" rx="10" fill="#164374" stroke="#164374" stroke-width="2"/>
   <text x="619" y="581" text-anchor="middle" class="arcnum" fill="#ffffff">L04</text>
-  <text x="619" y="600" text-anchor="middle" class="arcname" fill="#ffffff">Assume it apart</text>
+  <text x="619" y="600" text-anchor="middle" class="arcname" fill="#ffffff">Only p(y | x)</text>
   <rect x="688" y="560" width="122" height="52" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
   <text x="749" y="581" text-anchor="middle" class="arcnum" fill="#64748b">L05</text>
   <text x="749" y="600" text-anchor="middle" class="arcname" fill="#64748b">Graph the joint</text>

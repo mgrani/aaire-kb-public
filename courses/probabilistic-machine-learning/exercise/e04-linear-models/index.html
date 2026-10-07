@@ -1,61 +1,53 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 4 — Naive Bayes and the Generative Route</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 4 — Linear Models: Least Squares, Logistic Regression and Calibrated Scores</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
     </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 # Exercise Sheet 4
-## Naive Bayes and the Generative Route
+## Linear Models: Least Squares, Logistic Regression and Calibrated Scores
 
 Probabilistic Machine Learning
 
 Prof. Dr. Michael Granitzer
 
 Notes:
-Accompanies Lecture 04. About 50 minutes: 4.A (15 min) counts parameters and
-derives the categorical MLE; 4.B (20 min) runs naive Bayes by hand, with and
-without smoothing; 4.C (15 min) derives the linear log-odds and compares naive
-Bayes with logistic regression in a short numpy task. Pen and paper except
-4.C.2. Every number in the solutions was recomputed.
+Accompanies Lecture 04. About 85 minutes, to be split over two sessions if
+needed: 4.A (10 min) is the villa slide of the least-squares module; 4.B
+(20 min) the cross-entropy and runaway-peak slides, with one short Python task
+(4.B.2, numpy only); 4.C (25 min) derives the linear log-odds of naive Bayes
+(Lecture 03) and compares it with logistic regression in a second numpy task
+(4.C.2); 4.D (30 min) is the rebalancing mini-exercise and weight decay as a
+prior. Pen and paper except 4.B.2 and 4.C.2.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# 4.A The Generative Route
+# 4.A Least Squares Is a Likelihood
 
 --
 
-## Exercise 4.A.1: Counting Parameters
+## Exercise 4.A.1: Four Flats and a Villa
 
-A fraud classifier (two classes) uses four attributes: **payment** (card,
-invoice, wallet), **country** (domestic, EU, other), **new device** (yes/no)
-and **night** (yes/no).
+Model $y = w\_0 + w\_1 x + \varepsilon$, $\varepsilon \sim \mathcal{N}(0, \sigma^2)$
+i.i.d.; $x$ in m², $y$ in k€.
 
-1. How many free numbers does the full generative model need — the class
-   prior and one joint $p(x \mid y)$ per class?
-2. How many does naive Bayes need?
-3. For $p$ yes/no attributes and $K$ classes, give both counts as formulas.
-4. From which $p$ on does the full joint need more than a million numbers
-   *per class*?
+| $x$ | 40 | 60 | 80 | 100 |
+|---|---|---|---|---|
+| $y$ | 150 | 200 | 280 | 330 |
 
-
-
---
-
-## Exercise 4.A.2: Fitting Is Counting
-
-An attribute takes $k$ values. Within one class we observed it $n$ times, value
-$v$ exactly $n\_v$ times ($\sum\_v n\_v = n$). Model it as categorical with
-parameters $\theta\_1, \ldots, \theta\_k \geq 0$, $\sum\_v \theta\_v = 1$.
-
-1. Write down the log-likelihood $\ell(\theta)$ of the $n$ i.i.d. observations.
-2. For $k = 2$, substitute $\theta\_2 = 1 - \theta\_1$ and show that the MLE is
-   $\hat{\theta}\_1 = n\_1 / n$ — the $h/n$ of Lecture 03.
-3. For general $k$, maximise $\ell$ under the constraint $\sum\_v \theta\_v = 1$
-   (Lagrange multiplier) and show $\hat{\theta}\_v = n\_v / n$.
-4. Why can naive Bayes fit every attribute's table separately, while a full
-   joint $p(x \mid y)$ could not be fitted attribute by attribute?
+1. Write down $\ell(w\_0, w\_1, \sigma^2)$ and show that for **every** $\sigma^2$ the
+   maximum over $(w\_0, w\_1)$ is the least-squares fit.
+2. Compute $\hat{w}\_1 = S\_{xy}/S\_{xx}$ and $\hat{w}\_0 = \bar{y} - \hat{w}\_1\bar{x}$,
+   the residuals and the RSS.
+3. Compute $\hat{\sigma}^2\_{\mathrm{ML}} = \mathrm{RSS}/n$ and the unbiased
+   $\mathrm{RSS}/(n - 2)$. By which factor does the ML version underestimate
+   $\sigma^2$ on average?
+4. Give the plug-in 95% band $\hat{y} \pm 1.96\hat{\sigma}\_{\mathrm{ML}}$ at 80 m²
+   and at 600 m². Then use the half-width that counts the uncertainty about
+   $\mathbf{w}$, $1.96\hat{\sigma} \sqrt{1 + \frac{1}{n} + \frac{(x - \bar{x})^2}{S\_{xx}}}$.
+   What do you conclude?
 
 
 
@@ -63,50 +55,54 @@ parameters $\theta\_1, \ldots, \theta\_k \geq 0$, $\sum\_v \theta\_v = 1$.
 
 <!-- .slide: class="module-slide" -->
 
-# 4.B Naive Bayes by Hand
+# 4.B Classification: Only p(y | x)
 
 --
 
-<!-- .slide: class="smaller" -->
+## Exercise 4.B.1: Cross-Entropy and Its Gradient
 
-## Exercise 4.B.1: Twelve Transactions
+$h\_i = \sigma(\mathbf{w}^{\top}\mathbf{x}\_i)$ with $\sigma(z) = 1/(1 + e^{-z})$ and
+$\ell(\mathbf{w}) = \sum\_i [y\_i \ln h\_i + (1 - y\_i)\ln(1 - h\_i)]$.
 
-Flags: new device $D$, foreign IP $F$, night $N$, high amount $H$ (1 = yes).
-
-| # | $D$ | $F$ | $N$ | $H$ | fraud? | | # | $D$ | $F$ | $N$ | $H$ | fraud? |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 1 | 1 | 1 | 1 | yes | | 7 | 1 | 0 | 0 | 0 | no |
-| 2 | 1 | 1 | 0 | 1 | yes | | 8 | 0 | 0 | 0 | 0 | no |
-| 3 | 1 | 0 | 1 | 0 | yes | | 9 | 0 | 1 | 0 | 0 | no |
-| 4 | 0 | 1 | 1 | 1 | yes | | 10 | 0 | 0 | 0 | 0 | no |
-| 5 | 0 | 0 | 0 | 0 | no | | 11 | 1 | 0 | 1 | 0 | no |
-| 6 | 0 | 0 | 1 | 0 | no | | 12 | 0 | 0 | 0 | 0 | no |
-
-1. Estimate $P(\text{fraud})$ and $P(\text{flag} = 1 \mid \text{class})$ for all
-   four flags by counting.
-2. Compute $P(\text{fraud} \mid x)$ for $x\_1 = (D, F, N, H) = (1, 0, 0, 0)$.
-3. Do the same for $x\_2 = (0, 0, 0, 1)$. What goes wrong, and why?
-4. Repeat 2 and 3 with Laplace smoothing on the flags (keep the prior
-   unsmoothed). Which result changes a lot, which only a little?
+1. Show $\sigma'(z) = \sigma(z)(1 - \sigma(z))$.
+2. Show $\frac{\partial \ell}{\partial \mathbf{w}} = \sum\_i (y\_i - h\_i)\mathbf{x}\_i$.
+3. Six transactions, $\mathbf{x} = (1, \text{new device})$: new device —
+   fraud, fraud, legitimate; known device — fraud, legitimate, legitimate.
+   Compute the gradient at $\mathbf{w} = 0$.
+4. Set both components of the gradient to zero: which scores does the MLE give
+   to new and to known devices? Give $\hat{w}\_0$, $\hat{w}\_1$ and read $\hat{w}\_1$
+   as an odds ratio.
 
 
 
 --
 
-## Exercise 4.B.2: Smoothing Is a Prior
+## Exercise 4.B.2: The Peak That Runs Away (Python)
 
-A yes/no flag was seen $h$ times among $n$ frauds.
+```python
+import numpy as np
+x = np.array([-2.0, -1.5, -1.1, -0.6, -0.3, 0.2, 0.6, 1.0, 1.4, 1.9])
+y = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+sigma = lambda z: 1 / (1 + np.exp(-z))
 
-1. With a $\mathrm{Beta}(1, 1)$ prior on $\theta = P(\text{flag} \mid \text{fraud})$,
-   what is the posterior (Lecture 02)? Show that its **mean** is Laplace's
-   $(h + 1)/(n + 2)$.
-2. What is the posterior's **peak** for $h = 0$? What does that say about
-   "keep the peak"?
-3. "Add-$\alpha$" smoothing uses $(h + \alpha)/(n + 2\alpha)$. Which prior
-   belongs to it? Compute the estimate for $h = 0$, $n = 100$ and
-   $\alpha = 0.5, 1, 10$.
-4. A merchant category with $k = 10$ values; one category never occurred in
-   100 frauds. What does Laplace smoothing give, and which prior is behind it?
+def fit(tau2=None, steps=10_000, eta=0.05):
+    w0 = w1 = 0.0
+    for t in range(1, steps + 1):
+        h = sigma(w0 + w1 * x)
+        g0 = ___                      # gradient for the intercept
+        g1 = ___                      # gradient for the slope
+        if tau2 is not None:
+            g1 -= ___                 # log-prior N(0, tau2) on the slope
+        w0, w1 = w0 + eta * g0, w1 + eta * g1
+        if t in (10, 100, 1_000, 10_000):
+            h = sigma(w0 + w1 * x)
+            print(t, round(w1, 2), np.sum(y * np.log(h) + (1 - y) * np.log(1 - h)))
+```
+
+1. Fill in the blanks and run `fit()`. What happens to the slope, the
+   log-likelihood and the scores? Why will it never stop?
+2. Run `fit(tau2=1)` and `fit(tau2=100, steps=100_000)`. Explain the difference
+   with the MAP formula of the lecture.
 
 
 
@@ -162,7 +158,7 @@ def fit_nb(X, y, alpha=1.0):
     w0 = np.log(prior / (1 - prior)) + np.log((1 - th1) / (1 - th0)).sum()
     return w0, w
 
-def fit_lr(X, y, steps=5000, lr=0.5):   # gradient ascent, as in Lecture 03
+def fit_lr(X, y, steps=5000, lr=0.5):   # gradient ascent, as in the lecture
     Xb = np.column_stack([np.ones(len(X)), X]); w = np.zeros(Xb.shape[1])
     for _ in range(steps):
         w += lr * Xb.T @ (y - 1 / (1 + np.exp(-Xb @ w))) / len(y)
@@ -174,6 +170,44 @@ def fit_lr(X, y, steps=5000, lr=0.5):   # gradient ascent, as in Lecture 03
    twice, and which shares the credit?
 3. Which probability is closer to the fraction of frauds among the training
    rows with $x = (1, 1, 1)$?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 4.D When Is a Score a Probability?
+
+--
+
+## Exercise 4.D.1: The Rebalanced Fraud Model
+
+A model is trained on a 50/50 sample; on real traffic fraud is **1 in 1,000**.
+Undersampling kept every fraud and a random share of legitimate cases.
+
+1. Use Bayes' theorem in odds form to show: real odds = model odds ×
+   $\frac{1/999}{1}$. Which assumption about $p(\mathbf{x} \mid y)$ do you need?
+2. Convert the scores $0.5$, $0.9$ and $0.99$ into real fraud probabilities.
+3. Blocking a legitimate card costs **€10**, missing a fraud **€500**. Above
+   which real probability should a card be blocked, and which **raw score** is
+   that?
+
+
+
+--
+
+## Exercise 4.D.2: Weight Decay Is a Prior
+
+1. With $y\_i = \mathbf{w}^{\top}\mathbf{x}\_i + \varepsilon\_i$,
+   $\varepsilon\_i \sim \mathcal{N}(0, \sigma^2)$ and a prior
+   $\mathbf{w} \sim \mathcal{N}(0, \tau^2 \mathbf{I})$, show that the MAP
+   minimises $\mathrm{RSS}(\mathbf{w}) + \lambda \lVert \mathbf{w} \rVert^2$ with
+   $\lambda = \sigma^2/\tau^2$.
+2. One weight, no intercept, $y = wx + \varepsilon$. Show
+   $\hat{w}\_{\mathrm{MAP}} = \frac{\sum\_i x\_i y\_i}{\sum\_i x\_i^2 + \lambda}$.
+3. Data $(x, y) = (1, 2), (3, 7)$, $\sigma^2 = 1$, $\tau^2 = 0.1$. Compute the
+   MLE and the MAP. What happens as $\tau^2 \to \infty$ and as $\tau^2 \to 0$?
 
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
