@@ -431,6 +431,75 @@ The Open Web Index Research Retrieval System - OURRS: an early web search protot
 Notes:
 OURRS, two Rs. There is no paper; give the URL and the measurement date. Play thirty seconds. Then the research angle, which is the reason it exists: an agent cannot search a shard on disk, it needs a service it can call repeatedly. Snapshot id in every response, configurable ranking, corpus isolation so that ranking statistics do not leak between experiments, one API for people, applications and agents, and logging by design. Say "early prototype" out loud, and say that it is self-hostable, so a lab can run its own instrumented instance.
 → next: what this community already does well, and what it needs.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Learning very small retrieval models using Agent Traces
+
+<span class="eyebrow">Distil big models into small ones that run on low-resource devices</span>
+
+
+<div class="grid-3-1 gap-lg">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="ows/fellowship" data-steps="3"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### The setup
+- Teacher: Qwen 3-Next 80B, 5,000 rollouts
+- Kept: 1,490 accepted trajectories, 16,488 steps
+- Labels: seven retrieval actions
+- Student: Granite 4.1 3B on 13,194 actions
+- Baselines: the same model prompted, and TF-IDF
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+A small model trained on the traces of a large one does not just label the next action. Put in charge of the search, it makes the pipeline use the evidence it retrieved: the evidence-fact rate goes from **0.01 to 0.62**.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Al-Maamari, Zerhoudi, Granitzer, Mitrović, *The Fellowship of the Query: Learning Retrieval Actions*, CIKM 2026 short paper.
+
+</div>
+
+
+Notes:
+Goal: one minute. Traces are training data, and the capability they teach can be moved into a small model. The direction: we develop small retrieval models and distil them from big ones, so that they can run on low-resource devices, not only in a data centre.
+
+- **The task.** Given the state of a search trajectory, predict which of seven actions comes next: decompose, search, reformulate, extract, synthesise, verify, finish.
+- **The filtering matters.** 5,000 teacher rollouts, only 1,490 accepted. The student learns from work that succeeded, not from everything the teacher did.
+- **The headline.** Macro-F1 0.65 for the fine-tuned 3B model against 0.17 for the same model prompted zero-shot, and 0.54 for a TF-IDF baseline. The capability is learned, not prompted.
+- **The second experiment, and what its numbers actually measure.** Instead of only predicting labels, the fine-tuned 3B model is put in both seats at once: as **controller** it chooses which of the seven actions comes next at every step, and as **generator** it writes the final answer. Nothing of the teacher model is left in the loop. The scores are **answer quality**, not retrieval and not action prediction: the model is placed in an end-to-end BM25 pipeline and its final answers are scored SQuAD-style against the gold answer, exact match and token overlap F1, over 149 held-out trajectories.
+- **Be precise about which gain holds.** Token F1 rises from 0.778 to 0.830 and the paired bootstrap interval is [0.002, 0.104], so it clears zero but only just. Exact match rises from 0.753 to 0.795 and **its interval crosses zero**, so do not present that one as an established improvement.
+- **The large effect is elsewhere, and it is the interesting one.** The evidence-fact rate, how often the answer actually uses a fact from the retrieved evidence, goes from **0.012 with the base controller to 0.616 with the fine-tuned one**. The small model does not mainly make answers more correct; it makes the pipeline actually use what it retrieved. The paper notes this metric is an automatic matching heuristic, not human-verified factuality.
+- **Why it belongs here.** It closes the cost argument: if traces can be made cheaply and verified, the capability they teach does not have to be rented from a frontier model.
+
+→ next: and yet none of it tells us who asked.
 ---
 
 <!-- .slide: class="module-slide" -->
