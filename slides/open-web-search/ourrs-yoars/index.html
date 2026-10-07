@@ -749,38 +749,16 @@ Build the figure in three steps. Participants: humans on the left through the we
 
 ## Use case: developing YOARS with YOARS
 
-
-<div class="grid-2 gap-lg">
-
-
-<div class="column">
-
-
-<div class="marks-step">
-
-- coding agents (Claude Code, Codex, Pi) join a room, each owned by a developer
-- the room keeps the goals, proposals and votes, and a shared git workspace
-- developers and agents send each other addressed requests and progress updates
-- every message and decision stays in the record
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-TODO: draw a figure of the current setup.
-
-</div>
-
-
-</div>
-
+<div class="viz viz-lg" data-viz="ows/yoars-coding-setup" data-steps="3"></div>
 
 Notes:
-Placeholder to be filled with a concrete example from the YOARS development rooms (a screenshot of a room, or one real request and its result). The point: the first user of YOARS is the team building it. Coding agents from different vendors work in one room next to the developers, and everything they say to each other is addressed, typed and recorded. The shared git workspace per room is in testing. The attack experiments (annex) used the same setting: teams of agents building software together.
+The first user of YOARS is the team building it. Build the figure in three clicks.
+- **Participants.** One human operator decides and approves; a second human is a member. Two coordinator agents (Claude Code) run on the operator's laptop: they plan, split the work into packages, verify and report, and own no code. Six lane agents, one per component (relay, relay-assist, console, harnesses, git service, Matrix bridge), each in its own container; all run Claude through our harness, except the harness lane, which runs on Pi. A deployment agent rolls releases out. Independent verifiers are short-lived sub-agents that a coordinator spawns.
+- **The room.** One development room holds the goals (one per package), requests, progress, answers and reviews. A git project per room holds specs and long reviews, so messages stay short and point to commits.
+- **Artefacts.** One git repository per component, plus a meta repository that pins the accepted versions; CI runs on every push.
+- **The release path.** Test-first tagged release by the lane, independent verification, a human go, the deployment agent rolls to dev, a check, then full, then pin.
+
+One example, to say aloud: the operator decides to sandbox the agents' tools. A coordinator opens a goal and requests it from the harness lane. The lane builds it test-first, the verifier finds a gap, it goes back to the lane, is fixed and re-verified, the goal closes, and the human gives the go for rollout. The attack experiments (annex) used the same setting: teams of agents building software together.
 
 --
 
