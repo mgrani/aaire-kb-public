@@ -63,7 +63,8 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const fixedStage = Number.isFinite(params.stage) ? Math.max(0, Math.min(3, params.stage)) : null
 
   const svg = d3.select(el).append('svg')
-    .attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+    // without the caption, crop the strip it would sit in
+    .attr('viewBox', `0 0 ${W} ${showCaption ? H : 484}`).attr('role', 'img')
     .attr('aria-label', 'An agentic search system in three columns: retrieval, interaction, collaboration')
     .attr('font-family', 'Arial, Helvetica, sans-serif')
 
