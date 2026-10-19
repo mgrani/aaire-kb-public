@@ -1,17 +1,21 @@
 // Conditioning as renormalisation, on the unit square
 // (docs/PEDAGOGIC_CONCEPT.md Principle 6, tier 2 + tier 3).
 //
-// Ω is a square of area 1. A splits it into two columns; within each column B
-// takes a share. Conditioning on B keeps only the two B cells and stretches
-// them back to a full bar — which *is* the division by P(B) in the definition.
-// Sliding P(B|A) and P(B|¬A) together shows the independence case (the bar's
-// split stops moving) without any extra machinery.
+// Ω is a square of area 1. A splits it into two columns; the event B is drawn
+// as a violet outline made of two cells, A ∩ B inside A and ¬A ∩ B outside.
+// Conditioning on B keeps only those two cells and stretches them back to a
+// full bar — which *is* the division by P(B) in the definition
+// P(A | B) = P(A ∩ B) / P(B).
 //
-// Uses only: events, probability as area, conditional probability.
+// The knobs are areas, not conditionals: P(A), P(B) and P(A ∩ B) are free,
+// within max(0, P(A) + P(B) − 1) ≤ P(A ∩ B) ≤ min(P(A), P(B)); the overlap
+// slider snaps back into that range. P(A | B) is the one derived number.
 //
-// params: pA, pBgivenA, pBgivenNotA  (starting values)
-// steps: 1 the A columns · 2 B inside each column · 3 keep only B ·
-//        4 renormalise and read off P(A|B)
+// Uses only: events, probability as area.
+//
+// params: pA, pB, pAB  (starting values)
+// steps: 1 the A column · 2 the event B, as two cells · 3 keep only B ·
+//        4 stretch B back to width 1 and read off P(A|B)
 
 import { addControls } from '../core/controls.js'
 
@@ -33,104 +37,88 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .append('svg')
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('role', 'img')
-    .attr('aria-label', 'The unit square split by A and by B, then renormalised on B')
+    .attr('aria-label', 'The unit square split by A, the event B outlined, then renormalised on B')
 
   const gSquare = svg.append('g')
   const gBar = svg.append('g')
-  const gInfo = svg.append('g')
-  const caption = svg
-    .append('text')
-    .attr('x', W / 2)
-    .attr('y', 26)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', 20)
-    .attr('fill', NAVY)
-
+  const caption = svg.append('text')
+    .attr('x', W / 2).attr('y', 26).attr('text-anchor', 'middle')
+    .attr('font-size', 20).attr('fill', NAVY)
   const infoLines = [0, 1, 2, 3].map((i) =>
-    gInfo
-      .append('text')
-      .attr('x', x0 + S + 46)
-      .attr('y', y0 + 42 + i * 40)
-      .attr('font-size', 19)
-      .attr('fill', NAVY),
+    svg.append('text')
+      .attr('x', x0 + S + 40).attr('y', y0 + 42 + i * 40)
+      .attr('font-size', 18).attr('fill', NAVY),
   )
+  const f = (x) => x.toFixed(2)
 
-  function render(step, v) {
-    const { pA, pBgA, pBgNA } = v
-    const pB = pA * pBgA + (1 - pA) * pBgNA
-    const pAgB = pB > 0 ? (pA * pBgA) / pB : 0
-    const independent = Math.abs(pBgA - pBgNA) < 0.005
+  function render(step, { pA, pB, pAB }) {
+    const pNAB = pB - pAB
+    const pAgB = pB > 0 ? pAB / pB : 0
+    const independent = Math.abs(pAB - pA * pB) < 0.005
 
     gSquare.selectAll('*').remove()
     gBar.selectAll('*').remove()
 
+    // B's cells: the area A ∩ B sits in the A column, ¬A ∩ B in the other
     const wA = S * pA
-    // The four cells of the square: A/¬A across, B/¬B down within each column.
+    const hA = S * (pAB / pA)
+    const hN = S * (pNAB / (1 - pA))
     const cells = [
-      { key: 'AB', x: x0, w: wA, y: y0, h: S * pBgA, fill: NAVY, op: 0.8, inB: true },
-      { key: 'AnB', x: x0, w: wA, y: y0 + S * pBgA, h: S * (1 - pBgA), fill: NAVY, op: 0.22, inB: false },
-      { key: 'nAB', x: x0 + wA, w: S - wA, y: y0, h: S * pBgNA, fill: TEAL, op: 0.8, inB: true },
-      { key: 'nAnB', x: x0 + wA, w: S - wA, y: y0 + S * pBgNA, h: S * (1 - pBgNA), fill: TEAL, op: 0.22, inB: false },
+      { x: x0, w: wA, y: y0, h: hA, fill: NAVY, inB: true },
+      { x: x0, w: wA, y: y0 + hA, h: S - hA, fill: NAVY, inB: false },
+      { x: x0 + wA, w: S - wA, y: y0, h: hN, fill: TEAL, inB: true },
+      { x: x0 + wA, w: S - wA, y: y0 + hN, h: S - hN, fill: TEAL, inB: false },
     ]
 
-    gSquare
-      .append('rect')
-      .attr('x', x0).attr('y', y0).attr('width', S).attr('height', S)
-      .attr('fill', PALE)
+    gSquare.append('rect')
+      .attr('x', x0).attr('y', y0).attr('width', S).attr('height', S).attr('fill', PALE)
 
-    if (step >= 2) {
-      gSquare
-        .selectAll('rect.cell')
-        .data(cells)
-        .join('rect')
-        .attr('class', 'cell')
+    if (step >= 1) {
+      gSquare.selectAll('rect.cell').data(cells).join('rect').attr('class', 'cell')
         .attr('x', (d) => d.x).attr('y', (d) => d.y)
         .attr('width', (d) => d.w).attr('height', (d) => d.h)
         .attr('fill', (d) => d.fill)
-        .attr('opacity', (d) => (step >= 3 && !d.inB ? 0.06 : d.op))
-    } else if (step >= 1) {
-      gSquare
-        .append('rect')
-        .attr('x', x0).attr('y', y0).attr('width', wA).attr('height', S)
-        .attr('fill', NAVY).attr('opacity', 0.6)
-      gSquare
-        .append('rect')
-        .attr('x', x0 + wA).attr('y', y0).attr('width', S - wA).attr('height', S)
-        .attr('fill', TEAL).attr('opacity', 0.6)
+        .attr('opacity', (d) => (step < 2 ? 0.45 : d.inB ? 0.8 : step >= 3 ? 0.06 : 0.22))
     }
 
-    gSquare
-      .append('rect')
+    gSquare.append('rect')
       .attr('x', x0).attr('y', y0).attr('width', S).attr('height', S)
       .attr('fill', 'none').attr('stroke', NAVY).attr('stroke-width', 2.5)
-
-    gSquare
-      .append('text')
+    gSquare.append('text')
       .attr('x', x0 - 8).attr('y', y0 - 10)
-      .attr('font-size', 19).attr('font-style', 'italic').attr('fill', NAVY)
-      .text('Ω')
+      .attr('font-size', 19).attr('font-style', 'italic').attr('fill', NAVY).text('Ω')
 
     if (step >= 1) {
       gSquare.append('text')
         .attr('x', x0 + wA / 2).attr('y', y0 + S + 22)
-        .attr('text-anchor', 'middle').attr('font-size', 17).attr('fill', NAVY)
-        .text('A')
+        .attr('text-anchor', 'middle').attr('font-size', 17).attr('fill', NAVY).text('A')
       gSquare.append('text')
         .attr('x', x0 + wA + (S - wA) / 2).attr('y', y0 + S + 22)
-        .attr('text-anchor', 'middle').attr('font-size', 17).attr('fill', TEAL)
-        .text('¬A')
+        .attr('text-anchor', 'middle').attr('font-size', 17).attr('fill', TEAL).text('¬A')
     }
+
+    // B as one region, outlined in violet ("out of": the world conditioning
+    // keeps). Dashed while it is only shown, solid once the rest is gone.
     if (step >= 2) {
+      gSquare.append('path')
+        .attr('d', `M${x0} ${y0} H${x0 + S} V${y0 + hN} H${x0 + wA} V${y0 + hA} H${x0} Z`)
+        .attr('fill', 'none').attr('stroke', VIOLET).attr('stroke-width', 3.5)
+        .attr('stroke-dasharray', step >= 3 ? null : '7 5')
       gSquare.append('text')
-        .attr('x', x0 - 10).attr('y', y0 + 16)
-        .attr('text-anchor', 'end').attr('font-size', 17).attr('fill', NAVY)
-        .text('B')
+        .attr('x', x0 - 10).attr('y', y0 + Math.max(hA, hN) / 2 + 6)
+        .attr('text-anchor', 'end').attr('font-size', 18).attr('font-weight', 700)
+        .attr('fill', VIOLET).text('B')
+      if (hA >= 24 && wA >= 60) {
+        gSquare.append('text')
+          .attr('x', x0 + wA / 2).attr('y', y0 + hA / 2 + 6)
+          .attr('text-anchor', 'middle').attr('font-size', 15).attr('fill', '#ffffff').text('A ∩ B')
+      }
     }
 
     // Step 4: the two B cells, stretched back to a full-width bar. The stretch
     // factor is 1/P(B) — the definition, performed.
     if (step >= 4) {
-      const wAB = S * ((pA * pBgA) / pB)
+      const wAB = S * pAgB
       gBar.append('rect')
         .attr('x', x0).attr('y', BAR.y).attr('width', wAB).attr('height', BAR.h)
         .attr('fill', NAVY).attr('opacity', 0.8)
@@ -142,53 +130,51 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         .attr('fill', 'none').attr('stroke', VIOLET).attr('stroke-width', 2.5)
       gBar.append('text')
         .attr('x', x0 - 8).attr('y', BAR.y + BAR.h / 2 + 6)
-        .attr('text-anchor', 'end').attr('font-size', 15).attr('fill', VIOLET)
-        .text('given B')
+        .attr('text-anchor', 'end').attr('font-size', 15).attr('fill', VIOLET).text('given B')
       gBar.append('text')
         .attr('x', x0 + S + 14).attr('y', BAR.y + BAR.h / 2 + 6)
-        .attr('font-size', 19).attr('fill', VIOLET)
-        .text(`P(A | B) = ${pAgB.toFixed(2)}`)
+        .attr('font-size', 19).attr('fill', VIOLET).text(`P(A | B) = ${f(pAgB)}`)
     }
 
-    infoLines[0].attr('opacity', step >= 1 ? 1 : 0).text(`P(A) = ${pA.toFixed(2)}`)
-    infoLines[1].attr('opacity', step >= 2 ? 1 : 0)
-      .text(`P(B | A) = ${pBgA.toFixed(2)},  P(B | ¬A) = ${pBgNA.toFixed(2)}`)
-      .attr('font-size', 17)
-    infoLines[2].attr('opacity', step >= 3 ? 1 : 0)
-      .text(`P(B) = ${pB.toFixed(2)}`)
-    infoLines[3]
-      .attr('opacity', step >= 4 ? 1 : 0)
+    infoLines[0].attr('opacity', step >= 1 ? 1 : 0).text(`P(A) = ${f(pA)}`)
+    infoLines[1].attr('opacity', step >= 2 ? 1 : 0).attr('fill', VIOLET)
+      .text(`P(B) = ${f(pAB)} + ${f(pNAB)} = ${f(pB)}`)
+    infoLines[2].attr('opacity', step >= 2 ? 1 : 0)
+      .text(`P(A ∩ B) = ${f(pAB)}`)
+    infoLines[3].attr('opacity', step >= 4 ? 1 : 0)
       .attr('fill', independent ? TEAL : VIOLET)
-      .text(independent ? `P(A | B) = P(A) — independent` : `P(A ∩ B) = ${(pA * pBgA).toFixed(2)}`)
+      .text(`P(A | B) = ${f(pAB)} / ${f(pB)} = ${f(pAgB)}${independent ? ' = P(A)' : ''}`)
 
-    if (step >= 4) {
-      caption.attr('fill', VIOLET).text(
-        independent
-          ? 'Equal shares in both columns: the bar splits exactly like the square did'
-          : 'Conditioning on B = keep the B cells, stretch them back to width 1',
-      )
-    } else if (step === 3) {
-      caption.attr('fill', NAVY).text('B is now the whole world. What happened to the areas?')
-    } else if (step === 2) {
-      caption.attr('fill', NAVY).text('B takes a different share of each column')
-    } else if (step === 1) {
-      caption.attr('fill', NAVY).text('A splits Ω into two columns')
-    } else {
-      caption.attr('fill', NAVY).text('Ω has area 1')
-    }
+    const cap = [
+      'Ω has area 1',
+      'A takes a column of Ω',
+      'B has a piece inside A and a piece outside',
+      'B is now the whole world. How large is A inside it?',
+      independent
+        ? 'A takes the same share of B as of Ω: learning B changes nothing'
+        : 'Conditioning on B = keep B, stretch it back to width 1',
+    ]
+    caption.attr('fill', step >= 4 ? VIOLET : NAVY).text(cap[Math.min(step, 4)])
   }
 
   let step = 0
   const pct = (v) => `${Math.round(v * 100)}%`
+  const r2 = (x) => Math.round(x * 100) / 100
   const controls = addControls(
     el,
     { isPrint },
     [
       { id: 'pA', label: 'P(A)', type: 'range', min: 0.05, max: 0.95, step: 0.01, value: params.pA ?? 0.4, format: pct },
-      { id: 'pBgA', label: 'P(B|A)', type: 'range', min: 0, max: 1, step: 0.01, value: params.pBgivenA ?? 0.75, format: pct },
-      { id: 'pBgNA', label: 'P(B|¬A)', type: 'range', min: 0, max: 1, step: 0.01, value: params.pBgivenNotA ?? 0.25, format: pct },
+      { id: 'pB', label: 'P(B)', type: 'range', min: 0.01, max: 1, step: 0.01, value: params.pB ?? 0.16, format: pct },
+      { id: 'pAB', label: 'P(A ∩ B)', type: 'range', min: 0, max: 0.95, step: 0.01, value: params.pAB ?? 0.1, format: pct },
     ],
-    (id, values) => render(step, values),
+    (id, v) => {
+      // the overlap cannot exceed either event, nor leave more than Ω
+      const lo = Math.max(0, v.pA + v.pB - 1)
+      const hi = Math.min(v.pA, v.pB)
+      if (v.pAB < lo || v.pAB > hi) controls.set('pAB', r2(Math.min(hi, Math.max(lo, v.pAB))))
+      render(step, v)
+    },
   )
 
   const setStep = (i) => {

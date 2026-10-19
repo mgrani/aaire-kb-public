@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 05: Bayesian Networks</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/l05-bayesian-networks.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -10,22 +25,27 @@
 
 Prof. Dr. Michael Granitzer
 
-Notes:
-The lecture's place in the arc: "graph the joint". Lecture 03 assumed every
-attribute apart; this lecture lets the modeller state exactly which
-independences hold, draws them, reads them off, and then asks what the drawing
-costs. Five modules: graph the joint (conditional independence counted, the
-wet-grass model built and drawn, explaining away); what an arrow claims
-(belief networks, parameter counts); reading independence (d-separation on
-the wet grass, Markov equivalence); plate notation (the two models of Lecture
-07, drawn); and computing with the graph (a worked elimination, Markov
-networks as what inference runs on, "writable is not queryable" on a pixel
-lattice, learning as counting).
+<!-- 2026-09-26 (course plan N2): Factorising the Joint moved here from the naive-Bayes
+lecture (then Lecture 04, now L03). The shared Data Science units are replaced
+in PML by PML units with drawn figures; the shared units are unchanged. Markov
+networks are two slides inside Inference and Parameter Learning; soft and unreliable evidence is in the
+appendix. -->
 
-2026-09-26 (course plan N2): Module 1 moved here from Lecture 04. The shared
-Data Science units are replaced in PML by PML units with drawn figures; the
-shared units are unchanged. Markov networks are two slides inside Module 5;
-soft and unreliable evidence is in the appendix.
+Notes:
+Lecture 05 is shortcut 4 of the course, "graph the joint". Naive Bayes
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) made the joint
+affordable by one blanket conditional-independence assumption; a Bayesian
+network states only selected independences, and the graph encodes exactly
+those.
+
+Contents: conditional independence checked by counting, the wet-grass model
+and its factorisation, explaining away (Factorising the Joint); belief networks, the local
+Markov property and parameter counts (Belief Networks); chains, forks, colliders,
+d-separation and Markov equivalence (d-Separation); plate notation, with the two
+models of <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a> drawn (Plate Notation); variable
+elimination, Markov networks and moralisation, the intractability of exact
+inference on a pixel lattice, and parameter learning as counting (Inference and Parameter Learning).
+The appendix covers soft and unreliable evidence.
 
 --
 
@@ -44,7 +64,8 @@ soft and unreliable evidence is in the appendix.
 
 <div class="column">
 
-Lecture 03 made the joint affordable with one blanket assumption: **every**
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> skipped $p(x)$. <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> kept the whole
+joint and made it affordable with one blanket assumption: **every**
 attribute independent of every other, given the class. It worked — and it
 counted correlated evidence twice.
 
@@ -73,12 +94,21 @@ for a dense graph, affordable inference.
 
 
 Notes:
-Pick up the shortcut table of Lecture 01 again. "Assume it apart" was a
-blanket; "graph the joint" is the same move made selective: the modeller
-decides which independences to claim, and the graph states them. Say both
-costs now, so that the lecture can pay them off: a missing arrow is a claim
-that may be wrong (Modules 1–3), and a graph that can be written down may still
-be too expensive to condition on (Module 5, "writable is not queryable").
+A discriminative model (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) fits only $p(y \mid x)$
+and drops $p(x)$. Naive Bayes keeps the whole joint $p(y, x\_1, \ldots, x\_d)$
+and makes it affordable by assuming all attributes conditionally independent
+given the class. Drawn as a graph, this is the star on the left: the class
+points to every attribute and no arrow joins two attributes. Its known
+failure is double counting: two strongly correlated attributes enter the
+posterior as two independent pieces of evidence, which pushes the posterior
+too far.
+
+"Graph the joint" generalises the star: any directed acyclic graph defines a
+factorisation, and the modeller chooses which independences to assume.
+Naive Bayes is the special case with the star graph. Shortcut 4 has two
+costs: every missing arrow is an independence claim that may be false
+(Factorising the Joint, Belief Networks, d-Separation), and a graph that is compact to write down may still be too
+expensive to condition on exactly (Inference and Parameter Learning).
 
 
 --
@@ -94,17 +124,20 @@ be too expensive to condition on (Module 5, "writable is not queryable").
 
 
 Notes:
-The lecture on one page. Top row: the joint graphed, what its arrows claim,
-and how independence is read off. Middle row: the notation for repeated
-structure, the cost of querying, and the shortcut named with what it drops.
-The takeaway is the lecture in one sentence: writable is not queryable. Point
-at the strip: Lecture 05 is "graph the joint".
+Top row: the joint written as a graph, the claims its arrows and missing
+arrows make, and how conditional independences are read off the graph.
+Middle row: plate notation for repeated structure, the cost of querying a
+graph, and shortcut 4 with what it drops — every dependence not drawn and,
+for densely connected graphs, tractable inference. The single conclusion:
+a model that is cheap to write down (few parameters) can still be
+intractable to condition on, because the cost of exact inference depends on
+the graph's shape, not on its number of parameters.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Graph the Joint
+# Factorising the Joint
 
 
 <div class="guiding-question">
@@ -160,14 +193,21 @@ $P(A \cap B \mid C) = \frac{1}{4} = P(A \mid C) P(B \mid C)$
 
 
 Notes:
-The definition from Lecture 03, checked by counting cells. Students can verify
-every number on the picture: inside the dashed block, half the cells are A,
-half are B, and exactly one quarter are both. Also directly: P(A | B ∩ C) = 1/2
-= P(A | C).
+$A$ and $B$ are conditionally independent given $C$ if
+$P(A \cap B \mid C) = P(A \mid C)\\,P(B \mid C)$, equivalently
+$P(A \mid B \cap C) = P(A \mid C)$ whenever $P(B \cap C) > 0$. On the grid:
+$P(A) = 8/16$, $P(B) = 3/16$, $P(A \cap B) = 1/16$, so $A$ and $B$ are
+dependent ($1/16 \neq 3/32$). Inside the block $C$ (4 cells), 2 cells are in
+$A$, 2 in $B$ and 1 in both: $1/4 = 1/2 \cdot 1/2$. Also
+$P(A \mid B \cap C) = 1/2 = P(A \mid C)$.
 
-Give the everyday version: ice-cream sales and drownings are dependent, but
-independent given the temperature — a common cause. Conditioning on it
-*removed* a dependence. The rest of the module shows the opposite case.
+Neither property implies the other: marginal independence does not imply
+conditional independence, and conditional independence does not imply
+marginal independence. A typical source of the second case is a common
+cause: ice-cream sales and drownings are dependent, but approximately
+independent given the temperature. Conditioning on a common cause removes a
+dependence; conditioning on a common effect can create one (explaining away,
+later in this module).
 
 --
 
@@ -193,9 +233,16 @@ Before any arithmetic: does Jack's wet lawn make the sprinkler **more** or
 
 
 Notes:
-Barber's classic example. Collect predictions and keep them on the board;
-intuitions differ, which is the point. The answer comes two slides later, with
-numbers.
+The example is from Barber, *Bayesian Reasoning and Machine Learning*,
+Chapter 3. The answer is computed two slides on: Tracey's wet lawn alone
+raises $P(S{=}1)$ from 0.1 to 0.338; learning that Jack's lawn is also wet
+lowers it to 0.160. Jack's lawn is evidence for rain, rain explains
+Tracey's wet lawn, so the sprinkler is needed less as an explanation.
+
+A common intuition is that more evidence of wetness should make every wet
+cause more likely. It is wrong here because Jack's lawn depends on rain but
+not on the sprinkler: the extra evidence favours one cause specifically,
+and the two causes compete for the same effect.
 
 --
 
@@ -228,10 +275,19 @@ $$
 
 
 Notes:
-The reduction is not a trick: it is domain knowledge written as conditional
-independence. Each assumption can be challenged — ask for one that might fail
-(a shared hose? then J depends on S). This is "assume it apart" done
-selectively: three claims instead of naive Bayes' blanket.
+The chain rule holds for any ordering of the variables and never reduces the
+number of parameters: with four binary variables the factors need
+$8 + 4 + 2 + 1 = 15$ numbers, the same as the joint. The saving comes only
+from the three conditional-independence assumptions, each of which is
+domain knowledge and can fail. If Tracey and Jack share a garden hose, Jack's
+lawn depends on the sprinkler and $p(J \mid R, S) \neq p(J \mid R)$. If the
+sprinkler is switched on by a rain sensor, $p(R \mid S) \neq p(R)$.
+
+After the assumptions the factors need $4 + 2 + 1 + 1 = 8$ numbers. Naive
+Bayes makes one blanket assumption (all attributes independent given the
+class); here three specific claims are made and all other dependences are
+kept. The ordering matters for how compact the result is: choosing an
+order in which causes precede effects usually gives the fewest parents.
 
 --
 
@@ -272,11 +328,17 @@ selectively: three claims instead of naive Bayes' blanket.
 One node per variable, one arrow per conditioning bar, one table per node.
 
 Notes:
-Read the picture against the formula: every factor p(node | parents) is one
-node and its incoming arrows. The eight numbers in the table are the eight in
-the tally of the figure. Point at modelling choices that are visible and
-challengeable: "grass does not get wet by itself" (0.0), "rain always wets
-grass" (1.0). Module 5 will ask where such numbers come from.
+Each factor $p(\text{node} \mid \text{parents})$ corresponds to one node and its
+incoming arrows: $R$ and $S$ have no parents, $J$ has parent $R$, $T$ has
+parents $R$ and $S$. For binary variables each node needs one number per
+parent configuration: $1 + 1 + 2 + 4 = 8$, the eight rows of the table.
+
+Some entries are modelling choices rather than estimates: $p(T{=}1 \mid R{=}0, S{=}0) = 0$
+says the grass never gets wet without rain or sprinkler, and
+$p(J{=}1 \mid R{=}1) = 1$ says rain always wets Jack's lawn. Probabilities of
+exactly 0 or 1 cannot be changed by any amount of evidence under Bayes'
+rule, so they are strong claims. Inference and Parameter Learning shows that such values arise
+naturally as maximum-likelihood estimates from small samples.
 
 --
 
@@ -285,12 +347,16 @@ grass" (1.0). Module 5 will ask where such numbers come from.
 <div class="viz viz-lg" data-viz="math/explaining-away" data-steps="2"></div>
 
 Notes:
-Stepped. Step 1: Tracey's wet lawn raises P(sprinkler) from 10% to 33.8%.
-Step 2: Jack's lawn is wet too — rain now explains the wetness, and the
-sprinkler falls to 16.0%: most of the way back, but still above the prior,
-because it remains a possible additional cause. Compare with the predictions
-on the board. Computed by exact enumeration of the factorised joint:
-marginalisation, nothing new.
+Step 1 conditions on $T = 1$: $P(T{=}1) = 0.2 + 0.8 \cdot 0.1 \cdot 0.9 = 0.272$ and
+$P(S{=}1, T{=}1) = 0.02 + 0.072 = 0.092$, so $P(S{=}1 \mid T{=}1) = 0.338$, up
+from the prior 0.1. Step 2 adds $J = 1$: $P(S{=}1 \mid T{=}1, J{=}1) = 0.0344 / 0.2144 = 0.160$.
+
+The sprinkler probability falls most of the way back but stays above its
+prior: rain explains the wet lawn completely in this model, yet the
+sprinkler may still have been on in addition, and the evidence does not
+rule rain out ($p(J{=}1 \mid R{=}0) = 0.2$). Both values are obtained by
+exact enumeration of the factorised joint and marginalisation; no new rule
+of probability is needed.
 
 --
 
@@ -312,12 +378,18 @@ common effect **creates** one.
 
 
 Notes:
-The formula is the second click of the viz written out: the numerator keeps
-S = 1 (0.02 with rain, 0.0144 without), the denominator adds S = 0 (0.18 with
-rain, 0 without). Name the phenomenon: explaining away. Together with the
-16-cell example this gives both directions: conditioning can remove
-dependence (common cause) and create it (common effect). Module 3 turns the
-two into a rule that can be read off any graph.
+Numerator, $S = 1$: with rain $0.2 \cdot 0.1 \cdot 1 \cdot 1 = 0.02$; without
+rain $0.8 \cdot 0.1 \cdot 0.9 \cdot 0.2 = 0.0144$; sum 0.0344. Denominator adds
+$S = 0$: with rain $0.2 \cdot 0.9 \cdot 1 \cdot 1 = 0.18$; without rain 0,
+because $p(T{=}1 \mid R{=}0, S{=}0) = 0$. Total $0.2144$.
+
+$R \indep S$ holds marginally because neither has a parent and no path
+between them avoids $T$. Conditioning on $T$ (or on any descendant of $T$)
+makes them dependent. The 16-cell example and the wet grass are the two
+directions: a common cause induces dependence that conditioning removes; a
+common effect leaves its causes independent until conditioning creates a
+dependence. The d-separation module turns both into a rule that applies to any
+graph.
 
 --
 
@@ -344,9 +416,16 @@ to the prior 0.2. Explaining away works in both directions.
 
 
 Notes:
-The same collider, read the other way; answerable from the previous slide
-alone. Numbers for checking: P(R=1, T=1) = 0.2, P(T=1) = 0.272, so
-P(R=1 | T=1) = 0.735; P(R=1, S=1, T=1) = 0.02, P(S=1, T=1) = 0.092.
+$P(R{=}1, T{=}1) = 0.2$ and $P(T{=}1) = 0.272$, so $P(R{=}1 \mid T{=}1) = 0.735$.
+With the sprinkler known to be on: $P(R{=}1, S{=}1, T{=}1) = 0.02$ and
+$P(S{=}1, T{=}1) = 0.092$, so $P(R{=}1 \mid T{=}1, S{=}1) = 0.217$, close to
+the prior 0.2.
+
+It does not return exactly to 0.2 because $T{=}1$ still carries a little
+information about rain when $S{=}1$: $p(T{=}1 \mid R{=}1, S{=}1) = 1$ but
+$p(T{=}1 \mid R{=}0, S{=}1) = 0.9$, so a wet lawn is slightly more likely
+with rain. Explaining away is symmetric: evidence for either cause of a
+common effect lowers the probability of the other.
 
 --
 
@@ -367,7 +446,7 @@ Every *missing* edge is a claim; conditioning can make variables independent
 
 <!-- .slide: class="module-slide" -->
 
-# What an Arrow Claims
+# Belief Networks
 
 
 <div class="guiding-question">
@@ -424,16 +503,21 @@ else says more about Jack's lawn.
 
 
 Notes:
-Math first — the students built one by hand in Module 1, so the general form
-reads as a summary. "Acyclic" matters: with a cycle the product would not
-define a distribution.
+The product is a valid distribution for any choice of conditional tables:
+order the nodes so that parents precede children (always possible in a
+DAG); summing out the variables from the last to the first then removes one
+normalised factor at a time. With a cycle no such order exists, and a
+product of conditionals need not define a joint distribution.
 
-This answers the module's guiding question. An arrow only *permits*: the
-table may ignore the parent. In the wet-grass tables, p(T = 1 | R = 1, S) is 1
-for both values of S — given rain, the sprinkler arrow carries no influence at
-all. Absence of an arrow, by contrast, forces an independence for every table
-one could put on the graph. So the claims of a graph live in its missing
-edges.
+The non-descendants of $J$ are $R$, $S$ and $T$ ($T$ is not reachable from
+$J$), so the local Markov property gives $J \indep \lbrace S, T \rbrace \mid R$.
+
+An arrow only permits a dependence: a table may ignore a parent. In the
+wet-grass tables $p(T{=}1 \mid R{=}1, S) = 1$ for both values of $S$, so given
+rain the arrow $S \to T$ has no effect. A missing arrow, by contrast,
+enforces an independence for every choice of tables on that graph. The
+claims a graph makes are therefore carried by its missing edges; a fully
+connected DAG claims no independence and can represent every distribution.
 
 --
 
@@ -463,13 +547,21 @@ A node with $k$ binary parents needs $2^k$ numbers. The saving comes from
 
 
 Notes:
-A table because the three models are compared along the same two columns.
-Check the naive-Bayes row against Lecture 03: one prior plus one Bernoulli per
-flag and class. The last row is the general bound: 20 tables of at most 8
-numbers each, against 1,048,575.
+A node with $k$ binary parents needs $2^k$ free numbers ($2^k$ parent
+configurations, one Bernoulli parameter each); a root node needs one. Wet
+grass: $R$ and $S$ are roots, $J$ has one parent, $T$ two, so $1 + 1 + 2 + 4 = 8$.
 
-The second half of the answer prepares the next slide: many parents is the
-one place where a graph does not help by itself.
+Naive Bayes with a binary class and 30 binary flags: one class prior and,
+for every flag, one Bernoulli parameter per class, $1 + 2 \cdot 30 = 61$
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). The full joint over
+31 binary variables needs $2^{31} - 1 = 2{,}147{,}483{,}647$ numbers.
+
+With 20 nodes and at most 3 parents each, every table has at most 8 numbers:
+at most 160, against $2^{20} - 1 = 1{,}048{,}575$. In general, $n$ binary
+nodes with at most $k$ parents need at most $n \cdot 2^k$ numbers — linear in
+$n$, while the joint grows as $2^n$. The bound is exponential in $k$, so a
+single node with many parents (a symptom with 30 possible causes needs
+$2^{30}$ rows) removes the saving.
 
 --
 
@@ -511,13 +603,26 @@ alone but dangerous together break it.
 a group of parents and the child.
 
 Notes:
-Every table-shrinking technique is another assumption, and the slide names it.
-Ask for a real case of interaction before showing the warning. Mention that
-noisy-OR as written has no "leak": with no cause present, y never occurs; a
-leak term λ_0 adds the unexplained cases.
+Derivation: each present cause $i$ independently fails to trigger $y$ with
+probability $1 - \lambda\_i$, and $y = 0$ only if all present causes fail,
+which gives the product. With $\lambda = 0.8$ and $0.6$:
+$p(y = 0) = 0.2 \cdot 0.4 = 0.08$, so $p(y = 1) = 0.92$. Adding a present cause
+never lowers $p(y = 1)$.
 
-Divorcing is an elicitation argument as much as a storage one: an expert can
-state four numbers, not sixty-four.
+As written, noisy-OR has no leak: with no cause present, $p(y = 1) = 0$. A
+leak term $\lambda\_0$ covers causes outside the model:
+$p(y = 0 \mid x) = (1 - \lambda\_0) \prod\_{i : x\_i = 1} (1 - \lambda\_i)$.
+
+The independence assumption fails whenever causes interact, i.e. their
+joint effect differs from independent triggering: drug interactions, or two
+conditions that produce a symptom only together (an AND rather than an OR).
+
+Divorcing inserts an intermediate variable that summarises a subset of the
+parents. A child with six binary parents needs 64 numbers; splitting them
+into two groups of three, each summarised by a binary node, needs
+$8 + 8 + 4 = 20$. The assumption is that the child depends on each group
+only through its summary. Smaller tables are also easier to elicit from
+experts.
 
 --
 
@@ -545,9 +650,16 @@ $J \indep S \mid R$ — the missing arrow was that claim.
 
 
 Notes:
-One arrow, one table, one claim. Head-computable: only J's table changes. The
-second half is the module's thesis in miniature: adding an arrow removes a
-claim and costs numbers; removing one makes a claim and saves them.
+Only $J$'s table changes: with parents $R$ and $S$ it has 4 rows instead of
+2, so the total is $1 + 1 + 4 + 4 = 10$. The removed claim is
+$J \indep S \mid R$. Marginal independence of $J$ and $S$ disappears too:
+without the arrow the only path $J \leftarrow R \to T \leftarrow S$ is blocked
+by the unobserved collider $T$; with it, $J$ and $S$ are dependent even when
+nothing is observed.
+
+In general, adding an arrow removes independence claims and costs
+parameters; removing one adds a claim and saves parameters. The graph must
+stay acyclic, so not every arrow can be added.
 
 --
 
@@ -568,7 +680,7 @@ savings with more assumptions, which should be said out loud.
 
 <!-- .slide: class="module-slide" -->
 
-# Reading Independence off the Graph
+# d-Separation
 
 
 <div class="guiding-question">
@@ -589,11 +701,17 @@ single number?
 Every independence question in a DAG reduces to these three.
 
 Notes:
-Two of the three were met in Module 1: the fork is the common cause
-(temperature → ice cream, drownings; the 16 cells), the collider is the
-common effect (rain → wet lawn ← sprinkler). The chain is new but intuitive:
-information flows along it until the middle is known. Emphasise the collider's
-inversion: conditioning normally blocks, here it opens.
+Chain $a \to c \to b$: $p(a, b, c) = p(a)\\,p(c \mid a)\\,p(b \mid c)$, so
+$a \indep b \mid c$; marginally $a$ and $b$ are in general dependent.
+Fork $a \leftarrow c \to b$: $p(c)\\,p(a \mid c)\\,p(b \mid c)$, again
+$a \indep b \mid c$ and in general dependent marginally. The fork is the
+common cause (temperature for ice-cream sales and drownings).
+
+Collider $a \to c \leftarrow b$: $p(a)\\,p(b)\\,p(c \mid a, b)$. Summing out $c$
+gives $p(a)\\,p(b)$, so $a \indep b$ marginally; given $c$ the factor
+$p(c \mid a, b)$ couples them, and in general $a \not\indep b \mid c$. This is
+the common effect (rain → wet lawn ← sprinkler) and the only pattern in
+which observing the middle node opens the path instead of blocking it.
 
 --
 
@@ -616,18 +734,31 @@ ${X \indep Y \mid Z}$ in every distribution that factorises over the graph.
 
 <div class="c-note">
 
-Sound, not complete: a particular table may add independences the graph does
-not show — in our tables, once it rains, Tracey's lawn ignores the sprinkler.
+Sound, but not complete for a particular table: specific numbers can create
+independences the graph does not show. For almost every table that factorises
+over the graph, d-separation finds them all.
 
 </div>
 
 
 Notes:
-The definition after the three cases, so it reads as a summary. "Every
-descendant": observing a consequence of the collider is partial evidence about
-the collider itself, so it opens the path too — the mini-exercise tests it.
-The note ties back to "an arrow permits": the graph guarantees the
-independences it shows, and a table can make more hold numerically.
+The descendant clause: if a descendant of the collider is observed, it is
+indirect evidence about the collider, so the two causes again compete to
+explain it and the path is open.
+
+d-separation is sound: if $Z$ d-separates $X$ and $Y$, then $X \indep Y \mid Z$
+in every distribution that factorises over the graph. It is also complete
+with respect to the graph: if $X$ and $Y$ are not d-separated, there is some
+distribution on the graph in which they are dependent (indeed, almost every
+choice of tables makes them dependent). What d-separation does not capture
+are additional independences produced by particular numbers in the tables.
+
+The wet-grass example on the slide is of this kind, but weaker than a full
+conditional independence: $T \indep S \mid R{=}1$ holds (rain wets the lawn
+regardless of the sprinkler), while $T \indep S \mid R{=}0$ does not. Such a
+context-specific independence is a property of the tables, not of the graph.
+Distributions without any extra independences are called faithful to the
+graph.
 
 --
 
@@ -647,21 +778,27 @@ a fork at $R$, a collider at $T$.
 
 <div class="c-insight">
 
-The middle row is Module 1's explaining away: $10\\% \rightarrow 34\\% \rightarrow 16\\%$
+The middle row is the explaining away of Factorising the Joint: $10\\% \rightarrow 34\\% \rightarrow 16\\%$
 for the sprinkler. The graph predicted it before any number was computed.
 
 </div>
 
 
 Notes:
-Walk the path once, triple by triple, for each query. The numbers are exact
-(enumeration of the factorised joint): P(J=1) = 0.2 · 1 + 0.8 · 0.2 = 0.36;
-P(J=1 | T=1) = 0.2144/0.272 = 0.788; P(J=1 | T=1, S=1) = 0.0344/0.092 = 0.374;
-given rain, the sprinkler is back at its prior 0.1 whatever Jack's lawn does.
+Exact values by enumeration of the factorised joint:
+$P(J{=}1) = 0.2 \cdot 1 + 0.8 \cdot 0.2 = 0.36$, and the same given $S{=}1$
+because $J$ depends on $S$ only through the blocked collider.
+$P(J{=}1 \mid T{=}1) = 0.2144 / 0.272 = 0.788$; with $S{=}1$ in addition,
+$P(J{=}1 \mid T{=}1, S{=}1) = 0.0344 / 0.092 = 0.374$. The sprinkler explains
+Tracey's lawn, rain becomes less likely, and with it Jack's wet lawn. Given
+rain, $T{=}1$ is certain whatever $S$ is, so $P(S{=}1 \mid T{=}1, R{=}1)$
+equals the prior 0.1, with or without $J{=}1$.
 
-The point to stabilise: d-separation answers "does this evidence matter for
-that query?" from the picture alone — which is also what an inference
-algorithm uses to ignore irrelevant parts of a network.
+A path is checked triple by triple: it is blocked if any one triple on it is
+blocked. Here the fork at $R$ blocks when $R$ is observed, the collider at
+$T$ blocks unless $T$ or a descendant is observed. d-separation thus decides
+from the graph alone whether a piece of evidence can affect a query;
+inference algorithms use this to discard irrelevant parts of a network.
 
 --
 
@@ -679,14 +816,21 @@ equivalence). Data cannot orient such arrows — they are **not** causal claims.
 
 
 Notes:
-This is the honest answer to the guiding question of Module 2. The arrows of
-the wet-grass graph were drawn in the causal direction because we *know* the
-causal story; the independences would allow other directions. Only a collider
-leaves a trace in the data (two independent variables that become dependent
-given a third), which is why structure-learning algorithms can orient some
-edges and not others. Causal claims need more than a fitted graph —
-interventions or assumptions stated outside the data. Module 5 returns to this
-under structure learning.
+Two DAGs are Markov equivalent if they imply the same set of
+conditional independences. Verma and Pearl (1990) showed this holds exactly
+when they have the same skeleton (edges ignoring direction) and the same
+v-structures (colliders $a \to c \leftarrow b$ whose ends $a$, $b$ are not
+adjacent). The chain in either direction and the fork all claim only
+$a \indep b \mid c$; the collider claims $a \indep b$ instead.
+
+The wet-grass arrows point in the causal direction because the causal story
+is known, not because the independences require it. Only v-structures leave
+a signature in observational data (two independent variables that become
+dependent given a third), so structure-learning algorithms can orient some
+edges and leave others undetermined. A causal claim needs information
+beyond the observed distribution: interventions, temporal order, or
+explicitly stated assumptions. Inference and Parameter Learning states the same limit for structure
+learning.
 
 --
 
@@ -714,9 +858,17 @@ compete to explain it.
 
 
 Notes:
-One question, one rule — the "descendant" clause of d-separation, which
-students tend to skip. If the room is quick: what if we also learn it rained?
-Then the sprinkler becomes less likely, exactly as on the lawn.
+$D$ is a child of the collider $T$, so observing $D$ is indirect evidence
+about $T$: a wet doormat raises the probability of a wet lawn, and the two
+causes of the lawn compete again. The path $R \to T \leftarrow S$ is open
+given $D$, so $R \not\indep S \mid D$. If the doormat is wet exactly when the
+lawn is ($D = T$), observing $D$ is the same as observing $T$; if the doormat
+can also get wet otherwise, the effect is weaker but still present.
+
+With $D = T$: $P(S{=}1 \mid D{=}1) = 0.338$, and once rain is also observed,
+$P(S{=}1 \mid D{=}1, R{=}1) = 0.1$ — the sprinkler becomes less likely, exactly
+as on the lawn. The descendant clause of d-separation is the one most often
+forgotten.
 
 --
 
@@ -737,7 +889,7 @@ is the direction of cause: equivalent graphs make the same claims.
 
 <!-- .slide: class="module-slide" -->
 
-# Drawing Repeated Structure
+# Plate Notation
 
 
 <div class="guiding-question">
@@ -768,10 +920,20 @@ shading only says **what the data fixes** — which variables we condition on.
 
 
 Notes:
-Insist that this is notation, not theory: every diagram in a paper is a
-factorisation students can already read. Shading is the convention they will
-need most: conditioning on the data, Lecture 01's second move, is literally
-"shade the observed nodes".
+These conventions (directed graphical models with plates, after Buntine
+1994; standard in Bishop, *Pattern Recognition and Machine Learning*,
+Chapter 8) add no new semantics: arrows are read exactly as in a belief
+network, and the diagram encodes the factorisation
+$\prod\_i p(x\_i \mid \mathrm{pa}(x\_i))$.
+
+Shaded nodes are observed: the joint is conditioned on their values.
+Open nodes are latent variables or parameters with a distribution, to be
+inferred. A solid dot is a fixed quantity (a hyperparameter or a given
+input) that has no distribution in the model and therefore no factor of its
+own. Of the course's three moves — model the joint, condition on the data,
+read off answers — the second corresponds in the diagram to shading the
+observed nodes. Conventions differ between
+authors: some draw hyperparameters as small open circles or omit them.
 
 --
 
@@ -795,7 +957,7 @@ $N\_k$ patients each.
 
 <div class="column">
 
-![Lecture 02's model as a plate: the fixed a, b point to theta outside the plate; theta points to the observed x_i inside a plate over N users](/courses/probabilistic-machine-learning/figures/l05-plate-coin.svg)
+![The Beta–Bernoulli model as a plate: the fixed a, b point to theta outside the plate; theta points to the observed x_i inside a plate over N users](/courses/probabilistic-machine-learning/figures/l05-plate-coin.svg)
 
 </div>
 
@@ -807,20 +969,27 @@ $N\_k$ patients each.
 <div class="c-insight">
 
 Given $\theta$ the users are independent. With $\theta$ unknown they are
-**not**: in Lecture 02, the first ten users changed our prediction for the
+**not**: in <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>, the first ten users changed our prediction for the
 eleventh. That dependence is exactly why learning from data works.
 
 </div>
 
 
 Notes:
-The i.i.d. assumption of Lecture 02 is *conditional* i.i.d.: independent given
-the parameters. The figure is the L02 model as a plate: θ (open) → x_i
-(shaded) inside a plate of N, with a dot for (a, b) outside. Marginally, after
-summing θ out, the x_i are dependent — the Beta–Bernoulli predictive of the
-next user depends on how many earlier users came back. A student who says
-"i.i.d. means the data cannot teach us anything about the next point" has
-missed the word "given".
+A plate stands for $N$ copies of its contents with the same parameters; the
+factorisation gets a product $\prod\_{i=1}^{N}$ over the factors inside. The
+i.i.d. assumption of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> is
+conditional: the $x\_i$ are independent given $\theta$. Marginally, with
+$\theta$ summed out, they are dependent — the Beta–Bernoulli predictive is
+$P(x\_{N+1} = 1 \mid x\_{1:N}) = (a + k)/(a + b + N)$ with $k$ the number of
+ones so far, which depends on the earlier observations. In d-separation
+terms, every pair $x\_i \leftarrow \theta \to x\_j$ is a fork that is open
+while $\theta$ is unobserved.
+
+A frequent error is to read "i.i.d." as "the data says nothing about the
+next point"; that holds only given the parameters. Variables shared across
+copies must sit outside the plate; a variable inside a plate has one copy
+per index.
 
 --
 
@@ -856,19 +1025,27 @@ The plate became the product; each arrow became a conditioning bar.
 <div class="c-note">
 
 $x\_i$ is a **dot**: the inputs are given, not modelled — this is a
-discriminative model, $p(y \mid x)$, with a prior on $w$. Lecture 07 conditions
+discriminative model, $p(y \mid x)$, with a prior on $w$. <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a> conditions
 on the shaded $y\_i$ and keeps the whole posterior over $w$.
 
 </div>
 
 
 Notes:
-The Bayesian linear regression of Lecture 07, drawn now so that the model is
-familiar before its inference is. Two details the drawing forces us to decide:
-the inputs are fixed (a dot, no factor p(x_i) — Lecture 04's "only p(y | x)"
-visible in the notation), and the noise variance σ² is fixed rather than
-learned. Ask what would change if σ² were an open node: it would get a prior
-and a posterior like w.
+This is the model of <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>:
+a prior $p(w \mid \tau)$ and Gaussian likelihood
+$p(y\_i \mid x\_i, w, \sigma^2) = \mathcal{N}(y\_i \mid w^\top x\_i, \sigma^2)$.
+The inputs $x\_i$ are dots: they are conditioned on but not modelled, so the
+factorisation has no factor $p(x\_i)$. This is the discriminative choice of
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, visible directly in
+the notation; a generative model would draw $x\_i$ as a shaded random node
+with its own distribution.
+
+The noise variance $\sigma^2$ is also a dot, i.e. fixed. If it were an open
+node it would need a prior, and the posterior would be over $(w, \sigma^2)$
+jointly; with a Gaussian prior on $w$ and an inverse-gamma prior on
+$\sigma^2$ that posterior is still available in closed form
+(normal–inverse-gamma).
 
 --
 
@@ -903,7 +1080,7 @@ $\pi$, every $\mu\_k, \Sigma\_k$ and every label $z\_i$ — all **open**. $\alph
 $$
 p(\pi \mid \alpha) \prod\_{k} p(\mu\_k, \Sigma\_k) \prod\_{i} p(z\_i \mid \pi) p(x\_i \mid z\_i, \mu, \Sigma)
 $$
-A **mixture of Gaussians** — Lecture 07.
+A **mixture of Gaussians** — <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>.
 
 </div>
 
@@ -915,11 +1092,19 @@ A **mixture of Gaussians** — Lecture 07.
 
 
 Notes:
-One question, read off the conventions slide. The factorisation in the
-solution is for checking and for the notes: every open node with no parent
-inside a plate gets a prior (π, μ_k, Σ_k), every arrow a conditioning bar, and
-x_i depends on *all* components through z_i, which selects one. The z_i are
-latent *per data point* — the hidden labels that EM will infer in Lecture 07.
+Every open node without a parent gets a prior factor ($\pi$ via $\alpha$;
+$\mu\_k, \Sigma\_k$ directly); every arrow is a conditioning bar. $\alpha$ is a
+dot, a fixed hyperparameter, so it is set by the modeller, not inferred.
+The $K$ plate holds the component parameters, one copy per component; the
+$N$ plate holds $z\_i$ and $x\_i$, one copy per data point.
+
+$x\_i$ has arrows from $z\_i$ and from every $(\mu\_k, \Sigma\_k)$:
+$p(x\_i \mid z\_i, \mu, \Sigma) = \mathcal{N}(x\_i \mid \mu\_{z\_i}, \Sigma\_{z\_i})$,
+so $z\_i$ selects the component. The latent variables split into two kinds:
+global ($\pi$, $\mu\_k$, $\Sigma\_k$; their number does not grow with $N$) and
+local ($z\_i$; one per data point). EM in
+<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a> computes a distribution over
+the local $z\_i$ and point estimates of the global parameters.
 
 --
 
@@ -939,7 +1124,7 @@ and **what sits outside** is what learning has to estimate.
 
 <!-- .slide: class="module-slide" -->
 
-# Can We Compute With It?
+# Inference and Parameter Learning
 
 
 <div class="guiding-question">
@@ -961,11 +1146,17 @@ condition on it — and where do its numbers come from?
 | **learn the structure** | which arrows at all? | hardest — and only up to equivalence |
 
 Notes:
-The three tasks, one row each, with the running example. The ordering of
-difficulty matters and is often stated wrongly: with complete data, parameter
-learning is the easiest (it is counting); inference can be hard; structure
-learning is the hardest. The module takes them in the order inference →
-parameters → structure.
+Inference computes conditional distributions of unobserved variables given
+observed ones, with structure and tables known. Parameter learning fixes the
+graph and estimates the tables. Structure learning estimates the graph.
+
+With complete data (every variable observed in every record) the difficulty
+order is often stated wrongly: parameter learning is the easiest, because
+the likelihood decomposes into independent counting problems; exact
+inference is NP-hard in general, though cheap on chains and trees; structure
+learning is the hardest, since it searches a super-exponential space of
+graphs and its result is determined only up to Markov equivalence. With
+incomplete data parameter learning requires inference as a subroutine (EM).
 
 --
 
@@ -1006,14 +1197,18 @@ $= 0.2 + 0.0144 = 0.2144$ ✓
 
 
 Notes:
-Math first: show the formula, ask why it equals the plain double sum
-(distributivity: factors that do not mention S can leave the inner sum). The
-result is the denominator of the explaining-away formula in Module 1 — the
-same number, computed smarter. m(R) is a small table, a "message" from S to
-R; this is variable elimination.
+The plain sum is $\sum\_R \sum\_S p(R)\\,p(S)\\,p(J{=}1 \mid R)\\,p(T{=}1 \mid R, S)$.
+By distributivity, factors that do not mention $S$ can be moved out of the
+inner sum, leaving $m(R) = \sum\_S p(S)\\,p(T{=}1 \mid R, S)$, a table with one
+entry per value of $R$. $m(1) = 1$: given rain the lawn is wet whatever the
+sprinkler does. $m(0) = 0.09$: without rain only the sprinkler (on with 0.1,
+effective with 0.9) wets the lawn.
 
-On four variables the saving is invisible. The next slide shows where it
-becomes everything.
+The result, $0.2144$, is the denominator of the explaining-away formula in
+Factorising the Joint. Summing out one variable at a time and storing the intermediate
+tables ("messages") is variable elimination. On four variables the saving is
+negligible; it grows with the number of variables, provided the
+intermediate tables stay small.
 
 --
 
@@ -1056,13 +1251,19 @@ shape, not its size.
 
 
 Notes:
-The chain is the best case: each elimination step multiplies a two-entry
-message into a 2 × 2 table and sums one variable out — four products. Trees
-behave like chains. Numbers: 2^29 = 536,870,912 against 4 · 29 = 116.
+Summing all of $X\_1, \ldots, X\_{n-1}$ at once enumerates $2^{n-1}$
+configurations, each a product of $n$ factors: for $n = 30$, $2^{29} = 536{,}870{,}912$.
+Eliminating in order computes $m\_1(x\_2) = \sum\_{x\_1} p(x\_1)\\,p(x\_2 \mid x\_1)$,
+then $m\_2(x\_3) = \sum\_{x\_2} m\_1(x\_2)\\,p(x\_3 \mid x\_2)$, and so on. Each step
+multiplies a two-entry message into a $2 \times 2$ table (four products) and
+sums out one variable, so $4(n-1)$ products in total: 116 for $n = 30$.
 
-The general statement (not for the exam): the cost is exponential in the
-treewidth of the graph, roughly the size of the largest table elimination has
-to build. The next two slides meet a graph where that table is enormous.
+On a chain every elimination order keeps the intermediate tables at two
+variables; on general graphs a bad order creates large intermediate tables.
+Trees behave like chains. The general result: the cost
+of exact elimination is exponential in the treewidth of the graph (for the
+best order), roughly the number of variables in the largest table
+elimination has to build, and finding the best order is itself NP-hard.
 
 --
 
@@ -1100,11 +1301,19 @@ $P(\text{equal}) = 6/8$.
 
 
 Notes:
-Only what the lecture needs: potentials are not probabilities and do not
-normalise locally, so a global Z is required. The two-pixel example makes Z
-concrete and head-computable. For an image, Z sums over every possible image:
-2 to the number of pixels. That sum is the price of modelling symmetric
-influence — and the subject of the next-but-one slide.
+Potentials are non-negative functions, not probabilities: they need not sum
+to one, and a single potential has no probabilistic meaning on its own.
+Normalisation happens once, globally, through the partition function $Z$.
+Two pixels with $\phi = 3$ if equal and 1 if not: configurations (0,0),
+(0,1), (1,0), (1,1) have weights 3, 1, 1, 3, so $Z = 8$ and
+$P(\text{equal}) = 6/8 = 0.75$.
+
+For an image, $Z$ sums over all $2^{\text{pixels}}$ binary images. Many
+Markov networks are written in log form, $p(x) \propto \exp(-E(x))$ with
+an energy $E$; the Ising model of statistical physics is this pixel model.
+Conditional independence in a Markov network is graph separation: $A \indep
+B \mid C$ whenever every path from $A$ to $B$ passes through $C$ (the global
+Markov property; it holds for every distribution of this product form).
 
 --
 
@@ -1128,14 +1337,21 @@ works on that graph.
 
 
 Notes:
-Two slides for Markov networks, by design (course plan default): what they are,
-and how they relate to belief networks. The relation that matters for this
-module is the compilation one: exact inference algorithms (elimination,
-junction trees) turn a belief network into its moral graph first. The moral
-graph of the wet grass joins R and S — it has forgotten that they are
-marginally independent, which is why independence is read on the DAG and
-computation done on the moral graph. Neither model class contains the other: a
-collider has no undirected equivalent, a four-cycle no directed one.
+Moralisation ("marrying the parents") connects every pair of parents that
+share a child and drops all arrow heads. The resulting moral graph supports
+the same factorisation: each conditional table $p(x \mid \mathrm{pa}(x))$ is
+a potential over $x$ and its parents, which form a clique in the moral
+graph, and $Z = 1$. Exact inference algorithms (variable elimination,
+junction trees) operate on this undirected form.
+
+Moralisation loses information: the moral graph of the wet grass joins $R$
+and $S$, so it no longer shows that they are marginally independent. Hence
+independences are read off the DAG with d-separation, and computation runs
+on the moral graph. Neither model class contains the other as a set of
+independence structures: a collider ($a \indep b$ but not given $c$) has no
+undirected graph with exactly those independences, and a four-cycle
+($a \indep c \mid b, d$ and $b \indep d \mid a, c$) has no DAG with exactly
+those.
 
 --
 
@@ -1181,16 +1397,22 @@ shape where it is kind (chains, trees), and otherwise **sample** or
 
 
 Notes:
-This is the lecture's thesis, shown rather than asserted. The model is tiny to
-state — one 2 × 2 potential per neighbouring pair — and hopeless to condition
-exactly: eliminating the pixels row by row leaves a table over an entire row,
-2^100 entries (the treewidth of an n × n grid is n). Z itself sums over 2^10,000
-images.
+A $100 \times 100$ lattice has $100 \cdot 99 = 9{,}900$ horizontal and as many
+vertical edges, 19,800 in total; with a $2 \times 2$ potential each, 79,200
+numbers. Eliminating row by row creates intermediate tables over an entire
+row of 100 pixels, $2^{100} \approx 1.3 \cdot 10^{30}$ entries. This is not
+an artefact of a bad order: the treewidth of an $n \times n$ grid is $n$, so
+every elimination order produces a table over at least about 100 variables.
+$Z$ itself is a sum over $2^{10{,}000}$ images.
 
-Hardness results: exact inference, Cooper (1990); approximate inference to a
-guaranteed accuracy, Dagum & Luby (1993). In practice image models use
-sampling (MCMC) or variational approximations; Lecture 07's EM is a first,
-exact-where-possible example of alternating between inference and fitting.
+Hardness results: exact inference in belief networks is NP-hard (Cooper
+1990); approximating posterior probabilities with a guaranteed error bound
+is NP-hard as well (Dagum and Luby 1993). In practice such models are
+handled with sampling (Markov chain Monte Carlo) or variational
+approximations, or with exact algorithms where the graph structure allows
+(chains, trees, low treewidth). EM (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>)
+alternates between inference over latent variables and refitting the
+parameters.
 
 --
 
@@ -1206,23 +1428,30 @@ Fifty observed days. Estimate Jack's table $p(J{=}1 \mid R)$:
 
 <div class="c-insight">
 
-Counting **is** maximum likelihood (L03); pseudo-counts **are** the Beta
-posterior mean (L02) — Laplace smoothing (L03). "Rain always wets the grass" was
+Counting **is** maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>); pseudo-counts **are** the Beta
+posterior mean (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>) — Laplace smoothing (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). "Rain always wets the grass" was
 an MLE on ten days.
 
 </div>
 
 
-**Hidden** variables leave no counts: infer them, re-count, repeat — EM, Lecture 07.
+**Hidden** variables leave no counts: infer them, re-count, repeat — EM, <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>.
 
 Notes:
-The course's spiral on one slide. With complete data the likelihood of a
-belief network splits into one categorical per node and parent configuration,
-so each row is fitted separately — the same argument as naive Bayes, which is
-the star-graph special case. The 1.0 in Module 1's table now looks different:
-it is the three-heads-in-three-flips problem of Lecture 03 in a table row. A
-parent configuration that never occurs leaves its row undetermined (0/0); the
-pseudo-counts fill it with the prior mean 1/2.
+With complete data the log-likelihood of a belief network is a sum over
+nodes and parent configurations of terms that involve only one row of one
+table. Each row is therefore maximised separately, and the maximiser is the
+relative frequency: $\hat{p}(J{=}1 \mid R{=}r) = n(J{=}1, R{=}r) / n(R{=}r)$.
+Naive Bayes is the special case with the star graph.
+
+With a $\mathrm{Beta}(1, 1)$ prior on each row the posterior mean is
+$(n\_1 + 1)/(n + 2)$: $9/42 = 0.214$ and $11/12 = 0.917$. The 1.0 in the table of
+Factorising the Joint is a maximum-likelihood estimate from ten days without a single
+counterexample, the same situation as three heads in three flips in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. A parent configuration that never
+occurs leaves its row undetermined (0/0); the pseudo-counts fill it with the
+prior mean 1/2. With hidden variables the counts are unavailable; EM
+replaces them by expected counts under the current posterior.
 
 --
 
@@ -1264,10 +1493,20 @@ causal discovery.
 
 
 Notes:
-One slide on purpose: structure learning is a research area, not a technique to
-apply on Monday. The warning is Module 3's "arrows are not causes", now as a
-limit of learning. Students will meet confident causal claims from fitted
-graphs; this is the sentence that lets them challenge one.
+Score-based methods search over graphs and maximise a score that trades fit
+against complexity, such as BIC (log-likelihood minus $\tfrac{1}{2}\log N$
+per free parameter) or a Bayesian marginal likelihood. The number of DAGs on
+$n$ labelled nodes is 1, 3, 25, 543 for $n = 1, \ldots, 4$ and about
+$4 \cdot 10^{18}$ for $n = 10$, so search is heuristic (greedy, with local
+moves). Constraint-based methods (e.g. the PC algorithm) run conditional
+independence tests and keep graphs whose d-separations match them; errors
+in individual tests propagate.
+
+Both recover at best the Markov equivalence class, and only under
+assumptions: enough data, no unobserved common causes, and a distribution
+faithful to some DAG. A learned structure is therefore not a causal
+discovery; causal conclusions require interventional data or explicitly
+justified assumptions.
 
 --
 
@@ -1295,9 +1534,18 @@ Same data, two readings: the peak and the mean.
 
 
 Notes:
-Head-computable, and the same lesson in three lectures: L02 (Beta posterior
-mean), L03 (the peak can lie; smoothing). If time: with 400 of 400 the
-two readings agree to three decimals — the prior washes out.
+MLE: $4/4 = 1$. With one pseudo-count on each side, i.e. a $\mathrm{Beta}(1, 1)$
+prior, the posterior is $\mathrm{Beta}(5, 1)$ with mean $5/6 \approx 0.833$;
+its mode is still 1, the MLE. The three readings connect
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> (Beta posterior mean),
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (the peak of a small sample can lie)
+and <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (Laplace
+smoothing).
+
+The prior's influence shrinks with $n$: with 400 wet days out of 400 the
+smoothed estimate is $401/402 \approx 0.9975$, against the MLE 1. The
+difference of $1/(n + 2)$ vanishes as $n$ grows, but the MLE never
+leaves the boundary value 1 however many confirming days are counted.
 
 --
 
@@ -1364,10 +1612,20 @@ $$
 Both are drawn with a **dashed** edge.
 
 Notes:
-Appendix (course plan default): niche for this audience, kept for questions.
-The distinction: uncertain evidence keeps the observation and softens it;
-unreliable evidence keeps the report but changes the model of how the report
-arises. Students who conflate the two model rumours as noise.
+Uncertain (soft, or virtual) evidence keeps the model unchanged and replaces
+a hard observation $x = x^\*$ by a distribution over the states of $x$; the
+query averages over those states. With $p(T{=}1 \mid \tilde{T}) = 0.8$ and
+the wet-grass tables, $p(S{=}1 \mid \tilde{T}) = 0.8 \cdot p(S{=}1 \mid T{=}1) + 0.2 \cdot p(S{=}1 \mid T{=}0) = 0.8 \cdot 0.338 + 0.2 \cdot 0.011 \approx 0.273$.
+
+Unreliable evidence keeps the reported value but changes the model of how
+the report arises: the table of the reported variable is replaced by one
+that expresses how far the reporter is trusted. The two are frequently
+confused. A rumour is not an uncertain observation of the lawn; it is a
+certain observation of a report whose relation to the lawn is unreliable,
+and treating it as noise on the lawn itself models the wrong variable.
+
+This follows the treatment of soft and unreliable evidence in Barber,
+*Bayesian Reasoning and Machine Learning*, Chapter 3.
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

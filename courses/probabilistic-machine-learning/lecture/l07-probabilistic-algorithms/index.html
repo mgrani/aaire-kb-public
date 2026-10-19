@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 07: Selected Probabilistic Algorithms</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/l07-probabilistic-algorithms.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -11,15 +26,19 @@
 Prof. Dr. Michael Granitzer
 
 Notes:
-Reworked 2026-09-26 (docs/reviews/PML-L05-L07-REVIEW-2026-09.md §5.3). The
-closing lecture carries out Lecture 01's ideal — model the joint, condition on
-the data, read off answers — twice, and says honestly how far each gets.
-Module 1 is a three-slide k-means recap (the students know clustering) that ends
-on the question k-means cannot answer. Module 2: Gaussian mixtures and EM, a
-*partial* shortcut — a posterior over the hidden labels, a peak for the
-parameters. Module 3: Bayesian regression on Lecture 01's house prices, with
-the predictive variance split into a noise and a parameter term, in numbers —
-the promise of Lecture 01. Module 4 closes the course arc.
+The lecture applies the procedure stated in <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> — model
+the joint distribution, condition on the observed data, read answers off the
+posterior — to two models. A Gaussian mixture treats the cluster label as a
+latent variable; EM computes the exact posterior of every label given the
+current parameters, but represents the parameters themselves by one
+maximum-likelihood point, so it is a partial shortcut. Bayesian linear
+regression with a Gaussian prior and known noise keeps the full Gaussian
+posterior over the weights; the variance of its predictive distribution is the
+sum of a noise term $\sigma^2$ and a parameter term
+$\mathbf{x}^{\*\top}\mathbf{S}\_N\mathbf{x}^{\*}$, evaluated on the house-price
+data of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>. k-means serves as the
+hard-assignment baseline: it is the limit of EM in which every posterior over
+a label collapses to 0 or 1.
 
 ---
 
@@ -34,14 +53,24 @@ the promise of Lecture 01. Module 4 closes the course arc.
 
 
 Notes:
-The end of the arc. k-means gives every point one label; a mixture makes the label a latent variable and EM conditions on it — but keeps only a peak for the parameters, so EM is a partial shortcut. Bayesian regression keeps the posterior over the weights, and its predictive variance splits into the noise term (aleatoric — Lecture 01's identical patients) and the parameter term (epistemic — Lecture 01's 600 m² villa). The takeaway row says why every other lecture took a shortcut: the ideal costs computation, and even it cannot see a wrong model family.
+k-means assigns every point to exactly one cluster. A Gaussian mixture makes
+the assignment a latent variable $z\_i$; EM conditions $z\_i$ on the data, but
+returns a single value of $\pi, \mu, \sigma$, so it is exact only for the
+labels. Bayesian linear regression keeps the posterior over the weights
+$\mathbf{w}$, and its predictive variance is the sum of the noise term
+$\sigma^2$ (aleatoric: identical inputs, different outcomes) and the parameter
+term (epistemic: large far from the training data, such as the 600 m² villa of
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>). Two limits remain even with
+the full posterior. Computing it is cheap only in conjugate cases; otherwise it
+needs sampling or approximation. And it quantifies uncertainty only within the
+assumed model family: a wrong family changes the predictive mean but leaves no
+trace in the predictive variance.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## Hard Assignments (Recap)
+# k-Means (Recap)
 
 
 <div class="guiding-question">
@@ -65,11 +94,20 @@ optimum that depends on the start.
  data-params='{"k": 3}'></div>
 
 Notes:
-Recap, not teaching: every student has run k-means. Odd clicks assign, even
-clicks move; three rounds. Two things to plant for Module 2. First, the loop
-alternates between "which cluster?" and "where is the cluster?" — EM will
-alternate between the same two questions. Second, each assignment is a hard
-yes/no: a point is 100% in one cluster even when it sits on the boundary.
+Each iteration has two half-steps. The assignment step gives each point to its
+nearest centroid, which for fixed centroids minimises SSE over the assignments.
+The update step moves each centroid to the mean of its points, which for fixed
+assignments minimises $\sum \lVert \mathbf{x} - \boldsymbol{\mu}\_j \rVert^2$. Neither
+half-step can increase SSE and there are finitely many partitions, so the loop
+terminates — at a local optimum that depends on the initial centroids. Common
+remedies are several restarts and k-means++ seeding.
+
+In the visualisation, the odd steps are assignment steps and the even steps
+update steps: three rounds on three well-separated blobs. The alternation
+"which cluster?" / "where is the cluster?" is the structure of EM's E-step and
+M-step in <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>. The difference is
+that every k-means assignment is all-or-nothing, also for a point on the
+boundary between two clusters.
 
 --
 
@@ -85,11 +123,20 @@ yes/no: a point is 100% in one cluster even when it sits on the boundary.
 | how many clusters | $k$ is given | <span class="no">✗</span> still chosen — but by held-out likelihood |
 
 Notes:
-A table: six failure modes compared on the same two columns. The point of the
-last column: a Gaussian mixture is not a better k-means across the board. It
-fixes everything that comes from "distance only, one label", and fixes nothing
-that comes from "clusters are blobs". Adapted from the Data Science unit's four
-failure modes (exemplar-based-failure-examples).
+The first four failures share one cause: k-means uses only the Euclidean
+distance to a centroid and gives each point one label. Its decision boundary
+between two clusters is therefore the perpendicular bisector of the two
+centroids. A Gaussian mixture with its own covariance $\Sigma\_k$ and weight
+$\pi\_k$ per component shifts the boundary towards the smaller or narrower
+component, and with unequal covariances makes it quadratic.
+
+The last two rows are not fixed. Every component is still an ellipsoidal blob,
+so rings and spirals need a different representation (for example a
+similarity graph, as in spectral clustering) or many components per cluster.
+$K$ remains a choice, but a mixture is a density, so $K$ can be compared by
+held-out log-likelihood (or a penalised criterion such as BIC). For k-means
+the SSE, on training or held-out data, typically keeps decreasing as $k$
+grows, so it gives no comparable criterion.
 
 --
 
@@ -124,17 +171,24 @@ variable — and k-means reappears as the limit where the doubt is removed.
 
 
 Notes:
-The Module 1 guiding question, now on the table. Let two or three answers come
-before the click; someone usually suggests "a probability" or "both". Stress
-that the lost information matters for decisions: an ambiguous case routed to a
-human needs to be *known* as ambiguous.
+A point equidistant from two centroids contributes the same SSE under either
+label. k-means breaks the tie arbitrarily (in most implementations by index
+order) and reports the result with the same certainty as for a point lying on
+a centroid. Expressing "about half and half" requires a distribution over the
+label $z$, for example $P(z = 1 \mid \mathbf{x}) = P(z = 2 \mid \mathbf{x}) = 0.5$.
+In a mixture model this posterior is the responsibility; it equals 0.5 where
+the two weighted component densities are equal.
+
+The lost information matters for decisions: an ambiguous case can be deferred
+— routed to a human, or held until more features are known — only if the
+ambiguity is represented. k-means is recovered from the mixture as the limit
+of equal, vanishing variances, in which every responsibility becomes 0 or 1.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Mixture Models and EM
+# Mixture Models and EM
 
 
 <div class="guiding-question">
@@ -175,7 +229,7 @@ $$
 
 ![Plate diagram of a Gaussian mixture: pi points to the latent label z_i, which points to the observed x_i inside a plate over N; mu_k and Sigma_k inside a plate over K point to x_i](/courses/probabilistic-machine-learning/figures/l05-plate-gmm.svg)
 
-The plate of Lecture 05: $z\_i$ is **latent** — never observed.
+The plate of <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>: $z\_i$ is **latent** — never observed.
 
 </div>
 
@@ -184,18 +238,24 @@ The plate of Lecture 05: $z\_i$ is **latent** — never observed.
 
 
 Notes:
-Model the joint, including what is hidden: the first of Lecture 01's three
-moves, done on purpose. The sum is marginalisation over z (Lecture 02). One
-dimension keeps the formulas readable; in d dimensions σ² becomes a covariance
-matrix Σ, exactly as in the plate. The district is a real latent variable:
-every listing has one, the data set just does not record it.
+The generative story defines the joint $p(x, z) = \pi\_z \\, \mathcal{N}(x \mid \mu\_z, \sigma\_z^2)$;
+the density of $x$ is its marginal, obtained by summing over $z$
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). The weights satisfy
+$\pi\_k \ge 0$ and $\sum\_k \pi\_k = 1$. In $d$ dimensions $\sigma\_k^2$ becomes a
+covariance matrix $\Sigma\_k$, as drawn in the plate; one dimension keeps the
+formulas scalar.
+
+The district is a genuine latent variable: every flat has one, the data set
+does not record it. The components are identifiable only up to relabelling —
+permuting the component indices leaves $p(x)$ unchanged — so the likelihood has
+$K!$ equivalent maxima, and "component 1" has no meaning beyond a given fit.
 
 --
 
 ## Why There Is No Closed Form
 
-For one Gaussian, maximum likelihood is the sample mean and variance
-(Lecture 03). For a mixture, the log-likelihood is a **log of a sum**:
+For one Gaussian, maximum likelihood — the recipe of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> — gives the sample mean and variance. For a mixture, the log-likelihood is a **log of a sum**:
 
 $$
 \ell(\theta) = \sum\_{i=1}^{N} \log \sum\_{k=1}^{K} \pi\_k \mathcal{N}(x\_i \mid \mu\_k, \sigma\_k^2)
@@ -224,10 +284,21 @@ the two.**
 
 
 Notes:
-Math first (P5): the log of a sum is the whole difficulty. With labels, the log
-would sit directly on each π_k N(·) and split into separate, easy problems —
-that is why the two questions on the slide each have an easy answer. EM uses
-the second answer to fill in the first.
+For a single Gaussian, $\log \mathcal{N}$ is quadratic in $\mu$, and setting
+the derivatives to zero gives the sample mean and variance. For the mixture,
+the derivative with respect to $\mu\_k$ is
+$\sum\_i \gamma\_{ik} (x\_i - \mu\_k)/\sigma\_k^2$, where $\gamma\_{ik}$ (next slide)
+itself depends on all parameters. The stationarity condition
+$\mu\_k = \sum\_i \gamma\_{ik} x\_i / \sum\_i \gamma\_{ik}$ is an implicit equation,
+not a formula.
+
+With known labels, the complete-data log-likelihood
+$\sum\_i \log \big(\pi\_{z\_i} \mathcal{N}(x\_i \mid \mu\_{z\_i}, \sigma\_{z\_i}^2)\big)$
+has the log directly on each term and splits into one problem per group:
+$\pi\_k$ is the share of points in group $k$, $\mu\_k$ and $\sigma\_k^2$ are the
+mean and variance of that group. With known parameters, each label's posterior
+follows from Bayes' theorem. EM alternates the two; its M-step formulas are
+exactly the stationarity conditions above with $\gamma$ held fixed.
 
 --
 
@@ -246,16 +317,27 @@ $x\_i$), normalised over the components.
 
 <div class="c-insight">
 
-The same computation as Lecture 02's disease test — once per data point. A flat
+The same computation as <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s disease test — once per data point. A flat
 halfway between the two districts gets about $0.5 / 0.5$.
 
 </div>
 
 
 Notes:
-Say the E-step out loud as Bayes' theorem. This is the part of EM that performs
-the ideal: the hidden label is conditioned on the data and kept as a whole
-distribution, not collapsed to a guess.
+$\gamma\_{ik}$ is the posterior $P(z\_i = k \mid x\_i, \theta)$ under the current
+parameters $\theta$; the denominator is the mixture density $p(x\_i)$. For each
+point the responsibilities are non-negative and sum to 1 over $k$. The E-step
+keeps the whole distribution over each label instead of its most probable
+value, and given $\theta$ it is exact — this is the part of EM that conditions
+on the data as the ideal prescribes.
+
+The structure is that of the disease test in
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>: $\pi\_k$ is the base rate,
+the component density the likelihood. A point gets $0.5 / 0.5$ where the two
+weighted densities are equal; with unequal weights or variances this point is
+in general not the midpoint between the means. Implementations compute
+$\gamma\_{ik}$ in log space (log-sum-exp), because the densities underflow for
+points far from a component.
 
 --
 
@@ -284,10 +366,20 @@ $$
 
 
 Notes:
-The M-step is Lecture 03's maximum likelihood (share, mean, variance), with
-each point counted fractionally. With γ ∈ {0, 1} it would be exactly "fit each
-group separately". The monotone likelihood is EM's guarantee; like k-means, it
-reaches a local optimum that depends on the start.
+With $\gamma$ fixed, the M-step maximises the expected complete-data
+log-likelihood $\sum\_i \sum\_k \gamma\_{ik} \big[\log \pi\_k + \log \mathcal{N}(x\_i \mid \mu\_k, \sigma\_k^2)\big]$
+— maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) with each point
+counted fractionally in every component. $N\_k$ is the effective number of
+points in component $k$. The update for $\pi\_k$ follows with a Lagrange
+multiplier for $\sum\_k \pi\_k = 1$; the variance is divided by $N\_k$, so it is
+the (biased) maximum-likelihood estimate. With $\gamma\_{ik} \in \\{0, 1\\}$ the
+formulas reduce to fitting each group separately.
+
+Monotonicity: the E-step makes a lower bound on $\ell(\theta)$ tight at the
+current $\theta$, and the M-step raises that bound, so $\ell$ cannot decrease
+(Dempster, Laird and Rubin, 1977). EM converges to a stationary point, usually
+a local maximum that depends on the start; several restarts or an
+initialisation from k-means are common practice.
 
 --
 
@@ -299,13 +391,21 @@ reaches a local optimum that depends on the start.
 and does the flat at 3.5 k€/m² end up decided?
 
 Notes:
-Stepped viz (P6). Start: two Gaussians placed badly (μ = 2.2 and 3.4). Click 1:
-E-step — colour is responsibility (navy = component 1, teal = component 2).
-Click 2: M-step — the curves jump towards the data; the log-likelihood rises
-from −51.6 to −36.9. Clicks 3–4: a second round, small changes. Click 5: after
-60 iterations — π ≈ 0.48/0.52, μ ≈ 2.89 and 4.19, log-likelihood −36.52; the
-ringed flat at 3.5 has γ = 0.49/0.51. Click 6: the same flat with a hard label,
-as k-means would report it. Ask what was lost between clicks 5 and 6.
+Data: 30 flats with prices between 2.14 and 5.34 k€/m². Start: two components
+placed poorly, $\mu = 2.2$ and $3.4$, $\sigma = 0.6$, $\pi = 0.5 / 0.5$;
+log-likelihood −51.6. Step 1 (E): every flat is coloured by its
+responsibilities (navy = component 1, teal = component 2). Step 2 (M): the
+refit gives $\pi \approx 0.24 / 0.76$ and $\mu \approx 2.65 / 3.85$; the
+log-likelihood rises to −36.9. Steps 3–4: the second round changes little
+(−36.8). Step 5: after 60 iterations $\pi \approx 0.48 / 0.52$,
+$\mu \approx 2.89 / 4.19$, $\sigma \approx 0.47 / 0.60$, log-likelihood −36.52.
+Step 6: the same fit with every responsibility rounded to 0 or 1, as k-means
+would report it.
+
+At convergence the flats between about 3.2 and 3.8 k€/m² have
+responsibilities between 0.2 and 0.8. The ringed flat at 3.5 has
+$\gamma \approx 0.49 / 0.51$ — it is not decided; in step 6 it carries a single
+label with no indication that it is a near tie.
 
 --
 
@@ -328,6 +428,16 @@ becomes "move to the mean".
 </div>
 
 
+Notes:
+With equal weights and spherical covariances $\sigma^2 I$,
+$\gamma\_{ik} \propto \exp\big(-\lVert \mathbf{x}\_i - \boldsymbol{\mu}\_k \rVert^2 / 2\sigma^2\big)$.
+As $\sigma \to 0$ the term with the smallest distance dominates every other
+one exponentially, so $\gamma\_{ik} \to 1$ for the nearest centroid and $0$
+otherwise; the M-step mean becomes the mean of the assigned points. For this
+reason k-means is also called hard EM. It shares EM's dependence on the start,
+but optimises SSE rather than $\ell(\theta)$, and has no variances or weights
+that could shift the boundary between clusters.
+
 --
 
 ## What EM Still Drops
@@ -344,13 +454,13 @@ becomes "move to the mean".
 <div class="marks-no">
 
 - **The parameters:** $\pi\_k, \mu\_k, \sigma\_k$ are **one point estimate** —
-  Lecture 03's peak. The plate draws them as unknowns; EM gives them no error
+  <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s peak. The plate draws them as unknowns; EM gives them no error
   bar.
 - **A peak that may not exist:** a component that shrinks onto one point has
   $\sigma\_k \to 0$ and infinite likelihood. In practice: a floor on $\sigma\_k$,
   or a prior (MAP).
 - **The number of components:** the training likelihood always rises with $K$.
-  Choose $K$ by the **held-out** log-likelihood (Lecture 06), not by an elbow.
+  Choose $K$ by the **held-out** log-likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>), not by an elbow.
 
 </div>
 
@@ -366,11 +476,24 @@ or variational inference.
 
 
 Notes:
-This slide places EM honestly on the course arc. Lecture 01's table called
-Lecture 07 "no shortcut"; for EM that is true of the labels only. The collapse
-is a real failure, not a curiosity: it is why every GMM library has a
-regularisation parameter on the covariance. The held-out log-likelihood is the
-log-loss of Lecture 06, now for a density.
+EM conditions the labels on the data but returns one value of
+$\pi, \mu, \sigma$; parameter uncertainty is not represented, although the
+plate treats the parameters as unknown. The course roadmap's "no shortcut" row
+for this lecture carries exactly this qualification: EM is the ideal only for
+the hidden labels.
+
+Degeneracy: with $\mu\_k = x\_i$ and $\sigma\_k \to 0$, the term
+$\pi\_k \mathcal{N}(x\_i \mid x\_i, \sigma\_k^2) = \pi\_k / (\sqrt{2\pi}\\,\sigma\_k)$
+diverges while the other points keep a finite density from the other
+components, so the likelihood is unbounded and its "maximum" is a spike on one
+point. Libraries therefore add a small constant to the covariance (in
+scikit-learn's `GaussianMixture`, `reg_covar`) or place a prior on it (MAP-EM).
+
+Number of components: a mixture with $K + 1$ components contains the one with
+$K$ (set $\pi\_{K+1} = 0$), so the maximised training likelihood cannot fall as
+$K$ grows. The held-out log-likelihood is the log-loss of
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a> applied to a density;
+BIC is a common penalised alternative.
 
 --
 
@@ -400,9 +523,15 @@ weights.
 
 
 Notes:
-Head arithmetic, one question. The transferable point: responsibilities are
-posteriors, so prior and likelihood both count — exactly Lecture 02's base-rate
-lesson, for a cluster label.
+Weighted likelihoods: $0.75 \cdot 0.2 = 0.15$ and $0.25 \cdot 0.6 = 0.15$; their
+sum $p(x) = 0.30$ is the normaliser, so $\gamma = 0.15 / 0.30 = 0.5$ for each
+component. In odds form: prior odds 3 : 1 for component 1 times likelihood
+ratio 1 : 3 gives posterior odds 1 : 1 — the base-rate effect of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>, for a cluster label. If
+both components have the same $\sigma$, the larger density means that $x$ is
+closer to $\mu\_2$, so nearest-centroid assignment would give the flat to
+component 2 outright. The values 0.2 and 0.6 are densities, not probabilities
+(a narrow component can exceed 1); only their ratio enters $\gamma$.
 
 --
 
@@ -423,8 +552,7 @@ rest. k-means is what remains when the doubt is squeezed out.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 3
-## Keeping the Uncertainty
+# Bayesian Linear Regression
 
 
 <div class="guiding-question">
@@ -440,8 +568,8 @@ much of its doubt could data remove?
 
 ## Keeping the Distribution
 
-Lecture 01's house-price model: **20 flats of 40–120 m²**, and a question about
-a **600 m² villa**. The model and the plate of Lecture 05:
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s house-price model: **20 flats of 40–120 m²**, and a question about
+a **600 m² villa**. The model and the plate of <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>:
 
 
 <div class="grid-2-1">
@@ -456,7 +584,7 @@ $$
 
 <div class="marks-step">
 
-- **Likelihood:** the Gaussian noise model of Lecture 04, $\sigma = 40$ k€.
+- **Likelihood:** the Gaussian noise model of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, $\sigma = 40$ k€.
 - **Prior:** $\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \mathbf{S}\_0)$ — intercept
   within about ±1,000 k€, slope within about ±20 k€/m². Weak.
 - **Posterior:** Gaussian again — the prior is **conjugate**.
@@ -478,12 +606,22 @@ $$
 
 
 Notes:
-Maximum likelihood (Lectures 03–04) kept the peak of p(w | D); MAP kept the peak of
-a posterior. Now the whole posterior is kept — Lecture 02's Beta posterior, for
-two parameters. S₀ = diag(500², 10²): ±2 prior sd is ±1,000 k€ for the
-intercept and ±20 k€/m² for the slope — generous enough that the data decide.
-σ is treated as known to keep the posterior Gaussian; with σ unknown the
-predictive distribution becomes a Student t, slightly wider.
+Maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>,
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) returns the
+$\mathbf{w}$ that maximises $p(D \mid \mathbf{w})$; MAP returns the maximiser of
+the posterior $p(\mathbf{w} \mid D)$. Bayesian regression keeps the whole
+posterior — the two-parameter analogue of the Beta posterior in
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>.
+
+Prior: $\mathbf{S}\_0 = \mathrm{diag}(500^2, 10^2)$, intercept in k€, slope in
+k€/m². Two prior standard deviations are ±1,000 k€ and ±20 k€/m² — wide
+compared with the data-supported slope of about 3.5 k€/m², so the data
+dominate. Conjugacy: with a linear model, Gaussian noise and known $\sigma$,
+the log-likelihood is quadratic in $\mathbf{w}$, as is the log of a Gaussian
+prior; their sum is quadratic again, so the posterior is Gaussian. With
+$\sigma$ unknown and a normal–inverse-gamma prior the posterior is still in
+closed form, and the predictive distribution is a Student $t$ — heavier-tailed,
+and with 20 observations only slightly wider.
 
 --
 
@@ -502,7 +640,7 @@ $$
 <div class="card">
 
 ### The update is adding
-Posterior precision = prior precision + data precision — Lecture 02's
+Posterior precision = prior precision + data precision — <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s
 **adding counts**, for Gaussians. Every flat adds $\frac{1}{\sigma^2}\mathbf{x}\_i\mathbf{x}\_i^\top$.
 
 </div>
@@ -531,13 +669,25 @@ at the villa.
 
 
 Notes:
-Math first, then the reading. The first card is the Gaussian version of
-Beta(a + h, b + n − h): precisions add like counts. The second card answers the
-usual question "so Bayesian regression gives a different line?" — hardly: the
-centre is ridge, and a weak prior barely moves it. What changes is that the
-posterior also says how far every other line is from implausible. Intercept and
-slope are strongly negatively correlated (−0.96): lines pivot around the centre
-of the data, which the next slide shows.
+Derivation: the log-posterior is
+$-\frac{1}{2\sigma^2}\lVert \mathbf{y} - \mathbf{X}\mathbf{w} \rVert^2 - \frac{1}{2}\mathbf{w}^\top \mathbf{S}\_0^{-1}\mathbf{w}$
+plus a constant. The quadratic term in $\mathbf{w}$ gives the precision
+$\mathbf{S}\_N^{-1}$, the linear term gives
+$\mathbf{S}\_N^{-1}\mathbf{m}\_N = \mathbf{X}^\top\mathbf{y}/\sigma^2$ (zero prior
+mean). $\mathbf{X}$ has rows $(1, x\_i)$, so every flat adds
+$\mathbf{x}\_i\mathbf{x}\_i^\top/\sigma^2$ to the precision — the Gaussian analogue
+of Beta$(a + h, b + n - h)$.
+
+$\mathbf{m}\_N$ is the ridge solution with penalty $\sigma^2 \mathbf{S}\_0^{-1}$,
+here a different penalty per coefficient ($40^2/500^2 = 0.0064$ on the
+intercept, $40^2/10^2 = 16$ on the slope). Posterior mean: intercept 0.3 k€,
+slope 3.496 k€/m²; least squares: −0.07 k€ and 3.501 k€/m². A weak prior
+barely moves the line; what is new is $\mathbf{S}\_N$. Posterior sds: 30.7 k€
+for the intercept, 0.37 k€/m² for the slope, correlation −0.96. All flats lie
+far from $x = 0$ (40–120 m², mean 80 m²), so a steeper line fits only with a
+lower intercept: plausible lines pivot about the centre of the data, and the
+parameter sd $\sqrt{\mathbf{x}^{\*\top}\mathbf{S}\_N\mathbf{x}^{\*}}$ grows with the
+distance from it — 191 k€ at 600 m².
 
 --
 
@@ -549,14 +699,22 @@ of the data, which the next slide shows.
 Which part of the band shrinks — and which part cannot?
 
 Notes:
-Stepped viz (P6). On entry: the 20 flats and the question at 600 m². Click 1:
-keep the peak (Lecture 04) — least squares with the plug-in band ±2σ = ±80 k€,
-the same width everywhere. Click 2: fifteen lines drawn from the posterior —
-they agree on the flats and fan out at 600 m². Click 3: the predictive band
-(±2 sd) split into its two parts; the bars show the shares of the variance: at
-80 m² the noise is 95%, at 600 m² the parameter term is 96%. Click 4: ten
-villas — the parameter part collapses (at 600 m²: 191 → 13 k€), the noise part
-does not move. The dashed red lines are ±2σ around the mean: the noise alone.
+Step 0: the 20 flats (40–120 m²) and the query at 600 m². Step 1: keep the
+peak (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) — the
+least-squares line with the plug-in band ±2σ = ±80 k€, equally wide
+everywhere, because uncertainty about $\mathbf{w}$ is ignored. Step 2: fifteen
+lines drawn from $\mathcal{N}(\mathbf{m}\_N, \mathbf{S}\_N)$; they agree on the
+flats and fan out towards 600 m², since the slope uncertainty (sd 0.37 k€/m²)
+is multiplied by the distance from the data. Step 3: the predictive band
+(±2 sd) split into its two parts; the bars show variance shares — at 80 m² the
+noise is 95% (1,600 of 1,680 k€²), at 600 m² the parameter term is 96%
+(36,419 of 38,019 k€²). Step 4: ten villas of 550–650 m² join the data; the
+parameter sd at 600 m² falls from 191 to 13 k€, while the noise part — the
+dashed red lines at ±2σ around the mean — does not move.
+
+The parameter part shrinks with data near the query; the noise part cannot,
+because $\sigma$ describes the spread of prices at a given size, not a lack of
+data.
 
 --
 
@@ -580,21 +738,32 @@ $$
 <div class="c-important">
 
 Near the data the **noise** dominates, at the villa the **ignorance**. Ten
-villas remove the ignorance; the noise stays — Lecture 01's two examples.
+villas remove the ignorance; the noise stays — <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s two examples.
 
 </div>
 
 
 Notes:
-The promise of Lecture 01 (sources-of-uncertainty: "a Bayesian one can report
-them separately"), paid with numbers. Variances add, not standard deviations:
-at 600 m², 40² + 191² = 1,600 + 36,419 ≈ 195². Hence a small term vanishes next
-to a large one — 9 k€ of parameter sd next to 40 k€ of noise changes the total
-by 1 k€. At 120 m², the edge of the data: parameter sd 17, total 44 k€. All
-numbers from σ = 40 k€ known and S₀ = diag(500², 10²); the
-flat-prior limit gives the same to one digit. A thousand more flats of 40–120 m²
-would shrink the parameter term at 600 m² only slowly, because it is driven by
-the distance from the data; the noise term would not move at all.
+Derivation: $y^{\*} = \mathbf{w}^\top\mathbf{x}^{\*} + \varepsilon^{\*}$ with
+$\mathbf{w} \sim \mathcal{N}(\mathbf{m}\_N, \mathbf{S}\_N)$ independent of
+$\varepsilon^{\*} \sim \mathcal{N}(0, \sigma^2)$. A linear function of a Gaussian
+plus independent Gaussian noise is Gaussian, with mean
+$\mathbf{m}\_N^\top\mathbf{x}^{\*}$ and variance
+$\mathbf{x}^{\*\top}\mathbf{S}\_N\mathbf{x}^{\*} + \sigma^2$.
+
+Variances add, standard deviations do not: at 600 m²,
+$40^2 + 191^2 = 1{,}600 + 36{,}419 = 38{,}019 \approx 195^2$. A small term
+therefore vanishes next to a large one: 9 k€ of parameter sd next to 40 k€ of
+noise adds 1 k€ to the total. At 120 m², the edge of the data: parameter sd
+17, total 44 k€. All numbers use $\sigma = 40$ k€ known and
+$\mathbf{S}\_0 = \mathrm{diag}(500^2, 10^2)$; the flat-prior limit gives the
+same values to the precision shown.
+
+The parameter variance falls like $1/n$ when the design is repeated, and grows
+with the squared distance from the data. A thousand more flats spread over
+40–120 m² would cut the parameter sd at 600 m² from 191 to about 28 k€ — still
+more than the 13 k€ that ten villas achieve. The noise term stays at 40 k€ in
+both cases.
 
 --
 
@@ -647,17 +816,27 @@ be confidently wrong if the straight line itself is wrong.
 
 
 Notes:
-This is the third branch of Lecture 01's reasoning cycle ("noise, too little
-data, or the wrong model?"), now with the formula in hand: two of the three
-answers have a term, the third has none. Bayesian regression measures
-ignorance about w; it is silent about ignorance of the model. Only data at
-600 m² — or a richer model compared by held-out likelihood — can reveal it.
+Under the linear model the 95% predictive interval at 600 m² is
+$2{,}098 \pm 390$ k€, i.e. 1,708 to 2,488 k€. A true price of
+5,000 €/m² · 600 m² = 3,000 k€ lies 902 k€ above the mean, about 4.6 predictive
+standard deviations. Both terms of the predictive variance are computed
+conditional on the model family (linear mean, Gaussian noise of constant
+variance). Misspecification shifts the mean, but nothing in the variance
+reflects it.
+
+It can be detected only from outside the posterior: by held-out data near the
+query (residuals far outside the band), or by comparing model families — for
+example a quadratic term or a log-price model — on held-out log-likelihood or
+marginal likelihood. The three cards are the three answers of the reasoning
+cycle in <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> ("noise,
+too little data, or the wrong model?"): noise appears in $\sigma^2$, too little
+data in $\mathbf{x}^{\*\top}\mathbf{S}\_N\mathbf{x}^{\*}$, a wrong model in no term.
 
 --
 
 ## Deciding With the Predictive Distribution
 
-A lender lends up to the value it is 97.5% sure the property exceeds: the
+A lender lends up to the value it is about 98% sure the property exceeds: the
 mean minus two standard deviations.
 
 
@@ -702,19 +881,28 @@ where the **parameter** term dominates. Near the data it buys nothing — the
 
 
 Notes:
-Lecture 01's roadmap promised "keep uncertainty all the way to the decision".
-This is the simplest version: the decision reads a quantile of the predictive
-distribution, so both terms enter it. The same logic tells the lender where
-information is worth paying for: at 600 m², a few comparable sales change the
-decision by €0.3M; at 80 m², a thousand more flats would change it by almost
-nothing. A point estimate would lend €2.1M on the villa and be exposed to the
-whole €195k spread without knowing it.
+The lender's rule reads a quantile of the predictive distribution, so both
+variance terms enter the decision. For a Gaussian, mean − 2 sd is exceeded with
+probability 0.977 ("about 98%" on the slide); the exact 97.5% quantile
+would be mean − 1.96 sd. Amounts:
+$280 - 2 \cdot 41 = 198$ k€; $2{,}098 - 2 \cdot 195 = 1{,}708$ k€;
+$2{,}100 - 2 \cdot 42 = 2{,}016$ k€. Ten villa sales raise the credit by
+308 k€.
+
+The same calculation values information. Data reduce only the parameter term,
+so they pay where that term dominates. At 80 m² a thousand more flats would cut
+the total sd from 41.0 to about 40.0 k€ and raise the loan by about 2 k€. A
+lender using the plug-in band of maximum likelihood (±2σ = ±80 k€) would lend
+about 2,018 k€ on the villa today — an amount the Bayesian model supports only
+after the ten villa sales; the unrepresented parameter sd of 191 k€ is the
+exposure. This is the simplest case of keeping uncertainty up to the decision,
+as set out in <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>.
 
 --
 
 ## Mini-Exercise
 
-Model A (maximum likelihood with the plug-in noise of Lecture 04) and model B
+Model A (maximum likelihood with the plug-in noise of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) and model B
 (Bayesian) both predict about **€2.1M** for the 600 m² villa. A reports
 **±80 k€**.
 
@@ -738,13 +926,20 @@ never seen anything like.
 
 
 Notes:
-Two minutes; the numbers are on the previous slides. Two precise remarks for
-the discussion. (1) A's ±80 k€ is the plug-in interval N(ŵᵀx, σ̂²) of
-Lecture 04. The textbook frequentist prediction interval,
-s·t·√(1 + x*ᵀ(XᵀX)⁻¹x*), also widens with the distance from the data — here
-±410 k€ with the t quantile. The parameter term is not a Bayesian privilege;
-reading it as a probability about this villa is. (2) B's centre is the ridge
-estimate, practically least squares with this weak prior.
+B's total sd at 600 m² is 195 k€, so ±2 sd is ±390 k€. A's ±80 k€ is the
+plug-in interval $\mathcal{N}(\hat{\mathbf{w}}^\top\mathbf{x}^{\*}, \sigma^2)$ of
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, which treats
+$\hat{\mathbf{w}}$ as exact; at the villa it is as narrow as B's interval for an
+80 m² flat (±82 k€).
+
+The classical frequentist prediction interval,
+$\hat{y} \pm t\_{0.975,\\,n-2}\\, s \sqrt{1 + \mathbf{x}^{\*\top}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{x}^{\*}}$,
+also contains a parameter term; here $s = 40.0$ k€, $t\_{0.975,18} = 2.10$, and
+the half-width is about 410 k€. The widening is therefore not specific to
+Bayesian methods; what is Bayesian is reading the interval as a probability
+statement about this villa's price given the data. The centres agree: B's
+mean is the ridge estimate, which with this weak prior differs from least
+squares by about 2.5 k€ at 600 m² (2,098 vs. 2,100.5 k€).
 
 --
 
@@ -766,8 +961,7 @@ covers is a wrong model family.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## Closing the Arc
+# Course Synthesis
 
 
 <div class="guiding-question">
@@ -785,17 +979,17 @@ answer the rest?
 
 ## The Shortcuts, Revisited
 
-Lecture 01's table, with what the course has learned about each row:
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s table, with what the course has learned about each row:
 
 | shortcut | what it dropped | bought back by | at the cost of |
 |---|---|---|---|
-| **Keep the peak** · 03–04 | how sure we are about the parameters | the posterior (Module 3) | a prior, an integral |
-| **Assume it apart** · 03 | the dependences assumed away | a graph that draws them | more parameters |
-| **Only $p(y \mid x)$** · 04 | every question about $x$ | a generative model | modelling $x$ |
-| **Graph the joint** · 05 | the edges not drawn | more edges | costlier inference |
-| **Keep the loss** · 06 | every probability | calibration, log-loss, error bars | held-out data |
-| **EM**, partial · 07 | how sure we are about $\pi, \mu, \sigma$ | priors, sampling or VI | computation |
-| **No shortcut** · 07 | nothing — within the model family | — | a prior; the family itself |
+| **Keep the peak** · <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a>–<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> | how sure we are about the parameters | the posterior (Bayesian Linear Regression) | a prior, an integral |
+| **Assume it apart** · <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a> | the dependences assumed away | a graph that draws them | more parameters |
+| **Only $p(y \mid x)$** · <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> | every question about $x$ | a generative model | modelling $x$ |
+| **Graph the joint** · <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">05</a> | the edges not drawn | more edges | costlier inference |
+| **Keep the loss** · <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">06</a> | every probability | calibration, log-loss, error bars | held-out data |
+| **EM**, partial · <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">07</a> | how sure we are about $\pi, \mu, \sigma$ | priors, sampling or VI | computation |
+| **No shortcut** · <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">07</a> | nothing — within the model family | — | a prior; the family itself |
 
 
 <div class="c-insight">
@@ -807,12 +1001,24 @@ one a method takes tells you which question it can no longer answer.
 
 
 Notes:
-Close the arc with the table the course opened with (L01 roadmap), extended by
-two columns. Walk it top to bottom quickly — each row is one lecture's
-takeaway. Two rows need a sentence: EM is only partly the ideal (Module 2), and
-even Bayesian regression is exact only within its model family (Module 3,
-"what the posterior cannot know"). The last column is the honest reason why the
-shortcuts exist: the ideal is expensive.
+The table extends the shortcut table of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> by what
+each shortcut discards and what restores it. Keeping the peak (maximum
+likelihood, MAP) discards the spread of the parameter posterior; the full
+posterior restores it at the cost of a prior and an integral over the
+parameters. Assuming independence discards dependences; a graph can encode
+them, at the cost of more parameters. Modelling only $p(y \mid x)$ makes every
+question about $x$ (missing features, outliers, generating data)
+unanswerable without a model of $x$. A graph of the joint is only as good as
+its missing edges; adding edges makes inference costlier. A pure loss discards
+probabilities; calibration, log-loss and error bars recover them, using
+held-out data.
+
+EM is listed separately because it is exact for the hidden labels (the E-step
+is Bayes' theorem) but a point estimate for $\pi, \mu, \sigma$; a posterior
+over those needs MCMC or variational inference. The "no shortcut" row is exact
+only conditional on the linear-Gaussian model family and the chosen prior. The
+common reason for every shortcut is cost: integrals over parameters or latent
+variables are replaced by optimisation, or by more data.
 
 --
 
@@ -822,7 +1028,7 @@ shortcuts exist: the ideal is expensive.
 <div class="marks-step">
 
 - **Gaussian processes** — Bayesian regression with infinitely many basis
-  functions: the two-term band of Module 3, without the straight line.
+  functions: the two-term band of Bayesian linear regression, without the straight line.
 - **Bayesian neural networks and deep ensembles** — the parameter term for
   models with millions of weights, approximately.
 - **Sampling (MCMC) and variational inference** — conditioning on the data when
@@ -843,9 +1049,23 @@ how sure it is, and why: noise, ignorance, or a model that may be wrong.
 
 
 Notes:
-The outlook Lecture 01 promised ("and what comes after"). One line each; the
-point is that every one of them is the same programme with a different way of
-paying for the conditioning step. End on the course's one sentence.
+Gaussian processes: Bayesian regression on basis functions $\phi(x)$ with prior
+$\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \mathbf{S}\_0)$ implies the prior
+covariance $\phi(x)^\top \mathbf{S}\_0 \phi(x')$ between function values.
+Replacing it by a kernel $k(x, x')$ corresponds, for kernels such as the
+squared exponential, to infinitely many basis functions. The predictive
+variance is again noise plus a term that grows away from the data.
+
+Bayesian neural networks put a prior on the weights; the posterior has no
+closed form and is approximated (Laplace approximation, variational inference,
+MCMC). Deep ensembles — several networks trained from different random
+initialisations — are a common practical approximation of the parameter term.
+
+MCMC draws samples whose distribution converges to the posterior. Variational
+inference chooses the member of a tractable family that maximises the evidence
+lower bound (ELBO). EM maximises the same bound, with the latent-variable
+posterior computed exactly in the E-step and the parameters optimised to a
+point in the M-step.
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

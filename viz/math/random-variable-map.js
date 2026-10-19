@@ -8,8 +8,9 @@
 // Uses only: sample space, outcomes, Laplace probability.
 //
 // params: none (three fair coins; the example the unit already uses)
-// steps: 0 the two empty columns · 1 the outcomes · 2 the mapping onto the
-//        values · 3 the values, counted · 4 the probability mass function
+// steps: 0 the two empty columns · 1 the outcomes, 1/8 each · 2 the mapping,
+//        each arrow carrying its outcome's 1/8 · 3 the arrivals added up at
+//        each value · 4 the probability mass function
 
 const NAVY = '#164374'
 const TEAL = '#0083A1'
@@ -25,11 +26,11 @@ let instances = 0 // unique marker id per instance (url(#id) resolves document-w
 export async function mount(el, { d3, steps }) {
   const headId = `rvm-head-${++instances}`
   const W = 760
-  const H = 430
+  const H = 440
   const LX = 132 // Ω column centre
   const RX = 452 // range column centre
   const BX = 540 // where the mass bars start
-  const TOP = 86
+  const TOP = 98
 
   const svg = d3
     .select(el)
@@ -45,7 +46,7 @@ export async function mount(el, { d3, steps }) {
   const oy = (i) => TOP + i * 42
   const vy = (v) => TOP + 34 + (3 - v) * 80
 
-  svg.append('text').attr('x', LX).attr('y', 58).attr('text-anchor', 'middle')
+  svg.append('text').attr('x', LX).attr('y', 56).attr('text-anchor', 'middle')
     .attr('font-size', 18).attr('fill', NAVY).text('Ω  (outcomes)')
   svg.append('text').attr('x', RX).attr('y', 58).attr('text-anchor', 'middle')
     .attr('font-size', 18).attr('fill', VIOLET).text('Y  (number of heads)')
@@ -79,6 +80,11 @@ export async function mount(el, { d3, steps }) {
       .attr('font-family', 'ui-monospace, monospace').attr('fill', NAVY)
       .text((d) => d)
 
+    gOut.append('text')
+      .attr('x', LX).attr('y', 76).attr('text-anchor', 'middle')
+      .attr('font-size', 14).attr('fill', TEAL).attr('opacity', step >= 1 ? 1 : 0)
+      .text('P(ω) = 1/8 each')
+
     if (step >= 2) {
       gArrows.selectAll('path').data(OUTCOMES).join('path')
         .attr('d', (d, i) => {
@@ -88,6 +94,11 @@ export async function mount(el, { d3, steps }) {
         })
         .attr('fill', 'none').attr('stroke', TEAL).attr('stroke-width', 1.8)
         .attr('opacity', 0.75).attr('marker-end', `url(#${headId})`)
+      // the probability travels along the arrow, not with the number
+      gArrows.selectAll('text').data(OUTCOMES).join('text')
+        .attr('x', LX + 80).attr('y', (d, i) => oy(i) - 5)
+        .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', TEAL)
+        .text('1/8')
     }
 
     // the range exists as soon as the arrows need somewhere to land
@@ -105,7 +116,7 @@ export async function mount(el, { d3, steps }) {
         .attr('x', RX + 30).attr('y', (d) => vy(d) + 5)
         .attr('font-size', 15).attr('fill', NAVY)
         .attr('opacity', step === 3 ? 1 : 0)
-        .text((d) => `${counts[d]}/8`)
+        .text((d) => (counts[d] > 1 ? `${Array(counts[d]).fill('1/8').join(' + ')} = ${counts[d]}/8` : '1/8'))
 
       if (step >= 4) {
         const bw = 170
@@ -122,13 +133,13 @@ export async function mount(el, { d3, steps }) {
     }
 
     if (step >= 4) {
-      caption.attr('fill', VIOLET).text('Three arrows arrive at 1 and at 2 — which is the whole shape')
+      caption.attr('fill', VIOLET).text('Three arrows arrive at 1 and at 2: 3/8 each — the whole shape')
     } else if (step === 3) {
-      caption.attr('fill', NAVY).text('Four values. How much probability arrives at each?')
+      caption.attr('fill', NAVY).text('Each arrow carries 1/8. Add up what arrives at each value')
     } else if (step === 2) {
-      caption.attr('fill', NAVY).text('Y assigns exactly one number to every outcome — it is a function')
+      caption.attr('fill', NAVY).text('Y sends every outcome to one number, with its probability 1/8')
     } else if (step === 1) {
-      caption.attr('fill', NAVY).text('Eight equally likely outcomes')
+      caption.attr('fill', NAVY).text('Eight equally likely outcomes, P = 1/8 each')
     } else {
       caption.attr('fill', NAVY).text('Three fair coins are tossed')
     }

@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 6 — Evaluation and Empirical Risk Minimisation — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/exercise/e06-evaluation-and-risk/solutions/e06-evaluation-and-risk-solutions.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 # Exercise Sheet 6
 ## Evaluation and Empirical Risk Minimisation
@@ -12,11 +27,13 @@ Probabilistic Machine Learning
 Prof. Dr. Michael Granitzer
 
 Notes:
-Six exercises, about 50 minutes, pen and paper; a calculator helps for 6.B.1
-and 6.C.2. They follow the lecture's order: measuring a rare class (6.A), error
-bars (6.B), decisions from scores and scoring probabilities (6.C), and ERM as
-the shortcut that drops probabilities (6.D). Every number in the solutions was
-recomputed (numpy/scipy).
+Six exercises, pen and paper; a calculator helps for 6.B.1 and 6.C.2. 6.A
+covers the confusion matrix, costs and precision under a changed base rate,
+and the Bayes error; 6.B error bars on a recall (standard error, Beta
+posterior, required test-set size, paired comparison of two models); 6.C cost
+thresholds, the effect of miscalibration, and log-loss versus Brier score; 6.D
+MAP as regularised ERM ($\lambda = \sigma^2/(n\tau^2)$) and which methods are
+ERM. Every number in the solutions was recomputed (numpy/scipy).
 
 ---
 
@@ -211,7 +228,7 @@ the old costs, letting through would cost €15.
 
 **4.** A score of 0.0099 means a true probability of about 0.005, so the rule
 checks transactions whose true $p$ is only half the break-even: too many
-checks. Either calibrate the scores (Lecture 04: reliability diagram on held-out
+checks. Either calibrate the scores (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>: reliability diagram on held-out
 data, then refit) or, equivalently here, apply the threshold $2p^{\*} \approx 0.02$
 to the raw score. The cost rule needs **calibrated** probabilities.
 
@@ -299,7 +316,7 @@ Multiplying by $2\sigma^2/n$ does not move the minimum and gives the stated form
 with $\lambda = \sigma^2/(n\tau^2)$.
 
 **2.** $n = 20$: $\lambda = 1{,}600/2{,}000 = 0.8$. $n = 2{,}000$: $\lambda = 0.008$.
-The prior's weight falls like $1/n$ — Lecture 02's pseudo-counts being swamped
+The prior's weight falls like $1/n$ — <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s pseudo-counts being swamped
 by data.
 
 **3.**

@@ -57,7 +57,11 @@ export async function mount(el, { d3, params, steps }) {
     .attr('fill', TEAL).text(nameB)
 
   const info = svg.append('g').attr('font-size', 19).attr('fill', NAVY)
-  const lines = [0, 1, 2].map((i) =>
+  // Inside the overlap: in the independent case it is literally a
+  // width-P(A) by height-P(B) rectangle, so its area is the product.
+  const interLabel = g.append('text').attr('x', x0 + (S * pA) / 2).attr('y', y0 + hIn / 2 + 6)
+    .attr('text-anchor', 'middle').attr('font-size', 15).attr('fill', '#ffffff')
+  const lines = [0, 1, 2, 3].map((i) =>
     info.append('text').attr('x', x0 + S + 40).attr('y', y0 + 40 + i * 34),
   )
   const caption = svg.append('text').attr('x', W / 2).attr('y', 34)
@@ -80,12 +84,18 @@ export async function mount(el, { d3, params, steps }) {
     lines[0].text(step >= 1 ? `P(A) = ${f(pA)}` : '')
     lines[1].text(step >= 2 ? `P(${nameB}) = ${f(pB)}` : '')
     lines[2].text(step >= 3 ? `P(A ∩ ${nameB}) = ${f(pAB)}` : '')
+    // The meaning: knowing B, A keeps (or does not keep) its share
+    const pAgB = pAB / pB
+    lines[3].attr('fill', independent ? TEAL : '#b5322e').text(step >= 4
+      ? `P(A | ${nameB}) = ${f(pAB)} / ${f(pB)} = ${f(pAgB)} ${independent ? '=' : '≠'} P(A)`
+      : '')
+    interLabel.text(step >= 4 ? (independent ? 'P(A) · P(B)' : `P(A ∩ ${nameB})`) : '')
 
     if (step >= 4) {
       caption.attr('fill', independent ? TEAL : '#b5322e').text(
         independent
-          ? `${f(pA)} · ${f(pB)} = ${f(pA * pB)} = P(A ∩ ${nameB})  →  independent`
-          : `${f(pA)} · ${f(pB)} = ${f(pA * pB)} ≠ ${f(pAB)} = P(A ∩ ${nameB})  →  dependent`,
+          ? `P(A) · P(B) = ${f(pA)} · ${f(pB)} = ${f(pA * pB)} = P(A ∩ ${nameB})  →  independent`
+          : `P(A) · P(${nameB}) = ${f(pA)} · ${f(pB)} = ${f(pA * pB)} ≠ ${f(pAB)} = P(A ∩ ${nameB})  →  dependent`,
       )
     } else if (step === 3) {
       caption.attr('fill', NAVY).text(`Is P(A ∩ ${nameB}) equal to P(A) · P(${nameB})?`)

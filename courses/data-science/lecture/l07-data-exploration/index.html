@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 07: Data Exploration and Preprocessing</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/data-science/lecture/l07-data-exploration/l07-data-exploration.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -117,96 +132,85 @@ tractability. The takeaway is the lecture's arc chip.
 
 --
 
-## Four Attribute Types
+<!-- .slide: class="smaller" -->
+
+## Four Attribute Types — What the Values Allow
+
+| | type | the values… | meaningful | statistics | examples |
+|---|---|---|---|---|---|
+| categorical | **nominal** | are names that only distinguish objects | $=$, $\neq$ | mode, entropy, contingency table, $\chi^2$ test | ZIP code, employee ID, eye colour |
+| | **ordinal** | carry an order | $<$, $>$ | median, percentiles, rank correlation, sign test | grades, rankings, {good, better, best} |
+| numeric | **interval** | have meaningful differences; the zero is arbitrary | $+$, $-$ | mean, standard deviation, Pearson correlation, $t$-test | temperature in °C or °F, calendar dates |
+| | **ratio** | have a true zero, so ratios are meaningful | $\times$, $\div$ | geometric mean, harmonic mean, coefficient of variation | length, mass, counts, age, temperature in K |
+
+Each type permits everything the one above it does, plus more.
+
+Notes:
+The four scales go back to S. S. Stevens (1946). Nominal and ordinal
+attributes are called categorical (qualitative), interval and ratio attributes
+numeric (quantitative). The scales form a hierarchy: each permits the
+comparisons and statistics of the scales above it in the table, plus its own.
+So the mode is meaningful on every scale, the median from ordinal on, the mean
+from interval on, and ratios, the geometric mean and the coefficient of
+variation only on a ratio scale.
+
+The type is a property of the measurement, not of the storage format: a ZIP
+code stored as an integer is still nominal, and a street number is ordinal at
+best. Temperature in kelvin, unlike °C, is a ratio scale.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Four Attribute Types — What You May Transform
+
+| | type | permissible transformation | example |
+|---|---|---|---|
+| categorical | **nominal** | any one-to-one relabelling | reassigning employee IDs changes nothing |
+| | **ordinal** | any strictly increasing $f$: $x \mapsto f(x)$ | {good, better, best} is as well coded by {1, 2, 3} as by {1, 5, 9} |
+| numeric | **interval** | $x \mapsto a x + b$, $a > 0$ | °C and °F differ in zero point and unit |
+| | **ratio** | $x \mapsto a x$, $a > 0$ | length in metres or in feet |
 
 
-<div class="grid-4">
+<div class="c-intuition">
 
-
-<div class="card">
-
-### Nominal
-*categorical, qualitative*
-
-Labels only: eye colour, ZIP code, ID.
-
-Meaningful: $=$, $\neq$
-
-</div>
-
-
-<div class="card">
-
-### Ordinal
-*categorical, qualitative*
-
-Ordered labels: grades, rankings, "small/medium/large".
-
-Meaningful: $<$, $>$
-
-</div>
-
-
-<div class="card">
-
-### Interval
-*numeric, quantitative*
-
-Differences are meaningful, the zero point is arbitrary: temperature in °C, calendar dates.
-
-Meaningful: $+$, $-$
-
-</div>
-
-
-<div class="card">
-
-### Ratio
-*numeric, quantitative*
-
-A true zero, so ratios are meaningful: length, mass, counts, duration.
-
-Meaningful: $\times$, $\div$
-
-</div>
-
+A statement is **meaningful** on a scale if no permissible transformation can
+change its truth. "Twice as long" survives metres → feet; "twice as warm" does
+not survive °C → °F.
 
 </div>
 
 
 Notes:
-The four types form a hierarchy: each level permits everything the previous one
-does, plus more. The type is a property of the *measurement*, not of the storage
-format — which is why a ZIP code stored as an integer is still nominal.
+Each scale is characterised by the transformations that preserve its
+information: any one-to-one relabelling for nominal, any strictly increasing
+function for ordinal, positive affine maps $x \mapsto ax + b$ ($a > 0$) for
+interval (°C to °F), and positive scalings $x \mapsto ax$ for ratio (metres to
+feet). The smaller the set of permissible transformations, the more structure
+the values carry, and the more statements are meaningful.
+
+The criterion explains the statistics column of the previous table. The mean
+of an ordinal attribute is not meaningful because a strictly increasing
+recoding (1, 2, 3 to 1, 5, 9) can change which of two groups has the larger
+mean; the median's position is preserved by every such recoding. A ratio of
+two temperatures in °C changes under the affine map to °F (20 °C / 10 °C = 2,
+but 68 °F / 50 °F = 1.36); a ratio of two lengths is the same in metres and
+feet.
 
 --
 
 ## Why the Type Decides the Method
 
 
-<div class="grid-2">
+<div class="marks-no">
 
-
-<div class="card bad">
-
-### The classic error
-Averaging a nominal attribute. The mean of ZIP codes 10115 and 81667 is a
-number, and it is meaningless.
+- **The classic error:** averaging a nominal attribute. The mean of ZIP codes
+  10115 and 81667 is a number, and it is meaningless.
+- **The subtle one:** 20 °C is not "twice as warm" as 10 °C — interval scales
+  have no true zero, so ratios do not transfer.
 
 </div>
 
-
-<div class="card">
-
-### The subtle one
-20 °C is not "twice as warm" as 10 °C — interval scales have no true zero, so
-ratios do not transfer.
-
-</div>
-
-
-
-</div>
 
 
 <div class="c-important">
@@ -236,9 +240,18 @@ are fine.
 
 
 Notes:
-Solution on the same slide, click-gated. The two columns come back when a table is
-read as a sample from a joint distribution; payment method (nominal: only
-counting) and income (ratio: a true zero) complete the set if there is time.
+Satisfaction in stars is ordinal. The mean treats the gap from one to two
+stars as equal to the gap from four to five, which the scale does not
+guarantee; the median and the mode use only the order and the labels. Means of
+rating scales are nonetheless widely reported in practice, which amounts to
+treating the scale as interval.
+
+Year of birth is interval: year 0 is a convention, so "born twice as late" is
+meaningless, but the mean year and differences between years are meaningful.
+A difference of two interval values, such as an age computed from years of
+birth, is on a ratio scale. Payment method is nominal (only counts, shares
+and the mode are meaningful); income is ratio, with a true zero, so "twice the
+income" is a valid statement.
 
 --
 
@@ -291,12 +304,17 @@ $p(x\_1, \ldots, x\_d)$ that nobody has written down.
 
 
 Notes:
-Satisfaction and year of birth are the columns of the attribute-type
-mini-exercise — deliberately. There they were classified by scale; here they
-become random variables. Say the
-sentence that makes the rest of the course possible: *a dataset is not the
-distribution, it is a sample from it.* Everything we compute from the table is
-therefore an estimate, and an estimate comes with an error.
+A column is a random variable in the formal sense: a function from the
+population (here, customers) to values. Drawing a row means drawing a member of
+the population and recording all its attribute values at once, so the row is
+one realisation of the vector $(X\_1, \ldots, X\_d)$. The customer number is an
+identifier, not an attribute to be modelled.
+
+A dataset is not the distribution but a sample from it. Every quantity computed
+from the table — a mean, a proportion, a correlation — is therefore an
+estimate of a property of $p(x\_1, \ldots, x\_d)$. A different sample from the
+same distribution would give a different value, and this sample-to-sample
+variation is the estimate's error.
 
 --
 
@@ -320,38 +338,34 @@ for ZIP codes is as meaningless as their mean.
 
 
 Notes:
-Not a catalogue to memorise — a habit: before choosing a distribution, check what
-the scale permits. The categorical distribution is the Bernoulli with more than
-two values; it is the distribution naive Bayes uses for every nominal
-attribute. Satisfaction is the honest hard case: treating it as categorical
-throws the order away, treating it as numeric invents equal gaps.
+The categorical distribution assigns $P(X = j) = p\_j$ to each of $k$ values,
+with $k - 1$ free parameters because $\sum\_j p\_j = 1$; the Bernoulli is the
+case $k = 2$. Naive Bayes classifiers, for example, commonly model each
+nominal attribute this way, with one categorical distribution per class.
+
+Ordinal attributes are the hard case. A categorical model ignores the order; a
+numeric model (e.g. normal) assumes equal gaps between levels, which the
+ordinal scale does not justify. Dedicated ordinal models, such as
+cumulative-logit models, use the order without assuming equal gaps. For year of
+birth a normal model is only an approximation, since its support is the whole
+real line. Income is positive and right-skewed, so a normal model would put
+probability on negative incomes; a log-normal model means that $\log$ income
+is normal. ZIP codes are nominal despite consisting of digits.
 
 --
 
 ## What "i.i.d." Claims
 
-The standard reading of a table rests on one assumption: the rows are
-**independent and identically distributed**.
 
+<div class="c-definition">
 
-<div class="grid-2">
+The rows $\mathbf{x}\_1, \ldots, \mathbf{x}\_n$ are **independent and identically
+distributed** (i.i.d.) if
 
-
-<div class="card">
-
-### Independent
-One customer's row tells us nothing about another's.
-
-</div>
-
-
-<div class="card">
-
-### Identically distributed
-Every row comes from the **same** joint distribution.
-
-</div>
-
+| | | |
+|---|---|---|
+| **independent** | $p(\mathbf{x}\_1, \ldots, \mathbf{x}\_n) = \prod\_{i} p\_i(\mathbf{x}\_i)$ | <span class="intuition">one customer's row tells nothing about another's</span> |
+| **identically distributed** | $p\_i = p$ for every row $i$ | <span class="intuition">every row comes from the **same** joint distribution</span> |
 
 </div>
 
@@ -375,11 +389,24 @@ and spatial data all violate it — the arrangement *is* information.
 
 
 Notes:
-The i.i.d. assumption is what turns "the table" into "a sample", and it is what
-lets a likelihood factorise into a product over rows — the step every fitting
-method takes. Link back to
-the shapes of data: record data is the case where i.i.d. is at least plausible;
-graphs, grids and time series are the cases where it is not.
+Independence is a statement about rows, not columns: the attributes within a
+row may be strongly dependent (income and age, say). Under i.i.d. the
+probability of the whole dataset factorises,
+$p(\mathcal{D} \mid \theta) = \prod\_{i=1}^n p(x\_i \mid \theta)$, which is the
+form every likelihood-based fitting method starts from.
+
+Answer to the question. Daily sales of one shop are autocorrelated (one day
+predicts the next) and follow trends and seasons, so they are neither
+independent nor identically distributed. Two visits by the same customer are
+dependent because they share the person. Neighbouring pixels of one image are
+strongly correlated. A survey sent to a random sample yields approximately
+independent draws from the population (exactly so for sampling with
+replacement; without replacement the dependence is negligible when the
+population is large), though non-response can still make it unrepresentative.
+Record data is the setting where i.i.d. is at least plausible; graphs, grids
+and time series are the settings where it is not. A frequent violation of
+"identically distributed" in practice is distribution shift between the data
+a model is fitted on and the data it is applied to.
 
 --
 

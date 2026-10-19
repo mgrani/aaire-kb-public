@@ -1,38 +1,57 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 04: Linear Models — From Least Squares to Logistic Regression</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 04: Discriminative Models: Linear and Logistic Regression</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/l04-linear-models.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
-## Lecture 04: Linear Models — From Least Squares to Logistic Regression
+## Lecture 04: Discriminative Models: Linear and Logistic Regression
 
 Prof. Dr. Michael Granitzer
 
-Notes:
-One session. The students know linear and logistic regression; the lecture
-reads them as probability models. Module 1 is the classical account of linear
-regression as taught earlier (closed form, R², basis functions, LMS,
-Gauss–Markov) — the shared Data Science units, unchanged. Module 2 asks what
-squared error silently assumed and shows that it is a Gaussian likelihood
-(keep the peak, Lecture 03, applied to a regression). Module 3 swaps the
-Gaussian for a Bernoulli: logistic regression, and shortcut 3 — model only
-p(y | x). Module 4 sets it against naive Bayes of Lecture 03 (the same linear
-log-odds, fitted two ways). Module 5 answers Lecture 01's open question of when
-a score is a probability.
-Running examples: house prices for flats of 40–120 m² and the 600 m² villa of
-Lecture 01 (regression), and fraud with a base rate of 1 in 1,000
-(classification).
+<!-- 2026-10-06: swapped with the former Lecture 04. The classical account moved
+from the backup into Classical Linear Regression; the one-slide regression recap was dropped. -->
 
-2026-10-06: swapped with the former Lecture 04. The classical account moved
-from the backup into Module 1; the one-slide regression recap was dropped.
+Notes:
+Classical Linear Regression covers the residual sum of squares, the closed
+form, $R^2$, basis functions, the LMS update, gradient descent and the
+Gauss–Markov theorem. Probabilistic Linear Regression shows that squared error is the negative
+log-likelihood of Gaussian noise of fixed width, so the least-squares fit is the
+maximum-likelihood estimate (keep the peak, <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), and that
+$\hat\sigma^2\_{\mathrm{ML}} = \mathrm{RSS}/n$ is biased low. Logistic Regression replaces the
+Gaussian by a Bernoulli: logistic regression, cross-entropy as negative
+log-likelihood, and no finite maximum on separable data. Both models are
+discriminative — shortcut 3, model only $p(y \mid x)$. Generative vs. Discriminative Models shows that for
+yes/no attributes naive Bayes (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) has the same linear log-odds
+and differs only in how the weights are fitted. Calibration answers when a score is
+a probability (<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>): calibration, what maximum likelihood guarantees,
+the correction for rebalanced training, and penalties as priors.
+
+Running examples: house prices for 20 flats of 40–120 m² and the 600 m² villa of
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> (regression); fraud with a base rate of 1 in 1,000 and
+the yes/no flags of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (classification).
 
 --
 
 ## Where We Left Off
 
-Lecture 03 built a classifier from probability and took two shortcuts on the way:
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> built a classifier from probability and took two shortcuts on the way:
 
 | Shortcut | Instead of the ideal | What is dropped |
 |---|---|---|
@@ -69,18 +88,21 @@ $$
 
 
 Notes:
-Naive Bayes needed the whole joint, so it paid with an independence assumption.
-Today's models take the other way out: skip $p(x)$ altogether. Plan: Module 1 is
-classical linear regression exactly as the students know it (it was the backup
-of the earlier version of this lecture); Module 2 asks what squared error
-assumed; Module 3 turns the same idea into logistic regression; Module 4 sets
-logistic regression against naive Bayes, which turn out to share the linear
-log-odds; Module 5 answers Lecture 01's open question — when is a score a
-probability.
+Naive Bayes models the joint $p(x, y) = p(y)\\,p(x \mid y)$ and makes it
+tractable by assuming the attributes independent given the class. A
+discriminative model avoids the problem in another way: it parametrises
+$p(y \mid x)$ directly, so no distribution over the inputs is needed and no
+assumption about their dependences is made. The price is that the model says
+nothing about $x$ itself — how typical an input is, how to average over a missing
+attribute, how to generate an example.
 
-The fraud example returns: a base rate of 1 in 1,000 and a handful of yes/no
-red flags, plus the house prices (flats of 40–120 m², and the 600 m² villa) of
-Lecture 01.
+Both routes target the same quantity, $p(y \mid x) = p(y)\\,p(x \mid y)/p(x)$.
+The generative route computes it from the joint by Bayes' theorem; the
+discriminative route fits it as a function of $x$. Linear regression is
+discriminative in the same sense: it models the price given the floor area and
+never the distribution of floor areas. Running examples: fraud with a base rate
+of 1 in 1,000 and a few yes/no red flags, and the house prices (flats of
+40–120 m², the 600 m² villa) of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>.
 
 
 --
@@ -96,11 +118,23 @@ Lecture 01.
 
 
 Notes:
-Top row: classical regression, least squares as a likelihood, and what keeping
-the peak drops. Middle row: logistic regression as the Bernoulli twin, the
-comparison with naive Bayes, and what modelling only p(y | x) drops. Bottom:
-calibration and the takeaway that every loss so far is a likelihood. The strip
-marks Lecture 04's place in the arc. Return to the takeaway box at the end.
+Boxes of the map. Classical Linear Regression: squared error, closed form, LMS and Gauss–Markov,
+with no distribution assumed. Probabilistic Linear Regression: Gaussian noise implies squared error;
+$\hat\sigma^2$ divides by $n$ and is biased low; the plug-in band is as narrow at
+the villa as at a flat. Logistic Regression: Bernoulli labels imply cross-entropy; the
+gradient is error × feature as in LMS; on separable data the maximum-likelihood
+estimate does not exist. Generative vs. Discriminative Models: naive Bayes and logistic regression share the
+linear log-odds; naive Bayes is better with few data and handles missing fields,
+logistic regression reaches lower error with more data. "What is dropped":
+the inputs are never modelled, so unusual inputs raise no warning. Calibration:
+maximum likelihood is calibrated only on average, rebalanced scores are repaired
+with prior odds, weight decay is a Gaussian prior (MAP).
+
+Takeaway box: the loss states the noise model, the penalty is a prior, the fit
+is a peak. Losses that are not likelihoods follow in
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>. The strip places the lecture in the course arc
+from the ideal to the shortcuts: this lecture contributes shortcut 3, only
+$p(y \mid x)$.
 
 ---
 
@@ -118,10 +152,16 @@ exactly is the method, and what justifies it?
 
 
 Notes:
-Shared units from the Data Science course, included unchanged. Skim what the
-room knows; slow down on the LMS update (error × feature, it returns for
-logistic regression) and on Gauss–Markov, whose "no distribution needed" is the
-contrast for Module 2.
+The units of this module are shared with the Data Science course and give the
+classical, distribution-free account. Two of its results return later in the
+lecture. The LMS update $w\_i \leftarrow w\_i + \eta e x\_i$ (error × feature) has
+the same form as the gradient of the logistic log-likelihood, with the
+prediction passed through a sigmoid. The Gauss–Markov theorem justifies least
+squares under weak conditions — zero-mean, uncorrelated errors of equal
+variance, no normality — but yields only a point estimate. The probabilistic
+account of Probabilistic Linear Regression assumes Gaussian noise and in exchange gives a full
+distribution $p(y \mid x)$: a noise-variance estimate, a predictive band, and
+assumptions that can be checked on the residuals.
 
 --
 
@@ -170,8 +210,13 @@ The learning machinery is the same; only the shape of $Y$ — and therefore the
 loss — changes.
 
 Notes:
-Keep the same running example across both to make the point that the task, not
-the data, decides which you are doing.
+The distinction is fixed by the target set $Y$, not by the inputs: the same
+customer record supports a classification task (default, yes or no) and a
+regression task (credit line in euros). The usual losses follow from $Y$: 0/1
+error or cross-entropy for a finite $Y$, squared or absolute error for
+$Y = \mathbb{R}$. Ordinal targets (ratings 1–5) and counts lie in between;
+treating them as unordered classes ignores their order, treating them as real
+numbers ignores their discreteness.
 
 --
 
@@ -195,8 +240,17 @@ with $x\_0 = 1$ absorbing the intercept.
 The hypothesis space is $\mathbb{R}^{p+1}$: one hypothesis per weight vector.
 
 Notes:
-Name it as a hypothesis space — here a continuous space of finite dimension,
-which is why calculus rather than enumeration finds the optimum.
+Absorbing the intercept means prepending a constant feature $x\_0 = 1$ to every
+input, so that $w\_0$ is handled like any other weight and the design matrix
+$\mathbf{X}$ has a column of ones. The hypothesis space
+$\lbrace h\_{\mathbf{w}} : \mathbf{w} \in \mathbb{R}^{p+1} \rbrace$ is continuous and
+finite-dimensional, so the best hypothesis is found by calculus — setting the
+gradient of the objective to zero — rather than by enumeration.
+
+A weight $w\_j$ is the change of the prediction per unit change of $x\_j$ with all
+other features held fixed. Its size depends on the unit of $x\_j$: weights of
+features on different scales are not directly comparable, and a large weight
+does not by itself mean an important feature.
 
 --
 
@@ -218,8 +272,16 @@ it with **efficiency**, which is about runtime and computational effort.
 
 
 Notes:
-The effectiveness/efficiency distinction is from the source and worth keeping;
-students routinely say "efficient model" when they mean "accurate model".
+$\mathrm{RSS}/n$ is the mean squared error and $\sqrt{\mathrm{RSS}/n}$ the
+root-mean-square error, which is in the unit of the target. Squaring makes the
+objective differentiable everywhere and convex in $\mathbf{w}$ — a quadratic
+with a unique minimum when $\mathbf{X}^{\top}\mathbf{X}$ is invertible — and
+weights large residuals disproportionately: a residual twice as large costs four
+times as much, so a single outlier can move the fit considerably.
+
+Effectiveness and efficiency are independent: a model can be accurate and slow
+to fit, or fast and inaccurate. Calling an accurate model "efficient" is a
+common misuse of the term.
 
 --
 
@@ -267,10 +329,19 @@ The fitted line passes through the point of means.
 
 
 Notes:
-Both formulas are built from quantities the students defined in the statistics
-module — covariance and variance. Say that explicitly: regression is not new
-mathematics, it is the old summary statistics arranged to answer a prediction
-question.
+Derivation. Setting
+$\partial\mathrm{RSS}/\partial w\_0 = -2\sum\_i (y\_i - w\_0 - w\_1 x\_i) = 0$ gives
+$w\_0 = \overline{y} - w\_1\overline{x}$. Substituting this into
+$\partial\mathrm{RSS}/\partial w\_1 = -2\sum\_i x\_i (y\_i - w\_0 - w\_1 x\_i) = 0$
+gives the slope formula. Dividing numerator and denominator by $n - 1$ shows
+$\hat{w}\_1 = \mathrm{cov}(x, y)/\mathrm{var}(x) = r\_{xy}\\, s\_y / s\_x$, with
+$r\_{xy}$ the correlation coefficient; the slope is undefined when all $x\_i$ are
+equal.
+
+Consequences: the residuals sum to zero, and the line passes through
+$(\overline{x}, \overline{y})$. Regressing $x$ on $y$ gives a different line,
+because least squares measures errors vertically, in $y$ only; the two lines
+coincide only when $\lvert r\_{xy} \rvert = 1$.
 
 --
 
@@ -304,9 +375,19 @@ test $R^2$ and adjusted $R^2$ can and do fall.
 
 
 Notes:
-R² = 0 is exactly the trivial baseline that always predicts the mean. The
-warning is the regression counterpart of training error — and the reason a
-model is judged on data it was not fitted to.
+Definitions: $\mathrm{TSS} = \sum\_i (y\_i - \overline{y})^2$,
+$\mathrm{ESS} = \sum\_i (\hat{y}\_i - \overline{y})^2$,
+$\mathrm{RSS} = \sum\_i (y\_i - \hat{y}\_i)^2$. The split holds because, with an
+intercept, the residuals sum to zero and are orthogonal to the fitted values, so
+the cross term vanishes. For a single feature, $R^2 = r\_{xy}^2$.
+
+Without an intercept, or on test data, $1 - \mathrm{RSS}/\mathrm{TSS}$ can be
+negative: the model is then worse than predicting the mean. Training $R^2$
+cannot fall when a feature is added, because the larger model contains the
+smaller one (set the new weight to 0), so its minimal RSS is at most as large.
+Adjusted $R^2 = 1 - (1 - R^2)\\,\frac{n - 1}{n - p - 1}$ charges for each of the
+$p$ features and falls when a feature reduces RSS by less than a random feature
+would on average.
 
 --
 
@@ -332,9 +413,22 @@ the standard remedy.
 
 
 Notes:
-Do not derive the normal equations; state them and spend the time on when they
-break. The p > n case is the modern one — genomics, text — and motivates
-regularisation more than the algebra does.
+Derivation: $\mathrm{RSS}(\mathbf{w}) = \lVert \mathbf{y} - \mathbf{X}\mathbf{w} \rVert^2$
+has gradient $-2\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\mathbf{w})$; setting it to
+zero gives the normal equations
+$\mathbf{X}^{\top}\mathbf{X}\\,\mathbf{w} = \mathbf{X}^{\top}\mathbf{y}$, with
+$\mathbf{X}$ of size $n \times (p+1)$ including the column of ones.
+$\mathbf{X}^{\top}\mathbf{X}$ is invertible exactly when the columns of
+$\mathbf{X}$ are linearly independent, which requires $n \ge p + 1$.
+
+When it is singular the normal equations still have solutions, but infinitely
+many; the pseudo-inverse selects the one of minimal norm. Strongly correlated
+features leave the matrix invertible but ill-conditioned, and the weights become
+unstable. Numerical software solves the system by QR or Cholesky decomposition
+instead of forming the inverse. Ridge regression replaces
+$\mathbf{X}^{\top}\mathbf{X}$ by $\mathbf{X}^{\top}\mathbf{X} + \lambda\mathbf{I}$,
+which is invertible for every $\lambda > 0$. $p > n$ is the normal situation in
+genomics and text, where features outnumber examples.
 
 --
 
@@ -425,11 +519,18 @@ The feature map is fixed before fitting; only the weights are learned.
 
 
 Notes:
-This is the slide that unlocks the rest: the same least-squares machinery fits
-curves, interactions and periodic patterns, as long as the transformation is
-chosen in advance. Ask what is *not* expressible before revealing the note —
-anything where the transformation itself must be learned, which is what neural
-networks do.
+Linearity in the weights is what makes RSS a quadratic function of $\mathbf{w}$
+and keeps the normal equations valid: with a feature map $\phi$, the design
+matrix simply has entries $\Phi\_{ij} = \phi\_j(\mathbf{x}\_i)$. Fixed maps include
+polynomials, interactions $x\_1 x\_2$, $\log x$, indicator variables for
+categories, periodic terms $\sin(2\pi t / T)$ with known period $T$, and radial
+basis functions with fixed centres.
+
+Not expressible in this way: models whose transformation has parameters fitted
+to the data, such as $w\_1 \sin(w\_2 x)$ with a learned frequency $w\_2$, radial
+basis functions with learned centres, or the hidden layers of a neural network.
+Such models are non-linear in their parameters; their losses are in general
+non-convex and have no closed-form minimiser.
 
 --
 
@@ -480,8 +581,18 @@ Increasing the polynomial degree turns a dial on the bias–variance axis.
 
 
 Notes:
-The basis is the inductive bias made explicit. This is
-the cleanest example in the course of choosing a hypothesis space deliberately.
+What carries over is everything that holds for a linear model in
+$\phi(\mathbf{x})$: the closed form, the projection geometry, and the
+Gauss–Markov guarantee, provided the model is correctly specified in the chosen
+basis. Choosing the basis is choosing the hypothesis space — the inductive bias
+stated explicitly.
+
+Too rich a basis has low bias and high variance; with as many basis functions as
+data points the fit interpolates the training data. Too poor a basis has high
+bias: no amount of data lets a straight line fit a sine. Raw polynomial features
+$x, x^2, \dots, x^k$ are strongly correlated and make $\mathbf{X}^{\top}\mathbf{X}$
+ill-conditioned at high degree; rescaling $x$ to $[-1, 1]$ or using orthogonal
+polynomials mitigates this.
 
 --
 
@@ -494,10 +605,23 @@ is still "linear regression" — and $k$ is a dial.
  data-params='{"degrees": [1, 2, 3, 5, 9, 14]}'></div>
 
 Notes:
-Basis functions: linear in the parameters, any shape in the features. Each click raises the degree:
-training error falls monotonically, test error bottoms out and climbs again.
-In today's language: every degree is fitted by keeping the peak; the penalty of
-Module 5 (a prior) is the other way to turn the dial down.
+A polynomial of degree $k$ is linear regression on the basis
+$(1, x, \dots, x^k)$, so the closed form applies at every degree. The
+visualisation fits 12 noisy samples of $\sin(2\pi x)$ (noise standard deviation
+0.18) and reports the root-mean-square error on these points and on a second
+sample at the same inputs with fresh noise. For degrees 1, 2, 3, 5, 9, 14 the
+training error is 0.551, 0.546, 0.198, 0.150, 0.086, 0.015 and the test error
+0.487, 0.492, 0.171, 0.162, 0.206, 0.214.
+
+Training error never rises with the degree, because each model contains the
+previous one. Test error is lowest at degree 5 and cannot fall much below the
+noise level 0.18. Degree 14 has 15 coefficients for 12 points: $\mathbf{X}^{\top}\mathbf{X}$
+is singular and infinitely many polynomials pass (almost) through the data.
+Because the test inputs coincide with the training inputs, the rise in test
+error understates the overfitting; between the data points the high-degree
+curves swing far from the sine. Each degree is fitted by keeping the peak of a
+Gaussian likelihood. A penalty $\lambda\lVert\mathbf{w}\rVert^2$ — a Gaussian
+prior on $\mathbf{w}$ — reduces capacity without lowering the degree.
 
 
 --
@@ -519,9 +643,18 @@ Module 5 (a prior) is the other way to turn the dial down.
 
 
 Notes:
-Read the update aloud in words: move each weight in the direction that would
-have reduced this example's error, in proportion to how much that feature
-contributed. That sentence is all of gradient descent, before any calculus.
+The update is a gradient step on the squared error of a single example. With
+$e = y - \mathbf{w}^{\top}\mathbf{x}$ and $E = \tfrac12 e^2$,
+$\partial E / \partial w\_i = -e\\,x\_i$, so
+$w\_i \leftarrow w\_i - \eta\\,\partial E / \partial w\_i = w\_i + \eta e x\_i$. Each
+weight moves in the direction that reduces this example's error, in proportion
+to its feature value. The rule is also called the Widrow–Hoff or delta rule.
+
+Examples are usually visited in random order; one pass over $D$ is an epoch.
+With a constant $\eta$ the weights do not settle exactly at the least-squares
+solution but keep fluctuating around it, because every step follows a single
+noisy example; a decreasing learning rate or averaging of the iterates makes
+them converge.
 
 --
 
@@ -586,9 +719,19 @@ slowly. It is a hyperparameter — chosen, not learned.
 
 
 Notes:
-Ask what happens with η far too large before showing it; the prediction that
-"it overshoots and gets worse" is usually made correctly, which earns the
-hyperparameter concept. The visualisation in the optimisation unit shows it.
+Direction: if $e > 0$ the prediction was too low, and every weight with
+$x\_i > 0$ increases. Attribution: a feature with $x\_i = 0$ receives no update
+from that example, and features on large numeric scales receive large updates —
+one reason features are standardised before gradient-based fitting.
+
+Step size: one update changes this example's prediction by
+$\eta e \lVert \mathbf{x} \rVert^2$, so the new error is
+$e\\,(1 - \eta \lVert \mathbf{x} \rVert^2)$. The update overshoots the target when
+$\eta\lVert\mathbf{x}\rVert^2 > 1$ and enlarges the error when
+$\eta\lVert\mathbf{x}\rVert^2 > 2$; normalised LMS divides the step by
+$\lVert \mathbf{x} \rVert^2$ for this reason. The learning rate does not appear
+in the training loss and cannot be fitted by minimising it; it is chosen by
+comparing runs, typically on validation data.
 
 --
 
@@ -646,10 +789,18 @@ instead of per dataset (the factor 2 is absorbed into $\eta$).
 
 
 Notes:
-The right-hand column is the one that generalises: logistic regression and
-neural networks have no closed form, so the iterative method is the one that
-generalises. Make the LMS identification explicit —
-students otherwise carry two unconnected procedures.
+Costs: forming $\mathbf{X}^{\top}\mathbf{X}$ takes $O(np^2)$ operations and solving
+the $(p+1) \times (p+1)$ system $O(p^3)$; one full gradient step takes $O(np)$.
+The gradient is $\nabla\mathrm{RSS}(\mathbf{w}) = -2\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\mathbf{w})$:
+a full-batch step sums error × feature over all examples, while LMS uses one
+example per update (stochastic gradient descent).
+
+Because RSS is convex, gradient descent with a small enough learning rate
+approaches the minimum that the closed form computes. When
+$\mathbf{X}^{\top}\mathbf{X}$ is singular the minimum is not unique; started at
+$\mathbf{w} = 0$, gradient descent converges to the minimum-norm solution.
+Logistic regression and neural networks have no closed-form minimiser, so the
+iterative method is the general one and the closed form the special case.
 
 --
 
@@ -659,9 +810,16 @@ students otherwise carry two unconnected procedures.
  data-params='{"eta": 0.25, "start": -2.6}'></div>
 
 Notes:
-Stepped viz (P6). Each click is one update. Ask before the first click where
-the steps will be largest — where the slope is steepest, far from the minimum —
-and why they shrink as the minimum approaches, without η changing.
+The curve is a one-parameter stand-in for RSS, $L(w) = w^2 + 0.4w + 1$, with its
+minimum at $w = -0.2$. A step is $w \leftarrow w - \eta(2w + 0.4)$, so the
+distance to the minimum is multiplied by $1 - 2\eta$ in every step. With
+$\eta = 0.25$ the factor is 0.5: starting at $w = -2.6$ (distance 2.4), the
+distance halves with each step and is 0.0375 after six steps ($w \approx -0.24$).
+
+The steps shrink although $\eta$ is constant: the step length is
+$\eta \lvert L'(w) \rvert$, and the gradient is proportional to the distance from
+the minimum. Steps are therefore largest far from the minimum, where the slope
+is steepest.
 
 --
 
@@ -684,9 +842,19 @@ failure modes are silent — one looks unstable, the other looks converged.
 
 
 Notes:
-Predict-then-check: ask which curve belongs to which η before revealing. The
-"looks converged" failure is the dangerous one — a slow run and a finished run
-produce the same-looking loss curve over a short window.
+On the same loss the distance to the minimum is multiplied by $1 - 2\eta$ per
+step. For $\eta = 0.9$ the factor is $-0.8$: every step jumps across the minimum
+and removes only 20% of the remaining distance, so after six steps
+$0.8^6 \approx 26\\%$ of it remains. For $\eta = 0.05$ the factor is 0.9, leaving
+$0.9^6 \approx 53\\%$ — the "about half" on the slide. The iteration diverges for
+$\eta > 1$, where $\lvert 1 - 2\eta \rvert > 1$, and $\eta = 0.5$ reaches the
+minimum in a single step.
+
+In general, gradient descent on a quadratic with Hessian $\mathbf{H}$ is stable
+only for $\eta < 2/\lambda\_{\max}(\mathbf{H})$; here $\mathbf{H} = 2$. The slow
+run is the harder failure to detect: over a short window its loss curve
+flattens like that of a converged run, whereas the oscillation of a too-large
+$\eta$ is visible in the parameter trace.
 
 --
 
@@ -710,8 +878,16 @@ We minimised the *squared* residuals. Why squares — why not absolute
 deviations, or fourth powers?
 
 Notes:
-Guiding question. Most students have never been given a reason beyond
-differentiability. There is a real one, and it is worth the slide.
+Squared error has several independent justifications. It is differentiable and
+gives a closed form. Its minimiser is a mean: the constant minimising expected
+squared deviation is the mean, the one minimising expected absolute deviation is
+the median, so least squares estimates the conditional mean of $y$. Under the
+conditions of the Gauss–Markov theorem it gives the linear unbiased estimator of
+smallest variance, and under Gaussian noise it is the maximum-likelihood
+criterion. Absolute deviations give least-absolute-deviation regression, which
+estimates the conditional median and is less sensitive to outliers; higher even
+powers weight large residuals even more strongly and make the fit more
+sensitive to them.
 
 --
 
@@ -746,9 +922,19 @@ The residual carries no remaining linear information about the features.
 
 
 Notes:
-The orthogonality condition is the geometric content of the normal equations.
-It also explains why adding a feature can never increase RSS: the space you
-project onto only grew.
+The normal equations $\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\hat{\mathbf{w}}) = \mathbf{0}$
+state exactly that the residual vector is orthogonal to every column of
+$\mathbf{X}$. The fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$ with
+the hat matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}$,
+the orthogonal projection onto the column space. Pythagoras on
+$\mathbf{y} = \hat{\mathbf{y}} + \mathbf{e}$, after centring, gives
+TSS = ESS + RSS.
+
+Adding a feature enlarges the column space, so the closest point can only get
+closer and RSS cannot increase. "No remaining linear information" means that the
+residuals are uncorrelated with each feature in the sample; a non-linear pattern
+of the residuals against a feature remains possible and indicates a
+misspecified model.
 
 --
 
@@ -800,9 +986,20 @@ right on average over repeated samples
 
 
 Notes:
-Spell out what the theorem does *not* say: nothing about non-linear or biased
-estimators — and biased estimators (ridge, lasso) can beat OLS in prediction
-error. That is not a contradiction, it is a different criterion.
+Formal statement: for $\mathbf{y} = \mathbf{X}\mathbf{w} + \boldsymbol{\varepsilon}$
+with $\mathbf{X}$ fixed and of full column rank, $\mathbb{E}[\boldsymbol{\varepsilon}] = \mathbf{0}$
+and $\mathrm{Cov}(\boldsymbol{\varepsilon}) = \sigma^2\mathbf{I}$, every linear
+unbiased estimator $\tilde{\mathbf{w}} = \mathbf{C}\mathbf{y}$ has a covariance
+exceeding $\mathrm{Cov}(\hat{\mathbf{w}}\_{\mathrm{OLS}}) = \sigma^2(\mathbf{X}^{\top}\mathbf{X})^{-1}$
+by a positive semi-definite matrix. Hence every linear combination
+$\mathbf{c}^{\top}\mathbf{w}$, including each single weight and each
+prediction, is estimated with the smallest variance by OLS.
+
+The theorem says nothing about non-linear or biased estimators. Mean squared
+error is $\text{bias}^2 + \text{variance}$, so a biased estimator can be better:
+for ridge regression there always exists a $\lambda > 0$ whose weights have a
+smaller mean squared error than OLS (Hoerl & Kennard, 1970). This does not
+contradict the theorem, which ranks only unbiased linear estimators.
 
 --
 
@@ -846,15 +1043,25 @@ is a trade, and you should be able to name what you traded.
 
 
 Notes:
-Close the loop with the robustness discussion from descriptive statistics: mean
-versus median reappears here as squared versus absolute loss. Same trade-off,
-new context — exactly the spiral the pedagogic concept asks for.
+The assumptions in full: the model is linear in the parameters and correctly
+specified; the features are linearly independent; the errors have mean zero,
+equal variance and are uncorrelated. Normality is not required for BLUE; it is
+required for exact $t$- and $F$-tests and intervals in small samples. With
+unequal variances OLS remains unbiased but is no longer best; weighted least
+squares with weights $1/\sigma\_i^2$ restores optimality.
+
+Robust losses trade efficiency under ideal conditions for stability under
+outliers. The Huber loss is quadratic for small residuals and linear for large
+ones; absolute error is linear throughout. Their minimisers are not linear in
+$\mathbf{y}$, so the theorem does not cover them. The same trade appears in
+descriptive statistics: the mean minimises squared deviations and is pulled by
+outliers, the median minimises absolute deviations and is not.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Least Squares Is a Likelihood
+# Probabilistic Linear Regression
 
 
 <div class="guiding-question">
@@ -905,10 +1112,15 @@ classical account assume without saying it?
 
 
 Notes:
-Module 1 has just given the classical account: squared error, closed form,
-Gauss–Markov. Question first (P1). Let students vote. Most will guess "same" without being
-able to say why; the next two slides give the picture and then the derivation.
-The second half of the question is the module's guiding question in small.
+The two accounts give the same $\hat{\mathbf{w}}$: the Gaussian log-likelihood is
+a constant minus $\mathrm{RSS}/(2\sigma^2)$ (derivation below). What the
+classical account assumed without saying it is a noise model: errors that are
+Gaussian, of the same width at every $x$, and independent between rows. The
+probabilistic account states these assumptions as a model of how $y$ arises
+given $\mathbf{x}$, and returns more than $\hat{\mathbf{w}}$: an estimate of
+$\sigma^2$, a predictive distribution for a new $y$, and assumptions that can be
+checked on the residuals. Gauss–Markov justifies the same $\hat{\mathbf{w}}$ under
+weaker conditions (no normality) but provides no distribution for $y$.
 
 --
 
@@ -921,13 +1133,18 @@ A **conditional distribution** $p(y \mid x) = \mathcal{N}(\mathbf{w}^{\top}\math
 one bell per $x$, **equally wide**. Nothing about how $x$ arises.
 
 Notes:
-Click 1: the fitted line, ŷ ≈ 1 + 3.44·x (k€, m²). Click 2: the bells at 50, 80
-and 110 m², each with σ̂ ≈ 16 k€. Read a bell aloud: "an 80 m² flat costs about
-276 k€, give or take 30". This is the picture that makes both later points of
-the lecture visible: the loss is the shape of the bell (next slide), and the
-model is only about y *given* x — there is no bell for x itself. That second
-point is shortcut 2, named in Module 3: the model never learns what a typical
-flat looks like, so it cannot tell that a villa is unusual.
+Data: 20 flats of 41–120 m². Fit: $\hat{y} \approx 1.4 + 3.44\\,x$ (k€, m²), with
+$\hat\sigma\_{\mathrm{ML}} \approx 16.0$ k€. Step 1 shows the fitted line, step 2
+Gaussian bells at 50, 80 and 110 m², all with standard deviation $\hat\sigma$.
+Reading one bell: an 80 m² flat has a predicted mean of about 276 k€, and 95% of
+such prices lie within $\pm 1.96\\,\hat\sigma \approx \pm 31$ k€.
+
+The line is the conditional mean $\mathbb{E}[y \mid x]$; the bell is the
+conditional distribution, and the loss is the exponent of the bell (next slide).
+The model contains no distribution over $x$: it never represents which floor
+areas are typical, so it cannot recognise that a 600 m² villa lies far outside
+its data. This is shortcut 3, model only $p(y \mid x)$, named in
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
 
 --
 
@@ -952,11 +1169,16 @@ the exponent of the bell.
 
 
 Notes:
-Walk the line slowly — the course's thesis becomes concrete here. The first
-term does not contain w, the factor 1/(2σ²) is positive, so the arg max over w
-is the arg min of RSS whatever σ is. Answer to the previous slide's vote: the
-same ŵ — and the classical account had assumed, without saying so, Gaussian
-noise of one fixed width.
+The first term does not depend on $\mathbf{w}$ and $1/(2\sigma^2) > 0$, so for
+every fixed $\sigma^2$ the arg max of $\ell$ over $\mathbf{w}$ is the arg min of
+RSS. The value of $\sigma^2$ therefore does not affect $\hat{\mathbf{w}}$; it is
+estimated afterwards from the residuals. The i.i.d. assumption is what turns the
+joint likelihood into a product and the log-likelihood into a sum over rows.
+
+The equivalence is specific to Gaussian noise with one shared variance. With
+observation-specific variances $\sigma\_i^2$ the likelihood leads to weighted
+least squares, $\sum\_i (y\_i - \mathbf{w}^{\top}\mathbf{x}\_i)^2 / \sigma\_i^2$; with
+Laplace noise it leads to least absolute deviations.
 
 --
 
@@ -966,7 +1188,7 @@ noise of one fixed width.
 |---|---|---|
 | $\varepsilon$ has mean 0 | the line is the right shape | no pattern against $x$ |
 | one $\sigma$ for every $x$ | **homoscedastic** noise | no fan shape |
-| rows independent | i.i.d. (Lecture 02) | no pattern in time or space |
+| rows independent | i.i.d. (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>) | no pattern in time or space |
 | $\varepsilon$ Gaussian | thin tails: large errors are rare | no heavy tails, few outliers |
 
 
@@ -980,11 +1202,21 @@ residual is less surprising and an outlier pulls the fit less.
 
 
 Notes:
-Each row turns a property of the loss into a claim about the world, and every
-claim can be checked with a residual plot — that is what stating the model
-buys. The Laplace row answers a question students may bring from earlier
-courses ("why is L1 loss robust?") with a reason instead of a rule:
-−log of a Laplace density is |ε|/b plus a constant.
+Each row turns a property of the loss into a checkable statement about the
+data. Residuals plotted against the fitted values or against each feature
+should show no trend (mean 0, right shape) and constant spread
+(homoscedasticity); residuals in collection order or by location should show no
+correlation (independence); a normal Q–Q plot of the residuals reveals heavy
+tails.
+
+Laplace row: the density $\frac{1}{2b} e^{-\lvert\varepsilon\rvert/b}$ gives
+$-\log p = \lvert\varepsilon\rvert / b + \log(2b)$, so its maximum-likelihood fit
+minimises the sum of absolute residuals. The derivative with respect to a
+residual is bounded ($\pm 1/b$), whereas for the Gaussian it grows linearly with
+the residual — the reason an outlier pulls an absolute-error fit less. A
+violated row does not always spoil $\hat{\mathbf{w}}$: with non-Gaussian or
+unequal-variance noise of mean zero, least squares is still unbiased; the
+intervals fail first.
 
 --
 
@@ -1001,7 +1233,7 @@ $$
 
 <div class="q">
 
-Which of Lecture 02's two variances is this — and is it too small or too large?
+Which of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s two variances is this — and is it too small or too large?
 
 </div>
 
@@ -1024,11 +1256,19 @@ $p = 2$, RSS $\approx 5{,}097$ → $\hat{\sigma} \approx 16.0$ instead of $16.8$
 
 
 Notes:
-A second, quiet cost of keeping the peak (Lecture 03). Lecture 02 divided by n − 1 because one
-mean had been estimated; here p weights have been, so E[RSS] = (n − p)σ² and
-E[σ̂²_ML] = (n − p)/n · σ². With 20 flats that is 10% in the variance; with
-5 flats and 2 weights it would be 40%. Small or not, it always points the same
-way: the peak makes the model look less noisy than it is.
+Answer: the $1/n$ variance, which is biased low. The residuals come from a line
+fitted to the same data, and the fit absorbs part of the noise. For $p$ fitted
+weights the residual vector lies in an $(n - p)$-dimensional subspace, so
+$\mathbb{E}[\mathrm{RSS}] = (n - p)\sigma^2$ and
+$\mathbb{E}[\hat\sigma^2\_{\mathrm{ML}}] = \frac{n - p}{n}\sigma^2$. The $n - 1$ of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> is the case $p = 1$, a single estimated mean.
+
+Houses: $5{,}097 / 20 \approx 254.8$ gives $\hat\sigma \approx 16.0$ k€;
+$5{,}097 / 18 \approx 283.2$ gives 16.8 k€. The bias is 10% of the variance for
+$n = 20$, $p = 2$, and 40% for $n = 5$, $p = 2$. It always points the same way:
+taking the peak in $\sigma^2$ jointly with $\mathbf{w}$
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) makes the model look less noisy than the process that
+generated the data.
 
 --
 
@@ -1050,23 +1290,28 @@ The band is as narrow at the villa as at a flat. Is the model as sure?
 
 No: $\pm 31$ k€ is only the noise $\hat{\sigma}$. The uncertainty about
 $\mathbf{w}$ — dropped with the peak — grows off the data: $\pm 153$ k€ at the
-villa (Lecture 07).
+villa (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>).
 
 </div>
 
 
 Notes:
-Step 0: the fit and the plug-in band ŷ ± 1.96·σ̂ = ± 31 k€. Click 1: the villa
-of Lecture 01 — predicted about 2,064 k€ ± 31 k€, the same half-width as for any
-flat. Ask the question before the second click. Click 2: the band that also
-counts the uncertainty about the two weights, 1.96·σ̂·√(1 + 1/n +
-(x − x̄)²/Σ(xᵢ − x̄)²): ± 32 k€ at 80 m², ± 153 k€ at 600 m². This is Lecture 01's
-epistemic uncertainty, made visible — and exactly the spread that Lecture 03 said
-the peak drops.
+Step 0: the fit and the plug-in band $\hat{y} \pm 1.96\\,\hat\sigma = \pm 31$ k€,
+which treats $\hat{\mathbf{w}}$ as exact. Step 1: the villa of
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> at 600 m², predicted at about 2,064 k€ with the same
+$\pm 31$ k€. Step 2: the band that also counts the uncertainty about the two
+weights, half-width
+$1.96\\,\hat\sigma\sqrt{1 + 1/n + (x - \overline{x})^2 / \sum\_i (x\_i - \overline{x})^2}$:
+$\pm 32$ k€ at 80 m², $\pm 153$ k€ at 600 m².
 
-One more honesty point, for the discussion: even the wide band trusts the
-straight line all the way to 600 m². Whether villas follow the price per m² of
-flats is a modelling question no band can answer.
+The term $(x - \overline{x})^2$ makes the variance grow quadratically with the
+distance from the mean floor area. This is epistemic uncertainty, which data
+near 600 m² would reduce — the spread that keeping the peak drops
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). The band here uses $\hat\sigma\_{\mathrm{ML}}$ and 1.96; the
+textbook prediction interval uses the unbiased estimate and a $t$-quantile with
+$n - 2$ degrees of freedom and is slightly wider. Both assume the straight line
+holds up to 600 m²; whether villas follow the price per m² of flats is a
+question about the model that no band computed from flats can answer.
 
 --
 
@@ -1094,11 +1339,17 @@ too narrow for large ones.
 
 
 Notes:
-One minute to read, one to think. Students with a statistics background may add
-that ŵ stays unbiased but is no longer the most efficient estimator (the
-Gauss–Markov condition "equal variance" fails) — correct, and worth one
-sentence. The fix, if asked: model σ as a function of x, which is again just
-stating a different noise model.
+A fan shape violates homoscedasticity. The line can still be adequate:
+$\hat{\mathbf{w}}$ remains unbiased, but it is no longer the minimum-variance
+linear unbiased estimator, since Gauss–Markov requires equal variances. The
+single $\hat\sigma$ averages the spreads, so the band is too wide for small
+flats and too narrow for large ones, and the standard errors of the weights are
+unreliable as well.
+
+Remedies state a different noise model: $\sigma$ as a function of $x$ (here
+roughly proportional to the floor area), fitted by weighted least squares with
+weights $1/\sigma^2(x)$; or a model for $\log y$, where noise proportional to
+the price becomes additive noise of constant variance.
 
 --
 
@@ -1119,12 +1370,12 @@ as at a flat — the uncertainty about $\mathbf{w}$ was dropped.
 
 <!-- .slide: class="module-slide" -->
 
-# Classification: Model Only p(y | x)
+# Logistic Regression
 
 
 <div class="guiding-question">
 
-**Guiding Question:** Lecture 01's fraud model said 0.55. Where does such a
+**Guiding Question:** <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s fraud model said 0.55. Where does such a
 number come from — and what does the model refuse to know?
 
 </div>
@@ -1134,7 +1385,7 @@ number come from — and what does the model refuse to know?
 
 ## Why Not Regress on 0/1?
 
-Code fraud as $y = 1$, legitimate as $y = 0$, and fit Module 2's line.
+Code fraud as $y = 1$, legitimate as $y = 0$, and fit the line of probabilistic linear regression.
 
 
 <div class="fragment">
@@ -1156,7 +1407,7 @@ drags the boundary towards cases it already classifies correctly.
 
 ### The output is not a probability
 $\mathbf{w}^{\top}\mathbf{x}$ can be $17$ or $-40$. The Gaussian bell of
-Module 2 puts mass on every real $y$ — for a label that is 0 or 1.
+the regression model puts mass on every real $y$ — for a label that is 0 or 1.
 
 </div>
 
@@ -1177,10 +1428,15 @@ model that produces 0s and 1s.
 
 
 Notes:
-A known failure, stated in the language of Module 2: the loss is wrong because
-the noise model is wrong. A Gaussian around wᵀx is a model of a real number;
-fraud is a yes/no outcome. Everything else in the module follows from replacing
-the Gaussian by the Bernoulli.
+Least squares on 0/1 labels (the linear probability model) fails for two
+reasons. The loss: a fraud with score 3 has residual $-2$ and squared error 4,
+although it is classified correctly; minimising RSS reduces such residuals, so
+points far on the correct side tilt the boundary. The output: the linear score
+is unbounded and cannot be read as a probability, and the Gaussian noise model
+assigns density to every real $y$ although only 0 and 1 occur. A 0/1 label also
+has variance $h(1 - h)$, which depends on $\mathbf{x}$ and contradicts the single
+$\sigma$ of the Gaussian model. Replacing the Gaussian by a Bernoulli and
+modelling the log-odds linearly removes both problems.
 
 --
 
@@ -1199,12 +1455,20 @@ $$
 | the boundary: where $\mathbf{w}^{\top}\mathbf{x} = 0$ | score $0.5$ — still a straight line |
 
 Notes:
-The sigmoid is not an arbitrary squashing function; it is the inverse of the
-logit. The reading of the intercept ties the model to Lecture 02: a fraud model
-with no features has its peak at the base rate (h/n again: 1 in 1,000, log-odds
-ln(1/999)). The weight reading is the one to
-stabilise: weights add log-odds, so they multiply odds — the same bookkeeping as
-likelihood ratios in Bayes' theorem, which naive Bayes (Lecture 03) already exploited.
+The sigmoid $\sigma(z) = 1/(1 + e^{-z})$ is the inverse of the logit
+$\ln \frac{p}{1 - p}$; the model therefore states that the log-odds are linear in
+$\mathbf{x}$. Intercept: with no features the maximum-likelihood fit sets
+$\sigma(w\_0)$ to the fraction of positives, $1/1000$, so
+$w\_0 = \ln(1/999) \approx -6.91$ — the estimate $h/n$ of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> on the log-odds scale.
+
+Weights: one unit more of $x\_j$ adds $w\_j$ to the log-odds and multiplies the
+odds by $e^{w\_j}$. Odds are not probabilities: multiplying the odds by 6 moves
+$P$ from 0.10% to 0.60% at the base rate, but from 0.5 to 0.86 at odds 1. The
+boundary $\mathbf{w}^{\top}\mathbf{x} = 0$ is a hyperplane; another threshold
+than 0.5 shifts it in parallel. Adding log-odds is the arithmetic of multiplying
+likelihood ratios in Bayes' theorem (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>), which naive
+Bayes uses (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>).
 
 --
 
@@ -1236,7 +1500,7 @@ $$
 
 <div class="c-important">
 
-Cross-entropy **is** the Bernoulli negative log-likelihood — Lecture 03's coin,
+Cross-entropy **is** the Bernoulli negative log-likelihood — <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s coin,
 biased by $\mathbf{x}$. How $\mathbf{x}$ arises is never said.
 
 </div>
@@ -1246,10 +1510,18 @@ biased by $\mathbf{x}$. How $\mathbf{x}$ arises is never said.
 
 
 Notes:
-Math first (P5): the loss on the screen, the question, then the reveal. It is
-the same derivation as h/n in Lecture 03, with θ replaced by h(x) for every row.
-Stress the last sentence: this is a *conditional* story, y given x. It is not a
-generative story — nothing in it could produce a transaction.
+Answer: a Bernoulli noise model. Given $\mathbf{x}\_i$, the label is a draw
+$y\_i \sim \mathrm{Bernoulli}(h\_i)$ with $h\_i = \sigma(\mathbf{w}^{\top}\mathbf{x}\_i)$;
+$h\_i^{y\_i}(1 - h\_i)^{1 - y\_i}$ is a compact way of writing $h\_i$ for $y\_i = 1$
+and $1 - h\_i$ for $y\_i = 0$. Taking logs and summing over i.i.d. rows gives
+$\ell(\mathbf{w}) = -L(\mathbf{w})$. It is the derivation of the coin estimate
+$h/n$ in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, with the single bias $\theta$ replaced by a bias
+$h(\mathbf{x})$ for every row.
+
+The name: $-[y \ln h + (1 - y)\ln(1 - h)]$ is the cross-entropy between the
+observed label distribution (all mass on $y$) and the predicted one. The model is
+conditional: it describes $y$ given $\mathbf{x}$ and contains no distribution
+from which a transaction $\mathbf{x}$ could be generated.
 
 --
 
@@ -1277,10 +1549,19 @@ $0.99$ only $0.01$: confident mistakes dominate.
 
 
 Notes:
-One line of calculus: d/dw [y ln h + (1 − y) ln(1 − h)] = (y/h − (1 − y)/(1 − h))
-· h(1 − h) · x = (y − h) x. The table is the unification the lecture is after:
-two noise models, one form of update. The per-example version is exactly LMS
-with ŷ replaced by σ(wᵀx).
+Derivation for one row, using $\sigma'(z) = \sigma(z)(1 - \sigma(z))$:
+$\frac{\partial}{\partial \mathbf{w}}[y \ln h + (1 - y)\ln(1 - h)]
+= \left(\frac{y}{h} - \frac{1 - y}{1 - h}\right) h(1 - h)\\,\mathbf{x} = (y - h)\\,\mathbf{x}$.
+Both gradients in the table are error × feature; the per-example ascent step
+$\mathbf{w} \leftarrow \mathbf{w} + \eta\\,(y - h)\\,\mathbf{x}$ is the LMS rule
+with the prediction $\sigma(\mathbf{w}^{\top}\mathbf{x})$.
+
+Setting the logistic gradient to zero gives equations that are non-linear in
+$\mathbf{w}$, so there is no closed form. The negative log-likelihood is convex,
+so gradient methods or Newton's method (iteratively reweighted least squares)
+find the global optimum whenever one exists. Per-example loss: a fraud scored
+0.01 costs $-\ln 0.01 \approx 4.61$, scored 0.99 costs $-\ln 0.99 \approx 0.01$;
+the cost grows without bound as a confident score approaches the wrong label.
 
 --
 
@@ -1307,18 +1588,25 @@ to 0 and 1 — three heads in three flips. A prior's peak (MAP) is finite.
 
 
 Notes:
-Ask the question before the first click and let students guess. Clicks 1–4:
-the curve after 10, 100, 1,000 and 10,000 gradient steps — slope 1.4, 3.6, 8.3,
-17.8, log-likelihood −2.68, −1.04, −0.36, −0.06. It never stops; the optimiser
-is not broken, the peak does not exist. Click 5: a Gaussian prior N(0, 1) on the
-slope; MAP converges to slope 1.4 and stays there. In practice every library
-adds this prior by default — it is called regularisation, and Module 5 reads it
-as a prior. Separable data is common with many features (rare fraud, thousands
-of attributes), so this is not an exotic case.
+Data: one risk signal, six legitimate cases at $x \le 0.2$ and four frauds at
+$x \ge 0.6$, perfectly separated. Gradient ascent with step size 0.05 from
+$\mathbf{w} = 0$; steps 1–4 show the curve after 10, 100, 1,000 and 10,000
+steps, with slope 1.4, 3.6, 8.3, 17.8 and log-likelihood $-2.68$, $-1.04$,
+$-0.36$, $-0.06$. The log-likelihood is bounded above by 0 and approaches it only
+as the slope tends to infinity, so no finite maximiser exists; the optimiser
+behaves correctly. Step 5: a Gaussian prior $\mathcal{N}(0, 1)$ on the slope
+(intercept unpenalised); the MAP estimate converges to slope 1.4 and stays there.
+
+The same holds in any dimension: if a hyperplane separates the classes, scaling
+its weights up raises the likelihood indefinitely. $n$ points in general
+position are always separable when $n \le p + 1$, so separation is common with
+many features and few positives. Libraries usually penalise by default —
+scikit-learn's LogisticRegression applies an L2 penalty unless told otherwise;
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> reads that penalty as a prior.
 
 --
 
-## Shortcut 2: Model Only $p(y \mid \mathbf{x})$
+## Shortcut 3: Model Only $p(y \mid \mathbf{x})$
 
 Linear and logistic regression are **discriminative**: a model of $y$ given
 $\mathbf{x}$, none of $\mathbf{x}$.
@@ -1353,19 +1641,27 @@ $\mathbf{x}$, none of $\mathbf{x}$.
 
 <div class="c-note">
 
-Lecture 03 took the other route: model the joint $p(\mathbf{x}, y)$ and
-condition — **generative**. Module 4 compares the two.
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> took the other route: model the joint $p(\mathbf{x}, y)$ and
+condition — **generative**. Generative vs. Discriminative Models compares the two.
 
 </div>
 
 
 Notes:
-Name the shortcut explicitly and tie it to the L01 roadmap row "only what you
-need". The first dropped item is the villa of Module 2 in classification form:
-the model cannot know that an input is unusual, because it never modelled
-inputs. The gained column is not a consolation prize: for prediction with many
-features, discriminative models are usually more accurate — Module 4 makes
-the comparison with naive Bayes.
+A discriminative model specifies $p(y \mid \mathbf{x})$ and nothing about
+$p(\mathbf{x})$. Consequences: an input unlike any training example still
+receives a score, with no indication that it is unusual — the classification
+counterpart of the villa; a missing attribute cannot be marginalised out, since
+that requires a distribution for it given the observed ones; and the model
+cannot generate examples.
+
+Gains: no assumptions about how the features are distributed or how they depend
+on each other, which is where a generative model with many features makes most
+of its modelling errors; and all parameters are fitted to the conditional
+likelihood, the quantity a decision uses. Given enough data, discriminative
+classifiers usually reach lower error than generative ones whose input model is
+misspecified (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). The roadmap names this shortcut "only
+what you need".
 
 --
 
@@ -1394,10 +1690,14 @@ check.
 
 
 Notes:
-One minute to read, one to think. The transfer is the classification twin of
-the 600 m² villa. Good follow-up if time allows: "which of Lecture 01's two
-kinds of uncertainty is this?" — epistemic; ten such transfers in the training
-data would help.
+The 0.97 should not be taken at face value. The log-odds are linear in the
+amount, so a transfer 50 times larger than any seen pushes the score towards 0
+or 1 by extrapolation, not by evidence; no training data supports the shape of
+the model in that region. The model cannot warn: detecting an unusual input
+needs a model of $p(\mathbf{x})$ — a density estimate, a range check on the
+inputs, or a generative classifier. The uncertainty involved is epistemic
+(<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>): it comes from missing data in this region of input
+space, and training examples with similar amounts would reduce it.
 
 --
 
@@ -1406,7 +1706,7 @@ data would help.
 
 <div class="takeaway">
 
-Logistic regression is Module 2 with Bernoulli noise: linear log-odds,
+Logistic regression is probabilistic linear regression with Bernoulli noise: linear log-odds,
 cross-entropy as the negative log-likelihood, error × feature as the gradient.
 It **keeps the peak** — which runs away on separable data — and **models only
 $p(y \mid \mathbf{x})$**: it never learns what a normal transaction looks like.
@@ -1418,7 +1718,7 @@ $p(y \mid \mathbf{x})$**: it never learns what a normal transaction looks like.
 
 <!-- .slide: class="module-slide" -->
 
-# Generative vs Discriminative
+# Generative vs. Discriminative Models
 
 
 <div class="guiding-question">
@@ -1456,7 +1756,7 @@ Where have you seen a log-odds that is linear in $x$?
 
 <div class="c-insight">
 
-**Logistic regression** (Module 3): $P(\text{fraud} \mid x) = \sigma(w\_0 + w^\top x)$.
+**Logistic regression** (previous module): $P(\text{fraud} \mid x) = \sigma(w\_0 + w^\top x)$.
 Same family of classifiers — naive Bayes sets the weights by **counting**, one
 attribute at a time; logistic regression by **maximising
 $\sum\_i \log p(y\_i \mid x\_i)$**, all weights jointly.
@@ -1468,16 +1768,23 @@ $\sum\_i \log p(y\_i \mid x\_i)$**, all weights jointly.
 
 
 Notes:
-Math first (P5). The derivation is two lines and belongs on the exercise sheet:
-log p(x_j | y) = x_j log θ_jy + (1 − x_j) log(1 − θ_jy), so each flag
-contributes a constant plus x_j times a weight; the constants and the log
-prior odds collect in w_0. With the fraud numbers, w for the new device is
-log 6 − log(0.4/0.9) ≈ 1.79 + 0.81 = 2.60.
+Derivation: for a yes/no flag,
+$\log p(x\_j \mid y) = x\_j \log\theta\_{jy} + (1 - x\_j)\log(1 - \theta\_{jy})
+= \log(1 - \theta\_{jy}) + x\_j \log\frac{\theta\_{jy}}{1 - \theta\_{jy}}$. The
+naive-Bayes log-odds is the log prior odds plus the difference of these terms
+between $y = 1$ and $y = 0$. The constants collect in
+$w\_0 = \log\frac{P(\text{fraud})}{P(\text{honest})} + \sum\_j \log\frac{1 - \theta\_{j1}}{1 - \theta\_{j0}}$;
+the coefficients of $x\_j$ are the $w\_j$ on the slide.
 
-The consequence of "jointly": logistic regression sees that the new device
-and the foreign IP arrive together and splits the credit between them. Naive
-Bayes cannot; each weight is estimated as if its flag were alone. That is the
-double counting of Lecture 03, now visible in the weights.
+New device, $\theta\_{j1} = 0.6$, $\theta\_{j0} = 0.1$:
+$w\_j = \log 6 - \log(0.4/0.9) \approx 1.79 + 0.81 = 2.60$. The weight exceeds
+$\log 6$ because the absence of the flag is also evidence: honest transactions
+lack it more often. Naive Bayes estimates each $\theta\_{jy}$ by counting,
+attribute by attribute; logistic regression maximises the conditional
+likelihood over all weights jointly. When two flags are correlated — new device
+and foreign IP arrive together in an account take-over — logistic regression
+splits the credit between them, while naive Bayes gives each its full weight:
+the double counting of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
 
 --
 
@@ -1494,13 +1801,20 @@ double counting of Lecture 03, now visible in the weights.
 | drops | dependences between attributes | everything about $x$ |
 
 Notes:
-A table because the two are compared along shared dimensions. Walk it row by
-row and let students predict each cell for logistic regression before
-showing it, if time allows. The last row is the course arc: each model is
-placed by what it drops. "Correct the intercept": in logistic regression the
-base rate sits inside w_0, so a new base rate shifts w_0 by the log of the
-ratio of prior odds — possible, but not visible in the model as a separate
-factor.
+Fitting: naive Bayes maximises the joint likelihood
+$\prod\_i P(y\_i)\\,p(\mathbf{x}\_i \mid y\_i)$, whose maximiser is a set of relative
+frequencies; logistic regression maximises the conditional likelihood
+$\prod\_i P(y\_i \mid \mathbf{x}\_i)$, which has no closed-form maximiser. Missing
+field: in a product of per-attribute factors the missing factor sums to 1 over
+its values and drops out. Unusual $\mathbf{x}$: naive Bayes yields
+$p(\mathbf{x}) = \sum\_y P(y)\\,p(\mathbf{x} \mid y)$, so a low value flags an
+input unlike the training data — judged under the independence assumption,
+which can misjudge how unusual a combination is.
+
+New base rate: in naive Bayes only $P(y)$ changes. In logistic regression the
+base rate is part of $w\_0$; a change of prior odds from $o$ to $o'$ shifts $w\_0$
+by $\log(o'/o)$, valid if $p(\mathbf{x} \mid y)$ is unchanged. Last row: each
+model is characterised by what it leaves out.
 
 --
 
@@ -1535,22 +1849,23 @@ with data, and ends lower.
 <div class="c-note">
 
 Shown empirically and in theory by Ng & Jordan (2002). A wrong assumption costs
-accuracy in the limit and buys it early — the prior of Lecture 02, again.
+accuracy in the limit and buys it early — the prior of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>, again.
 
 </div>
 
 
 Notes:
-The figure is schematic — say so. Ng & Jordan (NIPS 2002, "On discriminative vs.
-generative classifiers") show that naive Bayes approaches its asymptotic error
-with a number of examples logarithmic in the number of attributes, logistic
-regression with a number linear in it; the discriminative asymptote is never
-worse. On many real datasets the curves cross.
+The figure is schematic, not measured. Ng & Jordan (NIPS 2002, "On
+discriminative vs. generative classifiers") compare naive Bayes with logistic
+regression: naive Bayes approaches its asymptotic error with a number of
+examples logarithmic in the number of attributes, logistic regression needs a
+number linear in it, and the asymptotic error of logistic regression is never
+higher. On many real datasets the learning curves cross.
 
-Answer the module's guiding question: with 50 labelled frauds, trust naive
-Bayes' ranking; with 50,000, logistic regression. And the general point:
-an assumption is information. When it is roughly right it substitutes for
-data; when it is wrong it caps what data can do.
+Answer to the module's question: with 50 labelled frauds naive Bayes is the
+safer choice, with 50,000 logistic regression. An assumption is information:
+when roughly right it substitutes for data, when wrong it limits the error that
+any amount of data can reach.
 
 --
 
@@ -1579,11 +1894,18 @@ impute one, or train a second model without the field.
 
 
 Notes:
-The generative advantage in its most practical form. Marginalising a missing
-attribute out of a product of per-attribute factors is summing one factor over
-its values, which gives 1. The number: 15/1014 ≈ 0.0148. Compare with 17% when
-the IP was present and foreign: the missing field matters, and naive Bayes
-reports that honestly instead of guessing it.
+Naive Bayes marginalises the missing attribute: for each class,
+$\sum\_v p(x\_{\text{IP}} = v \mid y) = 1$, so the IP factor disappears and the
+likelihood ratios 6 (new device) and 2.5 (night) remain. Odds
+$\frac{1}{999} \cdot 6 \cdot 2.5 = 15/999$, probability $15/1014 \approx 1.5\\%$.
+With a foreign IP the odds were $210/999$, i.e. 17.4%; with a domestic IP the
+ratio is $0.3/0.95 \approx 0.32$ and the probability about 0.5%. The 1.5% is the
+average of the two cases, weighted by how likely each IP value is given the
+other flags: the missing value is accounted for, not guessed.
+
+Logistic regression has a weight for $x\_{\text{IP}}$ but no distribution for it.
+It needs an imputed value, which commits to a guess, or a second model trained
+without the field.
 
 --
 
@@ -1601,29 +1923,34 @@ gets answers about $x$; the discriminative one pays with data.
 
 | lecture | shortcut | what is dropped |
 |---|---|---|
-| 03 | keep the peak | how sure we are |
-| 03 | assume it apart | every dependence between attributes |
-| 04 | only $p(y \mid x)$ | every question about $x$ |
+| <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> | keep the peak | how sure we are |
+| <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> | assume it apart | every dependence between attributes |
+| <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> | only $p(y \mid x)$ | every question about $x$ |
 
-Naive Bayes is a graph with one hub. **Lecture 05** draws the others — and
+Naive Bayes is a graph with one hub. **<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>** draws the others — and
 keeps exactly the dependences we claim.
 
 Notes:
-Close the lecture on the arc. The table is the L01 shortcut table, now with
-three rows filled. The teaser: the star graph of Lecture 03 is the simplest
-graphical model; Lecture 05 lets the modeller choose which arrows to keep,
-so the assumption becomes a statement rather than a blanket.
+The table lists the three shortcuts from the full Bayesian treatment so far.
+Keep the peak replaces the posterior over parameters by its maximum; assume it
+apart replaces the joint distribution of the attributes by a product of
+per-attribute factors; only $p(y \mid x)$ replaces the joint $p(x, y)$ by the
+conditional. Naive Bayes is the simplest directed graphical model: a class node
+with an arrow to each attribute and no arrows between attributes. Graphical
+models (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>) allow any chosen set of arrows, so each independence
+assumption becomes an explicit statement about specific variables rather than a
+blanket assumption over all attribute pairs.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# When Is a Score a Probability?
+# Calibration
 
 
 <div class="guiding-question">
 
-**Guiding Question:** Lecture 01 promised to say when a model's output earns the
+**Guiding Question:** <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> promised to say when a model's output earns the
 name "probability". When does it — and what breaks it?
 
 </div>
@@ -1666,13 +1993,19 @@ or below the diagonal at high scores?
 
 
 Notes:
-Step 0: the diagonal. Click 1: a calibrated model — the points scatter around
-the diagonal, as bins of real data would. Ask for the prediction, then click 2:
-the over-confident model lies *below* the diagonal at high scores and *above* it
-at low ones — its 0.9 is really 0.75, its 0.1 really 0.25. Lecture 03 showed a
-model that is over-confident by construction (naive Bayes counting correlated
-evidence twice). Only a calibrated score can go into Lecture 01's cost
-threshold p* = 0.1; a 0.9 that means 0.75 moves every decision near the cut.
+Step 0: the diagonal, where score equals observed frequency. Step 1: a
+calibrated model; its points scatter around the diagonal because each bin holds
+finitely many cases. Step 2: a model whose log-odds are twice the correct ones.
+Its scores are too extreme: below the diagonal at high scores, above it at low
+ones. A reported 0.9 has log-odds $\ln 9 \approx 2.20$; halving gives
+$\ln 3 \approx 1.10$, a true frequency of 0.75. Symmetrically, 0.1 is really 0.25.
+
+Naive Bayes is over-confident in this way when attributes are correlated,
+because correlated evidence is counted twice (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). A
+cost-based threshold such as $p^\* = 0.1$ in <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> gives the
+cost-optimal decision only if the score is the actual probability. Calibration
+and ranking are separate properties: a model can rank perfectly and be badly
+calibrated, or be calibrated and rank poorly.
 
 --
 
@@ -1707,13 +2040,20 @@ What does this equation promise — and what does it not?
 
 
 Notes:
-Math first: the equation is Module 3's gradient, read for the intercept only.
-It is a genuine guarantee, but a weak one: it holds on average and on the data
-the model was fitted to. Per-score calibration needs the model to be right
-(correctly specified), which a linear log-odds rarely is exactly; in practice
-logistic regression is often close, and that is why it has a reputation for
-"calibrated probabilities" — a reputation, not a theorem. Separation (ranking
-fraud above legitimate cases) is a different property, measured in Lecture 06.
+The equation is the intercept component of the gradient
+$\sum\_i (y\_i - h\_i)\mathbf{x}\_i$, which vanishes at the maximum. It requires an
+unpenalised intercept and an attained maximum. For a yes/no feature the same
+argument applied to its weight gives a second guarantee: among the training
+cases with that feature, the mean score equals the fraction of positives.
+
+Per-score calibration needs a correctly specified model — log-odds truly linear
+in the features — which is rarely exact; logistic regression is often close in
+practice, which explains its reputation for calibrated probabilities. All
+guarantees refer to the training distribution; a changed base rate or
+rebalanced training breaks them. A constant score equal to the base rate is
+perfectly calibrated and useless for separating the classes. Separation —
+ranking frauds above legitimate cases — is measured in
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>.
 
 --
 
@@ -1755,15 +2095,19 @@ Score $0.9$: odds $9 \to 9/999$, about **0.9%**.
 
 
 Notes:
-The click shows the rebalanced model on real traffic: every point hugs the
-floor. A score of 0.9 means about 0.9% fraud (odds 9/999, probability
-9/1008 = 0.89%). The repair is Bayes' theorem from Lecture 02 in odds form:
-undersampling legitimate cases changes the prior, not p(x | y), so the model's
-odds are the likelihood ratio times the *training* prior odds; swap in the real
-prior odds. General form: real odds = model odds × (real prior odds) / (training
-prior odds); here (1/999) / 1. The base rate that made a "99% accurate" flag mean 9% in Lecture 02
-returns — and a threshold of 0.5 on the raw score would block almost only honest
-customers.
+On real traffic the rebalanced model's points lie close to the floor: a score of
+0.9 corresponds to a fraud frequency of about 0.9% (odds $9/999$, probability
+$9/1008 \approx 0.89\\%$).
+
+Why the correction works: undersampling legitimate cases changes the class
+prior but not $p(\mathbf{x} \mid y)$, provided legitimate cases are dropped at
+random. The model's odds are therefore the likelihood ratio times the training
+prior odds, and the real odds are obtained by exchanging the prior:
+real odds = model odds × real prior odds / training prior odds, here
+$(1/999)/1$. This is Bayes' theorem in odds form
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>), and the same base-rate effect that made a "99%
+accurate" flag mean 9% there. A threshold of 0.5 on the raw score corresponds to
+a real fraud probability of 0.1%, so almost every case it blocks is legitimate.
 
 --
 
@@ -1784,7 +2128,7 @@ You know this as ridge regression or weight decay. Which prior's peak is it?
 
 <div class="fragment">
 
-MAP from Lecture 03 with $\mathbf{w} \sim \mathcal{N}(0, \tau^2 \mathbf{I})$:
+MAP from <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> with $\mathbf{w} \sim \mathcal{N}(0, \tau^2 \mathbf{I})$:
 $\log p(\mathbf{w} \mid D) = -\frac{\mathrm{RSS}}{2\sigma^2} - \frac{\lVert \mathbf{w} \rVert^2}{2\tau^2} + \text{const}$,
 so $\lambda = \sigma^2 / \tau^2$.
 
@@ -1797,15 +2141,20 @@ so $\lambda = \sigma^2 / \tau^2$.
 
 
 Notes:
-Multiply the log-posterior by −2σ² to get the penalised objective; λ = σ²/τ²
-reads well: noisy data (large σ²) or a tight prior (small τ²) means more
-shrinkage. This is Lecture 02's Beta(2, 2) exercise one level up: the prior
-pulled the peak from 0.8 to 0.75, the Gaussian prior pulls weights towards 0.
-For logistic regression the same prior gives cross-entropy + ‖w‖²/(2τ²) — the
-finite peak of the runaway slide. The intercept is usually left unpenalised,
-so calibration in the large survives. L1: the Laplace log-density −|w|/b has a
-corner at 0, and at a corner the peak can sit exactly at 0 over a whole range
-of data; averaging over the posterior smooths the corner away.
+Multiplying the log-posterior by $-2\sigma^2$ gives
+$\mathrm{RSS} + \frac{\sigma^2}{\tau^2}\lVert\mathbf{w}\rVert^2$, so
+$\lambda = \sigma^2/\tau^2$: noisy data (large $\sigma^2$) or a tight prior
+(small $\tau^2$) means more shrinkage, and $\tau^2 \to \infty$ recovers least
+squares. This is the Beta(2, 2) exercise of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> one level up:
+there the prior pulled the peak from 0.8 to 0.75, here the Gaussian prior pulls
+the weights towards 0. For logistic regression the same prior gives
+cross-entropy $+ \lVert\mathbf{w}\rVert^2/(2\tau^2)$ — the finite peak of the
+runaway example. The intercept is usually left unpenalised, so calibration in
+the large survives.
+
+L1: the Laplace log-density $-\lvert w \rvert / b$ has a corner at 0. At a corner
+the peak can sit exactly at 0 for a whole range of data, which produces exact
+zeros. The posterior mean averages over the posterior and is never exactly 0.
 
 --
 
@@ -1832,10 +2181,11 @@ the base rate itself. Score 0.8: odds $4 \to 4/999$, about **0.4%**.
 
 
 Notes:
-One minute to read, one to think; the odds 1 and 4 are chosen so that the
-arithmetic is trivial. The punchline of the first answer: a coin-flip score on
-balanced data means "nothing unusual" on real traffic. Exact values: 1/1000 =
-0.100% and 4/1003 = 0.399%.
+Rule: multiply the model odds by $1/999$. Score 0.5: odds 1, real odds $1/999$,
+probability $1/1000 = 0.100\\%$ — the base rate itself. Score 0.8: odds 4, real
+odds $4/999$, probability $4/1003 \approx 0.399\\%$. A score of 0.5 on a balanced
+training sample means "nothing unusual" on real traffic: the model's evidence
+is neutral, and the base rate decides.
 
 --
 
@@ -1856,7 +2206,7 @@ repair it. **Regularisation is a prior**, and a penalised fit is a MAP estimate.
 
 ## Every Loss So Far Is a Likelihood
 
-So far — Lecture 06 meets losses that are not.
+So far — <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a> meets losses that are not.
 
 | you minimised | it is $-\log$ of | the fit is |
 |---|---|---|
@@ -1872,7 +2222,7 @@ So far — Lecture 06 meets losses that are not.
 <div class="card">
 
 ### Dropped: the spread
-how sure we are about $\mathbf{w}$ — **Lecture 07** keeps it
+how sure we are about $\mathbf{w}$ — **<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>** keeps it
 
 </div>
 
@@ -1880,7 +2230,7 @@ how sure we are about $\mathbf{w}$ — **Lecture 07** keeps it
 <div class="card">
 
 ### Dropped: $p(\mathbf{x})$
-what a normal input looks like — **Lecture 03** modelled it, naive Bayes
+what a normal input looks like — **<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>** modelled it, naive Bayes
 
 </div>
 
@@ -1889,13 +2239,26 @@ what a normal input looks like — **Lecture 03** modelled it, naive Bayes
 
 
 Notes:
-The lecture in one table; point at the argument map's takeaway box. Read each
-row as a translation: a loss is a noise model, a penalty is a prior, a fitted
-model is a peak. Say "so far" out loud: the hinge loss and the 0/1 error are
-not negative log-likelihoods, and Lecture 06's shortcut (keep the loss) is
-exactly what remains when there is no probability model behind a loss. The two
-cards point forward: the villa's band (the spread, Lecture 07) and the unusual
-transfer (p(x), Lecture 04).
+Each row identifies an objective with a probability model. Minimising squared
+error maximises a Gaussian likelihood of fixed variance; minimising
+cross-entropy maximises a Bernoulli likelihood; adding
+$\lambda\lVert\mathbf{w}\rVert^2$ adds $-\log$ of a Gaussian prior
+$\mathcal{N}(0, \tau^2\mathbf{I})$, with $\lambda = \sigma^2/\tau^2$ in regression;
+adding $\lambda\lVert\mathbf{w}\rVert\_1$ adds $-\log$ of a Laplace prior. In
+every row the result is a single point: the peak of the likelihood (MLE) or of
+the posterior (MAP).
+
+"So far" is literal. Not every loss is a negative log-likelihood: the hinge
+loss of support vector machines is not $-\log p(y \mid \mathbf{x})$ of any
+model, because $e^{-\text{loss}}$ summed over the two labels depends on the
+score and cannot be normalised without changing the minimiser. Minimising such a
+loss directly, with no probability model behind it, is the shortcut of
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>.
+
+The cards name what the two shortcuts of this lecture leave out. The spread of
+$\mathbf{w}$ is what widens the band at the villa from ±31 k€ to ±153 k€;
+<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a> keeps it. $p(\mathbf{x})$ is what would flag a
+transfer unlike any seen; naive Bayes (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) models it.
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};

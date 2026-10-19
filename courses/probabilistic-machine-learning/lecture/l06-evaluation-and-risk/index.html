@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 06: Evaluation and Empirical Risk Minimisation</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/l06-evaluation-and-risk.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -11,21 +26,22 @@
 Prof. Dr. Michael Granitzer
 
 Notes:
-Reworked 2026-09-26 (docs/reviews/PML-L05-L07-REVIEW-2026-09.md §5.2). The
-lecture evaluates probabilities, not only decisions, and it names its shortcut.
-It stays on Lecture 02's fraud model throughout: Module 1 shows that the useful
-flag loses to "always legitimate" on accuracy and that the Bayes error is the
-aleatoric floor of Lecture 01; Module 2 puts error bars on metrics (Lecture 02's
-SE and Beta posterior); Module 3 turns calibrated scores into decisions with
-Lecture 01's cost threshold and scores the probabilities themselves; Module 4
-names what training minimised all along — the empirical risk — and what that
-shortcut drops.
+The lecture uses the fraud model of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>
+throughout (prevalence 1/1,000, recall 99%, false-positive rate 1%). Evaluating
+Rare-Class Classifiers defines the true error and the Bayes error, the aleatoric floor of
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>, and shows that on a rare
+class accuracy favours the model that catches nothing. Uncertainty of Metrics treats every
+metric as an estimate, with a standard error or a Beta posterior
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). Decisions and Scoring Rules derives the decision
+threshold $c\_{FP}/(c\_{FP} + c\_{FN})$ from the costs, as in
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>, and scores the probabilities with
+log-loss and the Brier score. Empirical Risk Minimisation defines risk and empirical risk:
+training by ERM keeps a loss and returns probabilities only when that loss is a
+negative log-probability; a regulariser corresponds to a prior (MAP), and
+calibration on held-out data recovers probabilities from scores.
 
-Practice first, theory last: the students do evaluation before they are told
-that training was ERM, so the theory arrives as an explanation. The Data
-Science evaluation units (measuring-performance-*) are no longer included; CV
-schemes and precision/recall are recapped in one slide each, because the
-students have taken ML courses before.
+Cross-validation schemes and precision/recall are assumed from earlier machine
+learning courses and are recapped in one slide each.
 
 ---
 
@@ -40,14 +56,21 @@ students have taken ML courses before.
 
 
 Notes:
-Read it top-left to bottom. Module 1: on fraud, accuracy rewards the model that catches nothing, and even the best model has a floor (the Bayes error). Module 2: every metric is an estimate, and for a rare class its error bar is set by the rare cases. Module 3: a calibrated probability plus the costs gives the decision, and the probabilities themselves can be scored. Module 4 names the shortcut in the strip: training minimised an average loss on the sample; unless that loss was a negative log-probability, the probabilities were dropped — which is why Modules 2 and 3 had to buy them back.
+Evaluating Rare-Class Classifiers: on a rare class accuracy rewards the model that catches nothing, and
+every classifier has a floor, the Bayes error. Uncertainty of Metrics: every metric is an
+estimate; for a rare class its error bar is set by the number of rare cases.
+Decisions and Scoring Rules: a calibrated probability plus the costs determines the decision, and
+the probabilities themselves can be scored. Empirical Risk Minimisation: training minimised an
+average loss on the sample (the empirical risk); unless that loss was a
+negative log-probability, the output carries no probability, and calibration
+on held-out data is needed to recover one — the reason the decision rule and
+the scoring rules of the decisions module require calibrated probabilities.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Module 1
-## What Are We Measuring?
+# Evaluating Rare-Class Classifiers
 
 
 <div class="guiding-question">
@@ -95,7 +118,7 @@ its error below 45%?
 <div class="c-insight">
 
 No — only **new attributes** can. The Bayes error is aleatoric uncertainty
-(Lecture 01's identical patients) written as an error rate: the floor that no
+(<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s identical patients) written as an error rate: the floor that no
 amount of data removes.
 
 </div>
@@ -105,22 +128,30 @@ amount of data removes.
 
 
 Notes:
-Math first (P5): let the room read the second formula before interpreting it.
-The best rule predicts the more probable label for every x, and on each x it is
-wrong with the probability of the less probable one; averaging over x gives the
-formula. Y is a random variable, not a function of x — that is the whole point.
-The 0.55 is Lecture 01's opening score. Push the nuance from Lecture 01 again:
-the floor is relative to the attributes; a new attribute (the device, the
-location) can lower it, more rows of the same attributes cannot.
+The Bayes-optimal rule predicts, for every $x$, the label with the larger
+conditional probability. On that $x$ it errs exactly with the probability of
+the other label, $\min\big(p(y{=}1 \mid x), 1 - p(y{=}1 \mid x)\big)$;
+averaging over $p(x)$ gives the formula. The error is not zero because $Y$
+given $X = x$ is still random: identical attribute vectors carry different
+labels.
 
-What we can compute is the error on a sample — the rest of the lecture is about
-how much that number can be trusted, and whether it was the right number.
+For the transaction type that is fraudulent 55% of the time (the gift-card
+score of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>), the best rule predicts
+"fraud" and is wrong 45% of the time; no model using the same attributes does
+better. The floor is relative to the attributes: a new attribute (device,
+location) that separates frauds from legitimate cases of that type can lower
+it, more rows with the same attributes cannot. More data only moves a learned
+classifier's error towards the floor.
+
+The true error is an expectation under the unknown $p$ and cannot be computed.
+What can be computed is the error on a finite sample, an estimate whose
+precision is the subject of Uncertainty of Metrics.
 
 --
 
-## Lecture 02's Flag, Evaluated
+## <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s Flag, Evaluated
 
-| per 100,000 transactions, 100 frauds | always "legitimate" | Lecture 02's flag |
+| per 100,000 transactions, 100 frauds | always "legitimate" | <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s flag |
 |---|---|---|
 | frauds caught · honest customers flagged | 0 · 0 | 99 · 999 |
 | **accuracy** | **99.9%** | **99.0%** |
@@ -151,12 +182,24 @@ accuracy counts the majority and hides that a model is useless.
 
 
 Notes:
-This is the payoff of Lecture 02's promise ("Lecture 06 opens with exactly that
-model"). The numbers are the same table: 99 + 98,901 correct gives 99.0%, and
-99,900 correct gives 99.9%. Let the room vote before the click. Then name the
-two rows below accuracy as what students already know as recall and precision —
-and point out that Lecture 02 computed them as two conditionals of Bayes'
-theorem: P(flag | fraud) = 0.99 and P(fraud | flag) = 99/1,098.
+The table applies the flag of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> to 100,000 transactions
+with prevalence 1/1,000: recall 99% and a false-positive rate of 1% (999 of
+99,900 honest customers). The flag decides 99 + 98,901 = 99,000 cases
+correctly (99.0%); "always legitimate" decides the 99,900 honest cases
+correctly (99.9%).
+
+Recall and precision are the two conditionals of Bayes' theorem:
+$P(\text{flag} \mid \text{fraud}) = 99/100 = 0.99$ and
+$P(\text{fraud} \mid \text{flag}) = 99/1{,}098 \approx 0.09$. Precision is
+undefined for the always-legitimate model, which flags nothing (0/0).
+
+A constant majority predictor has accuracy $1 - \pi$ for minority prevalence
+$\pi$. Another classifier beats it on accuracy only if it makes fewer than
+$\pi n$ errors in total — fewer than 100 here. The flag makes 1,000 errors
+(1 missed fraud, 999 false alarms) and loses on accuracy although it catches
+99 of 100 frauds. Accuracy weights both kinds of error equally, which is
+appropriate only if both cost the same.
 
 --
 
@@ -170,9 +213,9 @@ theorem: P(flag | fraud) = 0.99 and P(fraud | flag) = 99/1,098.
   nothing scores 99.9%.
 - **Measures that condition on the rare class**: recall conditions on the
   truth, precision on the decision — the two directions of Bayes' theorem that
-  Lecture 02 warned not to swap.
-- **The costs**: which of the two mistakes the application pays for. Module 3
-  turns them into a threshold.
+  <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> warned not to swap.
+- **The costs**: which of the two mistakes the application pays for. The decisions
+  module turns them into a threshold.
 
 </div>
 
@@ -187,11 +230,25 @@ precision 9% at 1 in 1,000 and about 50% at 1 in 100.
 
 
 Notes:
-A list, not cards: these are three habits, not three contrasting positions. The
-last line checks whether Lecture 02 landed: at prevalence 1/100, the flag
-catches 990 of 1,000 frauds and flags 990 of 99,000 honest customers, so
-precision is 990/1,980 = 0.5. Recall stays 0.99. That is why precision is the
-number that surprises people when a model moves to a new market.
+A baseline makes a number interpretable: the always-majority classifier has
+accuracy $1 - \pi$; for regression, predicting the training mean gives a mean
+squared error equal to the variance of $y$ (the reference point of $R^2$).
+
+Recall $P(\text{flag} \mid \text{fraud})$ and the false-positive rate
+$P(\text{flag} \mid \text{legitimate})$ condition on the truth and are
+properties of the classifier alone. Precision conditions on the decision and,
+by Bayes' theorem, mixes them with the base rate $\pi$:
+$$
+\text{precision} = \frac{\text{recall} \cdot \pi}{\text{recall} \cdot \pi + \text{FPR} \cdot (1 - \pi)}
+$$
+At $\pi = 1/100$ on 100,000 transactions: 1,000 frauds, 990 caught; 99,000
+honest customers, 1% of them (990) flagged; precision $990/1{,}980 = 0.5$,
+recall still 0.99. At $\pi = 1/1{,}000$ the same formula gives
+$0.00099/0.01098 \approx 0.09$. Precision therefore changes when an unchanged
+model is moved to a market with a different fraud rate.
+
+Costs make the two kinds of error comparable; Decisions and Scoring Rules derives the threshold
+$c\_{FP}/(c\_{FP} + c\_{FN})$ from them.
 
 --
 
@@ -218,9 +275,19 @@ why it is always reported together with precision, or with the costs.
 
 
 Notes:
-One minute to read, one to think. The mirror image of the always-legitimate
-model: that one maximises accuracy, this one maximises recall. Neither number
-alone says anything about usefulness.
+Flagging everything gives TP = all frauds and FN = 0, so recall is 1. Every
+transaction is flagged, so precision is the share of frauds among all
+transactions — the base rate, 0.1%. Accuracy equals the base rate as well,
+because only the frauds are classified correctly.
+
+The always-flag and always-legitimate models are the two ends of a threshold
+sweep (threshold 0 and threshold 1). On a rare class one maximises recall, the
+other accuracy, and neither is useful. Each single measure can be maximised by
+a trivial model; recall is therefore reported together with precision or the
+false-positive rate, and the operating point is chosen from the costs. The
+$F\_1$ score, the harmonic mean of precision and recall, is about 0.002 for the
+always-flag model; it combines the two by a fixed convention rather than by
+cost.
 
 --
 
@@ -240,8 +307,7 @@ majority: report a **baseline** and measures that condition on the rare class.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 2
-## Numbers With Error Bars
+# Uncertainty of Metrics
 
 
 <div class="guiding-question">
@@ -272,19 +338,31 @@ becomes training data. Keep one set that is looked at once.
 
 
 Notes:
-Recap for ML-experienced students: one slide, the three schemes they know, with
-the two statements that are often said wrongly. Training error is not a *lower
-bound* on the true error (for a given sample it can be above it); it is biased
-in expectation for the model it selected. Hold-out is one split, not "2-fold".
-The warning is the leaderboard effect. The rest of the module asks the question
-none of the three rows answers: how precise is the number?
+Training error is optimistically biased because the model was chosen to fit
+those data: its expected value is below the expected true error of the fitted
+model. It is not a lower bound for a single sample — on a given split it can
+exceed the true error. For a model fixed without looking at the test data, the
+test-set error is an unbiased estimate of its true error.
+
+Hold-out is one split; it is not 2-fold cross-validation, in which each half
+serves once as the test set. $k$-fold cross-validation estimates the
+performance of the *training procedure* on training sets of size
+$(k-1)n/k$, not of one particular fitted model. Its fold estimates are
+correlated because the training sets overlap, so the naive standard error of
+the fold average is too small.
+
+The warning describes adaptive overfitting: every choice made by looking at
+test results (model, hyperparameters, threshold) fits that choice to the noise
+of the test set, as on public leaderboards. A validation set (or nested
+cross-validation) for the choices and a test set evaluated once keep the final
+estimate unbiased.
 
 --
 
 ## A Metric Is a Proportion
 
 Accuracy on $n$ test cases is the mean of $n$ yes/no indicators — a Bernoulli
-sample (Lecture 02). Its standard error is $\sigma/\sqrt{n}$ with
+sample (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). Its standard error is $\sigma/\sqrt{n}$ with
 $\sigma^2 = p(1-p)$:
 
 $$
@@ -334,11 +412,22 @@ error bar is set by the rare class, not by the size of the test set.
 
 
 Notes:
-Both numbers are ±1.96 SE, rounded. SE(accuracy) = √(0.99 · 0.01 / 10,000) ≈
-0.001; SE(recall) = √(0.9 · 0.1 / 10) ≈ 0.095, so the 95% interval is
-[0.71, 1.09] — it runs past 1. That is the normal approximation breaking at
-n = 10 (Lecture 02 noted the same for 3 of 10 users) and the reason for the next
-slide.
+Accuracy is $\hat{p} = \frac{1}{n}\sum\_i \mathbb{1}[h(\mathbf{x}\_i) = y\_i]$, the
+mean of $n$ Bernoulli($p$) indicators, so $\mathrm{Var}(\hat{p}) = p(1-p)/n$;
+the standard error plugs in $\hat{p}$. SE(accuracy)
+$= \sqrt{0.99 \cdot 0.01/10{,}000} \approx 0.001$; SE(recall)
+$= \sqrt{0.9 \cdot 0.1/10} \approx 0.095$. The cards show ±1.96 SE, rounded:
+±0.002 and ±0.19, a ratio of about 95.
+
+Recall is a proportion over the frauds only, so its $n$ is the number of test
+frauds (10), not the 10,000 transactions; precision likewise uses the number of
+flagged cases. The size of the test set fixes only the error bar of accuracy.
+
+The normal interval for the recall, $[0.71, 1.09]$, extends beyond 1: with
+$n = 10$ and $\hat{p}$ near the boundary, the normal approximation to the
+binomial fails. Intervals that stay inside $[0, 1]$ are the Wilson interval
+($[0.60, 0.98]$ here), the exact Clopper–Pearson interval ($[0.55, 1.00]$) and
+the Beta posterior of the next slide.
 
 --
 
@@ -351,14 +440,22 @@ After 9 caught and 1 missed, with a flat prior: $\mathrm{Beta}(10, 2)$ — mean
 **0.83**, 95% credible interval **[0.59, 0.98]**.
 
 Notes:
-The Beta–Bernoulli model of Lecture 02 with "user returns" replaced by "fraud
-caught": each test fraud is one observation of the recall. Click through; the
-curve narrows slowly because there are only ten observations. The credible
-interval stays inside [0, 1] by construction and says what everyone wanted to
-say: the recall is probably somewhere between 0.6 and 0.98. The posterior mean
-0.83 sits below the observed 0.9 because the flat prior counts one catch and one
-miss (Lecture 02's pseudo-counts). With 100 test frauds, 90 caught, the interval
-would be [0.83, 0.94].
+Each test fraud is one Bernoulli observation of
+$\theta = P(\text{flag} \mid \text{fraud})$: caught = 1, missed = 0. This is the
+Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>: with
+prior $\mathrm{Beta}(1, 1)$, $k$ catches out of $n$ give
+$\mathrm{Beta}(1 + k, 1 + n - k)$. Step 0 of the viz shows the flat prior; step
+$i$ the posterior after the first $i$ frauds, in the order ✓✓✓✗✓✓✓✓✓✓. Each
+catch moves the curve right, the single miss (step 4) moves it left, and every
+observation narrows it a little. After all ten: $\mathrm{Beta}(10, 2)$.
+
+The posterior mean $10/12 = 0.83$ lies below the observed 0.9 because the flat
+prior acts as one pseudo-catch and one pseudo-miss; the mode,
+$(10-1)/(10+2-2) = 0.9$, equals the observed proportion. The equal-tailed 95%
+credible interval $[0.59, 0.98]$ lies inside $[0, 1]$ by construction and is
+close to the Wilson interval. With 100 test frauds and 90 caught, the posterior
+$\mathrm{Beta}(91, 11)$ has the interval $[0.83, 0.94]$, about $1/\sqrt{10}$ of
+the width.
 
 --
 
@@ -385,13 +482,22 @@ fraud** of difference — well inside either error bar. Compare two models on th
 
 
 Notes:
-The 1/√n law of Lecture 02 ("precision costs data"), now with a price tag in
-transactions: halving the error bar needs four times the frauds, and every fraud
-costs a thousand transactions. This is why fraud teams evaluate on months of
-data. The paired comparison is the honest way to compare two models: cases both
-get right or both get wrong carry no information about which is better; only
-the disagreements do. If A and B disagree on a single fraud, there is nothing to
-conclude.
+With $\hat{p} \approx 0.9$, $\mathrm{SE} = \sqrt{0.09/n\_{\text{fraud}}}$: 10
+frauds give 0.095, 100 give 0.030, 400 give 0.015, 1,000 give 0.0095. Halving
+the SE needs four times the frauds (the $1/\sqrt{n}$ law of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>), and at prevalence 1/1,000
+each fraud comes with about 1,000 transactions: an error bar of ±0.02 on recall
+needs around a million transactions. Fraud evaluations therefore span weeks or
+months of traffic, during which the fraud pattern itself may drift.
+
+Two recalls measured on separate test sets, each with SE ≈ 0.095, cannot
+resolve a difference of 0.1. On the same test cases, frauds that both models
+catch or both miss carry no information about which is better; only the
+discordant cases do. If the models are equally good, each discordant case goes
+to either model with probability ½ — the logic of McNemar's test, or an exact
+sign test on the discordant cases. With B at 10/10 and A at 9/10 there is
+exactly one discordant fraud; a 1 : 0 split occurs with probability ½ under
+equality, so nothing can be concluded.
 
 --
 
@@ -418,9 +524,15 @@ $0.09/n = 0.0009$, so $n = 100$ frauds — about **100,000 transactions** at one
 
 
 Notes:
-Head arithmetic: 0.03² = 0.0009. The second sentence is the transfer: the
-square-root law again. Students who reach for 1.96 have understood the next
-step; the question is only about the SE.
+$\mathrm{SE} = 0.03$ requires $0.09/n = 0.03^2 = 0.0009$, so $n = 100$ test
+frauds; at one fraud in 1,000 transactions that is about 100,000 transactions.
+Because $n \propto 1/\mathrm{SE}^2$, halving the SE to 0.015 requires 400 frauds
+(400,000 transactions). The question concerns the SE only; a 95% normal
+interval would be ±1.96 SE ≈ ±0.06.
+
+The calculation assumes the recall stays near 0.9. The variance $p(1-p)$ is
+largest at $p = 0.5$ (0.25), so a worst-case plan for SE = 0.03 needs
+$0.25/0.0009 \approx 278$ frauds.
 
 --
 
@@ -441,8 +553,7 @@ test set.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 3
-## From Scores to Decisions
+# Decisions and Scoring Rules
 
 
 <div class="guiding-question">
@@ -483,7 +594,7 @@ $$
 
 <div class="c-insight">
 
-Lecture 01's loan threshold, for fraud. Lecture 02's flagged transaction (9%
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s loan threshold, for fraud. <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s flagged transaction (9%
 fraud) is worth checking: 9% is nine times the break-even.
 
 </div>
@@ -493,12 +604,26 @@ fraud) is worth checking: 9% is nine times the break-even.
 
 
 Notes:
-Math first, then the question. The derivation is one line: check iff
-(1 − p)·c_FP < p·c_FN. Students have seen it in Lecture 01 (€1,000 against
-€9,000, p* = 0.1). The 9% precision that looked damning in Lecture 02 now looks
-different: precision is not the criterion; expected cost is. Correct outcomes
-cost 0 here; a checked fraud could cost €5 as well, which changes p* only
-marginally — say so if asked.
+Checking costs $c\_{FP}$ if the transaction is legitimate (probability $1 - p$)
+and nothing otherwise; letting it through costs $c\_{FN}$ if it is a fraud
+(probability $p$). Check iff $(1 - p) \cdot c\_{FP} < p \cdot c\_{FN}$, i.e.
+$p > c\_{FP}/(c\_{FP} + c\_{FN})$; with €5 and €500 this is $5/505 \approx 0.0099$.
+Only the cost ratio matters. Equal costs give $p^{\*} = 0.5$, so 0.5 is the
+right threshold only for symmetric costs. The same rule gives the loan
+threshold of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> (€1,000 against €9,000,
+$p^{\*} = 0.1$).
+
+For the flagged transaction of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>,
+$P(\text{fraud} \mid \text{flag}) \approx 0.09$: checking costs
+$0.91 \cdot €5 \approx €4.55$ in expectation, letting it through
+$0.09 \cdot €500 = €45$. A low precision is compatible with a correct decision
+to check; the criterion is expected cost, not precision.
+
+If correct decisions are not free, the rule is: check iff
+$p\\,(c\_{FN} - c\_{TP}) > (1 - p)(c\_{FP} - c\_{TN})$. If a checked fraud also
+costs the €5 text, $p^{\*} = 5/500 = 0.01$ instead of $5/505$ — a negligible
+change.
 
 --
 
@@ -511,17 +636,28 @@ marginally — say so if asked.
 best threshold move left or right — and does recall go up or down?
 
 Notes:
-Stepped viz (P6). A calibrated model on 100,000 transactions, one in 1,000
-fraudulent. On entry: the two costs — checking honest customers falls as the
-threshold rises, missed frauds rise. Click 1: their sum. Click 2: the minimum,
-at t* ≈ 0.01, exactly c_FP/(c_FP + c_FN) (€2,881: recall 97%, precision 29%).
-Click 3: Lecture 02's flag is this model at t = 0.001 (recall 99%, precision
-9%, €5,515); the default t = 0.5 catches only 80% and costs €10,062 — three
-and a half times the optimum. Click 4: c_FN = €1,000 moves t* to 0.005 (recall
-98%, €4,280). Say it out loud: precision and recall are not properties of a
-model but of a model plus a threshold, and the costs choose the point. The
-threshold rule works only if the score is **calibrated** — Lecture 04's
-condition.
+The model in the viz is calibrated by construction: a suspicion feature is
+$\mathcal{N}(0, 1)$ for legitimate and $\mathcal{N}(4.65, 1)$ for fraudulent
+transactions, prevalence 1/1,000, and the score is the exact posterior
+$p(\text{fraud} \mid \text{feature})$. Costs are counted over 100,000
+transactions (100 frauds).
+
+Step 0: the two cost components — checks of honest customers (€5 each) fall as
+the threshold rises, missed frauds (€500 each) rise. Step 1: their sum, the
+expected total cost. Step 2: its minimum at $t^{\*} = 5/505 \approx 0.01$: €2,881,
+recall 97%, precision 29%. Step 3: two comparison points — $t = 0.001$, which
+reproduces the flag of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>
+(recall 99%, precision 9%, €5,515), and the default $t = 0.5$ (recall 80%,
+precision 92%, €10,062, about 3.5 times the minimum). Step 4: with
+$c\_{FN} = €1{,}000$ the minimum moves left to $t^{\*} = 5/1{,}005 \approx 0.005$
+(€4,280); the lower threshold checks more transactions, so recall rises to 98%
+and precision falls to about 21%.
+
+Precision and recall are properties of a model together with a threshold; the
+costs select the point. The minimum lies exactly at $c\_{FP}/(c\_{FP} + c\_{FN})$
+only because the score is calibrated
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>); for a miscalibrated score the
+cost-optimal threshold on the score lies elsewhere.
 
 --
 
@@ -540,7 +676,7 @@ prediction on held-out data:
 $$
 \text{log-loss} = -\frac{1}{n}\sum\_{i=1}^{n} \log p\_{\text{model}}(y\_i \mid \mathbf{x}\_i)
 $$
-the held-out negative log-likelihood — Lecture 04's cross-entropy, on test data
+the held-out negative log-likelihood — <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s cross-entropy, on test data
 
 </div>
 
@@ -563,17 +699,32 @@ squared error of the probability against the 0/1 outcome
 <div class="c-note">
 
 Both scores are **proper**: in expectation they are best when the model reports
-the true probability. Accuracy is not — it cannot tell 0.51 from 0.99.
+the true probability. Accuracy is not strictly proper — it cannot tell 0.51 from 0.99.
 
 </div>
 
 
 Notes:
-Log-loss is the one the course has used all along: maximum likelihood (Lecture
-03) minimised it on the training data; here it is measured on data the model
-has not seen. "Proper" is the property that matters: a model cannot improve its
-expected score by reporting anything other than what it believes — which is
-exactly the incentive a decision-maker needs from a probability.
+Log-loss is the average negative log-likelihood of the observed labels under
+the model's predictive distribution: the Bernoulli negative log-likelihood of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> and the cross-entropy that logistic
+regression minimises in training
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), here evaluated on data
+the model has not seen. On training data it would carry the optimistic bias of
+any training error.
+
+A scoring rule $S(q, y)$ is proper if the expected score under the true
+probability $p$, $\mathbb{E}\_{y \sim p}[S(q, y)]$, is optimal at $q = p$, and
+strictly proper if $q = p$ is the unique optimum. For the Brier score,
+$\mathbb{E}[(q - y)^2] = p(1 - q)^2 + (1 - p)q^2$ has derivative $2(q - p)$,
+zero at $q = p$. For log-loss, $-p\log q - (1 - p)\log(1 - q)$ is also minimised
+at $q = p$. Both are strictly proper: a model cannot improve its expected score
+by reporting anything other than the probability it believes.
+
+Accuracy uses only the side of 0.5 on which a prediction falls, so 0.51 and
+0.99 score the same. Reporting the true $p$ is among its optima, but so is any
+$q$ on the same side of 0.5: it is not strictly proper and gives no incentive
+for accurate probabilities.
 
 --
 
@@ -590,18 +741,30 @@ exactly the incentive a decision-maker needs from a probability.
 
 Log-loss punishes **confident errors** without limit — $p = 0$ on a fraud costs
 infinity; Brier is bounded by 1. Whether "0.09" comes true 9% of the time is
-Lecture 04's **reliability diagram**, now drawn on held-out data.
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s **reliability diagram**, now drawn on held-out data.
 
 </div>
 
 
 Notes:
-The numbers: −ln 0.09 = 2.41, −ln 0.91 = 0.094; (0.91)² = 0.83, (0.09)² = 0.008;
-−ln 0.001 = 6.91, (0.999)² = 0.998. That is also why the always-legitimate
-model, right 99.9% of the time, is exposed at once when it states its certainty
-as a probability: one fraud at p = 0 and its log-loss is infinite. Refer to the
-reliability diagram of Lecture 04 rather than redrawing it: the new point is
-only that it must be drawn on data the model has not seen.
+Per-case terms for $p = 0.09$: on a fraud, $-\ln 0.09 = 2.41$ and
+$(1 - 0.09)^2 = 0.83$; on a legitimate transaction, $-\ln 0.91 = 0.094$ and
+$0.09^2 = 0.008$. For $p = 0.001$ on a fraud: $-\ln 0.001 = 6.91$ and
+$0.999^2 = 0.998$. Going from 0.09 to 0.001 nearly triples the log-loss term
+but raises the Brier term by only 20%: log-loss grows without bound as the
+probability of the observed outcome goes to 0, while each Brier term is at
+most 1.
+
+The always-legitimate model, read as a probabilistic model, assigns $p = 0$ to
+fraud; one fraud in the test set makes its log-loss infinite. Implementations
+clip probabilities to $[\varepsilon, 1 - \varepsilon]$, which turns the infinity
+into a large finite penalty.
+
+A good average score does not by itself establish calibration. Whether cases
+scored 0.09 are frauds about 9% of the time is checked with the reliability
+diagram of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, computed on held-out
+data; on training data a flexible model can look calibrated and still be
+overconfident on new cases.
 
 --
 
@@ -627,9 +790,16 @@ checking costs 0.98 · €5 ≈ €4.90. Equivalently, $0.02 > p^{\*} \approx 0.
 
 
 Notes:
-Two minutes, head arithmetic. A 2% fraud probability sounds negligible; at a
-100:1 cost ratio it is twice the break-even. The same reversal as the loan
-exercise of Lecture 01.
+Letting the transaction through costs $0.02 \cdot €500 = €10$ in expectation,
+checking it $0.98 \cdot €5 = €4.90$; checking is cheaper, consistent with
+$0.02 > p^{\*} = 5/505 \approx 0.0099$. A 2% probability is about twice the
+break-even at a 100 : 1 cost ratio.
+
+The decision depends on the probability and the cost ratio together. With a
+missed fraud at €100 (ratio 20 : 1), $p^{\*} = 5/105 \approx 0.048$ and the same
+transaction would be let through. The structure is the same as in the loan
+example of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>: a small probability of an
+expensive outcome justifies the cautious action.
 
 --
 
@@ -650,8 +820,7 @@ probabilities themselves.
 
 <!-- .slide: class="module-slide" -->
 
-# Module 4
-## Keep the Loss: Empirical Risk Minimisation
+# Empirical Risk Minimisation
 
 
 <div class="guiding-question">
@@ -686,7 +855,7 @@ $$
 <div class="card">
 
 ### 0/1 loss
-$R(h) = \mathrm{err}^{\*}(h)$ — the true error of Module 1
+$R(h) = \mathrm{err}^{\*}(h)$ — the true error of the rare-class module
 
 </div>
 
@@ -694,7 +863,7 @@ $R(h) = \mathrm{err}^{\*}(h)$ — the true error of Module 1
 <div class="card">
 
 ### Cost matrix
-$R(h)$ = the expected cost of Module 3
+$R(h)$ = the expected cost of the decisions module
 
 </div>
 
@@ -705,10 +874,18 @@ $R(h)$ = the expected cost of Module 3
 It is the quantity that matters — and **uncomputable**: $p$ is unknown.
 
 Notes:
-Math first (P5). Everything measured in Modules 1–3 was a risk under some loss:
-the error rate under 0/1 loss, the expected cost under the fraud cost matrix.
-The gap between what we want (an expectation under p) and what we can compute
-(an average over a sample) is the whole module.
+The risk is defined for any loss $L$ and any distribution $p$ over
+$(\mathbf{x}, y)$. With the 0/1 loss $L = \mathbb{1}[h(\mathbf{x}) \neq y]$ it is
+the true error $\mathrm{err}^{\*}(h)$ of the rare-class module; with the fraud cost matrix it
+is the expected cost per transaction of the decisions module. The minimiser over all
+functions is the Bayes decision rule for that loss — predict the label with the
+larger posterior under 0/1 loss, check when $p > c\_{FP}/(c\_{FP} + c\_{FN})$ under
+the cost matrix — and its risk is the Bayes risk (the Bayes error for 0/1
+loss).
+
+The risk is an expectation under the unknown data distribution and cannot be
+computed. A test set gives an unbiased estimate of $R(h)$ for a fixed $h$
+(Uncertainty of Metrics), but training needs a criterion it can optimise directly.
 
 --
 
@@ -731,18 +908,35 @@ $$
 
 | loss | trained model | is $h(\mathbf{x})$ a probability? |
 |---|---|---|
-| squared error | linear regression | the mean of a Gaussian — **yes** (Lecture 04) |
+| squared error | linear regression | the mean of a Gaussian — **yes** (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) |
 | cross-entropy $-\log p(y \mid \mathbf{x})$ | logistic regression, most neural nets | **yes** — this is maximum likelihood for $p(y \mid \mathbf{x})$ |
-| hinge $\max(0, 1 - y \cdot h(\mathbf{x}))$ | support vector machine | **no** — a distance to the margin |
+| hinge $\max(0, 1 - y \cdot h(\mathbf{x}))$ | support vector machine | **no** — a signed margin score |
 | 0/1 | what we care about; no useful gradient | **no** — only a label |
 
 Notes:
-A table, because the rows are compared on shared dimensions. The last column is
-the one the lecture needs: ERM is a general recipe, and only some losses keep a
-probability behind the number. Correct the tempting overstatement explicitly:
-"nearly every method is ERM" is false in this course. The Beta posterior
-(Lecture 02), inference in a Bayesian network (Lecture 05) and Bayesian
-regression (Lecture 07) condition on data; nothing is minimised.
+ERM replaces the expectation under $p$ by the average over the sample (the
+empirical distribution) and minimises over a hypothesis space $\mathcal{H}$. By
+the law of large numbers $\hat{R}(h) \to R(h)$ for each fixed $h$; for the
+minimiser $\hat{h}$ this is not automatic, which is the generalisation gap.
+
+The rows: least squares is maximum likelihood under Gaussian noise, and
+$h(\mathbf{x})$ is the mean of the predictive Gaussian
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). Cross-entropy is ERM
+with $L = -\log p(y \mid \mathbf{x})$, identical to conditional maximum
+likelihood, so the output is a probability. The expected hinge loss is
+minimised by $\mathrm{sign}\big(2p(y{=}1 \mid \mathbf{x}) - 1\big)$: it targets
+the 0/1 decision, and the score $\mathbf{w}^\top\mathbf{x} + b$ is the signed
+distance to the decision boundary times $\lVert\mathbf{w}\rVert$, not a
+probability. The 0/1 loss is piecewise constant in the parameters, so its
+gradient is zero almost everywhere, and minimising the empirical 0/1 loss is
+NP-hard in general, even for linear classifiers; cross-entropy and hinge are
+convex surrogates for it.
+
+ERM is one recipe among several. The Beta posterior
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>), inference in a Bayesian
+network (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>) and Bayesian linear
+regression (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>) condition on
+the data; nothing is minimised.
 
 --
 
@@ -767,7 +961,7 @@ large means "more fraud-like" — nothing more
 
 <span class="eyebrow">What it can no longer do</span>
 
-- apply the cost threshold $p > c\_{FP}/(c\_{FP} + c\_{FN})$ of Module 3
+- apply the cost threshold $p > c\_{FP}/(c\_{FP} + c\_{FN})$ of the decisions module
 - be scored by log-loss or Brier, or drawn in a reliability diagram
 - put an error bar on its own confidence
 
@@ -792,12 +986,27 @@ $\log p(\mathbf{x}, y)$, and Bayesian methods minimise nothing.
 
 
 Notes:
-The slide that links Modules 3 and 4. Ask first: "the SVM says 2.3 — check the
-transaction?" Nobody can answer without knowing what 2.3 means in probability,
-which is exactly what was dropped. Platt scaling is one line of Lecture 04:
-logistic regression with the score as the only feature, fitted on data the SVM
-did not train on. Even cross-entropy models are often miscalibrated after
-heavy training, so the reliability check of Module 3 applies to them too.
+An SVM score of 2.3 means that the transaction lies on the fraud side of the
+boundary and beyond the margin ($\mathbf{w}^\top\mathbf{x} + b > 1$). Without a
+map from scores to probabilities it says nothing about
+$p(\text{fraud} \mid \mathbf{x})$, so the cost rule, log-loss, the Brier score
+and the reliability diagram cannot be applied to it.
+
+Platt scaling fits $p = \sigma(a \cdot s + b)$ to pairs (score, label) by maximum
+likelihood — a logistic regression with the score as its only feature
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). It is fitted on data
+the SVM was not trained on: on training data the scores are optimistic and the
+fitted map becomes overconfident. Isotonic regression is the non-parametric
+alternative when the score-to-probability map is not sigmoid-shaped and enough
+calibration data are available.
+
+Training with cross-entropy does not guarantee calibration on new data: large
+neural networks trained to near-zero training loss are often overconfident
+(Guo et al., 2017), so the reliability check applies to them as well.
+
+Naive Bayes fitted by maximum likelihood maximises
+$\sum\_i \log p(\mathbf{x}\_i, y\_i)$, a joint likelihood that also models the
+inputs; it is not an average of a loss $L(h(\mathbf{x}\_i), y\_i)$ on predictions.
 
 --
 
@@ -811,15 +1020,26 @@ gap opens because $\hat{h}$ was **chosen on the data that then measures it**,
 and it tends to grow with the capacity of $\mathcal{H}$.
 
 Notes:
-Stepped viz: each click raises the polynomial degree on the same twelve
-training points. Training error falls every time; test error falls, bottoms out,
-then climbs. Two precise statements to add. (1) Training error is an unbiased
-estimate of R(h) for a fixed h chosen without that data — it is biased only for
-the h it selected. (2) A richer H widens the gap but can lower the risk: the
-excess risk over the best possible splits into approximation error (H too
-poor — falls with capacity) and estimation error (too little data to find the
-best h in H — grows with capacity). That split, not the gap, is the risk
-version of bias–variance.
+The viz fits least-squares polynomials of degree 1, 2, 3, 5, 9 and 14 (one per
+step, steps 0–5) to the same twelve noisy samples of $\sin(2\pi x)$ and reports
+the RMSE on the training points and on a second sample of twelve test points.
+Training error falls at every step (0.55 at degree 1, 0.015 at degree 14). Test
+error is lowest at degree 5 (about 0.16) and rises again at degrees 9 and 14
+(about 0.21). Degrees 1 and 2 cannot follow a full sine period, so both errors
+are high there.
+
+For a fixed $h$ chosen independently of the sample, $\hat{R}(h)$ is an unbiased
+estimate of $R(h)$; the bias belongs to the selected $\hat{h}$, because
+selection favours hypotheses that happen to fit this sample well. A richer
+$\mathcal{H}$ can widen the gap and still lower the risk. With
+$h^{\*}\_{\mathcal{H}}$ the best hypothesis in $\mathcal{H}$ and $R^{\*}$ the Bayes
+risk,
+$$
+R(\hat{h}) - R^{\*} = \underbrace{R(\hat{h}) - R(h^{\*}\_{\mathcal{H}})}\_{\text{estimation error}} + \underbrace{R(h^{\*}\_{\mathcal{H}}) - R^{\*}}\_{\text{approximation error}}
+$$
+Approximation error falls as capacity grows; estimation error, for fixed $n$,
+tends to grow. This decomposition, not the training–test gap, is the risk-level
+counterpart of the bias–variance decomposition.
 
 --
 
@@ -832,7 +1052,7 @@ $$
 $$
 
 With the loss $-\log p(y \mid \mathbf{x}, \mathbf{w})$, the MAP estimate of
-Lecture 04 has exactly this form:
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> has exactly this form:
 
 $$
 \frac{1}{n}\sum\_{i=1}^{n} -\log p(y\_i \mid \mathbf{x}\_i, \mathbf{w}) \enspace \underbrace{-\frac{1}{n}\log p(\mathbf{w})}\_{\lambda \Omega(\mathbf{w})}
@@ -842,18 +1062,35 @@ $$
 <div class="c-insight">
 
 The $\frac{1}{n}$ is the point: the prior's weight **fades as data grows** — the
-pseudo-counts of Lecture 02's Beta prior. A Gaussian prior
+pseudo-counts of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s Beta prior. A Gaussian prior
 $\mathcal{N}(0, \tau^2 \mathbf{I})$ gives $\lambda \Omega(\mathbf{w}) = \lVert\mathbf{w}\rVert^2/(2n\tau^2)$.
 
 </div>
 
 
 Notes:
-Divide the negative log-posterior by n to put it on the scale of an average
-loss; the prior term picks up the 1/n. Penalty, capacity control and prior are
-three readings of one term. But note what even MAP keeps: a single peak. The
-regulariser controls the gap; it does not bring back how sure the model is —
-that needs the whole posterior (Lecture 07).
+The MAP estimate maximises
+$\log p(\mathbf{w} \mid D) = \sum\_i \log p(y\_i \mid \mathbf{x}\_i, \mathbf{w}) + \log p(\mathbf{w}) + \text{const}$.
+Negating and dividing by $n$, which does not move the optimum, gives the
+average loss plus $-\frac{1}{n}\log p(\mathbf{w})$. For
+$\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \tau^2\mathbf{I})$,
+$-\log p(\mathbf{w}) = \lVert\mathbf{w}\rVert^2/(2\tau^2) + \text{const}$, so
+$\lambda\Omega(\mathbf{w}) = \lVert\mathbf{w}\rVert^2/(2n\tau^2)$: weight decay
+whose strength falls as $1/n$. A Laplace prior gives the $L\_1$ penalty in the
+same way.
+
+Penalty, capacity control and prior are three readings of one term. The $1/n$
+explains why regularisation matters for small samples and fades for large ones,
+as the pseudo-counts of a Beta prior
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>) are swamped by data.
+
+MAP still returns a single parameter vector. It controls the generalisation gap
+but carries no uncertainty about $\mathbf{w}$; predictions that reflect
+parameter uncertainty need the full posterior
+(<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>). In Vapnik's original
+formulation, structural risk minimisation chooses among nested hypothesis
+spaces by minimising a bound on the risk; the penalised objective is its common
+practical form.
 
 --
 
@@ -873,7 +1110,7 @@ Can they apply their rule to this transaction?
 
 <div class="fragment">
 
-**Not directly.** 2.3 is a distance to the margin, not a probability — the hinge
+**Not directly.** 2.3 is a margin score, not a probability — the hinge
 loss dropped it. First calibrate on held-out data,
 $p = \sigma(a \cdot 2.3 + b)$, then compare that $p$ with 0.01.
 
@@ -881,10 +1118,17 @@ $p = \sigma(a \cdot 2.3 + b)$, then compare that $p$ with 0.01.
 
 
 Notes:
-One question, the module's one point. Some students will answer "2.3 > 0.01,
-check": that is the confusion the slide is for. Others will say "the score is
-positive, so fraud": that is the SVM's own 0/1 decision, which uses the
-threshold 0 — and assumes equal costs.
+The score 2.3 is $\mathbf{w}^\top\mathbf{x} + b$, a scaled signed distance to the
+decision boundary; comparing it with 0.01 compares quantities on different
+scales. The SVM's own decision, fraud iff the score is positive, approximates
+the minimiser of the expected hinge loss, $\mathrm{sign}(2p - 1)$ — the
+threshold $p = 0.5$ of equal costs, not the bank's $p^{\*} \approx 0.01$.
+
+Applying the bank's rule requires a calibration map $p = \sigma(a \cdot s + b)$
+fitted on held-out data (Platt scaling), then the comparison $p > 0.01$. Two
+frequent errors: reading the score as a probability ("2.3 > 0.01, check"), and
+taking the sign of the score as the decision, which silently assumes equal
+costs.
 
 --
 

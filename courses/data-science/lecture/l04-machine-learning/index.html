@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Science — Lecture 04: Machine Learning</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/data-science/lecture/l04-machine-learning/l04-machine-learning.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -1293,8 +1308,13 @@ The learning machinery is the same; only the shape of $Y$ — and therefore the
 loss — changes.
 
 Notes:
-Keep the same running example across both to make the point that the task, not
-the data, decides which you are doing.
+The distinction is fixed by the target set $Y$, not by the inputs: the same
+customer record supports a classification task (default, yes or no) and a
+regression task (credit line in euros). The usual losses follow from $Y$: 0/1
+error or cross-entropy for a finite $Y$, squared or absolute error for
+$Y = \mathbb{R}$. Ordinal targets (ratings 1–5) and counts lie in between;
+treating them as unordered classes ignores their order, treating them as real
+numbers ignores their discreteness.
 
 --
 
@@ -1318,8 +1338,17 @@ with $x\_0 = 1$ absorbing the intercept.
 The hypothesis space is $\mathbb{R}^{p+1}$: one hypothesis per weight vector.
 
 Notes:
-Name it as a hypothesis space — here a continuous space of finite dimension,
-which is why calculus rather than enumeration finds the optimum.
+Absorbing the intercept means prepending a constant feature $x\_0 = 1$ to every
+input, so that $w\_0$ is handled like any other weight and the design matrix
+$\mathbf{X}$ has a column of ones. The hypothesis space
+$\lbrace h\_{\mathbf{w}} : \mathbf{w} \in \mathbb{R}^{p+1} \rbrace$ is continuous and
+finite-dimensional, so the best hypothesis is found by calculus — setting the
+gradient of the objective to zero — rather than by enumeration.
+
+A weight $w\_j$ is the change of the prediction per unit change of $x\_j$ with all
+other features held fixed. Its size depends on the unit of $x\_j$: weights of
+features on different scales are not directly comparable, and a large weight
+does not by itself mean an important feature.
 
 --
 
@@ -1341,8 +1370,16 @@ it with **efficiency**, which is about runtime and computational effort.
 
 
 Notes:
-The effectiveness/efficiency distinction is from the source and worth keeping;
-students routinely say "efficient model" when they mean "accurate model".
+$\mathrm{RSS}/n$ is the mean squared error and $\sqrt{\mathrm{RSS}/n}$ the
+root-mean-square error, which is in the unit of the target. Squaring makes the
+objective differentiable everywhere and convex in $\mathbf{w}$ — a quadratic
+with a unique minimum when $\mathbf{X}^{\top}\mathbf{X}$ is invertible — and
+weights large residuals disproportionately: a residual twice as large costs four
+times as much, so a single outlier can move the fit considerably.
+
+Effectiveness and efficiency are independent: a model can be accurate and slow
+to fit, or fast and inaccurate. Calling an accurate model "efficient" is a
+common misuse of the term.
 
 --
 
@@ -1390,10 +1427,19 @@ The fitted line passes through the point of means.
 
 
 Notes:
-Both formulas are built from quantities the students defined in the statistics
-module — covariance and variance. Say that explicitly: regression is not new
-mathematics, it is the old summary statistics arranged to answer a prediction
-question.
+Derivation. Setting
+$\partial\mathrm{RSS}/\partial w\_0 = -2\sum\_i (y\_i - w\_0 - w\_1 x\_i) = 0$ gives
+$w\_0 = \overline{y} - w\_1\overline{x}$. Substituting this into
+$\partial\mathrm{RSS}/\partial w\_1 = -2\sum\_i x\_i (y\_i - w\_0 - w\_1 x\_i) = 0$
+gives the slope formula. Dividing numerator and denominator by $n - 1$ shows
+$\hat{w}\_1 = \mathrm{cov}(x, y)/\mathrm{var}(x) = r\_{xy}\\, s\_y / s\_x$, with
+$r\_{xy}$ the correlation coefficient; the slope is undefined when all $x\_i$ are
+equal.
+
+Consequences: the residuals sum to zero, and the line passes through
+$(\overline{x}, \overline{y})$. Regressing $x$ on $y$ gives a different line,
+because least squares measures errors vertically, in $y$ only; the two lines
+coincide only when $\lvert r\_{xy} \rvert = 1$.
 
 --
 
@@ -1427,9 +1473,19 @@ test $R^2$ and adjusted $R^2$ can and do fall.
 
 
 Notes:
-R² = 0 is exactly the trivial baseline that always predicts the mean. The
-warning is the regression counterpart of training error — and the reason a
-model is judged on data it was not fitted to.
+Definitions: $\mathrm{TSS} = \sum\_i (y\_i - \overline{y})^2$,
+$\mathrm{ESS} = \sum\_i (\hat{y}\_i - \overline{y})^2$,
+$\mathrm{RSS} = \sum\_i (y\_i - \hat{y}\_i)^2$. The split holds because, with an
+intercept, the residuals sum to zero and are orthogonal to the fitted values, so
+the cross term vanishes. For a single feature, $R^2 = r\_{xy}^2$.
+
+Without an intercept, or on test data, $1 - \mathrm{RSS}/\mathrm{TSS}$ can be
+negative: the model is then worse than predicting the mean. Training $R^2$
+cannot fall when a feature is added, because the larger model contains the
+smaller one (set the new weight to 0), so its minimal RSS is at most as large.
+Adjusted $R^2 = 1 - (1 - R^2)\\,\frac{n - 1}{n - p - 1}$ charges for each of the
+$p$ features and falls when a feature reduces RSS by less than a random feature
+would on average.
 
 --
 
@@ -1455,9 +1511,22 @@ the standard remedy.
 
 
 Notes:
-Do not derive the normal equations; state them and spend the time on when they
-break. The p > n case is the modern one — genomics, text — and motivates
-regularisation more than the algebra does.
+Derivation: $\mathrm{RSS}(\mathbf{w}) = \lVert \mathbf{y} - \mathbf{X}\mathbf{w} \rVert^2$
+has gradient $-2\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\mathbf{w})$; setting it to
+zero gives the normal equations
+$\mathbf{X}^{\top}\mathbf{X}\\,\mathbf{w} = \mathbf{X}^{\top}\mathbf{y}$, with
+$\mathbf{X}$ of size $n \times (p+1)$ including the column of ones.
+$\mathbf{X}^{\top}\mathbf{X}$ is invertible exactly when the columns of
+$\mathbf{X}$ are linearly independent, which requires $n \ge p + 1$.
+
+When it is singular the normal equations still have solutions, but infinitely
+many; the pseudo-inverse selects the one of minimal norm. Strongly correlated
+features leave the matrix invertible but ill-conditioned, and the weights become
+unstable. Numerical software solves the system by QR or Cholesky decomposition
+instead of forming the inverse. Ridge regression replaces
+$\mathbf{X}^{\top}\mathbf{X}$ by $\mathbf{X}^{\top}\mathbf{X} + \lambda\mathbf{I}$,
+which is invertible for every $\lambda > 0$. $p > n$ is the normal situation in
+genomics and text, where features outnumber examples.
 
 --
 
@@ -1548,11 +1617,18 @@ The feature map is fixed before fitting; only the weights are learned.
 
 
 Notes:
-This is the slide that unlocks the rest: the same least-squares machinery fits
-curves, interactions and periodic patterns, as long as the transformation is
-chosen in advance. Ask what is *not* expressible before revealing the note —
-anything where the transformation itself must be learned, which is what neural
-networks do.
+Linearity in the weights is what makes RSS a quadratic function of $\mathbf{w}$
+and keeps the normal equations valid: with a feature map $\phi$, the design
+matrix simply has entries $\Phi\_{ij} = \phi\_j(\mathbf{x}\_i)$. Fixed maps include
+polynomials, interactions $x\_1 x\_2$, $\log x$, indicator variables for
+categories, periodic terms $\sin(2\pi t / T)$ with known period $T$, and radial
+basis functions with fixed centres.
+
+Not expressible in this way: models whose transformation has parameters fitted
+to the data, such as $w\_1 \sin(w\_2 x)$ with a learned frequency $w\_2$, radial
+basis functions with learned centres, or the hidden layers of a neural network.
+Such models are non-linear in their parameters; their losses are in general
+non-convex and have no closed-form minimiser.
 
 --
 
@@ -1603,8 +1679,18 @@ Increasing the polynomial degree turns a dial on the bias–variance axis.
 
 
 Notes:
-The basis is the inductive bias made explicit. This is
-the cleanest example in the course of choosing a hypothesis space deliberately.
+What carries over is everything that holds for a linear model in
+$\phi(\mathbf{x})$: the closed form, the projection geometry, and the
+Gauss–Markov guarantee, provided the model is correctly specified in the chosen
+basis. Choosing the basis is choosing the hypothesis space — the inductive bias
+stated explicitly.
+
+Too rich a basis has low bias and high variance; with as many basis functions as
+data points the fit interpolates the training data. Too poor a basis has high
+bias: no amount of data lets a straight line fit a sine. Raw polynomial features
+$x, x^2, \dots, x^k$ are strongly correlated and make $\mathbf{X}^{\top}\mathbf{X}$
+ill-conditioned at high degree; rescaling $x$ to $[-1, 1]$ or using orthogonal
+polynomials mitigates this.
 
 --
 
@@ -1614,8 +1700,16 @@ We minimised the *squared* residuals. Why squares — why not absolute
 deviations, or fourth powers?
 
 Notes:
-Guiding question. Most students have never been given a reason beyond
-differentiability. There is a real one, and it is worth the slide.
+Squared error has several independent justifications. It is differentiable and
+gives a closed form. Its minimiser is a mean: the constant minimising expected
+squared deviation is the mean, the one minimising expected absolute deviation is
+the median, so least squares estimates the conditional mean of $y$. Under the
+conditions of the Gauss–Markov theorem it gives the linear unbiased estimator of
+smallest variance, and under Gaussian noise it is the maximum-likelihood
+criterion. Absolute deviations give least-absolute-deviation regression, which
+estimates the conditional median and is less sensitive to outliers; higher even
+powers weight large residuals even more strongly and make the fit more
+sensitive to them.
 
 --
 
@@ -1650,9 +1744,19 @@ The residual carries no remaining linear information about the features.
 
 
 Notes:
-The orthogonality condition is the geometric content of the normal equations.
-It also explains why adding a feature can never increase RSS: the space you
-project onto only grew.
+The normal equations $\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\hat{\mathbf{w}}) = \mathbf{0}$
+state exactly that the residual vector is orthogonal to every column of
+$\mathbf{X}$. The fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$ with
+the hat matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}$,
+the orthogonal projection onto the column space. Pythagoras on
+$\mathbf{y} = \hat{\mathbf{y}} + \mathbf{e}$, after centring, gives
+TSS = ESS + RSS.
+
+Adding a feature enlarges the column space, so the closest point can only get
+closer and RSS cannot increase. "No remaining linear information" means that the
+residuals are uncorrelated with each feature in the sample; a non-linear pattern
+of the residuals against a feature remains possible and indicates a
+misspecified model.
 
 --
 
@@ -1704,9 +1808,20 @@ right on average over repeated samples
 
 
 Notes:
-Spell out what the theorem does *not* say: nothing about non-linear or biased
-estimators — and biased estimators (ridge, lasso) can beat OLS in prediction
-error. That is not a contradiction, it is a different criterion.
+Formal statement: for $\mathbf{y} = \mathbf{X}\mathbf{w} + \boldsymbol{\varepsilon}$
+with $\mathbf{X}$ fixed and of full column rank, $\mathbb{E}[\boldsymbol{\varepsilon}] = \mathbf{0}$
+and $\mathrm{Cov}(\boldsymbol{\varepsilon}) = \sigma^2\mathbf{I}$, every linear
+unbiased estimator $\tilde{\mathbf{w}} = \mathbf{C}\mathbf{y}$ has a covariance
+exceeding $\mathrm{Cov}(\hat{\mathbf{w}}\_{\mathrm{OLS}}) = \sigma^2(\mathbf{X}^{\top}\mathbf{X})^{-1}$
+by a positive semi-definite matrix. Hence every linear combination
+$\mathbf{c}^{\top}\mathbf{w}$, including each single weight and each
+prediction, is estimated with the smallest variance by OLS.
+
+The theorem says nothing about non-linear or biased estimators. Mean squared
+error is $\text{bias}^2 + \text{variance}$, so a biased estimator can be better:
+for ridge regression there always exists a $\lambda > 0$ whose weights have a
+smaller mean squared error than OLS (Hoerl & Kennard, 1970). This does not
+contradict the theorem, which ranks only unbiased linear estimators.
 
 --
 
@@ -1750,9 +1865,19 @@ is a trade, and you should be able to name what you traded.
 
 
 Notes:
-Close the loop with the robustness discussion from descriptive statistics: mean
-versus median reappears here as squared versus absolute loss. Same trade-off,
-new context — exactly the spiral the pedagogic concept asks for.
+The assumptions in full: the model is linear in the parameters and correctly
+specified; the features are linearly independent; the errors have mean zero,
+equal variance and are uncorrelated. Normality is not required for BLUE; it is
+required for exact $t$- and $F$-tests and intervals in small samples. With
+unequal variances OLS remains unbiased but is no longer best; weighted least
+squares with weights $1/\sigma\_i^2$ restores optimality.
+
+Robust losses trade efficiency under ideal conditions for stability under
+outliers. The Huber loss is quadratic for small residuals and linear for large
+ones; absolute error is linear throughout. Their minimisers are not linear in
+$\mathbf{y}$, so the theorem does not cover them. The same trade appears in
+descriptive statistics: the mean minimises squared deviations and is pulled by
+outliers, the median minimises absolute deviations and is not.
 
 --
 
@@ -1773,9 +1898,18 @@ new context — exactly the spiral the pedagogic concept asks for.
 
 
 Notes:
-Read the update aloud in words: move each weight in the direction that would
-have reduced this example's error, in proportion to how much that feature
-contributed. That sentence is all of gradient descent, before any calculus.
+The update is a gradient step on the squared error of a single example. With
+$e = y - \mathbf{w}^{\top}\mathbf{x}$ and $E = \tfrac12 e^2$,
+$\partial E / \partial w\_i = -e\\,x\_i$, so
+$w\_i \leftarrow w\_i - \eta\\,\partial E / \partial w\_i = w\_i + \eta e x\_i$. Each
+weight moves in the direction that reduces this example's error, in proportion
+to its feature value. The rule is also called the Widrow–Hoff or delta rule.
+
+Examples are usually visited in random order; one pass over $D$ is an epoch.
+With a constant $\eta$ the weights do not settle exactly at the least-squares
+solution but keep fluctuating around it, because every step follows a single
+noisy example; a decreasing learning rate or averaging of the iterates makes
+them converge.
 
 --
 
@@ -1840,9 +1974,19 @@ slowly. It is a hyperparameter — chosen, not learned.
 
 
 Notes:
-Ask what happens with η far too large before showing it; the prediction that
-"it overshoots and gets worse" is usually made correctly, which earns the
-hyperparameter concept. The visualisation in the optimisation unit shows it.
+Direction: if $e > 0$ the prediction was too low, and every weight with
+$x\_i > 0$ increases. Attribution: a feature with $x\_i = 0$ receives no update
+from that example, and features on large numeric scales receive large updates —
+one reason features are standardised before gradient-based fitting.
+
+Step size: one update changes this example's prediction by
+$\eta e \lVert \mathbf{x} \rVert^2$, so the new error is
+$e\\,(1 - \eta \lVert \mathbf{x} \rVert^2)$. The update overshoots the target when
+$\eta\lVert\mathbf{x}\rVert^2 > 1$ and enlarges the error when
+$\eta\lVert\mathbf{x}\rVert^2 > 2$; normalised LMS divides the step by
+$\lVert \mathbf{x} \rVert^2$ for this reason. The learning rate does not appear
+in the training loss and cannot be fitted by minimising it; it is chosen by
+comparing runs, typically on validation data.
 
 --
 
@@ -1900,10 +2044,18 @@ instead of per dataset (the factor 2 is absorbed into $\eta$).
 
 
 Notes:
-The right-hand column is the one that generalises: logistic regression and
-neural networks have no closed form, so the iterative method is the one that
-generalises. Make the LMS identification explicit —
-students otherwise carry two unconnected procedures.
+Costs: forming $\mathbf{X}^{\top}\mathbf{X}$ takes $O(np^2)$ operations and solving
+the $(p+1) \times (p+1)$ system $O(p^3)$; one full gradient step takes $O(np)$.
+The gradient is $\nabla\mathrm{RSS}(\mathbf{w}) = -2\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\mathbf{w})$:
+a full-batch step sums error × feature over all examples, while LMS uses one
+example per update (stochastic gradient descent).
+
+Because RSS is convex, gradient descent with a small enough learning rate
+approaches the minimum that the closed form computes. When
+$\mathbf{X}^{\top}\mathbf{X}$ is singular the minimum is not unique; started at
+$\mathbf{w} = 0$, gradient descent converges to the minimum-norm solution.
+Logistic regression and neural networks have no closed-form minimiser, so the
+iterative method is the general one and the closed form the special case.
 
 --
 
@@ -1913,9 +2065,16 @@ students otherwise carry two unconnected procedures.
  data-params='{"eta": 0.25, "start": -2.6}'></div>
 
 Notes:
-Stepped viz (P6). Each click is one update. Ask before the first click where
-the steps will be largest — where the slope is steepest, far from the minimum —
-and why they shrink as the minimum approaches, without η changing.
+The curve is a one-parameter stand-in for RSS, $L(w) = w^2 + 0.4w + 1$, with its
+minimum at $w = -0.2$. A step is $w \leftarrow w - \eta(2w + 0.4)$, so the
+distance to the minimum is multiplied by $1 - 2\eta$ in every step. With
+$\eta = 0.25$ the factor is 0.5: starting at $w = -2.6$ (distance 2.4), the
+distance halves with each step and is 0.0375 after six steps ($w \approx -0.24$).
+
+The steps shrink although $\eta$ is constant: the step length is
+$\eta \lvert L'(w) \rvert$, and the gradient is proportional to the distance from
+the minimum. Steps are therefore largest far from the minimum, where the slope
+is steepest.
 
 --
 
@@ -1938,9 +2097,19 @@ failure modes are silent — one looks unstable, the other looks converged.
 
 
 Notes:
-Predict-then-check: ask which curve belongs to which η before revealing. The
-"looks converged" failure is the dangerous one — a slow run and a finished run
-produce the same-looking loss curve over a short window.
+On the same loss the distance to the minimum is multiplied by $1 - 2\eta$ per
+step. For $\eta = 0.9$ the factor is $-0.8$: every step jumps across the minimum
+and removes only 20% of the remaining distance, so after six steps
+$0.8^6 \approx 26\\%$ of it remains. For $\eta = 0.05$ the factor is 0.9, leaving
+$0.9^6 \approx 53\\%$ — the "about half" on the slide. The iteration diverges for
+$\eta > 1$, where $\lvert 1 - 2\eta \rvert > 1$, and $\eta = 0.5$ reaches the
+minimum in a single step.
+
+In general, gradient descent on a quadratic with Hessian $\mathbf{H}$ is stable
+only for $\eta < 2/\lambda\_{\max}(\mathbf{H})$; here $\mathbf{H} = 2$. The slow
+run is the harder failure to detect: over a short window its loss curve
+flattens like that of a converged run, whereas the oscillation of a too-large
+$\eta$ is visible in the parameter trace.
 
 --
 

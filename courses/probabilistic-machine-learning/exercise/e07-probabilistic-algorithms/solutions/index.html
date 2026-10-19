@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 7 — Selected Probabilistic Algorithms — Solutions</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/exercise/e07-probabilistic-algorithms/solutions/e07-probabilistic-algorithms-solutions.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 # Exercise Sheet 7
 ## Selected Probabilistic Algorithms
@@ -12,11 +27,16 @@ Probabilistic Machine Learning
 Prof. Dr. Michael Granitzer
 
 Notes:
-Five exercises, about 55 minutes: one EM iteration by hand (7.A.1), what EM
-still drops (7.A.2), Bayesian regression by hand in one parameter (7.B.1), the
-lecture's two-term table in numpy (7.B.2), and sorting uncertainty into the
-noise term, the parameter term, or neither (7.B.3). A calculator helps for
-7.A.1 and 7.B.1. Every number in the solutions was recomputed.
+Content of the sheet: one EM iteration in one dimension with fixed, equal
+variances (7.A.1); the unbounded mixture likelihood and the choice of $K$ by
+held-out log-likelihood (7.A.2); conjugate Bayesian regression through the
+origin with a single weight, where every posterior quantity is a scalar
+(7.B.1); the two-term predictive table of <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>
+reproduced in numpy (7.B.2); sorting sources of uncertainty into the noise
+term, the parameter term, or neither (7.B.3). 7.A.1 and 7.B.1 need
+exponentials and square roots, i.e. a calculator. All solution numbers follow
+from the stated data, $\sigma$ and priors; the output of 7.B.2 equals the
+lecture's table.
 
 ---
 
@@ -64,6 +84,19 @@ half to each — the honest answer.
 </div>
 
 
+Notes:
+With equal weights and equal variances the responsibility is a logistic
+function of $x$ with linear log-odds:
+$\log(\gamma\_{i2}/\gamma\_{i1}) = \big((x-1)^2 - (x-5)^2\big)/2 = 4x - 12$. Any two
+Gaussian components with a shared variance give log-odds linear in $x$ — the
+form of logistic regression (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). The decision point
+$x = 3$ is the midpoint of the means only because weights and variances are
+equal. After the M-step the points at 0 and 6 are fully owned by one
+component, while $x = 3$ pulls both means towards the middle with weight 0.5:
+$\mu\_1$ rises from 1 to 1.40, $\mu\_2$ falls from 5 to 4.96. The weights move
+to about $0.62 / 0.38$ because three of the four points lie closer to
+component 1.
+
 
 
 --
@@ -101,11 +134,11 @@ bounded below by 0. Remedies: a floor on $\sigma\_k$, or a prior on it (MAP).
 
 **2.** $K = 2$: the held-out log-likelihood is highest there. The training value
 always rises with $K$, because a larger mixture contains the smaller one — it
-is the training-error trap of Lecture 06, for densities.
+is the training-error trap of <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>, for densities.
 
 **3.** It conditions the **hidden labels** on the data (the E-step is Bayes and
 keeps the whole distribution $\gamma\_{ik}$). It keeps the **parameters**
-$\pi, \mu, \sigma$ as a single maximum-likelihood point — Lecture 03's peak — with
+$\pi, \mu, \sigma$ as a single maximum-likelihood point — <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s peak — with
 no statement of how sure it is about them.
 
 </div>
@@ -168,7 +201,7 @@ total $\sqrt{391 + 1{,}600} \approx 44.6$ k€. The noise term is untouched.
 down the slope at 100 m² pins it down everywhere: the model *assumes* that
 price is proportional to area all the way to 600 m². The small parameter term
 is bought by that assumption, not by data near the villa. With an intercept
-(Lecture 07), lines pivot around the data and the parameter term grows with the
+(<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>), lines pivot around the data and the parameter term grows with the
 distance from it. A confident extrapolation is only as good as the model
 family — the term that no formula shows.
 

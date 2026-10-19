@@ -1,24 +1,45 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 4 — Linear Models: Least Squares, Logistic Regression and Calibrated Scores</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exercise Sheet 4 — Discriminative Models: Linear and Logistic Regression, Calibrated Scores</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/exercise/e04-linear-models/e04-linear-models-student.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide" -->
 
 # Exercise Sheet 4
-## Linear Models: Least Squares, Logistic Regression and Calibrated Scores
+## Discriminative Models: Linear and Logistic Regression, Calibrated Scores
 
 Probabilistic Machine Learning
 
 Prof. Dr. Michael Granitzer
 
 Notes:
-Accompanies Lecture 04. About 85 minutes, to be split over two sessions if
-needed: 4.A (10 min) is the villa slide of the least-squares module; 4.B
-(20 min) the cross-entropy and runaway-peak slides, with one short Python task
-(4.B.2, numpy only); 4.C (25 min) derives the linear log-odds of naive Bayes
-(Lecture 03) and compares it with logistic regression in a second numpy task
-(4.C.2); 4.D (30 min) is the rebalancing mini-exercise and weight decay as a
-prior. Pen and paper except 4.B.2 and 4.C.2.
+The sheet accompanies <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>. 4.A works through the Gaussian likelihood
+for four flats: least squares as maximum likelihood, the $1/n$ and $1/(n-2)$
+noise estimates, and the plug-in band against the band with parameter
+uncertainty at 80 m² and at the 600 m² villa. 4.B derives cross-entropy and its
+gradient from the Bernoulli likelihood; its numpy task (4.B.2) shows the
+maximum-likelihood slope growing without bound on separable data and a Gaussian
+prior on the slope stopping it. 4.C derives the linear log-odds of naive Bayes
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) and, in a second numpy task (4.C.2), compares naive Bayes
+with logistic regression when one flag is a near-copy of another. 4.D converts
+the scores of a model trained on a 50/50 sample to real probabilities with the
+prior odds, derives a blocking threshold from costs, and shows that weight decay
+is the MAP estimate under a Gaussian prior. All tasks except 4.B.2 and 4.C.2 are
+pen and paper.
 
 ---
 

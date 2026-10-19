@@ -1,8 +1,23 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Probabilistic Machine Learning — Lecture 01: Introduction</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="/vendor/toc-progress/style.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_._juH7FtS.css"></head><body><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l01-introduction/l01-introduction.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -12,29 +27,28 @@ Prof. Dr. Michael Granitzer
 
 Chair of Data Science · University of Passau
 
+<!--
+Maintenance: structure follows docs/reviews/PML-L01-REWORK-2026-09.md. The former
+"How Machines Learn" module (paradigms, T/E/P, γ/α/h notation, outer loop) is
+reduced to parts/learning-system-recap.md; its units stay in the library for the
+Data Science course. "Beyond True or False" uses reasoning-cycle-under-uncertainty
+instead of ds/basics/v-modell.
+TODO (needs input): University of Passau logo and the affiliation line (ITU
+fellowship) for the title slide — neither asset nor wording exists yet.
+-->
+
 Notes:
-Reworked 2026-09-08 along docs/reviews/PML-L01-REWORK-2026-09.md: the lecture
-is a guided progression prediction → uncertainty → its uses → its sources →
-where it enters a learning system → probability as the language → what the
-course enables → the road ahead (one ideal, several shortcuts). Formal
-vocabulary is deferred to the final section on purpose.
-
-2026-09-24: students have taken machine-learning courses before, so the former
-"How Machines Learn" module (paradigms, programming vs learning, T/E/P, the
-γ/α/h notation, the outer loop, design questions) is reduced to a one-slide
-recap of the learning system, read for uncertainty. The removed units remain in
-the library (the Data Science course uses them) and can be re-included.
-
-2026-09-24: "Beyond True or False" uses the PML unit
-reasoning-cycle-under-uncertainty instead of ds/basics/v-modell: the reasoning
-cycle on Uranus/Neptune and Mercury/Vulcan, the choice between saving and
-changing a theory as a decision under uncertainty, and a fraud-model exercise
-(noise, too little data, or the wrong model?). The app/churn exercise stays in
-the Data Science course only.
-
-TODO (needs input): the title slide should carry the University of Passau logo
-and the intended affiliation line (ITU fellowship). Neither asset nor wording
-exists in this repository — add the logo to figures/ and the wording here.
+The lecture argues from a single prediction to a course programme. A class
+label hides how sure a model is; a probability attached to it supports ranking,
+cost-based thresholds and deferral. Uncertainty has two sources — variation in
+the outcome given the observed features (aleatoric) and limited knowledge of
+the model (epistemic) — and it enters every component of a learning system:
+data, model family, parameters, objective, optimisation and evaluation. A
+learned prediction is an inductive or abductive inference rather than a
+deduction, so it needs a calculus of degrees of support; probability is that
+calculus for representing, combining and updating beliefs, and decisions add
+costs. The formal vocabulary (joint, conditioning, inference) is introduced in
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>; this lecture uses it only by name.
 
 ---
 
@@ -101,16 +115,19 @@ What would you need to know to treat them differently?
 
 
 Notes:
-Stepped visual, then discussion stepper. Click 1: the model stamps every
-transaction — five legitimate, three fraud. Click 2: the legitimate ones recede
-and the three flagged cases stand alone. Pause here: a €1,299 electronics order,
-twelve gift cards, and a hotel booking are obviously *different situations*, yet
-the model's output for them is one identical word.
+The batch holds eight card transactions. Step 1: the classifier labels each
+one — five legitimate, three fraud. Step 2: the legitimate ones recede, leaving
+the three flagged cases: a €1,299 online electronics order, twelve gift cards for
+€600, and a €410 hotel booking. These are different situations, yet the model's
+output for all three is the same word.
 
-Then reveal the questions one at a time and let the room answer before the next
-appears. Students should feel that a label gives them nothing to separate a
-near-certain case from a coin flip. Do not name the missing element — the next
-slide lets them discover it.
+The three questions have factual answers. The cases need not be equally
+suspicious, but a label cannot show it: most hard classifiers threshold an
+internal score, and the threshold discards everything except which side of it
+a case falls on. With labels only, all three cases must receive the same
+treatment. Treating them differently requires a graded quantity — ideally the
+probability of fraud given the features — together with the cost of each kind
+of error.
 
 --
 
@@ -128,19 +145,22 @@ What can you do now that you could not do a minute ago?
 
 
 Notes:
-Identical picture, identical batch — click 1 labels the batch again, click 2
-adds the number and the bar, and
-the three cases that were indistinguishable separate: 0.98 against 0.55 and
-0.51. Let students list what they can now do before revealing the cards (P2).
-Typical answers: rank them, act on the electronics order, send the other two to
-a person, ask why the model is unsure. Every answer is an action a bare label
-could not support — the number is not a nicer prediction, it is a **different
-kind of information**.
+Same batch, same model. Step 1 labels the batch again; step 2 attaches the
+model's probability of fraud and a bar to each flagged case: 0.98 for the
+electronics order, 0.55 for the gift cards, 0.51 for the hotel booking. The
+three cases that were indistinguishable now separate.
 
-If someone asks whether 0.55 "is" a probability: only if the model is
-*calibrated* — of all cases it scores 0.55, about 55% really are fraud. Many
-scores are not. Lecture 04 shows when a model's output earns the name; for now,
-assume it does.
+The number supports actions a label cannot: ranking the cases, acting at once
+on the near-certain one, routing the two borderline ones to a person, and
+asking why the model is unsure about them. It is not a more precise label but a
+different kind of information.
+
+A score of 0.55 is a probability in the operational sense only if the model is
+*calibrated*: among all cases scored 0.55, about 55% are fraud. Many classifier
+scores are monotone in the probability but not equal to it — margins, softmax
+outputs of over-confident networks, or scores from models trained with
+re-weighted classes. <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> treats when
+a model's output earns the name.
 
 --
 
@@ -168,10 +188,20 @@ assume it does.
 
 
 Notes:
-The four cards generalise the room's answers; the reveal is the module's
-central message and should be spoken, not read. Both halves matter:
-representing uncertainty is the easy part, doing something principled with it
-is the course.
+The four uses are distinct. *Comparing* requires only a monotone score;
+*weighing consequences* requires a calibrated probability, because expected
+costs are computed from it (worked out in the mini-exercise that follows).
+*Deferring* uses a band of probabilities around the decision threshold in which
+a human check costs less than the expected cost of either automatic action;
+whether more data would narrow that band depends on the source of the
+uncertainty. *Combining* evidence from several signals is principled only for
+probabilities: under conditional independence of the signals given the class,
+their likelihood ratios multiply.
+
+Representing uncertainty and reasoning with it are separate requirements. A
+number alone does not say how to combine it with another number, update it on
+new evidence, or turn it into an action; those rules are what the course
+develops.
 
 --
 
@@ -270,9 +300,14 @@ It is a **language for reasoning about predictions that are not certain**.
 
 
 Notes:
-Bridge slide. Read the five cards as one sentence, left to right. The last card
-is the transition: before we can manage uncertainty we need to know what causes
-it — and the answer turns out to matter for what we can do about it.
+The five stages read as one sentence: a prediction (label or value) is
+quantified by how sure the model is, that uncertainty is represented explicitly
+in a model, the representation is used to combine, compare and update, and the
+result is managed — acted on, deferred, or reduced by gathering data.
+
+The right way to manage uncertainty depends on its cause. Gathering data
+reduces uncertainty that stems from limited knowledge; it does not reduce
+variation inherent in the outcome given the features.
 
 --
 
@@ -300,10 +335,16 @@ $0.8 \cdot 1{,}000 = \text{€}800$. **Reject** — although $p$ is far below 0.
 
 
 Notes:
-One minute to read, one to think. Most students will say "accept, 0.2 is low" —
-let that answer stand for a moment before the click. The point is not the
-arithmetic but the reversal: a probability of 0.2 is high when the loss it
-guards against is nine times larger than the alternative.
+Expected cost of accepting: the bank loses €9,000 with probability 0.2, so
+$0.2 \cdot 9{,}000 = €1{,}800$. Expected cost of rejecting: it forgoes €1,000
+with probability 0.8 that the applicant would have repaid, so
+$0.8 \cdot 1{,}000 = €800$. Rejecting is cheaper by €1,000.
+
+The common intuitive answer, "accept, because 0.2 is low", treats 0.5 as a
+neutral threshold. It is wrong because the two errors have different costs: a
+probability of 0.2 is high when the loss it guards against is nine times the
+alternative. The decision depends on the product of probability and cost, not
+on the probability alone.
 
 --
 
@@ -348,13 +389,21 @@ never are.
 
 
 Notes:
-This slide answers the question students actually have — "where does the
-threshold come from?" — and corrects the intuition that 0.5 is neutral. At
-p* = 0.1 both expected costs are €900: that applicant is a genuine coin toss, and
-the place where a second signal is worth buying. Ask what happens to p* if the
-bank's margin doubles (€2,000: p* rises to 0.18, so it accepts more risk), and
-if the loan is ten times larger (€90,000: p* falls to about 0.011). The model
-output never changed; only the costs did.
+Derivation of the threshold: with $c\_A$ the cost of accepting a defaulter and
+$c\_R$ the cost of rejecting a good customer, reject when
+$p\\,c\_A > (1-p)\\,c\_R$, i.e. $p > p^{\*} = c\_R / (c\_R + c\_A)$. Here
+$p^{\*} = 1{,}000 / 10{,}000 = 0.1$, and the applicant's 0.2 is twice that. At
+$p = p^{\*}$ both expected costs are €900 ($0.1 \cdot 9{,}000 = 0.9 \cdot 1{,}000$):
+the decision is indifferent, and this is where an additional signal has the
+greatest value.
+
+Sensitivity: if the margin doubles to €2,000, $p^{\*} = 2{,}000/11{,}000 \approx
+0.18$ — a lost customer costs more, so more risk is accepted. If the loan is ten
+times larger (default cost €90,000, margin unchanged),
+$p^{\*} = 1{,}000/91{,}000 \approx 0.011$. The model output is the same in every
+case; only the costs change. The threshold 0.5 is optimal exactly when
+$c\_A = c\_R$. The rule also assumes calibrated probabilities: if the scores are
+systematically too low or too high, $p^{\*}$ is applied to the wrong quantity.
 
 --
 
@@ -375,7 +424,7 @@ uncertainty and reasoning with it** is what turns a prediction into a decision.
 
 All of this assumes the numbers are **calibrated**: a score of 0.55 is right
 about 55% of the time. Whether a model's output deserves that reading is a
-question Lecture 04 answers.
+question <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> answers.
 
 </div>
 
@@ -384,7 +433,7 @@ question Lecture 04 answers.
 
 <!-- .slide: class="module-slide" -->
 
-# Where Uncertainty Comes From
+# Sources of Uncertainty
 
 
 <div class="guiding-question">
@@ -447,9 +496,16 @@ doubt entirely?**
 
 
 Notes:
-Discussion stepper. Hold the two possibilities apart on the board: "the world
-is noisy" versus "we have not learned enough". Students usually reach the
-reducible/irreducible distinction themselves once the third question lands.
+A score of 0.55 instead of 0.99 has two possible causes. Either the outcome
+genuinely varies among cases with these features — then even a perfect model,
+trained on unlimited data, would report about 0.55 — or the model has seen too
+few similar cases to estimate the probability well, and its 0.55 is itself an
+uncertain estimate.
+
+The third question separates the two. More data of the same kind shrinks the
+second cause and leaves the first untouched: no amount of data turns a
+genuinely ambiguous case into a certain one. This is the distinction between
+reducible and irreducible uncertainty.
 
 --
 
@@ -507,53 +563,44 @@ Which uncertainty can be reduced, and which is part of the problem itself?
 
 
 Notes:
-Let students classify before the next slide. Push on Example A: "would a better
-model help?" — no, unless it sees *more attributes*; the noise is relative to
-the information available. That nuance is the honest version of "inherent".
+Example A is irreducible: the records are identical, so no model that sees only
+these records can separate the two patients, and more patients with the same
+records only estimate the outcome frequency more precisely. A better model does
+not help either, unless it has access to *more attributes*. The noise is
+therefore relative to the information available — "inherent" means inherent
+given the features, not inherent in nature.
+
+Example B is reducible: the model is extrapolating far beyond its training
+range (40–120 m²), so its prediction for a 600 m² villa rests on the assumed
+functional form, not on data. Training examples near 600 m² remove most of this
+uncertainty. A model that reports only a point prediction gives no sign that it
+is extrapolating.
 
 --
 
-## The Distinction — Then the Names
+## Aleatoric vs. Epistemic Uncertainty
 
-| | Where it comes from | More data? | Our example |
-|---|---|---|---|
-| **Uncertainty in the problem** | the outcome genuinely varies given what we observe | <span class="no">✗</span> never | identical patients, different outcomes |
-| **Uncertainty in our knowledge** | we have not seen enough to pin the model down | <span class="yes">✓</span> yes | the 600 m² villa |
-
-
-<div class="fragment">
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Aleatoric
-*from* alea, *dice* — noise in the world
-
-</div>
-
-
-<div class="card">
-
-### Epistemic
-*from* episteme, *knowledge* — ignorance in the model
-
-</div>
-
-
-</div>
-
-
-</div>
-
+| | **Aleatoric** | **Epistemic** |
+|---|---|---|
+| **Name** | *alea*, dice — noise in the world | *episteme*, knowledge — ignorance in the model |
+| **Where it comes from** | the outcome genuinely varies given what we observe | we have not seen enough to pin the model down |
+| **More data?** | <span class="no">✗</span> never — irreducible | <span class="yes">✓</span> yes — reducible |
+| **Our example** | identical patients, different outcomes (A) | the 600 m² villa (B) |
 
 Notes:
-The names arrive last, on a click, after the distinction has been made in plain
-words (intuition before terminology). Students who can only recite the Greek
-have learned nothing; students who can sort new cases into the two columns have
-learned the concept.
+Aleatoric uncertainty (Latin *alea*, die) is variation of the outcome given
+the observed inputs; formally, the spread of $p(y \mid x)$ under the true
+process. Epistemic uncertainty (Greek *epistēmē*, knowledge) is uncertainty
+about which model or parameters are correct; in a Bayesian model, the spread
+of the posterior $p(θ \mid D)$. Example A belongs in the aleatoric column,
+Example B in the epistemic one.
+
+The distinction is operational, not a matter of the names: a case is
+classified by asking whether more data of the same kind would reduce the
+uncertainty. Two caveats apply. Aleatoric uncertainty is relative to the
+chosen features — adding a feature can turn part of it into explained
+variation. And epistemic uncertainty shrinks with data only where the data
+fall: a large training set far from the query point leaves it unchanged.
 
 --
 
@@ -561,8 +608,8 @@ learned the concept.
 
 | If the uncertainty is… | The right response | The expensive mistake |
 |---|---|---|
-| **in our knowledge** (epistemic) | collect data where the model is thin; defer to a human who knows more | accepting it as inherent and never improving |
-| **in the problem** (aleatoric) | model the noise; set a policy for the ambiguous cases | buying more data that cannot help |
+| **aleatoric** (in the problem) | model the noise; set a policy for the ambiguous cases | buying more data that cannot help |
+| **epistemic** (in our knowledge) | collect data where the model is thin; defer to a human who knows more | accepting it as inherent and never improving |
 
 A model that can tell the two apart can report that it is **out of its depth**,
 not merely unsure.
@@ -572,10 +619,23 @@ not merely unsure.
 
 A probabilistic model can represent **both** kinds of uncertainty. A Bayesian
 one can even report them separately — noise and ignorance as two terms of one
-prediction (Lecture 07). That is why the distinction is worth a name.
+prediction (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>). That is why the distinction is worth a name.
 
 </div>
 
+
+Notes:
+The separation follows from the law of total variance over the posterior:
+$\mathrm{Var}[y \mid x, D] = \mathbb{E}\_{θ \mid D}\big[\mathrm{Var}(y \mid x, θ)\big] + \mathrm{Var}\_{θ \mid D}\big[\mathbb{E}(y \mid x, θ)\big]$.
+The first term is the expected noise (aleatoric), the second the disagreement
+between plausible parameter values (epistemic). In Bayesian linear regression
+with noise precision $β$ and posterior covariance $S\_N$ this becomes
+$σ^2(x) = 1/β + φ(x)^\top S\_N\\, φ(x)$; the second term shrinks as data
+accumulate near $x$, the first does not.
+
+A point-estimate model reports at most the first term, or neither. On an unfamiliar
+input such as the 600 m² villa it can therefore be confidently wrong: nothing
+in its output signals that it is outside its data.
 
 --
 
@@ -592,16 +652,19 @@ defer, act — depends on knowing which one you face.
 
 
 Notes:
-This is the consequence slide the terminology was for. It is also the bridge
-out: we now know uncertainty matters and comes in kinds — but we still have no
-systematic way to write it down, combine it or update it. That is where the
-lecture is heading.
+The practical test for any uncertain prediction is whether more data of the
+same kind would reduce the uncertainty. If yes, the uncertainty is epistemic
+and collecting data or deferring to someone better informed is worthwhile. If
+no, it is aleatoric relative to the current features: the remaining options are
+a decision policy for ambiguous cases or new features. Probability theory
+provides the means to represent both kinds, combine them and update them;
+this is developed from <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> onward.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Where Uncertainty Enters
+# Uncertainty in the Learning System
 
 
 <div class="guiding-question">
@@ -620,6 +683,9 @@ parts were uncertain — and which of those did your model ever report?
      data-params='{"mode": "build"}'></div>
 
 
+<div class="fragment">
+
+
 <div class="q">
 
 Which of these boxes did any model you have trained ever report its uncertainty
@@ -628,16 +694,25 @@ about?
 </div>
 
 
-Notes:
-A recap, not a lesson: the students have built such systems in earlier courses.
-Step through the four clicks quickly and name the boxes as a sentence — measure
-the situation, predict, compare with what happened, adjust the parameters,
-repeat. Data, model, loss, optimiser.
+</div>
 
-Then ask the question. The honest answer is usually "none, or only the final
-score" — which is exactly the gap the next slide opens. If the group has not
-seen the notation: $γ$ is the real process, $α$ the representation (what we
-measure), $h\_Θ$ the model with parameters $Θ$.
+
+Notes:
+The figure builds the supervised learning system in four steps. The real world
+holds a situation $o$ and its true outcome $y$, linked by the unknown true
+process $γ$. Step 1 adds the representation $α$: the features $x = α(o)$ are
+what is measured, never the situation itself. Step 2 adds the model $h\_Θ$,
+which maps $x$ to a prediction $ŷ$. Step 3 adds the loss $L(ŷ, y)$, which
+compares prediction and outcome. Step 4 adds the optimiser, which updates the
+parameters $Θ$ from the loss; the loop repeats until $Θ$ is fixed. In short:
+data, model, loss, optimiser.
+
+The question has a factual answer for most standard pipelines: none of these
+boxes reports its uncertainty. A typical trained classifier returns a label or
+a score; the closest thing to an uncertainty statement is an aggregate test
+error, usually reported without an interval although it is estimated from a
+finite sample. Yet every box is a source of
+uncertainty, from the noise in $γ$ to the finite test set.
 
 
 --
@@ -648,57 +723,45 @@ measure), $h\_Θ$ the model with parameters $Θ$.
      data-params='{"mode": "uncertainty"}'></div>
 
 Notes:
-The same figure the module has been building, now read a second way. One click
-per source, each highlighting the box it lives in:
+The learning-system figure, read for uncertainty. Each of the seven steps
+highlights one box and names the uncertainty located there:
 
-1. **the world** — identical situations, different outcomes (aleatoric)
-2. **the data** — noisy measurement, missing values, an unrepresentative sample
-3. **the model** — the family may not contain the truth
-4. **the parameters** — too few examples to pin them down (epistemic; this is
-   the one more data reduces)
-5. **the objective** — the loss is a *design choice*; it may not capture the
-   task
-6. **the optimisation** — stochastic steps, initialisation, approximate solutions
-7. **the evaluation** — a finite test set, and a future that may differ
+1. **the world** ($o$, $y$) — identical situations, different outcomes; this is
+   aleatoric uncertainty
+2. **the data** ($x$) — noisy measurement, missing values, a sample that does
+   not represent the population the model will meet
+3. **the model** ($h\_Θ$) — the chosen family may not contain the true
+   relationship, and its assumptions may not hold (misspecification)
+4. **the parameters** ($Θ$) — too few examples to pin them down; this is the
+   epistemic uncertainty that more data reduces
+5. **the objective** ($L$) — the loss is a design choice and may not measure
+   what matters for the task
+6. **the optimisation** — stochastic steps, random initialisation and
+   approximate convergence give different $Θ$ from the same data
+7. **the evaluation** ($ŷ$) — the test set is finite, so every reported metric
+   is an estimate, and deployment data may not resemble the test data
 
-Ask before each click: where would *you* look next?
+Only steps 1 and 4 match the aleatoric/epistemic pair directly. The others
+mix both kinds (measurement noise is aleatoric, an unrepresentative sample is
+not) or concern design choices, and more data of the same kind does not
+necessarily remove them: a misspecified model stays misspecified, and a
+biased sample stays biased however large it grows.
 
 --
 
-## Two Distinctions Worth Keeping Straight
+## Uncertainty in vs. about the Loss
 
-
-<div class="grid-2">
-
-
-<div class="card">
-
-<span class="eyebrow">Uncertainty *in* the loss</span>
-
-The quantities entering the loss are uncertain: $y$ is noisy, the sample is
-finite. The loss itself is an ordinary function.
-
-</div>
-
-
-<div class="card">
-
-<span class="eyebrow">Uncertainty *about* the loss</span>
-
-Whether this objective represents the task at all. That is a modelling
-judgement, not a random variable.
-
-</div>
-
-
-</div>
-
+| | What is uncertain | Kind | More data? |
+|---|---|---|---|
+| **In the loss** | the targets $y$ are noisy | aleatoric | <span class="no">✗</span> never |
+| | the training sample is finite | epistemic | <span class="yes">✓</span> yes |
+| **About the loss** | whether this objective represents the task at all | epistemic, but a modelling judgement | <span class="no">✗</span> only knowledge of the task |
 
 
 <div class="c-warning">
 
-Do not say "the loss is random". Say what is uncertain: the data it is computed
-from, or our confidence that it is the right objective.
+Do not say "the loss is random". The loss is an ordinary function — say what is
+uncertain: the data it is computed from, or whether it is the right objective.
 
 </div>
 
@@ -720,15 +783,28 @@ representing and reasoning about it at every one of these places.
 
 
 Notes:
-The first pair matters because students conflate them and then write things
-that are false. The closing statement is the return to the course's opening
-claim, now with a system diagram behind it rather than a fraud example.
+Inside the loss, the two kinds of uncertainty appear exactly as before. The
+targets $y$ are noisy, so the loss of a fixed model on a new example is a
+random variable (aleatoric). The training loss is an average over a finite
+sample, so it estimates the expected loss with sampling error, and the
+minimiser fitted to it differs from the one fitted to the population
+(epistemic; shrinks with more data).
+
+Uncertainty *about* the loss is of a different kind: it concerns whether the
+objective represents the task at all — for example, whether squared error is
+appropriate when the costs of over- and under-prediction differ. This is lack
+of knowledge, so epistemic in the broad sense, but more of the same data does
+not settle it; it is a modelling judgement, related to model misspecification.
+
+The loss itself is a deterministic function of its arguments. The statement
+"the loss is random" is imprecise; what is random is the data it is evaluated
+on.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# Beyond True or False
+# Reasoning Under Uncertainty
 
 
 <div class="guiding-question">
@@ -752,11 +828,20 @@ is never a proof — so what kind of conclusion is it, and how strong is it?
 Machine learning lives in the bottom two rows.
 
 Notes:
-One criterion across the three rows: what does each mode guarantee, and what
-does it buy? Deduction guarantees everything and discovers nothing; induction
-and abduction discover and guarantee nothing. The rest of this unit shows what
-happens when they meet in practice — and why the choice between explanations is
-a decision, not a derivation.
+Deduction is truth-preserving: if the premises are true, the conclusion must
+be, but the conclusion only makes explicit what the premises already contain
+(it is non-ampliative). Induction generalises from observed cases to a
+regularity; it adds content, and no finite number of observations guarantees
+the generalisation (Hume's problem of induction). Abduction, named by
+C. S. Peirce and also called inference to the best explanation, infers a
+hypothesis that would explain an observation; its conclusion is only as good
+as the comparison with rival explanations.
+
+Machine learning performs induction when it fits a model to data and
+abduction when a model or a hypothesis is selected because it explains the
+data best. Deduction occurs inside the process — computing a prediction from
+fitted parameters, proving a convergence theorem — but never as the step from
+data to model.
 
 --
 
@@ -814,10 +899,20 @@ about a degree from the prediction.
 
 
 Notes:
-Uranus was discovered in 1781; by the 1840s its tables no longer matched the
-sky. The point of the slide is the last step: an explanation earns its keep by
-predicting something checkable — here, a position in the sky. The success is
-famous. The next slide asks why it was not obvious.
+William Herschel discovered Uranus in 1781. Its predicted orbit was computed
+deductively from Newton's laws and the perturbations of the known planets; by
+the 1840s the observed positions deviated systematically from these tables,
+by more than the measurement error. The abduced explanation was an unseen
+planet beyond Uranus. Urbain Le Verrier (and independently John Couch Adams)
+computed where such a planet must be. On 23 September 1846 Johann Galle at the
+Berlin Observatory found Neptune about one degree from Le Verrier's predicted
+position.
+
+The episode shows the full cycle: induction establishes the anomaly,
+abduction proposes an explanation, deduction turns the explanation into a
+checkable prediction, and observation tests it. An abduced explanation gains
+support only through such a prediction; "an unseen planet" alone explains
+any deviation.
 
 --
 
@@ -859,17 +954,25 @@ famous. The next slide asks why it was not obvious.
 
 <div class="q">
 
-1859: Mercury's orbit turns about **43″ per century** more than Newton allows.
+1859: Mercury's orbit turns faster than Newton allows — about **43″ per century** by the modern figure.
 Which move would you make?
 
 </div>
 
 
 Notes:
-Collect votes before the next slide. After Neptune, almost everyone chooses
-"save the theory" — and that is the right answer *for 1859*: the same scientist
-had just been spectacularly vindicated by exactly that move. Make students
-commit; the next slide pays off only if they have.
+A failed prediction refutes the conjunction of the theory with its auxiliary
+assumptions (here: that the list of planets is complete), never the theory
+alone — the Duhem–Quine thesis. Logic therefore cannot decide which part to
+give up; that choice is a judgement under uncertainty.
+
+Saving the theory is the reasonable first move for Mercury in 1859. Newtonian
+mechanics had two centuries of accurate predictions behind it, and the same
+move by the same scientist had just found Neptune. Le Verrier, who reported
+Mercury's anomalous perihelion advance in 1859, proposed exactly that: an
+unseen planet, or a ring of bodies, inside Mercury's orbit. His 1859 value was
+about 38″ per century; Simon Newcomb's 1882 re-analysis gave the 43″ quoted on
+the slide and still used today.
 
 --
 
@@ -906,12 +1009,18 @@ evidence that did not exist yet.
 
 
 Notes:
-Same scientist, same method, same kind of anomaly, opposite outcomes. Vulcan
-was searched for at eclipses for decades and a few sightings were claimed; none
-survived. Einstein's theory produced the 43″ per century as a consequence, with
-nothing adjusted to fit it — which is why it replaced Newton rather than merely
-patching him.
+The two cases share the scientist, the method and the kind of anomaly, and end
+oppositely. The hypothetical planet "Vulcan" was searched for during solar
+eclipses for decades after 1859; several sightings were claimed, and none was
+confirmed. In November 1915 Einstein derived the 43″ per century from general
+relativity, with no parameter adjusted to fit it. A theory that predicts a
+known anomaly without being tuned to it gains far more support than a theory
+patched to accommodate it, which is why general relativity replaced Newtonian
+gravity rather than merely amending it.
 
+The lesson is that the quality of a decision and its outcome are different
+things. Both of Le Verrier's moves were justified by the evidence available
+when he made them; what distinguished them was evidence that came later.
 
 --
 
@@ -937,17 +1046,27 @@ patching him.
 <div class="c-insight">
 
 Beliefs of different strength, updated by evidence, acted on under costs — the
-whole lecture in one historical case. Lecture 02 gives each of these words its
+whole lecture in one historical case. <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> gives each of these words its
 mathematics.
 
 </div>
 
 
 Notes:
-Map each bullet to the course without naming the formulas: strength of belief
-is a prior, the accumulating searches are updating (Bayes, L02), "a rival
-explains more" is comparing models by how probable they make the data, and
-"costs decide" is the loan threshold from the start of the lecture.
+Each bullet has a precise counterpart in probability theory. *Strength of
+belief* is a prior probability. *Evidence accumulates* is repeated application
+of Bayes' rule (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>): in odds
+form, posterior odds = prior odds × likelihood ratio, so each failed search,
+being less probable if Vulcan exists than if it does not, lowers the odds by a
+factor, and many moderate factors compound into a decisive one. *A rival
+explains more* is model comparison by the probability each model assigns to
+the data (the marginal likelihood, or Bayes factor between two models). *Costs
+decide* is the expected-cost rule of the loan example: the action depends on
+both the probability and the cost of each error.
+
+The replacement criterion matches the philosophy of science: a theory is in
+practice abandoned when a rival accounts for its successes and its anomalies,
+not at the first refutation (Lakatos).
 
 --
 
@@ -976,11 +1095,21 @@ now the evidence says to change it.
 
 
 Notes:
-The Uranus/Mercury fork in machine-learning form: collecting data is saving the
-theory (the model family is fine, the sample is incomplete); changing the
-features or the family is changing the theory. The three candidates are the
-sources of uncertainty from earlier in the lecture — noise (aleatoric), too
-little data (epistemic), and the model box of "Where Uncertainty Enters".
+The three candidate causes are the sources of uncertainty of this lecture:
+too little data is epistemic uncertainty in the parameters, noise is
+aleatoric uncertainty in the world, and the wrong model is the model box of
+the learning system. Collecting more data is the "save the theory" move — the
+model family is assumed adequate and the sample incomplete; changing the
+features or the model family is the "change the theory" move.
+
+If too little data were the cause, 500 additional labelled cases from the new
+country would have reduced the error. That it did not move is strong evidence
+against this explanation, though not proof: 500 cases could still be too few if
+fraud in the new country is rare, and the labels themselves could be wrong.
+To separate the remaining two, a richer model or new features is tried; if the
+error drops, the model was wrong. If nothing helps and experts with the same
+information also cannot tell the cases apart, the uncertainty is aleatoric
+given the available features.
 
 --
 
@@ -1018,10 +1147,17 @@ also asks **how strongly the evidence supports each possible conclusion**.
 
 
 Notes:
-Connect to the three modes of reasoning just seen: deduction is the left card;
-induction and abduction live on the right, and they are the modes machine
-learning actually performs. A learned prediction is never a theorem — it is an
-inference from evidence, and its strength is the thing we want to write down.
+The left column describes deduction, the right column induction and
+abduction. Classical logic is *monotonic*: adding premises never removes a
+conclusion that already followed. Probabilistic reasoning is not: a new
+observation can lower the probability of a hypothesis that was well supported
+before, as each failed search for Vulcan did.
+
+A learned prediction is never a theorem. It is an inference from evidence, and
+the quantity of interest is how strongly the evidence supports it. Probability
+expresses this as a number between 0 and 1, conditional on the evidence:
+$P(\text{fraud} \mid \text{features})$ is a statement about this transaction
+given what was observed, not a claim that the transaction is partly fraudulent.
 
 --
 
@@ -1065,20 +1201,29 @@ second ingredient — what the outcomes cost.
 <div class="takeaway">
 
 Machine-learning predictions are inferences from evidence, not derivations from
-premises. **Probability is the calculus of such inferences** — which is why the
-next lecture is about it, and why it will feel like an answer rather than a
+premises. **Probability is the calculus of such inferences** — which is why
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> is about it, and why it will feel like an answer rather than a
 prerequisite.
 
 </div>
 
 
 Notes:
-The reveal is the pivot of the whole introduction: the mathematics is now the
-solution to a problem the room has already felt. Say explicitly that "one
-consistent set of rules" is a real theorem (Cox), not a slogan — and that it
-covers beliefs only. Acting on them needs utilities as well (von
-Neumann–Morgenstern, Savage); the loan exercise already showed that: the
-threshold came from the costs. Leave it there.
+"One consistent set of rules" refers to Cox's theorem (R. T. Cox, 1946; developed
+by E. T. Jaynes): any system that represents degrees of belief by real numbers
+and satisfies a few consistency requirements — among them agreement with
+classical logic in the limit of certainty — must be equivalent to probability
+theory, with its sum and product rules. Its exact assumptions are still
+discussed, but the conclusion is the standard justification for probability
+as the calculus of belief. De Finetti's Dutch-book argument reaches the same
+rules from betting: beliefs that violate them admit a combination of bets that
+loses in every outcome.
+
+The theorem covers beliefs only. Acting on beliefs needs preferences over
+outcomes as well; expected-utility theory (von Neumann and Morgenstern;
+Savage) shows that consistent choices maximise expected utility. The loan
+threshold is an instance: the probability came from the model, the threshold
+from the costs.
 
 ---
 
@@ -1165,9 +1310,21 @@ be able to answer after this course that you cannot answer today?
 
 
 Notes:
-Utility before curriculum structure. These are not learning objectives to be
-graded; they are the questions the students should recognise as *theirs* by the
-end. Ask which of them they can answer today — usually none with confidence.
+The twelve questions are grouped by their object. Questions about a prediction
+need a calibrated predictive distribution and a decision rule; the reject
+option ("refuse to decide") is the deferral band of an expected-cost
+comparison. Questions about the data are the aleatoric/epistemic distinction
+made quantitative: more data helps exactly where the epistemic part of the
+predictive uncertainty is large. Questions about learning are answered by
+Bayes' rule — prior knowledge enters as the prior, observations through the
+likelihood, and competing explanations are compared by the probability they
+assign to the data. Questions about the methods are answered by reading
+common methods as shortcuts of the probabilistic ideal: least squares is
+maximum likelihood under Gaussian noise, logistic regression under a Bernoulli
+model, and each inherits the assumptions of its model.
+
+A standard point-prediction pipeline answers none of these questions with
+confidence; it lacks the quantities they require.
 
 --
 
@@ -1224,15 +1381,23 @@ language in which all of them can be asked.
 
 
 Notes:
-Closing frame for the motivation half of the lecture. The right-hand card is the
-course in six questions; each later lecture answers one or two of them, which
-the roadmap at the end will make explicit.
+The six questions on the right are the course in brief. *How certain* and
+*what alternatives* require a full predictive distribution, not a point
+estimate. *Why uncertain* requires separating aleatoric from epistemic
+uncertainty. *How new evidence changes belief* is Bayes' rule. *What decision
+follows* combines probabilities with costs. *What can and cannot be inferred*
+concerns identifiability and the limits of the data: some questions, such as
+the direction of a causal effect, are in general not identifiable from
+observational data without further assumptions, however much of it there is.
+
+Prediction remains the core output; the probabilistic view adds the
+quantities around it.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# The Road Ahead
+# Course Roadmap
 
 
 <div class="guiding-question">
@@ -1256,7 +1421,17 @@ which of your questions?
 
 
 Notes:
-Recap of the whole lecture, shown once the room has made every step. Read it top-left to bottom: a label hides what a number shows; the number enables decisions; uncertainty has two sources and enters every part of a learning system; a prediction is an inference, so it needs a language of degrees; probability is that language. The bottom strip is the course: this lecture states the ideal, each later lecture takes one shortcut, and Lecture 07 takes none. Every later lecture opens with its own map and the same strip.
+The map reads top-left to bottom. A label hides what a number shows; the number
+enables decisions (ranking, thresholds set by costs, deferral); uncertainty has
+two sources and enters every part of a learning system; a prediction is an
+inference, not a proof, so it needs a language of degrees; probability is that
+language.
+
+The bottom strip is the course. This lecture states the ideal — model the
+joint, condition on the data, read off answers. Each later lecture studies one
+shortcut that approximates or drops part of the ideal, and
+<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a> keeps the whole posterior. Every later
+lecture's argument map carries the same strip with its own row highlighted.
 
 --
 
@@ -1270,7 +1445,7 @@ Each lecture answers one of the questions you have just met.
 
 <div class="stat-card concept">
 
-### 02
+### <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">02</a>
 **Representing uncertainty**
 *How do we describe uncertainty mathematically?*
 
@@ -1281,29 +1456,29 @@ Probability, distributions, and how to summarise data.
 
 <div class="stat-card concept">
 
-### 03
-**A classifier from probability**
+### <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a>
+**Generative models and naive Bayes**
 *What does a classifier look like when it is built straight from Bayes — and what does it cost?*
 
-Keeping the peak, the generative route and naive Bayes.
+Keeping the peak, modelling the joint $p(x, y)$, naive Bayes.
 
 </div>
 
 
 <div class="stat-card concept">
 
-### 04
-**Methods you know, re-read**
+### <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a>
+**Discriminative models**
 *What do linear and logistic regression assume — and when is their output a probability?*
 
-Least squares as a likelihood, logistic regression, calibration.
+Modelling only $p(y \mid x)$: linear and logistic regression, calibration.
 
 </div>
 
 
 <div class="stat-card concept">
 
-### 05
+### <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">05</a>
 **Structured models**
 *How do we write down a large, structured set of beliefs?*
 
@@ -1314,7 +1489,7 @@ Graphical models: drawing the assumptions, fitting them, computing with them.
 
 <div class="stat-card concept">
 
-### 06
+### <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">06</a>
 **Judging models**
 *What is the quantity we actually want to minimise — and what did we get instead?*
 
@@ -1325,7 +1500,7 @@ Evaluation and empirical risk minimisation.
 
 <div class="stat-card concept">
 
-### 07
+### <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">07</a>
 **Deciding and refining**
 *How do we keep uncertainty all the way to the decision?*
 
@@ -1338,9 +1513,18 @@ Mixtures, Bayesian regression, and what comes after.
 
 
 Notes:
-Only now the detailed structure — the students can read each question as one of
-their own. Point at the arc: represent → classify → re-read → structure → judge →
-decide.
+The six lectures follow one arc: represent uncertainty
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>), build a classifier from the joint
+distribution (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), model only the conditional
+$p(y \mid x)$ (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), structure a large joint
+distribution as a graph (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>), judge models by
+their risk (<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>), and keep uncertainty through
+to the decision (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>).
+
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a> and <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> form the
+generative/discriminative pair: a generative model specifies $p(x, y)$ and
+obtains $p(y \mid x)$ by Bayes' rule; a discriminative model specifies
+$p(y \mid x)$ directly and cannot answer questions about $x$ alone.
 
 --
 
@@ -1387,16 +1571,25 @@ one conditioned model.
 <div class="c-note">
 
 Every one of these words — joint, condition, inference — gets a precise meaning
-in Lecture 02. They appear here only so that you recognise them when they
+in <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>. They appear here only so that you recognise them when they
 return.
 
 </div>
 
 
 Notes:
-This is the former "programme" slide, moved to the end where its vocabulary is
-motivated rather than a burden. Say "ideal" out loud: the next slide admits that
-most methods the students already know do not perform all three moves.
+The three moves are the Bayesian ideal. Write the joint distribution of
+observed data $D$ and unknowns $θ$ as $p(D, θ) = p(D \mid θ)\\,p(θ)$. Fixing
+the observed $D$ and renormalising gives the posterior
+$p(θ \mid D) = p(D \mid θ)\\,p(θ) / p(D)$ — inference is conditioning. Every
+answer is then a quantity computed from that posterior, for example the
+predictive distribution $p(y \mid x, D) = \int p(y \mid x, θ)\\,p(θ \mid D)\\,dθ$
+or the expected cost of an action.
+
+The ideal is rarely carried out exactly: the normalising constant $p(D)$ and
+the integral over $θ$ are usually intractable, and specifying a full joint
+distribution may be infeasible. The methods in this course are measured by
+which of the three moves they approximate or omit.
 
 --
 
@@ -1408,12 +1601,12 @@ Most methods you already know take a shortcut — and each one drops something.
 
 | Shortcut | Instead | What is lost | L |
 |---|---|---|---|
-| **Keep the peak** | the single most probable parameter (maximum likelihood) | how sure we are about it | 03–04 |
-| **Assume it apart** | factorise the joint by independence | the dependences assumed away | 03 |
-| **Only what you need** | model $p(y \mid x)$, never the joint (discriminative) | every other question | 04 |
-| **Graph the joint** | state exactly which independences hold | cheap inference, in general | 05 |
-| **Keep the loss** | minimise average error on the sample (ERM) | every probability | 06 |
-| **No shortcut** | keep the whole posterior — EM only for the hidden labels | computation; it cannot see a wrong model family | 07 |
+| **Keep the peak** | a single best parameter (maximum likelihood or MAP) | how sure we are about it | <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a>–<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> |
+| **Assume it apart** | factorise the joint by independence | the dependences assumed away | <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a> |
+| **Only what you need** | model $p(y \mid x)$, never the joint (discriminative) | every other question | <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> |
+| **Graph the joint** | state exactly which independences hold | cheap inference, in general | <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">05</a> |
+| **Keep the loss** | minimise average error on the sample (ERM) | every probability | <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">06</a> |
+| **No shortcut** | keep the whole posterior — EM only for the hidden labels | computation; it cannot see a wrong model family | <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">07</a> |
 
 
 <div class="c-insight">
@@ -1425,16 +1618,26 @@ longer answer.
 
 
 Notes:
-This slide is the course's honesty clause. Students arrive knowing linear and
-logistic regression, trees, maybe neural networks — all of them shortcuts. The
-point is not that shortcuts are bad; it is that each one silently drops a kind
-of answer, and the course teaches them to name which.
+Each row names what a method computes instead of the full posterior and which
+answers are lost. Maximum likelihood keeps $\hat θ = \arg\max\_θ p(D \mid θ)$
+and discards the spread of $p(θ \mid D)$, so predictions ignore parameter
+uncertainty. Strictly, maximum likelihood maximises the likelihood; the most
+probable parameter under the posterior is the MAP estimate, and the two
+coincide under a flat prior. Naive Bayes factorises $p(x \mid y) = \prod\_j p(x\_j \mid y)$; the
+dependences between features are assumed away. A discriminative model fits
+$p(y \mid x)$ only, so it cannot generate inputs, handle missing features by
+marginalisation, or detect unusual $x$. A Bayesian network states exactly which
+conditional independences hold; exact inference in a general network is
+NP-hard. Empirical risk minimisation minimises the average loss on the sample
+and need not produce probabilities at all. The full posterior is the most
+expensive option and still conditions on a chosen model family; it cannot
+reveal that the family itself is wrong.
 
-Return to this table at the start of every later lecture: each lecture's
-argument map has the same strip at the bottom, with its own row highlighted.
-The generative/discriminative distinction is named here for the first time;
-Lecture 03 practises the generative side (naive Bayes) and Lecture 04 the
-discriminative side (logistic regression), and makes the comparison explicit.
+Most familiar methods — linear and logistic regression fitted by maximum
+likelihood, decision trees, standard neural networks — take one or more of
+these shortcuts. The generative side is treated in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, the discriminative side
+in <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;
 const tocProgressConfig = {};
