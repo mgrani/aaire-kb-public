@@ -47,7 +47,9 @@ Joint Distributions describes several at once. Data as a Sample reads a table as
 draws from a joint distribution, using independence for the i.i.d. assumption, and
 names what else enters recorded values: noise, artefacts, outliers, missing values.
 Statistics and Estimation computes statistics and estimators with their standard
-error and conditions a single parameter on data in the Beta–Bernoulli model.
+error and confidence interval. Conditioning a parameter on data, the
+Beta–Bernoulli model, follows in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, where naive Bayes
+needs it.
 
 Combinatorics and the axiomatic construction of probability (σ-algebras,
 measurability) are left out: the course needs the calculus of probability —
@@ -84,7 +86,7 @@ Random variables and their joint distribution
 <div class="stat-card evidence">
 
 ### Condition on the data
-For events (Conditional Probability) — for a parameter (Statistics and Estimation)
+For events (Conditional Probability) — for a parameter in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">L03</a>
 
 </div>
 
@@ -99,7 +101,7 @@ For events (Conditional Probability) — for a parameter (Statistics and Estimat
 <div class="stat-card insight">
 
 ### Read off answers
-A peak, a mean, an interval (Statistics and Estimation)
+An estimate and its standard error (Statistics and Estimation)
 
 </div>
 
@@ -121,16 +123,16 @@ The modules follow the order the mathematics requires, not the order in which
 the three moves are performed: conditioning is defined for events (Conditional Probability
 and Bayes) before random variables and joint distributions exist
 (Random Variables, Joint Distributions), and only then can a joint over data
-and parameters be conditioned (Statistics and Estimation).
+and parameters be conditioned (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>).
 
-The estimation module performs all three moves for the simplest possible model: yes/no data
-$x\_i \in \lbrace 0, 1\rbrace$, one parameter $\theta \in [0,1]$, a
-$\mathrm{Beta}(a, b)$ prior. The posterior is $\mathrm{Beta}(a + h, b + n - h)$
-for $h$ successes in $n$ trials, and its standard deviation shrinks roughly like
-$1/\sqrt{n}$ — the rate at which epistemic uncertainty about $\theta$
-disappears with more data. Keeping only the posterior's peak is the first
-shortcut (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>); the full treatment for many
-parameters returns in <a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>.
+The estimation module gives the rate: the standard error of an estimate from
+$n$ i.i.d. observations shrinks like $\sigma/\sqrt{n}$, so quadrupling the data
+halves the uncertainty about the estimated quantity. The same rate reappears
+for the posterior over a parameter in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>,
+whose standard deviation shrinks roughly like $1/\sqrt{n}$; keeping only that
+posterior's peak is the first shortcut (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>),
+and the full treatment for many parameters returns in
+<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>.
 
 --
 
@@ -160,8 +162,8 @@ to, and the count table of the introduction in general form. The strands meet
 at the data: a table is read as $n$ draws from a joint, and independence
 supplies the i.i.d. assumption; recorded values additionally carry noise,
 artefacts and outliers. Statistics and estimation then quantifies what a sample
-says about the population, and Bayes' theorem returns for a
-parameter. There is no arrow from independence to random variables: random
+says about the population and how precisely; Bayes' theorem returns for a
+parameter in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. There is no arrow from independence to random variables: random
 variables need only the measure.
 
 ---
@@ -2332,21 +2334,85 @@ independent, $\tfrac{1}{36} = \tfrac16 \cdot \tfrac16$.
 ## The Classic Confusion
 
 
-<div class="c-warning">
+<div class="img-h-sm">
 
-**Statistical independence does not mean the events are disjoint.**
+![Three sample spaces drawn as rectangles, A and B each of area 0.4. (a) disjoint vertical strips; (b) a vertical strip A and a horizontal strip B crossing in an area of 0.16; (c) a vertical strip A and a block B crossing it in an area of 0.1](/units/math/stochastic/figures/independence-disjoint-vs-crossing.svg)
 
 </div>
 
 
-Disjoint events with positive probability are about as **dependent** as events
-can be: if $A$ occurs, $B$ certainly did not.
 
-$$
-A \cap B = \emptyset \Rightarrow P(A \mid B) = 0 \neq P(A)
-$$
+<div class="q">
+
+Which pair is **independent** — and why?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+**(a) dependent.** If $B$ occurs, $A$ certainly did not:
+$P(A \mid B) = 0 \neq 0.4$.
+
+</div>
+
+
+<div class="column">
+
+**(b) independent.** $A$ takes the same share of $B$ as of $\Omega$:
+$P(A \mid B) = 0.16 / 0.4 = 0.4$.
+
+</div>
+
+
+<div class="column">
+
+**(c) dependent.** They overlap, but too little:
+$P(A \mid B) = 0.1 / 0.4 = 0.25 \neq 0.4$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+**Statistical independence does not mean the events are disjoint.** Disjoint
+events with positive probability are about as **dependent** as events can be.
+
+</div>
+
+
+</div>
+
 
 Notes:
+In the rectangle the areas are probabilities. (a): $P(A \cap B) = 0$ while
+$P(A)P(B) = 0.16$. (b): a vertical strip of width 0.4 and a horizontal strip
+of height 0.4 cross in a rectangle of area $0.4 \cdot 0.4 = 0.16 =
+P(A)P(B)$, so the product form holds exactly. Strips that cross the whole of
+$\Omega$ are always independent, whatever their widths; this is the picture
+behind the next slide. (c): $B$ is a block of width 0.8 and height 0.5, still
+area 0.4, starting inside $A$; the overlap is $0.2 \cdot 0.5 = 0.1 < 0.16$, so
+$A$ and $B$ are negatively dependent. Overlap alone decides nothing; only its
+size compared with $P(A)P(B)$ does.
+
+The overlap is bounded: $A \cap B \subseteq B$, so
+$P(A \cap B) \leq \min(P(A), P(B))$ always, with $P(A \cap B) = P(B)$ only when
+$B$ lies inside $A$ (up to a set of probability 0). Below that, every value
+down to $\max(0, P(A) + P(B) - 1)$ is possible; here $[0, 0.4]$, with 0.16 the
+single independent value.
+
+
 Disjoint events with positive probability exclude each other: the occurrence
 of one rules out the other, which is maximal information about it. Formally,
 $P(A \cap B) = 0$ while $P(A)P(B) > 0$, so the product form fails. Learning
@@ -2472,6 +2538,8 @@ A random variable is a function on the sample space; its distribution is
 inherited from the probability measure. The module covers one variable at a
 time: discrete and continuous distributions, expectation and variance, and the
 families the rest of the course uses (Bernoulli, binomial, uniform, normal).
+It closes with what a family is: a formula with a few parameters instead of a
+table with one number per value, which needs less data but assumes a shape.
 
 --
 
@@ -2907,6 +2975,114 @@ $\mathrm{Var}(X) = 91/6 - 12.25 = 35/12 \approx 2.92$ and $\sigma \approx 1.71$.
 
 --
 
+## Expectation and Variance, Drawn
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+<div class="viz" data-viz="math/distribution-explorer"
+ data-params='{"kind": "dice-sum", "moments": true}'></div>
+
+</div>
+
+
+<div class="column">
+
+<div class="viz" data-viz="math/distribution-explorer"
+ data-params='{"kind": "geometric", "p": 0.3, "n": 30, "moments": true}'></div>
+
+</div>
+
+
+</div>
+
+
+The red triangle marks $E[X]$: read the bars as weights on a beam, and the beam
+would rest level on it.
+
+
+<div class="q">
+
+Does $E[X]$ sit under the **highest bar**?
+
+</div>
+
+
+
+<div class="fragment">
+
+Only for the symmetric one. The geometric's highest bar is at 1, but
+$E[X] = 1/p \approx 3.33$: its **long right tail** pulls the expectation away
+from the peak, and widens $\sigma$.
+
+</div>
+
+
+Notes:
+The red fulcrum marks $E[X]$, the point at which the bars, read as weights
+$p(a\_i)$ placed at positions $a\_i$, balance: $\sum\_i (a\_i - \mu)\\,p(a\_i) = 0$.
+The bracket spans $\mu \pm \sigma$. Sum of two dice: $E[X] = 7$,
+$\mathrm{Var}(X) = 35/6$, $\sigma \approx 2.42$; the distribution is symmetric
+about 7, so expectation, peak (mode) and median coincide. Geometric with
+$p = 0.3$ (number of trials up to the first success): $E[X] = 1/p \approx 3.33$,
+$\mathrm{Var}(X) = (1 - p)/p^2 \approx 7.78$, $\sigma \approx 2.79$, mode 1,
+median 2. The figure truncates the support at 30, which carries probability
+$1 - 0.7^{30} > 0.9999$.
+
+For a right-skewed distribution the order is typically mode < median < mean.
+Far values pull the expectation in proportion to their distance, the variance
+in proportion to their squared distance. The next slide turns the asymmetry
+itself into a number.
+
+--
+
+## Skewness
+
+
+<div class="c-definition">
+
+**Definition (Skewness).** With $\mu = E[X]$ and $\sigma^2 = \mathrm{Var}(X)$,
+$$
+\mathrm{Skew}(X) = E\left[\left(\frac{X - \mu}{\sigma}\right)^{3}\right]
+= \frac{E\big[(X - \mu)^3\big]}{\sigma^3}
+$$
+
+</div>
+
+
+Cubing **keeps the sign** and lets far values dominate: a long right tail
+gives $\mathrm{Skew} > 0$, a long left tail $\mathrm{Skew} < 0$.
+
+| distribution | skewness | shape |
+|---|---|---|
+| sum of two dice | $0$ | symmetric about 7 |
+| geometric, $p = 0.3$ | $\frac{2 - p}{\sqrt{1 - p}} \approx 2.03$ | long right tail |
+
+Notes:
+Skewness is the standardised third central moment; the third moment
+$E[(X - \mu)^3]$ alone has the cubed unit of $X$, and dividing by $\sigma^3$
+makes it unit-free. It is invariant under $aX + b$ with $a > 0$ and changes
+sign for $a < 0$: $\mathrm{Skew}(-X) = -\mathrm{Skew}(X)$. A distribution
+symmetric about $\mu$ has skewness 0, because every $(a - \mu)^3$ is cancelled
+by its mirror image; the converse fails, and asymmetric distributions with
+skewness 0 exist. Skewness exists only if $E[|X|^3] < \infty$.
+
+Values: for the geometric distribution
+$\mathrm{Skew} = (2 - p)/\sqrt{1 - p} = 1.7/\sqrt{0.7} \approx 2.03$, positive
+for every $p < 1$. For the Bernoulli distribution
+$\mathrm{Skew} = (1 - 2p)/\sqrt{p(1 - p)}$: $p = 0.9$ gives
+$-0.8/0.3 \approx -2.67$, $p = 0.5$ gives 0. The binomial has
+$(1 - 2p)/\sqrt{np(1 - p)}$, which tends to 0 as $n$ grows, one sign of its
+approach to the normal distribution. The fourth standardised moment, the
+kurtosis $E[((X - \mu)/\sigma)^4]$, measures the weight of the tails and is 3
+for every normal distribution. The sample version of the skewness is in
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>.
+
+--
+
 ## Takeaway
 
 
@@ -3066,8 +3242,36 @@ point mass at 0 and a density above it.
 
 ## Probability Is Area Under the Curve
 
+
+<div class="grid-figure">
+
+
+<div class="column">
+
 <div class="viz viz-lg" data-viz="math/distribution-explorer" data-steps="1"
  data-params='{"kind": "normal", "mu": 0, "sigma": 1, "shade": [-1, 1]}'></div>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**One value: probability 0.** $P(X = a) = \int\_a^a f = 0$ for every real
+$a$ — a line has no area. The curve's height $f(a)$ is not a probability.
+
+At 0 the curve is 0.40 high, yet $P(X = 0) = 0$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 The shaded region is $P(-1 \leq X \leq 1)$ — the same "probability as area"
 intuition from the axioms unit, now with a curve instead of a Venn diagram.
@@ -3270,6 +3474,171 @@ combined with Bernoulli or binomial data yields a Beta posterior. The Dirichlet
 distribution generalises the Beta to vectors of probabilities that sum to 1 and
 plays the same role for categorical data. None of these four is needed for the
 rest of this unit.
+
+--
+
+## A Table or a Formula?
+
+
+<div class="q">
+
+How many numbers does it take to write down each distribution completely?
+
+</div>
+
+
+
+<div class="fragment">
+
+| random variable | as a table | as a formula |
+|---|---|---|
+| heads in 10 flips, $0, \ldots, 10$ | 10 numbers | binomial$(10, \theta)$: **1** number |
+| height in cm, 20 bins of 2.5 cm | 19 numbers | normal$(\mu, \sigma^2)$: **2** numbers |
+| a loaded die | 5 numbers | no shorter formula: still 5 |
+
+</div>
+
+
+
+<div class="fragment c-definition">
+
+A **parametric family** is one formula $p(x \mid \theta)$ for a whole set of
+distributions. The **parameter** $\theta$ picks one member: $\theta$ for the
+binomial, $(\mu, \sigma)$ for the normal.
+
+</div>
+
+
+Notes:
+A table lists one probability per value, so a variable with $k$ values needs
+$k - 1$ numbers (the last follows because they sum to 1). A formula computes
+every probability from a few parameters: the binomial
+$P(X = k) = \binom{n}{k} \theta^k (1 - \theta)^{n - k}$ fixes all eleven
+probabilities through $\theta$ alone, and the normal density fixes a whole
+continuum through $\mu$ and $\sigma$. The saving exists only when the formula
+has fewer parameters than the table has cells. For the loaded die there is no
+such formula, and the table is itself the parametric family "categorical with
+6 values", with 5 parameters.
+
+The notation $p(x \mid \theta)$ reads "the probability of $x$ for the
+parameter value $\theta$". Once $\theta$ is treated as unknown and given a
+distribution, the bar becomes an ordinary conditional — the step taken in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. A model that does not fix the
+number of parameters in advance (a histogram whose bins grow with the data, a
+kernel density estimate) is called **non-parametric**.
+
+--
+
+## What the Formula Buys — and What It Costs
+
+
+<div class="img-h-md">
+
+![Twenty heights summarised two ways: a histogram with 19 free numbers that gives an unseen height of 162 cm probability zero, and a normal curve with two numbers that gives it positive density](/units/math/stochastic/figures/parametric-vs-table.svg)
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="marks-yes">
+
+- **Fewer numbers to estimate:** 20 heights for 2 numbers, not for 19.
+- **Unseen values get probability:** the curve fills the gaps.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="fragment marks-no">
+
+- **The shape is an assumption.** If the family is wrong, more data does not
+  fix it.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Twenty heights, drawn from a normal distribution with mean 172 cm and standard
+deviation 8 cm. The table needs one number per bin; with 20 observations
+spread over 19 free numbers, most bins hold zero or one person, and an empty
+bin — no one is 162 cm tall — gets probability 0, although that height is
+clearly possible. The normal family estimates only $\mu$ and $\sigma$, from the
+same 20 values, and assigns every height a positive density. Each parameter is
+estimated from all observations, so the estimates are far less noisy.
+
+The price is an assumption about the shape. With enough data a histogram
+approaches any distribution; a normal curve stays a normal curve, so if the
+true distribution is skewed or has two peaks, the fitted model is wrong however
+many observations are added. This is the systematic-error pattern again: more
+data reduces the noise of the estimate, not the error of the assumption. The
+trade-off between few parameters (stable, possibly wrong) and many parameters
+(flexible, data-hungry) returns as the bias–variance trade-off.
+
+--
+
+## Mini-Exercise
+
+A class of **children and their parents** is measured, and a normal
+distribution is fitted to all heights.
+
+
+<div class="q">
+
+Where does the fitted curve have its peak, and how many people stand there?
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Between the two groups, where **almost nobody** is. The data has two peaks;
+the normal family has only one. A mixture of two normals fits.
+
+</div>
+
+
+Notes:
+With children around 130 cm and parents around 172 cm, the fitted mean lies
+near 150 cm, in the gap between the groups, and the fitted standard deviation
+is large enough to cover both. More measurements make $\hat\mu$ and
+$\hat\sigma$ more precise but leave the peak in the gap: the family, not the
+sample, is the problem. A mixture of two normals,
+$\pi\\, \mathcal{N}(\mu\_1, \sigma\_1^2) + (1 - \pi)\\, \mathcal{N}(\mu\_2, \sigma\_2^2)$,
+has five parameters and fits; mixture models and how to fit them are treated
+later in the course.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A **parametric family** describes a distribution by a formula with a few
+parameters instead of a table with one number per value. It needs far less
+data and gives unseen values probability — but its **shape is an assumption**
+that no amount of data corrects.
+
+</div>
+
 
 ---
 
@@ -3618,14 +3987,147 @@ co-variation. Zero covariance is weaker than independence.
 > could have produced it — and what else went into the recorded values?
 
 Notes:
-The module connects data to the probability language. What kinds of values
-and datasets exist: attribute types (nominal, ordinal, interval, ratio) decide
-which statistics and models are meaningful, and the shape of a dataset (record,
-graph, grid, spatio-temporal) decides whether rows can be treated as
-independent. How a table is read: $n$ rows are $n$ draws from a joint
-distribution over the columns, usually assumed i.i.d. What can go wrong on the
-way: noise, artefacts, outliers and missing values, each a statement about how
-a recorded value was generated.
+The module reads a dataset from the outside in. Its shape first: record,
+graph, grid or spatio-temporal, which decides whether rows can be treated as
+independent at all. The simplest shape, a table, is then read as a sample:
+columns are random variables, and $n$ rows are $n$ draws from a joint
+distribution over them. The columns' scales (nominal, ordinal, interval,
+ratio) decide which statistics are meaningful and which parametric family
+suits each column; the rows are usually assumed i.i.d. Last, the single
+recorded value: noise, artefacts, outliers and missing values, each a
+statement about how it was generated. Three mini-exercises and the takeaway
+close the module.
+
+--
+
+## Four Shapes of Data
+
+
+<div class="grid-4">
+
+
+<div class="card">
+
+### Record data
+Objects × attributes — the familiar table. Rows are *treated as* independent.
+
+</div>
+
+
+<div class="card">
+
+### Graph data
+Objects carry **links** to other objects: web pages, social networks,
+citations.
+
+</div>
+
+
+<div class="card">
+
+### Fields / grids
+Objects sit in a **spatial** arrangement: images, sensor lattices, simulations.
+
+</div>
+
+
+<div class="card">
+
+### Spatio-temporal
+Position **and** time: monthly land temperatures, traffic movement, trajectories.
+
+</div>
+
+
+
+</div>
+
+
+<div class="c-note">
+
+The shape decides which methods even apply. A table whose rows are treated as
+independent can be shuffled without loss; a grid or a time series cannot — the
+arrangement *is* information. Independence of rows is an assumption, not a
+property of the file.
+
+</div>
+
+
+Notes:
+Every shape can be flattened into a table, but not without loss: a graph
+becomes an edge list whose rows share nodes, an image becomes one row per
+pixel whose neighbours are correlated, a time series becomes rows whose order
+carries the dynamics. In each case the rows are no longer independent, so
+methods that assume independent rows give wrong standard errors and
+over-optimistic validation (a random train/test split leaks information
+between neighbouring rows). Network science, spatial statistics and
+time-series analysis are the methods that model the arrangement instead.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## A Table Is a Sample From a Joint Distribution
+
+| | payment | satisfaction | born | income (k€) | returned? |
+|---|---|---|---|---|---|
+| **column** | $X\_1$ · nominal | $X\_2$ · ordinal | $X\_3$ · interval | $X\_4$ · ratio | $X\_5$ · nominal |
+| **draw** $\mathbf{x}\_1$ | card | 4 | 1987 | 52 | yes |
+| **draw** $\mathbf{x}\_2$ | invoice | 2 | 1995 | 31 | no |
+
+Each **column** is a random variable **with a measurement scale**; each **row**
+is one draw $\mathbf{x}\_i$ from **one joint distribution** $p(x\_1, \ldots, x\_5)$
+that nobody has written down.
+
+
+<div class="q">
+
+A is 180 cm long, B 90 cm. Is A "twice as long"?
+
+</div>
+
+
+
+<div class="fragment">
+
+| length recorded as | A | B | what the values support |
+|---|---|---|---|
+| cm — **ratio** | 180 | 90 | "twice as long" — in inches 70.9 vs 35.4, still ×2 |
+| cm above 100 cm — **interval** | 80 | −10 | "90 cm longer"; the ratio −8 means nothing |
+| size class 1–3 — **ordinal** | 3 | 1 | "longer"; "three times" means nothing |
+| size label — **nominal** | L | S | "different" — nothing more |
+
+</div>
+
+
+Notes:
+The second header row is not data: it names the random variable behind each
+column and the scale its values are measured on. A random variable is a
+function from the population (customers) to values; the scale states which
+relations between those values carry information. A row is one customer drawn
+from the population with all attributes recorded at once, a realisation of the
+vector $(X\_1, \ldots, X\_5)$. The table as a whole is a sample of $n$ such draws.
+
+A dataset is not the distribution but a sample from it. Every quantity computed
+from the table — a mean, a proportion, a correlation — is therefore an
+estimate of a property of $p(x\_1, \ldots, x\_5)$. A different sample from the
+same distribution would give a different value, and this sample-to-sample
+variation is the estimate's error.
+
+The length example keeps the object fixed and changes only the recording. A
+ratio scale has a true zero, so ratios survive every change of unit
+($x \mapsto ax$, $a > 0$): 180/90 = 70.9/35.4 = 2. Measuring from an arbitrary
+reference point, here 100 cm, is an interval scale: the map
+$x \mapsto x - 100$ preserves differences (90 cm) but not ratios
+(80 / −10 = −8). Size classes keep only the order, and any strictly increasing
+recoding of 1, 2, 3 is equally valid. A label keeps only identity. The same
+number 3, or the same pair of values, therefore supports different statements
+depending on the scale; <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> defines the four
+scales and the statistics each permits (Stevens 1946).
+
+For the probabilistic reading the scale matters twice: it decides which
+summaries of a sample are meaningful, and which distribution family is a
+sensible model for the column, taken up in "The Scale Suggests the Model".
 
 --
 
@@ -3720,251 +4222,34 @@ and which **plots** are permissible. Every method in this course depends on it.
 
 --
 
-## Mini-Exercise
+<!-- .slide: class="smaller" -->
 
-A customer table records satisfaction (one to five stars) and year of birth.
-Which scale is each — and whose **mean** would you not report?
+## The Scale Suggests the Model
+
+
+<div class="q">
+
+Which distribution would you write down for each column — and how many
+numbers does it need?
+
+</div>
+
 
 
 <div class="fragment">
 
-Satisfaction is **ordinal**: its mean assumes equal gaps between the stars —
-report the median. Year of birth is **interval**: the mean year is fine, but
-ratios are not ("born twice as late" means nothing); differences such as age
-are fine.
+| attribute | values | scale | a first model | numbers |
+|---|---|---|---|---|
+| returned? | yes / no | nominal | **Bernoulli**$(p)$ | 1 |
+| payment | card, invoice, … ($k$) | nominal | **categorical**$(p\_1, \ldots, p\_k)$ | $k - 1$ |
+| satisfaction | 1 – 5 stars | ordinal | categorical (order unused) | 4 |
+| orders last month | 0, 1, 2, … | ratio, count | **Poisson**$(\lambda)$ | 1 |
+| height | around 170 cm | ratio | **normal**$(\mu, \sigma^2)$ | 2 |
+| income | $> 0$, skewed | ratio | **log-normal**: normal on $\log$ income | 2 |
+| share of orders returned | $[0, 1]$ | ratio | **Beta**$(\alpha, \beta)$ | 2 |
 
 </div>
 
-
-Notes:
-Satisfaction in stars is ordinal. The mean treats the gap from one to two
-stars as equal to the gap from four to five, which the scale does not
-guarantee; the median and the mode use only the order and the labels. Means of
-rating scales are nonetheless widely reported in practice, which amounts to
-treating the scale as interval.
-
-Year of birth is interval: year 0 is a convention, so "born twice as late" is
-meaningless, but the mean year and differences between years are meaningful.
-A difference of two interval values, such as an age computed from years of
-birth, is on a ratio scale. Payment method is nominal (only counts, shares
-and the mode are meaningful); income is ratio, with a true zero, so "twice the
-income" is a valid statement.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-An attribute's **scale of measurement** licenses the operations you may perform
-on it. Choosing a statistic before checking the scale is the most common
-silent error in data analysis.
-
-</div>
-
-
---
-
-## Four Shapes of Data
-
-
-<div class="grid-4">
-
-
-<div class="card">
-
-### Record data
-Objects × attributes — the familiar table. Rows are *treated as* independent.
-
-</div>
-
-
-<div class="card">
-
-### Graph data
-Objects carry **links** to other objects: web pages, social networks,
-citations.
-
-</div>
-
-
-<div class="card">
-
-### Fields / grids
-Objects sit in a **spatial** arrangement: images, sensor lattices, simulations.
-
-</div>
-
-
-<div class="card">
-
-### Spatio-temporal
-Position **and** time: monthly land temperatures, traffic movement, trajectories.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-note">
-
-The shape decides which methods even apply. A table whose rows are treated as
-independent can be shuffled without loss; a grid or a time series cannot — the
-arrangement *is* information. Independence of rows is an assumption, not a
-property of the file.
-
-</div>
-
-
-Notes:
-Ask what is lost by flattening each non-record type into a table. That question
-is the bridge to network science and to time-series methods, and it recurs
-whenever someone loads a CSV.
-
---
-
-## Three Data Quality Problems
-
-
-<div class="grid-3">
-
-
-<div class="card">
-
-### Noise
-Random distortion of measured values. Cannot be removed, only modelled or
-smoothed.
-
-</div>
-
-
-<div class="card">
-
-### Outliers
-Values far from the rest. Either an **error** to remove or the **signal** you
-were looking for — fraud, faults, discoveries.
-
-</div>
-
-
-<div class="card">
-
-### Missing values
-Absent entries. Handling depends on **why** they are missing, which the data
-itself does not tell you.
-
-</div>
-
-
-
-</div>
-
-
-<div class="c-warning">
-
-"Outlier" is not a property of a data point; it is a judgement about a model of
-what is normal. Deleting outliers deletes evidence against that model.
-
-</div>
-
-
---
-
-## Mini-Exercise
-
-A weather sensor misses 8% of its temperature readings, and it fails mostly
-**when it is very cold**. Is deleting the rows with missing values harmless?
-
-
-<div class="fragment c-insight">
-
-No. Deletion removes the coldest days, so every statistic afterwards — the mean
-temperature first — is biased upwards. Had the gaps been random transmission
-dropouts, deletion would be roughly harmless. The file looks the same in both
-cases; only the **mechanism** differs.
-
-</div>
-
-
-
-<div class="fragment takeaway">
-
-The shape of the data decides which methods apply; the **reason** for a quality
-problem decides how it may be handled. Neither is visible in the file.
-
-</div>
-
-
-Notes:
-This is Principle 3 in its most practical form: a preprocessing decision is a
-modelling assumption, and here an untestable one. Students should leave able to
-ask "why is this missing?" before "how do I impute it?". If time allows, ask
-what else could have told us about the mechanism (a thermometer next to it,
-the sensor's data sheet) — domain knowledge, not the data.
-
---
-
-## A Table Is a Sample From a Joint Distribution
-
-| customer | payment | satisfaction | born | income (k€) | returned? |
-|---|---|---|---|---|---|
-| 1 | card | 4 | 1987 | 52 | yes |
-| 2 | invoice | 2 | 1995 | 31 | no |
-| 3 | card | 5 | 1979 | 78 | no |
-| … | … | … | … | … | … |
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Each column is a random variable
-$X\_{\text{payment}}, X\_{\text{satisf.}}, \ldots$ — a function from customers to
-values, exactly as a random variable was defined.
-
-</div>
-
-
-<div class="card">
-
-### Each row is one draw
-The whole table is $n$ draws from one joint distribution
-$p(x\_1, \ldots, x\_d)$ that nobody has written down.
-
-</div>
-
-
-</div>
-
-
-Notes:
-A column is a random variable in the formal sense: a function from the
-population (here, customers) to values. Drawing a row means drawing a member of
-the population and recording all its attribute values at once, so the row is
-one realisation of the vector $(X\_1, \ldots, X\_d)$. The customer number is an
-identifier, not an attribute to be modelled.
-
-A dataset is not the distribution but a sample from it. Every quantity computed
-from the table — a mean, a proportion, a correlation — is therefore an
-estimate of a property of $p(x\_1, \ldots, x\_d)$. A different sample from the
-same distribution would give a different value, and this sample-to-sample
-variation is the estimate's error.
-
---
-
-## The Scale Suggests the Model
-
-| attribute | scale | a first model |
-|---|---|---|
-| returned? | nominal, two values | **Bernoulli**$(p)$ — one parameter |
-| payment | nominal, $k$ values | **categorical**$(p\_1, \ldots, p\_k)$, $\sum\_j p\_j = 1$ |
-| satisfaction | ordinal | categorical — the order is not used, or an ordinal model |
-| born | interval | normal, on a restricted range |
-| income | ratio, positive, skewed | log-normal, or normal on $\log$ income |
 
 
 <div class="c-warning">
@@ -3976,7 +4261,11 @@ for ZIP codes is as meaningless as their mean.
 
 
 Notes:
-The categorical distribution assigns $P(X = j) = p\_j$ to each of $k$ values,
+Each entry is a parametric family: a formula with a few parameters instead of
+one probability per value. The column "numbers" counts
+the parameters of the family: what has to be
+estimated from the data, instead of one probability per value. The categorical
+distribution assigns $P(X = j) = p\_j$ to each of $k$ values,
 with $k - 1$ free parameters because $\sum\_j p\_j = 1$; the Bernoulli is the
 case $k = 2$. Naive Bayes classifiers, for example, commonly model each
 nominal attribute this way, with one categorical distribution per class.
@@ -3984,11 +4273,19 @@ nominal attribute this way, with one categorical distribution per class.
 Ordinal attributes are the hard case. A categorical model ignores the order; a
 numeric model (e.g. normal) assumes equal gaps between levels, which the
 ordinal scale does not justify. Dedicated ordinal models, such as
-cumulative-logit models, use the order without assuming equal gaps. For year of
-birth a normal model is only an approximation, since its support is the whole
-real line. Income is positive and right-skewed, so a normal model would put
+cumulative-logit models, use the order without assuming equal gaps. For height a normal model is
+only an approximation, since its support is the whole real line, including
+negative values that carry negligible probability. Income is positive and right-skewed, so a normal model would put
 probability on negative incomes; a log-normal model means that $\log$ income
 is normal. ZIP codes are nominal despite consisting of digits.
+
+The Poisson distribution, $P(X = k) = e^{-\lambda} \lambda^k / k!$ for
+$k = 0, 1, 2, \ldots$, models the number of events in a fixed period at a
+constant rate $\lambda$, which is also its mean and its variance; real counts
+often vary more than that (overdispersion), and a negative binomial adds a
+second parameter for it. The exponential distribution models the waiting time
+between such events. A share in $[0, 1]$ is modelled by a Beta distribution,
+the same family that serves as the standard prior for an unknown probability.
 
 --
 
@@ -4048,21 +4345,6 @@ a model is fitted on and the data it is applied to.
 
 --
 
-## Takeaway
-
-
-<div class="takeaway">
-
-A dataset is **$n$ draws from an unknown joint distribution**: columns are random
-variables, rows are draws, and the scale of each column suggests its model.
-Reading a table this way rests on an assumption — **i.i.d.** — that should be
-checked, not presumed.
-
-</div>
-
-
---
-
 ## Where Does a Recorded Value Come From?
 
 
@@ -4074,7 +4356,7 @@ A sensor records 22.4 °C. Besides the temperature, what went into that number?
 
 
 <div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
- data-params='{"labels": ["the true value", "artefact — systematic, the same every time", "noise — random, mean 0"]}'>
+ data-params='{"labels": ["the true value", "artefact — deterministic, the same every time", "noise — random, mean 0"]}'>
 
 $$
 x = \eqa{s} + \eqb{b} + \eqc{\varepsilon}
@@ -4098,7 +4380,11 @@ $E[\varepsilon] = 0$. Noise is aleatoric: repeating the measurement gives a
 different $\varepsilon$ each time. An artefact is introduced by the
 measurement process itself (a sensor in the sun, a miscalibrated scale, a
 logging bug, a resampled image) and gives the same $b$ for every reading taken
-through that process. A third case is a reading that does not follow the
+through that process. More generally an artefact is any deterministic error
+$x = g(s)$: a decimal point shifted (1.85 m recorded as 18.5 m), °F stored as
+°C, a wrong conversion in the pipeline. The same $s$ always gives the same
+wrong $x$, so repeating the measurement does not reveal it, and it may affect
+every row or only those from one source. A third case is a reading that does not follow the
 model at all, an outlier. The same decomposition underlies regression later
 in the course, where $s$ becomes a function $f(\mathbf{x})$ and $\varepsilon$
 the observation noise.
@@ -4139,7 +4425,7 @@ close to it; with $n$ readings the mean's random error shrinks like
 $1/\sqrt{n}$ (made precise as the standard error in the statistics module).
 Artefact: the same scatter shifted by $b = 2.5$; the mean converges to
 $s + b$, not to $s$, so more data makes the estimate more precise but not more
-correct. Outlier: one reading of 35 °C (a decimal-point error, say) raises the
+correct. Outlier: one reading of 35 °C (a mistyped value, say) raises the
 mean from about 20 to about 21.3, while the median stays near 20.
 
 --
@@ -4149,7 +4435,7 @@ mean from about 20 to about 21.3, while the median stays near 20.
 | problem | in the model | more data | what helps |
 |---|---|---|---|
 | **noise** | $\varepsilon \sim p(\varepsilon)$, $E[\varepsilon] = 0$ | averages it out | model it; average |
-| **artefact** | $b \neq 0$, systematic | does **not** help | calibration, a second instrument, domain knowledge |
+| **artefact** | $x = g(s)$, deterministic | does **not** help | calibration, a second instrument, domain knowledge |
 | **outlier** | a draw from another $q$ | a share $\pi$ remains | robust statistics, or model $q$: $(1 - \pi)\\,p + \pi\\,q$ |
 | **missing** | $M$ = missing, $P(M \mid x)$ | depends on why | ask for the mechanism first |
 
@@ -4168,7 +4454,9 @@ $\mathcal{N}(0, \sigma^2)$; heavier-tailed choices (Laplace, Student-t) allow
 occasional large errors without calling them outliers. An artefact is a bias
 and is invisible from within one dataset, because every reading carries it;
 it shows only against an external reference (a calibrated instrument, a second
-data source, known physical limits). Outliers are modelled as a mixture: with
+data source, known physical limits: no adult is 18.5 m tall), or once the
+source of each value (the scale, the sensor, the clerk) is recorded as an
+attribute and the groups can be compared. Outliers are modelled as a mixture: with
 probability $1 - \pi$ a reading comes from the model $p$, with probability
 $\pi$ from a broad contamination distribution $q$. Fitting the mixture yields,
 for each reading, the posterior probability that it is an outlier — Bayes'
@@ -4176,33 +4464,98 @@ theorem with two hypotheses. Missing values are described by a missingness
 indicator $M$: missing completely at random (MCAR) if $P(M = 1)$ is a
 constant, missing at random (MAR) if it depends only on observed attributes,
 missing not at random (MNAR) if it depends on the missing value itself, as
-for the sensor that fails in the cold. Only under MCAR is deleting incomplete
+for a sensor that fails in the cold. Only under MCAR is deleting incomplete
 rows unbiased.
 
 --
 
-## Mini-Exercise
+## Mini-Exercise: Stars and Birth Years
 
-Patients are weighed on three scales; one of them reads 3 kg too high. Does
-weighing ten times as many patients bring the mean weight closer to the
-truth?
+A customer table records satisfaction (one to five stars) and year of birth.
+Which scale is each — and whose **mean** would you not report?
 
 
-<div class="fragment c-insight">
+<div class="fragment">
 
-No. If a third of the patients use each scale, the mean stays about 1 kg too
-high however many are weighed: an **artefact**. More data shrinks only the
-noise.
+Satisfaction is **ordinal**: its mean assumes equal gaps between the stars —
+report the median. Year of birth is **interval**: the mean year is fine, but
+ratios are not ("born twice as late" means nothing); differences such as age
+are fine.
 
 </div>
 
 
 Notes:
-The expected reading is $s + \tfrac{1}{3} \cdot 3 + \tfrac{2}{3} \cdot 0 = s + 1$
-kg. A larger sample lets the sample mean converge — to $s + 1$. The artefact
-is detectable once the scale is recorded as an attribute: the mean per scale
-then differs by about 3 kg, more than noise explains. Recording how a value
-was measured is what makes systematic errors visible.
+Satisfaction in stars is ordinal. The mean treats the gap from one to two
+stars as equal to the gap from four to five, which the scale does not
+guarantee; the median and the mode use only the order and the labels. Means of
+rating scales are nonetheless widely reported in practice, which amounts to
+treating the scale as interval.
+
+Year of birth is interval: year 0 is a convention, so "born twice as late" is
+meaningless, but the mean year and differences between years are meaningful.
+A difference of two interval values, such as an age computed from years of
+birth, is on a ratio scale. Payment method is nominal (only counts, shares
+and the mode are meaningful); income is ratio, with a true zero, so "twice the
+income" is a valid statement.
+
+--
+
+## Mini-Exercise: Three Scales
+
+Patients are weighed on three scales, a third on each. Two record
+$X = S + \varepsilon$; the third is miscalibrated and adds exactly 3 kg every
+time: $X = S + 3 + \varepsilon$. Does weighing ten times as many patients bring
+the mean of $X$ closer to $E[S]$?
+
+
+<div class="fragment c-insight">
+
+No. $E[X] = E[S] + \tfrac13 \cdot 3 = E[S] + 1$ kg: the mean converges, but to
+a value 1 kg too high — an **artefact**. More data shrinks only the noise
+$\varepsilon$.
+
+</div>
+
+
+Notes:
+$S$ is the true weight, $\varepsilon$ the random noise with $E[\varepsilon] = 0$,
+the same for all three scales. By linearity
+$E[X] = E[S] + \tfrac13 \cdot 3 + \tfrac23 \cdot 0 = E[S] + 1$ kg. The sample
+mean converges to $E[X]$, so a larger sample makes the estimate more precise
+but not more correct. The artefact is detectable once the scale is recorded
+as an attribute: the mean per scale then differs by about 3 kg, more than the
+noise explains.
+
+--
+
+## Mini-Exercise: A Sensor That Fails in the Cold
+
+Temperature $T$, missingness indicator $M$ (1 = reading missing). The sensor
+fails mostly in the cold: $P(M = 1 \mid T)$ is large for low $T$. After
+deleting the incomplete rows, does the mean estimate $E[T]$ — or what?
+
+
+<div class="fragment c-insight">
+
+It estimates $E[T \mid M = 0]$, which is **larger** than $E[T]$: the coldest
+days are gone. Only if $M$ is **independent** of $T$ is
+$E[T \mid M = 0] = E[T]$ and deletion harmless.
+
+</div>
+
+
+Notes:
+The rows that remain are draws from the conditional distribution
+$p(t \mid M = 0)$, not from $p(t)$. By Bayes' theorem,
+$p(t \mid M = 0) \propto P(M = 0 \mid t)\\, p(t)$: low temperatures are
+down-weighted because they are the ones likely to be missing, so the mean of
+the remaining rows overestimates $E[T]$, and more data does not remove the
+bias. This is missing not at random (MNAR). If $P(M = 1 \mid t)$ is a
+constant, $M$ and $T$ are independent, the weighting is flat and
+$p(t \mid M = 0) = p(t)$: missing completely at random (MCAR). The two cases
+produce files that look alike; telling them apart requires knowledge of the
+mechanism, such as a second thermometer or the sensor's specification.
 
 --
 
@@ -4211,12 +4564,20 @@ was measured is what makes systematic errors visible.
 
 <div class="takeaway">
 
-A recorded value is **truth + artefact + noise**, or it does not follow the
-model at all. More data removes **noise only**; artefacts, outliers and
-missing values each need an assumption about how the data was generated.
+A dataset is **$n$ draws from an unknown joint distribution** — and every way
+of reading it is an assumption about how it was generated.
 
 </div>
 
+
+1. **Shape:** only record data can plausibly be read as independent rows.
+2. **Table:** columns are random variables, rows are draws from
+   $p(x\_1, \ldots, x\_d)$.
+3. **Scale:** licenses a column's statistics and suggests its model.
+4. **i.i.d.:** lets the rows factorise — to be checked, not presumed.
+5. **Recorded value:** truth + artefact + noise. More data removes **noise
+   only**; artefacts, outliers and missing values need a model of how they
+   arose.
 
 ---
 
@@ -4229,13 +4590,12 @@ missing values each need an assumption about how the data was generated.
 > we be?
 
 Notes:
-Two steps. What is computed from a sample: a statistic is a function of the
-sample, and as an estimator of a population quantity it has a sampling
-distribution whose standard deviation is the standard error. What it says
-about a parameter: in the Beta–Bernoulli model the posterior over $\theta$ is
-again a Beta distribution. Under a flat prior $\mathrm{Beta}(1,1)$ the
-posterior's peak (mode) coincides with the maximum-likelihood estimate $h/n$,
-the starting point of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
+What is computed from a sample: a statistic is a function of the sample, and
+as an estimator of a population quantity it has a sampling distribution whose
+standard deviation is the standard error; a confidence interval turns it into a
+range. The Bayesian answer — a posterior over the parameter, in the
+Beta–Bernoulli model — follows in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, where naive
+Bayes' smoothing needs it.
 
 --
 
@@ -4507,6 +4867,43 @@ and the running sum of squared deviations with each new value.
 
 --
 
+## The Variance, Drawn
+
+<div class="viz viz-lg" data-viz="math/moment-deviations" data-steps="3"
+ data-params='{"power": 2, "unit": " min"}'></div>
+
+
+<div class="q">
+
+**Predict, then drag:** move the light point from 13 to 20 minutes. Roughly how
+much does $s^2$ grow?
+
+</div>
+
+
+Notes:
+The bars are the squared deviations $(x\_i - \overline{x})^2$; their average is
+$s^2$, the dashed line. The unsquared deviations would be useless: they always
+sum to 0, $\sum\_i (x\_i - \overline{x}) = \sum\_i x\_i - n\overline{x} = 0$, the
+balance-point property of the mean. Squaring removes the sign, so both sides contribute,
+and it weights a deviation by its own size: the point at 13 minutes, 6.67 from
+the mean, contributes 44.4 of the total 74.5, i.e. 60% of $s^2$ on its own.
+Here $s^2 = 74.5/9 \approx 8.28$ min² and $s \approx 2.88$ min.
+
+Moving that point to 20 minutes raises $s^2$ to about 23.5 min², almost three
+times as much, and $s$ to 4.85 min; the point then contributes 79% of the
+total. Moving it to 7 minutes gives $s^2 \approx 2.94$ min². The variance is
+therefore as sensitive to single far values as the mean, and more: a value at
+distance $d$ moves the mean by $d/n$ but contributes $d^2/n$ to the variance.
+Robust alternatives are the interquartile range and the median absolute
+deviation.
+
+The steps show the mean, the squared deviations as bars, and their average.
+The light point also moves with the slider below the figure, in steps of 0.5;
+Reset returns it to 13.
+
+--
+
 ## Why the Denominator Changes
 
 
@@ -4562,14 +4959,60 @@ in NumPy, `ddof=0`.
 
 --
 
+## Sample Skewness: Which Tail Is Longer?
+
+$$
+\widehat{\mathrm{Skew}} = \frac{1}{n}\sum\_{i=1}^{n}\left(\frac{x\_i - \overline{x}}{s}\right)^{3}
+\qquad
+\begin{cases} > 0 & \text{long right tail} \\\ < 0 & \text{long left tail} \end{cases}
+$$
+
+<div class="viz viz-lg" data-viz="math/moment-deviations" data-steps="3"
+ data-params='{"power": 3, "unit": " min"}'></div>
+
+
+<div class="q">
+
+Drag the light point left. Where is the skewness 0 — and why there?
+
+</div>
+
+
+Notes:
+The bars are the cubed standardised deviations $z\_i^3$ with
+$z\_i = (x\_i - \overline{x})/s$; their average is the (moment) skewness. Cubing
+keeps the sign, so left and right deviations compete, and it weights a
+deviation by the cube of its size, so the farthest point dominates: at 13
+minutes $z^3 \approx 12.4$, against $-2.5$ for all points left of the mean
+together. The skewness is $1.20$; the mean (6.33) lies to the right of the
+median (5.5). Dividing by $s$ makes the measure unit-free: it is unchanged when
+minutes are converted to seconds.
+
+Answer: at 1 minute. The sample 1, 3, 4, 4.5, 5, 5.5, 6, 7, 9 is symmetric
+about 5 (1 and 9, 3 and 7, 4 and 6, 4.5 and 5.5 mirror each other), so every
+cube is cancelled by its mirror image, mean and median are both 5, and the
+skewness is exactly 0. At 0 minutes it turns negative ($-0.36$). Skewness 0
+does not imply symmetry in general, but symmetry implies skewness 0.
+
+The formula replaces $E$, $\mu$ and $\sigma$ in the definition of
+$\mathrm{Skew}(X)$ by the sample average, $\overline{x}$ and $s$. Right-skewed data are common wherever values are bounded
+below but not above: waiting times, incomes, file sizes, counts. A log
+transformation often makes them nearly symmetric, which is why such
+attributes are modelled with a log-normal distribution. Statistical software
+often reports a bias-corrected sample skewness, which differs from this
+formula by a factor that tends to 1 as $n$ grows.
+
+--
+
 ## Takeaway
 
 
 <div class="takeaway">
 
-$s^2$ describes **the sample**; $\hat{\sigma}^2$ estimates **the population**.
-The $n-1$ is not a convention — it is the price of having estimated the mean
-from the same data.
+Variance and skewness average the deviations from the mean raised to the power
+**2 and 3**: squares add up, cubes compete by sign. $s^2$
+describes **the sample**; $\hat{\sigma}^2$ estimates **the population** — the
+$n-1$ is the price of having estimated the mean from the same data.
 
 </div>
 
@@ -4591,7 +5034,7 @@ What is the probability that the population mean $\mu$ is exactly 73.9 k€?
 
 <div class="fragment">
 
-Zero. $\overline{x}$ is not $\mu$ — it is one **estimate** of it, computed from
+Close to zero. $\overline{x}$ is not $\mu$ — it is one **estimate** of it, computed from
 the seven people who happened to be in the sample.
 
 The honest question is not *what is $\mu$* but **how far from $\mu$ can this
@@ -4602,8 +5045,10 @@ number be?**
 
 Notes:
 The question has no useful answer. If uncertainty about $\mu$ is described by
-any continuous distribution, the probability of one exact value is zero; in the
-frequentist view $\mu$ is a fixed number and carries no probability at all
+a continuous distribution, the probability of one exact value is exactly zero,
+as for any single value under a density; read as "73.9 to the nearest
+0.1 k€", it is the probability of an interval of width 0.1 k€, small but
+positive. In the frequentist view $\mu$ is a fixed number and carries no probability at all
 (it is either 73.9 or not). In both readings, $\overline{x} = \mu$ exactly is
 not to be expected: a different sample of seven people would give a different
 mean.
@@ -4710,9 +5155,10 @@ widely as the observations.
 
 <div class="marks-step">
 
-- The means pile up **around $\mu$** — the estimator is not systematically off
-- The pile is **narrower than the population** — averaging cancels noise
-- The pile is **bell-shaped**, even though the population was not
+- The sample means **centre on $\mu$** — the estimator is not systematically off
+- They **scatter less than single draws**: standard deviation 0.76 instead of
+  1.71 — averaging cancels noise
+- Their histogram is **bell-shaped**, even though the population was not
 
 </div>
 
@@ -4785,51 +5231,24 @@ population.
 ## Standard Error
 
 
-<div class="grid-3-2">
-
-
-<div class="column">
-
-
 <div class="c-definition">
 
-**Definition (Standard error).** The standard deviation of an estimator's
-sampling distribution. For the sample mean of independent draws:
-$$
-\mathrm{SE}(\overline{X}) = \frac{\sigma}{\sqrt{n}}
-$$
+**Definition (Standard error).** The standard error of an **estimator**
+$\hat{\theta}$ is the standard deviation of its **sampling distribution**:
+$\mathrm{SE}(\hat{\theta}) = \sqrt{\mathrm{Var}(\hat{\theta})}$. For the sample
+mean of $n$ independent draws, $\mathrm{SE}(\overline{X}) = \sigma/\sqrt{n}$.
 
 </div>
 
 
-</div>
+Two distributions, two spreads — the die from the widget, $n = 5$:
 
-
-<div class="column">
-
-
-<div class="c-intuition">
-
-How far off a typical **estimate** is — where $\sigma$ says how far apart
-typical **observations** are. Both in the unit of the data.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="c-warning">
-
-$\sigma$ and $\mathrm{SE}$ are different quantities. More data does nothing to
-$\sigma$ — the world stays as variable as it was — and shrinks $\mathrm{SE}$.
-
-</div>
-
+| | the **population** | the **estimator** $\overline{X}$ |
+|---|---|---|
+| distribution of | one draw $X$ | the mean of $n$ draws, sample after sample |
+| centre | $\mu = 3.5$ | $\mu = 3.5$ (unbiased) |
+| spread | $\sigma = 1.71$, the **standard deviation** | $\sigma/\sqrt{n} = 0.76$, the **standard error** |
+| more data | unchanged | shrinks like $1/\sqrt{n}$ |
 
 Notes:
 $\sigma/\sqrt{n}$ follows from independence:
@@ -4840,14 +5259,25 @@ without replacement from a finite population of size $N$, the standard error is
 multiplied by $\sqrt{(N - n)/(N - 1)}$, which is negligible for $n \ll N$ and
 gives 0 when the whole population is sampled.
 
-In practice $\sigma$ is unknown and replaced by the sample estimate
-$\hat{\sigma}$, giving $\hat{\sigma}/\sqrt{n}$. A weather forecast's "±3 °C"
+The standard error is a property of the estimator, i.e. of the procedure
+"take $n$ draws and average them", not of a single estimate: one number
+$\overline{x}$ has no spread. It describes how far a typical estimate lies
+from $\mu$, in the unit of the data. In practice $\sigma$ is unknown and
+replaced by the sample estimate $\hat{\sigma}$, giving $\hat{\sigma}/\sqrt{n}$,
+which is itself an estimate of the standard error; this is the "SE" printed
+by statistical software. A weather forecast's "±3 °C"
 generally mixes both kinds of uncertainty: the inherent variability of the
 weather and the forecaster's limited knowledge.
 
 --
 
 ## Precision Costs Data
+
+$$
+\mathrm{SE}(\overline{X}) = \frac{\sigma}{\sqrt{n}}
+\quad\Longrightarrow\quad
+\frac{\sigma}{\sqrt{k n}} = \frac{1}{\sqrt{k}} \cdot \frac{\sigma}{\sqrt{n}}
+$$
 
 Multiply the data by $k$, and the standard error is multiplied by $1/\sqrt{k}$:
 
@@ -5002,8 +5432,40 @@ samples (2.262 for $n = 10$) and approaches 1.96 as $n$ grows.
 
 ## What Does "95% Confident" Mean?
 
+
+<div class="grid-figure">
+
+
+<div class="column">
+
 <div class="viz viz-lg" data-viz="math/confidence-intervals" data-steps="4"
  data-params='{"mu": 100, "sigma": 15, "n": 10, "level": 0.95}'></div>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note small">
+
+**How to read it**
+
+- **Row:** one sample, $n = 10$, from $\mu = 100$, $\sigma = 15$
+- **Dot:** its mean $\overline{x}$
+- **Bar:** $\overline{x} \pm 1.96 \cdot 15/\sqrt{10} = \overline{x} \pm 9.3$, equal in every row
+- **Purple:** the true $\mu$, unknown in practice
+- **Red:** a bar that misses $\mu$
+- **confidence** sets the multiplier: 80 / 90 / 95 / 99 % → 1.28 / 1.64 / 1.96 / 2.58
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 Notes:
 The steps show (1) one sample's interval against the fixed true mean, (2)
@@ -5190,338 +5652,6 @@ on a test set: an accuracy measured on 1,000 test cases at around 90% has a
 standard error of $\sqrt{0.9 \cdot 0.1/1000} \approx 0.95$ percentage points.
 A Bayesian treatment answers the same question with a posterior distribution
 over the unknown quantity instead of a sampling distribution.
-
---
-
-## An Unknown Number, Ten Observations
-
-A new feature went live. Of the first **10 users**, **3 came back**.
-
-
-<div class="q">
-
-What is $p$, the probability that a user comes back — and how sure are we?
-
-</div>
-
-
-
-<div class="fragment">
-
-
-<div class="grid-2-3">
-
-
-<div class="card muted">
-
-<span class="eyebrow">What the last unit can say</span>
-
-$\hat{p} = 0.3$, standard error $\approx 0.14$, a 95% interval of roughly
-$[0.02, 0.58]$ — about the *procedure*, not about $p$.
-
-</div>
-
-
-<div class="c-important">
-
-<span class="eyebrow">What we would like to say</span>
-
-"$p$ is probably between 0.1 and 0.6, most likely around 0.3" — a statement
-**about $p$**.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The frequentist numbers: $\hat{p} = 3/10 = 0.3$,
-$\mathrm{SE} = \sqrt{0.3 \cdot 0.7/10} \approx 0.145$, and the normal-approximation
-(Wald) interval $0.3 \pm 1.96 \cdot 0.145 = [0.016, 0.584]$. The normal
-approximation is poor at $n = 10$: the binomial is discrete and, for $p$ away
-from 0.5, skewed, and the Wald interval is known to cover less often than its
-nominal 95% for small $n$. With 0 of 10 it would even give the degenerate
-interval $[0, 0]$.
-
-The confidence interval forbids the sentence "p lies in this interval with
-probability 0.95", because $p$ is treated as a fixed number. The Bayesian
-alternative describes the uncertainty about $p$ with a probability
-distribution, as for any other unknown quantity; the sentence then becomes a
-valid statement about that distribution.
-
---
-
-## Conditioning on the Data — for a Parameter
-
-Treat the unknown $p$ as a random variable $\theta$ and apply **Bayes' theorem**,
-with $\theta$ in place of the hypothesis and the data $D$ as the evidence:
-
-<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="4"
- data-params='{"labels": ["posterior — belief about θ after the data", "likelihood — how probable the data is for each θ", "prior — belief about θ before", "evidence — normalises, does not depend on θ"]}'>
-
-$$
-\eqa{p(\theta \mid D)} = \frac{\eqb{p(D \mid \theta)} \cdot \eqc{p(\theta)}}{\eqd{p(D)}}
-$$
-
-</div>
-
-For i.i.d. yes/no data with $h$ yeses in $n$ trials:
-$p(D \mid \theta) = \theta^{h} (1-\theta)^{n-h}$ — read as a function of
-$\theta$, with the data fixed.
-
-Notes:
-The structure is that of Bayes' theorem for events, with the hypothesis
-replaced by a number $\theta \in [0, 1]$: prior and posterior are densities
-over $[0, 1]$ instead of two probabilities. The evidence is
-$p(D) = \int\_0^1 p(D \mid \theta) p(\theta) d\theta$, the marginal probability
-of the data; it does not depend on $\theta$ and only normalises.
-
-The likelihood is the Bernoulli PMF multiplied over the $n$ rows, which is
-where the i.i.d. assumption enters. Only the counts $h$ and $n - h$ matter,
-not the order of the observations. The binomial coefficient is absent because
-$D$ is one specific sequence; including it would change nothing, since it
-cancels in the normalisation. As a function of $\theta$ the likelihood is not
-a probability distribution: $\int\_0^1 \theta^h (1 - \theta)^{n-h} d\theta$ is
-not 1 in general. <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> builds on this
-distinction.
-
---
-
-## A Prior That Behaves Like Counts
-
-
-<div class="c-definition">
-
-**Beta prior.** $p(\theta) \propto \theta^{a-1}(1-\theta)^{b-1}$ on $[0, 1]$,
-written $\mathrm{Beta}(a, b)$. $\mathrm{Beta}(1,1)$ is flat: every $p$ equally
-plausible.
-
-</div>
-
-
-Multiply by the likelihood $\theta^{h}(1-\theta)^{n-h}$:
-
-$$
-p(\theta \mid D) \propto \theta^{a+h-1}(1-\theta)^{b+n-h-1}
-\quad\Longrightarrow\quad
-\theta \mid D \sim \mathrm{Beta}(a + h,\enspace  b + n - h)
-$$
-
-
-<div class="c-insight">
-
-The update is **adding counts**: $a$ and $b$ act like yeses and noes seen before
-the data. A prior whose posterior stays in the same family is called
-**conjugate**.
-
-</div>
-
-
-Notes:
-The normalising constant of $\mathrm{Beta}(a, b)$ is
-$B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a + b)$, but it never has to be computed
-for the update: prior and likelihood are both of the form
-$\theta^{\cdot}(1 - \theta)^{\cdot}$, so their product is again of that form
-and the exponents add. The posterior is identified by its shape alone.
-
-The parameters act as pseudo-counts: $\mathrm{Beta}(a, b)$ behaves like
-$a - 1$ yeses and $b - 1$ noes already seen in terms of the peak, or $a$ and
-$b$ in terms of the mean $a/(a + b)$. A prior with $a + b = 2$ is outweighed by
-1,000 real observations. Conjugate priors exist for other likelihoods too,
-e.g. the Dirichlet for categorical data and the normal for the mean of normal
-data with known variance.
-
---
-
-## Watching the Posterior Form
-
-<div class="viz viz-lg" data-viz="math/bayes-updating" data-steps="10"
- data-params='{"prior": [1, 1], "observations": [0, 1, 0, 0, 1, 0, 0, 0, 1, 0], "symbols": ["✓", "✗"], "names": ["yes", "no"], "xLabel": "θ = P(user returns)"}'></div>
-
-**Predict before each click:** which way does the curve move after a ✗ — and
-does it get narrower every time?
-
-Notes:
-Step 0 shows the flat prior; each further step adds one observation of the
-sequence ✗ ✓ ✗ ✗ ✓ ✗ ✗ ✗ ✓ ✗. After the first ✗ the posterior is
-$\mathrm{Beta}(1, 2)$, density $2(1 - \theta)$, highest at $\theta = 0$ and
-ruling out only $\theta = 1$. After the first ✓ it is $\mathrm{Beta}(2, 2)$,
-peaked at 0.5. Every ✗ moves the peak left and every ✓ moves it right. After
-all ten: $\mathrm{Beta}(4, 8)$, peak 0.3, mean 0.33.
-
-The curve does **not** narrow at every step. Its standard deviation falls from
-0.289 (flat) to 0.138 after nine observations, but the ninth observation, a ✓
-after five ✗ in the last six, raises it slightly to 0.139, because the data
-then look less one-sided. In general an observation that contradicts the
-current belief can widen the posterior; only on average over possible
-observations does the posterior variance decrease. The overall narrowing is
-the epistemic uncertainty shrinking, as described in
-<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>.
-
---
-
-## What the Posterior Gives You
-
-After 3 of 10, with a flat prior: $\theta \mid D \sim \mathrm{Beta}(4, 8)$.
-
-| question | answer | from |
-|---|---|---|
-| most plausible $p$ | $0.30 = h/n$ | the peak (mode) |
-| best guess on average | $0.33$ | the posterior mean $\frac{a+h}{a+b+n}$ |
-| where is $p$, 95%? | $[0.11,\ 0.61]$ | a **credible interval** |
-| after 1,000 users, 300 back | $[0.27,\ 0.33]$ | same model, more data |
-
-
-<div class="c-note">
-
-The peak under a flat prior is exactly $h/n$. **<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>** keeps only this peak
-and calls it maximum likelihood — the first shortcut of the course.
-
-</div>
-
-
-Notes:
-All rows follow from $\mathrm{Beta}(4, 8)$. Mode: $(a - 1)/(a + b - 2) = 3/10$.
-Mean: $4/12 \approx 0.33$; it lies to the right of the mode because the
-posterior is right-skewed. The 95% interval is the equal-tailed one, from the
-2.5% and 97.5% quantiles: $[0.109, 0.610]$. It supports the statement "$p$
-lies in $[0.11, 0.61]$ with probability 0.95", given the prior and the model.
-A highest-density interval, the shortest interval with 95% probability, is a
-common alternative and differs slightly for skewed posteriors.
-
-With 300 of 1,000 the posterior is $\mathrm{Beta}(301, 701)$, interval
-$[0.272, 0.329]$. The posterior standard deviation falls from 0.131 to 0.0145,
-a factor of about 9 for 100 times the data, close to the $1/\sqrt{n}$ law.
-Under a flat prior the posterior is proportional to the likelihood, so the
-mode equals the maximum-likelihood estimate $h/n$.
-
---
-
-## How Much Does the Prior Matter?
-
-Two analysts: one with a flat prior $\mathrm{Beta}(1,1)$, one convinced that
-$p$ is near a half, $\mathrm{Beta}(10,10)$.
-
-<div class="viz viz-xl" data-viz="math/prior-washout" data-steps="1"
- data-params='{"priors": [[1, 1], [10, 10]], "datasets": [[3, 10], [300, 1000]], "xLabel": "θ = P(user returns)"}'></div>
-
-
-<div class="c-important">
-
-With little data the prior matters; with enough data the analysts **agree**.
-A prior is a stated assumption — it can be argued with, and it washes out.
-
-</div>
-
-
-Notes:
-Step 0 shows the posteriors after 3 of 10, step 1 adds 300 of 1,000; each
-panel has its own height scale. "Near a half" prior: $\mathrm{Beta}(10 + 3, 10 + 7) = \mathrm{Beta}(13, 17)$,
-mean $13/30 \approx 0.43$; with 300 of 1,000, $\mathrm{Beta}(310, 710)$, mean
-$310/1020 \approx 0.304$. Flat prior: means $4/12 \approx 0.33$ and
-$301/1002 \approx 0.300$.
-
-The posterior mean is a weighted average of prior mean and observed
-proportion: $\frac{a + h}{a + b + n} = \frac{a + b}{a + b + n} \cdot \frac{a}{a + b} + \frac{n}{a + b + n} \cdot \frac{h}{n}$.
-The prior's weight is $(a + b)/(a + b + n)$: for $\mathrm{Beta}(10, 10)$ it is
-$20/30$ with 10 observations and $20/1020 \approx 2\\%$ with 1,000. The prior is
-an explicit modelling assumption that can be criticised like any other. Where
-data are scarce its influence is large, and it is then the only additional
-information available. A prior that assigns zero density to some region can
-never be corrected there by data.
-
---
-
-## Mini-Exercise
-
-Prior $\mathrm{Beta}(2, 2)$. Of 10 users, **8** come back.
-
-
-<div class="q">
-
-Is the posterior mean above or below $0.8$ — and why?
-
-</div>
-
-
-
-<div class="fragment">
-
-**Below.** The posterior is $\mathrm{Beta}(2+8,\ 2+2) = \mathrm{Beta}(10, 4)$,
-mean $10/14 \approx 0.71$. The prior counts two yeses and two noes, so it
-pulls towards $0.5$ — and the pull fades as data grows.
-
-</div>
-
-
-Notes:
-The posterior is $\mathrm{Beta}(10, 4)$ with mean $10/14 \approx 0.714$ and
-mode $9/12 = 0.75$, both below the observed $0.8$. The weighted-average form
-gives the reason: the mean is
-$\frac{4}{14} \cdot 0.5 + \frac{10}{14} \cdot 0.8 \approx 0.714$, a compromise
-between the prior mean 0.5 (weight $4/14$) and the data (weight $10/14$). With
-80 of 100 the mean would be $82/104 \approx 0.79$.
-
-Pulling an estimate towards a default value is called shrinkage. The same
-effect appears as regularisation in model fitting: a prior centred on zero
-weights corresponds to a penalty on large weights, which is how
-<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> reads weight decay.
-
---
-
-## Two Ways to Answer "Where Is p?"
-
-| | random | the 95% interval | needs |
-|---|---|---|---|
-| **Frequentist** | the data; $p$ is fixed | a **procedure** that catches $p$ in 95% of samples — about this one interval, no probability statement | nothing but the sampling model |
-| **Bayesian** | $p$; the data is fixed | "$p$ lies in this interval with probability 0.95" — a true sentence about $p$ | a **prior**: what we believed about $p$ before the data |
-
-
-<div class="c-insight">
-
-The axioms are the same; the question is not. The rest of the course mostly
-takes the second road — and <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> starts with its cheapest version: keep
-only the peak.
-
-</div>
-
-
-Notes:
-Both schools use the same probability axioms but assign probabilities to
-different things. Frequentist statistics assigns them only to repeatable
-random events, here the data; a parameter is fixed, so statements about it are
-statements about procedures (coverage, error rates). Bayesian statistics
-assigns probabilities to any uncertain quantity, including a parameter, and
-conditions on the observed data. The confidence interval needs no prior and
-makes the weaker, procedural statement; the credible interval makes the direct
-statement about $p$ and requires a prior.
-
-With a flat prior and much data the two nearly coincide numerically: for 300
-of 1,000 the credible interval is $[0.272, 0.329]$ and the Wald interval
-$0.3 \pm 1.96 \cdot 0.0145 = [0.272, 0.328]$. This follows from the
-Bernstein–von Mises theorem: for large $n$ the posterior is approximately
-normal around the maximum-likelihood estimate with the same spread as its
-sampling distribution. For small $n$, or an informative prior, the two
-intervals differ, as for 3 of 10.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-An unknown parameter is just another unknown: give it a **prior**, condition on
-the data, and the **posterior** says what the data justifies — as a peak, a mean
-and an interval. For yes/no data with a Beta prior the update is **adding
-counts**, and the prior's influence fades as data grows.
-
-</div>
-
 
 ---
 

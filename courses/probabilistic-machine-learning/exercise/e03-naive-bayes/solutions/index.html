@@ -27,7 +27,10 @@ Probabilistic Machine Learning
 Prof. Dr. Michael Granitzer
 
 Notes:
-Accompanies <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>; pen and paper only. 3.A.1 derives the
+Accompanies <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>; pen and paper only. 3.A.1 extends the
+Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> to an
+informative prior, sequential updating and the posterior predictive probability.
+3.A.2 derives the
 MAP estimate of a Bernoulli parameter under a Beta prior and contrasts MLE, MAP
 and posterior mean on very small samples (0 of 4, 3 of 3), including the exact
 95% interval of Beta(4, 1). 3.B.1 counts the free parameters of the full
@@ -45,11 +48,47 @@ numbers in the solutions have been recomputed.
 
 <!-- .slide: class="module-slide" -->
 
-# 3.A Keep the Peak
+# 3.A A Posterior and Its Peak
 
 --
 
-## Exercise 3.A.1: Peak, Mean and a Prior's Peak
+## Exercise 3.A.1: Two Analysts, One Campaign
+
+Same data: 60 of 400 converted. Analyst A uses a flat prior $\mathrm{Beta}(1,1)$;
+analyst B, from earlier campaigns, uses $\mathrm{Beta}(20, 80)$.
+
+1. Write down both posteriors and their means.
+2. How many "pseudo-observations" is B's prior worth? Why do the two analysts
+   nearly agree?
+3. The data arrived in two batches: 25 of the first 200, 35 of the second 200.
+   Show that updating twice gives the same posterior as updating once.
+4. What is A's probability that the next user converts?
+
+
+--
+
+## Exercise 3.A.1: Two Analysts, One Campaign — Solution
+
+
+<div class="fragment">
+
+1. A: $\mathrm{Beta}(61, 341)$, mean $61/402 \approx 0.152$.
+   B: $\mathrm{Beta}(80, 420)$, mean $80/500 = 0.160$.
+   95% credible intervals: A $[0.118, 0.188]$, B $[0.129, 0.193]$.
+2. $a + b = 100$ pseudo-observations against 400 real ones; B's prior mean 0.2 is
+   pulled almost all the way to the data's 0.15.
+3. A: $\mathrm{Beta}(1,1) \to \mathrm{Beta}(26, 176) \to \mathrm{Beta}(61, 341)$
+   — counts simply add, in any order.
+4. The posterior mean, $\approx 0.152$: averaging $\theta$ over the posterior.
+
+</div>
+
+
+
+
+--
+
+## Exercise 3.A.2: Peak, Mean and a Prior's Peak
 
 Returning users, $\theta = P(\text{user returns})$, prior $\mathrm{Beta}(a, b)$,
 $h$ of $n$ users return.
@@ -67,7 +106,7 @@ $h$ of $n$ users return.
 
 --
 
-## Exercise 3.A.1: Peak, Mean and a Prior's Peak — Solution
+## Exercise 3.A.2: Peak, Mean and a Prior's Peak — Solution
 
 
 <div class="fragment">
@@ -269,7 +308,7 @@ counts are smallest.
 A yes/no flag was seen $h$ times among $n$ frauds.
 
 1. With a $\mathrm{Beta}(1, 1)$ prior on $\theta = P(\text{flag} \mid \text{fraud})$,
-   what is the posterior (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>)? Show that its **mean** is Laplace's
+   what is the posterior (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>)? Show that its **mean** is Laplace's
    $(h + 1)/(n + 2)$.
 2. What is the posterior's **peak** for $h = 0$? What does that say about
    "keep the peak"?

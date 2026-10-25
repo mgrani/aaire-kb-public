@@ -8,9 +8,12 @@
 //   mu, sigma, a, b: parameters for normal/uniform
 //   sweep:  optional {param: "n"|"p"|"sigma", values: [...]} — one step per value
 //   shade:  optional [lo, hi] interval to shade under a continuous density
+//   moments: optional true — mark E[X] (the balance point) and the band E[X] ± σ
+//           on a discrete PMF
 
 const NAVY = '#164374'
 const TEAL = '#0083A1'
+const RED = '#dc2626'
 
 const fact = (k) => { let r = 1; for (let i = 2; i <= k; i++) r *= i; return r }
 const choose = (n, k) => fact(n) / (fact(k) * fact(n - k))
@@ -102,6 +105,31 @@ export async function mount(el, { d3, params, steps }) {
       const every = xs.length <= 14 ? 1 : [2, 5, 10, 20, 50].find((k) => xs.length / k <= 13) ?? 100
       xAxis.call(d3.axisBottom(x).tickValues(xs.filter((v) => v % every === 0)))
       yAxis.call(d3.axisLeft(y).ticks(4))
+      if (params.moments) {
+        // xs are consecutive integers, so a fractional value sits between two
+        // band centres at the band step.
+        // normalised, so a truncated geometric still gives E[X] ≈ 1/p
+        const mass = d3.sum(data, (d) => d[1])
+        const mu = d3.sum(data, (d) => d[0] * d[1]) / mass
+        const sd = Math.sqrt(d3.sum(data, (d) => (d[0] - mu) ** 2 * d[1]) / mass)
+        const at = (v) => x(xs[0]) + x.bandwidth() / 2 + (v - xs[0]) * x.step()
+        const top = M.top + 4
+        plot.append('line')
+          .attr('x1', at(mu)).attr('x2', at(mu)).attr('y1', top + 10).attr('y2', y(0))
+          .attr('stroke', RED).attr('stroke-width', 2.5).attr('stroke-dasharray', '6 4')
+        plot.append('path')
+          .attr('d', `M ${at(mu)} ${y(0) - 16} l -9 16 l 18 0 Z`).attr('fill', RED)
+        plot.append('text')
+          .attr('x', at(mu) + 8).attr('y', top + 6).attr('font-size', 16).attr('fill', RED)
+          .text(`E[X] = ${mu.toFixed(2)}`)
+        const yb = top + 30
+        plot.append('path')
+          .attr('d', `M ${at(mu - sd)} ${yb - 7} v 14 M ${at(mu - sd)} ${yb} H ${at(mu + sd)} M ${at(mu + sd)} ${yb - 7} v 14`)
+          .attr('stroke', NAVY).attr('stroke-width', 2.5).attr('fill', 'none')
+        plot.append('text')
+          .attr('x', at(mu + sd) + 8).attr('y', yb + 5).attr('font-size', 15).attr('fill', NAVY)
+          .text(`± σ = ${sd.toFixed(2)}`)
+      }
       caption.text(
         kind === 'binomial' ? `Binomial B(n = ${prm.n}, p = ${prm.p}) — probability mass`
         : kind === 'geometric' ? `Geometric (p = ${prm.p}) — flips until the first success`

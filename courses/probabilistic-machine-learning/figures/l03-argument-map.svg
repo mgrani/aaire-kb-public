@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
   <title id="title">Lecture 03 argument map</title>
-  <desc id="desc">Keeping only the peak of the posterior (maximum likelihood, MAP) on a coin, the generative route to a classifier, the explosion of the class-conditional joint, and naive Bayes as the payment: assume it apart.</desc>
+  <desc id="desc">A generative classifier and its difference to a discriminative one, the explosion of the class-conditional joint, naive Bayes as assuming it apart and fitting by counting, then the posterior over a parameter and maximum likelihood and MAP as what counting and smoothing were, with what each shortcut drops.</desc>
   <defs>
     <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="12" refY="6.5" orient="auto">
       <path d="M0,0 L13,6.5 L0,13 Z" fill="#64748b"/>
@@ -21,44 +21,53 @@
   <text x="50" y="46" class="arclabel" style="font-size:15px">Lecture 03 · argument map</text>
   <path d="M358 134 H406" class="arrow"/>
   <path d="M714 134 H762" class="arrow"/>
-  <path d="M916 196 C916 217 204 217 204 238" class="arrow"/>
-  <path d="M358 300 H406" class="arrow"/>
-  <path d="M204 196 C204 217 916 217 916 238" class="arrow"/>
-  <path d="M560 362 C560 383 560 383 560 404" class="arrow"/>
+  <path d="M916 196 C916 217 916 217 916 238" class="arrow"/>
+  <path d="M916 196 C916 217 560 217 560 238" class="arrow"/>
+  <text x="738" y="211" text-anchor="middle" class="arcsub">why counting?</text>
+  <path d="M406 300 H358" class="arrow"/>
   <path d="M916 362 C916 383 916 383 916 404" class="arrow"/>
+  <path d="M204 362 C204 383 204 383 204 404" class="arrow"/>
   <g transform="translate(50 72)">
-    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#164374">ML AND MAP · SHORTCUT 1</text>
-    <text x="18" y="48" class="head">Keep the peak</text>
-    <text x="18" y="73" class="text">MLE: the posterior's peak</text>
-    <text x="18" y="93" class="small">3 of 3 heads → θ̂ = 1</text>
-    <text x="18" y="111" class="small">a prior's peak: MAP</text>
-  </g>
-  <g transform="translate(406 72)">
     <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#164374">GENERATIVE CLASSIFIERS</text>
     <text x="18" y="48" class="head">The generative route</text>
     <text x="18" y="73" class="text">p(y) · p(x | y), then Bayes</text>
-    <text x="18" y="93" class="small">the 1/1000 prior stays explicit</text>
-    <text x="18" y="111" class="small">questions about x become possible</text>
+    <text x="18" y="93" class="small">discriminative: p(y | x) directly</text>
+    <text x="18" y="111" class="small">the 1/1000 prior stays explicit</text>
   </g>
-  <g transform="translate(762 72)">
+  <g transform="translate(406 72)">
     <rect width="308" height="124" rx="12" fill="#fff1f1" stroke="#dc2626" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#dc2626">THE PROBLEM</text>
+    <text x="18" y="24" class="tag" fill="#dc2626">CURSE OF DIMENSIONALITY</text>
     <text x="18" y="48" class="head">The joint explodes</text>
-    <text x="18" y="73" class="text">2³⁰ − 1 numbers per class</text>
-    <text x="18" y="93" class="small">for 30 yes/no flags</text>
+    <text x="18" y="73" class="text">the table is a sample: mᵖ cells</text>
+    <text x="18" y="93" class="small">2³⁰ − 1 numbers per class</text>
     <text x="18" y="111" class="small">100 frauds to fill them</text>
   </g>
-  <g transform="translate(50 238)">
+  <g transform="translate(762 72)">
     <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#164374">NAIVE BAYES · ASSUME IT APART</text>
     <text x="18" y="48" class="head">Naive Bayes</text>
     <text x="18" y="73" class="text">flags independent given the class</text>
-    <text x="18" y="93" class="small">fitting = counting = MLE</text>
-    <text x="18" y="111" class="small">+1 smoothing = L02 posterior mean</text>
+    <text x="18" y="93" class="small">fitting = counting</text>
+    <text x="18" y="111" class="small">one zero vetoes everything</text>
+  </g>
+  <g transform="translate(50 238)">
+    <rect width="308" height="124" rx="12" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
+    <text x="18" y="24" class="tag" fill="#d97706">WHAT IS DROPPED</text>
+    <text x="18" y="48" class="head">Shortcut 1 drops the spread</text>
+    <text x="18" y="73" class="text">how sure we are about θ</text>
+    <text x="18" y="93" class="small">fine with 1,000 users</text>
+    <text x="18" y="111" class="small">wrong with 3 flips</text>
   </g>
   <g transform="translate(406 238)">
+    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
+    <text x="18" y="24" class="tag" fill="#164374">FITTING · POSTERIOR, MLE, MAP</text>
+    <text x="18" y="48" class="head">Posterior, then its peak</text>
+    <text x="18" y="73" class="text">Beta prior + counts = Beta posterior</text>
+    <text x="18" y="93" class="small">counting = MLE · +1 = posterior mean</text>
+    <text x="18" y="111" class="small">MAP: a prior's peak · any model</text>
+  </g>
+  <g transform="translate(762 238)">
     <rect width="308" height="124" rx="12" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#d97706">WHAT IS DROPPED</text>
     <text x="18" y="48" class="head">Shortcut 2: assume it apart</text>
@@ -66,20 +75,12 @@
     <text x="18" y="93" class="small">correlated evidence counted twice</text>
     <text x="18" y="111" class="small">probabilities over-confident</text>
   </g>
-  <g transform="translate(762 238)">
-    <rect width="308" height="124" rx="12" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#d97706">WHAT IS DROPPED</text>
-    <text x="18" y="48" class="head">Shortcut 1 drops the spread</text>
-    <text x="18" y="73" class="text">how sure we are about the parameters</text>
-    <text x="18" y="93" class="small">fine with 1,000 users</text>
-    <text x="18" y="111" class="small">wrong with 3 flips</text>
-  </g>
   <g transform="translate(50 404)">
     <rect width="1020" height="124" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#7c3aed">TAKEAWAY</text>
     <text x="18" y="48" class="head">A classifier from probability — and two named assumptions</text>
-    <text x="18" y="73" class="text">the peak makes fitting a count; independence makes the joint affordable; both decide which answers stay trustworthy</text>
-    <text x="18" y="93" class="small">L04: the same ideas for p(y | x) · L05: exactly the independences you claim</text>
+    <text x="18" y="73" class="text">independence makes the joint affordable; the peak makes fitting a count; both decide which answers stay trustworthy</text>
+    <text x="18" y="93" class="small">L04: the same fitting for p(y | x) · L05: exactly the independences you claim</text>
   </g>
   <line x1="50" y1="540" x2="1070" y2="540" stroke="#e2e8f0" stroke-width="1.5"/>
   <text x="50" y="582" class="arclabel">Course arc</text>
@@ -92,7 +93,7 @@
   <text x="359" y="600" text-anchor="middle" class="arcname" fill="#64748b">The language</text>
   <rect x="428" y="560" width="122" height="52" rx="10" fill="#164374" stroke="#164374" stroke-width="2"/>
   <text x="489" y="581" text-anchor="middle" class="arcnum" fill="#ffffff">L03</text>
-  <text x="489" y="600" text-anchor="middle" class="arcname" fill="#ffffff">Peak · apart</text>
+  <text x="489" y="600" text-anchor="middle" class="arcname" fill="#ffffff">Apart · peak</text>
   <rect x="558" y="560" width="122" height="52" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
   <text x="619" y="581" text-anchor="middle" class="arcnum" fill="#64748b">L04</text>
   <text x="619" y="600" text-anchor="middle" class="arcname" fill="#64748b">Only p(y | x)</text>

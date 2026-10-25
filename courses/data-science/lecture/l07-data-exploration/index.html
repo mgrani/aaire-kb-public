@@ -223,110 +223,100 @@ and which **plots** are permissible. Every method in this course depends on it.
 
 --
 
-## Mini-Exercise
+<!-- .slide: class="smaller" -->
 
-A customer table records satisfaction (one to five stars) and year of birth.
-Which scale is each — and whose **mean** would you not report?
+## A Table Is a Sample From a Joint Distribution
+
+| | payment | satisfaction | born | income (k€) | returned? |
+|---|---|---|---|---|---|
+| **column** | $X\_1$ · nominal | $X\_2$ · ordinal | $X\_3$ · interval | $X\_4$ · ratio | $X\_5$ · nominal |
+| **draw** $\mathbf{x}\_1$ | card | 4 | 1987 | 52 | yes |
+| **draw** $\mathbf{x}\_2$ | invoice | 2 | 1995 | 31 | no |
+
+Each **column** is a random variable **with a measurement scale**; each **row**
+is one draw $\mathbf{x}\_i$ from **one joint distribution** $p(x\_1, \ldots, x\_5)$
+that nobody has written down.
+
+
+<div class="q">
+
+A is 180 cm long, B 90 cm. Is A "twice as long"?
+
+</div>
+
 
 
 <div class="fragment">
 
-Satisfaction is **ordinal**: its mean assumes equal gaps between the stars —
-report the median. Year of birth is **interval**: the mean year is fine, but
-ratios are not ("born twice as late" means nothing); differences such as age
-are fine.
+| length recorded as | A | B | what the values support |
+|---|---|---|---|
+| cm — **ratio** | 180 | 90 | "twice as long" — in inches 70.9 vs 35.4, still ×2 |
+| cm above 100 cm — **interval** | 80 | −10 | "90 cm longer"; the ratio −8 means nothing |
+| size class 1–3 — **ordinal** | 3 | 1 | "longer"; "three times" means nothing |
+| size label — **nominal** | L | S | "different" — nothing more |
 
 </div>
 
 
 Notes:
-Satisfaction in stars is ordinal. The mean treats the gap from one to two
-stars as equal to the gap from four to five, which the scale does not
-guarantee; the median and the mode use only the order and the labels. Means of
-rating scales are nonetheless widely reported in practice, which amounts to
-treating the scale as interval.
-
-Year of birth is interval: year 0 is a convention, so "born twice as late" is
-meaningless, but the mean year and differences between years are meaningful.
-A difference of two interval values, such as an age computed from years of
-birth, is on a ratio scale. Payment method is nominal (only counts, shares
-and the mode are meaningful); income is ratio, with a true zero, so "twice the
-income" is a valid statement.
-
---
-
-## Takeaway
-
-
-<div class="takeaway">
-
-An attribute's **scale of measurement** licenses the operations you may perform
-on it. Choosing a statistic before checking the scale is the most common
-silent error in data analysis.
-
-</div>
-
-
---
-
-## A Table Is a Sample From a Joint Distribution
-
-| customer | payment | satisfaction | born | income (k€) | returned? |
-|---|---|---|---|---|---|
-| 1 | card | 4 | 1987 | 52 | yes |
-| 2 | invoice | 2 | 1995 | 31 | no |
-| 3 | card | 5 | 1979 | 78 | no |
-| … | … | … | … | … | … |
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### Each column is a random variable
-$X\_{\text{payment}}, X\_{\text{satisf.}}, \ldots$ — a function from customers to
-values, exactly as a random variable was defined.
-
-</div>
-
-
-<div class="card">
-
-### Each row is one draw
-The whole table is $n$ draws from one joint distribution
-$p(x\_1, \ldots, x\_d)$ that nobody has written down.
-
-</div>
-
-
-</div>
-
-
-Notes:
-A column is a random variable in the formal sense: a function from the
-population (here, customers) to values. Drawing a row means drawing a member of
-the population and recording all its attribute values at once, so the row is
-one realisation of the vector $(X\_1, \ldots, X\_d)$. The customer number is an
-identifier, not an attribute to be modelled.
+The second header row is not data: it names the random variable behind each
+column and the scale its values are measured on. A random variable is a
+function from the population (customers) to values; the scale states which
+relations between those values carry information. A row is one customer drawn
+from the population with all attributes recorded at once, a realisation of the
+vector $(X\_1, \ldots, X\_5)$. The table as a whole is a sample of $n$ such draws.
 
 A dataset is not the distribution but a sample from it. Every quantity computed
 from the table — a mean, a proportion, a correlation — is therefore an
-estimate of a property of $p(x\_1, \ldots, x\_d)$. A different sample from the
+estimate of a property of $p(x\_1, \ldots, x\_5)$. A different sample from the
 same distribution would give a different value, and this sample-to-sample
 variation is the estimate's error.
 
+The length example keeps the object fixed and changes only the recording. A
+ratio scale has a true zero, so ratios survive every change of unit
+($x \mapsto ax$, $a > 0$): 180/90 = 70.9/35.4 = 2. Measuring from an arbitrary
+reference point, here 100 cm, is an interval scale: the map
+$x \mapsto x - 100$ preserves differences (90 cm) but not ratios
+(80 / −10 = −8). Size classes keep only the order, and any strictly increasing
+recoding of 1, 2, 3 is equally valid. A label keeps only identity. The same
+number 3, or the same pair of values, therefore supports different statements
+depending on the scale; <a href="/courses/data-science/lecture/l07-data-exploration/">Lecture 07</a> defines the four
+scales and the statistics each permits (Stevens 1946).
+
+For the probabilistic reading the scale matters twice: it decides which
+summaries of a sample are meaningful, and which distribution family is a
+sensible model for the column, taken up in "The Scale Suggests the Model".
+
 --
+
+<!-- .slide: class="smaller" -->
 
 ## The Scale Suggests the Model
 
-| attribute | scale | a first model |
-|---|---|---|
-| returned? | nominal, two values | **Bernoulli**$(p)$ — one parameter |
-| payment | nominal, $k$ values | **categorical**$(p\_1, \ldots, p\_k)$, $\sum\_j p\_j = 1$ |
-| satisfaction | ordinal | categorical — the order is not used, or an ordinal model |
-| born | interval | normal, on a restricted range |
-| income | ratio, positive, skewed | log-normal, or normal on $\log$ income |
+
+<div class="q">
+
+Which distribution would you write down for each column — and how many
+numbers does it need?
+
+</div>
+
+
+
+<div class="fragment">
+
+| attribute | values | scale | a first model | numbers |
+|---|---|---|---|---|
+| returned? | yes / no | nominal | **Bernoulli**$(p)$ | 1 |
+| payment | card, invoice, … ($k$) | nominal | **categorical**$(p\_1, \ldots, p\_k)$ | $k - 1$ |
+| satisfaction | 1 – 5 stars | ordinal | categorical (order unused) | 4 |
+| orders last month | 0, 1, 2, … | ratio, count | **Poisson**$(\lambda)$ | 1 |
+| height | around 170 cm | ratio | **normal**$(\mu, \sigma^2)$ | 2 |
+| income | $> 0$, skewed | ratio | **log-normal**: normal on $\log$ income | 2 |
+| share of orders returned | $[0, 1]$ | ratio | **Beta**$(\alpha, \beta)$ | 2 |
+
+</div>
+
 
 
 <div class="c-warning">
@@ -338,7 +328,11 @@ for ZIP codes is as meaningless as their mean.
 
 
 Notes:
-The categorical distribution assigns $P(X = j) = p\_j$ to each of $k$ values,
+Each entry is a parametric family: a formula with a few parameters instead of
+one probability per value. The column "numbers" counts
+the parameters of the family: what has to be
+estimated from the data, instead of one probability per value. The categorical
+distribution assigns $P(X = j) = p\_j$ to each of $k$ values,
 with $k - 1$ free parameters because $\sum\_j p\_j = 1$; the Bernoulli is the
 case $k = 2$. Naive Bayes classifiers, for example, commonly model each
 nominal attribute this way, with one categorical distribution per class.
@@ -346,11 +340,19 @@ nominal attribute this way, with one categorical distribution per class.
 Ordinal attributes are the hard case. A categorical model ignores the order; a
 numeric model (e.g. normal) assumes equal gaps between levels, which the
 ordinal scale does not justify. Dedicated ordinal models, such as
-cumulative-logit models, use the order without assuming equal gaps. For year of
-birth a normal model is only an approximation, since its support is the whole
-real line. Income is positive and right-skewed, so a normal model would put
+cumulative-logit models, use the order without assuming equal gaps. For height a normal model is
+only an approximation, since its support is the whole real line, including
+negative values that carry negligible probability. Income is positive and right-skewed, so a normal model would put
 probability on negative incomes; a log-normal model means that $\log$ income
 is normal. ZIP codes are nominal despite consisting of digits.
+
+The Poisson distribution, $P(X = k) = e^{-\lambda} \lambda^k / k!$ for
+$k = 0, 1, 2, \ldots$, models the number of events in a fixed period at a
+constant rate $\lambda$, which is also its mean and its variance; real counts
+often vary more than that (overdispersion), and a negative binomial adds a
+second parameter for it. The exponential distribution models the waiting time
+between such events. A share in $[0, 1]$ is modelled by a Beta distribution,
+the same family that serves as the standard prior for an unknown probability.
 
 --
 
@@ -410,21 +412,6 @@ a model is fitted on and the data it is applied to.
 
 --
 
-## Takeaway
-
-
-<div class="takeaway">
-
-A dataset is **$n$ draws from an unknown joint distribution**: columns are random
-variables, rows are draws, and the scale of each column suggests its model.
-Reading a table this way rests on an assumption — **i.i.d.** — that should be
-checked, not presumed.
-
-</div>
-
-
---
-
 ## Four Shapes of Data
 
 
@@ -479,90 +466,250 @@ property of the file.
 
 
 Notes:
-Ask what is lost by flattening each non-record type into a table. That question
-is the bridge to network science and to time-series methods, and it recurs
-whenever someone loads a CSV.
+Every shape can be flattened into a table, but not without loss: a graph
+becomes an edge list whose rows share nodes, an image becomes one row per
+pixel whose neighbours are correlated, a time series becomes rows whose order
+carries the dynamics. In each case the rows are no longer independent, so
+methods that assume independent rows give wrong standard errors and
+over-optimistic validation (a random train/test split leaks information
+between neighbouring rows). Network science, spatial statistics and
+time-series analysis are the methods that model the arrangement instead.
 
 --
 
-## Three Data Quality Problems
+## Where Does a Recorded Value Come From?
 
 
-<div class="grid-3">
+<div class="q">
 
-
-<div class="card">
-
-### Noise
-Random distortion of measured values. Cannot be removed, only modelled or
-smoothed.
+A sensor records 22.4 °C. Besides the temperature, what went into that number?
 
 </div>
 
 
-<div class="card">
+<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
+ data-params='{"labels": ["the true value", "artefact — deterministic, the same every time", "noise — random, mean 0"]}'>
 
-### Outliers
-Values far from the rest. Either an **error** to remove or the **signal** you
-were looking for — fraud, faults, discoveries.
-
-</div>
-
-
-<div class="card">
-
-### Missing values
-Absent entries. Handling depends on **why** they are missing, which the data
-itself does not tell you.
+$$
+x = \eqa{s} + \eqb{b} + \eqc{\varepsilon}
+$$
 
 </div>
 
 
+<div class="fragment c-note">
 
-</div>
-
-
-<div class="c-warning">
-
-"Outlier" is not a property of a data point; it is a judgement about a model of
-what is normal. Deleting outliers deletes evidence against that model.
-
-</div>
-
-
---
-
-## Mini-Exercise
-
-A weather sensor misses 8% of its temperature readings, and it fails mostly
-**when it is very cold**. Is deleting the rows with missing values harmless?
-
-
-<div class="fragment c-insight">
-
-No. Deletion removes the coldest days, so every statistic afterwards — the mean
-temperature first — is biased upwards. Had the gaps been random transmission
-dropouts, deletion would be roughly harmless. The file looks the same in both
-cases; only the **mechanism** differs.
-
-</div>
-
-
-
-<div class="fragment takeaway">
-
-The shape of the data decides which methods apply; the **reason** for a quality
-problem decides how it may be handled. Neither is visible in the file.
+A dataset records $x$, never $s$. Every data problem is a claim about the
+terms that were added on the way.
 
 </div>
 
 
 Notes:
-This is Principle 3 in its most practical form: a preprocessing decision is a
-modelling assumption, and here an untestable one. Students should leave able to
-ask "why is this missing?" before "how do I impute it?". If time allows, ask
-what else could have told us about the mechanism (a thermometer next to it,
-the sensor's data sheet) — domain knowledge, not the data.
+The equation is a measurement model: the recorded value $x$ is the quantity of
+interest $s$ plus a systematic error $b$ plus a random error $\varepsilon$ with
+$E[\varepsilon] = 0$. Noise is aleatoric: repeating the measurement gives a
+different $\varepsilon$ each time. An artefact is introduced by the
+measurement process itself (a sensor in the sun, a miscalibrated scale, a
+logging bug, a resampled image) and gives the same $b$ for every reading taken
+through that process. More generally an artefact is any deterministic error
+$x = g(s)$: a decimal point shifted (1.85 m recorded as 18.5 m), °F stored as
+°C, a wrong conversion in the pipeline. The same $s$ always gives the same
+wrong $x$, so repeating the measurement does not reveal it, and it may affect
+every row or only those from one source. A third case is a reading that does not follow the
+model at all, an outlier. The same decomposition underlies regression later
+in the course, where $s$ becomes a function $f(\mathbf{x})$ and $\varepsilon$
+the observation noise.
+
+--
+
+## Three Problems on One Axis
+
+
+<div class="img-h-md">
+
+![Twelve readings of one true value: noise scatters them around it, an artefact shifts all of them by b, a single outlier pulls the mean away](/units/math/stochastic/figures/data-problems.svg)
+
+</div>
+
+
+
+<div class="q">
+
+Which of the three problems does collecting more data fix?
+
+</div>
+
+
+
+<div class="fragment">
+
+Only **noise**. An artefact shifts every new reading too; an outlier comes
+back in the same proportion.
+
+</div>
+
+
+Notes:
+Twelve readings of a true value $s = 20$ °C in each row; the triangle marks
+the sample mean. Noise: the readings scatter around $s$ and their mean is
+close to it; with $n$ readings the mean's random error shrinks like
+$1/\sqrt{n}$ (made precise as the standard error in the statistics module).
+Artefact: the same scatter shifted by $b = 2.5$; the mean converges to
+$s + b$, not to $s$, so more data makes the estimate more precise but not more
+correct. Outlier: one reading of 35 °C (a mistyped value, say) raises the
+mean from about 20 to about 21.3, while the median stays near 20.
+
+--
+
+## Each Problem Is a Model Statement
+
+| problem | in the model | more data | what helps |
+|---|---|---|---|
+| **noise** | $\varepsilon \sim p(\varepsilon)$, $E[\varepsilon] = 0$ | averages it out | model it; average |
+| **artefact** | $x = g(s)$, deterministic | does **not** help | calibration, a second instrument, domain knowledge |
+| **outlier** | a draw from another $q$ | a share $\pi$ remains | robust statistics, or model $q$: $(1 - \pi)\\,p + \pi\\,q$ |
+| **missing** | $M$ = missing, $P(M \mid x)$ | depends on why | ask for the mechanism first |
+
+
+<div class="c-warning">
+
+None of these can be read off the data alone. Calling a value noise, an
+artefact or an outlier is an assumption about how it was generated.
+
+</div>
+
+
+Notes:
+Noise is modelled by a distribution for $\varepsilon$, most often
+$\mathcal{N}(0, \sigma^2)$; heavier-tailed choices (Laplace, Student-t) allow
+occasional large errors without calling them outliers. An artefact is a bias
+and is invisible from within one dataset, because every reading carries it;
+it shows only against an external reference (a calibrated instrument, a second
+data source, known physical limits: no adult is 18.5 m tall), or once the
+source of each value (the scale, the sensor, the clerk) is recorded as an
+attribute and the groups can be compared. Outliers are modelled as a mixture: with
+probability $1 - \pi$ a reading comes from the model $p$, with probability
+$\pi$ from a broad contamination distribution $q$. Fitting the mixture yields,
+for each reading, the posterior probability that it is an outlier — Bayes'
+theorem with two hypotheses. Missing values are described by a missingness
+indicator $M$: missing completely at random (MCAR) if $P(M = 1)$ is a
+constant, missing at random (MAR) if it depends only on observed attributes,
+missing not at random (MNAR) if it depends on the missing value itself, as
+for a sensor that fails in the cold. Only under MCAR is deleting incomplete
+rows unbiased.
+
+--
+
+## Mini-Exercise: Stars and Birth Years
+
+A customer table records satisfaction (one to five stars) and year of birth.
+Which scale is each — and whose **mean** would you not report?
+
+
+<div class="fragment">
+
+Satisfaction is **ordinal**: its mean assumes equal gaps between the stars —
+report the median. Year of birth is **interval**: the mean year is fine, but
+ratios are not ("born twice as late" means nothing); differences such as age
+are fine.
+
+</div>
+
+
+Notes:
+Satisfaction in stars is ordinal. The mean treats the gap from one to two
+stars as equal to the gap from four to five, which the scale does not
+guarantee; the median and the mode use only the order and the labels. Means of
+rating scales are nonetheless widely reported in practice, which amounts to
+treating the scale as interval.
+
+Year of birth is interval: year 0 is a convention, so "born twice as late" is
+meaningless, but the mean year and differences between years are meaningful.
+A difference of two interval values, such as an age computed from years of
+birth, is on a ratio scale. Payment method is nominal (only counts, shares
+and the mode are meaningful); income is ratio, with a true zero, so "twice the
+income" is a valid statement.
+
+--
+
+## Mini-Exercise: Three Scales
+
+Patients are weighed on three scales, a third on each. Two record
+$X = S + \varepsilon$; the third is miscalibrated and adds exactly 3 kg every
+time: $X = S + 3 + \varepsilon$. Does weighing ten times as many patients bring
+the mean of $X$ closer to $E[S]$?
+
+
+<div class="fragment c-insight">
+
+No. $E[X] = E[S] + \tfrac13 \cdot 3 = E[S] + 1$ kg: the mean converges, but to
+a value 1 kg too high — an **artefact**. More data shrinks only the noise
+$\varepsilon$.
+
+</div>
+
+
+Notes:
+$S$ is the true weight, $\varepsilon$ the random noise with $E[\varepsilon] = 0$,
+the same for all three scales. By linearity
+$E[X] = E[S] + \tfrac13 \cdot 3 + \tfrac23 \cdot 0 = E[S] + 1$ kg. The sample
+mean converges to $E[X]$, so a larger sample makes the estimate more precise
+but not more correct. The artefact is detectable once the scale is recorded
+as an attribute: the mean per scale then differs by about 3 kg, more than the
+noise explains.
+
+--
+
+## Mini-Exercise: A Sensor That Fails in the Cold
+
+Temperature $T$, missingness indicator $M$ (1 = reading missing). The sensor
+fails mostly in the cold: $P(M = 1 \mid T)$ is large for low $T$. After
+deleting the incomplete rows, does the mean estimate $E[T]$ — or what?
+
+
+<div class="fragment c-insight">
+
+It estimates $E[T \mid M = 0]$, which is **larger** than $E[T]$: the coldest
+days are gone. Only if $M$ is **independent** of $T$ is
+$E[T \mid M = 0] = E[T]$ and deletion harmless.
+
+</div>
+
+
+Notes:
+The rows that remain are draws from the conditional distribution
+$p(t \mid M = 0)$, not from $p(t)$. By Bayes' theorem,
+$p(t \mid M = 0) \propto P(M = 0 \mid t)\\, p(t)$: low temperatures are
+down-weighted because they are the ones likely to be missing, so the mean of
+the remaining rows overestimates $E[T]$, and more data does not remove the
+bias. This is missing not at random (MNAR). If $P(M = 1 \mid t)$ is a
+constant, $M$ and $T$ are independent, the weighting is flat and
+$p(t \mid M = 0) = p(t)$: missing completely at random (MCAR). The two cases
+produce files that look alike; telling them apart requires knowledge of the
+mechanism, such as a second thermometer or the sensor's specification.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+A dataset is **$n$ draws from an unknown joint distribution** — and every way
+of reading it is an assumption about how it was generated.
+
+</div>
+
+
+1. **Shape:** only record data can plausibly be read as independent rows.
+2. **Table:** columns are random variables, rows are draws from
+   $p(x\_1, \ldots, x\_d)$.
+3. **Scale:** licenses a column's statistics and suggests its model.
+4. **i.i.d.:** lets the rows factorise — to be checked, not presumed.
+5. **Recorded value:** truth + artefact + noise. More data removes **noise
+   only**; artefacts, outliers and missing values need a model of how they
+   arose.
 
 --
 
@@ -1414,7 +1561,97 @@ const tocProgressConfig = {};
           }
         }
       });
-    })();</script><script>(function(){const MIN_FREE = 120;
+    })();</script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
+          };
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
 
   (() => {
     const SLIDE_H = 720;

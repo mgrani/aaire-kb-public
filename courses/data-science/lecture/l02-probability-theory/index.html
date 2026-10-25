@@ -2491,21 +2491,85 @@ independent, $\tfrac{1}{36} = \tfrac16 \cdot \tfrac16$.
 ## The Classic Confusion
 
 
-<div class="c-warning">
+<div class="img-h-sm">
 
-**Statistical independence does not mean the events are disjoint.**
+![Three sample spaces drawn as rectangles, A and B each of area 0.4. (a) disjoint vertical strips; (b) a vertical strip A and a horizontal strip B crossing in an area of 0.16; (c) a vertical strip A and a block B crossing it in an area of 0.1](/units/math/stochastic/figures/independence-disjoint-vs-crossing.svg)
 
 </div>
 
 
-Disjoint events with positive probability are about as **dependent** as events
-can be: if $A$ occurs, $B$ certainly did not.
 
-$$
-A \cap B = \emptyset \Rightarrow P(A \mid B) = 0 \neq P(A)
-$$
+<div class="q">
+
+Which pair is **independent** — and why?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="grid-3">
+
+
+<div class="column">
+
+**(a) dependent.** If $B$ occurs, $A$ certainly did not:
+$P(A \mid B) = 0 \neq 0.4$.
+
+</div>
+
+
+<div class="column">
+
+**(b) independent.** $A$ takes the same share of $B$ as of $\Omega$:
+$P(A \mid B) = 0.16 / 0.4 = 0.4$.
+
+</div>
+
+
+<div class="column">
+
+**(c) dependent.** They overlap, but too little:
+$P(A \mid B) = 0.1 / 0.4 = 0.25 \neq 0.4$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+**Statistical independence does not mean the events are disjoint.** Disjoint
+events with positive probability are about as **dependent** as events can be.
+
+</div>
+
+
+</div>
+
 
 Notes:
+In the rectangle the areas are probabilities. (a): $P(A \cap B) = 0$ while
+$P(A)P(B) = 0.16$. (b): a vertical strip of width 0.4 and a horizontal strip
+of height 0.4 cross in a rectangle of area $0.4 \cdot 0.4 = 0.16 =
+P(A)P(B)$, so the product form holds exactly. Strips that cross the whole of
+$\Omega$ are always independent, whatever their widths; this is the picture
+behind the next slide. (c): $B$ is a block of width 0.8 and height 0.5, still
+area 0.4, starting inside $A$; the overlap is $0.2 \cdot 0.5 = 0.1 < 0.16$, so
+$A$ and $B$ are negatively dependent. Overlap alone decides nothing; only its
+size compared with $P(A)P(B)$ does.
+
+The overlap is bounded: $A \cap B \subseteq B$, so
+$P(A \cap B) \leq \min(P(A), P(B))$ always, with $P(A \cap B) = P(B)$ only when
+$B$ lies inside $A$ (up to a set of probability 0). Below that, every value
+down to $\max(0, P(A) + P(B) - 1)$ is possible; here $[0, 0.4]$, with 0.16 the
+single independent value.
+
+
 Disjoint events with positive probability exclude each other: the occurrence
 of one rules out the other, which is maximal information about it. Formally,
 $P(A \cap B) = 0$ while $P(A)P(B) > 0$, so the product form fails. Learning
@@ -3683,6 +3747,114 @@ $\mathrm{Var}(X) = 91/6 - 12.25 = 35/12 \approx 2.92$ and $\sigma \approx 1.71$.
 
 --
 
+## Expectation and Variance, Drawn
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+<div class="viz" data-viz="math/distribution-explorer"
+ data-params='{"kind": "dice-sum", "moments": true}'></div>
+
+</div>
+
+
+<div class="column">
+
+<div class="viz" data-viz="math/distribution-explorer"
+ data-params='{"kind": "geometric", "p": 0.3, "n": 30, "moments": true}'></div>
+
+</div>
+
+
+</div>
+
+
+The red triangle marks $E[X]$: read the bars as weights on a beam, and the beam
+would rest level on it.
+
+
+<div class="q">
+
+Does $E[X]$ sit under the **highest bar**?
+
+</div>
+
+
+
+<div class="fragment">
+
+Only for the symmetric one. The geometric's highest bar is at 1, but
+$E[X] = 1/p \approx 3.33$: its **long right tail** pulls the expectation away
+from the peak, and widens $\sigma$.
+
+</div>
+
+
+Notes:
+The red fulcrum marks $E[X]$, the point at which the bars, read as weights
+$p(a\_i)$ placed at positions $a\_i$, balance: $\sum\_i (a\_i - \mu)\\,p(a\_i) = 0$.
+The bracket spans $\mu \pm \sigma$. Sum of two dice: $E[X] = 7$,
+$\mathrm{Var}(X) = 35/6$, $\sigma \approx 2.42$; the distribution is symmetric
+about 7, so expectation, peak (mode) and median coincide. Geometric with
+$p = 0.3$ (number of trials up to the first success): $E[X] = 1/p \approx 3.33$,
+$\mathrm{Var}(X) = (1 - p)/p^2 \approx 7.78$, $\sigma \approx 2.79$, mode 1,
+median 2. The figure truncates the support at 30, which carries probability
+$1 - 0.7^{30} > 0.9999$.
+
+For a right-skewed distribution the order is typically mode < median < mean.
+Far values pull the expectation in proportion to their distance, the variance
+in proportion to their squared distance. The next slide turns the asymmetry
+itself into a number.
+
+--
+
+## Skewness
+
+
+<div class="c-definition">
+
+**Definition (Skewness).** With $\mu = E[X]$ and $\sigma^2 = \mathrm{Var}(X)$,
+$$
+\mathrm{Skew}(X) = E\left[\left(\frac{X - \mu}{\sigma}\right)^{3}\right]
+= \frac{E\big[(X - \mu)^3\big]}{\sigma^3}
+$$
+
+</div>
+
+
+Cubing **keeps the sign** and lets far values dominate: a long right tail
+gives $\mathrm{Skew} > 0$, a long left tail $\mathrm{Skew} < 0$.
+
+| distribution | skewness | shape |
+|---|---|---|
+| sum of two dice | $0$ | symmetric about 7 |
+| geometric, $p = 0.3$ | $\frac{2 - p}{\sqrt{1 - p}} \approx 2.03$ | long right tail |
+
+Notes:
+Skewness is the standardised third central moment; the third moment
+$E[(X - \mu)^3]$ alone has the cubed unit of $X$, and dividing by $\sigma^3$
+makes it unit-free. It is invariant under $aX + b$ with $a > 0$ and changes
+sign for $a < 0$: $\mathrm{Skew}(-X) = -\mathrm{Skew}(X)$. A distribution
+symmetric about $\mu$ has skewness 0, because every $(a - \mu)^3$ is cancelled
+by its mirror image; the converse fails, and asymmetric distributions with
+skewness 0 exist. Skewness exists only if $E[|X|^3] < \infty$.
+
+Values: for the geometric distribution
+$\mathrm{Skew} = (2 - p)/\sqrt{1 - p} = 1.7/\sqrt{0.7} \approx 2.03$, positive
+for every $p < 1$. For the Bernoulli distribution
+$\mathrm{Skew} = (1 - 2p)/\sqrt{p(1 - p)}$: $p = 0.9$ gives
+$-0.8/0.3 \approx -2.67$, $p = 0.5$ gives 0. The binomial has
+$(1 - 2p)/\sqrt{np(1 - p)}$, which tends to 0 as $n$ grows, one sign of its
+approach to the normal distribution. The fourth standardised moment, the
+kurtosis $E[((X - \mu)/\sigma)^4]$, measures the weight of the tails and is 3
+for every normal distribution. The sample version of the skewness is in
+<a href="/courses/data-science/lecture/l02-probability-theory/">Lecture 02</a>.
+
+--
+
 ## Takeaway
 
 
@@ -3842,8 +4014,36 @@ point mass at 0 and a density above it.
 
 ## Probability Is Area Under the Curve
 
+
+<div class="grid-figure">
+
+
+<div class="column">
+
 <div class="viz viz-lg" data-viz="math/distribution-explorer" data-steps="1"
  data-params='{"kind": "normal", "mu": 0, "sigma": 1, "shade": [-1, 1]}'></div>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+**One value: probability 0.** $P(X = a) = \int\_a^a f = 0$ for every real
+$a$ — a line has no area. The curve's height $f(a)$ is not a probability.
+
+At 0 the curve is 0.40 high, yet $P(X = 0) = 0$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 The shaded region is $P(-1 \leq X \leq 1)$ — the same "probability as area"
 intuition from the axioms unit, now with a curve instead of a Venn diagram.
@@ -4647,6 +4847,43 @@ and the running sum of squared deviations with each new value.
 
 --
 
+## The Variance, Drawn
+
+<div class="viz viz-lg" data-viz="math/moment-deviations" data-steps="3"
+ data-params='{"power": 2, "unit": " min"}'></div>
+
+
+<div class="q">
+
+**Predict, then drag:** move the light point from 13 to 20 minutes. Roughly how
+much does $s^2$ grow?
+
+</div>
+
+
+Notes:
+The bars are the squared deviations $(x\_i - \overline{x})^2$; their average is
+$s^2$, the dashed line. The unsquared deviations would be useless: they always
+sum to 0, $\sum\_i (x\_i - \overline{x}) = \sum\_i x\_i - n\overline{x} = 0$, the
+balance-point property of the mean. Squaring removes the sign, so both sides contribute,
+and it weights a deviation by its own size: the point at 13 minutes, 6.67 from
+the mean, contributes 44.4 of the total 74.5, i.e. 60% of $s^2$ on its own.
+Here $s^2 = 74.5/9 \approx 8.28$ min² and $s \approx 2.88$ min.
+
+Moving that point to 20 minutes raises $s^2$ to about 23.5 min², almost three
+times as much, and $s$ to 4.85 min; the point then contributes 79% of the
+total. Moving it to 7 minutes gives $s^2 \approx 2.94$ min². The variance is
+therefore as sensitive to single far values as the mean, and more: a value at
+distance $d$ moves the mean by $d/n$ but contributes $d^2/n$ to the variance.
+Robust alternatives are the interquartile range and the median absolute
+deviation.
+
+The steps show the mean, the squared deviations as bars, and their average.
+The light point also moves with the slider below the figure, in steps of 0.5;
+Reset returns it to 13.
+
+--
+
 ## Why the Denominator Changes
 
 
@@ -4702,14 +4939,60 @@ in NumPy, `ddof=0`.
 
 --
 
+## Sample Skewness: Which Tail Is Longer?
+
+$$
+\widehat{\mathrm{Skew}} = \frac{1}{n}\sum\_{i=1}^{n}\left(\frac{x\_i - \overline{x}}{s}\right)^{3}
+\qquad
+\begin{cases} > 0 & \text{long right tail} \\\ < 0 & \text{long left tail} \end{cases}
+$$
+
+<div class="viz viz-lg" data-viz="math/moment-deviations" data-steps="3"
+ data-params='{"power": 3, "unit": " min"}'></div>
+
+
+<div class="q">
+
+Drag the light point left. Where is the skewness 0 — and why there?
+
+</div>
+
+
+Notes:
+The bars are the cubed standardised deviations $z\_i^3$ with
+$z\_i = (x\_i - \overline{x})/s$; their average is the (moment) skewness. Cubing
+keeps the sign, so left and right deviations compete, and it weights a
+deviation by the cube of its size, so the farthest point dominates: at 13
+minutes $z^3 \approx 12.4$, against $-2.5$ for all points left of the mean
+together. The skewness is $1.20$; the mean (6.33) lies to the right of the
+median (5.5). Dividing by $s$ makes the measure unit-free: it is unchanged when
+minutes are converted to seconds.
+
+Answer: at 1 minute. The sample 1, 3, 4, 4.5, 5, 5.5, 6, 7, 9 is symmetric
+about 5 (1 and 9, 3 and 7, 4 and 6, 4.5 and 5.5 mirror each other), so every
+cube is cancelled by its mirror image, mean and median are both 5, and the
+skewness is exactly 0. At 0 minutes it turns negative ($-0.36$). Skewness 0
+does not imply symmetry in general, but symmetry implies skewness 0.
+
+The formula replaces $E$, $\mu$ and $\sigma$ in the definition of
+$\mathrm{Skew}(X)$ by the sample average, $\overline{x}$ and $s$. Right-skewed data are common wherever values are bounded
+below but not above: waiting times, incomes, file sizes, counts. A log
+transformation often makes them nearly symmetric, which is why such
+attributes are modelled with a log-normal distribution. Statistical software
+often reports a bias-corrected sample skewness, which differs from this
+formula by a factor that tends to 1 as $n$ grows.
+
+--
+
 ## Takeaway
 
 
 <div class="takeaway">
 
-$s^2$ describes **the sample**; $\hat{\sigma}^2$ estimates **the population**.
-The $n-1$ is not a convention — it is the price of having estimated the mean
-from the same data.
+Variance and skewness average the deviations from the mean raised to the power
+**2 and 3**: squares add up, cubes compete by sign. $s^2$
+describes **the sample**; $\hat{\sigma}^2$ estimates **the population** — the
+$n-1$ is the price of having estimated the mean from the same data.
 
 </div>
 
@@ -4859,7 +5142,7 @@ What is the probability that the population mean $\mu$ is exactly 73.9 k€?
 
 <div class="fragment">
 
-Zero. $\overline{x}$ is not $\mu$ — it is one **estimate** of it, computed from
+Close to zero. $\overline{x}$ is not $\mu$ — it is one **estimate** of it, computed from
 the seven people who happened to be in the sample.
 
 The honest question is not *what is $\mu$* but **how far from $\mu$ can this
@@ -4870,8 +5153,10 @@ number be?**
 
 Notes:
 The question has no useful answer. If uncertainty about $\mu$ is described by
-any continuous distribution, the probability of one exact value is zero; in the
-frequentist view $\mu$ is a fixed number and carries no probability at all
+a continuous distribution, the probability of one exact value is exactly zero,
+as for any single value under a density; read as "73.9 to the nearest
+0.1 k€", it is the probability of an interval of width 0.1 k€, small but
+positive. In the frequentist view $\mu$ is a fixed number and carries no probability at all
 (it is either 73.9 or not). In both readings, $\overline{x} = \mu$ exactly is
 not to be expected: a different sample of seven people would give a different
 mean.
@@ -4978,9 +5263,10 @@ widely as the observations.
 
 <div class="marks-step">
 
-- The means pile up **around $\mu$** — the estimator is not systematically off
-- The pile is **narrower than the population** — averaging cancels noise
-- The pile is **bell-shaped**, even though the population was not
+- The sample means **centre on $\mu$** — the estimator is not systematically off
+- They **scatter less than single draws**: standard deviation 0.76 instead of
+  1.71 — averaging cancels noise
+- Their histogram is **bell-shaped**, even though the population was not
 
 </div>
 
@@ -5053,51 +5339,24 @@ population.
 ## Standard Error
 
 
-<div class="grid-3-2">
-
-
-<div class="column">
-
-
 <div class="c-definition">
 
-**Definition (Standard error).** The standard deviation of an estimator's
-sampling distribution. For the sample mean of independent draws:
-$$
-\mathrm{SE}(\overline{X}) = \frac{\sigma}{\sqrt{n}}
-$$
+**Definition (Standard error).** The standard error of an **estimator**
+$\hat{\theta}$ is the standard deviation of its **sampling distribution**:
+$\mathrm{SE}(\hat{\theta}) = \sqrt{\mathrm{Var}(\hat{\theta})}$. For the sample
+mean of $n$ independent draws, $\mathrm{SE}(\overline{X}) = \sigma/\sqrt{n}$.
 
 </div>
 
 
-</div>
+Two distributions, two spreads — the die from the widget, $n = 5$:
 
-
-<div class="column">
-
-
-<div class="c-intuition">
-
-How far off a typical **estimate** is — where $\sigma$ says how far apart
-typical **observations** are. Both in the unit of the data.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="c-warning">
-
-$\sigma$ and $\mathrm{SE}$ are different quantities. More data does nothing to
-$\sigma$ — the world stays as variable as it was — and shrinks $\mathrm{SE}$.
-
-</div>
-
+| | the **population** | the **estimator** $\overline{X}$ |
+|---|---|---|
+| distribution of | one draw $X$ | the mean of $n$ draws, sample after sample |
+| centre | $\mu = 3.5$ | $\mu = 3.5$ (unbiased) |
+| spread | $\sigma = 1.71$, the **standard deviation** | $\sigma/\sqrt{n} = 0.76$, the **standard error** |
+| more data | unchanged | shrinks like $1/\sqrt{n}$ |
 
 Notes:
 $\sigma/\sqrt{n}$ follows from independence:
@@ -5108,14 +5367,25 @@ without replacement from a finite population of size $N$, the standard error is
 multiplied by $\sqrt{(N - n)/(N - 1)}$, which is negligible for $n \ll N$ and
 gives 0 when the whole population is sampled.
 
-In practice $\sigma$ is unknown and replaced by the sample estimate
-$\hat{\sigma}$, giving $\hat{\sigma}/\sqrt{n}$. A weather forecast's "±3 °C"
+The standard error is a property of the estimator, i.e. of the procedure
+"take $n$ draws and average them", not of a single estimate: one number
+$\overline{x}$ has no spread. It describes how far a typical estimate lies
+from $\mu$, in the unit of the data. In practice $\sigma$ is unknown and
+replaced by the sample estimate $\hat{\sigma}$, giving $\hat{\sigma}/\sqrt{n}$,
+which is itself an estimate of the standard error; this is the "SE" printed
+by statistical software. A weather forecast's "±3 °C"
 generally mixes both kinds of uncertainty: the inherent variability of the
 weather and the forecaster's limited knowledge.
 
 --
 
 ## Precision Costs Data
+
+$$
+\mathrm{SE}(\overline{X}) = \frac{\sigma}{\sqrt{n}}
+\quad\Longrightarrow\quad
+\frac{\sigma}{\sqrt{k n}} = \frac{1}{\sqrt{k}} \cdot \frac{\sigma}{\sqrt{n}}
+$$
 
 Multiply the data by $k$, and the standard error is multiplied by $1/\sqrt{k}$:
 
@@ -5270,8 +5540,40 @@ samples (2.262 for $n = 10$) and approaches 1.96 as $n$ grows.
 
 ## What Does "95% Confident" Mean?
 
+
+<div class="grid-figure">
+
+
+<div class="column">
+
 <div class="viz viz-lg" data-viz="math/confidence-intervals" data-steps="4"
  data-params='{"mu": 100, "sigma": 15, "n": 10, "level": 0.95}'></div>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note small">
+
+**How to read it**
+
+- **Row:** one sample, $n = 10$, from $\mu = 100$, $\sigma = 15$
+- **Dot:** its mean $\overline{x}$
+- **Bar:** $\overline{x} \pm 1.96 \cdot 15/\sqrt{10} = \overline{x} \pm 9.3$, equal in every row
+- **Purple:** the true $\mu$, unknown in practice
+- **Red:** a bar that misses $\mu$
+- **confidence** sets the multiplier: 80 / 90 / 95 / 99 % → 1.28 / 1.64 / 1.96 / 2.58
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 Notes:
 The steps show (1) one sample's interval against the fixed true mean, (2)
