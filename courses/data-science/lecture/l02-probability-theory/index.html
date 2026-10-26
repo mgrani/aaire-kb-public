@@ -5477,8 +5477,8 @@ For i.i.d. observations with mean $\mu$ and finite variance $\sigma^2$:
 
 | | | |
 |---|---|---|
-| **Law of large numbers** | $\overline{X}\_n \to \mu \text{ as } n \to \infty$ | <span class="intuition">the pile keeps narrowing onto the truth</span> |
-| **Central limit theorem** | $\overline{X}\_n \approx N(\mu, \sigma^2/n) \text{ for large } n$ | <span class="intuition">and we know the *shape* of what is left</span> |
+| **Law of large numbers** (LLN) | $\overline{X}\_n \to \mu \text{ as } n \to \infty$ | <span class="intuition">the sample means close in on the truth</span> |
+| **Central limit theorem** (CLT) | $\overline{X}\_n \approx N(\mu, \sigma^2/n) \text{ for large } n$ | <span class="intuition">and we know the *shape* of what is left</span> |
 
 </div>
 
@@ -5509,32 +5509,93 @@ diluted by later observations, not because they are compensated.
 
 ## From a Number to an Interval
 
-If $\overline{X} \approx N(\mu, \sigma^2/n)$, then for 95% of samples
-$\overline{X}$ lands within $1.96\thinsp\mathrm{SE}$ of $\mu$ — and therefore $\mu$
-lands within $1.96\thinsp\mathrm{SE}$ of $\overline{X}$.
+
+<div class="grid-3-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+**Definition (Confidence interval).** Statistics $L, U$ of the sample form a
+**confidence interval** for $\theta$ at **level** $1 - \alpha$ if, for every $\theta$,
+$$
+P(L \leq \theta \leq U) \geq 1 - \alpha
+$$
+**Exact** if $=$ holds for every $\theta$.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-warning">
+
+Over **samples**: $L, U$ random, $\theta$ fixed. Confidence is the
+**coverage rate** of the procedure, not a probability for $\theta$.
+
+</div>
+
+
+
+<div class="c-note small">
+
+**$z$ from $\alpha$:** $P(-z \leq Z \leq z) = 1 - \alpha$ for
+$Z \sim N(0, 1)$: 1.28, 1.96, 2.58 at 80, 95, 99%.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+For the mean, the central limit theorem, $\overline{X} \approx N(\mu, \mathrm{SE}^2)$,
+gives $P(|\overline{X} - \mu| \leq z\\,\mathrm{SE}) \approx 1 - \alpha$, hence
 
 <div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
- data-params='{"labels": ["the estimate — our best single guess", "how confident we insist on being", "how noisy the estimate is"]}'>
+ data-params='{"labels": ["the estimate, here x̄", "the quantile set by α: 1.96 for 95%", "the standard error, here σ/√n"]}'>
 
 $$
-\eqa{\overline{x}} \pm \eqb{1.96} \cdot \eqc{\frac{\sigma}{\sqrt{n}}}
+\eqa{\hat{\theta}} \pm \eqb{z} \cdot \eqc{\mathrm{SE}(\hat{\theta})}
 $$
 
 </div>
 
 Notes:
-The interval follows from the normal approximation:
-$P(|\overline{X} - \mu| \leq 1.96\\,\mathrm{SE}) \approx 0.95$, and the event
-$|\overline{X} - \mu| \leq 1.96\\,\mathrm{SE}$ is the same as
-$\mu \in [\overline{X} - 1.96\\,\mathrm{SE}, \overline{X} + 1.96\\,\mathrm{SE}]$.
-The value 1.96 is the 97.5% quantile of $N(0, 1)$; 90% intervals use 1.645,
-99% intervals 2.576.
+$\alpha$ is the miss rate the procedure is allowed: $\alpha = 0.05$ for a 95%
+interval. The requirement holds for every value of $\theta$ because $\theta$ is
+unknown: the guarantee must not depend on where it happens to lie. The level
+is a lower bound on the coverage: the confidence coefficient is
+$\inf\_\theta P\_\theta(L \leq \theta \leq U)$ (Casella & Berger; Wasserman
+writes the definition with $\geq$). Equality for every $\theta$ makes the
+interval exact, as for the mean of normal data with known $\sigma$. For
+discrete data an exact level is usually unattainable, and intervals such as
+Clopper–Pearson for a proportion cover with probability above $1 - \alpha$
+(conservative). The interval from the central limit theorem below meets the
+level only approximately, for large $n$; its coverage can fall short of
+$1 - \alpha$ for small samples or skewed data.
+
+For the mean, the interval follows from the normal approximation:
+$P(|\overline{X} - \mu| \leq z\\,\mathrm{SE}) \approx 1 - \alpha$, and the event
+$|\overline{X} - \mu| \leq z\\,\mathrm{SE}$ is the same as
+$\mu \in [\overline{X} - z\\,\mathrm{SE}, \overline{X} + z\\,\mathrm{SE}]$, so
+$L = \overline{X} - z\\,\mathrm{SE}$ and $U = \overline{X} + z\\,\mathrm{SE}$.
+$z$ is the $1 - \alpha/2$ quantile of $N(0, 1)$: 1.645 for 90%, 1.96 for 95%,
+2.576 for 99%.
 
 The interval widens with a higher confidence level, with larger $\sigma$, and
 with smaller $n$. The formula treats $\sigma$ as known. When $\sigma$ is
-replaced by $\hat{\sigma}$, the quantile 1.96 is replaced by a quantile of the
+replaced by $\hat{\sigma}$, the quantile $z$ is replaced by a quantile of the
 $t$ distribution with $n - 1$ degrees of freedom, which is larger for small
-samples (2.262 for $n = 10$) and approaches 1.96 as $n$ grows.
+samples (2.262 instead of 1.96 for $n = 10$) and approaches $z$ as $n$ grows.
 
 --
 
@@ -5559,12 +5620,14 @@ samples (2.262 for $n = 10$) and approaches 1.96 as $n$ grows.
 
 **How to read it**
 
-- **Row:** one sample, $n = 10$, from $\mu = 100$, $\sigma = 15$
-- **Dot:** its mean $\overline{x}$
-- **Bar:** $\overline{x} \pm 1.96 \cdot 15/\sqrt{10} = \overline{x} \pm 9.3$, equal in every row
-- **Purple:** the true $\mu$, unknown in practice
-- **Red:** a bar that misses $\mu$
-- **confidence** sets the multiplier: 80 / 90 / 95 / 99 % → 1.28 / 1.64 / 1.96 / 2.58
+- **Purple band:** $\mu \pm z \cdot \mathrm{SE}$ around the true $\mu = 100$;
+  **confidence** sets $z$: 80 / 90 / 95 / 99 % → 1.28 / 1.64 / 1.96 / 2.58
+- **Row:** one sample of $n$ values (slider), $\sigma = 15$; **dot:** its
+  mean $\overline{x}$, not a data point — 10, then 60 samples
+- **Green / red:** $\overline{x}$ inside / outside the band
+- **Bar** (last step): $\overline{x} \pm z \cdot \mathrm{SE}$ — it covers
+  $\mu$ exactly when its dot is inside the band
+- Higher confidence → wider band and bars → fewer misses
 
 </div>
 
@@ -5576,18 +5639,119 @@ samples (2.262 for $n = 10$) and approaches 1.96 as $n$ grows.
 
 
 Notes:
-The steps show (1) one sample's interval against the fixed true mean, (2)
-twenty intervals, (3) all sixty with the coverage count, misses drawn in red,
-and (4) controls for the confidence level and $n$. With $\mu = 100$,
-$\sigma = 15$ and $n = 10$, the standard error is $15/\sqrt{10} \approx 4.74$
-and each 95% interval has half-width $\approx 9.3$; all intervals have the same
-width because $\sigma$ is known, and only their centres move.
+The steps show (1) the band $\mu \pm z\\,\mathrm{SE}$ around the fixed true
+mean, (2) the means of ten samples, (3) all sixty with the count inside the
+band, and (4) the bar $\overline{x} \pm z\\,\mathrm{SE}$ around each mean. With
+$\mu = 100$, $\sigma = 15$ and $n = 10$, the standard error is
+$15/\sqrt{10} \approx 4.74$, so at 95% the band and every bar have half-width
+$1.96 \cdot 4.74 \approx 9.3$; all bars have the same width because $\sigma$
+is known, and only their centres move.
+
+The band is the sampling distribution read as a statement about $\overline{X}$:
+$P(|\overline{X} - \mu| \leq z\\,\mathrm{SE}) = $ level. The inequality is
+symmetric in $\overline{X}$ and $\mu$, so the same event is
+"$\mu$ lies within $z\\,\mathrm{SE}$ of $\overline{X}$", which is what the bar
+states; a dot outside the band and a bar that misses $\mu$ are the same rows.
+This is the standard (Neyman) reading: the confidence level is the coverage
+probability of the procedure, $P(\mu \in [\overline{X} \pm z\\,\mathrm{SE}])$,
+computed before the data are seen. A higher level demands a higher hit rate
+and therefore a wider interval; a lower level buys a narrower interval with
+more misses.
+
+The band is also the acceptance region of the two-sided test of
+$H\_0\colon \mu = \mu\_0$ at significance level $\alpha = 1 - \text{level}$: a
+sample mean outside $\mu\_0 \pm z\\,\mathrm{SE}$ rejects $H\_0$. The confidence
+interval is the set of all $\mu\_0$ that the observed $\overline{x}$ does not
+reject. Tests and confidence intervals are two readings of the same sampling
+distribution.
 
 Of sixty 95% intervals, on average 3 miss $\mu$; the count is itself binomial,
 $B(60, 0.05)$, so anything from 0 to about 6 is unremarkable. Changing the
 level changes the width and the miss rate; changing $n$ changes the width but
 not the miss rate. A missing interval cannot be recognised from the data: it
 looks exactly like one that covers $\mu$.
+
+--
+
+## Confidence Is Coverage, Not Certainty
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+One sample, estimating $\theta = \mu$ with $\hat{\theta} = \overline{x} = 103$,
+$\mathrm{SE}(\hat{\theta}) = 3$:
+
+| level | $\hat{\theta} \pm z \cdot \mathrm{SE}(\hat{\theta})$ | width |
+|---|---|---|
+| 80% | $[99.2,\ 106.8]$ | 7.7 |
+| 95% | $[97.1,\ 108.9]$ | 11.8 |
+| 99% | $[95.3,\ 110.7]$ | 15.5 |
+
+</div>
+
+
+<div class="column">
+
+
+<div class="q">
+
+Which of the three tells you the most about $\theta$?
+
+</div>
+
+
+
+<div class="fragment">
+
+None — the data are the same. The level is a **promise**: the rule may miss
+in a share $\alpha$ of samples. A **weaker promise** allows a **narrower
+interval**.
+
+- **100%:** $(-\infty, \infty)$ — always right, says nothing
+- **near 0%:** the point $\hat{\theta}$ — precise, almost never right
+
+At the same level, only **more data** narrows it:
+$\mathrm{SE}(\hat{\theta}) = \sigma/\sqrt{n}$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The intervals are $103 \pm 1.2816 \cdot 3$, $103 \pm 1.96 \cdot 3$ and
+$103 \pm 2.5758 \cdot 3$. The level trades coverage against precision for a
+fixed amount of data; it adds no information. In everyday language "99%
+confident" suggests more certainty than "80% confident", while statistically
+it only means that the interval-building method captures $\theta$ in 99% of
+repeated samples, which is why "coverage interval" would be the more
+descriptive name. The target $\theta$ does not move; the net, centred on
+$\hat{\theta}$, moves from sample to sample.
+
+The sampling distribution describes the possible values of the estimator
+$\hat{\theta}$ and, for an unbiased estimator, is centred on $\theta$; it is
+not a distribution of $\theta$. The level is therefore not the probability
+that $\theta$ lies in the sampling distribution or in a particular interval.
+Halving the width at a fixed level requires four times the data.
+
+The trade-off does not depend on the normal distribution. Any confidence
+interval is built from a region that contains the estimator (or a statistic of
+the sample) with probability $1 - \alpha$; a lower level needs a smaller
+region, so the intervals for decreasing levels are nested. The normal
+distribution only supplies the numbers here: $z$ and the symmetric form
+$\hat{\theta} \pm z\\,\mathrm{SE}$. Other settings use other quantiles: the
+$t$ distribution for a mean with estimated $\sigma$, the $\chi^2$
+distribution for a variance, the binomial for a proportion (Clopper–Pearson),
+or the quantiles of resampled estimates (bootstrap). The
+$\mathrm{SE}(\overline{X}) = \sigma/\sqrt{n}$ law holds for i.i.d. data with
+finite variance, whatever their distribution.
 
 --
 
@@ -5604,10 +5768,10 @@ looks exactly like one that covers $\mu$.
 
 <span class="eyebrow">What it does not mean</span>
 
-"There is a 95% probability that $\mu$ lies in **this** interval."
+"There is a 95% probability that $\theta$ lies in **this** interval."
 
-$\mu$ is a fixed number. It is either in this interval or it is not — there is
-no probability left to have.
+$\theta$ is a fixed number. It is either in this interval or it is not — there
+is no probability left to have.
 
 </div>
 
@@ -5622,7 +5786,7 @@ no probability left to have.
 
 <span class="eyebrow">What it means</span>
 
-"95% of the intervals produced **by this procedure** contain $\mu$."
+"95% of the intervals produced **by this procedure** contain $\theta$."
 
 The probability is a property of the recipe, evaluated before the data is seen.
 
@@ -5636,18 +5800,129 @@ The probability is a property of the recipe, evaluated before the data is seen.
 
 
 Notes:
-Before the data are seen, the interval's end points are random variables, and
-$P(\mu \in [\overline{X} \pm 1.96\\,\mathrm{SE}]) = 0.95$ is a genuine
-probability statement. After the data are plugged in, both end points and
-$\mu$ are fixed numbers, and the statement is either true or false. The 95% is
-therefore the coverage rate of the procedure under repeated sampling.
+Before the data are seen, the estimator $\hat{\theta} = g(X\_1, \ldots, X\_n)$ is
+a random variable, so are the interval's end points, and
+$P(\theta \in [\hat{\theta} \pm 1.96\\,\mathrm{SE}(\hat{\theta})]) = 0.95$ is a
+genuine probability statement. After the data are plugged in, both end points
+and $\theta$ are fixed numbers, and the statement is either true or false. The
+95% is therefore the coverage rate of the procedure under repeated sampling.
 
-A Bayesian credible interval does support the first sentence: it is an
-interval to which the posterior distribution of $\mu$, given the observed data,
-assigns 95% probability. This requires a prior distribution for $\mu$. For the
-mean of normal data with a flat prior, the 95% credible interval coincides
-numerically with the 95% confidence interval, although the two statements mean
-different things.
+The first sentence is a statement about $\theta$ given the data. It becomes
+correct once $\theta$ itself is given a probability distribution — the
+Bayesian reading on the next slides.
+
+--
+
+## The Bayesian Reading: A Distribution Over θ
+
+
+<div class="grid-figure">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="math/posterior-mean" data-steps="2"
+ data-params='{"theta": 100, "sigma": 6, "n": 4, "start": 103}'></div>
+
+</div>
+
+
+<div class="column">
+
+Bayes, for $\theta$ and the sample $\mathbf{x} = (x\_1, \ldots, x\_n)$:
+$$
+p(\theta \mid \mathbf{x}) \propto p(\mathbf{x} \mid \theta)\\, p(\theta)
+$$
+
+With a flat prior: $\theta \mid \mathbf{x} \sim N(103, 3^2)$.
+
+
+<div class="c-important small">
+
+"95% probability that $\theta$ lies in $[97.1, 108.9]$": false for the
+confidence interval, **correct** for the credible interval,
+$P(97.1 \leq \theta \leq 108.9 \mid \mathbf{x}) = 0.95$. Also
+$P(\theta > 100 \mid \mathbf{x}) \approx 0.84$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The figure opens on the true $\theta = 100$ alone: one fixed number, in
+practice unknown. Step 1 adds the opening sample of four points below the axis
+and the posterior it gives, with its 95% credible interval, $\hat{\theta} = 103$
+and $\mathrm{SE}(\hat{\theta})$: centred apart from $\theta$. Step 2 adds the
+controls. The data are normal with known
+$\sigma = 6$, so $\mathrm{SE}(\hat{\theta}) = 6/\sqrt{4} = 3$. "New sample"
+draws four fresh points: the posterior moves, the true $\theta$ does not, and
+about one credible interval in twenty misses it. "Add 4 points" enlarges the
+sample: $\mathrm{SE}(\hat{\theta}) = \sigma/\sqrt{n}$ shrinks and the
+posterior narrows around a $\hat{\theta}$ that approaches $\theta$. The
+curve is scaled to its own peak, so the narrowing shows in its width.
+
+The shaded area is the 95% **credible interval**: the posterior probability
+assigned to the values of $\theta$ in it. The posterior describes what is
+known about the one fixed $\theta$, given the data and the prior; it is not a
+distribution of values that $\theta$ takes. $N(103, 3^2)$ is not assumed: it
+follows from the assumed likelihood (normal data, known $\sigma$) and the flat
+prior by Bayes' theorem. Any interval holding 95% of the posterior is a 95%
+credible interval; the central one and the narrowest one (highest posterior
+density) coincide for a symmetric posterior. Here $\theta = \mu$, the population
+mean, and $\hat{\theta} = \overline{x}$. With a normal likelihood of known
+variance and a flat prior, the posterior is
+$N(\hat{\theta}, \mathrm{SE}(\hat{\theta})^2)$, so the credible interval
+coincides numerically with the confidence interval of the previous slides;
+only the reading differs.
+$P(\theta > 100 \mid \mathbf{x}) = \Phi((103 - 100)/3) = \Phi(1) \approx 0.841$:
+a direct probability statement about the unknown parameter, which a confidence
+interval does not provide.
+
+The probability now depends on the data **and** the prior. A flat prior over
+the real line is not a proper distribution, but the posterior it produces is.
+An informative prior, for example from earlier studies, shifts and narrows the
+posterior and makes the two intervals differ. Prior, likelihood and posterior
+for a parameter are treated systematically with the Beta–Bernoulli model.
+
+--
+
+## Frequentist or Bayesian: What Is Uncertain?
+
+| | frequentist | Bayesian |
+|---|---|---|
+| the parameter $\theta$ | fixed, unknown — **no** probability | fixed, unknown — uncertainty about it as a **distribution** $p(\theta \mid \mathbf{x})$ |
+| the sample $\mathbf{x}$ | random before it is seen, and so is $\hat{\theta}$ | observed, conditioned on |
+| the interval | confidence interval $\hat{\theta} \pm z \cdot \mathrm{SE}(\hat{\theta})$ | credible interval |
+| "95%" means | 95% of intervals from repeated samples contain $\theta$ | $P(\theta \in \text{this interval} \mid \mathbf{x}) = 0.95$ |
+| needs | a sampling model | a sampling model **and** a prior $p(\theta)$ |
+
+
+<div class="c-insight">
+
+Both still trade coverage for width: a 99% credible interval is wider than an
+80% one. Neither gets more information out of the same sample.
+
+</div>
+
+
+Notes:
+Frequentist statistics assigns probabilities only to outcomes of (hypothetical)
+repeated sampling; Bayesian statistics also assigns probabilities to unknown
+quantities, conditional on what is known. Neither requires $\theta$ to vary
+physically: in the Bayesian reading the distribution describes the state of
+knowledge about one fixed value, i.e. epistemic uncertainty. That is why the
+Bayesian reading can answer questions such as $P(\theta > 100 \mid \mathbf{x})$
+directly, and why it needs the prior as an additional assumption.
+
+The frequentist guarantee holds whatever the true $\theta$ is, without a
+prior; the Bayesian statement holds given the prior and the model, for the
+sample actually observed. With much data both readings converge numerically,
+since the likelihood dominates the prior (Bernstein–von Mises theorem).
 
 --
 
@@ -5746,7 +6021,9 @@ be correlated, which would make the true standard error larger.
 A statistic is a **random variable**. Its distribution over repeated samples is
 the sampling distribution; its spread is the **standard error**, $\sigma/\sqrt{n}$.
 A confidence interval reports that spread — and its percentage describes the
-**procedure**, not the one interval in front of you.
+**procedure**, not the one interval in front of you. A probability for $\theta$
+itself needs the Bayesian reading: a prior, and a **credible interval** from
+the posterior.
 
 </div>
 
@@ -5758,8 +6035,8 @@ interval is a property of the procedure. They apply to every reported
 measurement with an error bar, including an accuracy or error rate estimated
 on a test set: an accuracy measured on 1,000 test cases at around 90% has a
 standard error of $\sqrt{0.9 \cdot 0.1/1000} \approx 0.95$ percentage points.
-A Bayesian treatment answers the same question with a posterior distribution
-over the unknown quantity instead of a sampling distribution.
+With a flat prior and normal data, the credible interval and the confidence
+interval coincide numerically; they differ in what the percentage refers to.
 
 ---
 
@@ -5956,6 +6233,17 @@ Probability $\beta$; **power** $= 1 - \beta$.
 Lowering $\alpha$ raises $\beta$ for a fixed design. To improve both: more
 data, less noise, or a **paired** design that cancels shared noise.
 
+
+<div class="c-note small">
+
+**The same rule as the confidence interval:** reject $H\_0: \theta = \theta\_0$
+at level $\alpha$ $\iff$ $\theta\_0$ lies outside the $1 - \alpha$ interval.
+Type I = the interval misses the true $\theta$; Type II = it contains a wrong
+$\theta\_0$.
+
+</div>
+
+
 Notes:
 The trade-off is the practical content of the slide. In an ML context: a strict
 α means real improvements get dismissed; a lax α means noise gets published.
@@ -5963,6 +6251,17 @@ Power analysis answers "how many runs do I need", which is the question people
 actually have. The paired design is the cheap one in ML: evaluate both models on
 the same seeds and test splits, and the split-to-split noise cancels in the
 differences.
+
+The note is the duality between tests and confidence intervals: the
+$1 - \alpha$ confidence interval is the set of all $\theta\_0$ that the
+two-sided level-$\alpha$ test does not reject. Its miss rate is therefore the
+Type I error rate, and a narrower interval (a larger $\alpha$) keeps fewer
+wrong values, i.e. has a smaller $\beta$. Example with $\overline{x} = 103$,
+$\mathrm{SE} = 3$ and $H\_0: \theta = 98$: the 80% interval
+$[99.2, 106.8]$ excludes 98, so the test at $\alpha = 0.20$ rejects; the 95%
+interval $[97.1, 108.9]$ contains 98, so the test at $\alpha = 0.05$ does not.
+The extremes: the interval $(-\infty, \infty)$ never rejects (Type I error 0,
+power 0); the single point $\hat{\theta}$ rejects every other value.
 
 --
 

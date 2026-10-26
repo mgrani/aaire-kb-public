@@ -1,16 +1,20 @@
 // What "95% confident" is a statement about (Principle 6, tier 3).
 //
-// Each row is one sample and the interval computed from it. The true mean is a
-// fixed vertical line. Intervals that miss it are drawn in red. The confidence
-// level is a property of the *procedure* — the fraction of rows that cover —
-// not of any single interval, and that only becomes visible with many rows.
+// Starts from the sampling distribution: around the fixed true mean lies the
+// band μ ± z·SE, which by construction catches the chosen share (the level) of
+// all sample means. Each row is one sample; its mean is a dot, green inside
+// the band and red outside. The last step turns it around: the same half-width
+// drawn around each dot is the confidence interval, and a bar covers μ exactly
+// when its dot lies inside the band, so the red rows stay the same. The level
+// is thus a property of the *procedure* — the share of rows that cover — not
+// of any single interval. A higher level widens the band and the bars alike.
 //
 // Uses only: sample, sample mean, standard error, the normal distribution.
 // σ is treated as known so no t-distribution is needed at this point.
 //
 // params: mu, sigma, n, level (0.80 | 0.90 | 0.95 | 0.99), rows, seed
-// steps: 1 one interval · 2 twenty · 3 all rows, with the coverage count ·
-//        4 the invitation to change the level
+// steps: 1 the band around μ · 2 ten sample means · 3 all rows, with the
+//        count inside the band · 4 the bars around each mean: the intervals
 
 import { addControls, rng } from '../core/controls.js'
 
@@ -30,6 +34,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const mu = params.mu ?? 100
   const sigma = params.sigma ?? 15
   const ROWS = params.rows ?? 60
+  const FEW = 10 // the first rows, shown alone before all ROWS
   const seed = params.seed ?? 20260910
 
   const x = d3.scaleLinear().domain([mu - 3.4 * sigma, mu + 3.4 * sigma]).range([48, W - 34])
@@ -39,7 +44,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .append('svg')
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('role', 'img')
-    .attr('aria-label', 'One confidence interval per row against the fixed true mean')
+    .attr('aria-label', 'Sample means against the band around the fixed true mean, then one confidence interval per row')
 
   const caption = svg.append('text')
     .attr('x', W / 2).attr('y', 26).attr('text-anchor', 'middle')
@@ -49,6 +54,11 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .attr('transform', `translate(0,${BOT + 8})`).attr('color', NAVY)
     .call(d3.axisBottom(x).ticks(7)).attr('font-size', 14)
 
+  const band = svg.append('rect')
+    .attr('y', TOP - 6).attr('height', BOT - TOP + 12)
+    .attr('fill', VIOLET).attr('fill-opacity', 0.1)
+  const bandLabel = svg.append('text')
+    .attr('y', TOP - 18).attr('font-size', 15).attr('fill', VIOLET)
   const gRows = svg.append('g')
   const truth = svg.append('line')
     .attr('x1', x(mu)).attr('x2', x(mu)).attr('y1', TOP - 12).attr('y2', BOT + 6)
@@ -84,52 +94,52 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   }
 
   function render(cfg) {
-    const count = step >= 3 ? ROWS : step >= 2 ? 20 : step >= 1 ? 1 : 0
+    const count = step >= 3 ? ROWS : step >= 2 ? FEW : 0
     const data = intervals(cfg, count)
+    const z = Z[cfg.level] ?? 1.96
+    const half = (z * sigma) / Math.sqrt(cfg.n)
+    const showBand = step >= 1
+    band.attr('x', x(mu - half)).attr('width', x(mu + half) - x(mu - half))
+      .attr('opacity', showBand ? 1 : 0)
+    bandLabel.attr('x', x(mu + half) + 6)
+      .text(showBand ? `μ ± ${z.toFixed(2)} SE` : '')
     const dy = (BOT - TOP) / ROWS
-    const y = (i) => TOP + (i + 0.5) * (count <= 20 ? Math.min(dy * 3, (BOT - TOP) / count) : dy)
+    const y = (i) => TOP + (i + 0.5) * (count <= FEW ? Math.min(dy * 5, (BOT - TOP) / count) : dy)
 
     gRows.selectAll('*').remove()
     const g = gRows.selectAll('g').data(data).join('g')
-    g.append('line')
+    if (step >= 4) g.append('line')
       .attr('x1', (d) => x(d.lo)).attr('x2', (d) => x(d.hi))
       .attr('y1', (d, i) => y(i)).attr('y2', (d, i) => y(i))
       .attr('stroke', (d) => (d.covers ? GREEN : RED))
-      .attr('stroke-width', count <= 20 ? 3 : 2)
+      .attr('stroke-width', count <= FEW ? 3 : 2)
       .attr('opacity', (d) => (d.covers ? 0.75 : 1))
     g.append('circle')
       .attr('cx', (d) => x(d.m)).attr('cy', (d, i) => y(i))
-      .attr('r', count <= 20 ? 3.5 : 2.2)
-      .attr('fill', NAVY)
+      .attr('r', count <= FEW ? 5 : 3)
+      .attr('fill', (d) => (d.covers ? GREEN : RED))
 
     truth.raise()
 
     const missed = data.filter((d) => !d.covers).length
-    if (step >= 3) {
+    const level = Math.round(cfg.level * 100)
+    if (step >= 2) {
       const pct = (100 * (count - missed)) / count
-      tally.attr('fill', NAVY).text(
-        `${count - missed} of ${count} intervals cover μ  (${pct.toFixed(0)}%) — nominal ${Math.round(cfg.level * 100)}%`,
-      )
-    } else if (step >= 1) {
-      tally.attr('fill', NAVY).text(
-        count === 1
-          ? data[0].covers
-            ? 'this one covers μ — but we could not have known that'
-            : 'this one misses μ — and nothing in the sample said so'
-          : `${count - missed} of ${count} cover μ`,
-      )
+      tally.attr('fill', NAVY).text(step >= 4
+        ? `${count - missed} of ${count} intervals cover μ  (${pct.toFixed(0)}%) — level ${level}%`
+        : `${count - missed} of ${count} sample means inside the band  (${pct.toFixed(0)}%) — level ${level}%`)
     } else tally.text('')
 
     if (step >= 4) {
-      caption.attr('fill', VIOLET).text('Change the level or n — which number follows, and which does not?')
+      caption.attr('fill', VIOLET).text('Same width around each mean: a bar covers μ ⇔ its dot is in the band')
     } else if (step === 3) {
-      caption.attr('fill', NAVY).text('The percentage is a property of the procedure, not of one interval')
+      caption.attr('fill', NAVY).text(`${ROWS} samples of n = ${cfg.n}: about ${level}% of their means land in the band`)
     } else if (step === 2) {
-      caption.attr('fill', NAVY).text('Twenty samples, each with its own interval')
+      caption.attr('fill', NAVY).text(`Ten samples of n = ${cfg.n}: each dot is one sample's mean`)
     } else if (step === 1) {
-      caption.attr('fill', NAVY).text('One sample, one interval. Does it contain μ?')
+      caption.attr('fill', NAVY).text(`The band that catches ${level}% of sample means`)
     } else {
-      caption.attr('fill', NAVY).text('μ is fixed and unknown. Only the intervals move.')
+      caption.attr('fill', NAVY).text('μ is fixed. Where will the sample means land?')
     }
   }
 
