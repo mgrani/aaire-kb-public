@@ -11,6 +11,15 @@
 //         "inference"   — the trained model on unseen input; training parts recede
 //         "uncertainty" — the finished figure, with one source of uncertainty
 //                         highlighted per step
+//         "approaches"  — the finished figure read three ways (Lecture 03): what
+//                         the model box computes, what ŷ is and what the loss
+//                         scores for a rule system, a model of p(y | x) and a
+//                         model of p(x, y), in Lecture 03 notation (θ, not Θ);
+//                         the last step runs the generative
+//                         model backwards to features (sampling)
+//   reading: mode "approaches" only — the reading to start from (0–4); steps
+//            count on from it, so one slide per kind of classifier can show
+//            its own reading (and the generative one step on to sampling)
 //   stage: starting stage for "build" (default 0); steps count on from it, so
 //          stage 2 with data-steps="2" resumes the build at the loss
 
@@ -54,6 +63,8 @@ const EDGES = [
   { from: 'loss', to: 'opt',   at: 4, label: '', dash: false, curve: 0 },
   { from: 'opt',  to: 'theta', at: 4, label: 'update', dash: false, curve: 1 },
   { from: 'theta',to: 'model', at: 4, label: '', dash: true, curve: 0 },
+  // mode "approaches" only: the generative model produces features
+  { from: 'model',to: 'x',     at: 9, label: 'sample', dash: true, curve: 1, sample: true },
 ]
 
 const BUILD_CAPTIONS = [
@@ -72,6 +83,28 @@ const UNCERTAINTY = [
   { ids: ['loss'],          title: 'In the objective',  text: 'the loss is a design choice — it may not capture what we actually care about' },
   { ids: ['opt'],           title: 'In the optimisation', text: 'stochastic steps, initialisation, an approximate solution' },
   { ids: ['yhat'],          title: 'In the evaluation', text: 'a finite test set, and a future that may not resemble the past' },
+]
+
+// mode "approaches": per step, what the model box, the prediction and the loss
+// read; `mark` lists the boxes that change (amber), `x` marks the features as
+// scored by the loss (generative only)
+const APPROACHES = [
+  { title: 'Three ways to fill the model box',
+    text: 'same data, same loop — different answers to "what does the model compute?"' },
+  { title: 'Discriminant function: rules',
+    text: 'x ↦ a class; no probability, nothing about how x arises',
+    model: 'rule(x; θ)', yhat: 'a class', loss: 'errors', mark: ['model', 'yhat', 'loss'] },
+  { title: 'Discriminative model: p(y | x) only',
+    text: 'a distribution over y for each x; x itself is never modelled',
+    model: 'P(y | x; θ)', yhat: 'P(y | x)', loss: '−log P(y | x)', mark: ['model', 'yhat', 'loss'] },
+  { title: 'Generative model: p(x, y)',
+    text: 'the loss scores the features too; ŷ follows by Bayes\' theorem',
+    model: 'p(x, y; θ)', yhat: 'P(y | x)', yLabel: 'via Bayes', loss: '−log p(x, y)',
+    mark: ['model', 'yhat', 'loss', 'x'] },
+  { title: 'Generative model, sampling',
+    text: 'draw y, then x from p(x | y): a new data point the model would produce',
+    model: 'p(x, y; θ)', yhat: 'P(y | x)', yLabel: 'via Bayes', loss: '−log p(x, y)',
+    mark: ['model', 'x'], sample: true },
 ]
 
 export async function mount(el, { d3, params, steps, isPrint }) {
@@ -108,6 +141,8 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   // edge geometry: leave from the nearest side of the source box
   function path(e) {
     const a = byId[e.from], b = byId[e.to]
+    // model bottom → features bottom, clear of the x → model arrow
+    if (e.sample) return `M${a.x + 30},${a.y + a.h} Q${(a.x + b.x + b.w) / 2},${a.y + a.h + 52} ${b.x + b.w / 2},${b.y + b.h}`
     const ax = a.x + a.w / 2, ay = a.y + a.h / 2
     const bx = b.x + b.w / 2, by = b.y + b.h / 2
     const horiz = Math.abs(bx - ax) > Math.abs(by - ay)
@@ -152,7 +187,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .attr('x', (n) => n.w / 2).attr('y', 22).attr('text-anchor', 'middle')
     .attr('font-size', 14).attr('fill', INK).text((n) => n.label)
   // "h_Θ" must render as h with a subscript, not with a literal underscore
-  nodes.append('text')
+  nodes.append('text').attr('class', 'sub')
     .attr('x', (n) => n.w / 2).attr('y', 43).attr('text-anchor', 'middle')
     .attr('font-size', 16).attr('font-weight', 700).attr('font-style', 'italic')
     .attr('fill', (n) => (n.zone === 'real' ? NAVY : TEAL))
@@ -170,6 +205,15 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .attr('rx', 4).attr('fill', '#fff7ed').attr('stroke', '#d97706')
   const badgeText = badge.append('text').attr('x', 490).attr('y', H - 17)
     .attr('text-anchor', 'middle').attr('font-size', 15).attr('fill', '#8a4b06')
+
+  // write a node's sub text: "h_Θ" renders as h with subscript Θ
+  function setSub(sel, txt) {
+    sel.selectAll('tspan').remove()
+    const [base, sub] = txt.split('_')
+    sel.append('tspan').text(base)
+    if (sub) sel.append('tspan').attr('font-size', 12).attr('dy', 4).text(sub)
+  }
+  edges.filter((e) => e.sample).select('text').attr('dy', 82)
 
   function stroke(n) { return n.zone === 'real' ? NAVY : TEAL }
 
@@ -195,6 +239,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       nodes.attr('opacity', (n) => (!live ? 1 : on.includes(n.id) ? 1 : DIM))
         .select('rect').attr('stroke', stroke)
       edges.attr('opacity', (e) => {
+        if (e.sample) return 0
         if (!live) return 1
         return on.includes(e.from) && on.includes(e.to) ? 1 : DIM
       })
@@ -204,6 +249,26 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         : 'Training used every box; using the model does not')
       badge.attr('opacity', live ? 1 : 0)
       badgeText.text(live ? 'the learned parameters Θ are now fixed' : '')
+    } else if (mode === 'approaches') {
+      const k = (params.reading ?? 0) + step
+      const a = APPROACHES[Math.min(Math.max(k, 0), APPROACHES.length - 1)]
+      const marked = (n) => (a.mark ?? []).includes(n.id)
+      nodes.attr('opacity', 1)
+      nodes.select('rect')
+        .attr('stroke', (n) => (marked(n) ? '#d97706' : stroke(n)))
+        .attr('stroke-width', (n) => (marked(n) ? 3.5 : 2))
+      nodes.select('text.sub').each(function (n) {
+        const over = { model: a.model, yhat: a.yhat, loss: a.loss, theta: 'θ' }[n.id]
+        setSub(d3.select(this), over ?? n.sub)
+      })
+      nodes.select('text:not(.sub)').text((n) => (n.id === 'yhat' && a.yLabel ? a.yLabel : n.label))
+      edges.attr('opacity', (e) => (e.sample ? (a.sample ? 1 : 0) : a.sample ? 0.35 : 1))
+      edges.select('path')
+        .attr('stroke', (e) => (e.sample ? TEAL : e.at >= 3 ? VIOLET : NAVY))
+        .attr('marker-end', (e) => mk(e.sample ? 'a-teal' : e.at >= 3 ? 'a-violet' : 'a-navy'))
+      caption.text(a.title)
+      badge.attr('opacity', 1)
+      badgeText.text(a.text)
     } else {
       const i = Math.min(Math.max(step, 0), UNCERTAINTY.length) - 1
       const cur = i >= 0 ? UNCERTAINTY[i] : null
@@ -211,7 +276,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         .select('rect')
         .attr('stroke', (n) => (cur && cur.ids.includes(n.id) ? '#d97706' : stroke(n)))
         .attr('stroke-width', (n) => (cur && cur.ids.includes(n.id) ? 3.5 : 2))
-      edges.attr('opacity', cur ? 0.25 : 1)
+      edges.attr('opacity', (e) => (e.sample ? 0 : cur ? 0.25 : 1))
       edges.select('path').attr('stroke', (e) => (e.at >= 3 ? VIOLET : NAVY))
         .attr('marker-end', (e) => mk(e.at >= 3 ? 'a-violet' : 'a-navy'))
       caption.text(cur ? cur.title : 'Uncertainty is not only in the prediction')
@@ -220,6 +285,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     }
   }
 
-  render(isPrint && mode !== 'build' ? (mode === 'inference' ? 1 : UNCERTAINTY.length) : steps)
+  const last = { inference: 1, uncertainty: UNCERTAINTY.length, approaches: APPROACHES.length - 1 }
+  render(isPrint && mode !== 'build' && params.reading == null ? last[mode] : steps)
   return { setStep: (i) => render(i) }
 }

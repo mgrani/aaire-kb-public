@@ -9,7 +9,10 @@
 //   power 3  cubed standardised deviations — the sign stays and the far point
 //            dominates; average = skewness
 // The last point is draggable (and on a slider), so the effect of one far
-// value on each statistic can be tried.
+// value on each statistic can be tried. With `bin`, a histogram of the sample
+// sits above the number line, so the shape (its peak, its tail) is visible
+// too; for power 3 the tallest bin is marked as the mode, next to median and
+// mean.
 //
 // params:
 //   values   the fixed part of the sample
@@ -17,6 +20,7 @@
 //   power    2 or 3
 //   domain   [lo, hi] for the axis
 //   unit     suffix for the readouts
+//   bin      histogram bin width (omit for no histogram)
 // steps: 1 the mean · 2 the bars · 3 their average
 
 import { addControls } from '../core/controls.js'
@@ -37,11 +41,15 @@ const median = (xs) => {
 const fmt = (v) => (Math.abs(v) < 0.005 ? '0' : v.toFixed(Math.abs(v) >= 100 ? 0 : 2))
 
 export async function mount(el, { d3, params, steps, isPrint }) {
+  const bin = params.bin
+  // the histogram takes a band between the caption and the number line
+  const HIST = bin ? { top: 52, base: 112 } : null
+  const shift = HIST ? 80 : 0
   const W = 760
-  const H = 362
-  const LINE = 92
-  const PANEL_TOP = 146
-  const PANEL_BOT = 326
+  const H = 362 + shift
+  const LINE = 92 + shift
+  const PANEL_TOP = 146 + shift
+  const PANEL_BOT = 326 + shift
   const fixed = params.values ?? [3, 4, 4.5, 5, 5.5, 6, 7, 9]
   const start = params.movable ?? 13
   const power = params.power ?? 2
@@ -73,6 +81,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .call(d3.axisBottom(x).ticks(10).tickSize(4))
     .attr('font-size', 13)
 
+  const gHist = svg.append('g')
   const gPanel = svg.append('g')
   const gMarks = svg.append('g')
   const gPts = svg.append('g')
@@ -100,6 +109,34 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
     gMarks.selectAll('*').remove()
     gPanel.selectAll('*').remove()
+    gHist.selectAll('*').remove()
+
+    if (HIST) {
+      const edges = d3.range(lo, hi, bin)
+      const counts = edges.map((a) => data.filter((d) => d >= a && d < a + bin).length)
+      const top = d3.max(counts)
+      const hy = (c) => HIST.base - (c / top) * (HIST.base - HIST.top)
+      gHist.append('line')
+        .attr('x1', x(lo)).attr('x2', x(hi)).attr('y1', HIST.base).attr('y2', HIST.base)
+        .attr('stroke', RULE).attr('stroke-width', 1.5)
+      gHist.append('text')
+        .attr('x', x(hi)).attr('y', HIST.top - 6).attr('text-anchor', 'end')
+        .attr('font-size', 13).attr('fill', MUTED)
+        .text('histogram of the sample')
+      // the mode is marked only where it is compared with median and mean
+      const isMode = (c) => power === 3 && step >= 1 && c === top
+      gHist.selectAll('rect').data(edges).join('rect')
+        .attr('x', (a) => x(a) + 1).attr('width', x(lo + bin) - x(lo) - 2)
+        .attr('y', (a, i) => hy(counts[i])).attr('height', (a, i) => HIST.base - hy(counts[i]))
+        .attr('fill', (a, i) => (isMode(counts[i]) ? '#7b8ba0' : '#c3cdd9'))
+      edges.forEach((a, i) => {
+        if (!isMode(counts[i])) return
+        gHist.append('text')
+          .attr('x', x(a + bin / 2)).attr('y', hy(counts[i]) - 5).attr('text-anchor', 'middle')
+          .attr('font-size', 14).attr('fill', MUTED)
+          .text(`mode ≈ ${+(a + bin / 2).toFixed(2)}${unit}`)
+      })
+    }
 
     if (step >= 1) {
       gMarks.append('path')
@@ -167,9 +204,10 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     }
 
     const text = {
-      2: ['The sample', 'The mean', 'Square them: nothing cancels, far points count most',
+      2: ['The sample', 'The mean', 'Square the deviations x − x̄: nothing cancels, far points count most',
         'The variance is the average square'],
-      3: ['The sample', 'Mean and median', 'Cube them in units of s: the sign stays',
+      3: ['The sample', HIST ? 'Mode, median and mean' : 'Mean and median',
+        'Cube the deviations, in units of s: the sign stays',
         avg > 0.05 ? 'Right side outweighs left: skewed right' : avg < -0.05
           ? 'Left side outweighs right: skewed left' : 'Both sides balance: symmetric'],
     }[power]

@@ -17,7 +17,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/data-science/lecture/l02-probability-theory/l02-probability-theory.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.Cuxaplvk.css"></head><body><a class="deck-download" href="/courses/data-science/lecture/l02-probability-theory/l02-probability-theory.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Data Science
@@ -4850,7 +4850,7 @@ and the running sum of squared deviations with each new value.
 ## The Variance, Drawn
 
 <div class="viz viz-lg" data-viz="math/moment-deviations" data-steps="3"
- data-params='{"power": 2, "unit": " min"}'></div>
+ data-params='{"power": 2, "unit": " min", "bin": 2}'></div>
 
 
 <div class="q">
@@ -4887,10 +4887,15 @@ Reset returns it to 13.
 ## Why the Denominator Changes
 
 
+<div class="grid-2">
+
+
+<div class="column">
+
+
 <div class="c-definition">
 
-The **population variance** $\sigma^2$ is the variance over the whole
-population. With the true mean $\mu$ unknown, it is estimated by
+The **population variance** $\sigma^2$, with $\mu$ unknown, is estimated by
 $$
 \hat{\sigma}^2 = \frac{1}{n-1}\sum\_{i=1}^{n}(x\_i - \overline{x})^2
 $$
@@ -4898,22 +4903,36 @@ $$
 </div>
 
 
+</div>
+
+
+<div class="column">
+
 
 <div class="c-intuition">
 
-$\overline{x}$ is computed from the same data, so it sits closer to the data
-than $\mu$ does: the deviations come out **systematically too small**. Dividing
-by $n-1$ instead of $n$ compensates — one degree of freedom was spent on the
-mean.
+$\overline{x}$ sits closer to the data than $\mu$: the deviations come out
+**too small**. $n - 1$ compensates — one degree of freedom went into the mean.
 
 </div>
 
 
+</div>
+
+
+</div>
+
+
+| you want to … | divide by |
+|---|---|
+| **describe** these $n$ values (or they are the whole population) | $n$ — this is $s^2$ |
+| **estimate** $\sigma^2$ of a population from a sample, $\mu$ unknown | $n - 1$ — this is $\hat{\sigma}^2$ |
+
 
 <div class="sidenote">
 
-Naming is not uniform: many textbooks, and pandas, call the $n-1$ version $s^2$;
-NumPy's `var` divides by $n$ unless told otherwise.
+Names differ: many textbooks, R and pandas call the $n - 1$ version $s^2$;
+NumPy divides by $n$.
 
 </div>
 
@@ -4935,25 +4954,59 @@ about spread. If $\mu$ is known, $\frac{1}{n}\sum\_i (x\_i - \mu)^2$ is already
 unbiased. Unbiasedness does not carry over to the square root:
 $\hat{\sigma}$ underestimates $\sigma$ slightly on average. For large $n$ the
 two denominators differ negligibly. In pandas, `var` uses `ddof=1` by default;
-in NumPy, `ddof=0`.
+in NumPy, `ddof=0`; R's `var` and Excel's `VAR.S` divide by $n - 1$, Excel's
+`VAR.P` by $n$.
+
+If $\mu$ is known, $\frac{1}{n}\sum\_i (x\_i - \mu)^2$ is unbiased: no degree
+of freedom is spent. In practice: whenever the variance is a statement about a population (a
+standard error, a confidence interval, a test), use $n - 1$. The $1/n$ version
+is also what maximum likelihood gives for normal data; it is biased but has a
+slightly smaller mean squared error, so neither is "wrong" — they answer
+different questions.
 
 --
 
 ## Sample Skewness: Which Tail Is Longer?
 
-$$
-\widehat{\mathrm{Skew}} = \frac{1}{n}\sum\_{i=1}^{n}\left(\frac{x\_i - \overline{x}}{s}\right)^{3}
-\qquad
-\begin{cases} > 0 & \text{long right tail} \\\ < 0 & \text{long left tail} \end{cases}
-$$
+
+<div class="grid-figure">
+
+
+<div class="column">
 
 <div class="viz viz-lg" data-viz="math/moment-deviations" data-steps="3"
- data-params='{"power": 3, "unit": " min"}'></div>
+ data-params='{"power": 3, "unit": " min", "bin": 2}'></div>
+
+</div>
+
+
+<div class="column">
+
+$$
+\widehat{\mathrm{Skew}} = \frac{1}{n}\sum\_{i=1}^{n}\left(\frac{x\_i - \overline{x}}{s}\right)^{3}
+$$
+
+$> 0$: right tail, $< 0$: left tail.
+
+
+<div class="c-insight small">
+
+A long right tail pulls the mean most, the median less, the peak not at all:
+**mode < median < mean**.
+
+</div>
+
 
 
 <div class="q">
 
 Drag the light point left. Where is the skewness 0 — and why there?
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -4965,12 +5018,26 @@ keeps the sign, so left and right deviations compete, and it weights a
 deviation by the cube of its size, so the farthest point dominates: at 13
 minutes $z^3 \approx 12.4$, against $-2.5$ for all points left of the mean
 together. The skewness is $1.20$; the mean (6.33) lies to the right of the
-median (5.5). Dividing by $s$ makes the measure unit-free: it is unchanged when
+median (5.5), and both to the right of the mode. For a sample of distinct
+values the mode is read off a histogram: the centre of the tallest bin, here
+the bin from 4 to 6 minutes, so mode ≈ 5. The value depends on the bin width
+and the bin edges, which is why the mode is the least stable of the three.
+
+The order mode < median < mean for a right tail (reversed for a left tail) is
+a rule of thumb, not a theorem. The mean is pulled in proportion to the
+distance of the tail values, the median only by how many values lie on each
+side, and the mode not at all. It holds for most unimodal continuous
+distributions met in practice (exponential, log-normal, gamma), but there are
+distributions with positive skewness and the mean below the median,
+particularly discrete ones; skewness and the order of the three are related
+but not equivalent.
+
+Dividing by $s$ makes the measure unit-free: it is unchanged when
 minutes are converted to seconds.
 
 Answer: at 1 minute. The sample 1, 3, 4, 4.5, 5, 5.5, 6, 7, 9 is symmetric
 about 5 (1 and 9, 3 and 7, 4 and 6, 4.5 and 5.5 mirror each other), so every
-cube is cancelled by its mirror image, mean and median are both 5, and the
+cube is cancelled by its mirror image, mode, median and mean are all 5, and the
 skewness is exactly 0. At 0 minutes it turns negative ($-0.36$). Skewness 0
 does not imply symmetry in general, but symmetry implies skewness 0.
 
@@ -5236,8 +5303,38 @@ how one estimator is judged better than another.
 
 ## An Estimator Has a Distribution
 
+
+<div class="grid-figure">
+
+
+<div class="column">
+
 <div class="viz viz-lg" data-viz="math/sampling-distribution" data-steps="4"
  data-params='{"shape": "uniform", "n": 5}'></div>
+
+</div>
+
+
+<div class="column">
+
+
+<div class="c-note small">
+
+**Two numbers, two roles**
+
+- **$n$** = values per sample: one sample (teal) → one mean $\overline{x}$
+- **$k$** = number of samples: each adds one mean to the violet histogram
+- $n$ sets the **width**; $k$ only sharpens the picture
+- $n = 1$: each mean is a single value, so the means look like the population
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 **Predict first:** after a thousand samples, what shape will the lower picture
 have — and how wide?
@@ -5281,6 +5378,17 @@ $\hat{\theta}$ is **unbiased** if $E[\hat{\theta}] = \theta$.
 </div>
 
 
+
+<div class="c-note small">
+
+**Why repeat the sample?** In practice there is **one** sample of size $n$ and
+one $\overline{x}$. The $k$ repetitions are a thought experiment: they show
+where that one $\overline{x}$ could have landed, and so how far from $\mu$ it
+may be.
+
+</div>
+
+
 Notes:
 The three observations are unbiasedness ($E[\overline{X}] = \mu$, by
 linearity), the standard error ($\mathrm{Var}(\overline{X}) = \sigma^2/n$, by
@@ -5297,9 +5405,82 @@ from the CLT for sums.
 
 --
 
+## When Is the Sample Mean Biased?
+
+The data record $x = s + b + \varepsilon$, not the quantity $s$ we want, with
+$\theta = \mu = E[S]$. $\overline{X}$ is unbiased for $E[X]$ — always. The
+question is whether $E[X] = \mu$.
+
+| what went into the data | $E[\overline{X}]$ | biased for $\mu$? |
+|---|---|---|
+| noise $\varepsilon$, $E[\varepsilon] = 0$ | $\mu$ | **no** — only a wider spread |
+| offset or artefact, $x = g(s)$ | $E[g(S)]$, e.g. $\mu + b$ | **yes** |
+| temperature $T$ lost when cold ($M = 1$), rows deleted | $E[T \mid M = 0] > E[T]$ | **yes** |
+| readings missing independently of $T$ | $E[T]$ | **no** — only fewer rows |
+
+
+<div class="c-important">
+
+More data **narrows** the sampling distribution but does **not move its
+centre**: a bias stays, however large $n$ is.
+
+</div>
+
+
+Notes:
+The bias of an estimator is $E[\hat{\theta}] - \theta$; it is defined
+relative to a target. By linearity, $E[\overline{X}] = E[X]$ for i.i.d. draws
+of any distribution, so the sample mean always estimates the mean of what was
+recorded. With the measurement model, $E[X] = \mu + E[b] + E[\varepsilon]$:
+zero-mean noise leaves the target unchanged and only adds variance,
+$\mathrm{Var}(X) = \mathrm{Var}(S) + \mathrm{Var}(\varepsilon)$ for independent
+noise, so the standard error grows. A constant offset $b$ gives bias $b$. A
+general deterministic error $g$ gives $E[g(S)]$: a decimal point shifted by a
+factor 10 in a share $p$ of the rows gives $(1 - p)\mu + 10p\mu$, bias
+$9p\mu$.
+
+Missing values act through the sample rather than the values. Deleting the
+incomplete rows keeps draws from $p(t \mid M = 0)$; if missingness depends on
+$T$ (missing not at random), $E[T \mid M = 0] \neq E[T]$ and the mean of the
+kept rows is biased, the selection bias of the cold-sensor example. If $M$ is
+independent of $T$ (missing completely at random), the kept rows are still a
+sample from $p(t)$ and only $n$ shrinks.
+
+A biased estimator need not be worse: the mean squared error decomposes as
+$E[(\hat{\theta} - \theta)^2] = \mathrm{bias}^2 + \mathrm{SE}^2$, and a
+small bias can be worth a large reduction in variance (the $1/n$ sample
+variance, shrinkage estimators, regularisation). What more data cannot do is
+remove the bias term: the SE shrinks like $1/\sqrt{n}$, the bias does not
+change.
+
+Bias concerns only the centre of the sampling distribution, not its shape or
+family: the means of a uniform die are approximately normal and still
+unbiased. A different source of bias is a wrong model assumption linking
+$\theta$ to what is computed. Under a normal model the median equals the mean,
+so $\overline{x}$ "estimates the median"; for right-skewed data it
+overestimates the true median however large $n$ is (bias from
+misspecification).
+
+--
+
 ## Use the Widget: Change the Population
 
+
+<div class="grid-figure">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="math/sampling-distribution"
+ data-params='{"shape": "skewed", "n": 5}'></div>
+
+</div>
+
+
+<div class="column">
+
 Set the population to **skewed** and then to **bimodal**, keeping $n = 5$.
+Then try $n = 1$ and $n = 30$.
 
 
 <div class="q">
@@ -5312,9 +5493,14 @@ Which of the three observations survive a population that is not symmetric?
 
 <div class="fragment">
 
-All three. The shape of the sampling distribution stops depending on the shape
-of the population as soon as $n$ is more than a handful — which is why one
-formula can cover cases we never inspect.
+All three, once $n$ is more than a handful: centre $\mu$, spread
+$\sigma/\sqrt{n}$, bell shape.
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -5324,7 +5510,7 @@ Unbiasedness and the standard error $\sigma/\sqrt{n}$ do not depend on the
 population's shape at all; they need only independence and a finite variance.
 The bell shape is the approximate part. The bimodal population is the clearest
 case: two separate humps, yet the means of five draws already form a single
-hump.
+hump. The figure opens on the skewed population after a thousand samples.
 
 How fast the bell shape appears depends on the population. For a symmetric
 population, a handful of draws suffices; for a strongly skewed one, the

@@ -17,7 +17,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.D7J2Gb0F.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/l03-naive-bayes.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.Cuxaplvk.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/l03-naive-bayes.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -44,12 +44,21 @@ Lecture 02 and opens the fitting module: the posterior over a parameter first,
 then its peak. Naive Bayes introduces +1 smoothing as a pseudo-count and
 defers its reading as a posterior mean to that module. Exercise 2.C.3 moved
 to E03 as 3.A.1.
+2026-10-31: module 1 rebuilt as Three Kinds of Classifier (unit
+three-kinds-of-classifier): notation x = data, y = hypothesis, θ = parameters;
+rules (discriminant function), the joint, discriminative and generative
+classifiers, each in the learning-system figure of Lecture 01; then
+generative-route (the joint explodes). Planned next: continuous attributes,
+the Bayes decision rule; fitting moves to Lecture 04
+(docs/reviews/PML-L03-RESTRUCTURE-2026-10.md).
 -->
 
 Notes:
-Three modules. Generative classifiers: a classifier obtained from Bayes'
-theorem by modelling $P(y)$ and $p(x \mid y)$, in contrast to a discriminative
-model of $P(y \mid x)$; read as a sample, the training table cannot fill a full
+Three modules. Three kinds of classifier: a rule maps $x$ to a class without
+any probability; a discriminative classifier models $P(y \mid x; θ)$ only; a
+generative classifier models $P(y)$ and $p(x \mid y)$ and obtains the
+posterior by Bayes' theorem, and can generate data. Read as a sample, the
+training table cannot fill a full
 $p(x \mid y)$, whose cells multiply with every attribute (the curse of
 dimensionality), so the model must be restricted — by a simpler structure, by
 parametric families, or both. Naive Bayes: conditional independence of the
@@ -89,38 +98,37 @@ running example.
 | **pass** | 30 | 54 | 84 |
 | **total** | 40 | 60 | 100 |
 
+</div>
+
+
+<div class="column middle">
+
 $$
 P(\text{PML} \mid \text{fail})
 = \frac{P(\text{fail} \mid \text{PML})\\, P(\text{PML})}{P(\text{fail})}
 = \frac{10}{16}
 $$
 
-</div>
 
+<div class="c-insight">
 
-<div class="column">
-
-
-<div class="q">
-
-Replace the course by a **class** — fraud or honest — and the exam result by
-a transaction's **attributes**. What do we get?
-
-</div>
-
-
-
-<div class="fragment c-insight">
-
-A **classifier**: $P(\text{fraud} \mid x)$ from how often each class occurs and
-how each class looks. Counting worked for one attribute with two values —
-today has thirty.
+**One** hypothesis, **one** piece of evidence: Bayes' theorem reads the table
+backwards.
 
 </div>
 
 
 </div>
 
+
+</div>
+
+
+
+<div class="fragment q">
+
+Now the hypothesis is a **class** — fraud or honest — and the evidence a whole
+**transaction**. What changes?
 
 </div>
 
@@ -133,61 +141,44 @@ $P(\text{fail} \mid \text{PML}) = 10/40$, the evidence
 $P(\text{fail}) = 16/100$, so $P(\text{PML} \mid \text{fail}) = 10/16 \approx 0.63$.
 
 A generative classifier is exactly this computation with the course replaced by
-the class $y$ and the exam result by an attribute vector $x$: the class prior
-$P(y)$ and the class-conditional distribution $p(x \mid y)$ are estimated from
-a labelled table and combined by Bayes' theorem. With one binary attribute the
-table has four cells and counting is reliable; with thirty attributes it has
-over a billion cells per class, which is the problem of this lecture.
+the class $y$ and the exam result by an attribute vector $x = (x\_1, \ldots, x\_p)$:
+the class prior $P(y)$ and the class-conditional distribution $p(x \mid y)$ are
+estimated from a labelled table and combined by Bayes' theorem.
 
 --
 
-## Today: Assume It Apart, Keep the Peak
-
-<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s table, rows 1 and 2 — and the first classifier built straight from probability:
-
-| shortcut | instead of the ideal | what is lost | where |
-|---|---|---|---|
-| **Assume it apart** | factorise the joint by independence | the dependences assumed away | naive Bayes |
-| **Keep the peak** | the most probable parameter — MLE or MAP | how sure we are about it | every count · a coin |
+## From One Attribute to Many
 
 
-<div class="flow-row">
+<div class="q-list">
 
 
-<div class="stat-card concept">
+<div class="fragment">
 
-### The generative route
-a classifier from Bayes
+**Many variables at once.** Amount, country, hour, device — how do they
+combine into one probability per class?
 
 </div>
 
 
-<div class="flow-arrow">
+<div class="fragment">
 
-→
-
-</div>
-
-
-<div class="stat-card concept">
-
-### Naive Bayes
-assume it apart
+**Dependent variables.** Does a new device make a foreign IP more likely?
 
 </div>
 
 
-<div class="flow-arrow">
+<div class="fragment">
 
-→
+**Numbers, not yes/no.** What is the probability of *1,250.00 €*?
 
 </div>
 
 
-<div class="stat-card concept">
+<div class="fragment">
 
-### Fitting
-what counting was: keep the peak
+**Probabilities at all?** A rule *if amount > 1k € and new device, then fraud*
+also classifies.
 
 </div>
 
@@ -196,12 +187,36 @@ what counting was: keep the peak
 
 
 Notes:
+The four questions are the extensions this lecture takes up. Several
+variables: $p(x \mid y)$ is a joint distribution over all attributes, with one
+number per combination of values ($2^{30} - 1$ per class for 30 binary flags).
+Dependence: the joint is not determined by its margins, so each dependence is
+a number of its own; naive Bayes assumes them away. Numbers: a continuous
+attribute has a density, not a probability per value, so it needs bins or a
+parametric family. Probabilities at all: a rule maps $x$ to a class without any
+distribution (a discriminant function); logistic regression models
+$p(y \mid x)$ only (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>); the generative route models
+$p(x, y)$.
+
+--
+
+## Today: Naive Bayes and Its Two Assumptions
+
+A classifier built from Bayes' theorem needs two assumptions to become
+estimable — rows 1 and 2 of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s table of shortcuts:
+
+| assumption | replaces | what is lost | module |
+|---|---|---|---|
+| **Conditional independence** | the joint $p(x \mid y)$ by $\prod\_j p(x\_j \mid y)$ | the dependences between attributes | Naive Bayes |
+| **Point estimate** (MLE, MAP) | the posterior over a parameter by its peak | how sure we are about the parameter | Fitting the Parameters |
+
+Notes:
 The shortcut table of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> lists the approximations the
-course makes to the ideal of carrying full distributions. This lecture covers
-the first two, in the order a classifier needs them. Assume it apart replaces a
-joint distribution by a product of smaller factors under an independence
-assumption and discards the dependences between the factors. Keep the peak
-replaces the posterior over a parameter by its most probable value (MLE with a
+course makes to the ideal of carrying full distributions; there they are named
+"assume it apart" and "keep the peak". This lecture covers the first two, in
+the order a classifier needs them. Conditional independence replaces a
+joint distribution by a product of smaller factors and discards the
+dependences between the factors. A point estimate replaces the posterior over a parameter by its most probable value (MLE with a
 flat prior, MAP otherwise) and discards the uncertainty about that value.
 
 Naive Bayes takes both: the joint $p(x \mid y)$ is replaced by a product of
@@ -252,82 +267,21 @@ which independences are assumed.
 
 <!-- .slide: class="module-slide" -->
 
-# Generative Classifiers
+# Three Kinds of Classifier
 
 
 <div class="guiding-question">
 
-**Guiding Question:** A classifier needs $P(\text{fraud} \mid x)$. Bayes'
-theorem builds it from how fraud *looks* — what would it take to model that, and
-why does nobody do it in full?
+**Guiding Question:** A rule, a model of $P(y \mid x)$, a model of how the
+data arise — what can each one tell us about a transaction, and what does the
+most informative one cost?
 
 </div>
 
 
 --
 
-## Two Routes to the Same Posterior
-
-A labelled table of transactions supports **both** routes to
-$P(\text{fraud} \mid x)$, where $x$ is the vector of red flags:
-
-
-<div class="grid-2">
-
-
-<div class="card">
-
-<span class="eyebrow">Discriminative — <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a></span>
-
-### Model $p(y \mid x)$ directly
-
-A score for each $x$, as logistic regression will give (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). Nothing
-is said about how $x$ arises.
-
-</div>
-
-
-<div class="card">
-
-<span class="eyebrow">Generative — today</span>
-
-### Model $p(y)$ and $p(x \mid y)$
-
-How does a *fraudulent* transaction look, and how an honest one? Then convert
-with Bayes.
-
-</div>
-
-
-</div>
-
-
-$$
-\eqa{P(y \mid x)} = \frac{\eqb{p(x \mid y)} \cdot \eqc{P(y)}}{\eqd{\sum\_{y'} p(x \mid y') P(y')}}
-$$
-
-Notes:
-This is Bayes' theorem of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>
-with the hypothesis replaced by a class $y$ and the evidence by a whole
-attribute vector $x$; the colour slots are the same (posterior, likelihood,
-prior, normaliser). The denominator is the law of total probability over the
-classes, $p(x) = \sum\_{y'} p(x \mid y') P(y')$. For classification only the
-arg max over $y$ matters, so the denominator can be ignored for decisions; it is
-needed for calibrated probabilities.
-
-Both routes are estimable from the same labelled table. The discriminative
-route fits $p(y \mid x)$ directly, as logistic regression does
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>); the generative route
-fits $P(y)$ and $p(x \mid y)$ and derives $P(y \mid x)$. The generative route is
-a modelling choice, not a necessity imposed by the data. It models more than
-classification needs, namely the full joint $p(x, y) = p(x \mid y)P(y)$.
-
---
-
-## The Generative Route, Drawn
-
-<div class="viz viz-lg" data-viz="ml/joint-class-attribute" data-steps="3"
- data-params='{"prior": 0.2, "observed": 3}'></div>
+## Data and Hypothesis as Random Variables
 
 
 <div class="grid-2">
@@ -335,7 +289,11 @@ classification needs, namely the full joint $p(x, y) = p(x \mid y)P(y)$.
 
 <div class="column">
 
-**Before the last click:** a transaction of 200–1k €. More likely fraud?
+| amount | distance | … | fraud? |
+|---|---|---|---|
+| 49.90 € | 3 km | … | no |
+| 1,250 € | 900 km | … | **yes** |
+| $X\_1$ | $X\_2$ | … | $Y$ |
 
 </div>
 
@@ -343,13 +301,84 @@ classification needs, namely the full joint $p(x, y) = p(x \mid y)P(y)$.
 <div class="column">
 
 
-<div class="fragment">
+<div class="c-definition">
 
-No: $6\\% / 14\\% \approx 43\\%$. A discriminative model learns **only these
-column shares**; a generative one the whole picture.
+- **Data** $x = (x\_1, \ldots, x\_p)$: the values of the attributes
+  $X\_1, \ldots, X\_p$ — what we observe.
+- **Hypothesis** $y$: the value of the class variable $Y$ — what we want to
+  know.
+- **Decision:** the posterior $P(y \mid x)$.
 
 </div>
 
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment q">
+
+The student table had hypothesis $A$ = "PML" and evidence $B$ = "fail".
+Which of the two is the data, which the hypothesis?
+
+</div>
+
+
+Notes:
+This fixes the notation for the rest of the course. Each column of a labelled
+table is a random variable, as in <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>;
+the attribute columns are $X\_1, \ldots, X\_p$ and the label column is $Y$. A row
+is one realisation $(x, y)$ of the vector $(X\_1, \ldots, X\_p, Y)$, and the
+table is a sample of $n$ such draws.
+
+The names follow the reading of Bayes' theorem: $y$ is the hypothesis (which
+class), $x$ the data (what was observed about the case). The count table of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> has the course as the hypothesis, $y$, and the
+exam result as the data, $x$: $P(\text{PML} \mid \text{fail})$ is
+$P(y \mid x)$. The textbook letters vary (Bishop: $\mathbf{x}$ and $t$ or
+$\mathcal{C}\_k$; MacKay: $D$ and $H$); in machine learning $x$ and $y$ are
+standard. Capital letters denote the random variables, small letters their
+values; $x$ is a vector whenever there is more than one attribute.
+
+--
+
+## Parameters $θ$
+
+
+<div class="c-definition">
+
+A **model** is a family of distributions $p(\\,\cdot\\,; θ)$. The
+**parameters** $θ$ pick one member; training sets them.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Read the notation
+
+$p(x \mid y; θ)$ — the probability of data $x$, **given** the hypothesis $y$,
+**for** the parameter value $θ$.
+
+The bar conditions on a random variable, the semicolon fixes a parameter.
+
+</div>
+
+
+<div class="card">
+
+### Example
+
+amount given fraud ~ normal: $θ = (μ, σ)$.
+
+Fraud share $P(Y = \text{fraud}; θ) = θ$: one number.
 
 </div>
 
@@ -358,62 +387,157 @@ column shares**; a generative one the whole picture.
 
 
 Notes:
-The heatmap is the joint $p(y, x)$ of the class and one attribute, the amount
-in five bins, with a fraud share of 20% instead of 1 in 1,000 so that the fraud
-row is visible (the slider sets it). It is the count table of
-<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> with colour instead of counts.
-Steps: the joint cells; the row sums (prior $P(y)$) and the column sums
-(evidence $p(x)$); the fraud row measured against its own total, the
-likelihood $p(x \mid \text{fraud})$; one column measured against its own total,
-the posterior $P(y \mid x)$.
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> wrote a parametric family as
+$p(x \mid θ)$. From here on the parameters are separated by a semicolon,
+$p(x; θ)$ and $p(x \mid y; θ)$, so that the bar is reserved for conditioning
+on random variables of the model (data and hypothesis). The two notations
+mean the same density; the semicolon says that $θ$ is treated as a fixed,
+unknown number, not as a random variable.
 
-For 200–1k €: $p(\text{fraud}, x) = 0.2 \cdot 0.30 = 0.06$ and
-$p(\text{honest}, x) = 0.8 \cdot 0.10 = 0.08$, so
-$P(\text{fraud} \mid x) = 0.06/0.14 \approx 0.43$. At the real base rate of
-1 in 1,000 the same column gives $0.0003/0.1002 \approx 0.3\\%$: the likelihood
-row is unchanged, only the prior margin moved.
-
-A generative model estimates the whole picture — the prior margin and each
-class's row — and obtains every column share from it. A discriminative model
-estimates only the column shares $P(y \mid x)$; it never represents how the
-amounts are distributed, which is why it cannot report $p(x)$ or swap in a new
-prior.
+The bar returns for $θ$ once $θ$ gets a distribution of its own: a prior
+$p(θ)$ and a posterior $p(θ \mid D)$ over the parameters given the training
+data $D$, as in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. Every model in this
+course has parameters in this sense — the thresholds of a rule, the weights of
+logistic regression, the means and spreads of class distributions.
 
 --
 
-## Why Model How Fraud Looks?
+## Rule-Based Classifier
+
+
+<div class="grid-1-2">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+A **rule-based classifier**: rules "if $C\_k(x)$ then $c\_k$" plus a default
+class. The **rules are the parameters** $θ$.
+
+</div>
+
+
+
+<div class="card">
+
+$x\_1 > a,\ x\_2 > b$ → fraud, else honest: $θ = (a, b)$, trained for the
+fewest errors
+$$\hat θ = \arg\min\_θ \sum\_i \mathbb{1}[\hat y\_i \neq y\_i]$$
+
+</div>
+
+
+</div>
+
+
+<div class="column middle">
+
+<div class="viz" data-viz="ml/learning-system" data-steps="0"
+     data-params='{"mode": "approaches", "reading": 1}'></div>
+
+</div>
+
+
+</div>
+
+
+Notes:
+The learning system of the introductory lecture with a rule learner in the
+model box. The features are the attributes $x$; the model computes
+$\text{rule}(x; θ)$; the prediction is a class; the loss counts errors on the
+training rows (the 0/1 loss, $\mathbb{1}[\hat y\_i \neq y\_i]$ with
+$\hat y\_i = \text{rule}(x\_i; θ)$), and the optimiser searches over $θ$. The
+parameters of a rule set are its structure and its thresholds: which
+attributes the conditions test, the cut points $a, b$, the class of each rule
+and their order (first match wins). For a fixed form, as in the example, only
+the thresholds are free; a rule learner (RIPPER, CN2) or a decision tree (CART,
+C4.5) also chooses the conditions, greedily, because the number of possible
+rule sets grows combinatorially. A decision tree is a rule set whose
+conditions are the paths from the root to the leaves.
+
+No component of the system represents a probability: there is nothing to
+condition on, nothing to marginalise and no prior to change. The 0/1 loss is
+piecewise constant in $θ$, so it is minimised by search over candidate
+thresholds, not by gradients.
+
+--
+
+## Rules From Data
+
+<div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="2"
+ data-params='{"view": "rule"}'></div>
 
 
 <div class="q">
 
-A discriminative model — logistic regression (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) — gives
-$P(\text{fraud} \mid x)$ directly. What can a model of $p(x \mid y)$ do that it
-cannot?
+Which transaction is the rule surest about — A, B or C?
+
+</div>
+
+
+Notes:
+The data are 105 labelled transactions with two attributes, the amount $x\_1$
+and the distance from the card holder's home $x\_2$ (both on log axes); fraud is
+over-represented (a third) so that it is visible. The rule is learned from the
+table: among all rules of the form "amount $> a$ and distance $> b$ → fraud",
+the thresholds $(a, b)$ with the fewest training errors are chosen by trying
+every split between neighbouring values — the rule and the training criterion
+of the previous slide. The learned box has 6 training errors.
+
+The rule assigns the same class to every point in its box. The only number it
+can attach is the share of fraud among the training rows in the box, the same
+for A (at the corner) and B (deep inside). C is a transaction unlike any row in
+the table; the rule classifies it as honest without any indication that the
+answer is unsupported.
+
+--
+
+## What a Rule Can Not Say
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="marks-no">
+
+- **How sure.** One share for the whole box — A and B alike.
+- **Honestly.** The share is measured on the rows that chose the box:
+  optimistic, 100% for a box searched until pure.
+- **Under a new base rate.** The training mix is baked into the thresholds.
+- **That an input is strange.** No model of $x$: C gets an answer like any other.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Examples
+
+- **Fraud rule engines:** "amount > 1k € and new device → block".
+- **Decision trees:** rules learned by splitting, one class per leaf.
 
 </div>
 
 
 
-<div class="fragment">
+<div class="c-insight">
 
-
-<div class="marks-yes">
-
-- **Keep the prior explicit.** The 1 in 1,000 of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> is a separate
-  factor: a new market with 1 in 200 changes $P(y)$, not the whole model.
-- **Handle a missing field.** An attribute nobody observed can be summed out of
-  $p(x \mid y)$.
-- **Notice the strange.** A transaction with tiny $p(x)$ under *both* classes
-  is unlike anything seen — a score alone cannot say so.
+A rule is a **discriminant function**: $x \mapsto$ a class. No distribution
+is modelled.
 
 </div>
 
-
-
-<div class="c-warning">
-
-The price: $p(x \mid y)$ is a **joint distribution over all attributes**, one
-per class.
 
 </div>
 
@@ -422,26 +546,298 @@ per class.
 
 
 Notes:
-All three capabilities follow from having the joint $p(x, y)$.
+A discriminant function maps an input directly to a class (Bishop, *Pattern
+Recognition and Machine Learning*, §1.5.4, distinguishes it from the two
+probabilistic approaches that follow). Rule sets and decision trees are the
+standard examples; a support vector machine is another.
 
-Explicit prior: the posterior odds are the prior odds times the likelihood
-ratio, so a change of base rate (1 in 1,000 to 1 in 200) only replaces $P(y)$
-while $p(x \mid y)$ stays valid, provided the class-conditional distributions do
-not change between the settings. A discriminative model absorbs the training
-base rate into its parameters and must be corrected afterwards.
+The leaf or box share is a relative frequency $\hat P(y \mid x \in R)$ for the
+region $R$, not $P(y \mid x)$: it is constant over $R$, and because $R$ was
+selected to make the share extreme, the training share overstates the share on
+new data (selection bias; the same effect makes a fully grown decision tree
+report 100% in every leaf). Calibrating such scores needs held-out data
+(a held-out set, not the training rows). Thresholds learned on a sample with one base rate
+encode that base rate; under a different one they are no longer optimal, and
+nothing in the rule says how to adjust them. Since no distribution over $x$ is
+represented, the rule cannot measure how typical an input is or handle a
+missing attribute other than by ad hoc defaults.
 
-Missing attributes: $p(x\_{\text{obs}} \mid y) = \sum\_{x\_{\text{mis}}} p(x\_{\text{obs}}, x\_{\text{mis}} \mid y)$
-by marginalisation; under the naive assumption the missing factor simply drops
-out of the product. A model of $p(y \mid x)$ has no principled way to do this
-without a model of $x$.
+--
 
-Novelty: $p(x) = \sum\_y p(x \mid y) P(y)$ measures how typical a transaction is.
-A small $p(x)$ flags an input unlike the training data (outlier or
-distribution shift), which $p(y \mid x)$ alone cannot detect because it is
-normalised for every $x$.
+## The Joint Distribution $p(x\_1, \ldots, x\_p, y)$
 
-The cost is a full distribution over all attributes per class. These three
-points are compared concretely in
+A **probabilistic** classifier starts from the joint distribution of data and
+hypothesis. Every question is read off it:
+
+| question | what is read off the joint |
+|---|---|
+| Is this transaction fraud? | $P(y \mid x) = p(x, y) \\,/\\, p(x)$ |
+| How does fraud look? | $p(x \mid y) = p(x, y) \\,/\\, P(y)$ |
+| How common is fraud? | $P(y) = \sum\_x p(x, y)$ |
+| How unusual is this transaction? | $p(x) = \sum\_y p(x, y)$ |
+| The distance is missing — now? | sum $x\_2$ out, then condition |
+
+
+<div class="c-insight">
+
+The joint is the course's ideal: model everything, then condition.
+
+</div>
+
+
+Notes:
+All quantities are obtained by the two operations of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>: conditioning (divide
+by a margin) and marginalisation (sum, or integrate, over the variables that
+are not asked about). For continuous attributes the sums over $x$ are
+integrals and the probabilities densities.
+
+The joint therefore contains strictly more than the decision needs. The two
+probabilistic classifiers differ in how much of it they model: the
+discriminative classifier only the conditional $P(y \mid x)$, the generative
+classifier the whole joint, factorised as $p(x \mid y)\\, P(y)$. The cost of
+the whole joint is the subject of the rest of the module.
+
+--
+
+## Discriminative: Model $P(y \mid x; θ)$ Only
+
+
+<div class="grid-figure">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ml/joint-class-attribute" data-steps="3"
+ data-params='{"prior": 0.2, "observed": 3}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+Fit **exactly** the decision: a distribution over $y$ for every $x$.
+
+
+<div class="marks-no">
+
+- no $p(x)$, no $p(x \mid y)$
+- no Bayes: nothing to turn around
+
+</div>
+
+
+
+<div class="card">
+
+### Examples
+Logistic regression · neural networks with a softmax output
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The heatmap is the joint $p(y, x)$ of the class and one attribute (the amount,
+five bins), with a fraud share of 20% so that the row is visible. Steps: the
+cells of the joint; the margins (prior $P(y)$ as row sums, evidence $p(x)$ as
+column sums); the fraud row against its total, the likelihood
+$p(x \mid \text{fraud})$; one column against its total, the posterior
+$P(y \mid x)$. A discriminative classifier models exactly the column shares:
+a family $P(y \mid x; θ)$ whose parameters are fitted by maximising the
+probability of the training labels given the training attributes.
+
+Unlike a rule, its output is a probability distribution over the classes,
+and its loss, $-\log P(y \mid x; θ)$, rewards calibrated probabilities. Unlike
+a generative classifier, it never represents how $x$ is distributed: the row
+margins and row shapes are not part of the model, so $p(x)$, $p(x \mid y)$ and
+the prior cannot be recovered, and Bayes' theorem cannot be applied to it.
+Logistic regression (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) and
+neural networks with a softmax output layer are discriminative in this sense.
+A change of base rate must be corrected from outside
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+
+For 200–1k €: $p(\text{fraud}, x) = 0.2 \cdot 0.30 = 0.06$ and
+$p(\text{honest}, x) = 0.8 \cdot 0.10 = 0.08$, so
+$P(\text{fraud} \mid x) = 0.06/0.14 \approx 0.43$.
+
+--
+
+## The Discriminative System in the Learning System
+
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="0"
+     data-params='{"mode": "approaches", "reading": 2}'></div>
+
+Notes:
+The model box computes $P(y \mid x; θ)$; the prediction is a distribution over
+the classes, from which a class is chosen; the loss is the negative
+log-probability of the observed label, $-\log P(y \mid x; θ)$, the
+cross-entropy. The features enter only as the condition: the model is
+evaluated at the observed $x$ and makes no statement about which $x$ occur.
+Fitting by maximum likelihood follows with logistic regression
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+
+--
+
+## Generative: Model $p(x \mid y; θ)\\, P(y; θ)$
+
+<div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="3"
+ data-params='{"view": "generative", "prior": 0.1}'></div>
+
+
+<div class="q">
+
+Set $P(\text{fraud})$ to 0.1%. What happens to the boundary — and why can the
+rule not do this?
+
+</div>
+
+
+Notes:
+Each class has its own distribution over both attributes, here a
+two-dimensional normal in (log amount, log distance) with parameters
+$θ\_y = (μ\_y, Σ\_y)$: two means, two spreads and a correlation per class. The
+prior $P(y; θ)$ is one more parameter. Bayes' theorem combines them for every
+point,
+$P(\text{fraud} \mid x) = p(x \mid \text{fraud})P(\text{fraud}) \\,/\\,
+\sum\_{y'} p(x \mid y') P(y')$, which the large panel shows; the violet line is
+where the posterior is 0.5.
+
+Lowering the prior shrinks the fraud region: the likelihoods are unchanged, only
+the factor $P(\text{fraud})$ moves, so the model can be carried to a setting
+with a different base rate without refitting. At 1 in 1,000 the boundary
+retreats to where the likelihood ratio exceeds 999. Step 3 adds the rule of the
+previous slides (dashed) and greys out the region where $p(x)$ is tiny: there
+the posterior is still defined, but $p(x)$ says that no training data supports
+it. The sliders move the fraud mean and the correlation within the fraud
+class; the button draws transactions from the model.
+
+--
+
+## Generating Data
+
+
+<div class="c-definition">
+
+**Run the model forwards:** draw $y \sim P(y)$, then $x \sim p(x \mid y)$ — a
+new data point.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Naive Bayes spam filter
+Words drawn one by one from $p(\text{word} \mid \text{spam})$:
+*free winner click offer meeting now* — each word fits, the sentence does not.
+
+</div>
+
+
+<div class="card">
+
+### Language models
+$p(x\_1, \ldots, x\_T) = \prod\_t p(x\_t \mid x\_{<t})$, fitted by maximum
+likelihood, sampled word by word.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Neither rules nor $P(y \mid x)$ can do this: generating needs a model of $x$.
+
+</div>
+
+
+Notes:
+Sampling follows the factorisation $p(x, y) = p(x \mid y)P(y)$ from left to
+right: first the class, then the attributes given the class. Drawing a missing
+attribute from $p(x\_j \mid x\_{-j}, y)$, the conditional given the observed
+attributes, fills in part of a data point; a discriminative model has no
+distribution over $x$ to draw from.
+
+The naive Bayes example anticipates the next module: under the naive
+assumption each word is drawn independently given the class, so the words are
+individually typical of spam but do not form a sentence — the dependences
+between words are exactly what the assumption drops. An autoregressive
+language model keeps every dependence by the chain rule of probability, each
+factor $p(x\_t \mid x\_{<t})$ being one shared neural network evaluated on the
+context; it is fitted by maximum likelihood (cross-entropy on the next token).
+Whether a model can generate is therefore a property of *what* it models, not
+of *how* its parameters are fitted. Each factor of a language model, taken
+alone, is a classifier over the vocabulary; the product of all factors is the
+generative model.
+
+--
+
+## The Generative System in the Learning System
+
+<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="1"
+     data-params='{"mode": "approaches", "reading": 3}'></div>
+
+Notes:
+The model box computes the joint $p(x, y; θ)$; the prediction $P(y \mid x)$
+follows by Bayes' theorem; the loss under maximum likelihood is
+$-\log p(x, y; θ) = -\log p(x \mid y; θ) - \log P(y; θ)$, which scores the
+features as well as the label, so the features box is part of what is fitted.
+The second step runs the model without input: from the parameters to a
+sampled data point.
+
+--
+
+## Three Kinds of Classifier
+
+| | rules | discriminative | generative |
+|---|---|---|---|
+| models | $x \mapsto$ class | $P(y \mid x; θ)$ | $p(x \mid y; θ)\\, P(y; θ)$ |
+| how sure | <span class="no">✗</span> | <span class="yes">✓</span> | <span class="yes">✓</span> |
+| new base rate | <span class="no">✗</span> refit | correct from outside | <span class="yes">✓</span> swap $P(y)$ |
+| unusual input | <span class="no">✗</span> | <span class="no">✗</span> | <span class="yes">✓</span> $p(x)$ small |
+| missing field | <span class="no">✗</span> ad hoc | <span class="no">✗</span> ad hoc | <span class="yes">✓</span> sum it out |
+| generate data | <span class="no">✗</span> | <span class="no">✗</span> | <span class="yes">✓</span> |
+| examples | decision tree | logistic regression | naive Bayes, language model |
+
+
+<div class="c-warning">
+
+The price of the right column: a distribution over **all** attributes, per
+class.
+
+</div>
+
+
+Notes:
+New base rate: the posterior odds are the prior odds times the likelihood
+ratio, so a generative model only replaces $P(y)$, provided the class-conditional
+distributions are the same in both settings. A discriminative model absorbs
+the training base rate into its parameters; it can be corrected by
+multiplying its odds by the ratio of new to old prior odds, which requires
+knowing the training base rate. A rule has to be re-learned.
+
+Missing attributes: $p(x\_{\text{obs}} \mid y) = \sum\_{x\_{\text{mis}}} p(x\_{\text{obs}}, x\_{\text{mis}} \mid y)$.
+Without a model of $x$ the alternatives are imputation or a separate model per
+pattern of missing fields.
+
+Unusual inputs: $p(x) = \sum\_y p(x \mid y) P(y)$ is small for an input unlike
+the training data (outlier, distribution shift); $P(y \mid x)$ is normalised
+for every $x$ and cannot show this.
+
+The comparison of accuracy, which favours the discriminative classifier with
+much data and the generative one with little, follows in
 <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
 
 --

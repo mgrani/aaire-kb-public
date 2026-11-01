@@ -280,8 +280,8 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     const se = pop.sd / Math.sqrt(cfg.n)
     title.text(
       step >= 2
-        ? `${POPULATIONS[cfg.shape].label} · n = ${cfg.n} · ${means.length} sample${means.length === 1 ? '' : 's'}`
-        : `${POPULATIONS[cfg.shape].label} · n = ${cfg.n}`,
+        ? `${POPULATIONS[cfg.shape].label} · n = ${cfg.n} per sample · k = ${means.length} sample${means.length === 1 ? '' : 's'}`
+        : `${POPULATIONS[cfg.shape].label} · n = ${cfg.n} per sample`,
     )
 
     if (step >= 4) {
@@ -316,7 +316,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         options: Object.entries(POPULATIONS).map(([k, v]) => ({ value: k, label: v.label })),
       },
       { id: 'n', label: 'sample size n', type: 'range', min: 1, max: 50, value: cfg.n },
-      { id: 'more', label: '+500 samples', type: 'button' },
+      { id: 'more', label: 'k + 500 samples', type: 'button' },
     ],
     (id, values) => {
       if (id === 'more') {
@@ -340,5 +340,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   setStep(isPrint ? steps || 4 : steps ? 0 : 4)
   // Keep the readouts in sync if a deck passed non-default params.
   controls.set('n', cfg.n)
-  return { setStep }
+  // Without data-steps the widget opens complete; the runtime's setStep(0)
+  // for stepless figures would otherwise reset it to the empty first frame.
+  return steps ? { setStep } : undefined
 }
