@@ -27,73 +27,29 @@ Probabilistic Machine Learning
 Prof. Dr. Michael Granitzer
 
 Notes:
-Accompanies <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>; pen and paper only. 3.A.1 extends the
-Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> to an
-informative prior, sequential updating and the posterior predictive probability.
-3.A.2 derives the
-MAP estimate of a Bernoulli parameter under a Beta prior and contrasts MLE, MAP
-and posterior mean on very small samples (0 of 4, 3 of 3), including the exact
-95% interval of Beta(4, 1). 3.B.1 counts the free parameters of the full
-generative model and of naive Bayes, $K(2^p - 1) + (K - 1)$ against
-$Kp + (K - 1)$ for binary attributes. 3.B.2 derives the MLE of a categorical
-distribution, for two values by direct differentiation and in general with a
-Lagrange multiplier, and shows why the naive assumption lets each attribute be
-fitted separately. 3.C.1 runs naive Bayes by hand on twelve transactions,
-exhibits the zero-frequency problem and repeats the computation with Laplace
-smoothing. 3.C.2 identifies Laplace and add-$\alpha$ smoothing as posterior
-means under Beta$(1, 1)$, Beta$(\alpha, \alpha)$ and the flat Dirichlet. All
-numbers in the solutions have been recomputed.
+Accompanies <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>; pen and paper only. 3.A.1 counts the
+free parameters of the full generative model and of naive Bayes,
+$K(2^p - 1) + (K - 1)$ against $Kp + (K - 1)$ for binary attributes. 3.B.1 runs
+naive Bayes by hand on twelve transactions, exhibits the zero-frequency problem
+and repeats the computation with Laplace smoothing. 3.C.1 fits Gaussian naive
+Bayes by hand (a normal per class for the log amount, a flag) and computes the
+posterior; 3.C.2 shows that a shared spread makes the log-odds linear, finds
+the cut on the amount at two base rates and writes the posterior in logistic
+form. 3.D.1 derives the cost threshold on the posterior and on the likelihood
+ratio and applies it to three transactions and to a market with another base
+rate. The exercises on the posterior over a parameter, MLE and MAP moved to
+Exercise Sheet 4 (4.A) with the fitting module. All numbers in the solutions
+have been recomputed.
 
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# 3.A A Posterior and Its Peak
+# 3.A The Generative Route
 
 --
 
-## Exercise 3.A.1: Two Analysts, One Campaign
-
-Same data: 60 of 400 converted. Analyst A uses a flat prior $\mathrm{Beta}(1,1)$;
-analyst B, from earlier campaigns, uses $\mathrm{Beta}(20, 80)$.
-
-1. Write down both posteriors and their means.
-2. How many "pseudo-observations" is B's prior worth? Why do the two analysts
-   nearly agree?
-3. The data arrived in two batches: 25 of the first 200, 35 of the second 200.
-   Show that updating twice gives the same posterior as updating once.
-4. What is A's probability that the next user converts?
-
-
-
---
-
-## Exercise 3.A.2: Peak, Mean and a Prior's Peak
-
-Returning users, $\theta = P(\text{user returns})$, prior $\mathrm{Beta}(a, b)$,
-$h$ of $n$ users return.
-
-1. Maximise $\log p(D \mid \theta) + \log p(\theta)$ and show
-   $\hat{\theta}\_{\mathrm{MAP}} = \frac{h + a - 1}{n + a + b - 2}$.
-2. **0 of 4** users return. Give the MLE, the MAP under $\mathrm{Beta}(2, 2)$ and
-   the posterior mean under $\mathrm{Beta}(2, 2)$. Which one would you report to
-   a product manager, and why?
-3. The posterior mean under a flat prior is $\frac{h + 1}{n + 2}$. Under which
-   prior is the **MAP** equal to it?
-4. After 3 of 3 with a flat prior the posterior is $\mathrm{Beta}(4, 1)$, with
-   density $4\theta^3$. Compute its central 95% interval.
-
-
-
----
-
-<!-- .slide: class="module-slide" -->
-
-# 3.B The Generative Route
-
---
-
-## Exercise 3.B.1: Counting Parameters
+## Exercise 3.A.1: Counting Parameters
 
 A fraud classifier (two classes) uses four attributes: **payment** (card,
 invoice, wallet), **country** (domestic, EU, other), **new device** (yes/no)
@@ -108,35 +64,17 @@ and **night** (yes/no).
 
 
 
---
-
-## Exercise 3.B.2: Fitting Is Counting
-
-An attribute takes $k$ values. Within one class we observed it $n$ times, value
-$v$ exactly $n\_v$ times ($\sum\_v n\_v = n$). Model it as categorical with
-parameters $\theta\_1, \ldots, \theta\_k \geq 0$, $\sum\_v \theta\_v = 1$.
-
-1. Write down the log-likelihood $\ell(\theta)$ of the $n$ i.i.d. observations.
-2. For $k = 2$, substitute $\theta\_2 = 1 - \theta\_1$ and show that the MLE is
-   $\hat{\theta}\_1 = n\_1 / n$ — the $h/n$ of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
-3. For general $k$, maximise $\ell$ under the constraint $\sum\_v \theta\_v = 1$
-   (Lagrange multiplier) and show $\hat{\theta}\_v = n\_v / n$.
-4. Why can naive Bayes fit every attribute's table separately, while a full
-   joint $p(x \mid y)$ could not be fitted attribute by attribute?
-
-
-
 ---
 
 <!-- .slide: class="module-slide" -->
 
-# 3.C Naive Bayes by Hand
+# 3.B Naive Bayes by Hand
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Exercise 3.C.1: Twelve Transactions
+## Exercise 3.B.1: Twelve Transactions
 
 Flags: new device $D$, foreign IP $F$, night $N$, high amount $H$ (1 = yes).
 
@@ -158,22 +96,72 @@ Flags: new device $D$, foreign IP $F$, night $N$, high amount $H$ (1 = yes).
 
 
 
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 3.C Continuous Attributes
+
 --
 
-## Exercise 3.C.2: Smoothing Is a Prior
+## Exercise 3.C.1: Gaussian Naive Bayes by Hand
 
-A yes/no flag was seen $h$ times among $n$ frauds.
+Twelve transactions: the amount as $x = \log\_{10}$ amount in € ($x = 2$ is
+100 €) and the flag new device $D$.
 
-1. With a $\mathrm{Beta}(1, 1)$ prior on $\theta = P(\text{flag} \mid \text{fraud})$,
-   what is the posterior (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>)? Show that its **mean** is Laplace's
-   $(h + 1)/(n + 2)$.
-2. What is the posterior's **peak** for $h = 0$? What does that say about
-   "keep the peak"?
-3. "Add-$\alpha$" smoothing uses $(h + \alpha)/(n + 2\alpha)$. Which prior
-   belongs to it? Compute the estimate for $h = 0$, $n = 100$ and
-   $\alpha = 0.5, 1, 10$.
-4. A merchant category with $k = 10$ values; one category never occurred in
-   100 frauds. What does Laplace smoothing give, and which prior is behind it?
+| | $x$ | $D = 1$ |
+|---|---|---|
+| **4 frauds** | 2, 2, 3, 3 | 3 of 4 |
+| **8 honest** | 1, 1, 1, 1, 2, 2, 2, 2 | 2 of 8 |
+
+1. Fit a normal per class to $x$: mean and standard deviation (divide by $n$).
+2. A new transaction of 316 € ($x = 2.5$), device unknown. Compute
+   $p(x \mid \text{fraud})$, $p(x \mid \text{honest})$, their ratio and
+   $P(\text{fraud} \mid x)$ with the prior of the table.
+3. It came from a new device. Update the posterior with Gaussian naive Bayes.
+4. Would the likelihood ratio change if the densities were written over the
+   amount in € instead of $\log\_{10}$ amount? Why (not)?
+
+
+
+--
+
+## Exercise 3.C.2: A Shared Spread Gives a Threshold
+
+Both classes of 3.C.1 have the same spread, $σ = 0.5$.
+
+1. Show that with equal spreads
+   $\log \frac{p(x \mid \text{fraud})}{p(x \mid \text{honest})}$ is linear in
+   $x$, and give it for the fitted numbers.
+2. With the prior of the table, above which amount does the Bayes decision
+   rule decide fraud?
+3. The same model at the real base rate $1 : 999$: where is the cut now?
+4. Write $P(\text{fraud} \mid x)$ as $1 / (1 + e^{-(wx + b)})$ for the prior of
+   the table. Which model of the next lecture has this form?
+
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# 3.D Deciding on a Class
+
+--
+
+## Exercise 3.D.1: Costs, Prior and One Threshold
+
+A naive Bayes fraud model at the base rate $1 : 999$. Checking a transaction
+costs €5 if it is honest; a fraud let through costs €500.
+
+1. Above which posterior should a transaction be checked? Above which
+   likelihood ratio?
+2. Three transactions have likelihood ratios 6, 84 and 1,140. Which are
+   checked?
+3. Which of the three does the Bayes decision rule (equal costs) call fraud?
+4. A new market has a fraud rate of 1 in 100 and the same fraud patterns.
+   What is the threshold on the likelihood ratio there — and must the model
+   be refitted?
 
 
 </textarea></section></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script src="/vendor/toc-progress/plugin.js"></script><script>(function(){const enableTocProgress = true;

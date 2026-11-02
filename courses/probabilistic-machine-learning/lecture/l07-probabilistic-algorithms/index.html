@@ -250,12 +250,17 @@ does not record it. The components are identifiable only up to relabelling —
 permuting the component indices leaves $p(x)$ unchanged — so the likelihood has
 $K!$ equivalent maxima, and "component 1" has no meaning beyond a given fit.
 
+The same model appeared as the remedy for a class with two patterns
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>): there each fraud row's
+pattern was known, so the components could be fitted pattern by pattern. Here
+the label is hidden, which is what EM is for.
+
 --
 
 ## Why There Is No Closed Form
 
 For one Gaussian, maximum likelihood — the recipe of
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> — gives the sample mean and variance. For a mixture, the log-likelihood is a **log of a sum**:
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> — gives the sample mean and variance. For a mixture, the log-likelihood is a **log of a sum**:
 
 $$
 \ell(\theta) = \sum\_{i=1}^{N} \log \sum\_{k=1}^{K} \pi\_k \mathcal{N}(x\_i \mid \mu\_k, \sigma\_k^2)
@@ -368,7 +373,7 @@ $$
 Notes:
 With $\gamma$ fixed, the M-step maximises the expected complete-data
 log-likelihood $\sum\_i \sum\_k \gamma\_{ik} \big[\log \pi\_k + \log \mathcal{N}(x\_i \mid \mu\_k, \sigma\_k^2)\big]$
-— maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) with each point
+— maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) with each point
 counted fractionally in every component. $N\_k$ is the effective number of
 points in component $k$. The update for $\pi\_k$ follows with a Lagrange
 multiplier for $\sum\_k \pi\_k = 1$; the variance is divided by $N\_k$, so it is
@@ -454,7 +459,7 @@ that could shift the boundary between clusters.
 <div class="marks-no">
 
 - **The parameters:** $\pi\_k, \mu\_k, \sigma\_k$ are **one point estimate** —
-  <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s peak. The plate draws them as unknowns; EM gives them no error
+  <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s peak. The plate draws them as unknowns; EM gives them no error
   bar.
 - **A peak that may not exist:** a component that shrinks onto one point has
   $\sigma\_k \to 0$ and infinite likelihood. In practice: a floor on $\sigma\_k$,
@@ -606,12 +611,12 @@ $$
 
 
 Notes:
-Maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>,
+Maximum likelihood (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>,
 <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) returns the
 $\mathbf{w}$ that maximises $p(D \mid \mathbf{w})$; MAP returns the maximiser of
 the posterior $p(\mathbf{w} \mid D)$. Bayesian regression keeps the whole
 posterior — the two-parameter analogue of the Beta posterior in
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
 
 Prior: $\mathbf{S}\_0 = \mathrm{diag}(500^2, 10^2)$, intercept in k€, slope in
 k€/m². Two prior standard deviations are ±1,000 k€ and ±20 k€/m² — wide
@@ -640,7 +645,7 @@ $$
 <div class="card">
 
 ### The update is adding
-Posterior precision = prior precision + data precision — <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s
+Posterior precision = prior precision + data precision — <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s
 **adding counts**, for Gaussians. Every flat adds $\frac{1}{\sigma^2}\mathbf{x}\_i\mathbf{x}\_i^\top$.
 
 </div>
@@ -983,8 +988,8 @@ answer the rest?
 
 | shortcut | what it dropped | bought back by | at the cost of |
 |---|---|---|---|
-| **Keep the peak** · <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a>–<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> | how sure we are about the parameters | the posterior (Bayesian Linear Regression) | a prior, an integral |
 | **Assume it apart** · <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">03</a> | the dependences assumed away | a graph that draws them | more parameters |
+| **Keep the peak** · <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> | how sure we are about the parameters | the posterior (Bayesian Linear Regression) | a prior, an integral |
 | **Only $p(y \mid x)$** · <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">04</a> | every question about $x$ | a generative model | modelling $x$ |
 | **Graph the joint** · <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">05</a> | the edges not drawn | more edges | costlier inference |
 | **Keep the loss** · <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">06</a> | every probability | calibration, log-loss, error bars | held-out data |

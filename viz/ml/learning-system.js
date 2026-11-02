@@ -17,6 +17,12 @@
 //                         model of p(x, y), in Lecture 03 notation (θ, not Θ);
 //                         the last step runs the generative
 //                         model backwards to features (sampling)
+//         "assumptions" — the finished figure (Lecture 03 notation) with the two
+//                         ways out of the curse of dimensionality placed: step 1
+//                         marks the features — simpler structure, an assumption
+//                         on the data (which attributes depend on each other);
+//                         step 2 adds the model and θ — a parametric family, an
+//                         assumption on the model (the form, few parameters)
 //   reading: mode "approaches" only — the reading to start from (0–4); steps
 //            count on from it, so one slide per kind of classifier can show
 //            its own reading (and the generative one step on to sampling)
@@ -105,6 +111,18 @@ const APPROACHES = [
     text: 'draw y, then x from p(x | y): a new data point the model would produce',
     model: 'p(x, y; θ)', yhat: 'P(y | x)', yLabel: 'via Bayes', loss: '−log p(x, y)',
     mark: ['model', 'x'], sample: true },
+]
+
+// mode "assumptions": cumulative, so the final (print) frame shows both
+const AMBER = '#d97706'
+const ASSUMPTIONS = [
+  { title: 'Two ways out — where does each one act?' },
+  { title: '① Simplify the structure: an assumption on the data',
+    text: 'how the attributes x arise: independent given the class y — a count can check it',
+    mark: ['x'], tag: { x: 170, y: 344, lines: ['① on the data', 'attributes independent given y'] } },
+  { title: '② Use a parametric family: an assumption on the model',
+    text: 'which distributions the model may use: a family — it fixes how many θ are fitted',
+    mark: ['model', 'theta'], tag: { x: 420, y: 256, lines: ['② on the model: a family, few θ'] } },
 ]
 
 export async function mount(el, { d3, params, steps, isPrint }) {
@@ -215,6 +233,17 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   }
   edges.filter((e) => e.sample).select('text').attr('dy', 82)
 
+  // mode "assumptions": a label beside each marked box
+  const tags = svg.append('g')
+  if (mode === 'assumptions') {
+    ASSUMPTIONS.slice(1).forEach(({ tag }) => {
+      const t = tags.append('g').attr('opacity', 0)
+      tag.lines.forEach((line, i) => t.append('text').attr('x', tag.x).attr('y', tag.y + i * 20)
+        .attr('text-anchor', 'middle').attr('font-size', i ? 14 : 16).attr('font-weight', i ? 400 : 700)
+        .attr('fill', i ? INK : AMBER).text(line))
+    })
+  }
+
   function stroke(n) { return n.zone === 'real' ? NAVY : TEAL }
 
   function render(step) {
@@ -269,6 +298,24 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       caption.text(a.title)
       badge.attr('opacity', 1)
       badgeText.text(a.text)
+    } else if (mode === 'assumptions') {
+      const k = Math.min(Math.max(step, 0), ASSUMPTIONS.length - 1)
+      const marks = ASSUMPTIONS.slice(1, k + 1).flatMap((a) => a.mark)
+      nodes.attr('opacity', 1)
+      nodes.select('rect')
+        .attr('stroke', (n) => (marks.includes(n.id) ? AMBER : stroke(n)))
+        .attr('stroke-width', (n) => (marks.includes(n.id) ? 3.5 : 2))
+      nodes.select('text.sub').each(function (n) {
+        setSub(d3.select(this), { model: 'p(x, y; θ)', theta: 'θ' }[n.id] ?? n.sub)
+      })
+      edges.attr('opacity', (e) => (e.sample ? 0 : 1))
+      edges.select('path').attr('stroke', (e) => (e.at >= 3 ? VIOLET : NAVY))
+        .attr('marker-end', (e) => mk(e.at >= 3 ? 'a-violet' : 'a-navy'))
+      tags.selectAll(':scope > g').attr('opacity', (_, i) => (i < k ? 1 : 0))
+      caption.text(ASSUMPTIONS[k].title)
+      badge.attr('opacity', ASSUMPTIONS[k].text ? 1 : 0)
+      badge.select('rect').attr('x', 150).attr('width', 680) // centred on 490, as the text
+      badgeText.text(ASSUMPTIONS[k].text ?? '')
     } else {
       const i = Math.min(Math.max(step, 0), UNCERTAINTY.length) - 1
       const cur = i >= 0 ? UNCERTAINTY[i] : null
@@ -285,7 +332,8 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     }
   }
 
-  const last = { inference: 1, uncertainty: UNCERTAINTY.length, approaches: APPROACHES.length - 1 }
+  const last = { inference: 1, uncertainty: UNCERTAINTY.length, approaches: APPROACHES.length - 1,
+    assumptions: ASSUMPTIONS.length - 1 }
   render(isPrint && mode !== 'build' && params.reading == null ? last[mode] : steps)
   return { setStep: (i) => render(i) }
 }

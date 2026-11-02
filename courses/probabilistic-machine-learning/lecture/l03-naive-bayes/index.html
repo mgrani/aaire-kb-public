@@ -51,34 +51,48 @@ classifiers, each in the learning-system figure of Lecture 01; then
 generative-route (the joint explodes). Planned next: continuous attributes,
 the Bayes decision rule; fitting moves to Lecture 04
 (docs/reviews/PML-L03-RESTRUCTURE-2026-10.md).
+2026-11-01: new modules Continuous Attributes (continuous-attributes: a
+density per class, Gaussian naive Bayes, one Gaussian per class, shared
+covariance, mixture outlook) and Deciding on a Class (bayes-decision-rule:
+minimum error, costs, prior and costs in one threshold). The fitting module
+(bayes-for-a-parameter, keep-the-peak) moved to the start of Lecture 04;
+exercises 3.A.1, 3.A.2, 3.B.2 and 3.C.2 moved with it to Exercise Sheet 4
+(4.A).
+2026-11-01: the three kinds are defined beside the learning-system figure and
+fitted to the same 98 transactions, compared in one table; generative-route
+became its own module, The Curse of Dimensionality, the hinge to its two ways
+out (naive Bayes, continuous attributes).
 -->
 
 Notes:
-Three modules. Three kinds of classifier: a rule maps $x$ to a class without
+Five modules. Three kinds of classifier: a rule maps $x$ to a class without
 any probability; a discriminative classifier models $P(y \mid x; θ)$ only; a
-generative classifier models $P(y)$ and $p(x \mid y)$ and obtains the
-posterior by Bayes' theorem, and can generate data. Read as a sample, the
-training table cannot fill a full
-$p(x \mid y)$, whose cells multiply with every attribute (the curse of
-dimensionality), so the model must be restricted — by a simpler structure, by
-parametric families, or both. Naive Bayes: conditional independence of the
-attributes given the class, which reduces the number of parameters from
-$2^p - 1$ to $p$ per class for $p$ binary attributes; fitting is counting, and a
-count of zero vetoes all other evidence unless it is smoothed. Fitting the
-parameters: Bayes' theorem applied to a parameter gives a posterior over it —
-for yes/no data with a Beta prior, by adding counts
-(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). On that posterior, counting
-was its peak, the maximum likelihood estimate (MLE); smoothing its mean under a
-flat prior; and a prior's peak is the MAP estimate. The posterior can be drawn,
-so the spread a point estimate discards is visible.
+generative classifier models $P(y)$ and $p(x \mid y)$, obtains the posterior
+by Bayes' theorem and can generate data. The curse of dimensionality: read as
+a sample, the training table cannot fill a full $p(x \mid y)$, whose cells multiply with every attribute
+(the curse of dimensionality), so the model must be restricted — by a simpler
+structure, by parametric families, or both. Naive Bayes: conditional
+independence of the attributes given the class, which reduces the number of
+parameters from $2^p - 1$ to $p$ per class for $p$ binary attributes; fitting
+is counting, and a count of zero vetoes all other evidence unless it is
+smoothed. Continuous attributes: a density per class, of which Bayes' theorem
+needs only the ratio; Gaussian naive Bayes; one Gaussian per class keeps the
+correlations at a cost quadratic in $p$; a shared covariance makes the
+boundary linear, the logistic form of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>; a class
+with two patterns needs a mixture (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>).
+Deciding on a class: the most probable class minimises the error rate (the
+Bayes decision rule); unequal costs move the threshold on the posterior to
+$c\_{FP}/(c\_{FP} + c\_{FN})$; for a generative model prior and costs meet in one
+threshold on the likelihood ratio.
 
 Three choices are independent of each other: what to model (generative or
-discriminative), how to fit its parameters (MLE, MAP or the whole posterior),
-and how to decide on a class. MLE and MAP apply equally to logistic regression
-in <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, which treats linear and logistic regression as
-models of a conditional distribution and compares logistic regression with
-naive Bayes. Fraud detection (base rate 1 in 1,000, binary red flags) is the
-running example.
+discriminative), how to fit its parameters, and how to decide on a class. This
+lecture fits by counting and by class means and spreads;
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> opens by showing what these estimates are (the
+peak of a posterior over the parameter, the maximum likelihood estimate; +1
+smoothing is its mean) and then fits discriminative models the same way. Fraud
+detection (base rate 1 in 1,000, red flags and the amount) is the running
+example.
 
 --
 
@@ -200,34 +214,37 @@ $p(x, y)$.
 
 --
 
-## Today: Naive Bayes and Its Two Assumptions
+## Today: Generative Classifiers and the Bayes Decision Rule
 
-A classifier built from Bayes' theorem needs two assumptions to become
-estimable — rows 1 and 2 of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s table of shortcuts:
-
-| assumption | replaces | what is lost | module |
-|---|---|---|---|
-| **Conditional independence** | the joint $p(x \mid y)$ by $\prod\_j p(x\_j \mid y)$ | the dependences between attributes | Naive Bayes |
-| **Point estimate** (MLE, MAP) | the posterior over a parameter by its peak | how sure we are about the parameter | Fitting the Parameters |
+| question | module | the answer, in short |
+|---|---|---|
+| Probabilities at all? | **Three Kinds of Classifier** | a rule gives a class; a model of $p(x, y)$ gives $P(y \mid x)$, $p(x)$ and new data — if the joint can be estimated |
+| Many variables at once? | **The Curse of Dimensionality** | the joint explodes; two ways out — simpler structure, a family |
+| Dependent variables? | **Naive Bayes** | assume them independent given the class: one small table each |
+| Numbers, not yes/no? | **Continuous Attributes** | a density per class; one Gaussian keeps the dependences |
+| Which class, then? | **Deciding on a Class** | the most probable one — or a threshold set by costs and prior |
 
 Notes:
-The shortcut table of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a> lists the approximations the
-course makes to the ideal of carrying full distributions; there they are named
-"assume it apart" and "keep the peak". This lecture covers the first two, in
-the order a classifier needs them. Conditional independence replaces a
-joint distribution by a product of smaller factors and discards the
-dependences between the factors. A point estimate replaces the posterior over a parameter by its most probable value (MLE with a
-flat prior, MAP otherwise) and discards the uncertainty about that value.
+The rows follow the questions of the previous slide, with the decision added:
+a posterior is not yet an action. Two assumptions make the joint estimable,
+the two ways out of the curse of dimensionality. Conditional independence given the class
+is the shortcut "assume it apart" of <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s table: it
+replaces $p(x \mid y)$ by $\prod\_j p(x\_j \mid y)$ and discards the dependences
+between attributes. A parametric family replaces a table of counts by a
+formula with few parameters, a normal for an amount; one normal per class
+keeps the dependences at a cost that grows quadratically, not exponentially,
+with the number of attributes, but it cannot follow a class with several
+patterns.
 
-Naive Bayes takes both: the joint $p(x \mid y)$ is replaced by a product of
-factors $p(x\_j \mid y)$, and each factor is estimated by a relative frequency,
-which the last module identifies as a peak. A generative classifier as such
-requires neither shortcut: independence is what makes the joint affordable, and
-the peak is what turns fitting into counting. How the parameters are fitted is
-a choice of its own, made in the same way for discriminative models.
+A generative classifier as such requires neither assumption; they are what
+makes it affordable. How the parameters are fitted — by counting, by class
+means and spreads — is a choice of its own, made in the same way for
+discriminative models; <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> opens with it. The
+decision is a third, separate choice: the Bayes decision rule for equal costs,
+a threshold from the costs otherwise.
 
 Running example: fraud detection with a base rate of 1 in 1,000 (prior odds
-1 : 999) and a handful of binary red flags.
+1 : 999), a handful of binary red flags and the amount.
 
 
 --
@@ -237,31 +254,34 @@ Running example: fraud detection with a base rate of 1 in 1,000 (prior odds
 
 <div class="img-h-xl">
 
-![Argument map for Lecture 03: the generative route, the exploding joint, naive Bayes and fitting by counting, then the posterior over a parameter, MLE and MAP, and what each shortcut drops](/courses/probabilistic-machine-learning/figures/l03-argument-map.svg)
+![Argument map for Lecture 03: three kinds of classifier, the exploding joint and its two ways out — naive Bayes and a density per class — then the Bayes decision rule with costs and the prior](/courses/probabilistic-machine-learning/figures/l03-argument-map.svg)
 
 </div>
 
 
 Notes:
-The map follows the three modules. The generative route models $p(y)$ and
-$p(x \mid y)$ and converts with Bayes, keeping the 1/1,000 prior explicit; a
-discriminative model would fit $p(y \mid x)$ directly. Its problem is the joint:
-read as a sample, the table puts almost no data into each of the $m^p$ cells
-($2^{30} - 1$ numbers per class for 30 binary flags, against 100 frauds).
-Naive Bayes assumes the flags independent given the class, so fitting becomes
-counting; it drops the dependences between flags, so correlated evidence is
-counted twice and the probabilities are over-confident. A count of zero vetoes
-all other evidence, which motivates the last module: conditioning a parameter
-on the data gives a posterior; counting was its peak, the maximum likelihood
-estimate, +1 smoothing its mean, and MAP is a prior's peak. Keeping
-only a peak drops the spread, harmless with 1,000 observations and misleading
-with 3. How parameters are fitted is a separate choice from what is modelled:
-it applies unchanged to the discriminative models of
-<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">L04</a>. The course-arc strip places the lecture after
-the language of probability (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">L02</a>) and
-before models of $p(y \mid x)$ only (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">L04</a>) and
-graphical models (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">L05</a>), which state exactly
-which independences are assumed.
+The map follows the five modules. Of the three kinds of classifier, only the
+generative one models $p(y)$ and $p(x \mid y)$; it converts with Bayes' theorem,
+keeps the 1/1,000 prior explicit and can generate data. Its problem is the
+joint: read as a sample, the table puts almost no data into each of the $m^p$
+cells ($2^{30} - 1$ numbers per class for 30 binary flags, against 100 frauds).
+There are two ways out. Structure: naive Bayes assumes the flags independent
+given the class, so fitting becomes counting; it drops the dependences between
+flags, so correlated evidence is counted twice and the probabilities are
+over-confident. A family: a density per class for each number, Gaussian naive
+Bayes, or one Gaussian per class, which keeps the correlations at a cost
+quadratic in the number of attributes; a shared covariance makes the boundary
+linear, and a class with two patterns needs a mixture. The Bayes decision rule
+turns the posterior into a class: the most probable class makes the fewest
+errors, unequal costs move the threshold, and prior and costs enter as one
+threshold on the likelihood ratio, so both change without refitting.
+
+What the counts and class means were — the peak of a posterior over the
+parameter, the maximum likelihood estimate — opens
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">L04</a>, which fits discriminative models the same
+way; <a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">L05</a> states exactly which independences
+a model assumes. The course-arc strip places the lecture after the language of
+probability (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">L02</a>).
 
 ---
 
@@ -341,7 +361,10 @@ exam result as the data, $x$: $P(\text{PML} \mid \text{fail})$ is
 $P(y \mid x)$. The textbook letters vary (Bishop: $\mathbf{x}$ and $t$ or
 $\mathcal{C}\_k$; MacKay: $D$ and $H$); in machine learning $x$ and $y$ are
 standard. Capital letters denote the random variables, small letters their
-values; $x$ is a vector whenever there is more than one attribute.
+values; $x$ is a vector whenever there is more than one attribute. In general
+statements the attributes are numbered, $x\_1, \ldots, x\_p$; in the examples
+they are indexed by name, $x\_\text{amt}$ for the amount and $x\_\text{dist}$ for
+the distance.
 
 --
 
@@ -376,9 +399,11 @@ The bar conditions on a random variable, the semicolon fixes a parameter.
 
 ### Example
 
-amount given fraud ~ normal: $θ = (μ, σ)$.
+Fraud share: $P(Y = \text{fraud}; θ) = π$, one number.
 
-Fraud share $P(Y = \text{fraud}; θ) = θ$: one number.
+Log amount per class ~ normal: $μ\_\text{f}, σ\_\text{f}$ and $μ\_\text{h}, σ\_\text{h}$.
+
+Together: $θ = (π, μ\_\text{f}, σ\_\text{f}, μ\_\text{h}, σ\_\text{h})$.
 
 </div>
 
@@ -394,9 +419,16 @@ on random variables of the model (data and hypothesis). The two notations
 mean the same density; the semicolon says that $θ$ is treated as a fixed,
 unknown number, not as a random variable.
 
+$θ$ always stands for all parameters of the model; its components get names of
+their own — $π$ for the class share (Bishop's notation), $μ$ and $σ$ per class
+for a normal. A model with a single parameter, such as the Bernoulli model of
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, writes $θ$ for that one number.
+The amount is modelled on a log scale, as the module on continuous attributes
+shows: amounts are skewed, their logarithms close to normal.
+
 The bar returns for $θ$ once $θ$ gets a distribution of its own: a prior
 $p(θ)$ and a posterior $p(θ \mid D)$ over the parameters given the training
-data $D$, as in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. Every model in this
+data $D$, as in <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>. Every model in this
 course has parameters in this sense — the thresholds of a rule, the weights of
 logistic regression, the means and spreads of class distributions.
 
@@ -405,7 +437,7 @@ logistic regression, the means and spreads of class distributions.
 ## Rule-Based Classifier
 
 
-<div class="grid-1-2">
+<div class="grid-2-3">
 
 
 <div class="column">
@@ -420,11 +452,17 @@ class. The **rules are the parameters** $θ$.
 
 
 
-<div class="card">
+<div class="card small">
 
-$x\_1 > a,\ x\_2 > b$ → fraud, else honest: $θ = (a, b)$, trained for the
-fewest errors
-$$\hat θ = \arg\min\_θ \sum\_i \mathbb{1}[\hat y\_i \neq y\_i]$$
+**Example:** $x\_\text{amt} > a$ and $x\_\text{dist} > b$ → fraud, else honest;
+$θ = (a, b)$. **Training:** the fewest errors on the $n$ rows,
+$$
+\hat θ = \arg\min\_θ\\, \textstyle\sum\_{i=1}^{n} \mathbb{1}[\hat y\_i \neq y\_i]
+$$
+
+- $y\_i$: label of row $i$; $\hat y\_i = \text{rule}(x\_i; θ)$: the rule's class
+- $\mathbb{1}[\cdot]$: 1 if true, else 0 — the sum counts errors
+- $\arg\min\_θ$: the $θ$ with the fewest; $\hat θ$: the fitted $θ$
 
 </div>
 
@@ -478,13 +516,14 @@ Which transaction is the rule surest about — A, B or C?
 
 
 Notes:
-The data are 105 labelled transactions with two attributes, the amount $x\_1$
-and the distance from the card holder's home $x\_2$ (both on log axes); fraud is
+The data are 98 labelled transactions with two attributes, the amount
+$x\_\text{amt}$ and the distance from the card holder's home $x\_\text{dist}$
+(both on log axes); fraud is
 over-represented (a third) so that it is visible. The rule is learned from the
 table: among all rules of the form "amount $> a$ and distance $> b$ → fraud",
 the thresholds $(a, b)$ with the fewest training errors are chosen by trying
 every split between neighbouring values — the rule and the training criterion
-of the previous slide. The learned box has 6 training errors.
+of the previous slide. The learned box has 5 training errors.
 
 The rule assigns the same class to every point in its box. The only number it
 can attach is the share of fraud among the training rows in the box, the same
@@ -569,13 +608,33 @@ missing attribute other than by ad hoc defaults.
 A **probabilistic** classifier starts from the joint distribution of data and
 hypothesis. Every question is read off it:
 
-| question | what is read off the joint |
+
+<div class="grid-2">
+
+
+<div class="column middle">
+
+<div class="viz" data-viz="ml/joint-class-attribute" data-steps="3"
+ data-params='{"prior": 0.2, "observed": 3}'></div>
+
+</div>
+
+
+<div class="column middle small">
+
+| question | read off the joint |
 |---|---|
 | Is this transaction fraud? | $P(y \mid x) = p(x, y) \\,/\\, p(x)$ |
 | How does fraud look? | $p(x \mid y) = p(x, y) \\,/\\, P(y)$ |
 | How common is fraud? | $P(y) = \sum\_x p(x, y)$ |
 | How unusual is this transaction? | $p(x) = \sum\_y p(x, y)$ |
-| The distance is missing — now? | sum $x\_2$ out, then condition |
+| The distance is missing — now? | sum $x\_\text{dist}$ out, then condition |
+
+</div>
+
+
+</div>
+
 
 
 <div class="c-insight">
@@ -592,102 +651,220 @@ by a margin) and marginalisation (sum, or integrate, over the variables that
 are not asked about). For continuous attributes the sums over $x$ are
 integrals and the probabilities densities.
 
+The heatmap is the joint $p(y, x)$ of the class and one attribute (the amount,
+five bins), with a fraud share of 20% so that the fraud row is visible. Steps:
+the cells of the joint; the margins (prior $P(y)$ as row sums, evidence $p(x)$
+as column sums); the fraud row against its total, the likelihood
+$p(x \mid \text{fraud})$; one column against its total, the posterior
+$P(y \mid x)$. For 200–1k €: $p(\text{fraud}, x) = 0.2 \cdot 0.30 = 0.06$ and
+$p(\text{honest}, x) = 0.8 \cdot 0.10 = 0.08$, so
+$P(\text{fraud} \mid x) = 0.06/0.14 \approx 0.43$.
+
 The joint therefore contains strictly more than the decision needs. The two
 probabilistic classifiers differ in how much of it they model: the
-discriminative classifier only the conditional $P(y \mid x)$, the generative
-classifier the whole joint, factorised as $p(x \mid y)\\, P(y)$. The cost of
-the whole joint is the subject of the rest of the module.
+discriminative classifier only the column shares, $P(y \mid x)$, as a function
+of $x$; the generative classifier the whole picture, factorised as
+$p(x \mid y)\\, P(y)$.
 
 --
 
-## Discriminative: Model $P(y \mid x; θ)$ Only
+## Discriminative Classifier
 
 
-<div class="grid-figure">
+<div class="grid-2-3">
 
 
 <div class="column">
 
-<div class="viz viz-lg" data-viz="ml/joint-class-attribute" data-steps="3"
- data-params='{"prior": 0.2, "observed": 3}'></div>
+
+<div class="c-definition">
+
+A **discriminative classifier** models only $P(y \mid x; θ)$ — nothing about
+which $x$ occur.
+
+</div>
+
+
+
+<div class="card small">
+
+**Example:** logistic regression, 3 numbers:
+
+$$
+\begin{aligned}
+z &= θ\_0 + θ\_\text{amt} \log x\_\text{amt} + θ\_\text{dist} \log x\_\text{dist}
+\\\ P(\text{fraud} \mid x; θ) &= σ(z) = 1 / (1 + e^{-z})
+\end{aligned}
+$$
+
+**Training:** the most probable labels,
+$$
+\hat θ = \arg\max\_θ\\, \textstyle\sum\_{i=1}^{n} \log P(y\_i \mid x\_i; θ)
+$$
+
+$x\_i$ stands only right of the bar: given, never modelled.
+
+</div>
+
 
 </div>
 
 
 <div class="column middle">
 
-Fit **exactly** the decision: a distribution over $y$ for every $x$.
-
-
-<div class="marks-no">
-
-- no $p(x)$, no $p(x \mid y)$
-- no Bayes: nothing to turn around
-
-</div>
-
-
-
-<div class="card">
-
-### Examples
-Logistic regression · neural networks with a softmax output
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-Notes:
-The heatmap is the joint $p(y, x)$ of the class and one attribute (the amount,
-five bins), with a fraud share of 20% so that the row is visible. Steps: the
-cells of the joint; the margins (prior $P(y)$ as row sums, evidence $p(x)$ as
-column sums); the fraud row against its total, the likelihood
-$p(x \mid \text{fraud})$; one column against its total, the posterior
-$P(y \mid x)$. A discriminative classifier models exactly the column shares:
-a family $P(y \mid x; θ)$ whose parameters are fitted by maximising the
-probability of the training labels given the training attributes.
-
-Unlike a rule, its output is a probability distribution over the classes,
-and its loss, $-\log P(y \mid x; θ)$, rewards calibrated probabilities. Unlike
-a generative classifier, it never represents how $x$ is distributed: the row
-margins and row shapes are not part of the model, so $p(x)$, $p(x \mid y)$ and
-the prior cannot be recovered, and Bayes' theorem cannot be applied to it.
-Logistic regression (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) and
-neural networks with a softmax output layer are discriminative in this sense.
-A change of base rate must be corrected from outside
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
-
-For 200–1k €: $p(\text{fraud}, x) = 0.2 \cdot 0.30 = 0.06$ and
-$p(\text{honest}, x) = 0.8 \cdot 0.10 = 0.08$, so
-$P(\text{fraud} \mid x) = 0.06/0.14 \approx 0.43$.
-
---
-
-## The Discriminative System in the Learning System
-
-<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="0"
+<div class="viz" data-viz="ml/learning-system" data-steps="0"
      data-params='{"mode": "approaches", "reading": 2}'></div>
 
+</div>
+
+
+</div>
+
+
 Notes:
-The model box computes $P(y \mid x; θ)$; the prediction is a distribution over
-the classes, from which a class is chosen; the loss is the negative
-log-probability of the observed label, $-\log P(y \mid x; θ)$, the
-cross-entropy. The features enter only as the condition: the model is
-evaluated at the observed $x$ and makes no statement about which $x$ occur.
-Fitting by maximum likelihood follows with logistic regression
+A discriminative classifier is a family $P(y \mid x; θ)$ of distributions over
+the classes, one for every input. It is not a table of the joint read by
+columns: it is a function of $x$ with a fixed, small number of parameters,
+which assigns a probability to inputs it has never seen. Logistic regression
+uses a linear score $z$ of the attributes passed through the logistic function
+$σ$, which maps any number to $(0, 1)$; $z$ itself is the log-odds,
+$z = \log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}$. A neural
+network with a softmax output layer uses a learned score. The
+attributes enter on the log scale, as in the figures.
+
+The learning system of the introductory lecture with a discriminative model in
+the model box: the prediction is a distribution over the classes, from which a
+class is chosen; the loss is the negative log-probability of the observed
+label, $-\log P(y\_i \mid x\_i; θ)$, the cross-entropy, and training maximises
+$\sum\_i \log P(y\_i \mid x\_i; θ)$, the probability of the training labels given
+the training attributes (maximum likelihood, made precise in
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). The features enter only as the
+condition: the model is evaluated at the observed $x$ and makes no statement
+about which $x$ occur, so $p(x)$, $p(x \mid y)$ and the prior cannot be
+recovered and Bayes' theorem cannot be applied to it. A change of base rate
+must be corrected from outside
 (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
 
 --
 
-## Generative: Model $p(x \mid y; θ)\\, P(y; θ)$
+## $P(y \mid x)$ From Data
+
+<div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="1"
+ data-params='{"view": "discriminative"}'></div>
+
+
+<div class="q">
+
+Compare with the rule: what is new for A and B — and what is still missing for
+C?
+
+</div>
+
+
+Notes:
+The 98 transactions of the rule, now with a logistic regression fitted to them
+by maximum likelihood (Newton's method):
+$\hat θ = (-11.5,\ 2.2,\ 3.7)$ on $\log\_{10}$ amount and $\log\_{10}$ distance.
+The colour is $P(\text{fraud} \mid x; \hat θ)$ for every $x$, the violet line
+the 0.5 boundary — a straight line, because the score is linear in the
+attributes. Three numbers replace the box's two thresholds.
+
+The weights are not probabilities. They act on the score
+$z = -11.5 + 2.2 \log\_{10} x\_\text{amt} + 3.7 \log\_{10} x\_\text{dist}$, the
+log-odds of fraud, which can be any number; the curve on the right, $σ(z)$,
+turns it into a probability. Read on the odds, a weight is a factor: ten
+times the amount adds 2.2 to $z$ and multiplies the odds of fraud by
+$e^{2.2} \approx 9$, ten times the distance by $e^{3.7} \approx 40$. How much
+that changes the probability depends on where on the curve a transaction
+sits: near $z = 0$ (A) a step moves the probability a lot, far out (B) hardly
+at all. A weight's size also depends on the scale of its attribute, so it
+measures importance only for attributes on comparable scales.
+
+A gets 39%, B 99.5%: the model is graded where the rule was flat (94% for
+both). C, at 3.5k € and 1.6 km, gets 6% fraud — a confident "honest" for an
+input unlike any training row, without any warning, because the model has no
+$p(x)$ to tell it so. The fit has 7 training errors against the rule's 5:
+logistic regression maximises the probability of the labels, not the number of
+correct decisions, and its boundary is a straight line where the rule's is a
+corner.
+
+--
+
+## Generative Classifier
+
+
+<div class="grid-2-3">
+
+
+<div class="column">
+
+
+<div class="c-definition">
+
+A **generative classifier** models how the data arise — $p(x \mid y; θ)$
+and $P(y; θ)$ — and obtains $P(y \mid x)$ by Bayes' theorem.
+
+</div>
+
+
+
+<div class="card small">
+
+**Example:** a normal per class and the fraud share, 11 numbers:
+
+$$
+\begin{aligned}
+p(x \mid y; θ) &= \mathcal{N}\big((\log x\_\text{amt}, \log x\_\text{dist});\ μ\_y, Σ\_y\big)
+\\\ P(\text{fraud}; θ) &= π
+\end{aligned}
+$$
+
+**Training:** the most probable rows,
+$$
+\hat θ = \arg\max\_θ\\, \textstyle\sum\_{i=1}^{n} \big[\log p(x\_i \mid y\_i; θ) + \log P(y\_i; θ)\big]
+$$
+
+$x\_i$ is scored too: modelled, not only given.
+
+</div>
+
+
+</div>
+
+
+<div class="column middle">
+
+<div class="viz" data-viz="ml/learning-system" data-steps="1"
+     data-params='{"mode": "approaches", "reading": 3}'></div>
+
+</div>
+
+
+</div>
+
+
+Notes:
+The learning system with a generative model in the model box: the model is
+the joint $p(x, y; θ)$; the prediction $P(y \mid x)$ follows by Bayes' theorem;
+the loss under maximum likelihood is
+$-\log p(x, y; θ) = -\log p(x \mid y; θ) - \log P(y; θ)$, which scores the
+features as well as the label, so the features box is part of what is fitted.
+The second step runs the model without input: from the parameters to a sampled
+data point.
+
+In the example $μ\_y$ is the mean of the class in (log amount, log distance) and
+$Σ\_y$ its covariance matrix — two spreads and a correlation, introduced
+properly in the module on continuous attributes. The maximisation has a closed
+form: per class the mean vector, spreads and correlation of its rows, and
+$\hat π$ the share of fraud rows, 35 of 98. Parameter count: $2 \cdot (2 + 2 + 1) + 1 = 11$, against 3 for
+logistic regression and 2 for the rule — the price of modelling $x$.
+
+--
+
+## $p(x \mid y)$ From Data
 
 <div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="3"
- data-params='{"view": "generative", "prior": 0.1}'></div>
+ data-params='{"view": "generative", "prior": 0.36}'></div>
 
 
 <div class="q">
@@ -699,114 +876,85 @@ rule not do this?
 
 
 Notes:
-Each class has its own distribution over both attributes, here a
-two-dimensional normal in (log amount, log distance) with parameters
-$θ\_y = (μ\_y, Σ\_y)$: two means, two spreads and a correlation per class. The
-prior $P(y; θ)$ is one more parameter. Bayes' theorem combines them for every
-point,
-$P(\text{fraud} \mid x) = p(x \mid \text{fraud})P(\text{fraud}) \\,/\\,
+Each class has its own distribution over both attributes, a two-dimensional
+normal in (log amount, log distance) fitted to the class's rows of the same
+98 transactions: two means, two spreads and a correlation per class. The prior
+starts at the training share, 36%. Bayes' theorem combines them for every
+point, $P(\text{fraud} \mid x) = p(x \mid \text{fraud})P(\text{fraud}) \\,/\\,
 \sum\_{y'} p(x \mid y') P(y')$, which the large panel shows; the violet line is
 where the posterior is 0.5.
+
+Step 3 adds the rule (dashed), greys out the region where $p(x)$ is tiny and
+marks A, B and C: 57%, 99.8% and 0.0% — and C lies in the grey region. There
+the posterior is still defined, but $p(x)$ says that no training data supports
+it; this is the warning neither the rule nor logistic regression can give.
 
 Lowering the prior shrinks the fraud region: the likelihoods are unchanged, only
 the factor $P(\text{fraud})$ moves, so the model can be carried to a setting
 with a different base rate without refitting. At 1 in 1,000 the boundary
-retreats to where the likelihood ratio exceeds 999. Step 3 adds the rule of the
-previous slides (dashed) and greys out the region where $p(x)$ is tiny: there
-the posterior is still defined, but $p(x)$ says that no training data supports
-it. The sliders move the fraud mean and the correlation within the fraud
-class; the button draws transactions from the model.
+retreats to where the likelihood ratio exceeds 999. The sliders move the fraud
+mean and the correlation within the fraud class; the button draws transactions
+from the model.
 
 --
 
 ## Generating Data
 
+**Generating** is sampling from the model: draw $y \sim P(y)$, then
+$x \sim p(x \mid y)$ — here $y$ = spam, $x$ = the words of a mail.
 
-<div class="c-definition">
-
-**Run the model forwards:** draw $y \sim P(y)$, then $x \sim p(x \mid y)$ — a
-new data point.
-
-</div>
+<div class="viz viz-xl" data-viz="ml/generate-text" data-steps="8"></div>
 
 
+<div class="q">
 
-<div class="grid-2">
-
-
-<div class="card">
-
-### Naive Bayes spam filter
-Words drawn one by one from $p(\text{word} \mid \text{spam})$:
-*free winner click offer meeting now* — each word fits, the sentence does not.
-
-</div>
-
-
-<div class="card">
-
-### Language models
-$p(x\_1, \ldots, x\_T) = \prod\_t p(x\_t \mid x\_{<t})$, fitted by maximum
-likelihood, sampled word by word.
-
-</div>
-
-
-</div>
-
-
-
-<div class="fragment c-insight">
-
-Neither rules nor $P(y \mid x)$ can do this: generating needs a model of $x$.
+Which mail reads like a real one — and what does naive Bayes leave out?
 
 </div>
 
 
 Notes:
 Sampling follows the factorisation $p(x, y) = p(x \mid y)P(y)$ from left to
-right: first the class, then the attributes given the class. Drawing a missing
-attribute from $p(x\_j \mid x\_{-j}, y)$, the conditional given the observed
-attributes, fills in part of a data point; a discriminative model has no
-distribution over $x$ to draw from.
+right: first the class, then the attributes given the class; the figure fixes
+the class to spam, and the attributes are the words of the mail. Both models
+share one vocabulary of 13 words, listed once in the middle of the chart:
+naive Bayes' probabilities to the left, the language model's to the right, on
+the same scale. Each step draws one word in both mails (top) and shows the
+distribution over the vocabulary it was drawn from (bottom). Naive Bayes draws every word from the same
+$p(\text{word} \mid \text{spam})$: each word is typical of spam, the sequence
+is not a sentence — the dependences between words are exactly what the naive
+assumption (next module) drops. The language model draws each word from
+$p(x\_t \mid x\_1, \ldots, x\_{t-1})$, the chain rule of probability, so the
+candidates change with the context: after "won" only "a" is possible, after
+"a" only "free" or "prize". Its bars are peaked where naive Bayes' bars are
+flat. Both models are toys with hand-set
+probabilities, and the toy language model conditions only on the previous
+word; a real one conditions on the whole context with one shared neural
+network and is fitted by maximum likelihood (cross-entropy on the next token).
+"Sample again" draws two new mails.
 
-The naive Bayes example anticipates the next module: under the naive
-assumption each word is drawn independently given the class, so the words are
-individually typical of spam but do not form a sentence — the dependences
-between words are exactly what the assumption drops. An autoregressive
-language model keeps every dependence by the chain rule of probability, each
-factor $p(x\_t \mid x\_{<t})$ being one shared neural network evaluated on the
-context; it is fitted by maximum likelihood (cross-entropy on the next token).
-Whether a model can generate is therefore a property of *what* it models, not
-of *how* its parameters are fitted. Each factor of a language model, taken
-alone, is a classifier over the vocabulary; the product of all factors is the
-generative model.
-
---
-
-## The Generative System in the Learning System
-
-<div class="viz viz-lg" data-viz="ml/learning-system" data-steps="1"
-     data-params='{"mode": "approaches", "reading": 3}'></div>
-
-Notes:
-The model box computes the joint $p(x, y; θ)$; the prediction $P(y \mid x)$
-follows by Bayes' theorem; the loss under maximum likelihood is
-$-\log p(x, y; θ) = -\log p(x \mid y; θ) - \log P(y; θ)$, which scores the
-features as well as the label, so the features box is part of what is fitted.
-The second step runs the model without input: from the parameters to a
-sampled data point.
+Drawing a missing attribute from $p(x\_j \mid x\_{-j}, y)$, the conditional given
+the observed attributes, fills in part of a data point. Neither a rule nor a
+model of $P(y \mid x)$ can generate: generating needs a model of $x$. Whether a
+model can generate is a property of *what* it models, not of *how* its
+parameters are fitted. Each factor of a language model, taken alone, is a
+classifier over the vocabulary; the product of all factors is the generative
+model.
 
 --
+
+<!-- .slide: class="smaller" -->
 
 ## Three Kinds of Classifier
 
-| | rules | discriminative | generative |
+| | rule | discriminative | generative |
 |---|---|---|---|
 | models | $x \mapsto$ class | $P(y \mid x; θ)$ | $p(x \mid y; θ)\\, P(y; θ)$ |
-| how sure | <span class="no">✗</span> | <span class="yes">✓</span> | <span class="yes">✓</span> |
+| fitted here | 2 thresholds | 3 weights | 11 numbers |
+| A, just inside the box | fraud, 94% | 39% | 57% |
+| B, deep inside | fraud, 94% | 99.5% | 99.8% |
+| C, unlike any row | honest, <span class="no">no warning</span> | 6%, <span class="no">no warning</span> | 0.0%, <span class="yes">p(x) tiny</span> |
 | new base rate | <span class="no">✗</span> refit | correct from outside | <span class="yes">✓</span> swap $P(y)$ |
-| unusual input | <span class="no">✗</span> | <span class="no">✗</span> | <span class="yes">✓</span> $p(x)$ small |
 | missing field | <span class="no">✗</span> ad hoc | <span class="no">✗</span> ad hoc | <span class="yes">✓</span> sum it out |
 | generate data | <span class="no">✗</span> | <span class="no">✗</span> | <span class="yes">✓</span> |
 | examples | decision tree | logistic regression | naive Bayes, language model |
@@ -821,6 +969,13 @@ class.
 
 
 Notes:
+All three were fitted to the same 98 transactions. The rule gives A and B the
+same box share; logistic regression and the generative model grade them. For
+C, unlike any training row, the rule and logistic regression answer without
+any indication that the answer is unsupported; the generative model's answer
+is just as confident (0.0% fraud) but comes with $p(x)$, which says that no
+data lie there.
+
 New base rate: the posterior odds are the prior odds times the likelihood
 ratio, so a generative model only replaces $P(y)$, provided the class-conditional
 distributions are the same in both settings. A discriminative model absorbs
@@ -832,66 +987,43 @@ Missing attributes: $p(x\_{\text{obs}} \mid y) = \sum\_{x\_{\text{mis}}} p(x\_{\
 Without a model of $x$ the alternatives are imputation or a separate model per
 pattern of missing fields.
 
-Unusual inputs: $p(x) = \sum\_y p(x \mid y) P(y)$ is small for an input unlike
-the training data (outlier, distribution shift); $P(y \mid x)$ is normalised
-for every $x$ and cannot show this.
-
 The comparison of accuracy, which favours the discriminative classifier with
 much data and the generative one with little, follows in
 <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# The Curse of Dimensionality
+
+
+<div class="guiding-question">
+
+**Guiding Question:** A generative classifier needs $p(x \mid y)$ over all
+attributes at once. How many numbers is that — and how can a model get by
+with fewer?
+
+</div>
+
 
 --
 
 ## Bayes' Theorem With Two Red Flags
 
-Two flags at once, $D$ = new device and $F$ = foreign IP: the evidence is a
-**conjunction** of events.
+Two flags at once: $D$ = new device, $F$ = foreign IP.
 
 $$
 \eqa{P(\text{fraud} \mid D \cap F)} = \frac{\eqb{P(D \cap F \mid \text{fraud})} \cdot \eqc{P(\text{fraud})}}{\eqd{\sum\_{y} P(D \cap F \mid y)\\, P(y)}}
 $$
 
-
-<div class="grid-2">
-
-
-<div class="column">
+Nothing in the theorem changes. New is the evidence: a **conjunction**
+$D \cap F$, whose likelihood is needed for every class $y$.
 
 
 <div class="q">
 
-Among frauds, 60% show $D$ and 70% show $F$. How many show **both**?
-
-</div>
-
-
-</div>
-
-
-<div class="column">
-
-
-<div class="fragment">
-
-1. **Not fixed by the parts.** Anything from 30% to 60% fits; the data say 55%.
-   $P(D \cap F \mid y)$ is a number of its own.
-2. **One number per combination.** $p$ flags: $2^p - 1$ per class.
-3. **Ever rarer.** Each added flag shrinks the count behind the conjunction.
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="fragment c-insight">
-
-Multiplying the parts, $0.60 \cdot 0.70 = 0.42$, is correct only if $D$ and $F$
-are **independent given the class** — the assumption of **naive Bayes**.
+Among 100 frauds, 60 show $D$ and 70 show $F$. How many show **both**?
 
 </div>
 
@@ -900,29 +1032,95 @@ Notes:
 This is Bayes' theorem for multiple events of
 <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> with the classes as the
 partition and the evidence $B = D \cap F$. Nothing in the theorem changes; the
-difficulty is entirely in the likelihood of the conjunction. (A conjunction on
-the other side, $P(E\_i \cap E\_k \mid B)$ for two classes, is zero: classes
-are disjoint. Several events enter a classifier as several pieces of evidence.)
+difficulty is entirely in the likelihood of the conjunction, which is needed
+for every class: the denominator sums $P(D \cap F \mid y)\\, P(y)$ over fraud
+and honest. (A conjunction on the other side, $P(E\_i \cap E\_k \mid B)$ for two
+classes, is zero: classes are disjoint. Several events enter a classifier as
+several pieces of evidence.)
 
-The bounds: for probabilities $a = 0.60$ and $b = 0.70$ the intersection lies
-in $[\max(0, a + b - 1), \min(a, b)] = [0.30, 0.60]$ (Fréchet bounds). The lower
-end is the most "avoiding" overlap, the upper end has every $D$-fraud also
-showing $F$. The single-flag rates therefore do not determine
-$P(D \cap F \mid \text{fraud})$; it must be estimated separately. In the
-running example it is 0.55 among frauds and 0.04 among honest transactions,
-the figures used again in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
+--
 
-The general form: for flags $E\_1, \ldots, E\_p$, the likelihood
-$P(E\_1 \cap \ldots \cap E\_p \mid y)$ is needed for every combination of
-present and absent flags, $2^p$ patterns with $2^p - 1$ free numbers per class.
-The chain rule writes it exactly as
-$P(E\_1 \mid y)\\, P(E\_2 \mid E\_1, y) \cdots P(E\_p \mid E\_1, \ldots, E\_{p-1}, y)$;
-each later factor conditions on more events, so it is estimated from fewer
-rows. Dropping the conditioning events in every factor gives the product
-$\prod\_j P(E\_j \mid y)$, which is exact iff the flags are conditionally
-independent given the class. With $D$ and $F$ the product gives 0.42 instead
-of 0.55 among frauds and $0.10 \cdot 0.05 = 0.005$ instead of 0.04 among
-honest transactions.
+## The Joint of Two Flags
+
+<div class="viz viz-xl" data-viz="ml/two-flags" data-steps="4"
+ data-params='{"view": "overlap"}'></div>
+
+
+<div class="fragment c-insight">
+
+**Not fixed by the parts:** 30 to 60 all fit both rates, so
+$P(D \cap F \mid y)$ is a number of its own. The product
+$0.60 \cdot 0.70 = 0.42$ assumes $D$ and $F$ **independent given the class** —
+naive Bayes.
+
+</div>
+
+
+Notes:
+The bounds, read off the bars: $F$ needs 70 of the 100 frauds and only 40
+lack $D$, so at least 30 frauds show both; and no more than the 60 frauds with
+$D$ can. In general, for probabilities $a$ and $b$ the intersection lies in
+$[\max(0, a + b - 1), \min(a, b)]$ (Fréchet bounds), here $[0.30, 0.60]$.
+Every value in between is a different joint with the same two margins; the
+two rates fix two numbers, the joint of two flags has three.
+
+The positions of $F$ mean different dependences. At 42 the share of $F$ is the
+same with and without $D$ (70% each): independence given the class, the only
+case in which the product is right. In the running example 55 frauds show
+both: 92% of the frauds with a new device come from a foreign IP, but only
+38% of the others ($15/40$). An account take-over brings both flags at once,
+so they are positively dependent among frauds. Among honest transactions the
+figures are 0.10, 0.05 and 0.04 for both instead of the product 0.005; both
+values return in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
+
+--
+
+## One Number per Flag Pattern
+
+
+<div class="q">
+
+A third flag, *night*: how many groups now — and how many frauds in each?
+
+</div>
+
+
+<div class="viz viz-xl" data-viz="ml/two-flags" data-steps="5"
+ data-params='{"view": "patterns"}'></div>
+
+
+<div class="fragment c-insight">
+
+Every flag **doubles** the patterns — $p$ flags, $2^p$ patterns, $2^p - 1$
+numbers per class — and **halves** the frauds behind each: at 7 flags, 73 of
+128 patterns are **empty**.
+
+</div>
+
+
+Notes:
+The rows nest: each bar of a row splits into the two bars below it, flag
+present on the left, absent on the right. Row 2 is the four groups of the
+previous slide (55, 5, 15, 25). The probabilities of all patterns of a class
+sum to 1, so one of them is determined by the others: $2^p$ patterns give
+$2^p - 1$ free numbers per class, and the two classes need them separately.
+
+Exactly, with the chain rule,
+$P(E\_1 \cap \ldots \cap E\_p \mid y) = P(E\_1 \mid y)\\, P(E\_2 \mid E\_1, y)
+\cdots P(E\_p \mid E\_1, \ldots, E\_{p-1}, y)$: each later factor conditions on
+more flags, so it is estimated only from the rows that match all of them —
+one row of the figure further down. Dropping the conditioning flags in every
+factor gives $\prod\_j P(E\_j \mid y)$, which is exact iff the flags are
+conditionally independent given the class (naive Bayes).
+
+The flags after $D$ and $F$ are illustrative (drawn with a fixed seed, with
+night, a new payee and a VPN more frequent in an account take-over). In this
+sample the first patterns become empty at 4 flags (2 of 16), then 7 of 32,
+24 of 64 and 73 of 128. An empty pattern has count 0, so its estimate is 0
+— the problem the next slides scale up to 30 flags. On average the frauds per
+pattern halve with every flag ($100 / 2^p$); the honest class has a thousand
+times more rows and therefore, on average, about ten more flags ($2^{10}
+\approx 1{,}000$) before the same happens.
 
 --
 
@@ -1039,7 +1237,7 @@ was not seen among honest transactions either).
 
 A share computed from a tiny count is an extreme value, here multiplied across
 a billion cells; naive Bayes meets the same zero in a single cell, and
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> names the estimate behind it. More data does not solve it: filling the table reliably would need far
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> names the estimate behind it. More data does not solve it: filling the table reliably would need far
 more frauds than cells. The general pattern, and the two ways to reduce the
 number of parameters, follow on the next two slides.
 
@@ -1089,10 +1287,10 @@ not better, unless the model is restricted.
 
 <div class="card">
 
-### Simplify the structure
+### ① Simplify the structure
 
-Assume attributes are **independent given the class**: one small table per
-attribute instead of one huge joint.
+**Assumption on the data:** attributes **independent given the class** — one
+small table each, not one huge joint.
 
 30 flags: **30** numbers per class, not $2^{30} - 1$.
 
@@ -1103,13 +1301,14 @@ attribute instead of one huge joint.
 
 <div class="card">
 
-### Use a parametric family
+### ② Use a parametric family
 
-Replace a table of counts by a **formula with few parameters**.
+**Assumption on the model:** a **formula with few parameters** instead of a
+table of counts.
 
 amount given fraud ~ log-normal$(\mu, \sigma)$: **2** numbers, not 100 bins.
 
-<span class="eyebrow"><a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a></span>
+<span class="eyebrow"><a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>; a normal per class — today</span>
 
 </div>
 
@@ -1139,7 +1338,38 @@ no bins at all.
 Naive Bayes uses both: independent attributes given the class, each with a
 small family. The resulting estimates are stable from little data, but
 correlated attributes are counted twice and a misfitting family distorts the
-likelihood ratio; both costs are taken up in the naive Bayes module.
+likelihood ratio. The naive Bayes module takes the first cost up; continuous
+attributes (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) the second, and
+show that a family alone — one Gaussian per class — already turns the
+exponential count into a quadratic one.
+
+--
+
+## Assumptions on the Data and on the Model
+
+<div class="viz viz-xl" data-viz="ml/learning-system" data-steps="2"
+ data-params='{"mode": "assumptions"}'></div>
+
+Notes:
+The figure is the learning system of
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>, in
+this lecture's notation: the model box computes $p(x, y; \theta)$. Both ways
+out restrict that joint, but they restrict different things. Simpler
+structure is a claim about how the data arise: which attributes depend on
+each other once the class is known. It holds or fails in the world, and the
+data can show it — among frauds 92% of the new-device cases come from a
+foreign IP against 38% of the others, so the independence of naive Bayes
+fails there. A parametric family is a choice of the model: the shape each
+distribution may take (Bernoulli for a flag, a normal for a log amount) and
+with it the number of parameters $\theta$. It is wrong when the shape is,
+for example one normal for a class with two fraud patterns.
+
+The two choices are independent of each other. Naive Bayes with counted
+tables simplifies the structure only; one full Gaussian per class uses a
+family only and keeps every dependence; Gaussian naive Bayes does both
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). A graphical model
+(<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>) simplifies the structure less
+drastically, keeping selected dependences.
 
 --
 
@@ -1296,7 +1526,7 @@ $$
 
 <div class="c-warning">
 
-**Shortcut 2 — assume it apart.** Dropped: every dependence *within* a class.
+**Shortcut 1 — assume it apart.** Dropped: every dependence *within* a class.
 
 </div>
 
@@ -1316,7 +1546,7 @@ from about $2.1 \cdot 10^9$ to 61.
 
 The model is still generative, since it specifies $p(y)$ and $p(x \mid y)$ and
 can generate transactions. What it drops is every dependence between attributes
-within a class (shortcut 2 of the course roadmap). The assumption is almost
+within a class (shortcut 1 of the course roadmap). The assumption is almost
 never exactly true; whether it matters depends on the task, as the last slides
 of the module show.
 
@@ -1374,6 +1604,74 @@ $x\_1$ and $x\_2$ are dependent even when $\rho = 0$ — through the class, whic
 naive Bayes keeps. Conditional independence given $y$ does not imply
 independence overall.
 
+What naive Bayes stores are the margins $p(x\_j \mid y)$: one-dimensional
+distributions, one per attribute and class. How each is estimated is the next
+question.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## A Distribution per Attribute and Class
+
+
+<div class="q">
+
+Naive Bayes needs $p(x\_j \mid \text{fraud})$ and $p(x\_j \mid \text{honest})$
+for each attribute **on its own**. How would you estimate them for these four?
+
+</div>
+
+
+
+<div class="fragment">
+
+| attribute $x\_j$ | values | model for $p(x\_j \mid y)$ | fitted from the class's rows by | numbers per class |
+|---|---|---|---|---|
+| new device | yes / no | Bernoulli$(\theta\_y)$ | the share of *yes* | 1 |
+| country | $k$ countries | categorical | the share of each country | $k - 1$ |
+| logins, last hour | 0, 1, 2, … | a **table** of the values — or **Poisson**$(\lambda\_y)$ | the share of each value — or the **mean** count | one per value — or 1 |
+| amount | positive, skewed | **normal** on the log amount | mean and spread of $\log x$ | 2 |
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Naive Bayes fixes the **structure** (way out ①). Each factor still needs a
+model: a **table**, fitted by counting, or a **family** with few parameters
+(way out ②). Both are fitted per class, in one pass over the rows.
+
+</div>
+
+
+Notes:
+The naive assumption leaves $p$ one-dimensional distributions per class, and
+for each the scale of the attribute suggests a model, as in "The Scale Suggests
+the Model" of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>. For a nominal
+attribute the table is the family: a Bernoulli for a flag, a categorical for a
+country, both fitted by relative frequencies. Naive Bayes over flags and
+categories is therefore fitted by counting alone, the case taken up next.
+
+A count attribute can be treated either way. As a table, every observed value
+gets its share: many parameters, and a value never seen among frauds (twelve
+logins) gets probability 0 — the problem of
+"One Zero Vetoes Everything" below. As a Poisson, one rate per class
+describes all values, and its maximum likelihood estimate is the mean count of
+the class; twelve logins keep a small positive probability. The price is the
+shape: a Poisson has variance equal to its mean, which real counts often
+exceed.
+
+A continuous attribute has no table at all without bins. A normal per class
+on the log amount gives Gaussian naive Bayes, the subject of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. The factors may be mixed
+freely, Bernoulli for some attributes, Poisson or normal for others, because
+under the naive assumption each factor is estimated on its own. Text
+classifiers use the same idea with word counts (multinomial naive Bayes).
+All of these maximum likelihood estimates are closed-form summaries of the
+class's rows — shares, means, spreads — so no optimiser is needed.
+
 --
 
 ## Fitting Is Counting
@@ -1391,8 +1689,8 @@ $$
 <div class="card">
 
 ### One small table per attribute
-Each attribute, within one class, is a **categorical** variable — for a
-yes/no flag, a Bernoulli (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>).
+For flags and categories, each factor is a **table**: a categorical — for a
+yes/no flag, a Bernoulli.
 
 </div>
 
@@ -1412,8 +1710,8 @@ from a new device? 60, so $0.6$.
 
 <div class="c-insight">
 
-Naive Bayes is fitted in **one pass over the table**, with no optimiser. Why a
-share is the right estimate — and when it is not — is the last module.
+Naive Bayes over tables is fitted in **one pass**, by counting — no optimiser.
+Why a share is the right estimate — and when it is not — is <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
 
 </div>
 
@@ -1427,7 +1725,7 @@ $\sum\_v n(x\_j = v, y) \log \theta\_{jvy}$ per attribute and class, plus one te
 for the class prior. No parameter appears in two terms, so each is maximised
 separately, and each is the log-likelihood of a categorical distribution whose
 maximum likelihood estimate is the relative frequency (derived for two values
-as $h/n$ in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>; for $k$ values with a
+as $h/n$ in <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>; for $k$ values with a
 Lagrange multiplier). The categorical distribution was introduced in
 <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> as the distribution for a
 nominal attribute.
@@ -1436,8 +1734,8 @@ The independence assumption is what makes the MLE a closed-form count: with a
 full joint the parameters are per combination of values, and the counts would
 be of entire rows. Logistic regression, by contrast, has no closed-form MLE and
 is fitted iteratively. Every estimated number in naive Bayes is a peak of a
-likelihood, so shortcut 1 is taken in addition to shortcut 2; the last module
-makes this precise.
+likelihood, so shortcut 2, keep the peak, is taken in addition to shortcut 1;
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> makes this precise.
 
 --
 
@@ -1482,15 +1780,64 @@ reference class play the same role.
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## Likelihood Ratios From Counts
+
+The training table: 100,000 transactions, **100** fraud and **99,900** honest.
+
+
+<div class="q">
+
+A new device shows up in **60** frauds — and in **9,990** honest transactions.
+How strong is it as evidence for fraud?
+
+</div>
+
+
+
+<div class="fragment">
+
+| flag | frauds with it | $P(\text{flag} \mid \text{fraud})$ | honest with it | $P(\text{flag} \mid \text{honest})$ | likelihood ratio |
+|---|---|---|---|---|---|
+| new device | 60 of 100 | 0.60 | 9,990 of 99,900 | 0.10 | 0.60 / 0.10 = **6** |
+| foreign IP | 70 of 100 | 0.70 | 4,995 of 99,900 | 0.05 | 0.70 / 0.05 = **14** |
+| night | 50 of 100 | 0.50 | 19,980 of 99,900 | 0.20 | 0.50 / 0.20 = **2.5** |
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Strength is a ratio of **shares**, not of counts: a new device is **6 times as
+common** among frauds — although 9,990 of its 10,050 transactions are honest.
+
+</div>
+
+
+Notes:
+Each share is the fitted factor of "Fitting Is Counting":
+$\hat P(x\_j = \text{yes} \mid y) = n(x\_j = \text{yes}, y) / n(y)$, counted
+within the class. The likelihood ratio divides the two shares of one flag,
+$\mathrm{LR}\_j = P(x\_j \mid \text{fraud}) / P(x\_j \mid \text{honest})$, and
+says how many times more common the observation is among frauds than among
+honest transactions. Arithmetic: $60/100 = 0.60$ and $9{,}990/99{,}900 = 0.10$,
+so $\mathrm{LR} = 6$; $0.70/0.05 = 14$; $0.50/0.20 = 2.5$.
+
+The ratio measures the evidence, not the answer. Of the $60 + 9{,}990 =
+10{,}050$ transactions with a new device only 60 are fraud, so
+$P(\text{fraud} \mid \text{new device}) = 60/10{,}050 \approx 0.6\\%$: the
+evidence multiplies the odds by 6, from $1 : 999$ to $6 : 999$, and the rare
+class stays rare. A flag observed absent has its own ratio, for the new device
+$(1 - 0.60)/(1 - 0.10) \approx 0.44$, which speaks against fraud.
+
+--
+
 ## Three Red Flags
 
-100,000 transactions, 100 of them fraud: prior odds $1 : 999$.
-
-| flag | among frauds | among honest | likelihood ratio |
-|---|---|---|---|
-| new device | 60% | 10% | 6 |
-| foreign IP | 70% | 5% | 14 |
-| night | 50% | 20% | 2.5 |
+Prior odds $100 : 99{,}900 = 1 : 999$. Likelihood ratios: new device **6**,
+foreign IP **14**, night **2.5**.
 
 
 <div class="q">
@@ -1522,9 +1869,9 @@ of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-
 
 
 Notes:
-Arithmetic: $0.6/0.1 = 6$, $0.7/0.05 = 14$, $0.5/0.2 = 2.5$; the product is 210,
-and the posterior odds are $210 : 999$, so
-$P(\text{fraud} \mid x) = 210/(210 + 999) = 0.174$.
+The odds form of the classifier: prior odds times one likelihood ratio per
+observed flag. The product of the ratios is 210, and the posterior odds are
+$210 : 999$, so $P(\text{fraud} \mid x) = 210/(210 + 999) = 0.174$.
 
 The answer is no: the transaction is still more likely honest. A combined
 likelihood ratio of 210 is strong evidence, but the prior odds of 1 : 999 are
@@ -1540,19 +1887,62 @@ $(1 - 0.5)/(1 - 0.2) = 0.625$.
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Evidence Adds Up
+
+Take the logarithm of the odds form: the **product** of ratios becomes a **sum**.
+
+$$
+\log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}
+= \log \frac{P(\text{fraud})}{P(\text{honest})} + \sum\_{j} \log \mathrm{LR}\_j
+$$
+
+
+<div class="grid-3-2">
+
+
+<div class="column">
 
 <div class="viz viz-lg" data-viz="ml/gm-log-odds-staircase" data-steps="3"
  data-params='{"prior": [1, 999], "factors": [{"lr": 6, "label": "new device"}, {"lr": 14, "label": "foreign IP"}, {"lr": 2.5, "label": "night"}]}'></div>
 
+</div>
+
+
+<div class="column middle">
+
 **Predict before each click:** which flag moves the probability most?
 
+
+<div class="fragment">
+
+| evidence | odds | log-odds | $P$ |
+|---|---|---|---|
+| base rate | $1 : 999$ | $-6.91$ | 0.1% |
+| new device | $\times 6$ | $+1.79$ | 0.6% |
+| foreign IP | $\times 14$ | $+2.64$ | 7.8% |
+| night | $\times 2.5$ | $+0.92$ | 17.4% |
+| **sum** | $210 : 999$ | $\mathbf{-1.56}$ | **17.4%** |
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
 Notes:
+The table is the equation term by term, in natural logarithms: the rounded
+terms add to $-6.91 + 1.79 + 2.64 + 0.92 = -1.56$, and
+$P = 1/(1 + e^{1.56}) = 0.174$. The base of the logarithm only rescales the
+axis; the figure labels it in probabilities.
+
 On a log-odds axis each likelihood ratio is a step of fixed height $\log
 \mathrm{LR}\_j$, independent of the current position: the log-odds are the sum
-of the log prior odds and the log likelihood ratios. Natural logarithms:
-prior $\log(1/999) = -6.91$; steps $\log 6 = 1.79$, $\log 14 = 2.64$,
-$\log 2.5 = 0.92$.
+of the log prior odds and the log likelihood ratios.
 
 Step 1 (new device): odds $6/999$, probability 0.6%. Step 2 (foreign IP): odds
 $84/999$, probability 7.8%. Step 3 (night): odds $210/999$, probability 17.4%.
@@ -1610,7 +2000,7 @@ fraud are 0 regardless of all other likelihood ratios. If a value has count 0 in
 both classes, the posterior is the undefined $0/0$.
 
 The cause is that a relative frequency of a small count is an extreme value;
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> shows the same failure on a coin
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> shows the same failure on a coin
 (three heads in three flips give $\hat\theta = 1$) and names the estimate. With 100 frauds, any flag with a true rate below about 1% is likely to
 have count 0 (for a true rate of 1% the probability of no occurrence in 100 is
 $0.99^{100} = 0.37$). In a log-odds implementation the zero appears as
@@ -1638,7 +2028,7 @@ For a yes/no flag ($k\_j = 2$) this is $\frac{h + 1}{n + 2}$.
 <div class="c-insight">
 
 Where the count is large, nothing changes; where it is 0, the veto is gone.
-Why **+1**, and not +5? The next module: smoothing is a **prior**.
+Why **+1**, and not +5? <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>: smoothing is a **prior**.
 
 </div>
 
@@ -1653,9 +2043,9 @@ negligible (0.60 vs 0.598); on empty cells it replaces 0 by $1/102 \approx
 Add-$\alpha$ smoothing, $(h + \alpha)/(n + 2\alpha)$ for a flag, generalises the
 rule to $\alpha$ imagined occurrences per value; larger $\alpha$ pulls every
 estimate more strongly towards one half. The choice $\alpha = 1$ is a convention
-(Laplace's rule of succession). The next module derives it:
+(Laplace's rule of succession). <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> derives it:
 $(h + 1)/(n + 2)$ is the posterior mean of the flag probability under a flat
-Beta$(1, 1)$ prior (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), and
+Beta$(1, 1)$ prior (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), and
 add-$\alpha$ is the posterior mean under Beta$(\alpha, \alpha)$; for $k\_j > 2$
 values the flat Dirichlet plays the same role.
 
@@ -1720,6 +2110,12 @@ Pazzani (1997, Machine Learning 29) show that naive Bayes can be optimal under
 zero–one loss in many cases where the independence assumption is violated,
 which is why it classifies well despite a false assumption.
 
+The word salad of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (Generating
+Data) is the same assumption seen from the generating side: words drawn
+independently given the class are each typical of spam, but the dependences
+that make a sentence are gone — the same dependences whose absence counts
+correlated evidence twice.
+
 --
 
 ## Mini-Exercise
@@ -1780,28 +2176,87 @@ probabilities are over-confident wherever attributes move together.
 
 <!-- .slide: class="module-slide" -->
 
-# Fitting the Parameters: Posterior, MLE and MAP
+# Continuous Attributes
 
 
 <div class="guiding-question">
 
-**Guiding Question:** Naive Bayes fitted itself by counting, and a count of
-zero vetoed everything. What was counting, really — and what does a prior
-change?
+**Guiding Question:** An amount of 1,250 € has probability zero. How does a
+number enter Bayes' theorem — and what does a model of many numbers cost?
 
 </div>
 
 
 --
 
-## An Unknown Number, Ten Observations
+## A Density per Class
 
-A new feature went live. Of the first **10 users**, **3 came back**.
+<div class="viz viz-lg" data-viz="ml/class-densities" data-steps="2"
+ data-params='{"view": "fit", "query": 1250}'></div>
 
 
 <div class="q">
 
-What is $p$, the probability that a user comes back — and how sure are we?
+What is the probability that a fraud is **exactly** 1,250.00 €?
+
+</div>
+
+
+Notes:
+The histograms are the amounts of the training table, 100 frauds and 1,000
+honest transactions (a sample of the honest ones), each class normalised to a
+density so that both are visible. On a logarithmic axis the amounts of each
+class are close to normal: the amount itself is log-normal, the second way
+out of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. Step 1 fits one normal per
+class to $\log\_{10}$ amount, with the class's mean and standard deviation as
+parameters: honest $\hat μ = 1.55$ (median 35 €), $\hat σ = 0.45$; fraud
+$\hat μ = 2.6$ (median 400 €), $\hat σ = 0.40$. Two numbers replace a
+histogram's bins.
+
+Answer to the question: zero. The amount is a continuous random variable, and
+every single value has probability 0
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>); the curve is a
+density, probability per unit of $x$. What Bayes' theorem needs is the ratio
+of the two densities at the observed value (step 2): at 1,250 € the fraud
+curve is about 190 times higher than the honest one.
+
+--
+
+## Bayes' Theorem With Densities
+
+
+<div class="c-definition">
+
+For a continuous attribute, $p(x \mid y; θ)$ is a **density** — probability per
+unit of $x$. Bayes' theorem holds with densities:
+$$
+P(y \mid x) = \frac{p(x \mid y; θ)\\, P(y)}{\sum\_{y'} p(x \mid y'; θ)\\, P(y')}
+$$
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Why it works.** An interval $[x, x + Δ]$ has probability
+$≈ p(x \mid y)\\,Δ$ in each class; the $Δ$ cancels.
+
+</div>
+
+
+<div class="column">
+
+**Normal per class**, $θ\_y = (μ\_y, σ\_y)$:
+$$
+p(x \mid y; θ) = \tfrac{1}{σ\_y \sqrt{2π}}\\, e^{-(x - μ\_y)^2 / 2σ\_y^2}
+$$
+
+</div>
+
 
 </div>
 
@@ -1809,242 +2264,280 @@ What is $p$, the probability that a user comes back — and how sure are we?
 
 <div class="fragment">
 
-
-<div class="grid-2-3">
-
-
-<div class="card muted">
-
-<span class="eyebrow">What the last unit can say</span>
-
-$\hat{p} = 0.3$, standard error $\approx 0.14$, a 95% interval of roughly
-$[0.02, 0.58]$ — about the *procedure*, not about $p$.
-
-</div>
-
-
-<div class="c-important">
-
-<span class="eyebrow">What we would like to say</span>
-
-"$p$ is probably between 0.1 and 0.6, most likely around 0.3" — a statement
-**about $p$**.
-
-</div>
-
-
-</div>
-
+At 1,250 €: likelihood ratio $0.46 / 0.0024 ≈ 190$. With prior odds $1 : 999$,
+$P(\text{fraud} \mid x) = 190 / 1{,}189 ≈ 16\\%$.
 
 </div>
 
 
 Notes:
-The frequentist numbers: $\hat{p} = 3/10 = 0.3$,
-$\mathrm{SE} = \sqrt{0.3 \cdot 0.7/10} \approx 0.145$, and the normal-approximation
-(Wald) interval $0.3 \pm 1.96 \cdot 0.145 = [0.016, 0.584]$. The normal
-approximation is poor at $n = 10$: the binomial is discrete and, for $p$ away
-from 0.5, skewed, and the Wald interval is known to cover less often than its
-nominal 95% for small $n$. With 0 of 10 it would even give the degenerate
-interval $[0, 0]$.
+The limit argument: $P(x \le X \le x + Δ \mid y) = p(x \mid y)\\,Δ + o(Δ)$, so
+$P(y \mid x \le X \le x + Δ) \to p(x \mid y) P(y) / \sum\_{y'} p(x \mid y')
+P(y')$ as $Δ \to 0$. The conditional on the event $X = x$, which has
+probability zero, is defined by this limit. The likelihood ratio of a
+continuous attribute is therefore a ratio of densities, and it depends on the
+observed value.
 
-The confidence interval forbids the sentence "p lies in this interval with
-probability 0.95", because $p$ is treated as a fixed number. The Bayesian
-alternative describes the uncertainty about $p$ with a probability
-distribution, as for any other unknown quantity; the sentence then becomes a
-valid statement about that distribution.
+Numbers: $x = \log\_{10} 1{,}250 = 3.10$. Fraud: $z = (3.10 - 2.6)/0.40 = 1.24$,
+density $0.46$. Honest: $z = (3.10 - 1.55)/0.45 = 3.44$, density $0.0024$.
+Ratio $191$, posterior odds $191 : 999$, $P = 0.16$. The densities are taken
+over $\log\_{10}$ amount; over the amount itself both carry the same factor
+$1/(x \ln 10)$, which cancels in the ratio, so the scale on which the density
+is written does not change the posterior.
+
+The class's sample mean and standard deviation are the natural estimates
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>); they are the maximum
+likelihood estimates of $μ\_y$ and $σ\_y$ (with divisor $n$ for $σ$, a
+difference that vanishes for 100 rows), as <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>
+derives for a single parameter.
 
 --
 
-## Conditioning on the Data — for a Parameter
+## Gaussian Naive Bayes
 
-Treat the unknown $p$ as a random variable $\theta$ and apply **Bayes' theorem**,
-with $\theta$ in place of the hypothesis and the data $D$ as the evidence:
-
-<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="4"
- data-params='{"labels": ["posterior — belief about θ after the data", "likelihood — how probable the data is for each θ", "prior — belief about θ before", "evidence — normalises, does not depend on θ"]}'>
+Naive Bayes with a **family per attribute** — a normal for each number, a
+Bernoulli for each flag — all independent given the class:
 
 $$
-\eqa{p(\theta \mid D)} = \frac{\eqb{p(D \mid \theta)} \cdot \eqc{p(\theta)}}{\eqd{p(D)}}
+p(x \mid y; θ) = \prod\_{\text{numbers } j} \mathcal{N}(x\_j;\ μ\_{jy}, σ\_{jy}^2)
+\cdot \prod\_{\text{flags } j} θ\_{jy}^{x\_j} (1 - θ\_{jy})^{1 - x\_j}
 $$
+
+| attribute of the transaction | fitted per class | likelihood ratio |
+|---|---|---|
+| amount 1,250 € | mean and spread of log amount | ≈ 190 |
+| new device: yes | share of rows with the flag | 6 |
+| **both** | | $190 \cdot 6 = 1{,}140$ |
+
+
+<div class="fragment c-insight">
+
+Posterior odds $1{,}140 : 999$, so **53%** fraud. Fitting is still one pass over
+the table: a mean and a spread per number and class, a share per flag and class.
 
 </div>
 
-For i.i.d. yes/no data with $h$ yeses in $n$ trials:
-$p(D \mid \theta) = \theta^{h} (1-\theta)^{n-h}$ — read as a function of
-$\theta$, with the data fixed.
 
 Notes:
-The structure is that of Bayes' theorem for events, with the hypothesis
-replaced by a number $\theta \in [0, 1]$: prior and posterior are densities
-over $[0, 1]$ instead of two probabilities. The evidence is
-$p(D) = \int\_0^1 p(D \mid \theta) p(\theta) d\theta$, the marginal probability
-of the data; it does not depend on $\theta$ and only normalises.
+The naive assumption of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>
+does not depend on the type of the attributes: each factor $p(x\_j \mid y)$ can
+come from its own family, normal (or log-normal) for amounts and durations,
+Bernoulli for flags, categorical for the country. The classifier and its odds
+form are unchanged; every attribute contributes its own likelihood ratio, for
+a number the ratio of two normal densities at the observed value. The model
+with only normal factors is called Gaussian naive Bayes (scikit-learn
+`GaussianNB`).
 
-The likelihood is the Bernoulli PMF multiplied over the $n$ rows, which is
-where the i.i.d. assumption enters. Only the counts $h$ and $n - h$ matter,
-not the order of the observations. The binomial coefficient is absent because
-$D$ is one specific sequence; including it would change nothing, since it
-cancels in the normalisation. As a function of $\theta$ the likelihood is not
-a probability distribution: $\int\_0^1 \theta^h (1 - \theta)^{n-h} d\theta$ is
-not 1 in general. <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> builds on this
-distinction.
+Parameter count: two numbers per continuous attribute and class (mean and
+variance), one per binary flag and class. In log-odds form a normal factor
+contributes
+$\log(σ\_{jh}/σ\_{jf}) - (x\_j - μ\_{jf})^2/2σ\_{jf}^2 + (x\_j - μ\_{jh})^2/2σ\_{jh}^2$,
+a quadratic function of $x\_j$; with equal variances in both classes the
+quadratic terms cancel and the contribution is linear in $x\_j$. With unequal
+variances the ratio eventually falls again on the side of the narrower class:
+for the amount, $σ\_\text{fraud} < σ\_\text{honest}$, the likelihood ratio peaks
+at about 3.5 million € and decreases beyond — far outside the data, where
+$p(x)$ is negligible anyway.
+
+Numbers: $191 \cdot 6 = 1{,}149$; posterior odds $1{,}149 : 999$,
+$P = 1{,}149/2{,}148 = 0.53$. The amount alone gave 16%, the device flag alone
+$6/1{,}005 = 0.6\\%$.
 
 --
 
-## A Prior That Behaves Like Counts
+## One Gaussian per Class
+
+<div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="2"
+ data-params='{"view": "fit"}'></div>
+
+
+<div class="q">
+
+In fraud, amount and distance rise together. Which ellipses can follow the
+tilt — and what does one covariance for both classes do to the boundary?
+
+</div>
+
+
+Notes:
+The 98 labelled transactions of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>,
+now with a normal fitted to each class's rows; the ellipses are the 1σ and 2σ
+contours, the violet line is where the fitted posterior is 0.5 (the prior is
+the training share of fraud), and the tinted region is decided as fraud.
+
+Step 0, naive: amount and distance independent within each class, so each
+class gets a diagonal covariance and its ellipses stay upright; the model is
+the two-attribute version of the previous slide. Step 1, full: one covariance
+per class, which keeps the within-class correlation (0.78 in fraud in this sample); the
+fraud ellipse tilts with its cloud and the boundary bends with it. Step 2,
+shared: one covariance for both classes, estimated from all rows (the pooled
+within-class covariance); both ellipses have the same shape and the boundary
+is a straight line. The choice control returns to any of the three.
+
+--
+
+## The Multivariate Normal
+
+
+<div class="grid-2-1">
+
+
+<div class="column">
+
+$$
+\mathcal{N}(x;\ μ, Σ) = \frac{1}{(2π)^{p/2} \sqrt{\det Σ}}
+\exp\\!\Big(-\tfrac12 (x - μ)^\top Σ^{-1} (x - μ)\Big)
+$$
+
+$$
+Σ = \begin{pmatrix} σ\_1^2 & ρ\\, σ\_1 σ\_2 \\\ ρ\\, σ\_1 σ\_2 & σ\_2^2 \end{pmatrix}
+$$
+
+</div>
 
 
 <div class="c-definition">
 
-**Beta prior.** $p(\theta) \propto \theta^{a-1}(1-\theta)^{b-1}$ on $[0, 1]$,
-written $\mathrm{Beta}(a, b)$. $\mathrm{Beta}(1,1)$ is flat: every $p$ equally
-plausible.
+The **covariance matrix** $Σ$: spreads on the diagonal, covariances off it.
 
 </div>
 
 
-Multiply by the likelihood $\theta^{h}(1-\theta)^{n-h}$:
+</div>
 
-$$
-p(\theta \mid D) \propto \theta^{a+h-1}(1-\theta)^{b+n-h-1}
-\quad\Longrightarrow\quad
-\theta \mid D \sim \mathrm{Beta}(a + h,\enspace  b + n - h)
-$$
+
+| model of $p(x \mid y)$ for $p$ numbers | numbers per class | $p = 30$ |
+|---|---|---|
+| counts, 10 bins per attribute | $10^p - 1$ | $10^{30}$ |
+| Gaussian naive Bayes | $2p$ | 60 |
+| one Gaussian per class | $p + p(p + 1)/2$ | 495 |
 
 
 <div class="c-insight">
 
-The update is **adding counts**: $a$ and $b$ act like yeses and noes seen before
-the data. A prior whose posterior stays in the same family is called
-**conjugate**.
+The family alone defeats the explosion: **quadratic** in $p$, not exponential —
+and the correlations stay in the model.
 
 </div>
 
 
 Notes:
-The normalising constant of $\mathrm{Beta}(a, b)$ is
-$B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a + b)$, but it never has to be computed
-for the update: prior and likelihood are both of the form
-$\theta^{\cdot}(1 - \theta)^{\cdot}$, so their product is again of that form
-and the exponents add. The posterior is identified by its shape alone.
+In one dimension the formula is the normal density of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>. The exponent is
+minus one half of the squared Mahalanobis distance of $x$ from $μ$; its level
+sets are the ellipses of the previous slide. The off-diagonal entries are the
+covariances of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>,
+$\mathrm{cov}(X\_1, X\_2) = ρ σ\_1 σ\_2$. $Σ$ is symmetric and must be positive
+definite; with fewer rows than attributes in a class its estimate is singular,
+which is one reason to share or to restrict it.
 
-The parameters act as pseudo-counts: $\mathrm{Beta}(a, b)$ behaves like
-$a - 1$ yeses and $b - 1$ noes already seen in terms of the peak, or $a$ and
-$b$ in terms of the mean $a/(a + b)$. A prior with $a + b = 2$ is outweighed by
-1,000 real observations. Conjugate priors exist for other likelihoods too,
-e.g. the Dirichlet for categorical data and the normal for the mean of normal
-data with known variance.
+Counts: a mean vector has $p$ entries, a symmetric $p \times p$ matrix
+$p(p + 1)/2$ free ones ($p$ variances and $p(p - 1)/2$ covariances). For
+$p = 30$: $30 + 465 = 495$ per class. Binning instead needs a full joint over
+$10^{30}$ cells (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). Gaussian naive
+Bayes is the special case of a diagonal $Σ$; a shared $Σ$ needs $p$ numbers
+per class plus $p(p + 1)/2$ once.
 
---
-
-## Watching the Posterior Form
-
-<div class="viz viz-lg" data-viz="math/bayes-updating" data-steps="10"
- data-params='{"prior": [1, 1], "observations": [0, 1, 0, 0, 1, 0, 0, 0, 1, 0], "symbols": ["✓", "✗"], "names": ["yes", "no"], "xLabel": "θ = P(user returns)"}'></div>
-
-**Predict before each click:** which way does the curve move after a ✗ — and
-does it get narrower every time?
-
-Notes:
-Step 0 shows the flat prior; each further step adds one observation of the
-sequence ✗ ✓ ✗ ✗ ✓ ✗ ✗ ✗ ✓ ✗. After the first ✗ the posterior is
-$\mathrm{Beta}(1, 2)$, density $2(1 - \theta)$, highest at $\theta = 0$ and
-ruling out only $\theta = 1$. After the first ✓ it is $\mathrm{Beta}(2, 2)$,
-peaked at 0.5. Every ✗ moves the peak left and every ✓ moves it right. After
-all ten: $\mathrm{Beta}(4, 8)$, peak 0.3, mean 0.33.
-
-The curve does **not** narrow at every step. Its standard deviation falls from
-0.289 (flat) to 0.138 after nine observations, but the ninth observation, a ✓
-after five ✗ in the last six, raises it slightly to 0.139, because the data
-then look less one-sided. In general an observation that contradicts the
-current belief can widen the posterior; only on average over possible
-observations does the posterior variance decrease. The overall narrowing is
-the epistemic uncertainty shrinking, as described in
-<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>.
+The price of the family is its shape: one ellipse per class, symmetric, with
+a single peak. Where the data are shaped differently, the model is wrong in a
+way no amount of data repairs (the last slide of the module).
 
 --
 
-## What the Posterior Gives You
+## A Shared Covariance Gives a Linear Boundary
 
-After 3 of 10, with a flat prior: $\theta \mid D \sim \mathrm{Beta}(4, 8)$.
+With the **same** $Σ$ in both classes, the quadratic terms cancel in the
+log-odds:
 
-| question | answer | from |
-|---|---|---|
-| most plausible $p$ | $0.30 = h/n$ | the peak (mode) |
-| best guess on average | $0.33$ | the posterior mean $\frac{a+h}{a+b+n}$ |
-| where is $p$, 95%? | $[0.11,\ 0.61]$ | a **credible interval** |
-| after 1,000 users, 300 back | $[0.27,\ 0.33]$ | same model, more data |
+$$
+\log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}
+= \underbrace{(μ\_\text{f} - μ\_\text{h})^\top Σ^{-1}}\_{w^\top}\\, x + b
+\qquad\Longrightarrow\qquad
+P(\text{fraud} \mid x) = \frac{1}{1 + e^{-(w^\top x + b)}}
+$$
+
+- **One $Σ$ per class:** a quadratic boundary — *quadratic discriminant analysis*.
+- **Shared $Σ$:** a straight boundary — *linear discriminant analysis*.
+- **Diagonal $Σ$ per class:** Gaussian naive Bayes, quadratic as well.
 
 
-<div class="c-note">
+<div class="c-insight">
 
-The peak under a flat prior is exactly $h/n$. **<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>** keeps only this peak
-and calls it maximum likelihood — the first shortcut of the course.
+A logistic function of a linear score: the form that logistic regression
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) fits **directly**,
+without modelling $x$.
 
 </div>
 
 
 Notes:
-All rows follow from $\mathrm{Beta}(4, 8)$. Mode: $(a - 1)/(a + b - 2) = 3/10$.
-Mean: $4/12 \approx 0.33$; it lies to the right of the mode because the
-posterior is right-skewed. The 95% interval is the equal-tailed one, from the
-2.5% and 97.5% quantiles: $[0.109, 0.610]$. It supports the statement "$p$
-lies in $[0.11, 0.61]$ with probability 0.95", given the prior and the model.
-A highest-density interval, the shortest interval with 95% probability, is a
-common alternative and differs slightly for skewed posteriors.
+Derivation. $\log \mathcal{N}(x; μ, Σ) = -\tfrac12 x^\top Σ^{-1} x + μ^\top
+Σ^{-1} x - \tfrac12 μ^\top Σ^{-1} μ + \text{const}$, where the constant
+depends on $Σ$ only. In the difference of the two classes' logs the term
+$x^\top Σ^{-1} x$ and the constant cancel when $Σ$ is shared, leaving
+$w = Σ^{-1}(μ\_\text{f} - μ\_\text{h})$ and
+$b = \tfrac12 μ\_\text{h}^\top Σ^{-1} μ\_\text{h} - \tfrac12 μ\_\text{f}^\top
+Σ^{-1} μ\_\text{f} + \log \frac{P(\text{fraud})}{P(\text{honest})}$. The prior
+enters only the offset $b$: changing the base rate shifts the line parallel to
+itself. With a separate $Σ$ per class the quadratic term
+$-\tfrac12 x^\top (Σ\_\text{f}^{-1} - Σ\_\text{h}^{-1}) x$ remains, and the
+boundary is a conic section (ellipse, parabola or hyperbola).
 
-With 300 of 1,000 the posterior is $\mathrm{Beta}(301, 701)$, interval
-$[0.272, 0.329]$. The posterior standard deviation falls from 0.131 to 0.0145,
-a factor of about 9 for 100 times the data, close to the $1/\sqrt{n}$ law.
-Under a flat prior the posterior is proportional to the likelihood, so the
-mode equals the maximum-likelihood estimate $h/n$.
+Posterior odds $e^{a}$ correspond to the probability $1/(1 + e^{-a})$, the
+logistic (sigmoid) function. This is Bishop, *Pattern Recognition and Machine
+Learning*, §4.2.1. Logistic regression fits $w$ and $b$ directly by maximising
+the likelihood of the labels; linear discriminant analysis obtains them from
+the class means, the shared covariance and the prior. The two estimates differ
+whenever the Gaussian assumption is wrong, the same contrast as naive Bayes
+against logistic regression for flags
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
 
 --
 
-## How Much Does the Prior Matter?
+## When One Gaussian Is Not Enough
 
-Two analysts: one with a flat prior $\mathrm{Beta}(1,1)$, one convinced that
-$p$ is near a half, $\mathrm{Beta}(10,10)$.
-
-<div class="viz viz-xl" data-viz="math/prior-washout" data-steps="1"
- data-params='{"priors": [[1, 1], [10, 10]], "datasets": [[3, 10], [300, 1000]], "xLabel": "θ = P(user returns)"}'></div>
+<div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="1"
+ data-params='{"view": "fit", "fraud": "two"}'></div>
 
 
-<div class="c-important">
+<div class="q">
 
-With little data the prior matters; with enough data the analysts **agree**.
-A prior is a stated assumption — it can be argued with, and it washes out.
+Fraud comes in two patterns. Where does a single normal put its mean — and
+what does that do to the boundary?
 
 </div>
 
 
 Notes:
-Step 0 shows the posteriors after 3 of 10, step 1 adds 300 of 1,000; each
-panel has its own height scale. "Near a half" prior: $\mathrm{Beta}(10 + 3, 10 + 7) = \mathrm{Beta}(13, 17)$,
-mean $13/30 \approx 0.43$; with 300 of 1,000, $\mathrm{Beta}(310, 710)$, mean
-$310/1020 \approx 0.304$. Flat prior: means $4/12 \approx 0.33$ and
-$301/1002 \approx 0.300$.
+Two kinds of fraud in one class: card testing, where stolen card data are
+tried with small amounts (around 9 €) far from the card holder's home, and
+large purchases (around 900 €) close to home with a stolen card. One normal
+for the fraud class has its mean between the two patterns, at an amount and
+distance where almost no fraud occurs, and a wide, tilted ellipse that spreads
+probability over the empty space between them. Its density is too low in both
+patterns and too high in the gap; the boundary follows the ellipse, not the
+data.
 
-The posterior mean is a weighted average of prior mean and observed
-proportion: $\frac{a + h}{a + b + n} = \frac{a + b}{a + b + n} \cdot \frac{a}{a + b} + \frac{n}{a + b + n} \cdot \frac{h}{n}$.
-The prior's weight is $(a + b)/(a + b + n)$: for $\mathrm{Beta}(10, 10)$ it is
-$20/30$ with 10 observations and $20/1020 \approx 2\\%$ with 1,000. The prior is
-an explicit modelling assumption that can be criticised like any other. Where
-data are scarce its influence is large, and it is then the only additional
-information available. A prior that assigns zero density to some region can
-never be corrected there by data.
+Step 1 fits a mixture of two normals for fraud,
+$p(x \mid \text{fraud}) = π\_1 \mathcal{N}(x; μ\_1, Σ\_1) + π\_2 \mathcal{N}(x;
+μ\_2, Σ\_2)$, with $π\_k$ the shares of the patterns. Here each row's pattern is
+known to the figure and the mixture is fitted pattern by pattern, by means and
+covariances. In real data the pattern is not recorded: it is a hidden
+variable, and fitting the mixture without it is the EM algorithm of
+<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>. A model shape that is wrong
+does not improve with more rows; only a richer family does.
 
 --
 
 ## Mini-Exercise
 
-Prior $\mathrm{Beta}(2, 2)$. Of 10 users, **8** come back.
+Ten numeric attributes, two classes.
 
 
 <div class="q">
 
-Is the posterior mean above or below $0.8$ — and why?
+How many numbers does Gaussian naive Bayes need — and one full Gaussian per
+class? Count the prior too.
 
 </div>
 
@@ -2052,62 +2545,19 @@ Is the posterior mean above or below $0.8$ — and why?
 
 <div class="fragment">
 
-**Below.** The posterior is $\mathrm{Beta}(2+8,\ 2+2) = \mathrm{Beta}(10, 4)$,
-mean $10/14 \approx 0.71$. The prior counts two yeses and two noes, so it
-pulls towards $0.5$ — and the pull fades as data grows.
+**41 and 131.** Naive: $10 + 10 = 20$ per class, $2 \cdot 20 + 1$. Full:
+$10 + 55 = 65$ per class, $2 \cdot 65 + 1$.
 
 </div>
 
 
 Notes:
-The posterior is $\mathrm{Beta}(10, 4)$ with mean $10/14 \approx 0.714$ and
-mode $9/12 = 0.75$, both below the observed $0.8$. The weighted-average form
-gives the reason: the mean is
-$\frac{4}{14} \cdot 0.5 + \frac{10}{14} \cdot 0.8 \approx 0.714$, a compromise
-between the prior mean 0.5 (weight $4/14$) and the data (weight $10/14$). With
-80 of 100 the mean would be $82/104 \approx 0.79$.
-
-Pulling an estimate towards a default value is called shrinkage. The same
-effect appears as regularisation in model fitting: a prior centred on zero
-weights corresponds to a penalty on large weights, which is how
-<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> reads weight decay.
-
---
-
-## Two Ways to Answer "Where Is p?"
-
-| | random | the 95% interval | needs |
-|---|---|---|---|
-| **Frequentist** | the data; $p$ is fixed | a **procedure** that catches $p$ in 95% of samples — about this one interval, no probability statement | nothing but the sampling model |
-| **Bayesian** | $p$; the data is fixed | "$p$ lies in this interval with probability 0.95" — a true sentence about $p$ | a **prior**: what we believed about $p$ before the data |
-
-
-<div class="c-insight">
-
-The axioms are the same; the question is not. The rest of the course mostly
-takes the second road — and <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> starts with its cheapest version: keep
-only the peak.
-
-</div>
-
-
-Notes:
-Both schools use the same probability axioms but assign probabilities to
-different things. Frequentist statistics assigns them only to repeatable
-random events, here the data; a parameter is fixed, so statements about it are
-statements about procedures (coverage, error rates). Bayesian statistics
-assigns probabilities to any uncertain quantity, including a parameter, and
-conditions on the observed data. The confidence interval needs no prior and
-makes the weaker, procedural statement; the credible interval makes the direct
-statement about $p$ and requires a prior.
-
-With a flat prior and much data the two nearly coincide numerically: for 300
-of 1,000 the credible interval is $[0.272, 0.329]$ and the Wald interval
-$0.3 \pm 1.96 \cdot 0.0145 = [0.272, 0.328]$. This follows from the
-Bernstein–von Mises theorem: for large $n$ the posterior is approximately
-normal around the maximum-likelihood estimate with the same spread as its
-sampling distribution. For small $n$, or an informative prior, the two
-intervals differ, as for 3 of 10.
+Gaussian naive Bayes: per class 10 means and 10 variances, 20 numbers; two
+classes 40; the prior $P(\text{fraud})$ one more: 41. One Gaussian per class:
+10 means and a symmetric $10 \times 10$ covariance matrix with
+$10 \cdot 11/2 = 55$ free entries, 65 per class, 130 for both, 131 with the
+prior. A shared covariance needs $2 \cdot 10 + 55 + 1 = 76$. Binned into 10
+values each, the full joint would need $10^{10} - 1$ per class.
 
 --
 
@@ -2116,121 +2566,128 @@ intervals differ, as for 3 of 10.
 
 <div class="takeaway">
 
-An unknown parameter is just another unknown: give it a **prior**, condition on
-the data, and the **posterior** says what the data justifies — as a peak, a mean
-and an interval. For yes/no data with a Beta prior the update is **adding
-counts**, and the prior's influence fades as data grows.
+A number enters through a **density** per class; Bayes' theorem needs only the
+ratio of the two densities. **Gaussian naive Bayes** fits a mean and a spread
+per attribute and class; **one Gaussian per class** keeps the correlations at
+a quadratic, not exponential, cost; a **shared covariance** makes the boundary
+linear. One Gaussian cannot follow a class with two patterns — a **mixture**
+can.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Deciding on a Class
+
+
+<div class="guiding-question">
+
+**Guiding Question:** The model says 17% fraud. Block, check or let it
+through — and who decides where the line is?
 
 </div>
 
 
 --
 
-## What Was Counting, Really?
+## Decision Regions and Their Errors
+
+<div class="viz viz-lg" data-viz="ml/class-densities" data-steps="3"
+ data-params='{"view": "decide", "prior": 0.1, "cut": 1000}'></div>
 
 
 <div class="q">
 
-Naive Bayes set $P(\text{new device} \mid \text{fraud}) = 60/100$ and
-$P(\text{crypto} \mid \text{fraud}) = 0/100$. Which principle produces these
-numbers — and which one would have avoided the 0?
-
-</div>
-
-
-
-<div class="fragment">
-
-The share is the parameter value under which the observed data are **most
-probable**: the **maximum likelihood estimate**. Smoothing used a prior and
-took the posterior **mean**.
-
-</div>
-
-
-
-<div class="fragment c-note">
-
-Both are readings of the posterior over the parameter just built — one its
-peak, one its mean.
+Flag every transaction above the cut. Where should the cut go to make the
+fewest errors?
 
 </div>
 
 
 Notes:
-A flag within one class is a Bernoulli variable with unknown parameter
-$\theta = P(\text{flag} \mid y)$. For $h$ occurrences among $n$ cases of the
-class, the probability of the observed data is $\theta^h (1 - \theta)^{n - h}$,
-largest at $\theta = h/n$: the share. For $h = 0$ the maximum is at
-$\theta = 0$, which is the zero-frequency problem. Laplace smoothing replaced
-the share by $(h + 1)/(n + 2)$, the mean of the posterior under a flat prior.
-Both readings are taken on the returning-users example of
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, where the whole posterior is
-known and can be plotted.
+The model of the previous module, one normal per class over $\log\_{10}$
+amount, with a fraud share of 10% so that the fraud curve is visible. Each
+curve is $p(x, y) = p(x \mid y)\\, P(y)$: how much of all transactions belongs
+to that class at that amount; the area under each curve is its prior. A cut
+splits the axis into two **decision regions**, pass below and flag above. The
+frauds below the cut are passed (orange area), the honest transactions above
+it are flagged (navy area); the error rate is the sum of the two areas.
+
+Step 1: a cut at 1,000 € passes 84 of 100 frauds per 1,000 transactions and
+flags 0.6 honest ones, 85 errors per 1,000. Step 2: between the cut and the
+point where the curves cross, the fraud curve lies above the honest one, so
+every transaction there is more often fraud than not and is passed anyway;
+that wedge (red) is avoidable. Step 3: the cut at the crossing, about 300 €,
+makes 38 + 18 = 56 errors per 1,000, the minimum. At the crossing
+$p(x \mid \text{fraud}) P(\text{fraud}) = p(x \mid \text{honest}) P(\text{honest})$,
+which is $P(\text{fraud} \mid x) = 0.5$. The slider and the button "best cut"
+repeat the experiment for other priors.
 
 --
 
-## One Posterior, Three Readings
+## Two Kinds of Error
+
+The best cut of the last slide, about 300 €, per 1,000 transactions (100 of them
+fraud):
+
+| | is fraud | is honest |
+|---|---|---|
+| **flag** (decide fraud) | 62 — true positive | **18 — false positive**: type I error, a false alarm |
+| **pass** (decide honest) | **38 — false negative**: type II error, a missed fraud | 882 — true negative |
 
 
-<div class="grid-figure">
+<div class="q">
 
-
-<div class="column">
-
-<div class="viz viz-lg" data-viz="ml/posterior-readings"
- data-params='{"posterior": [4, 8], "xLabel": "θ = P(user returns)", "title": "3 of 10 users, flat prior → Beta(4, 8)", "peakName": "peak h/n"}'></div>
-
-</div>
-
-
-<div class="column middle">
-
-- **peak** $0.30 = h/n$ — the share
-- **mean** $0.33$ — the smoothed value
-- **95% interval** $[0.11, 0.61]$
-
-
-<div class="c-insight">
-
-Naive Bayes kept only the **peak**. What does that drop — and why does almost
-everyone do it?
+Move the cut to 1,000 €. What happens to the two errors?
 
 </div>
 
 
-</div>
 
+<div class="fragment c-insight">
+
+False alarms fall to 0.6, missed frauds rise to 84: moving the cut **trades one
+error for the other**. The Bayes rule minimises their **sum**; costs, next,
+weigh them.
 
 </div>
 
 
 Notes:
-The posterior of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: 3 of 10 users
-return, flat prior Beta(1, 1), so the posterior is Beta(1 + 3, 1 + 7) =
-Beta(4, 8). Its three summaries: the mode $(a-1)/(a+b-2) = 3/10 = 0.30$, which
-equals $h/n$ because the prior is flat; the mean $a/(a+b) = 4/12 = 0.33$, which
-is Laplace's $(h + 1)/(n + 2)$; the central 95% interval $[0.109, 0.610]$ from
-the Beta quantiles. The standard deviation is 0.13.
+"Positive" means flagged as fraud, the class searched for; "true" and "false"
+say whether the decision was right. The numbers follow from the two normals of
+the previous slide at the cut $\log\_{10} 301$: $100 \cdot 0.381 = 38$ frauds
+lie below it, $900 \cdot 0.020 = 18$ honest transactions above it. As rates
+within each true class, the false positive rate is $18/900 = 2\\%$ and the
+false negative rate $38/100 = 38\\%$; one minus the latter, 62%, is the share
+of frauds caught (recall, in <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>).
 
-The peak (navy in the plot) is the only one of the three that can be found
-without the normaliser, by maximising; mean and interval (amber) need the whole
-distribution. Fitting by least squares or by cross-entropy is exactly this kind
-of peak: least squares is the MLE under Gaussian noise, cross-entropy is the
-negative log-likelihood of a Bernoulli or categorical output, and adding weight
-decay turns either into a MAP estimate (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+The names type I and type II come from statistical testing. Read the decision
+as a test of the null hypothesis $H\_0$: "the transaction is honest". A type I
+error rejects $H\_0$ although it is true (an honest transaction flagged); its
+probability is the significance level $\alpha$ of a test. A type II error keeps
+$H\_0$ although it is false (a fraud let through); its probability is $\beta$,
+and $1 - \beta$ is the power. For a given model, $\alpha$ and $\beta$ move in
+opposite directions with the cut: at 100 € the false alarms rise to 143 and
+the missed frauds fall to 7 (150 errors); at 1,000 € they are 0.6 and 84
+(85 errors). Only better attributes, which separate the two curves further,
+lower both at once.
 
 --
 
-## The Likelihood, Read Along the Other Axis
+## The Bayes Decision Rule
 
 
 <div class="c-definition">
 
-The **likelihood** is the probability of the observed data, read as a function
-of the **parameter** with the data held fixed: $L(\theta) = p(D \mid \theta)$.
-The **maximum likelihood estimate** is its peak,
-$\hat{\theta}\_{\mathrm{ML}} = \arg\max\_{\theta} p(D \mid \theta)$.
+The **Bayes decision rule** decides the most probable class:
+$$
+\hat y(x) = \arg\max\_y P(y \mid x) = \arg\max\_y p(x \mid y)\\, P(y)
+$$
+No other rule on the same attributes makes fewer errors.
 
 </div>
 
@@ -2241,20 +2698,20 @@ $\hat{\theta}\_{\mathrm{ML}} = \arg\max\_{\theta} p(D \mid \theta)$.
 
 <div class="card">
 
-### <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, 3 of 10 users
-$$p(\theta \mid D) \propto \theta^{3}(1-\theta)^{7} \cdot 1$$
-With a **flat prior** the posterior *is* the normalised likelihood — so its peak
-$h/n = 0.3$ is the maximum likelihood estimate.
+### Why it errs least
+At each $x$, deciding $\hat y$ is wrong with probability $1 - P(\hat y \mid x)$ —
+smallest for the most probable class. Best at every $x$ is best on average.
 
 </div>
 
 
 <div class="card">
 
-### Not a distribution over $\theta$
-$$\int\_0^1 \theta^{3}(1-\theta)^{7} \mathrm{d}\theta = \frac{1}{1320}$$
-The likelihood is a probability over **data**. Read along $\theta$ it need not
-integrate to 1 — only the posterior does.
+### Two classes, as odds
+Decide fraud iff $P(\text{fraud} \mid x) > 0.5$, i.e.
+$$
+\mathrm{LR}(x) > \frac{P(\text{honest})}{P(\text{fraud})} = 999
+$$
 
 </div>
 
@@ -2263,215 +2720,45 @@ integrate to 1 — only the posterior does.
 
 
 Notes:
-With a flat prior $p(\theta) = 1$ on $[0, 1]$, Bayes' theorem gives
-$p(\theta \mid D) = p(D \mid \theta) / p(D)$: the posterior is the likelihood
-divided by a constant, so both have the same shape and the same arg max. The MLE
-is therefore the MAP under a flat prior. With any other prior the two peaks
-differ.
+The error rate of a rule $\hat y$ is
+$P(\text{error}) = \int \big(1 - P(\hat y(x) \mid x)\big)\\, p(x)\\, dx$. The
+integrand is non-negative and depends on the rule only through the class it
+picks at $x$, so the integral is smallest when every integrand is smallest,
+which is the class with the largest posterior. Since $p(x)$ does not depend on
+$y$, the largest posterior is the largest $p(x \mid y) P(y)$: the higher curve
+of the previous slide. The regions where each class is decided are the
+decision regions; the boundary between them is where the posteriors are equal.
+The same rule holds for any number of classes.
 
-The normaliser here is $\int\_0^1 \theta^3 (1-\theta)^7 \\, d\theta = B(4, 8) =
-3!\\,7!/11! = 1/1320$, the Beta function that turns the likelihood into the
-Beta(4, 8) density. That the integral is not 1 shows that the likelihood is not
-a density over $\theta$: it is a probability of the data for each fixed
-$\theta$, and summed over all possible datasets it gives 1, not integrated over
-$\theta$. A common error is to read "the likelihood of $\theta = 0.3$" as "the
-probability that $\theta = 0.3$"; only the posterior supports the second
-statement, and only after a prior has been chosen. The likelihood is also
-defined only up to a constant factor in $\theta$ (for example the binomial
-coefficient $\binom{10}{3}$ when only the count is recorded), which changes
-neither its peak nor the posterior.
+What remains is the area under the lower curve everywhere, the overlap of the
+classes. It is the Bayes error of
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>: the lowest error any
+classifier can reach with these attributes, a property of the data, not of the
+model. The rule is also called the MAP decision (maximum a posteriori class).
+It should not be confused with MAP *estimation*
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), which picks the most probable
+parameter value given the training data; both maximise a posterior, over
+different unknowns.
 
---
-
-## Deriving $h/n$ Without a Posterior
-
-The i.i.d. assumption of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> lets the likelihood factorise over rows; the
-logarithm turns the product into a sum without moving the peak:
-
-$$
-\ell(\theta) = \log \prod\_{i=1}^{n} \theta^{y\_i}(1-\theta)^{1-y\_i}
-= h \log \theta + (n-h)\log(1-\theta)
-$$
-
-$$
-\frac{d\ell}{d\theta} = \frac{h}{\theta} - \frac{n-h}{1-\theta} = 0
-\quad\Longrightarrow\quad
-\hat{\theta}\_{\mathrm{ML}} = \frac{h}{n}
-$$
-
-
-<div class="c-insight">
-
-Last week's peak, found by **setting a derivative to zero** — no prior, no
-normaliser, no integral. The recipe works unchanged for a million parameters,
-where nobody can draw the posterior.
-
-</div>
-
-
-Notes:
-Steps of the derivation. Under the i.i.d. assumption
-$p(D \mid \theta) = \prod\_i \theta^{y\_i}(1-\theta)^{1-y\_i} = \theta^h (1-\theta)^{n-h}$
-with $h = \sum\_i y\_i$, so the data enter only through the count $h$ (a
-sufficient statistic). Taking the logarithm is allowed because $\log$ is
-strictly increasing, so it does not move the arg max; it also avoids numerical
-underflow of a product of many small probabilities and makes the derivative a
-sum of per-row terms. Solving $h/\theta = (n-h)/(1-\theta)$ gives
-$h(1-\theta) = (n-h)\theta$, i.e. $\theta = h/n$. The second derivative
-$-h/\theta^2 - (n-h)/(1-\theta)^2$ is negative, so this is a maximum. For
-$h = 0$ or $h = n$ the maximum lies on the boundary ($\theta = 0$ or $1$), where
-the derivative is not zero; the formula $h/n$ still holds.
-
-The reason the peak is used in practice: it replaces integration (the
-normaliser $p(D)$) by optimisation. For models with many parameters there is no
-closed form, and the maximum is found numerically, typically by gradient
-methods on the negative log-likelihood.
+Odds form, from <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: the
+posterior odds are the prior odds times the likelihood ratio, and they exceed
+1 iff $\mathrm{LR}(x) > P(\text{honest})/P(\text{fraud})$. At the base rate of
+1 in 1,000 the three red flags (ratio 210) and the amount of 1,250 € (190) each
+fall short; amount and new device together (1,140) pass it.
 
 --
 
-## The Peak Can Lie
+## Unequal Costs
 
-Three flips, **three heads**. Maximum likelihood: $\hat{\theta}\_{\mathrm{ML}} = 3/3 = 1$.
-
-<div class="viz viz-lg" data-viz="ml/posterior-readings" data-steps="2"
- data-params='{"posterior": [4, 1], "prior": [1, 1], "xLabel": "θ = P(heads)", "title": "Flat prior (dashed), 3 heads: posterior Beta(4, 1)", "peakName": "peak (MLE)"}'></div>
-
-
-<div class="q">
-
-Predict before the second click: where do the posterior mean and the 95%
-interval lie?
-
-</div>
-
-
-Notes:
-Step 1 marks the peak of Beta(4, 1) at $\theta = 1$: the MLE $3/3$ assigns
-probability 0 to tails, a claim no finite number of heads can justify. Step 2
-adds the posterior mean and the central 95% interval. Beta(4, 1) has density
-$4\theta^3$ and CDF $\theta^4$, so the mean is $4/5 = 0.8$ and the 2.5% and
-97.5% quantiles are $0.025^{1/4} = 0.398$ and $0.975^{1/4} = 0.994$. The
-posterior therefore says "probably above one half, possibly well below 1",
-whereas the peak says "never tails".
-
-The data and the model are not at fault; the information loss comes from
-reducing a skewed posterior to its mode. For a posterior with its mode on the
-boundary of the parameter space, the mode is an extreme point of the
-distribution and a poor summary. This is the zero-frequency problem of naive
-Bayes on a coin: there a count of 0 gave an estimated probability of exactly 0.
-
---
-
-## A Prior's Peak: MAP
-
-Keep the prior, and still take only the peak — the **maximum a posteriori**
-estimate. With a $\mathrm{Beta}(a, b)$ prior, the same derivative gives
-
-$$
-\hat{\theta}\_{\mathrm{MAP}} = \arg\max\_{\theta} p(D \mid \theta) p(\theta)
-= \frac{h + a - 1}{n + a + b - 2}
-$$
-
-| prior | data | MLE $h/n$ | MAP | posterior mean |
-|---|---|---|---|---|
-| $\mathrm{Beta}(1,1)$ flat | 3 of 3 | 1 | 1 | 0.80 |
-| $\mathrm{Beta}(2,2)$ | 3 of 3 | 1 | **0.80** | 0.71 |
-| $\mathrm{Beta}(2,2)$ | 8 of 10 (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) | 0.80 | **0.75** | 0.71 |
-
-
-<div class="c-note">
-
-The prior shifts the peak as if $a-1$ yeses and $b-1$ noes had been seen before
-the data — a **flat** prior shifts nothing. MAP pulls 3 of 3 back to 0.8 — and still
-reports one number.
-
-</div>
-
-
-Notes:
-Derivation: the log-posterior is, up to a constant,
-$(h + a - 1)\log\theta + (n - h + b - 1)\log(1 - \theta)$, the log-likelihood of a
-dataset with $a - 1$ extra successes and $b - 1$ extra failures. Its maximum is
-therefore $(h + a - 1)/(n + a + b - 2)$, valid when both exponents
-$h + a - 1$ and $n - h + b - 1$ are non-negative and not both zero (for
-$a, b < 1$ and few data the posterior density is unbounded at the boundary).
-Beta(1, 1) adds nothing and MAP equals MLE.
-
-Rows of the table. Beta(2, 2) with 3 of 3 gives posterior Beta(5, 2): mode
-$4/5 = 0.80$, mean $5/7 = 0.71$. Beta(2, 2) with 8 of 10 gives Beta(10, 4):
-mode $9/12 = 0.75$, mean $10/14 = 0.71$; this is the mini-exercise of
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
-
-The posterior mean $(a + h)/(a + b + n)$ is a different point from the MAP
-$(a + h - 1)/(a + b + n - 2)$; they coincide only for a symmetric posterior
-($a + h = b + n - h$). MAP is not invariant under reparametrisation (the mode of
-a density changes when $\theta$ is transformed), the MLE is. Penalised fitting
-of weights, such as ridge regression or weight decay, is MAP with a Gaussian
-prior (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
-
---
-
-## Why Everyone Keeps the Peak
-
-
-<div class="grid-2-1">
-
-
-<div class="column">
-
-| | the whole posterior | only the peak |
+| | is fraud | is honest |
 |---|---|---|
-| **needs** | the normaliser $p(D)$ — an integral over $\theta$ | a derivative |
-| **in 1 dimension** | a Beta table | $h/n$ |
-| **in a million** | an integral nobody can compute exactly | gradient descent |
-| **costs** | computation | the **spread** |
-
-</div>
-
-
-<div class="c-note">
-
-With **1,000 users** the posterior is $\mathrm{Beta}(301, 701)$: standard
-deviation $0.015$. The peak is nearly everything there is to know.
-
-</div>
-
-
-</div>
-
-
-Notes:
-The full posterior needs $p(D) = \int p(D \mid \theta) p(\theta)\\,d\theta$. In
-one dimension with a conjugate prior this is a known Beta function; in general
-it is an integral over all parameters, which has no closed form for most models
-and grows intractable with dimension. The peak needs only the unnormalised
-log-posterior and its gradient.
-
-Numbers for the note: Beta(301, 701) has standard deviation
-$\sqrt{ab/((a+b)^2(a+b+1))} = 0.0145$ and central 95% interval
-$[0.272, 0.329]$ (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). With $n$
-observations the posterior standard deviation shrinks roughly as
-$\sqrt{\theta(1-\theta)/n}$, so with enough data the posterior concentrates
-around the peak and the peak is an adequate summary.
-
-The approximation fails where the data say little: small samples, many
-parameters relative to data, and predictions far from the observed inputs. The
-last case persists even with large datasets; Bayesian linear regression
-(<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>) shows predictive
-uncertainty growing away from the data, which a point estimate of the weights
-cannot express.
-
---
-
-## Mini-Exercise
-
-Two analysts both report $\hat{\theta} = 0.3$. One saw **3 of 10** users return,
-the other **300 of 1,000**.
+| **check it** (a text to the customer) | 0 | €5 ($c\_{FP}$, false positive) |
+| **let it through** | €500 ($c\_{FN}$, false negative) | 0 |
 
 
 <div class="q">
 
-What does the reported number hide — and which estimate would you bet on?
+With $p = P(\text{fraud} \mid x)$, at which $p$ is checking the cheaper action?
 
 </div>
 
@@ -2479,63 +2766,127 @@ What does the reported number hide — and which estimate would you bet on?
 
 <div class="fragment">
 
-The **spread**. The posteriors of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: $[0.11, 0.61]$ after 10 users,
-$[0.27, 0.33]$ after 1,000 — the same peak, an interval nine times wider. Bet
-on the second; a point estimate cannot tell you to.
+$$
+\underbrace{(1 - p)\\, c\_{FP}}\_{\text{check}} < \underbrace{p\\, c\_{FN}}\_{\text{let through}}
+\quad\Longleftrightarrow\quad
+p > p^{\*} = \frac{c\_{FP}}{c\_{FP} + c\_{FN}} = \frac{5}{505} \approx 1\\%
+$$
+
+
+<div class="c-insight">
+
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s loan threshold, for fraud. The
+three-flag transaction (17%) is not more likely fraud than not — and well worth
+a check.
+
+</div>
+
 
 </div>
 
 
 Notes:
-Answer: the point estimate hides the spread. 3 of 10 with a flat prior gives
-Beta(4, 8), 95% interval $[0.11, 0.61]$, standard deviation 0.13; 300 of 1,000
-gives Beta(301, 701), interval $[0.27, 0.33]$, standard deviation 0.015. The
-interval widths are 0.50 and 0.057, a ratio of about 9, close to the factor
-$\sqrt{1000/10} = 10$ expected from a spread shrinking as $1/\sqrt{n}$.
+The table is a cost matrix: the cost of each action in each true state. The
+expected cost of an action is its cost in each state weighted by the
+posterior: checking costs $c\_{FP}$ when the transaction is honest, letting it
+through costs $c\_{FN}$ when it is fraud. The cheaper action is chosen at every
+$x$; with zero cost for correct actions the rule is $p > c\_{FP}/(c\_{FP} +
+c\_{FN})$. Only the ratio of the costs matters. Equal costs give $p^\* = 0.5$,
+the Bayes decision rule of the previous slide, which therefore minimises the
+expected cost exactly when both errors cost the same.
 
-The two estimates agree in value but not in reliability, so the 1,000-user
-estimate is the one to rely on. The number 0.3 alone cannot distinguish the two
-cases; reporting $n$ or an interval alongside the estimate restores the missing
-information.
+In general, with actions $a$ and costs $c(a, y)$, the rule chooses
+$\arg\min\_a \sum\_y c(a, y)\\, P(y \mid x)$, the action with the smallest
+expected cost (the Bayes risk at $x$). A third action, deferring to a human,
+adds a band of posteriors around the threshold in which neither automatic
+action is cheap enough (<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>).
+
+The three-flag transaction of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> has posterior 17%:
+checking costs 0.83 × €5 = €4.15 in expectation, letting it through
+0.17 × €500 = €85. The threshold applies to a calibrated probability;
+the naive Bayes posterior is over-confident where flags are correlated, so the
+threshold is applied to a number that may be too high
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
 
 --
 
-## Three Choices, Made Separately
+## Costs and Prior in One Threshold
 
-| choice | options | decides |
-|---|---|---|
-| **what to model** | generative: $p(y)$, $p(x \mid y)$ · discriminative: $p(y \mid x)$ | which distribution is learned |
-| **how to fit $\theta$** | MLE · MAP · keep the whole posterior | which parameters we keep |
-| **how to decide** | most probable class · a threshold from the costs | what we do with $P(y \mid x)$ |
+<div class="viz viz-lg" data-viz="ml/class-densities" data-steps="2"
+ data-params='{"view": "decide", "costs": true, "prior": 0.1}'></div>
+
+$$
+\text{check iff}\quad \mathrm{LR}(x) > \frac{c\_{FP}}{c\_{FN}} \cdot \frac{P(\text{honest})}{P(\text{fraud})}
+$$
 
 
-<div class="c-warning">
+<div class="q">
 
-**Two different "MAP"s.** MAP *estimation* picks the most probable
-**parameter** given the training data. The MAP *decision* picks the most
-probable **class** for one input, $\arg\max\_y P(y \mid x)$.
+**Predict before the last click:** fraud becomes 100 times rarer. Where does
+the cut go?
 
 </div>
 
 
 Notes:
-The three choices can be combined freely. Naive Bayes is generative; fitted by
-counting it is the MLE, with Laplace smoothing the posterior mean under a flat
-prior, and with a Beta$(a, b)$ prior and the mode it is MAP. Logistic regression
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) is discriminative;
-fitted by minimising cross-entropy it is the MLE, with an L2 penalty the MAP
-estimate under a Gaussian prior. Either model can keep its whole posterior over
-parameters instead (Bayesian logistic regression, Bayesian naive Bayes), at the
-cost of an integral.
+In odds form the rule $p > c\_{FP}/(c\_{FP} + c\_{FN})$ reads: posterior odds
+$> c\_{FP}/c\_{FN}$, and with posterior odds = prior odds × likelihood ratio,
+$\mathrm{LR}(x) > (c\_{FP}/c\_{FN}) \cdot P(\text{honest})/P(\text{fraud})$. The
+costs and the prior enter only as this product; the model's part, the
+likelihood ratio, is untouched. In the figure each curve is weighted by the
+cost of misclassifying its class, $c\_{FN}\\, p(x, \text{fraud})$ and
+$c\_{FP}\\, p(x, \text{honest})$, and the best cut is where the weighted curves
+cross.
 
-The decision is a third, separate step. The MAP decision rule
-$\arg\max\_y P(y \mid x)$ minimises the error rate; with unequal costs of errors
-the threshold moves (<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>). The
-"maximum likelihood decision" $\arg\max\_y p(x \mid y)$ ignores the class prior;
-for rare classes it is the base-rate error of
-<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>. The name clash between
-MAP estimation and the MAP decision is common in textbooks; both maximise a
-posterior, but over different unknowns.
+Step 0: fraud share 10%, equal costs: threshold on the ratio 9, cut at about
+300 €. Step 1: a missed fraud costs €500, a check €5: the fraud curve grows a
+hundredfold, the threshold on the ratio falls to $0.09$ and the cut moves to
+about 49 €, flagging more than a third of the honest transactions — at a fraud
+share of 10% that is the cheaper policy. Step 2: fraud share 0.1%: the threshold is
+$0.01 \cdot 999 \approx 10$ again and the cut returns to about 314 €. A class
+that is 100 times rarer and 100 times costlier to miss gets the same
+boundary. At the real base rate with equal costs the cut would lie at about
+3,000 €.
+
+A generative model changes both factors without refitting: a new base rate
+replaces $P(y)$, new costs replace $c\_{FP}/c\_{FN}$. A discriminative model can
+take new costs the same way, and a new base rate by correcting its odds
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>); a rule has to be learned
+again. How the threshold trades recall against precision, and how its cost
+curve looks, is <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>.
+
+--
+
+## Mini-Exercise
+
+A transaction has likelihood ratio **20**; prior odds $1 : 999$.
+
+
+<div class="q">
+
+Is it fraud under the Bayes decision rule? Is it worth a €5 check against a
+€500 loss?
+
+</div>
+
+
+
+<div class="fragment">
+
+**No, and yes.** $20 < 999$: $P(\text{fraud} \mid x) = 20/1{,}019 ≈ 2\\%$. The
+check pays above $1\\%$: on the ratio, above $999 \cdot 5/500 ≈ 10$.
+
+</div>
+
+
+Notes:
+Posterior odds $20 : 999$, probability $20/1{,}019 = 0.0196$. Under the Bayes
+decision rule (equal costs) fraud would need a ratio above 999. With
+$c\_{FP}$ = €5 and $c\_{FN}$ = €500 the threshold on the posterior is
+$5/505 = 0.0099$, on the likelihood ratio $(5/500) \cdot 999 = 9.99$; the
+ratio 20 exceeds it. Expected costs: checking 0.98 × €5 = €4.90,
+letting it through 0.0196 × €500 = €9.80.
 
 --
 
@@ -2544,11 +2895,11 @@ posterior, but over different unknowns.
 
 <div class="takeaway">
 
-**Shortcut 1 — keep the peak.** Maximum likelihood (flat prior) and MAP (with a
-prior) keep the posterior's most probable point; naive Bayes' counting was the
-first. It is cheap — a derivative instead of an integral — and harmless with
-plenty of data. It drops the **spread**, and it is a choice of its own:
-generative or discriminative, every model is fitted this way.
+Deciding the **most probable class** gives the fewest errors — the **Bayes
+decision rule**; what remains is the overlap of the classes. **Unequal costs**
+move the threshold on the posterior to $c\_{FP}/(c\_{FP} + c\_{FN})$. For a
+generative model costs and **prior** meet in one threshold on the likelihood
+ratio: both change without refitting $p(x \mid y)$.
 
 </div>
 

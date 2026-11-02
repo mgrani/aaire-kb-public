@@ -32,9 +32,10 @@ Rare-Class Classifiers defines the true error and the Bayes error, the aleatoric
 <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>, and shows that on a rare
 class accuracy favours the model that catches nothing. Uncertainty of Metrics treats every
 metric as an estimate, with a standard error or a Beta posterior
-(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). Decisions and Scoring Rules derives the decision
-threshold $c\_{FP}/(c\_{FP} + c\_{FN})$ from the costs, as in
-<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>, and scores the probabilities with
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). Decisions and Scoring Rules recalls the decision
+threshold $c\_{FP}/(c\_{FP} + c\_{FN})$ derived from the costs in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (the loan threshold of
+<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>), sweeps it, and scores the probabilities with
 log-loss and the Brier score. Empirical Risk Minimisation defines risk and empirical risk:
 training by ERM keeps a loss and returns probabilities only when that loss is a
 negative log-probability; a regulariser corresponds to a prior (MAP), and
@@ -129,7 +130,8 @@ amount of data removes.
 
 Notes:
 The Bayes-optimal rule predicts, for every $x$, the label with the larger
-conditional probability. On that $x$ it errs exactly with the probability of
+conditional probability — the Bayes decision rule of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. On that $x$ it errs exactly with the probability of
 the other label, $\min\big(p(y{=}1 \mid x), 1 - p(y{=}1 \mid x)\big)$;
 averaging over $p(x)$ gives the formula. The error is not zero because $Y$
 given $X = x$ is still random: identical attribute vectors carry different
@@ -442,7 +444,7 @@ After 9 caught and 1 missed, with a flat prior: $\mathrm{Beta}(10, 2)$ — mean
 Notes:
 Each test fraud is one Bernoulli observation of
 $\theta = P(\text{flag} \mid \text{fraud})$: caught = 1, missed = 0. This is the
-Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: with
+Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>: with
 prior $\mathrm{Beta}(1, 1)$, $k$ catches out of $n$ give
 $\mathrm{Beta}(1 + k, 1 + n - k)$. Step 0 of the viz shows the flat prior; step
 $i$ the posterior after the first $i$ frauds, in the order ✓✓✓✗✓✓✓✓✓✓. Each
@@ -566,45 +568,40 @@ let it through — and who decides where the line is?
 
 --
 
-## Two Mistakes, Two Prices
+## Cost Threshold (Recap)
 
 | | transaction is fraud | transaction is legitimate |
 |---|---|---|
 | **check it** (a text to the customer) | 0 | €5 ($c\_{FP}$) |
 | **let it through** | €500 ($c\_{FN}$) | 0 |
 
-The model says $p = p(\text{fraud} \mid \mathbf{x})$. Expected cost of checking:
-$(1-p) \cdot c\_{FP}$; of letting it through: $p \cdot c\_{FN}$.
+From <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: check iff
+$$
+p(\text{fraud} \mid \mathbf{x}) > p^{\*} = \frac{c\_{FP}}{c\_{FP} + c\_{FN}} = \frac{5}{505} \approx 0.01
+$$
 
 
 <div class="q">
 
-At which $p$ does checking become the cheaper action?
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s flagged transaction is
+9% fraud: 91% of these checks hit honest customers. Check it anyway?
 
 </div>
 
 
 
-<div class="fragment">
+<div class="fragment c-insight">
 
-$$
-p > p^{\*} = \frac{c\_{FP}}{c\_{FP} + c\_{FN}} = \frac{5}{505} \approx 0.01
-$$
-
-
-<div class="c-insight">
-
-<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s loan threshold, for fraud. <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>'s flagged transaction (9%
-fraud) is worth checking: 9% is nine times the break-even.
-
-</div>
-
+Yes: 9% is nine times the break-even. The criterion is expected cost, not
+precision.
 
 </div>
 
 
 Notes:
-Checking costs $c\_{FP}$ if the transaction is legitimate (probability $1 - p$)
+The threshold and the cost matrix are derived in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, where the prior and the costs
+are combined into one threshold on the likelihood ratio. Checking costs $c\_{FP}$ if the transaction is legitimate (probability $1 - p$)
 and nothing otherwise; letting it through costs $c\_{FN}$ if it is a fraud
 (probability $p$). Check iff $(1 - p) \cdot c\_{FP} < p \cdot c\_{FN}$, i.e.
 $p > c\_{FP}/(c\_{FP} + c\_{FN})$; with €5 and €500 this is $5/505 \approx 0.0099$.
@@ -707,7 +704,7 @@ the true probability. Accuracy is not strictly proper — it cannot tell 0.51 fr
 Notes:
 Log-loss is the average negative log-likelihood of the observed labels under
 the model's predictive distribution: the Bernoulli negative log-likelihood of
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> and the cross-entropy that logistic
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> and the cross-entropy that logistic
 regression minimises in training
 (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), here evaluated on data
 the model has not seen. On training data it would carry the optimistic bias of
@@ -933,7 +930,7 @@ NP-hard in general, even for linear classifiers; cross-entropy and hinge are
 convex surrogates for it.
 
 ERM is one recipe among several. The Beta posterior
-(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), inference in a Bayesian
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), inference in a Bayesian
 network (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>) and Bayesian linear
 regression (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>) condition on
 the data; nothing is minimised.
@@ -1062,7 +1059,7 @@ $$
 <div class="c-insight">
 
 The $\frac{1}{n}$ is the point: the prior's weight **fades as data grows** — the
-pseudo-counts of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s Beta prior. A Gaussian prior
+pseudo-counts of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s Beta prior. A Gaussian prior
 $\mathcal{N}(0, \tau^2 \mathbf{I})$ gives $\lambda \Omega(\mathbf{w}) = \lVert\mathbf{w}\rVert^2/(2n\tau^2)$.
 
 </div>
@@ -1082,7 +1079,7 @@ same way.
 Penalty, capacity control and prior are three readings of one term. The $1/n$
 explains why regularisation matters for small samples and fades for large ones,
 as the pseudo-counts of a Beta prior
-(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) are swamped by data.
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) are swamped by data.
 
 MAP still returns a single parameter vector. It controls the generalisation gap
 but carries no uncertainty about $\mathbf{w}$; predictions that reflect

@@ -175,8 +175,9 @@ best. Temperature in kelvin, unlike °C, is a ratio scale.
 <div class="c-intuition">
 
 A statement is **meaningful** on a scale if no permissible transformation can
-change its truth. "Twice as long" survives metres → feet; "twice as warm" does
-not survive °C → °F.
+change its truth. "A is twice as long as B" holds in metres and in feet.
+"20 °C is twice 10 °C" holds for the numbers in °C and fails in °F (68 vs 50):
+it says nothing about the temperatures.
 
 </div>
 
@@ -195,7 +196,9 @@ recoding (1, 2, 3 to 1, 5, 9) can change which of two groups has the larger
 mean; the median's position is preserved by every such recoding. A ratio of
 two temperatures in °C changes under the affine map to °F (20 °C / 10 °C = 2,
 but 68 °F / 50 °F = 1.36); a ratio of two lengths is the same in metres and
-feet.
+feet. The factor 2 in °C is an artefact of where the scale puts its zero, so
+20 °C is not twice as warm as 10 °C in any physical sense either: on the
+ratio scale kelvin the ratio is 293.15 K / 283.15 K ≈ 1.035.
 
 --
 
@@ -289,6 +292,52 @@ sensible model for the column, taken up in "The Scale Suggests the Model".
 
 --
 
+## Categorical, Poisson, Log-Normal, Beta
+
+
+<div class="q">
+
+Bernoulli, binomial, normal: does any of them fit these four columns?
+
+</div>
+
+
+<div class="viz viz-xl" data-viz="math/distribution-families" data-steps="4"></div>
+
+Notes:
+The histograms are 200 simulated customers; the curves and dots are the
+families that generated them. None of the known families fits: the binomial
+needs a fixed number of trials, the normal is symmetric and puts probability
+on negative values.
+
+Categorical: $P(X = j) = p\_j$ for $k$ unordered values with
+$\sum\_j p\_j = 1$, so $k - 1$ free parameters; the Bernoulli is the case
+$k = 2$. It is a table, the shortest formula there is for a nominal attribute,
+and naive Bayes uses one per attribute and class. A loaded die is the same
+family with six values.
+
+Poisson: $P(X = k) = e^{-\lambda} \lambda^k / k!$ for $k = 0, 1, 2, \ldots$,
+the number of events in a fixed period at a constant rate $\lambda$, which is
+both its mean and its variance. It arises as the limit of a binomial with many
+trials and a small success probability ($n \to \infty$, $n\theta = \lambda$).
+Real counts often vary more than $\lambda$ (overdispersion); a negative
+binomial adds a second parameter for it.
+
+Log-normal: $X$ is log-normal if $\log X$ is normal$(\mu, \sigma^2)$. It is
+positive and right-skewed, with median $e^{\mu}$ and mean
+$e^{\mu + \sigma^2/2}$; here $\mu = \log 40$ and $\sigma = 0.5$, a median
+income of 40 k€ and a mean of 45 k€. Products of many positive factors are
+log-normal by the central limit theorem applied to the logarithm, which is why
+incomes, prices and amounts often are.
+
+Beta: a density on $[0, 1]$ proportional to
+$x^{\alpha - 1} (1 - x)^{\beta - 1}$, with mean $\alpha / (\alpha + \beta)$;
+$\mathrm{Beta}(1, 1)$ is the uniform distribution. It models a share or an
+unknown probability, and returns as the standard prior for an unknown
+probability: a Beta prior and Bernoulli data give a Beta posterior.
+
+--
+
 <!-- .slide: class="smaller" -->
 
 ## The Scale Suggests the Model
@@ -346,13 +395,9 @@ negative values that carry negligible probability. Income is positive and right-
 probability on negative incomes; a log-normal model means that $\log$ income
 is normal. ZIP codes are nominal despite consisting of digits.
 
-The Poisson distribution, $P(X = k) = e^{-\lambda} \lambda^k / k!$ for
-$k = 0, 1, 2, \ldots$, models the number of events in a fixed period at a
-constant rate $\lambda$, which is also its mean and its variance; real counts
-often vary more than that (overdispersion), and a negative binomial adds a
-second parameter for it. The exponential distribution models the waiting time
-between such events. A share in $[0, 1]$ is modelled by a Beta distribution,
-the same family that serves as the standard prior for an unknown probability.
+The families are those of the previous slide and of the random-variables
+module; the exponential distribution would model the waiting time between the
+events a Poisson counts.
 
 --
 
