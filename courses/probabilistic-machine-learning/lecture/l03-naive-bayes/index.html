@@ -2009,8 +2009,11 @@ that call such a transaction "clearly fraud" neglect the base rate.
 
 <div class="q">
 
-The same transaction, but paid **to a crypto exchange**:
-$x = (1, 1, 1, 1)$, four red flags. What does the model say?
+The same transaction, but paid **to a crypto exchange** — four red flags.
+What does the model say?
+$$
+x = (x\_\text{dev}, x\_\text{IP}, x\_\text{night}, x\_\text{crypto}) = (1, 1, 1, \mathbf{1})
+$$
 
 </div>
 
@@ -2393,6 +2396,157 @@ one ratio per attribute.
 ## Log-Odds and the Sigmoid
 
 
+<div class="c-definition">
+
+**Definition.** For a probability $P \in (0, 1)$, the **odds** $o$ and the
+**log-odds** (*logit*) $s$:
+$$
+o = \frac{P}{1 - P} \in (0, \infty)
+\qquad
+s = \operatorname{logit}(P) = \log \frac{P}{1 - P} \in \mathbb{R}
+$$
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+
+<div class="q">
+
+Given $s$, what is $P$? Solve for it:
+
+</div>
+
+$$
+\begin{aligned}
+e^{s} &= \frac{P}{1 - P}
+\\\ e^{s} - e^{s} P &= P
+\\\ e^{s} &= P\\,(1 + e^{s})
+\\\ P &= \frac{e^{s}}{1 + e^{s}} = \frac{1}{1 + e^{-s}} = σ(s)
+\end{aligned}
+$$
+
+</div>
+
+
+<div class="column middle fragment">
+
+
+<div class="c-insight">
+
+The **sigmoid** $σ(s) = \frac{1}{1 + e^{-s}}$ is no modelling choice: it is
+the **exact inverse** of the logit. Log-odds and probability carry the same
+information.
+
+</div>
+
+
+| $P$ | 0.001 | 0.1 | 0.5 | 0.9 | 0.999 |
+|---|---|---|---|---|---|
+| odds | $\frac{1}{999}$ | $\frac{1}{9}$ | 1 | 9 | 999 |
+| $s$ | $-6.91$ | $-2.20$ | 0 | $+2.20$ | $+6.91$ |
+
+</div>
+
+
+</div>
+
+
+Notes:
+The odds were introduced with Bayes' theorem in
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>; the log-odds add one
+step, the (natural) logarithm, which maps the odds from $(0, \infty)$ onto the
+whole real line. Odds of 1 become 0, odds above 1 positive, odds below 1
+negative; reciprocal odds have opposite log-odds,
+$\operatorname{logit}(1 - P) = -\operatorname{logit}(P)$, which is the
+symmetry of the table, and correspondingly $σ(-s) = 1 - σ(s)$.
+
+The derivation solves $s = \log(P/(1 - P))$ for $P$: exponentiate,
+$e^{s}(1 - P) = P$, so $P(1 + e^{s}) = e^{s}$ and $P = e^{s}/(1 + e^{s})$;
+dividing numerator and denominator by $e^{s}$ gives $1/(1 + e^{-s})$. The
+sigmoid is therefore not a modelling choice here but the exact conversion from
+log-odds back to a probability. Near $P = 0.5$ the logit is close to linear,
+$s \approx 4(P - 0.5)$; towards 0 and 1 it grows without bound, which is why
+rare-event probabilities such as the base rate sit far out on the log-odds
+axis. The name logit and the sigmoid return in logistic regression
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), where $s$ is a linear
+score of the attributes.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Log-Odds of the Posterior
+
+
+<div class="q">
+
+The logit takes one probability $P$ and $1 - P$. How does a sum of many log
+ratios fit into it?
+
+</div>
+
+
+
+<div class="fragment">
+
+Two classes $y \in \\{0, 1\\}$, attributes $x = (x\_1, \ldots, x\_p)$. Take
+$P = P(y{=}1 \mid x)$; then $1 - P = P(y{=}0 \mid x)$, and the logit is the
+log **posterior odds**:
+$$
+\begin{aligned}
+\operatorname{logit} P(y{=}1 \mid x)
+&= \log \frac{P(y{=}1 \mid x)}{P(y{=}0 \mid x)}
+\\\ &= \log \frac{P(y{=}1)}{P(y{=}0)} + \log \frac{p(x \mid y{=}1)}{p(x \mid y{=}0)}
+&& \text{Bayes' theorem — always}
+\\\ &= \log \frac{P(y{=}1)}{P(y{=}0)} + \sum\_{j=1}^{p} \log \frac{p(x\_j \mid y{=}1)}{p(x\_j \mid y{=}0)}
+&& \text{naive: } x\_j \text{ independent given } y
+\end{aligned}
+$$
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+So $P(y{=}1 \mid x) = σ\big(\log \text{prior odds} + \sum\_j \log \mathrm{LR}\_j\big)$.
+The sigmoid needs only **two classes**; the **sum over attributes** needs the
+naive assumption.
+
+</div>
+
+
+Notes:
+In the running example $y = 1$ is fraud and $y = 0$ honest. The first line is
+the definition of the logit with $P = P(y{=}1 \mid x)$: with two classes the
+complement is the other class. The second line is
+Bayes' theorem in odds form: the normaliser $p(x)$ cancels in the ratio, so
+log posterior odds = log prior odds + the log of one likelihood ratio, for
+any model of $p(x \mid y)$ — a full joint, a Gaussian per class, anything. The
+third line uses the naive assumption,
+$p(x \mid y) = \prod\_j p(x\_j \mid y)$: the log of a product of ratios is a sum
+of logs, one term per attribute. Without the assumption the second line still
+holds, but its likelihood ratio does not split; that is the case of
+"Counting Evidence Twice", where the pair $x\_\text{dev}, x\_\text{IP}$ needs
+its joint ratio $0.55/0.04$.
+
+For more than two classes the complement is no longer one class. Then the
+log-odds of each class against a reference class are used, and the sigmoid is
+replaced by its multi-class generalisation, the softmax.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Three Red Flags in Log-Odds
+
+
 <div class="grid-2">
 
 
@@ -2408,8 +2562,8 @@ one ratio per attribute.
 
 <div class="q">
 
-Take the log of the odds form: the product becomes a **sum** $s$. How does
-$s$ turn back into a probability?
+$x = (x\_\text{dev}, x\_\text{IP}, x\_\text{night}) = (1, 1, 1)$. What are the
+log posterior odds, fraud against honest — and $P(\text{fraud} \mid x)$?
 
 </div>
 
@@ -2419,7 +2573,9 @@ $s$ turn back into a probability?
 
 $$
 \begin{aligned}
-s &= \log \tfrac{1}{999} + \log 6 + \log 14 + \log 2.5 = -1.56
+s = \log \tfrac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}
+&= \underbrace{\log \tfrac{1}{999}}\_{\text{prior}} + \underbrace{\log 6}\_{x\_\text{dev}} + \underbrace{\log 14}\_{x\_\text{IP}} + \underbrace{\log 2.5}\_{x\_\text{night}}
+\\\ &= -6.91 + 1.79 + 2.64 + 0.92 = -1.56
 \\\ \text{odds} &= e^{s} = 0.21 = \tfrac{210}{999}
 \\\ P(\text{fraud} \mid x) &= \frac{\text{odds}}{1 + \text{odds}} = \frac{1}{1 + e^{-s}} = 17.4\\%
 \end{aligned}
@@ -2435,18 +2591,19 @@ $$
 
 
 
-<div class="fragment c-definition">
+<div class="fragment c-insight">
 
-The **sigmoid** (logistic function) $σ(s) = 1/(1 + e^{-s})$ turns any log-odds
-$s$ into a probability between 0 and 1: $s = 0$ is 50%, $s > 0$ favours fraud,
-$s < 0$ honest. So $P(\text{fraud} \mid x) = σ(\text{log-odds})$.
+The log of a product is a **sum**: the log-odds add one term per factor, and
+the sigmoid turns the sum back into $P(\text{fraud} \mid x)$. The base rate
+sits on the flat tail at $-6.91$; three flags lift it to $-1.56$.
 
 </div>
 
 
 Notes:
 Three steps, each the inverse of a step that led to the sum. The log-odds are
-the natural logarithm of the posterior odds; the odds form makes them a sum,
+the natural logarithm of the posterior odds; the logarithm of the odds form
+makes them a sum,
 $\ln(1/999) = -6.91$, $\ln 6 = 1.79$, $\ln 14 = 2.64$, $\ln 2.5 = 0.92$, in
 all $-1.56$. Exponentiating undoes the logarithm: $e^{-1.56} = 0.21$, the odds
 $210/999$. The odds give the probability as in
@@ -2707,6 +2864,8 @@ curve is about 190 times higher than the honest one.
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Bayes' Theorem With Densities
 
 
@@ -2721,21 +2880,47 @@ $$
 </div>
 
 
-**Normal per class**, $θ\_y = (μ\_y, σ\_y)$:
+
+<div class="grid-2">
+
+
+<div class="column">
+
+**Normal per class** on $x = \log\_{10}$ amount, $θ\_y = (μ\_y, σ\_y)$:
 $$
-p(x \mid y; θ) = \tfrac{1}{σ\_y \sqrt{2π}}\\, e^{-(x - μ\_y)^2 / 2σ\_y^2}
+p(x \mid y; θ) = \mathcal{N}(x;\ μ\_y, σ\_y^2) = \tfrac{1}{σ\_y \sqrt{2π}}\\, e^{-(x - μ\_y)^2 / 2σ\_y^2}
 $$
+
+</div>
+
+
+<div class="column">
+
+Fitted from each class's rows:
+
+| class $y$ | $\hat μ\_y$ | $\hat σ\_y$ | median amount |
+|---|---|---|---|
+| fraud | 2.60 | 0.40 | 400 € |
+| honest | 1.55 | 0.45 | 35 € |
+
+</div>
+
+
+</div>
+
 
 
 <div class="fragment">
 
-At 1,250 € the two densities are $0.46$ (fraud) and $0.0024$ (honest), a
-likelihood ratio of about 190:
+At 1,250 €, $x = \log\_{10} 1{,}250 = 3.10$:
 $$
-\text{posterior odds} = \underbrace{\tfrac{1}{999}}\_{\text{prior odds}} \cdot \underbrace{190}\_{\text{LR}} = \frac{190}{999}
-\quad\Longrightarrow\quad
-P(\text{fraud} \mid x) = \frac{190}{190 + 999} ≈ 16\\%
+p(3.10 \mid \text{fraud}) = \mathcal{N}(3.10;\ 2.60, 0.40^2) = 0.46
+\qquad
+p(3.10 \mid \text{honest}) = \mathcal{N}(3.10;\ 1.55, 0.45^2) = 0.0024
 $$
+Prior odds times the likelihood ratio $0.46/0.0024 ≈ 190$:
+$\\;\frac{1}{999} \cdot 190 = \frac{190}{999}$, so
+$P(\text{fraud} \mid x) = \frac{190}{190 + 999} ≈ 16\\%$.
 
 </div>
 
