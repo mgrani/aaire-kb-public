@@ -37,6 +37,9 @@
 //   startStep: generative view, step to start from (default 0)
 //   drawn:     transactions drawn from the model at mount (default 0)
 //   fraud:     "one" | "two" — fraud patterns in view "fit" (default "one")
+//   model:     view "fit": the model of step 0 ("naive" | "full" | "shared" |
+//              "one" | "mix"), so that one slide per covariance case can
+//              show its own; later steps continue from it
 
 import { addControls, rng } from '../core/controls.js'
 
@@ -51,7 +54,8 @@ const U = [0.5, 3.8]
 const V = [0, 3.8]
 const N = 80 // grid resolution
 
-const DEFAULT = {
+// exported for ml/mvn-covariance, which shows the same frauds
+export const DEFAULT = {
   honest: { mu: [1.55, 0.9], sd: [0.45, 0.6], rho: 0.15 },
   fraud: { mu: [2.6, 2.3], sd: [0.4, 0.4], rho: 0.5 },
 }
@@ -148,7 +152,7 @@ function sampler(seed) {
   }
 }
 
-function trainingTable(model) {
+export function trainingTable(model) {
   const s = sampler(20261031)
   const rows = []
   for (const y of ['honest', 'fraud']) {
@@ -603,8 +607,10 @@ export async function mount(el, { d3, params, steps, isPrint }) {
           one: 'one Gaussian', mix: 'mixture of two',
         }[k] })) },
     ], (id, v) => render(v.model))
+    // params.model shifts the steps: step 0 shows that model
+    const first = Math.max(0, ORDER.indexOf(params.model))
     const setStep = (i) => {
-      const key = ORDER[Math.min(i, ORDER.length - 1)]
+      const key = ORDER[Math.min(first + (i || 0), ORDER.length - 1)]
       controls.values.model = key
       controls.set('model', key)
       render(key)

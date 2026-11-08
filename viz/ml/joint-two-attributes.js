@@ -6,13 +6,15 @@
 // (the attributes are correlated within the class). Right: what naive Bayes
 // keeps, the product of the two margins p(x₁ | y) · p(x₂ | y), which can never
 // tilt. The tilt is the dependence that is assumed away; with ρ = 0 the two
-// pictures coincide.
+// pictures coincide. The slider is the correlation within a class: for these
+// normal-shaped blobs, the measure of conditional dependence given y.
 //
 // Uses only: joint distribution, marginalisation, conditional independence.
 //
 // params: rho (correlation within each class, default 0.7)
-// steps: 0 the full grid per class · 1 its two margins · 2 the naive product
-//        of the margins · 3 what the product drops
+// steps: 0 the full grid per class · 1 its two margins · 2 one cell of the
+//        product, with arrows from its two margin bars (value = bar × bar) ·
+//        3 the whole naive product · 4 what the product drops
 
 import { addControls } from '../core/controls.js'
 
@@ -56,7 +58,12 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     .attr('aria-label', 'Per class, the joint of two attributes as a grid, and the product of its margins')
   const caption = svg.append('text').attr('x', W / 2).attr('y', 24)
     .attr('text-anchor', 'middle').attr('font-size', 19).attr('fill', NAVY)
+  svg.append('defs').append('marker').attr('id', 'jta-arrow').attr('viewBox', '0 0 10 10')
+    .attr('refX', 9).attr('refY', 5).attr('markerWidth', 7).attr('markerHeight', 7).attr('orient', 'auto')
+    .append('path').attr('d', 'M0,0 L10,5 L0,10 z').attr('fill', VIOLET)
   const g = svg.append('g')
+  const arrow = (x1, y1, x2, y2) => g.append('line').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
+    .attr('stroke', VIOLET).attr('stroke-width', 2.5).attr('marker-end', 'url(#jta-arrow)')
   const shade = d3.interpolateRgb('#ffffff', TEAL)
 
   function panel(ox, oy, cells, vmax, framed) {
@@ -107,14 +114,38 @@ export async function mount(el, { d3, params, steps, isPrint }) {
             .attr('width', w).attr('height', C - 10).attr('fill', NAVY).attr('opacity', 0.7)
         })
       }
-      if (step >= 2) {
+      if (step === 2) {
+        // one cell of the product: the bar above it times the bar beside it
+        const [a, b] = d3.range(M * M).map((k) => [Math.floor(k / M), k % M])
+          .reduce((best, c) => (d.naive[c[0]][c[1]] > d.naive[best[0]][best[1]] ? c : best))
+        const nx = ox + NX
+        const mmax = d3.max([...d.m1, ...d.m2])
+        panel(nx, OY, d.naive.map((row, i) => row.map((v, j) => (i === a && j === b ? v : 0))), vmax, true)
+        d.m1.forEach((p, i) => {
+          const h = 22 * p / mmax
+          g.append('rect').attr('x', nx + i * C + 4).attr('y', OY - 6 - h).attr('width', C - 10).attr('height', h)
+            .attr('fill', i === a ? VIOLET : NAVY).attr('opacity', i === a ? 0.9 : 0.25)
+        })
+        // the x₂ bar of row b sits beside the joint, left of the product
+        const w = 22 * d.m2[b] / mmax
+        g.append('rect').attr('x', ox + P + 6).attr('y', OY + (M - 1 - b) * C + 4)
+          .attr('width', w).attr('height', C - 10).attr('fill', VIOLET)
+        const cx = nx + a * C + (C - 2) / 2
+        const cy = OY + (M - 1 - b) * C + (C - 2) / 2
+        arrow(cx, OY - 4, cx, cy - (C - 2) / 2 - 1)
+        arrow(ox + P + 8 + w, cy, nx + a * C - 1, cy)
+        g.append('text').attr('x', nx + P / 2).attr('y', OY + P + 40).attr('text-anchor', 'middle')
+          .attr('font-size', 15).attr('font-weight', 700).attr('fill', VIOLET)
+          .text(`${d.m1[a].toFixed(2)} · ${d.m2[b].toFixed(2)} = ${d.naive[a][b].toFixed(2)}`)
+      }
+      if (step >= 3) {
         g.append('text').attr('x', ox + (P + 30 + NX) / 2).attr('y', OY + P / 2 + 8)
           .attr('text-anchor', 'middle').attr('font-size', 24).attr('fill', VIOLET).text('→')
         panel(ox + NX, OY, d.naive, vmax, true)
         g.append('text').attr('x', ox + NX + P / 2).attr('y', OY + P + 40).attr('text-anchor', 'middle')
           .attr('font-size', 15).attr('fill', VIOLET).text('p(x₁ | y) · p(x₂ | y)')
       }
-      if (step >= 3) {
+      if (step >= 4) {
         // how far the product is from the joint: total variation distance
         const tv = 0.5 * d3.sum(d3.range(M), (a) => d3.sum(d3.range(M), (b) => Math.abs(d.joint[a][b] - d.naive[a][b])))
         g.append('text').attr('x', ox + (NX + P) / 2).attr('y', OY + P + 66).attr('text-anchor', 'middle')
@@ -126,17 +157,18 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     const cap = [
       `One full grid per class: ${M}² − 1 = ${M * M - 1} numbers; for p attributes ${M}ᵖ − 1`,
       'Each grid has two margins: p(x₁ | y) on top, p(x₂ | y) at the side',
+      'One cell of the product: the bar above it × the bar beside it',
       `Naive Bayes keeps only the margins: 2 · ${M - 1} = ${2 * (M - 1)} numbers per class`,
       Math.abs(rho) < 0.05
         ? 'No tilt within a class: the product is exact'
         : 'The tilt within each class is what naive Bayes drops',
     ]
-    caption.attr('fill', step >= 2 ? VIOLET : NAVY).text(cap[Math.min(step, 3)])
+    caption.attr('fill', step >= 2 ? VIOLET : NAVY).text(cap[Math.min(step, 4)])
   }
 
   let step = 0
   const controls = addControls(el, { isPrint }, [
-    { id: 'rho', label: 'correlation within a class', type: 'range', min: -0.9, max: 0.9, step: 0.05,
+    { id: 'rho', label: 'correlation within a class (conditional dependence)', type: 'range', min: -0.9, max: 0.9, step: 0.05,
       value: params.rho ?? 0.7, format: (v) => v.toFixed(2) },
   ], (id, v) => render(step, v))
 
@@ -144,6 +176,6 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     step = i
     render(i, controls.values)
   }
-  setStep(isPrint ? steps || 3 : steps ? 0 : 3)
+  setStep(isPrint ? steps || 4 : steps ? 0 : 4)
   return { setStep }
 }

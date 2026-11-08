@@ -1,13 +1,16 @@
 // Generating text, word by word, from two models (PML Lecture 03, Principle 6
-// tiers 2–3): naive Bayes draws every word from the same p(word | spam); a
-// language model draws each word from p(next word | the words so far).
+// tiers 2–3): naive Bayes draws every word from the same
+// p(word | class = spam); the toy language model draws each word from
+// p(next word | previous word), a distribution that changes with the value of
+// the previous word.
 //
 // Both models share one small vocabulary of 13 words, listed once in the
 // middle of a back-to-back chart: naive Bayes' probabilities to the left, the
 // language model's to the right, on the same scale. The naive Bayes bars never
 // change, the language model's move with the context. Top: the two mails
 // sampled so far (the latest word highlighted); below: the distribution over
-// the vocabulary the latest word was drawn from.
+// the vocabulary the latest word was drawn from, labelled with the value of
+// the conditioning variable: p(next word | previous word = "a").
 //
 // Both models are toys with hand-set probabilities. The language model uses
 // only the previous word as its context (a bigram model); a real language
@@ -105,16 +108,17 @@ export async function mount(el, { d3, params, steps, isPrint }) {
 
   function render() {
     g.selectAll('*').remove()
-    mail(10, 'Naive Bayes', 'each word from p(word | spam)', s.nb, step)
-    mail(MID + 30, 'Language model (toy)', 'each word from p(word | the words before)', s.lm, step)
+    mail(10, 'Naive Bayes', 'each word from p(word | class = spam)', s.nb, step)
+    mail(MID + 30, 'Language model (toy)', 'each word from p(next word | previous word)', s.lm, step)
     g.append('line').attr('x1', 10).attr('x2', W - 10).attr('y1', 108).attr('y2', 108).attr('stroke', RULE)
     text(MID, 134, 'The vocabulary: 13 words, the same for both models', { size: 17, anchor: 'middle', bold: true })
     const at = (seq) => seq[Math.min(Math.max(step - 1, 0), seq.length - 1)]
     const nb = at(s.nb), lm = at(s.lm)
     const nbHit = step > 0 ? nb.word : null
     const lmHit = step > 0 && step <= s.lm.length ? lm.word : null
-    text(MID - 45, 158, 'p(word | spam) — the same every time', { size: 15, anchor: 'end', colour: GREY })
-    text(MID + 45, 158, `p(next word | “${lm.context === '<s>' ? 'start' : lm.context}”)`, { size: 15, colour: GREY })
+    text(MID - 45, 158, 'p(word | class = spam) — the same every time', { size: 15, anchor: 'end', colour: GREY })
+    text(MID + 45, 158, lm.context === '<s>' ? 'p(first word)' : `p(next word | previous word = “${lm.context}”)`,
+      { size: 15, colour: GREY })
     // back-to-back bars on one scale: probability 1 = 300 px
     const L = 300
     VOCAB.forEach((w, j) => {

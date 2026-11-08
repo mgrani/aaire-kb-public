@@ -17,7 +17,7 @@
       @media print {
         @page { size: 1280px 720px; margin: 0; }
       }
-    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.Cuxaplvk.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/l03-naive-bayes.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_slug_.mthe8lGp.css"></head><body><a class="deck-download" href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/l03-naive-bayes.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template>
 <!-- .slide: class="title-slide" -->
 
 # Probabilistic Machine Learning
@@ -62,10 +62,21 @@ exercises 3.A.1, 3.A.2, 3.B.2 and 3.C.2 moved with it to Exercise Sheet 4
 fitted to the same 98 transactions, compared in one table; generative-route
 became its own module, The Curse of Dimensionality, the hinge to its two ways
 out (naive Bayes, continuous attributes).
+2026-11-08 (docs/reviews/PML-L03-NARRATIVE-2026-11.md): Naive Bayes in
+probabilities only — conditional independence example-first (55 vs 42), the
+assumption stated without a graph (Lecture 05 opens with it drawn), the
+classifier as scores and a normaliser, the three red flags followed through
+1,000,000 transactions. Odds, likelihood ratios and log-odds became their own
+module (odds-and-log-odds) before Continuous Attributes, with the reasons for
+log-odds on a slide.
+2026-11-08: the worked example as one sequence — Counts to Shares (four
+flags, crypto exchange 0 of 100 frauds), Classifying One Transaction (the
+numbers in the equation, 17%), One Zero Vetoes Everything (the same
+transaction to a crypto exchange) — replacing the natural-frequency table.
 -->
 
 Notes:
-Five modules. Three kinds of classifier: a rule maps $x$ to a class without
+Six modules. Three kinds of classifier: a rule maps $x$ to a class without
 any probability; a discriminative classifier models $P(y \mid x; θ)$ only; a
 generative classifier models $P(y)$ and $p(x \mid y)$, obtains the posterior
 by Bayes' theorem and can generate data. The curse of dimensionality: read as
@@ -74,8 +85,11 @@ a sample, the training table cannot fill a full $p(x \mid y)$, whose cells multi
 structure, by parametric families, or both. Naive Bayes: conditional
 independence of the attributes given the class, which reduces the number of
 parameters from $2^p - 1$ to $p$ per class for $p$ binary attributes; fitting
-is counting, and a count of zero vetoes all other evidence unless it is
-smoothed. Continuous attributes: a density per class, of which Bayes' theorem
+is counting, the classifier multiplies one fitted share per attribute into a
+score per class and normalises, and a count of zero vetoes all other evidence
+unless it is smoothed. Odds and log-odds: for two classes the ratio of the
+scores suffices, the posterior odds are the prior odds times one likelihood
+ratio per attribute, and in log-odds the evidence adds up. Continuous attributes: a density per class, of which Bayes' theorem
 needs only the ratio; Gaussian naive Bayes; one Gaussian per class keeps the
 correlations at a cost quadratic in $p$; a shared covariance makes the
 boundary linear, the logistic form of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>; a class
@@ -214,6 +228,8 @@ $p(x, y)$.
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Today: Generative Classifiers and the Bayes Decision Rule
 
 | question | module | the answer, in short |
@@ -221,6 +237,7 @@ $p(x, y)$.
 | Probabilities at all? | **Three Kinds of Classifier** | a rule gives a class; a model of $p(x, y)$ gives $P(y \mid x)$, $p(x)$ and new data — if the joint can be estimated |
 | Many variables at once? | **The Curse of Dimensionality** | the joint explodes; two ways out — simpler structure, a family |
 | Dependent variables? | **Naive Bayes** | assume them independent given the class: one small table each |
+| How strong is each flag? | **Odds and Log-Odds** | one likelihood ratio per attribute; in log-odds the evidence adds up |
 | Numbers, not yes/no? | **Continuous Attributes** | a density per class; one Gaussian keeps the dependences |
 | Which class, then? | **Deciding on a Class** | the most probable one — or a threshold set by costs and prior |
 
@@ -395,9 +412,7 @@ The bar conditions on a random variable, the semicolon fixes a parameter.
 </div>
 
 
-<div class="card">
-
-### Example
+<div class="c-example">
 
 Fraud share: $P(Y = \text{fraud}; θ) = π$, one number.
 
@@ -452,9 +467,9 @@ class. The **rules are the parameters** $θ$.
 
 
 
-<div class="card small">
+<div class="c-example small">
 
-**Example:** $x\_\text{amt} > a$ and $x\_\text{dist} > b$ → fraud, else honest;
+$x\_\text{amt} > a$ and $x\_\text{dist} > b$ → fraud, else honest;
 $θ = (a, b)$. **Training:** the fewest errors on the $n$ rows,
 $$
 \hat θ = \arg\min\_θ\\, \textstyle\sum\_{i=1}^{n} \mathbb{1}[\hat y\_i \neq y\_i]
@@ -686,9 +701,9 @@ which $x$ occur.
 
 
 
-<div class="card small">
+<div class="c-example small">
 
-**Example:** logistic regression, 3 numbers:
+Logistic regression, 3 numbers:
 
 $$
 \begin{aligned}
@@ -808,9 +823,9 @@ and $P(y; θ)$ — and obtains $P(y \mid x)$ by Bayes' theorem.
 
 
 
-<div class="card small">
+<div class="c-example small">
 
-**Example:** a normal per class and the fraud share, 11 numbers:
+A normal per class and the fraud share, 11 numbers:
 
 $$
 \begin{aligned}
@@ -1441,7 +1456,26 @@ classifies well anyway. How can both be true?
 ## Conditional Independence
 
 
-<div class="c-definition">
+<div class="q">
+
+Among the 100 frauds, **60** come from a new device and **70** from a foreign
+IP. If the device told us nothing about the IP, how many would show **both**?
+
+</div>
+
+
+
+<div class="fragment">
+
+70% of the 60, so **42**: the product $0.60 \cdot 0.70$. The data say **55**.
+Among frauds, a new device makes a foreign IP *more* likely: $55/60 = 92\\%$
+instead of 70%.
+
+</div>
+
+
+
+<div class="fragment c-definition">
 
 **Definition.** $A$ and $B$ are **conditionally independent given $C$**,
 written $A \indep B \mid C$, iff
@@ -1450,16 +1484,7 @@ P(A \cap B \mid C) = P(A \mid C) \cdot P(B \mid C)
 \quad\Longleftrightarrow\quad
 P(A \mid B \cap C) = P(A \mid C)
 $$
-
-</div>
-
-
-Reading: **once $C$ is known, $B$ tells us nothing more about $A$.**
-
-
-<div class="q">
-
-Among frauds only: does a new device make a foreign IP more likely?
+Once $C$ is known, $B$ tells us nothing more about $A$.
 
 </div>
 
@@ -1478,11 +1503,13 @@ conditioning can create a dependence between independent causes
 (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a> treats both cases with a counted
 example).
 
-Answer to the question: in an account take-over the attacker typically uses
-both a new device and a foreign IP, so among frauds the two flags are positively
-dependent. With the figures used later in this module, $P(F \mid D, \text{fraud})
-= 0.55 / 0.60 \approx 0.92$, compared with $P(F \mid \text{fraud}) = 0.70$.
-This is the dependence that naive Bayes assumes away.
+The numbers are those of "The Joint of Two Flags"
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), where 42 was the mark for
+"multiplied" among the possible overlaps 30 to 60. In an account take-over the
+attacker typically uses both a new device and a foreign IP, so among frauds the
+two flags are positively dependent: with $C$ = fraud, $A$ = foreign IP and
+$B$ = new device, $P(A \mid B \cap C) = 0.55/0.60 \approx 0.92$ against
+$P(A \mid C) = 0.70$. This is the dependence that naive Bayes assumes away.
 
 --
 
@@ -1490,13 +1517,6 @@ This is the dependence that naive Bayes assumes away.
 
 
 <div class="grid-2">
-
-
-<div class="column">
-
-![Naive Bayes as a graph: the class points to every attribute, no arrows between attributes](/courses/probabilistic-machine-learning/figures/l03-naive-bayes-star.svg)
-
-</div>
 
 
 <div class="column">
@@ -1512,7 +1532,17 @@ $$
 </div>
 
 
-| flags | full joint, per class | naive |
+In words: each attribute depends on the class, and **on nothing else** once
+the class is known.
+
+</div>
+
+
+<div class="column">
+
+Numbers per class, for yes/no flags:
+
+| flags | full joint | naive |
 |---|---|---|
 | 3 | 7 | 3 |
 | 30 | 1,073,741,823 | 30 |
@@ -1532,11 +1562,14 @@ $$
 
 
 Notes:
-In the graph the class $y$ points to every attribute and no arrow joins two
-attributes. Read as a Bayesian network
-(<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>), each missing arrow is an
-independence claim: every attribute is independent of all others given the
-class. The attributes are still dependent marginally, through the class.
+The assumption is one conditional independence per attribute: given the
+class, $x\_j$ is independent of all other attributes. It says nothing about
+the attributes without the class: over all transactions a new device and a
+foreign IP still go together, because both are more frequent among frauds.
+That dependence runs through the class, and naive Bayes keeps it.
+<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a> draws the same assumption as a graph
+(the class pointing to every attribute) and uses it as the first example of a
+Bayesian network.
 
 Parameter count: with the assumption, $p(x \mid y)$ needs one Bernoulli
 parameter per binary flag and class, $p$ numbers instead of $2^p - 1$. For a
@@ -1554,27 +1587,29 @@ of the module show.
 
 ## Assuming It Apart, Drawn
 
-<div class="viz viz-lg" data-viz="ml/joint-two-attributes" data-steps="3"
+<div class="viz viz-lg" data-viz="ml/joint-two-attributes" data-steps="4"
  data-params='{"rho": 0.7}'></div>
 
 
 <div class="grid-2">
 
 
-<div class="column">
+<div class="c-note">
 
-**Predict:** set the correlation to 0. What happens to the two pictures?
+The slider measures **conditional dependence**: the correlation of $x\_1$ and
+$x\_2$ *within* a class. At 0 they are independent given the class.
 
 </div>
 
 
 <div class="column">
 
+**Predict:** set it to 0. What happens to the two pictures?
+
 
 <div class="fragment">
 
-They become **identical**. Naive Bayes is exact exactly when the attributes are
-independent **within** each class.
+They become **identical**: naive Bayes is exact exactly then.
 
 </div>
 
@@ -1586,6 +1621,16 @@ independent **within** each class.
 
 
 Notes:
+The steps: the full grid per class, its two margins, one cell of the product
+(the bar above it times the bar beside it), the whole product, and how much
+mass it misplaces.
+
+The correlation coefficient stands in for conditional dependence here because
+the blobs are normal-shaped: for a normal distribution, correlation 0 is
+independence. In general a correlation of 0 rules out only a *linear*
+dependence, and conditional independence is the stronger property that
+$p(x\_1, x\_2 \mid y) = p(x\_1 \mid y)\\, p(x\_2 \mid y)$ in every cell.
+
 The full object is a cube, class × $x\_1$ × $x\_2$; the figure shows its two
 class slices. Left: the true class-conditional joint $p(x\_1, x\_2 \mid y)$ on a
 $5 \times 5$ grid, $5^2 - 1 = 24$ numbers per class, and $5^p - 1$ for $p$
@@ -1676,39 +1721,37 @@ class's rows — shares, means, spreads — so no optimiser is needed.
 
 ## Fitting Is Counting
 
+
+<div class="q">
+
+The training table has 100,000 transactions; **100** are fraud, and **60** of
+those came from a new device, $x\_\text{dev} = 1$. Estimate $P(\text{fraud})$
+and $P(x\_\text{dev} = 1 \mid \text{fraud})$.
+
+</div>
+
+
+
+<div class="fragment">
+
+Write $n(\cdot)$ for the **number of training rows** that match $\cdot$:
+
+- $n$: all rows (100,000)
+- $n(y)$: the rows of class $y$, e.g. $n(\text{fraud}) = 100$
+- $n(x\_j = v,\ y)$: the rows of class $y$ with value $v$ in attribute $x\_j$,
+  e.g. $n(x\_\text{dev} = 1,\ \text{fraud}) = 60$
+
 $$
-\hat{P}(y) = \frac{n(y)}{n}
+\hat{P}(y) = \frac{n(y)}{n} = \frac{100}{100{,}000} = 0.001
 \qquad
-\hat{P}(x\_j = v \mid y) = \frac{n(x\_j = v,\ y)}{n(y)}
+\hat{P}(x\_j = v \mid y) = \frac{n(x\_j = v,\ y)}{n(y)} = \frac{60}{100} = 0.6
 $$
 
-
-<div class="grid-2">
-
-
-<div class="card">
-
-### One small table per attribute
-For flags and categories, each factor is a **table**: a categorical — for a
-yes/no flag, a Bernoulli.
-
-</div>
-
-
-<div class="card">
-
-### Estimated by its share
-$P(\text{new device} \mid \text{fraud})$: of the 100 frauds, how many came
-from a new device? 60, so $0.6$.
-
-</div>
-
-
 </div>
 
 
 
-<div class="c-insight">
+<div class="fragment c-insight">
 
 Naive Bayes over tables is fitted in **one pass**, by counting — no optimiser.
 Why a share is the right estimate — and when it is not — is <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>.
@@ -1717,6 +1760,12 @@ Why a share is the right estimate — and when it is not — is <a href="/course
 
 
 Notes:
+The conditional estimate divides by $n(y)$, not by $n$: it is a share within
+the class. Dividing 60 by all 100,000 rows would estimate the joint
+$P(\text{new device}, \text{fraud}) = 0.0006$ instead. For a flag, the counts
+of one class over its values sum to $n(y)$ (60 with a new device, 40
+without), so the estimates sum to 1.
+
 Derivation. Under the naive assumption the log-likelihood of a labelled table
 is
 $\sum\_i \log P(y\_i) + \sum\_i \sum\_j \log p(x\_{ij} \mid y\_i)$.
@@ -1741,68 +1790,116 @@ likelihood, so shortcut 2, keep the peak, is taken in addition to shortcut 1;
 
 ## The Classifier
 
+Bayes' theorem, with the naive product as the likelihood:
+
 $$
 P(y \mid x\_1, \ldots, x\_p) = \frac{P(y) \prod\_{j} p(x\_j \mid y)}{\sum\_{y'} P(y') \prod\_{j} p(x\_j \mid y')}
 $$
 
-For two classes, divide the two posteriors — the normaliser cancels:
 
-$$
-\underbrace{\frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}}\_{\text{posterior odds}}
-= \underbrace{\frac{P(\text{fraud})}{P(\text{honest})}}\_{\text{prior odds}}
-\cdot \prod\_{j=1}^{p} \underbrace{\frac{p(x\_j \mid \text{fraud})}{p(x\_j \mid \text{honest})}}\_{\text{likelihood ratio } \mathrm{LR}\_j}
-$$
+<div class="flow-row">
 
 
-<div class="c-note">
+<div class="stat-card concept">
 
-Every observed attribute **multiplies the odds** by its likelihood ratio: above
-1 it speaks for fraud, below 1 against.
+### Score
+each class: its prior × one fitted factor per attribute
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card concept">
+
+### Normalise
+divide each score by the sum of all scores
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### Posterior
+one probability per class, summing to 1
+
+</div>
+
 
 </div>
 
 
 Notes:
-The first line is Bayes' theorem with the naive product in place of
-$p(x \mid y)$; the denominator is the law of total probability. In the ratio of
-two posteriors the denominator cancels, which gives the odds form: posterior
-odds = prior odds × product of likelihood ratios. Odds and their relation to
-probabilities, $P = \text{odds}/(1 + \text{odds})$, were introduced with Bayes'
-theorem in <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>.
+The numerator is the score of class $y$: Bayes' theorem with the naive
+product in place of $p(x \mid y)$. The denominator is the sum of the scores of
+all classes, which is $p(x)$ by the law of total probability; it is the same
+for every class and makes the posteriors sum to 1. With two classes there are
+two scores, fraud and honest.
 
-Each attribute contributes one factor $\mathrm{LR}\_j$. A ratio above 1 raises
-the odds of fraud, below 1 lowers them, and exactly 1 means the attribute is
-uninformative. Because multiplication is commutative, the order in which
-evidence arrives does not matter. An observed absent flag also contributes a
-factor, $(1 - p\_{j,\text{fraud}})/(1 - p\_{j,\text{honest}})$, which is usually
-below 1 for a red flag. For more than two classes, odds relative to one
-reference class play the same role.
+Every attribute contributes one factor per class, and every factor is one of
+the fitted shares. A flag observed present contributes
+$\hat P(x\_j = \text{yes} \mid y)$, a flag observed absent
+$\hat P(x\_j = \text{no} \mid y) = 1 - \hat P(x\_j = \text{yes} \mid y)$, and an
+attribute that was not observed is left out of the product: summing the joint
+over its values gives a factor of 1. A missing value therefore needs no
+imputation, a property the discriminative models of
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> lack.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Likelihood Ratios From Counts
+## Counts to Shares
 
 The training table: 100,000 transactions, **100** fraud and **99,900** honest.
+Four yes/no attributes, coded $1$ = yes, $0$ = no: $x = (x\_\text{dev},
+x\_\text{IP}, x\_\text{night}, x\_\text{crypto})$.
 
 
-<div class="q">
+<div class="grid-2">
 
-A new device shows up in **60** frauds — and in **9,990** honest transactions.
-How strong is it as evidence for fraud?
+
+<div class="column">
+
+**Counts** $n(x\_j = 1,\ y)$
+
+| attribute $x\_j$ | fraud | honest |
+|---|---|---|
+| $x\_\text{dev}$: new device | 60 | 9,990 |
+| $x\_\text{IP}$: foreign IP | 70 | 4,995 |
+| $x\_\text{night}$: at night | 50 | 19,980 |
+| $x\_\text{crypto}$: to a crypto exchange | **0** | 10 |
+| class total $n(y)$ | 100 | 99,900 |
 
 </div>
 
 
+<div class="column fragment">
 
-<div class="fragment">
+**Shares** $\hat P(x\_j = 1 \mid y) = n(x\_j = 1,\ y) \\,/\\, n(y)$
 
-| flag | frauds with it | $P(\text{flag} \mid \text{fraud})$ | honest with it | $P(\text{flag} \mid \text{honest})$ | likelihood ratio |
-|---|---|---|---|---|---|
-| new device | 60 of 100 | 0.60 | 9,990 of 99,900 | 0.10 | 0.60 / 0.10 = **6** |
-| foreign IP | 70 of 100 | 0.70 | 4,995 of 99,900 | 0.05 | 0.70 / 0.05 = **14** |
-| night | 50 of 100 | 0.50 | 19,980 of 99,900 | 0.20 | 0.50 / 0.20 = **2.5** |
+| attribute $x\_j$ | fraud | honest |
+|---|---|---|
+| $x\_\text{dev}$ | 0.60 | 0.10 |
+| $x\_\text{IP}$ | 0.70 | 0.05 |
+| $x\_\text{night}$ | 0.50 | 0.20 |
+| $x\_\text{crypto}$ | **0** | 0.0001 |
+| prior $\hat P(y) = n(y) / n$ | 0.001 | 0.999 |
+
+</div>
+
 
 </div>
 
@@ -1810,199 +1907,158 @@ How strong is it as evidence for fraud?
 
 <div class="fragment c-insight">
 
-Strength is a ratio of **shares**, not of counts: a new device is **6 times as
-common** among frauds — although 9,990 of its 10,050 transactions are honest.
+Each share is counted **within** its class: 9,990 honest transactions have a
+new device — but that is only 10% of the honest ones, against 60% of the frauds.
 
 </div>
 
 
 Notes:
-Each share is the fitted factor of "Fitting Is Counting":
-$\hat P(x\_j = \text{yes} \mid y) = n(x\_j = \text{yes}, y) / n(y)$, counted
-within the class. The likelihood ratio divides the two shares of one flag,
-$\mathrm{LR}\_j = P(x\_j \mid \text{fraud}) / P(x\_j \mid \text{honest})$, and
-says how many times more common the observation is among frauds than among
-honest transactions. Arithmetic: $60/100 = 0.60$ and $9{,}990/99{,}900 = 0.10$,
-so $\mathrm{LR} = 6$; $0.70/0.05 = 14$; $0.50/0.20 = 2.5$.
+Every share is a fitted factor of "Fitting Is Counting": the count of
+$x\_j = 1$ within the class, divided by the size of the class. The shares of
+$x\_j = 0$ follow as $\hat P(x\_j = 0 \mid y) = 1 - \hat P(x\_j = 1 \mid y)$. Arithmetic of the honest
+shares: $9{,}990 / 99{,}900 = 0.10$, $4{,}995 / 99{,}900 = 0.05$,
+$19{,}980 / 99{,}900 = 0.20$, $10 / 99{,}900 \approx 0.0001$. The shares of
+$x\_j = 0$: 0.40, 0.30, 0.50 and 1 among frauds; 0.90, 0.95, 0.80 and 0.9999
+among honest transactions. $P(\text{honest}) =
+1 - P(\text{fraud})$ is not a number of its own.
 
-The ratio measures the evidence, not the answer. Of the $60 + 9{,}990 =
-10{,}050$ transactions with a new device only 60 are fraud, so
-$P(\text{fraud} \mid \text{new device}) = 60/10{,}050 \approx 0.6\\%$: the
-evidence multiplies the odds by 6, from $1 : 999$ to $6 : 999$, and the rare
-class stays rare. A flag observed absent has its own ratio, for the new device
-$(1 - 0.60)/(1 - 0.10) \approx 0.44$, which speaks against fraud.
-
---
-
-## Three Red Flags
-
-Prior odds $100 : 99{,}900 = 1 : 999$. Likelihood ratios: new device **6**,
-foreign IP **14**, night **2.5**.
-
-
-<div class="q">
-
-A transaction shows all three flags. Is it more likely fraud than not?
-
-</div>
-
-
-
-<div class="fragment">
-
-$$
-\text{odds} = \frac{1}{999} \cdot 6 \cdot 14 \cdot 2.5 = \frac{210}{999}
-\quad\Longrightarrow\quad
-P(\text{fraud} \mid x) = \frac{210}{1{,}209} \approx 17\\%
-$$
-
-
-<div class="c-warning">
-
-Three red flags, each one strong — and still **mostly honest**. The base rate
-of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>, once more.
-
-</div>
-
-
-</div>
-
-
-Notes:
-The odds form of the classifier: prior odds times one likelihood ratio per
-observed flag. The product of the ratios is 210, and the posterior odds are
-$210 : 999$, so $P(\text{fraud} \mid x) = 210/(210 + 999) = 0.174$.
-
-The answer is no: the transaction is still more likely honest. A combined
-likelihood ratio of 210 is strong evidence, but the prior odds of 1 : 999 are
-stronger; the posterior exceeds 50% only when the combined ratio exceeds 999.
-This is the base-rate effect of
-<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>. Intuitive judgements
-that call such a transaction "clearly fraud" neglect the base rate.
-
-The model in this example contains exactly these three flags, all observed
-present, so only the three ratios enter. In a model with more flags, every flag
-observed absent contributes its own factor; for night that factor would be
-$(1 - 0.5)/(1 - 0.2) = 0.625$.
+The fitted model is these nine numbers: the prior and four shares per class,
+$1 + 2 \cdot 4 = 9$. The full joint of four flags would need
+$1 + 2 \cdot (2^4 - 1) = 31$. The crypto flag is rare in both classes and
+never occurred among the 100 frauds; its zero returns two slides on.
 
 --
 
 <!-- .slide: class="smaller" -->
 
-## Evidence Adds Up
-
-Take the logarithm of the odds form: the **product** of ratios becomes a **sum**.
-
-$$
-\log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}
-= \log \frac{P(\text{fraud})}{P(\text{honest})} + \sum\_{j} \log \mathrm{LR}\_j
-$$
+## Classifying One Transaction
 
 
-<div class="grid-3-2">
+<div class="q">
 
-
-<div class="column">
-
-<div class="viz viz-lg" data-viz="ml/gm-log-odds-staircase" data-steps="3"
- data-params='{"prior": [1, 999], "factors": [{"lr": 6, "label": "new device"}, {"lr": 14, "label": "foreign IP"}, {"lr": 2.5, "label": "night"}]}'></div>
+A transaction $x = (x\_\text{dev}, x\_\text{IP}, x\_\text{night}, x\_\text{crypto})
+= (1, 1, 1, 0)$: new device, foreign IP, at night, not to a crypto exchange.
+Fraud or not?
 
 </div>
 
-
-<div class="column middle">
-
-**Predict before each click:** which flag moves the probability most?
 
 
 <div class="fragment">
 
-| evidence | odds | log-odds | $P$ |
-|---|---|---|---|
-| base rate | $1 : 999$ | $-6.91$ | 0.1% |
-| new device | $\times 6$ | $+1.79$ | 0.6% |
-| foreign IP | $\times 14$ | $+2.64$ | 7.8% |
-| night | $\times 2.5$ | $+0.92$ | 17.4% |
-| **sum** | $210 : 999$ | $\mathbf{-1.56}$ | **17.4%** |
+$$
+P(\text{fraud} \mid x) = \frac{\text{score}(\text{fraud})}{\text{score}(\text{fraud}) + \text{score}(\text{honest})},
+\qquad
+\text{score}(y) = \hat P(y) \prod\_j \hat P(x\_j \mid y)
+$$
+
+$$
+\begin{aligned}
+\text{score}(\text{fraud}) &= \underbrace{0.001}\_{\hat P(y)} \cdot \underbrace{0.60}\_{x\_\text{dev} = 1} \cdot \underbrace{0.70}\_{x\_\text{IP} = 1} \cdot \underbrace{0.50}\_{x\_\text{night} = 1} \cdot \underbrace{1}\_{x\_\text{crypto} = 0} &&= 0.00021
+\\\ \text{score}(\text{honest}) &= 0.999 \cdot 0.10 \cdot 0.05 \cdot 0.20 \cdot 0.9999 &&\approx 0.000999
+\\\ P(\text{fraud} \mid x) &= \frac{0.00021}{0.00021 + 0.000999} &&\approx 17\\%
+\end{aligned}
+$$
+
+Each factor is $\hat P(x\_j \mid y)$ at the observed value; for
+$x\_\text{crypto} = 0$ it is $1 - 0$ and $1 - 0.0001$.
 
 </div>
 
 
-</div>
 
+<div class="fragment c-warning">
+
+Three red flags, each one strong — and still **mostly honest**: the base rate
+of 1 in 1,000 outweighs them.
 
 </div>
 
 
 Notes:
-The table is the equation term by term, in natural logarithms: the rounded
-terms add to $-6.91 + 1.79 + 2.64 + 0.92 = -1.56$, and
-$P = 1/(1 + e^{1.56}) = 0.174$. The base of the logarithm only rescales the
-axis; the figure labels it in probabilities.
+Each attribute contributes the share of its observed value,
+$\hat P(x\_j = 1 \mid y)$ for the three red flags and
+$\hat P(x\_\text{crypto} = 0 \mid y)$ for the crypto exchange. The scores are the numerator of
+"The Classifier" for each class, and the posterior divides the fraud score by
+their sum. Arithmetic: $0.001 \cdot 0.6 = 0.0006$, $\cdot\\, 0.7 = 0.00042$,
+$\cdot\\, 0.5 = 0.00021$; $0.999 \cdot 0.1 = 0.0999$, $\cdot\\, 0.05 = 0.004995$,
+$\cdot\\, 0.2 = 0.000999$, $\cdot\\, 0.9999 = 0.0009989$. Then
+$0.00021 / 0.0012089 = 0.174$.
 
-On a log-odds axis each likelihood ratio is a step of fixed height $\log
-\mathrm{LR}\_j$, independent of the current position: the log-odds are the sum
-of the log prior odds and the log likelihood ratios.
+In natural frequencies: of 1,000,000 transactions, $10^6 \cdot 0.00021 = 210$
+frauds and $10^6 \cdot 0.000999 = 999$ honest ones show exactly this pattern
+of flags, so 210 of these 1,209 are fraud.
 
-Step 1 (new device): odds $6/999$, probability 0.6%. Step 2 (foreign IP): odds
-$84/999$, probability 7.8%. Step 3 (night): odds $210/999$, probability 17.4%.
-The foreign IP has the largest ratio and therefore the largest step; night is
-the weakest of the three, although it moves the probability more in absolute
-terms than the first flag did, because probability is not linear in log-odds.
+The naive assumption enters in the product: the score multiplies by 0.70 for
+the foreign IP whether or not the device was new, as if the device told
+nothing about the IP. The data say 55 of 100 frauds show both, not 42
+("Conditional Independence"); "Counting Evidence Twice" puts the real pair
+into the equation.
 
-A sum of per-attribute contributions plus a constant is a linear score. For
-binary attributes the naive Bayes log-odds are exactly linear in $x$, the same
-functional form as logistic regression
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>); the two differ in how
-the weights are estimated
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+The answer to the question is no: 17% is far from certain fraud. Each flag is
+much more common among frauds, but honest transactions outnumber frauds 999 to
+1. This is the base-rate effect of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>; intuitive judgements
+that call such a transaction "clearly fraud" neglect the base rate.
 
 --
 
 ## One Zero Vetoes Everything
 
-A new flag: **payment to a crypto exchange**. Among the 100 frauds it never
-occurred.
 
+<div class="q">
 
-<div class="grid-2-1">
-
-
-<div class="column">
-
-$$
-\hat{P}(\text{crypto} \mid \text{fraud}) = \frac{0}{100} = 0
-$$
-
-A transaction with this flag gets posterior odds **exactly 0** — whatever the
-other thirty flags say. One unseen value vetoes all other evidence.
+The same transaction, but paid **to a crypto exchange**:
+$x = (1, 1, 1, 1)$, four red flags. What does the model say?
 
 </div>
 
 
-<div class="c-danger">
 
-<span class="eyebrow">Counting, fails</span>
+<div class="fragment">
 
-"Not seen in 100 frauds" became "impossible for a fraud" — a share of a small
-count, read as certainty.
+$\hat P(x\_\text{crypto} = 1 \mid \text{fraud}) = 0/100 = 0$, so
+$$
+\text{score}(\text{fraud}) = 0.001 \cdot 0.60 \cdot 0.70 \cdot 0.50 \cdot \mathbf{0} = 0
+\quad\Longrightarrow\quad P(\text{fraud} \mid x) = 0
+$$
+Four red flags — and the model calls it **certainly honest**. One unseen value
+vetoes all other evidence, however much of it there is.
 
 </div>
 
+
+
+<div class="fragment c-danger">
+
+<span class="eyebrow">Counting, fails — in both directions</span>
+
+A value never seen among the **honest** transactions vetoes the other way:
+the honest score is 0 and $P(\text{fraud} \mid x) = 1$ — **certainly fraud**. Never seen in either class: $0/0$. Each time a share of a
+small count is read as certainty.
 
 </div>
 
 
 Notes:
-This is the zero-frequency problem. The MLE of a count of 0 is the probability
-0, and a single factor of 0 makes the whole product 0, so the posterior odds of
-fraud are 0 regardless of all other likelihood ratios. If a value has count 0 in
-both classes, the posterior is the undefined $0/0$.
+The honest score stays positive, $0.999 \cdot 0.10 \cdot 0.05 \cdot 0.20
+\cdot 0.0001 \approx 10^{-7}$, so $P(\text{honest} \mid x) = 1$. The veto is
+symmetric: had the 99,900 honest transactions never shown some value, say a
+merchant category, every transaction with it would be classified fraud with
+probability 1, whatever its other attributes. With 99,900 honest rows such
+zeros are rarer than with 100 frauds, but for a value with many categories
+(merchant, country) they occur in both classes. This is the zero-frequency
+problem. The MLE of a count of 0 is the probability 0, and a
+single factor of 0 makes the whole fraud score 0, so the posterior of fraud is
+0 regardless of all other factors. If a value has count 0 in both classes,
+both scores are 0 and the posterior is the undefined $0/0$.
 
 The cause is that a relative frequency of a small count is an extreme value;
 <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> shows the same failure on a coin
-(three heads in three flips give $\hat\theta = 1$) and names the estimate. With 100 frauds, any flag with a true rate below about 1% is likely to
-have count 0 (for a true rate of 1% the probability of no occurrence in 100 is
+(three heads in three flips give $\hat\theta = 1$) and names the estimate.
+With 100 frauds, any flag with a true rate below about 1% is likely to have
+count 0 (for a true rate of 1% the probability of no occurrence in 100 is
 $0.99^{100} = 0.37$). In a log-odds implementation the zero appears as
 $\log 0 = -\infty$. Standard repairs add pseudo-counts (next slide) or replace
 zeros by a small floor value; the first has a probabilistic justification.
@@ -2051,64 +2107,71 @@ values the flat Dirichlet plays the same role.
 
 --
 
+<!-- .slide: class="smaller" -->
+
 ## Counting Evidence Twice
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
-![Naive Bayes with the dropped dependence between new device and foreign IP](/courses/probabilistic-machine-learning/figures/l03-naive-bayes-dropped.svg)
-
-</div>
+In an account take-over, a new device and a foreign IP **arrive together**:
+both appear on **55%** of frauds — and, with travel and VPNs, on **4%** of
+honest transactions.
 
 
-<div class="column">
+<div class="q">
 
-In an account take-over, a new device and a foreign IP **arrive together**.
-Suppose both appear on 55% of frauds and 4% of honest transactions:
-
-| | ratio for the pair | $P(\text{fraud})$ with night |
-|---|---|---|
-| naive Bayes | $6 \cdot 14 = 84$ | 17.4% |
-| the real pair | $0.55 / 0.04 \approx 14$ | 3.3% |
-
-</div>
-
+Put the real pair into the equation instead of the product. What happens to
+the 17%?
 
 </div>
 
 
 
-<div class="c-warning">
+<div class="fragment">
 
-Correlated flags are **counted twice**, so naive Bayes is **over-confident**.
-Its ranking of transactions often survives; its probabilities do not.
+| $x\_\text{dev} = 1$ and $x\_\text{IP} = 1$ | $y$ = fraud | $y$ = honest | $P(\text{fraud} \mid x)$ |
+|---|---|---|---|
+| naive: $\hat P(x\_\text{dev} {=} 1 \mid y) \cdot \hat P(x\_\text{IP} {=} 1 \mid y)$ | $0.60 \cdot 0.70 = 0.42$ | $0.10 \cdot 0.05 = 0.005$ | **17.4%** |
+| the real pair: $\hat P(x\_\text{dev} {=} 1, x\_\text{IP} {=} 1 \mid y)$ | $0.55$ | $0.04$ | **3.3%** |
+
+</div>
+
+
+
+<div class="fragment c-warning">
+
+The product makes the pair **eight times too rare** among honest
+transactions: the IP is counted as new evidence, although it mostly repeats
+the device. Correlated flags are **counted twice**, so naive Bayes is
+**over-confident**. Its ranking often survives; its probabilities do not.
 
 </div>
 
 
 Notes:
-The dashed edge in the figure is the dependence between new device and foreign
-IP that naive Bayes omits. Naive Bayes multiplies both likelihood ratios as if
-they were independent pieces of evidence, $6 \cdot 14 = 84$. The pair's actual
-likelihood ratio is $P(D, F \mid \text{fraud}) / P(D, F \mid \text{honest}) =
-0.55/0.04 = 13.75$. With night added, the posterior odds are
-$13.75 \cdot 2.5 / 999 = 34.4/999$, so $P(\text{fraud} \mid x) = 3.3\\%$ instead
-of 17.4%. Under independence within the classes the pair would occur on
-$0.6 \cdot 0.7 = 42\\%$ of frauds and $0.1 \cdot 0.05 = 0.5\\%$ of honest
-transactions; the assumed 4% among honest ones is eight times that, which is
-where the error comes from.
+Arithmetic, with night and no crypto exchange as before. Naive: the scores
+0.00021 and 0.000999 of "Classifying One Transaction", 17.4%. Real: the pair
+factor replaces the two separate shares, $\text{score}(\text{fraud}) = 0.001
+\cdot 0.55 \cdot 0.50 \cdot 1 = 0.000275$ and $\text{score}(\text{honest}) =
+0.999 \cdot 0.04 \cdot 0.20 \cdot 0.9999 \approx 0.00799$, so
+$P(\text{fraud} \mid x) = 0.000275 / 0.008266 = 3.3\\%$.
 
-Correlated attributes therefore push naive Bayes posteriors towards 0 and 1:
-the probabilities are not calibrated
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). Classification by arg max
-depends only on which side of the decision threshold the posterior falls, so it
-can remain correct even when the probabilities are badly off. Domingos and
-Pazzani (1997, Machine Learning 29) show that naive Bayes can be optimal under
-zero–one loss in many cases where the independence assumption is violated,
-which is why it classifies well despite a false assumption.
+Both classes are affected, in different measure. Among frauds the pair is a
+little more common than the product says (55% against 42%); among honest
+transactions it is eight times more common (4% against 0.5%), because travel
+and VPN use also bring both flags at once. The naive model thus makes the pair
+look much rarer among honest transactions than it is, and the posterior too
+high. Correlated attributes push naive Bayes posteriors towards 0 and 1: the
+probabilities are not calibrated
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). In the odds form of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> the same error reads: naive Bayes
+multiplies the likelihood ratios $6 \cdot 14 = 84$, while the pair's ratio is
+$0.55/0.04 \approx 14$.
+
+Classification by arg max depends only on which side of the decision
+threshold the posterior falls, so it can remain correct even when the
+probabilities are badly off. Domingos and Pazzani (1997, Machine Learning 29)
+show that naive Bayes can be optimal under zero–one loss in many cases where
+the independence assumption is violated, which is why it classifies well
+despite a false assumption.
 
 The word salad of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (Generating
 Data) is the same assumption seen from the generating side: words drawn
@@ -2134,21 +2197,22 @@ Does the fraud probability of our three-flag transaction go up, down, or stay
 
 <div class="fragment">
 
-**Up — from 17% to about 75%.** The odds get a second factor 14:
-$2{,}940 : 999$. Naive Bayes cannot tell a copy from new evidence; a strongly
-correlated attribute is almost a copy.
+**Up — from 17% to about 75%.** Both scores get the factor once more:
+$0.00021 \cdot 0.70 = 0.000147$ against $0.000999 \cdot 0.05 \approx 0.00005$.
+Naive Bayes cannot tell a copy from new evidence; a strongly correlated
+attribute is almost a copy.
 
 </div>
 
 
 Notes:
-Answer: up. The duplicated flag contributes its likelihood ratio twice, so the
-odds become $210 \cdot 14 / 999 = 2940/999$ and
-$P(\text{fraud} \mid x) = 2940/3939 = 0.746$, from 17%.
+Answer: up. The duplicated flag contributes its factor twice in each class:
+the scores become $0.000147$ and $0.0000499$, so
+$P(\text{fraud} \mid x) = 0.000147/0.000197 = 0.746$, from 17%.
 
 The true information content is unchanged, since a copy of an attribute carries
-no new evidence: the correct likelihood ratio of the pair (flag, copy) is just
-the ratio of the flag, 14. Naive Bayes cannot detect duplication, because the
+no new evidence: given the flag, the copy is certain in both classes, so its
+correct factor is 1. Naive Bayes cannot detect duplication, because the
 model has no parameter for the relation between attributes. A duplicate is the
 limiting case of perfect correlation; strongly correlated attributes act as
 partial copies. Real feature sets contain them routinely: the same information
@@ -2168,6 +2232,427 @@ Naive Bayes **assumes the joint apart** — attributes independent given the
 class — and fits every factor by **counting**, smoothed by pseudo-counts so no
 zero can veto. It is cheap, needs little data and ranks well. Its
 probabilities are over-confident wherever attributes move together.
+
+</div>
+
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Odds and Log-Odds
+
+
+<div class="guiding-question">
+
+**Guiding Question:** Three red flags give 17% fraud. How much did each flag
+contribute — and why do practitioners add instead of multiply?
+
+</div>
+
+
+--
+
+## Compare, Don't Normalise
+
+Bayes' theorem for the transaction of "Classifying One Transaction":
+
+$$
+P(\text{fraud} \mid x)
+= \frac{\text{score}(\text{fraud})}{\underbrace{\text{score}(\text{fraud}) + \text{score}(\text{honest})}\_{\text{normaliser: the total } p(x)}}
+= \frac{0.00021}{0.00021 + 0.000999} \approx 17\\%
+$$
+
+
+<div class="q">
+
+To decide *fraud or not*, do we need the normaliser?
+
+</div>
+
+
+
+<div class="fragment">
+
+No. Both posteriors share it, so in their **ratio** it cancels — the
+**posterior odds**:
+$$
+\frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}
+= \frac{\text{score}(\text{fraud})}{\text{score}(\text{honest})}
+= \frac{0.00021}{0.000999} = \frac{210}{999}
+$$
+
+</div>
+
+
+
+<div class="fragment c-note">
+
+Odds above 1: fraud is the more probable class. Back to a probability:
+$P = 210 / (210 + 999) = 17\\%$.
+
+</div>
+
+
+Notes:
+Odds and their relation to probabilities were introduced with Bayes' theorem
+in <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>: odds
+$o = P/(1 - P)$, and $P = o/(1 + o)$. For two classes
+$P(\text{honest} \mid x) = 1 - P(\text{fraud} \mid x)$, so the posterior odds
+of fraud are exactly the odds of this formula.
+
+The crypto-exchange flag of that transaction, observed absent, contributes
+the ratio $1 / 0.9999 \approx 1.0001$, invisible at this precision; the odds
+below use the three red flags.
+
+Dividing the two posteriors removes the denominator of Bayes' theorem,
+$p(x) = \sum\_y P(y) \prod\_j p(x\_j \mid y)$, which needs every class. The odds
+need only the two scores, and the decision "the more probable class" of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> needs only whether the odds
+exceed 1. For more than two classes, odds relative to one reference class play
+the same role.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Odds Form
+
+Split each score into its factors and divide them **pairwise**:
+
+$$
+\underbrace{\frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}}\_{\text{posterior odds}}
+= \underbrace{\frac{P(\text{fraud})}{P(\text{honest})}}\_{\text{prior odds}}
+\cdot \prod\_{j=1}^{p} \underbrace{\frac{p(x\_j \mid \text{fraud})}{p(x\_j \mid \text{honest})}}\_{\text{likelihood ratio } \mathrm{LR}\_j}
+$$
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+| observed | $\hat P(x\_j \mid \text{fraud})$ | $\hat P(x\_j \mid \text{honest})$ | $\mathrm{LR}\_j$ |
+|---|---|---|---|
+| $x\_\text{dev} = 1$ | 0.60 | 0.10 | **6** |
+| $x\_\text{IP} = 1$ | 0.70 | 0.05 | **14** |
+| $x\_\text{night} = 1$ | 0.50 | 0.20 | **2.5** |
+
+</div>
+
+
+<div class="column middle fragment">
+
+$$
+\frac{1}{999} \cdot 6 \cdot 14 \cdot 2.5 = \frac{210}{999}
+$$
+The same odds, **one factor per flag**: above 1 for fraud, below 1 against.
+
+
+<div class="c-insight">
+
+Strength is a ratio of **shares**: $x\_\text{dev} = 1$ is 6 times as common
+among frauds, though 9,990 of its 10,050 rows are honest.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The prior odds are $0.001/0.999 = 1 : 999$, and each likelihood ratio divides
+the two fitted shares of "Counts to Shares"
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>): $0.60/0.10 = 6$,
+$0.70/0.05 = 14$, $0.50/0.20 = 2.5$. A ratio says how many times more common
+the observation is among frauds than among honest transactions; exactly 1
+means the attribute is uninformative. Because multiplication is commutative,
+the order in which evidence arrives does not matter.
+
+The ratio measures the evidence, not the answer. Of the $60 + 9{,}990 =
+10{,}050$ training transactions with a new device only 60 are fraud, so
+$P(\text{fraud} \mid \text{new device}) = 60/10{,}050 \approx 0.6\\%$: the
+evidence multiplies the odds by 6, from $1 : 999$ to $6 : 999$, and the rare
+class stays rare. The posterior exceeds 50% only when the combined ratio
+exceeds 999. A flag observed absent has its own ratio, the ratio of the shares
+of *no*: for the new device $(1 - 0.60)/(1 - 0.10) \approx 0.44$, which speaks
+against fraud.
+
+The odds form holds for any generative classifier, $\mathrm{posterior\ odds} =
+\mathrm{prior\ odds} \cdot p(x \mid \text{fraud}) / p(x \mid \text{honest})$;
+the naive assumption is what splits the one likelihood ratio into a product of
+one ratio per attribute.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Log-Odds and the Sigmoid
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="ml/log-odds-sigmoid" data-steps="2"></div>
+
+</div>
+
+
+<div class="column middle">
+
+
+<div class="q">
+
+Take the log of the odds form: the product becomes a **sum** $s$. How does
+$s$ turn back into a probability?
+
+</div>
+
+
+
+<div class="fragment">
+
+$$
+\begin{aligned}
+s &= \log \tfrac{1}{999} + \log 6 + \log 14 + \log 2.5 = -1.56
+\\\ \text{odds} &= e^{s} = 0.21 = \tfrac{210}{999}
+\\\ P(\text{fraud} \mid x) &= \frac{\text{odds}}{1 + \text{odds}} = \frac{1}{1 + e^{-s}} = 17.4\\%
+\end{aligned}
+$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-definition">
+
+The **sigmoid** (logistic function) $σ(s) = 1/(1 + e^{-s})$ turns any log-odds
+$s$ into a probability between 0 and 1: $s = 0$ is 50%, $s > 0$ favours fraud,
+$s < 0$ honest. So $P(\text{fraud} \mid x) = σ(\text{log-odds})$.
+
+</div>
+
+
+Notes:
+Three steps, each the inverse of a step that led to the sum. The log-odds are
+the natural logarithm of the posterior odds; the odds form makes them a sum,
+$\ln(1/999) = -6.91$, $\ln 6 = 1.79$, $\ln 14 = 2.64$, $\ln 2.5 = 0.92$, in
+all $-1.56$. Exponentiating undoes the logarithm: $e^{-1.56} = 0.21$, the odds
+$210/999$. The odds give the probability as in
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>, $P = o/(1 + o)$; with
+$o = e^{s}$, dividing numerator and denominator by $e^{s}$ gives
+$1/(1 + e^{-s})$.
+
+The figure shows the whole map from log-odds to probability. It is symmetric
+around $s = 0$ ($σ(-s) = 1 - σ(s)$), nearly linear between about $-2$ and $+2$
+(12% to 88%), and flat at the ends: the base rate sits at $s = -6.91$, where
+a whole unit of log-odds changes the probability by only a fraction of a
+percent. The same function returns as the link of logistic regression
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), where $s$ is a
+linear score of the attributes.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Evidence Adds Up
+
+In log-odds, every flag is **one term** of the sum — a step of fixed height,
+whatever came before:
+
+$$
+s = \log \frac{P(\text{fraud})}{P(\text{honest})} + \sum\_{j} \log \mathrm{LR}\_j,
+\qquad
+P(\text{fraud} \mid x) = σ(s)
+$$
+
+
+<div class="grid-3-2">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ml/gm-log-odds-staircase" data-steps="3"
+ data-params='{"prior": [1, 999], "factors": [{"lr": 6, "label": "new device"}, {"lr": 14, "label": "foreign IP"}, {"lr": 2.5, "label": "night"}]}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+**Predict before each click:** which flag moves the probability most?
+
+
+<div class="fragment">
+
+| evidence | odds | log-odds | $P$ |
+|---|---|---|---|
+| base rate | $1 : 999$ | $-6.91$ | 0.1% |
+| new device | $\times 6$ | $+1.79$ | 0.6% |
+| foreign IP | $\times 14$ | $+2.64$ | 7.8% |
+| night | $\times 2.5$ | $+0.92$ | 17.4% |
+| **sum** | $210 : 999$ | $\mathbf{-1.56}$ | **17.4%** |
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The table is the equation term by term, in natural logarithms: the rounded
+terms add to $-6.91 + 1.79 + 2.64 + 0.92 = -1.56$, and
+$P = σ(-1.56) = 1/(1 + e^{1.56}) = 0.174$, the sigmoid of "Log-Odds and the
+Sigmoid". Each row of the table converts its running sum the same way: $-6.91 \to 0.1\\%$, $-5.12 \to 0.6\\%$,
+$-2.48 \to 7.8\\%$, $-1.56 \to 17.4\\%$. The base of the logarithm only rescales the
+axis; the figure labels it in probabilities.
+
+On a log-odds axis each likelihood ratio is a step of fixed height $\log
+\mathrm{LR}\_j$, independent of the current position: the log-odds are the sum
+of the log prior odds and the log likelihood ratios.
+
+Step 1 (new device): odds $6/999$, probability 0.6%. Step 2 (foreign IP): odds
+$84/999$, probability 7.8%. Step 3 (night): odds $210/999$, probability 17.4%.
+The foreign IP has the largest ratio and therefore the largest step; night is
+the weakest of the three, although it moves the probability more in absolute
+terms than the first flag did, because probability is not linear in log-odds.
+
+--
+
+## Why Work in Log-Odds
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### A scorecard
+Each flag adds **fixed points** — new device $+1.8$, foreign IP $+2.6$, night
+$+0.9$ — whatever came before. A sign says for or against.
+
+</div>
+
+
+<div class="card">
+
+### One axis
+Prior, evidence and — in Deciding on a Class — **costs** are terms on the same
+axis. A decision threshold is one number on it.
+
+</div>
+
+
+<div class="card">
+
+### A linear score
+$\sum\_j w\_j x\_j + b$: for yes/no flags the log-odds are linear in $x$ — the
+form **logistic regression** fits directly.
+
+</div>
+
+
+<div class="card">
+
+### Numbers a computer can hold
+1,000 words at $10^{-4}$ each: the product $10^{-4000}$ is **0** in floating
+point; the sum of logs, $-9{,}210$, is not.
+
+</div>
+
+
+</div>
+
+
+Notes:
+Scorecard: the points are the natural logarithms of the likelihood ratios
+($\ln 6 = 1.79$, $\ln 14 = 2.64$, $\ln 2.5 = 0.92$). A ratio above 1 gives
+positive points, below 1 negative ones, 1 none. Credit scorecards are built
+in exactly this form, usually with the logarithm rescaled to integer points.
+
+One axis: the Bayes decision rule of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> decides fraud when the posterior
+odds exceed $c\_{FP}/c\_{FN}$; in log-odds, evidence $\sum\_j \log \mathrm{LR}\_j$
+is compared with $\log(c\_{FP}/c\_{FN}) - \log(\text{prior odds})$. A new base
+rate or new costs shift the threshold; the evidence terms stay.
+
+Linear score: a binary flag contributes $\log \mathrm{LR}\_j^{\text{yes}}$ when
+present and $\log \mathrm{LR}\_j^{\text{no}}$ when absent, i.e.
+$w\_j x\_j + c\_j$ with $w\_j = \log \mathrm{LR}\_j^{\text{yes}} - \log
+\mathrm{LR}\_j^{\text{no}}$. Summed over the flags, with the prior in the
+constant, the naive Bayes log-odds are exactly linear in $x$: the functional
+form of logistic regression (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>);
+the two differ in how the weights are estimated
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+
+Underflow: the smallest positive double is about $4.9 \cdot 10^{-324}$, so a
+product of a thousand factors of $10^{-4}$ — a text classifier over a long
+mail — rounds to 0 in both classes, and the posterior becomes $0/0$. The sum
+of logarithms, $1{,}000 \cdot \ln 10^{-4} = -9{,}210.3$, is an ordinary
+number. Implementations therefore always work with log-probabilities and
+convert back with the log-sum-exp trick when a probability is needed.
+
+--
+
+## Mini-Exercise
+
+A transaction comes from a **known** device, $x\_\text{dev} = 0$:
+$\hat P(x\_\text{dev} = 0 \mid \text{fraud}) = 0.40$,
+$\hat P(x\_\text{dev} = 0 \mid \text{honest}) = 0.90$.
+
+
+<div class="q">
+
+Does this step the log-odds up or down — and by more or less than the $+1.8$
+of $x\_\text{dev} = 1$?
+
+</div>
+
+
+
+<div class="fragment">
+
+**Down, and by less.** The ratio is $0.40/0.90 \approx 0.44 < 1$, so the step
+is $\ln 0.44 \approx -0.81$. An absent flag is evidence too — weak evidence
+against.
+
+</div>
+
+
+Notes:
+Answer: the likelihood ratio of the observation "no new device" is
+$P(\text{no} \mid \text{fraud}) / P(\text{no} \mid \text{honest}) =
+0.40/0.90 = 0.444$, below 1, so it speaks against fraud; $\ln 0.444 = -0.81$.
+Its size is less than half of the $+1.79$ of a present new device: most
+honest transactions and many frauds come from a known device, so its absence
+says little. Every observed attribute enters the sum, present or absent; only
+an unobserved attribute is left out (its factor is 1, its log 0).
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+For two classes, **compare** instead of normalising: posterior odds = prior
+odds × one **likelihood ratio** per attribute. In **log-odds** the evidence
+**adds up** — a scorecard, one axis for prior, evidence and costs, a linear
+score, and sums a computer can hold.
 
 </div>
 
@@ -2227,8 +2712,8 @@ curve is about 190 times higher than the honest one.
 
 <div class="c-definition">
 
-For a continuous attribute, $p(x \mid y; θ)$ is a **density** — probability per
-unit of $x$. Bayes' theorem holds with densities:
+For a continuous attribute, $p(x \mid y; θ)$ is a **density**. Bayes' theorem
+is unchanged:
 $$
 P(y \mid x) = \frac{p(x \mid y; θ)\\, P(y)}{\sum\_{y'} p(x \mid y'; θ)\\, P(y')}
 $$
@@ -2236,42 +2721,29 @@ $$
 </div>
 
 
-
-<div class="grid-2">
-
-
-<div class="column">
-
-**Why it works.** An interval $[x, x + Δ]$ has probability
-$≈ p(x \mid y)\\,Δ$ in each class; the $Δ$ cancels.
-
-</div>
-
-
-<div class="column">
-
 **Normal per class**, $θ\_y = (μ\_y, σ\_y)$:
 $$
 p(x \mid y; θ) = \tfrac{1}{σ\_y \sqrt{2π}}\\, e^{-(x - μ\_y)^2 / 2σ\_y^2}
 $$
 
-</div>
-
-
-</div>
-
-
 
 <div class="fragment">
 
-At 1,250 €: likelihood ratio $0.46 / 0.0024 ≈ 190$. With prior odds $1 : 999$,
-$P(\text{fraud} \mid x) = 190 / 1{,}189 ≈ 16\\%$.
+At 1,250 € the two densities are $0.46$ (fraud) and $0.0024$ (honest), a
+likelihood ratio of about 190:
+$$
+\text{posterior odds} = \underbrace{\tfrac{1}{999}}\_{\text{prior odds}} \cdot \underbrace{190}\_{\text{LR}} = \frac{190}{999}
+\quad\Longrightarrow\quad
+P(\text{fraud} \mid x) = \frac{190}{190 + 999} ≈ 16\\%
+$$
 
 </div>
 
 
 Notes:
-The limit argument: $P(x \le X \le x + Δ \mid y) = p(x \mid y)\\,Δ + o(Δ)$, so
+As since Lecture 02, $p$ stands for a PMF or a density alike, and Bayes'
+theorem reads the same for both. For reference, the limit argument behind it:
+$P(x \le X \le x + Δ \mid y) = p(x \mid y)\\,Δ + o(Δ)$, so
 $P(y \mid x \le X \le x + Δ) \to p(x \mid y) P(y) / \sum\_{y'} p(x \mid y')
 P(y')$ as $Δ \to 0$. The conditional on the event $X = x$, which has
 probability zero, is defined by this limit. The likelihood ratio of a
@@ -2307,13 +2779,14 @@ $$
 |---|---|---|
 | amount 1,250 € | mean and spread of log amount | ≈ 190 |
 | new device: yes | share of rows with the flag | 6 |
-| **both** | | $190 \cdot 6 = 1{,}140$ |
 
 
-<div class="fragment c-insight">
+<div class="fragment">
 
-Posterior odds $1{,}140 : 999$, so **53%** fraud. Fitting is still one pass over
-the table: a mean and a spread per number and class, a share per flag and class.
+Prior odds times one ratio per attribute:
+$\\;\frac{1}{999} \cdot 190 \cdot 6 = \frac{1{,}140}{999}$, so
+$P(\text{fraud} \mid x) = \frac{1{,}140}{1{,}140 + 999} ≈ \mathbf{53\\%}$.
+Fitting is still one pass over the table.
 
 </div>
 
@@ -2339,81 +2812,131 @@ for the amount, $σ\_\text{fraud} < σ\_\text{honest}$, the likelihood ratio pea
 at about 3.5 million € and decreases beyond — far outside the data, where
 $p(x)$ is negligible anyway.
 
+Fitting: a mean and a spread per number and class, a share per flag and
+class, all in one pass over the table.
+
 Numbers: $191 \cdot 6 = 1{,}149$; posterior odds $1{,}149 : 999$,
 $P = 1{,}149/2{,}148 = 0.53$. The amount alone gave 16%, the device flag alone
 $6/1{,}005 = 0.6\\%$.
 
 --
 
-## One Gaussian per Class
+## One Normal over Two Numbers
 
-<div class="viz viz-lg" data-viz="ml/generative-2d" data-steps="2"
- data-params='{"view": "fit"}'></div>
+<div class="viz viz-xl" data-viz="ml/mvn-covariance" data-steps="1"></div>
 
 
 <div class="q">
 
-In fraud, amount and distance rise together. Which ellipses can follow the
-tilt — and what does one covariance for both classes do to the boundary?
+Gaussian naive Bayes gives the frauds two independent normals, one for the
+amount, one for the distance. Written as **one** normal over the vector $x$,
+what does its covariance matrix look like — and what do the data say?
 
 </div>
 
 
 Notes:
-The 98 labelled transactions of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>,
-now with a normal fitted to each class's rows; the ellipses are the 1σ and 2σ
-contours, the violet line is where the fitted posterior is 0.5 (the prior is
-the training share of fraud), and the tinted region is decided as fraud.
+The 35 frauds of the training table of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, in base-10 logarithms;
+the ellipses are the 1σ and 2σ contours of the normal with the fitted means
+(2.55 and 2.24, about 357 € and 173 km) and spreads (0.45 and 0.47).
 
-Step 0, naive: amount and distance independent within each class, so each
-class gets a diagonal covariance and its ellipses stay upright; the model is
-the two-attribute version of the previous slide. Step 1, full: one covariance
-per class, which keeps the within-class correlation (0.78 in fraud in this sample); the
-fraud ellipse tilts with its cloud and the boundary bends with it. Step 2,
-shared: one covariance for both classes, estimated from all rows (the pooled
-within-class covariance); both ellipses have the same shape and the boundary
-is a straight line. The choice control returns to any of the three.
+Step 0, $ρ = 0$: the matrix is diagonal, the ellipse upright, and the 2-D
+density is exactly the product of the two 1-D normals of "Gaussian Naive
+Bayes". Step 1, the fitted $ρ = 0.78$: the off-diagonal entries become the
+covariance $ρ σ\_1 σ\_2 = 0.78 \cdot 0.45 \cdot 0.47 = 0.17$, and the ellipse
+tilts with the cloud — large amounts come with large distances. A negative
+$ρ$ (slider) tilts it the other way. The upright ellipse misses the tilt the
+data show: this is the dependence within the class that naive Bayes drops,
+now for numbers.
 
 --
+
+<!-- .slide: class="smaller" -->
 
 ## The Multivariate Normal
 
 
-<div class="grid-2-1">
+<div class="c-definition">
 
-
-<div class="column">
-
+**Definition.** For $x, μ \in \mathbb{R}^p$ and a $p \times p$ **covariance
+matrix** $Σ$:
 $$
 \mathcal{N}(x;\ μ, Σ) = \frac{1}{(2π)^{p/2} \sqrt{\det Σ}}
 \exp\\!\Big(-\tfrac12 (x - μ)^\top Σ^{-1} (x - μ)\Big)
 $$
 
+</div>
+
+
+For $p = 2$, the frauds:
 $$
-Σ = \begin{pmatrix} σ\_1^2 & ρ\\, σ\_1 σ\_2 \\\ ρ\\, σ\_1 σ\_2 & σ\_2^2 \end{pmatrix}
+x = \begin{pmatrix} \log \text{amount} \\\ \log \text{distance} \end{pmatrix}
+\qquad
+μ\_\text{f} = \begin{pmatrix} 2.55 \\\ 2.24 \end{pmatrix}
+\qquad
+Σ = \begin{pmatrix} σ\_1^2 & ρ\\, σ\_1 σ\_2 \\\ ρ\\, σ\_1 σ\_2 & σ\_2^2 \end{pmatrix},
+\quad
+Σ\_\text{f} = \begin{pmatrix} 0.45^2 & 0.17 \\\ 0.17 & 0.47^2 \end{pmatrix}
 $$
 
-</div>
 
+<div class="fragment c-insight">
 
-<div class="c-definition">
-
-The **covariance matrix** $Σ$: spreads on the diagonal, covariances off it.
-
-</div>
-
+**Diagonal $Σ$** ($ρ = 0$): the density factorises,
+$\mathcal{N}(x; μ, Σ) = \prod\_j \mathcal{N}(x\_j; μ\_j, σ\_j^2)$ — independent
+attributes, i.e. Gaussian naive Bayes. Off-diagonal entries are the
+dependences it drops.
 
 </div>
 
 
-| model of $p(x \mid y)$ for $p$ numbers | numbers per class | $p = 30$ |
-|---|---|---|
-| counts, 10 bins per attribute | $10^p - 1$ | $10^{30}$ |
-| Gaussian naive Bayes | $2p$ | 60 |
-| one Gaussian per class | $p + p(p + 1)/2$ | 495 |
+Notes:
+$μ$ has one mean per number, $Σ$ the squared spreads on its diagonal and the
+covariances of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> off it,
+$\mathrm{cov}(X\_1, X\_2) = ρ σ\_1 σ\_2$. The fraud values: $0.78 \cdot 0.45
+\cdot 0.47 = 0.17$. The honest class has $μ\_\text{h} = (1.65, 1.07)$ (about
+44 € at 12 km), spreads 0.45 and 0.54 and correlation 0.27.
+
+In one dimension the formula is the normal density of
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>, with
+$(x - μ)^\top Σ^{-1} (x - μ) = (x - μ)^2/σ^2$. In general the exponent is
+minus one half of the squared Mahalanobis distance of $x$ from $μ$; its level
+sets are the ellipses of the figure. For a diagonal $Σ$, $Σ^{-1}$ is diagonal
+with entries $1/σ\_j^2$ and $\det Σ = \prod\_j σ\_j^2$, so the exponent is the sum
+$\sum\_j (x\_j - μ\_j)^2/σ\_j^2$ and the density is the product of $p$ normals.
+For normal distributions, uncorrelated means independent; in general it does
+not. $Σ$ is symmetric and must be positive definite; with fewer rows than
+attributes in a class its estimate is singular, which is one reason to share
+or to restrict it.
+
+--
+
+## Quadratic, Not Exponential
 
 
-<div class="c-insight">
+<div class="q">
+
+For $p = 30$ numbers, how many parameters does one Gaussian per class need —
+compared to counting in bins?
+
+</div>
+
+
+
+<div class="fragment">
+
+| model of $p(x \mid y)$ for $p$ numbers | numbers per class | $p = 2$ | $p = 30$ |
+|---|---|---|---|
+| counts, 10 bins per attribute | $10^p - 1$ | 99 | $10^{30}$ |
+| Gaussian naive Bayes | $2p$ | 4 | 60 |
+| one Gaussian per class | $p + p(p + 1)/2$ | 5 | 495 |
+
+</div>
+
+
+
+<div class="fragment c-insight">
 
 The family alone defeats the explosion: **quadratic** in $p$, not exponential —
 and the correlations stay in the model.
@@ -2422,17 +2945,9 @@ and the correlations stay in the model.
 
 
 Notes:
-In one dimension the formula is the normal density of
-<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>. The exponent is
-minus one half of the squared Mahalanobis distance of $x$ from $μ$; its level
-sets are the ellipses of the previous slide. The off-diagonal entries are the
-covariances of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>,
-$\mathrm{cov}(X\_1, X\_2) = ρ σ\_1 σ\_2$. $Σ$ is symmetric and must be positive
-definite; with fewer rows than attributes in a class its estimate is singular,
-which is one reason to share or to restrict it.
-
 Counts: a mean vector has $p$ entries, a symmetric $p \times p$ matrix
 $p(p + 1)/2$ free ones ($p$ variances and $p(p - 1)/2$ covariances). For
+$p = 2$: 2 means, 2 spreads, 1 covariance, 5 numbers, as in the example. For
 $p = 30$: $30 + 465 = 495$ per class. Binning instead needs a full joint over
 $10^{30}$ cells (<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). Gaussian naive
 Bayes is the special case of a diagonal $Σ$; a shared $Σ$ needs $p$ numbers
@@ -2444,26 +2959,162 @@ way no amount of data repairs (the last slide of the module).
 
 --
 
+## A Diagonal Covariance per Class
+
+
+<div class="grid-3-2">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="ml/generative-2d" data-params='{"view": "fit", "model": "naive"}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+
+<div class="q">
+
+Each class its own **diagonal** $Σ$. Can upright ellipses follow the fraud
+tilt?
+
+</div>
+
+
+
+<div class="fragment">
+
+No. The log-odds are one term per attribute, each in $x\_j$ alone:
+$$
+\text{log-odds} = b + \sum\_j \big(a\_j x\_j^2 + w\_j x\_j\big)
+$$
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-note">
+
+**Gaussian naive Bayes**: the boundary bends where the spreads differ
+($a\_j \neq 0$), never with the tilt — no term $x\_1 x\_2$.
+
+</div>
+
+
+Notes:
+The 98 labelled transactions of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>,
+now with a normal fitted to each class's rows; the ellipses are the 1σ and 2σ
+contours, the violet line is where the fitted posterior is 0.5 (the prior is
+the training share of fraud), and the tinted region is decided as fraud. The
+choice control switches to the other two covariance models of the next slides.
+
+Naive: amount and distance independent within each class, so each class gets
+a diagonal covariance and its ellipses stay upright; the model is the
+two-attribute version of "Gaussian Naive Bayes". Each attribute contributes
+$\log \mathcal{N}(x\_j; μ\_{j,\text{f}}, σ\_{j,\text{f}}^2) - \log
+\mathcal{N}(x\_j; μ\_{j,\text{h}}, σ\_{j,\text{h}}^2)$, whose $x\_j^2$ coefficient
+is $a\_j$; $w\_j = μ\_{j,\text{f}}/σ\_{j,\text{f}}^2 - μ\_{j,\text{h}}/σ\_{j,\text{h}}^2$,
+and $b$ collects the constants and the log prior odds; on the slide,
+$a\_j = 1/2σ\_{j,\text{h}}^2 - 1/2σ\_{j,\text{f}}^2$. There is no term
+$x\_1 x\_2$, which is what a tilt would need. With equal spreads in both classes
+$a\_j = 0$ and the naive boundary is a straight line as well.
+
+--
+
+## One Covariance per Class: A Curved Boundary
+
+
+<div class="grid-3-2">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="ml/generative-2d" data-params='{"view": "fit", "model": "full"}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+A full $Σ$ per class keeps the correlation: the fraud ellipse **tilts** with
+its cloud. The log-odds keep a quadratic term, now with $x\_1 x\_2$:
+$$
+\begin{aligned}
+\text{log-odds} &= x^\top A\\, x + w^\top x + b
+\\\ A &= -\tfrac12 \big(Σ\_\text{f}^{-1} - Σ\_\text{h}^{-1}\big)
+\end{aligned}
+$$
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-note">
+
+A **quadratic** boundary — **quadratic discriminant analysis** (QDA). Five
+numbers per class here: 2 means, 2 spreads, 1 correlation.
+
+</div>
+
+
+Notes:
+One covariance per class, estimated from the class's rows, keeps the
+within-class correlation (0.78 in fraud in this sample). Derivation:
+$\log \mathcal{N}(x; μ, Σ) = -\tfrac12 x^\top Σ^{-1} x + μ^\top Σ^{-1} x -
+\tfrac12 μ^\top Σ^{-1} μ - \tfrac12 \log \det Σ + \text{const}$. In the
+difference of the two classes the quadratic forms do not cancel when the
+covariances differ, so the boundary $\\{x : \text{log-odds} = 0\\}$ is a conic
+section (ellipse, parabola or hyperbola), with
+$w = Σ\_\text{f}^{-1} μ\_\text{f} - Σ\_\text{h}^{-1} μ\_\text{h}$. The price is a
+covariance matrix per class, $p(p + 1)/2$ numbers each, estimated from that
+class's rows only — for 100 frauds and 30 attributes, 465 numbers from 100
+rows, which is not estimable without restriction.
+
+--
+
 ## A Shared Covariance Gives a Linear Boundary
 
-With the **same** $Σ$ in both classes, the quadratic terms cancel in the
-log-odds:
 
+<div class="grid-3-2">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="ml/generative-2d" data-params='{"view": "fit", "model": "shared"}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+One $Σ$ for both classes, from all rows: both ellipses have the **same
+shape**, and the quadratic term cancels:
 $$
-\log \frac{P(\text{fraud} \mid x)}{P(\text{honest} \mid x)}
-= \underbrace{(μ\_\text{f} - μ\_\text{h})^\top Σ^{-1}}\_{w^\top}\\, x + b
-\qquad\Longrightarrow\qquad
-P(\text{fraud} \mid x) = \frac{1}{1 + e^{-(w^\top x + b)}}
+\text{log-odds} = \underbrace{(μ\_\text{f} - μ\_\text{h})^\top Σ^{-1}}\_{w^\top}\\, x + b
 $$
 
-- **One $Σ$ per class:** a quadratic boundary — *quadratic discriminant analysis*.
-- **Shared $Σ$:** a straight boundary — *linear discriminant analysis*.
-- **Diagonal $Σ$ per class:** Gaussian naive Bayes, quadratic as well.
+</div>
+
+
+</div>
+
 
 
 <div class="c-insight">
 
-A logistic function of a linear score: the form that logistic regression
+A straight boundary — **linear discriminant analysis** (LDA). Its posterior
+$1/(1 + e^{-(w^\top x + b)})$ is the form logistic regression
 (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) fits **directly**,
 without modelling $x$.
 
@@ -2471,26 +3122,62 @@ without modelling $x$.
 
 
 Notes:
-Derivation. $\log \mathcal{N}(x; μ, Σ) = -\tfrac12 x^\top Σ^{-1} x + μ^\top
-Σ^{-1} x - \tfrac12 μ^\top Σ^{-1} μ + \text{const}$, where the constant
-depends on $Σ$ only. In the difference of the two classes' logs the term
-$x^\top Σ^{-1} x$ and the constant cancel when $Σ$ is shared, leaving
-$w = Σ^{-1}(μ\_\text{f} - μ\_\text{h})$ and
+One covariance for both classes, estimated from all rows (the pooled
+within-class covariance); both ellipses have the same shape and the boundary
+is a straight line.
+
+Derivation. With $Σ$ shared, the term $x^\top Σ^{-1} x$ and the
+$\log \det Σ$ constant cancel in the difference of the two classes' logs,
+leaving $w = Σ^{-1}(μ\_\text{f} - μ\_\text{h})$ and
 $b = \tfrac12 μ\_\text{h}^\top Σ^{-1} μ\_\text{h} - \tfrac12 μ\_\text{f}^\top
 Σ^{-1} μ\_\text{f} + \log \frac{P(\text{fraud})}{P(\text{honest})}$. The prior
 enters only the offset $b$: changing the base rate shifts the line parallel to
-itself. With a separate $Σ$ per class the quadratic term
-$-\tfrac12 x^\top (Σ\_\text{f}^{-1} - Σ\_\text{h}^{-1}) x$ remains, and the
-boundary is a conic section (ellipse, parabola or hyperbola).
+itself. The three cases side by side: a diagonal $Σ$ per class (Gaussian naive
+Bayes) and a full $Σ$ per class (QDA) give quadratic boundaries, a shared $Σ$
+(LDA) a linear one.
 
 Posterior odds $e^{a}$ correspond to the probability $1/(1 + e^{-a})$, the
-logistic (sigmoid) function. This is Bishop, *Pattern Recognition and Machine
-Learning*, §4.2.1. Logistic regression fits $w$ and $b$ directly by maximising
-the likelihood of the labels; linear discriminant analysis obtains them from
-the class means, the shared covariance and the prior. The two estimates differ
-whenever the Gaussian assumption is wrong, the same contrast as naive Bayes
-against logistic regression for flags
+logistic (sigmoid) function of "Evidence Adds Up"
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>). This is Bishop, *Pattern
+Recognition and Machine Learning*, §4.2.1. Logistic regression fits $w$ and
+$b$ directly by maximising the likelihood of the labels; linear discriminant
+analysis obtains them from the class means, the shared covariance and the
+prior. The two estimates differ whenever the Gaussian assumption is wrong, the
+same contrast as naive Bayes against logistic regression for flags
 (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Three Covariance Models
+
+| $Σ$ | numbers per class ($p = 2$) | log-odds | boundary | name |
+|---|---|---|---|---|
+| diagonal, one per class | 2 means + 2 spreads | $\sum\_j (a\_j x\_j^2 + w\_j x\_j) + b$ | curved, no tilt | Gaussian naive Bayes |
+| full, one per class | 2 means + 2 spreads + 1 covariance | $x^\top A\\, x + w^\top x + b$ | curved (quadratic) | QDA |
+| full, shared | 2 means; $Σ$ once | $w^\top x + b$ | straight | LDA |
+
+
+<div class="fragment c-insight">
+
+QDA is the general case; the other two **restrict** it. Naive Bayes sets the
+off-diagonal entries to 0, LDA sets $Σ\_\text{f} = Σ\_\text{h}$. Fewer numbers,
+a simpler boundary, less data needed — and less of the data's shape kept.
+
+</div>
+
+
+Notes:
+The three models are nested: a diagonal $Σ$ per class and a shared full $Σ$
+are both special cases of a full $Σ$ per class. Both restrictions together, one
+shared diagonal $Σ$, give naive Bayes with equal spreads in both classes, whose
+log-odds are linear as well ($a\_j = 0$). Which to use is a bias–variance
+choice: QDA needs $p(p + 1)/2$ covariance entries per class from that class's
+rows alone (465 for $p = 30$, from 100 frauds), LDA estimates one $Σ$ from all
+rows, naive Bayes only $p$ spreads per class. With few rows in the rare class,
+the restricted models are often better despite their wrong assumption — the
+same trade as naive Bayes for flags.
 
 --
 
