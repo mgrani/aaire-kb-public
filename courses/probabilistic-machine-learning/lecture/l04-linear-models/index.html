@@ -34,6 +34,11 @@ by MLE and MAP; exercises 3.A.1, 3.A.2, 3.B.2, 3.C.2 became 4.A.1–4.A.4. -->
 Notes:
 Fitting the Parameters applies Bayes' theorem to a parameter: for yes/no data
 with a Beta prior the posterior is obtained by adding counts
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). The update can go one
+observation at a time, each posterior the prior for the next; the same rule
+updates the class flag by flag, works on a grid for any likelihood, and holds
+only for observations independent given a fixed θ, with the whole posterior
+carried on and no false zeros in the prior; copies make it over-confident
 (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). On that posterior, the
 counting of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> was its peak, the maximum likelihood
 estimate (MLE); +1 smoothing its mean under a flat prior; a prior's peak is the
@@ -347,6 +352,127 @@ the epistemic uncertainty shrinking, as described in
 
 --
 
+## The Posterior Is the Next Prior
+
+
+<div class="c-definition">
+
+**Sequential Bayesian updating.** If the observations of the data
+$D = (d\_1, \ldots, d\_n)$ are **independent given $\theta$**, then for every $i$
+$$
+p(\theta \mid d\_1, \ldots, d\_i) = \frac{p(d\_i \mid \theta)\\; p(\theta \mid d\_1, \ldots, d\_{i-1})}{p(d\_i \mid d\_1, \ldots, d\_{i-1})}
+$$
+
+</div>
+
+
+
+<div class="flow-row">
+
+
+<div class="stat-card">
+
+### $p(\theta)$
+prior
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### $\times\\, p(d\_1 \mid \theta)$
+first observation, normalised
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card">
+
+### $p(\theta \mid d\_1)$
+posterior = prior for $d\_2$
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### $\times\\, p(d\_2 \mid \theta)$
+and so on
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+After all $n$: $p(\theta \mid D) \propto p(\theta) \prod\_i p(d\_i \mid \theta)$,
+the same as one update on all the data, in **any order**. With a Beta prior a
+step adds 1 to $a$ or $b$; for any other model it is still multiply and
+normalise.
+
+</div>
+
+
+Notes:
+Notation: $D = (d\_1, \ldots, d\_n)$ is the data and $d\_i$ one observation,
+whatever one row is: a yes/no here, a pair $(x\_i, y\_i)$ in regression. Small
+letters denote observed values, as throughout the course; in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> the observations were the
+device flags $x\_1, \ldots, x\_n$ of the fraud rows.
+
+Derivation. By Bayes' theorem on all $i$ observations,
+$p(\theta \mid d\_1, \ldots, d\_i) \propto p(d\_1, \ldots, d\_i \mid \theta)\\, p(\theta)$.
+The chain rule splits the likelihood into
+$p(d\_i \mid \theta, d\_1, \ldots, d\_{i-1}) \cdot p(d\_1, \ldots, d\_{i-1} \mid \theta)$.
+Independence given $\theta$ drops the earlier observations from the first
+factor, and the second factor times $p(\theta)$ is, up to a constant, the
+posterior after $i - 1$ observations. The steps of "Watching the Posterior
+Form" are this rule: each curve is the prior of the next click.
+
+The denominator $p(d\_i \mid d\_1, \ldots, d\_{i-1}) = \int p(d\_i \mid \theta)\\,
+p(\theta \mid d\_1, \ldots, d\_{i-1})\\, d\theta$ is the probability of the next
+observation given the earlier ones, the posterior predictive. Under
+$\mathrm{Beta}(a, b)$ the probability that the next observation is a yes is
+$a/(a + b)$, the posterior mean; with a flat prior after $h$ yeses in $n$ this
+is $(h + 1)/(n + 2)$, Laplace's rule of succession and the +1 smoothing of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>.
+
+Independent given $\theta$ is not independent. Without knowing $\theta$ the
+observations are dependent: three yeses make a fourth more probable, because
+they shift the belief about $\theta$. That dependence is exactly what the
+update exploits. <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>
+counted the fraud rows one at a time in the same way, and
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> stated the rule for
+events. <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> compares the
+update of a class with that of a parameter, computes it without a conjugate
+prior, and shows what dependent observations do to it.
+
+--
+
 ## What the Posterior Gives You
 
 After 3 of 10, with a flat prior: $\theta \mid D \sim \mathrm{Beta}(4, 8)$.
@@ -500,8 +626,326 @@ intervals differ, as for 3 of 10.
 
 An unknown parameter is just another unknown: give it a **prior**, condition on
 the data, and the **posterior** says what the data justifies — as a peak, a mean
-and an interval. For yes/no data with a Beta prior the update is **adding
-counts**, and the prior's influence fades as data grows.
+and an interval. The update can go **one observation at a time**: each
+posterior is the prior for the next. For yes/no data with a Beta prior a step
+is **adding a count**, and the prior's influence fades as data grows.
+
+</div>
+
+
+--
+
+## Sequential Updating of a Class and of a Parameter
+
+
+<div class="q">
+
+Lecture 03 multiplied a transaction's odds flag by flag; the Beta posterior grew
+observation by observation. Is that the same rule?
+
+</div>
+
+
+
+<div class="fragment">
+
+| | unknown | evidence per step | one step | needs |
+|---|---|---|---|---|
+| **classify** | the class $y$ | one attribute $x\_j$ | odds × likelihood ratio | attributes independent given $y$ |
+| **learn a share** | $θ$ | one observation $d\_i$ | +1 to $a$ or $b$ | observations independent given $θ$ |
+| **learn any model** | $θ$ | one observation $d\_i$ | × $p(d\_i \mid θ)$, normalise | observations independent given $θ$ |
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+One rule: **posterior ∝ likelihood of the new evidence × previous posterior**.
+Only the unknown changes, and the evidence must be independent **given that
+unknown**.
+
+</div>
+
+
+Notes:
+Classify: the fraud odds of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> start
+at the prior odds 1/999 and are multiplied by the likelihood ratio of each flag,
+6 (new device), 14 (foreign IP) and 2.5 (night), giving 84/999 after two flags
+and 210/999, 17.4%, after three. Each intermediate odds is the prior for the
+next flag. Learn a share: the Beta posterior of
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> starts at $\mathrm{Beta}(1, 1)$
+and adds 1 to $a$ for a yes and to $b$ for a no, ending at $\mathrm{Beta}(4, 8)$
+after 3 of 10. Learn any model: the same step with the model's likelihood
+$p(d\_i \mid θ)$, computed on a grid two slides on.
+
+The two updates differ only in what is unknown. The class belongs to one
+transaction and takes two values, so its distribution is two numbers, or one
+odds. The parameter is shared by all rows and takes values in an interval, so
+its distribution is a density. In each case the condition is the one under
+which the evidence factor of a step does not depend on the earlier evidence:
+for the class, conditional independence of the attributes given $y$ (the naive
+Bayes assumption); for the parameter, of the observations given $θ$.
+<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a> stated the rule for
+events; it holds for any unknown.
+
+Naive Bayes uses both: training updates the shares row by row
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), prediction updates
+the class flag by flag.
+
+--
+
+## Dependent Observations Are Counted Twice
+
+
+<div class="q">
+
+100 users, 30 came back, but every user was logged **10 times**. Updated as
+1,000 independent rows, how much too narrow is the posterior?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="grid-2-3">
+
+
+<div class="card muted">
+
+<span class="eyebrow">1,000 rows, as if independent</span>
+
+$\mathrm{Beta}(301, 701)$: 95% in $[0.27,\ 0.33]$
+
+</div>
+
+
+<div class="c-important">
+
+<span class="eyebrow">100 users, each counted once</span>
+
+$\mathrm{Beta}(31, 71)$: 95% in $[0.22,\ 0.40]$, about **3 times** wider
+($\sqrt{10}$)
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-warning">
+
+A copy carries no new information, but the update counts it as new: the
+posterior is **over-confident**. Correlated flags in naive Bayes make the same
+error.
+
+</div>
+
+
+Notes:
+Independent given $θ$ means: once $θ$ is known, one observation says nothing
+about the next. Ten log entries of the same user violate it: given $θ$ they are
+one draw, not ten. Treating them as ten multiplies the likelihood of each user
+by itself ten times, $p(D \mid θ)^{10}$, so the posterior is the correct one
+raised to the tenth power (as a function of $θ$, then normalised); for large
+$n$ this shrinks its standard deviation by $\sqrt{10} \approx 3.2$. Here
+0.0145 against 0.0453, a factor of 3.1. The mean is barely affected (0.300
+against 0.304): the estimate is right, the stated certainty is not.
+
+The same violation occurs with duplicated records, several transactions of one
+customer, and time series in which neighbouring observations are alike (a fraud
+wave). Remedies are to remove the copies, to model the group explicitly (one
+parameter per customer drawn from a shared distribution, drawn as a plate in
+<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>), or to weight each group as one
+observation. "Counting Evidence Twice" in
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> is the attribute-level
+version: correlated flags within one transaction, there 0.5% against 4%.
+
+--
+
+## When Sequential Updating Works
+
+
+<div class="q">
+
+Copies broke the update. What else must hold for "the posterior is the next
+prior" to give the right answer?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="marks-yes">
+
+- **Independent given $θ$**: no copies, no clusters (previous slide).
+- **$θ$ stays fixed**: one value for all observations. If the share drifts,
+  the old rows outvote the new ones.
+- **The whole posterior is carried on**: both counts, not only the share. A
+  peak alone has lost how certain it was.
+- **The prior excludes nothing possible**: where it is 0, every product
+  stays 0.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Then order and batching do not matter: one at a time, in blocks or all at
+once, the posterior is the same.
+
+</div>
+
+
+Notes:
+Drift. 1,000 users return with $θ = 0.3$, then the feature changes and 100
+users return with $θ = 0.6$. With a flat prior the expected posterior mean is
+$(300 + 60 + 1)/(1{,}100 + 2) = 0.33$, with a standard deviation of about 0.014:
+confident and wrong, because all 1,100 rows count equally although only the
+last 100 describe the present $θ$. A forgetting factor multiplies both counts
+by $λ < 1$ before every update, so the posterior rests on about $1/(1 - λ)$
+recent rows; with $λ = 0.99$ the mean after the change is 0.49 and moving
+towards 0.6, on an effective 100 rows. This is no longer the Bayesian update
+of a fixed $θ$ but of a $θ$ assumed to change slowly. The prediction of the
+bank's fraud model faces the same issue: fraud patterns change, and the counts
+of last year weigh in.
+
+Carrying on the peak. $\mathrm{Beta}(4, 8)$ (3 of 10) and
+$\mathrm{Beta}(301, 701)$ (300 of 1,000) have nearly the same peak, 0.30. One
+more returning user moves the first mean from 0.33 to $5/13 = 0.38$, the second
+from 0.300 to $302/1{,}003 = 0.301$. A share without its counts cannot be
+updated correctly; this is what <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> drops.
+For other models the whole posterior means a whole distribution, which a grid
+or a conjugate family can represent.
+
+Prior zeros. If the prior gives $θ > 0.5$ density 0, the posterior is 0 there
+for any data: with 600 of 1,000 returning it piles up at 0.5. Assigning
+probability 0 only to the impossible is known as Cromwell's rule; the zero
+veto of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> is the same
+effect on a fitted share.
+
+--
+
+## Updating on a Grid
+
+
+<div class="grid-2">
+
+
+<div class="c-algorithm">
+
+1. Lay $θ$ on a grid; give each point its prior weight.
+2. For an observation, multiply every weight by $p(d\_i \mid θ)$.
+3. Divide by the sum: the posterior, and the prior for the next observation.
+
+</div>
+
+
+<div class="column">
+
+Flat prior, the users' ✗ ✓ ✗:
+
+| $θ$ | 0.1 | 0.3 | 0.5 | 0.7 | 0.9 |
+|---|---|---|---|---|---|
+| prior | .20 | .20 | .20 | .20 | .20 |
+| ✗ $\times (1 - θ)$ | .36 | .28 | .20 | .12 | .04 |
+| ✓ $\times\\, θ$ | .11 | .25 | .29 | .25 | .11 |
+| ✗ $\times (1 - θ)$ | .19 | .35 | .29 | .15 | .02 |
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+No conjugate prior and no formula: only step 2 knows the model, so **any**
+prior and **any** likelihood work.
+
+</div>
+
+
+Notes:
+First step: the prior weights times $1 - θ$ are 0.18, 0.14, 0.10, 0.06, 0.02,
+sum 0.50; divided by 0.50 they give the second row. Second step: times $θ$,
+0.036, 0.084, 0.100, 0.084, 0.036, sum 0.34. Third step: sum 0.50 again. One
+update on all three at once, $0.2 \cdot θ (1 - θ)^2$ normalised, gives the
+same last row. The probability that the next user returns is
+$\sum\_θ θ \cdot w(θ) = 0.39$ on the grid; the exact posterior
+$\mathrm{Beta}(2, 3)$ has mean 0.40 and peak $1/3$. A finer grid approaches the
+Beta curve of "Watching the Posterior Form".
+
+The example uses a Bernoulli likelihood only so that the result can be checked
+against the Beta posterior. Step 2 can use any likelihood: a normal density for
+a measured value, or the logistic likelihood of
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>, for which no conjugate
+prior exists. The limit is the number of parameters: $k$ grid points per
+parameter and $d$ parameters need $k^d$ points, $10^{10}$ for ten parameters
+at ten points each. Models with many parameters therefore need a conjugate
+prior (Bayesian linear regression,
+<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>), keep only the peak
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), or approximate the posterior
+otherwise.
+
+--
+
+## Mini-Exercise
+
+Prior $\mathrm{Beta}(1, 1)$, observations ✓ ✓ ✗.
+
+
+<div class="q">
+
+One analyst updates after each observation, another once on all three. Whose
+posterior is wider?
+
+</div>
+
+
+
+<div class="fragment">
+
+**Neither**: both end at $\mathrm{Beta}(3, 2)$. Each step adds one count, and
+a sum does not depend on how it is split.
+
+</div>
+
+
+Notes:
+$\mathrm{Beta}(1, 1) \to \mathrm{Beta}(2, 1) \to \mathrm{Beta}(3, 1) \to
+\mathrm{Beta}(3, 2)$ one at a time; $\mathrm{Beta}(1 + 2, 1 + 1)$ at once. The
+posterior has mean 0.6 and 95% credible interval $[0.19, 0.93]$. The order
+does not matter either: ✗ ✓ ✓ ends at the same posterior. Both statements
+require the observations to be independent given $θ$; with copies among them
+both analysts would be equally over-confident.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Bayes' theorem can be applied **one piece of evidence at a time**: each
+posterior is the prior for the next. The same rule updates a class flag by flag
+and a parameter row by row; counting is its special case for a share, and a
+grid computes it for any one-parameter model. It needs the evidence
+independent **given the unknown**, a fixed unknown, the whole posterior carried
+on, and a prior that rules out nothing possible.
 
 </div>
 

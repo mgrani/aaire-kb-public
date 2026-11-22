@@ -87,7 +87,11 @@ independence of the attributes given the class, which reduces the number of
 parameters from $2^p - 1$ to $p$ per class for $p$ binary attributes; fitting
 is counting, the classifier multiplies one fitted share per attribute into a
 score per class and normalises, and a count of zero vetoes all other evidence
-unless it is smoothed. Odds and log-odds: for two classes the ratio of the
+unless it is smoothed. Bayesian parameter updates explain why fitting is
+counting: Bayes' theorem with the parameter as the unknown, applied one row at
+a time (each posterior the prior for the next row), reduces to adding counts
+because the Bernoulli likelihood depends on the rows only through the counts.
+Odds and log-odds: for two classes the ratio of the
 scores suffices, the posterior odds are the prior odds times one likelihood
 ratio per attribute, and in log-odds the evidence adds up. Continuous attributes: a density per class, of which Bayes' theorem
 needs only the ratio; Gaussian naive Bayes; one Gaussian per class keeps the
@@ -271,27 +275,32 @@ Running example: fraud detection with a base rate of 1 in 1,000 (prior odds
 
 <div class="img-h-xl">
 
-![Argument map for Lecture 03: three kinds of classifier, the exploding joint and its two ways out — naive Bayes and a density per class — then the Bayes decision rule with costs and the prior](/courses/probabilistic-machine-learning/figures/l03-argument-map.svg)
+![Argument map for Lecture 03: three kinds of classifier, the exploding joint and its two ways out — naive Bayes, whose evidence adds up in log-odds, and a normal per class whose covariance sets the boundary — then the Bayes decision rule with costs and the prior](/courses/probabilistic-machine-learning/figures/l03-argument-map.svg)
 
 </div>
 
 
 Notes:
-The map follows the five modules. Of the three kinds of classifier, only the
+The map follows the six modules. Of the three kinds of classifier, only the
 generative one models $p(y)$ and $p(x \mid y)$; it converts with Bayes' theorem,
 keeps the 1/1,000 prior explicit and can generate data. Its problem is the
 joint: read as a sample, the table puts almost no data into each of the $m^p$
 cells ($2^{30} - 1$ numbers per class for 30 binary flags, against 100 frauds).
 There are two ways out. Structure: naive Bayes assumes the flags independent
-given the class, so fitting becomes counting; it drops the dependences between
-flags, so correlated evidence is counted twice and the probabilities are
-over-confident. A family: a density per class for each number, Gaussian naive
-Bayes, or one Gaussian per class, which keeps the correlations at a cost
-quadratic in the number of attributes; a shared covariance makes the boundary
-linear, and a class with two patterns needs a mixture. The Bayes decision rule
-turns the posterior into a class: the most probable class makes the fewest
-errors, unequal costs move the threshold, and prior and costs enter as one
-threshold on the likelihood ratio, so both change without refitting.
+given the class, so $p(x \mid y)$ is a product of one factor per flag and
+fitting becomes counting; a value never counted in a class vetoes that class.
+In log-odds the evidence adds up: the log posterior odds are the log prior odds
+plus one log likelihood ratio per flag, and the sigmoid, the exact inverse of
+the logit, turns the sum back into a probability. The sum holds only under the
+independence assumption; correlated flags are counted twice and the
+probabilities come out over-confident. A family: a normal per class for the
+numbers, whose covariance matrix sets the boundary: diagonal is Gaussian naive
+Bayes, a full covariance per class gives a quadratic boundary (QDA), a shared
+one a linear boundary (LDA); a class with two patterns needs a mixture. The
+Bayes decision rule turns the posterior into a class: the most probable class
+makes the fewest errors, unequal costs move the threshold, and prior and costs
+enter as one threshold on the likelihood ratio, so both change without
+refitting.
 
 What the counts and class means were — the peak of a posterior over the
 parameter, the maximum likelihood estimate — opens
@@ -345,6 +354,8 @@ most informative one cost?
 - **Hypothesis** $y$: the value of the class variable $Y$ — what we want to
   know.
 - **Decision:** the posterior $P(y \mid x)$.
+- **Names for readability:** in examples an attribute is indexed by its
+  field, $x\_\text{amt}$ for $x\_1$, $x\_\text{dist}$ for $x\_2$.
 
 </div>
 
@@ -354,14 +365,6 @@ most informative one cost?
 
 </div>
 
-
-
-<div class="fragment q">
-
-The student table had hypothesis $A$ = "PML" and evidence $B$ = "fail".
-Which of the two is the data, which the hypothesis?
-
-</div>
 
 
 Notes:
@@ -379,9 +382,14 @@ $P(y \mid x)$. The textbook letters vary (Bishop: $\mathbf{x}$ and $t$ or
 $\mathcal{C}\_k$; MacKay: $D$ and $H$); in machine learning $x$ and $y$ are
 standard. Capital letters denote the random variables, small letters their
 values; $x$ is a vector whenever there is more than one attribute. In general
-statements the attributes are numbered, $x\_1, \ldots, x\_p$; in the examples
-they are indexed by name, $x\_\text{amt}$ for the amount and $x\_\text{dist}$ for
-the distance.
+statements the attributes are numbered, $x\_1, \ldots, x\_p$, with $x\_j$ for any
+one of them; in the examples they are indexed by name, $x\_\text{amt}$ for the
+amount and $x\_\text{dist}$ for the distance, so that a formula can be read
+without looking up which number belongs to which column. The named attribute is
+the raw field; a transformed value is written out, $\log x\_\text{amt}$. Where a
+module builds a vector of its own, such as $x = (\log \text{amount}, \log
+\text{distance})$ for a two-dimensional normal, its entries are numbered again
+by position, $x\_1$ and $x\_2$, as are the matching $σ\_1, σ\_2$ of the covariance.
 
 --
 
@@ -414,7 +422,8 @@ The bar conditions on a random variable, the semicolon fixes a parameter.
 
 <div class="c-example">
 
-Fraud share: $P(Y = \text{fraud}; θ) = π$, one number.
+Class ~ Bernoulli: $P(Y = \text{fraud}; θ) = π$. The probability **is**
+the parameter, one number.
 
 Log amount per class ~ normal: $μ\_\text{f}, σ\_\text{f}$ and $μ\_\text{h}, σ\_\text{h}$.
 
@@ -433,6 +442,13 @@ $p(x; θ)$ and $p(x \mid y; θ)$, so that the bar is reserved for conditioning
 on random variables of the model (data and hypothesis). The two notations
 mean the same density; the semicolon says that $θ$ is treated as a fixed,
 unknown number, not as a random variable.
+
+$π$ is a probability and a parameter at once. The class $Y$ takes two values,
+so its distribution is a Bernoulli, and a Bernoulli has exactly one free
+number: the probability of the one value, here fraud ($1 - π$ for honest
+follows). $π$ is not a shorthand for a known $P(\text{fraud})$ but an unknown
+the model has to learn; training sets it to the fraud share of the training
+rows, $\hat π = n\_\text{fraud} / n$.
 
 $θ$ always stands for all parameters of the model; its components get names of
 their own — $π$ for the class share (Bishop's notation), $μ$ and $σ$ per class
@@ -477,7 +493,7 @@ $$
 
 - $y\_i$: label of row $i$; $\hat y\_i = \text{rule}(x\_i; θ)$: the rule's class
 - $\mathbb{1}[\cdot]$: 1 if true, else 0 — the sum counts errors
-- $\arg\min\_θ$: the $θ$ with the fewest; $\hat θ$: the fitted $θ$
+- $\arg\min\_θ$: the $θ$ with the fewest errors; $\hat θ$: the fitted $θ$
 
 </div>
 
@@ -1170,7 +1186,7 @@ Almost always **none**. Counting needs examples of every combination of values.
 Notes:
 This is the reading of a table set up in
 <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>: a column is a random
-variable, a row is one realisation of the vector $(X\_1, \ldots, X\_d, Y)$, and
+variable, a row is one realisation of the vector $(X\_1, \ldots, X\_p, Y)$, and
 the table is $n$ draws from a joint distribution nobody has written down.
 Restricting to the rows with $y = \text{fraud}$ is conditioning on the class,
 so those rows are a sample from $p(x \mid \text{fraud})$.
@@ -1458,8 +1474,8 @@ classifies well anyway. How can both be true?
 
 <div class="q">
 
-Among the 100 frauds, **60** come from a new device and **70** from a foreign
-IP. If the device told us nothing about the IP, how many would show **both**?
+Among the 100 frauds, **60** come from a new device and **50** happen at night.
+If the device told us nothing about the time, how many would show **both**?
 
 </div>
 
@@ -1467,9 +1483,9 @@ IP. If the device told us nothing about the IP, how many would show **both**?
 
 <div class="fragment">
 
-70% of the 60, so **42**: the product $0.60 \cdot 0.70$. The data say **55**.
-Among frauds, a new device makes a foreign IP *more* likely: $55/60 = 92\\%$
-instead of 70%.
+Half of the 60, so **30**: the product $0.60 \cdot 0.50$. The data say **31**.
+*Within the frauds*, the device leaves the time as it was: $31/60 \approx 52\\%$
+at night, against 50% of all frauds.
 
 </div>
 
@@ -1489,6 +1505,15 @@ Once $C$ is known, $B$ tells us nothing more about $A$.
 </div>
 
 
+
+<div class="fragment c-warning">
+
+Not every pair: 60 new device and 70 foreign IP give **42** by the product,
+the data **55** — an account take-over brings both.
+
+</div>
+
+
 Notes:
 The two forms are equivalent whenever $P(B \cap C) > 0$: dividing
 $P(A \cap B \mid C) = P(A \mid C) P(B \mid C)$ by $P(B \mid C)$ gives
@@ -1503,28 +1528,30 @@ conditioning can create a dependence between independent causes
 (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a> treats both cases with a counted
 example).
 
-The numbers are those of "The Joint of Two Flags"
-(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), where 42 was the mark for
+In the question, $C$ = fraud, $A$ = at night and $B$ = new device:
+$P(A \cap B \mid C) = 0.31$ against $P(A \mid C) \cdot P(B \mid C) = 0.30$, or
+$P(A \mid B \cap C) = 31/60 \approx 0.52$ against $P(A \mid C) = 0.50$. The
+night counts are those of the 100 frauds in "One Number per Flag Pattern"
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>); in a sample of 100 a difference
+of one transaction is noise, so the pair is conditionally independent for
+practical purposes. "Given $C$" is the restriction to the fraud rows: the
+statement is checked within one class, and for the honest class separately.
+
+The counter-example is "The Joint of Two Flags", where 42 was the mark for
 "multiplied" among the possible overlaps 30 to 60. In an account take-over the
 attacker typically uses both a new device and a foreign IP, so among frauds the
-two flags are positively dependent: with $C$ = fraud, $A$ = foreign IP and
-$B$ = new device, $P(A \mid B \cap C) = 0.55/0.60 \approx 0.92$ against
-$P(A \mid C) = 0.70$. This is the dependence that naive Bayes assumes away.
+two flags are positively dependent: with $A$ = foreign IP,
+$P(A \mid B \cap C) = 0.55/0.60 \approx 0.92$ against $P(A \mid C) = 0.70$.
+This is the dependence that naive Bayes assumes away.
 
 --
 
 ## The Naive Assumption
 
 
-<div class="grid-2">
-
-
-<div class="column">
-
-
 <div class="c-important">
 
-Assume the attributes are **independent given the class**:
+Assume the attributes are **conditionally independent given the class**:
 $$
 p(x\_1, \ldots, x\_p \mid y) = \prod\_{j=1}^{p} p(x\_j \mid y)
 $$
@@ -1532,13 +1559,24 @@ $$
 </div>
 
 
+
+
+
+<div class="grid-2">
+
+
+<div class="column">
+
 In words: each attribute depends on the class, and **on nothing else** once
-the class is known.
+the class is known. So the shortcut is to drop every dependence *within* a class.
 
 </div>
 
 
 <div class="column">
+
+
+<div class="c-example">
 
 Numbers per class, for yes/no flags:
 
@@ -1553,12 +1591,9 @@ Numbers per class, for yes/no flags:
 </div>
 
 
-
-<div class="c-warning">
-
-**Shortcut 1 — assume it apart.** Dropped: every dependence *within* a class.
-
 </div>
+
+
 
 
 Notes:
@@ -2110,6 +2145,278 @@ values the flat Dirichlet plays the same role.
 
 --
 
+<span class="eyebrow">From a known to an unknown parameter</span>
+
+## Bayesian Parameter Updates: Why We Count
+
+
+<div class="q">
+
+The classifier treated $θ$ as known. Can Bayes' theorem also estimate $θ$?
+
+</div>
+
+
+
+<div class="fragment">
+
+
+<div class="grid-2-3">
+
+
+<div class="card muted">
+
+<span class="eyebrow">Classify: parameter fixed</span>
+
+$$
+P(y \mid x; θ) \propto p(x \mid y; θ)\\; P(y; θ)
+$$
+
+Unknown: $y$. Evidence: one transaction $x$.
+
+</div>
+
+
+<div class="c-important">
+
+<span class="eyebrow">Learn: parameter unknown</span>
+
+$$
+p(θ \mid D) \propto p(D \mid θ)\\; p(θ)
+$$
+
+Unknown: $θ$. Evidence: the training data $D$.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Same theorem, $θ$ as the hypothesis: it needs a **prior** $p(θ)$, and the
+semicolon becomes a bar. Read the fraud rows' device flags one at a time:
+$p(θ \mid x\_1, \ldots, x\_i)$.
+
+</div>
+
+
+Notes:
+"Parameters $θ$" in <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>
+wrote $p(x \mid y; θ)$ with a semicolon, $θ$ a fixed unknown number, and
+announced that the bar returns once $θ$ gets a distribution of its own; this is
+that step. The classifier so far plugs the fitted shares into Bayes' theorem as
+if they were the true $θ$. Learning treats $θ$ as the unknown instead: the
+prior $p(θ)$ states what is believed about $θ$ before any data, the likelihood
+$p(D \mid θ)$ is the probability of the training data under the model, now
+read as a function of $θ$, and the posterior $p(θ \mid D)$ is the belief about
+$θ$ after the data.
+
+Which data inform which parameter follows from the model. $θ = P(x\_\text{dev} =
+1 \mid \text{fraud})$ is a parameter of $p(x \mid \text{fraud})$, so only the
+fraud rows carry information about it, and of those only the device flag. Here
+$x\_i$ is short for $x\_{i,\text{dev}}$, the device flag of the $i$-th fraud row,
+and $D = (x\_1, \ldots, x\_n)$ with $n = 100$. Each of the nine parameters of
+"Counts to Shares" is learned from its own part of the table in the same way.
+
+--
+
+<span class="eyebrow">One fraud row at a time</span>
+
+## Bayesian Parameter Updates: Why We Count
+
+
+<div class="q">
+
+No data yet: every $θ = P(x\_\text{dev} = 1 \mid \text{fraud})$ is equally
+plausible. A fraud from a new device arrives: which $θ$ gain, and how much?
+
+</div>
+
+
+
+<div class="grid-3-2">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="math/bayes-updating" data-steps="6"
+ data-params='{"mode": "factor", "observations": [1, 1, 0, 1, 0, 1], "symbols": ["✓", "✗"], "names": ["new device", "other device"], "xLabel": "θ = P(new device | fraud)"}'></div>
+
+</div>
+
+
+<div class="column middle">
+
+
+<div class="fragment">
+
+Each $θ$ is multiplied by the probability of the row: $θ$ or $1 - θ$.
+
+After $h$ new and $m$ other devices: $θ^{h} (1 - θ)^{m}$.
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+The exponents **are the counts**; each belief is the start for the next row.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The figure: grey is the belief before the row, the dotted teal line the factor
+of the row (right axis), navy the belief after it, rescaled to area 1. A new
+device multiplies by $θ$, so values of $θ$ near 1 gain most and $θ = 0$ is ruled
+out; another device multiplies by $1 - θ$ and rules out $θ = 1$. The six rows
+end at $θ^4 (1 - θ)^2$, peaked at $4/6$.
+
+The belief after $h$ new and $m$ other devices among $n = h + m$ frauds is
+$θ^h (1 - θ)^m$, whose peak is the count share $h/n$ and whose mean is
+Laplace's $(h + 1)/(n + 2)$: 61/102 for the 60 of 100 frauds of "Counts to Shares". A
+101st fraud from a new device turns $θ^{60}(1 - θ)^{40}$ into
+$θ^{61}(1 - θ)^{40}$, so nothing has to be counted again. A multiplication does
+not depend on the order of its factors, so the order of the rows does not
+matter either. A deployed model can learn from each newly labelled transaction
+without keeping the training table: per flag and class it stores two counts.
+
+--
+
+<span class="eyebrow">Prior, likelihood and posterior</span>
+
+## Bayesian Parameter Updates: Why We Count
+
+<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="4"
+ data-params='{"labels": ["posterior — belief about θ after x₁, …, xᵢ", "likelihood of xᵢ — θ if xᵢ = 1, 1 − θ if xᵢ = 0", "prior for xᵢ — the posterior after xᵢ₋₁", "evidence — normalises, does not depend on θ"]}'>
+
+$$
+\eqa{p(θ \mid x\_1, \ldots, x\_i)} = \frac{\eqb{p(x\_i \mid θ)} \cdot \eqc{p(θ \mid x\_1, \ldots, x\_{i-1})}}{\eqd{p(x\_i \mid x\_1, \ldots, x\_{i-1})}}
+$$
+
+</div>
+
+
+<div class="c-definition fragment">
+
+- **Data:** $x\_i = x\_{i,\text{dev}} \in \\{0, 1\\}$, the device flag of the
+  $i$-th fraud row; $D = (x\_1, \ldots, x\_n)$.
+- **Model:** each $x\_i$ is **Bernoulli**,
+  $p(x\_i \mid θ) = θ^{x\_i} (1 - θ)^{1 - x\_i}$.
+- **Assumption:** the $x\_i$ are **conditionally independent given $θ$**,
+  $p(x\_i \mid θ, x\_1, \ldots, x\_{i-1}) = p(x\_i \mid θ)$.
+
+</div>
+
+
+Notes:
+This is Bayes' theorem of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>
+with the parameter $θ$ in place of the hypothesis and one row as the evidence.
+The prior and posterior here are distributions over a parameter, not the class
+prior $P(y)$ and class posterior $P(y \mid x)$ of the classifier: the same
+theorem, a different unknown. The prior for row $i$ is the posterior after the
+rows before it; for row 1 it is the flat prior of the start. The likelihood is
+read as a function of $θ$ with the row fixed: $θ$ for $x\_i = 1$, $1 - θ$ for
+$x\_i = 0$, the factor drawn on the previous slide. The evidence
+$p(x\_i \mid x\_1, \ldots, x\_{i-1}) = \int\_0^1 p(x\_i \mid θ)\\, p(θ \mid x\_1,
+\ldots, x\_{i-1})\\, dθ$ does not depend on $θ$ and only rescales the curve to
+area 1; for $x\_i = 1$ it is the mean of the current belief, the probability
+that the next fraud comes from a new device.
+
+Conditional independence given $θ$: once $θ$ is known, an earlier row says
+nothing about the next. Without knowing $θ$ the rows are dependent, since
+every row shifts the belief about $θ$ and with it the expectation for the next
+row; this dependence is what learning uses. The condition is violated by
+duplicated rows or several transactions of one fraud case, which would be
+counted as separate evidence. It is the same kind of assumption as the naive
+one, about rows given $θ$ instead of attributes given the class.
+
+--
+
+<span class="eyebrow">Why the update is counting</span>
+
+## Bayesian Parameter Updates: Why We Count
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### Sequential updating
+Holds for **any** model of the rows. Needs Bayes' theorem and rows
+**conditionally independent given $θ$**. Gives: the posterior after row $i$ is
+the prior for row $i + 1$.
+
+</div>
+
+
+<div class="card fragment">
+
+### Counting
+Holds for the **Bernoulli** model. Its likelihood depends on the rows only
+through the counts, a **sufficient statistic**, and the belief keeps its form
+$θ^{h} (1 - θ)^{m}$, a **conjugate** prior: a row adds 1 to $h$ or $m$.
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment c-example">
+
+The fraud share: 60 of 100 frauds from a new device give
+$θ^{60} (1 - θ)^{40}$; the 101st gives $θ^{61} (1 - θ)^{40}$. A normal amount
+(Continuous Attributes) also updates row by row, but keeps three sums instead
+of two counts: $n$, $\sum x$ and $\sum x^2$.
+
+</div>
+
+
+Notes:
+The two principles are independent. Sequential updating follows from Bayes'
+theorem and conditional independence alone; it holds for any likelihood, also
+one for which the belief has no closed form and must be kept as a whole curve.
+That the update reduces to counting follows from the Bernoulli likelihood. The
+likelihood of all $n$ rows is
+$\prod\_i θ^{x\_i} (1 - θ)^{1 - x\_i} = θ^{h} (1 - θ)^{m}$ with
+$h = \sum\_i x\_i$ and $m = n - h$: the order of the rows and everything but
+the two counts drop out. A statistic that carries all the information the data
+contain about a parameter is called **sufficient**. And because the flat prior,
+and every belief of the form $θ^{h} (1 - θ)^{m}$, multiplied by $θ$ or
+$1 - θ$ stays of that form, the belief is described by two numbers at every
+step. A prior whose posterior stays in the same family is called **conjugate**.
+
+For a categorical attribute with $k$ values the same holds with $k$ counts.
+For a normal attribute the sufficient statistics are $n$, $\sum x$ and
+$\sum x^2$, from which mean and spread follow; the fitted normal of
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> can therefore also be updated
+row by row.
+
+<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> in Lecture 04 names the curve
+$θ^{h} (1 - θ)^{m}$ the Beta distribution $\mathrm{Beta}(h + 1, m + 1)$, states
+sequential updating for any parameter, and calls the Beta the conjugate prior of
+the Bernoulli. Its peak $h/n$ is the maximum likelihood estimate
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), its mean $(h + 1)/(n + 2)$ the
+Laplace estimate. <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> applies
+the rule where it is no longer counting and states when it holds.
+
+--
+
 <!-- .slide: class="smaller" -->
 
 ## Counting Evidence Twice
@@ -2135,6 +2442,10 @@ the 17%?
 | naive: $\hat P(x\_\text{dev} {=} 1 \mid y) \cdot \hat P(x\_\text{IP} {=} 1 \mid y)$ | $0.60 \cdot 0.70 = 0.42$ | $0.10 \cdot 0.05 = 0.005$ | **17.4%** |
 | the real pair: $\hat P(x\_\text{dev} {=} 1, x\_\text{IP} {=} 1 \mid y)$ | $0.55$ | $0.04$ | **3.3%** |
 
+Why the product: if the IP ignored the device, the 10% of honest
+transactions with a new device would show a foreign IP as often as all
+honest ones do, 5% — and 5% of 10% is 0.5%.
+
 </div>
 
 
@@ -2156,6 +2467,17 @@ factor replaces the two separate shares, $\text{score}(\text{fraud}) = 0.001
 \cdot 0.55 \cdot 0.50 \cdot 1 = 0.000275$ and $\text{score}(\text{honest}) =
 0.999 \cdot 0.04 \cdot 0.20 \cdot 0.9999 \approx 0.00799$, so
 $P(\text{fraud} \mid x) = 0.000275 / 0.008266 = 3.3\\%$.
+
+The product is the chain rule with the condition dropped:
+$P(x\_\text{dev} = 1, x\_\text{IP} = 1 \mid y) = P(x\_\text{dev} = 1 \mid y) \cdot
+P(x\_\text{IP} = 1 \mid x\_\text{dev} = 1, y)$ always holds, and conditional
+independence replaces the second factor by $P(x\_\text{IP} = 1 \mid y)$. In
+counts for the honest class: 9,990 of 99,900 have a new device; if 5% of
+them came from a foreign IP, about 500 would show both, 0.5%. The real 4% is
+about 3,996, so $P(x\_\text{IP} = 1 \mid x\_\text{dev} = 1, \text{honest})
+\approx 3{,}996 / 9{,}990 = 0.40$ — eight times the 5% the product assumes.
+The same reasoning gives the fraud column: 70% of the 60 frauds with a new
+device, 42.
 
 Both classes are affected, in different measure. Among frauds the pair is a
 little more common than the product says (55% against 42%); among honest
@@ -2993,7 +3315,7 @@ $\log(σ\_{jh}/σ\_{jf}) - (x\_j - μ\_{jf})^2/2σ\_{jf}^2 + (x\_j - μ\_{jh})^2
 a quadratic function of $x\_j$; with equal variances in both classes the
 quadratic terms cancel and the contribution is linear in $x\_j$. With unequal
 variances the ratio eventually falls again on the side of the narrower class:
-for the amount, $σ\_\text{fraud} < σ\_\text{honest}$, the likelihood ratio peaks
+for the amount, $σ\_\text{f} < σ\_\text{h}$, the likelihood ratio peaks
 at about 3.5 million € and decreases beyond — far outside the data, where
 $p(x)$ is negligible anyway.
 
@@ -3144,6 +3466,100 @@ way no amount of data repairs (the last slide of the module).
 
 --
 
+<!-- .slide: class="smaller" -->
+
+## The Log-Odds of Two Normals
+
+
+<div class="q">
+
+One attribute $x$, a normal per class. What does its log likelihood ratio look
+like as a function of $x$?
+
+</div>
+
+
+
+<div class="grid-2 fragment">
+
+
+<div class="column">
+
+The log of a normal is a **quadratic** in $x$ — expand the square:
+
+$$
+\begin{aligned}
+\log \mathcal{N}(x;\ μ, σ^2) &= -\frac{(x - μ)^2}{2σ^2} - \log\big(σ\sqrt{2π}\big)
+\\\ &= -\frac{x^2}{2σ^2} + \frac{μ}{σ^2}\\, x - \frac{μ^2}{2σ^2} - \log\big(σ\sqrt{2π}\big)
+\end{aligned}
+$$
+
+</div>
+
+
+<div class="column">
+
+The difference of the two classes keeps that form:
+
+$$
+\begin{aligned}
+\log \frac{\mathcal{N}(x;\ μ\_\text{f}, σ\_\text{f}^2)}{\mathcal{N}(x;\ μ\_\text{h}, σ\_\text{h}^2)}
+&= a\\, x^2 + w\\, x + c
+\\\ a = \frac{1}{2σ\_\text{h}^2} - \frac{1}{2σ\_\text{f}^2}, &\quad
+w = \frac{μ\_\text{f}}{σ\_\text{f}^2} - \frac{μ\_\text{h}}{σ\_\text{h}^2}
+\end{aligned}
+$$
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="fragment c-example">
+
+Log amount, fitted $2.60, 0.40$ (fraud), $1.55, 0.45$ (honest):
+$a = -0.66$, $w = 8.60$, $c = -15.08$. At $x = 3.10$:
+$-0.66 \cdot 3.10^2 + 8.60 \cdot 3.10 - 15.08 = 5.27$, and
+$e^{5.27} ≈ 190$ — the likelihood ratio of the densities, as a log.
+
+</div>
+
+
+<div class="fragment c-insight">
+
+The $x^2$ term comes from the square in the exponent. It **cancels** when both
+classes have the same spread ($a = 0$): the log-odds are then **linear** in $x$.
+
+</div>
+
+
+</div>
+
+
+Notes:
+The constant is $c = μ\_\text{h}^2/2σ\_\text{h}^2 - μ\_\text{f}^2/2σ\_\text{f}^2 +
+\log(σ\_\text{h}/σ\_\text{f})$; the $\sqrt{2π}$ cancels in the difference.
+Arithmetic for the amount: $a = 1/(2 \cdot 0.45^2) - 1/(2 \cdot 0.40^2) =
+2.469 - 3.125 = -0.656$; $w = 2.60/0.16 - 1.55/0.2025 = 16.25 - 7.654 = 8.596$;
+$c = 5.932 - 21.125 + 0.118 = -15.075$. At $x = 3.10$: $-6.303 + 26.647 -
+15.075 = 5.269$, $e^{5.269} = 194$; the densities themselves are $0.4566$ and
+$0.002352$, ratio 194, which "Bayes' Theorem With Densities" rounds to
+$0.46 / 0.0024 ≈ 190$.
+
+$a < 0$ because fraud has the smaller spread: far out on either side the
+narrower normal falls faster, so the ratio peaks and decreases again (at
+$x = -w/2a = 6.55$, about 3.5 million €, far outside the data). Added to the
+log prior odds, this is the log-odds of a one-attribute classifier; the
+decision boundary $a x^2 + w x + c + \log \text{prior odds} = 0$ has up to two
+roots, so the region decided as fraud can be an interval.
+
+--
+
 ## A Diagonal Covariance per Class
 
 
@@ -3171,9 +3587,13 @@ tilt?
 
 <div class="fragment">
 
-No. The log-odds are one term per attribute, each in $x\_j$ alone:
+No. One log ratio of two normals per attribute, each in $x\_j$ alone:
+
 $$
-\text{log-odds} = b + \sum\_j \big(a\_j x\_j^2 + w\_j x\_j\big)
+\begin{aligned}
+\text{log-odds} &= \log \text{prior odds}
+\\\ &\quad + \textstyle\sum\_j \big(a\_j x\_j^2 + w\_j x\_j + c\_j\big)
+\end{aligned}
 $$
 
 </div>
@@ -3205,10 +3625,9 @@ Naive: amount and distance independent within each class, so each class gets
 a diagonal covariance and its ellipses stay upright; the model is the
 two-attribute version of "Gaussian Naive Bayes". Each attribute contributes
 $\log \mathcal{N}(x\_j; μ\_{j,\text{f}}, σ\_{j,\text{f}}^2) - \log
-\mathcal{N}(x\_j; μ\_{j,\text{h}}, σ\_{j,\text{h}}^2)$, whose $x\_j^2$ coefficient
-is $a\_j$; $w\_j = μ\_{j,\text{f}}/σ\_{j,\text{f}}^2 - μ\_{j,\text{h}}/σ\_{j,\text{h}}^2$,
-and $b$ collects the constants and the log prior odds; on the slide,
-$a\_j = 1/2σ\_{j,\text{h}}^2 - 1/2σ\_{j,\text{f}}^2$. There is no term
+\mathcal{N}(x\_j; μ\_{j,\text{h}}, σ\_{j,\text{h}}^2) = a\_j x\_j^2 + w\_j x\_j + c\_j$,
+with $a\_j$, $w\_j$ and $c\_j$ as in "The Log-Odds of Two Normals", computed from
+attribute $j$'s means and spreads. There is no term
 $x\_1 x\_2$, which is what a tilt would need. With equal spreads in both classes
 $a\_j = 0$ and the naive boundary is a straight line as well.
 

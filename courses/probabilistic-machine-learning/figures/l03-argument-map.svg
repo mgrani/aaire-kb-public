@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
   <title id="title">Lecture 03 argument map</title>
-  <desc id="desc">Three kinds of classifier — rules, a model of p(y given x), a model of p(x, y) — then the explosion of the class-conditional joint and the two ways out: naive Bayes (independence, fitting by counting; odds and log-odds, in which evidence adds up) and parametric families for continuous attributes (Gaussian naive Bayes, one Gaussian per class, shared covariance, mixtures); finally the Bayes decision rule, costs and the prior as one threshold.</desc>
+  <desc id="desc">Three kinds of classifier — rules, a model of p(y given x), a model of p(x, y) — then the explosion of the class-conditional joint and the two ways out: naive Bayes (independence, fitting by counting), whose evidence adds up in log-odds and returns to a probability through the sigmoid, unless correlated evidence is counted twice; and a normal per class for continuous attributes, whose covariance — diagonal, full or shared — gives Gaussian naive Bayes, a quadratic (QDA) or a linear (LDA) boundary; finally the Bayes decision rule, costs and the prior as one threshold.</desc>
   <defs>
     <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="12" refY="6.5" orient="auto">
       <path d="M0,0 L13,6.5 L0,13 Z" fill="#64748b"/>
@@ -22,12 +22,12 @@
   <path d="M269 134 H317" class="arrow"/>
   <path d="M536 134 H584" class="arrow"/>
   <text x="560" y="128" text-anchor="middle" class="arcsub">structure</text>
-  <path d="M426 196 C426 217 560 217 560 238" class="arrow"/>
-  <text x="493" y="211" text-anchor="middle" class="arcsub">a family</text>
-  <path d="M694 196 C694 217 916 217 916 238" class="arrow"/>
+  <path d="M426 196 C426 217 204 217 204 238" class="arrow"/>
+  <text x="315" y="211" text-anchor="middle" class="arcsub">a family</text>
   <path d="M803 134 H851" class="arrow"/>
-  <path d="M960 196 C960 217 204 217 204 238" class="arrow"/>
-  <path d="M406 300 H358" class="arrow"/>
+  <path d="M960 196 C960 217 560 217 560 238" class="arrow"/>
+  <path d="M960 196 C960 217 916 217 916 238" class="arrow"/>
+  <path d="M358 300 H406" class="arrow"/>
   <path d="M204 362 C204 383 204 383 204 404" class="arrow"/>
   <path d="M560 362 C560 383 560 383 560 404" class="arrow"/>
   <path d="M916 362 C916 383 916 383 916 404" class="arrow"/>
@@ -51,33 +51,33 @@
     <rect width="219" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#164374">NAIVE BAYES</text>
     <text x="18" y="48" class="head">Naive Bayes</text>
-    <text x="18" y="73" class="text">flags independent given the class</text>
-    <text x="18" y="93" class="small">fitting = counting</text>
-    <text x="18" y="111" class="small">one zero vetoes everything</text>
+    <text x="18" y="73" class="text">p(x|y) = p(x₁|y) · p(x₂|y) ⋯</text>
+    <text x="18" y="93" class="small">flags independent given y</text>
+    <text x="18" y="111" class="small">fitting = counting · 0 vetoes</text>
   </g>
   <g transform="translate(851 72)">
     <rect width="219" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#164374">ODDS AND LOG-ODDS</text>
     <text x="18" y="48" class="head">Evidence adds up</text>
-    <text x="18" y="73" class="text">prior odds × one LR per flag</text>
-    <text x="18" y="93" class="small">log-odds: evidence is a sum</text>
+    <text x="18" y="73" class="text">log prior odds + Σ log LR</text>
+    <text x="18" y="93" class="small">σ(s) turns it back into P</text>
     <text x="18" y="111" class="small">a linear score · no underflow</text>
   </g>
   <g transform="translate(50 238)">
+    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
+    <text x="18" y="24" class="tag" fill="#164374">CONTINUOUS ATTRIBUTES</text>
+    <text x="18" y="48" class="head">A normal per class</text>
+    <text x="18" y="73" class="text">its covariance Σ sets the boundary</text>
+    <text x="18" y="93" class="small">diagonal: Gaussian NB · full: QDA (curved)</text>
+    <text x="18" y="111" class="small">shared: LDA (linear) · 2 patterns: mixture</text>
+  </g>
+  <g transform="translate(406 238)">
     <rect width="308" height="124" rx="12" fill="#f0fdf4" stroke="#16803c" stroke-width="2"/>
     <text x="18" y="24" class="tag" fill="#16803c">DECIDING ON A CLASS</text>
     <text x="18" y="48" class="head">The Bayes decision rule</text>
     <text x="18" y="73" class="text">most probable class: fewest errors</text>
     <text x="18" y="93" class="small">costs: threshold c_FP/(c_FP + c_FN)</text>
     <text x="18" y="111" class="small">prior and costs: one threshold on the LR</text>
-  </g>
-  <g transform="translate(406 238)">
-    <rect width="308" height="124" rx="12" fill="#edf2f7" stroke="#164374" stroke-width="2"/>
-    <text x="18" y="24" class="tag" fill="#164374">CONTINUOUS ATTRIBUTES</text>
-    <text x="18" y="48" class="head">A density per class</text>
-    <text x="18" y="73" class="text">Gaussian NB · one Gaussian per class</text>
-    <text x="18" y="93" class="small">correlations kept: quadratic in p</text>
-    <text x="18" y="111" class="small">shared Σ: linear · two patterns: mixture</text>
   </g>
   <g transform="translate(762 238)">
     <rect width="308" height="124" rx="12" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>

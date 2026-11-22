@@ -5696,10 +5696,7 @@ diluted by later observations, not because they are compensated.
 ## From a Number to an Interval
 
 
-<div class="grid-3-2">
-
-
-<div class="column">
+<div class="grid-2">
 
 
 <div class="c-definition">
@@ -5714,12 +5711,6 @@ $$
 </div>
 
 
-</div>
-
-
-<div class="column">
-
-
 <div class="c-warning">
 
 Over **samples**: $L, U$ random, $\theta$ fixed. Confidence is the
@@ -5728,32 +5719,17 @@ Over **samples**: $L, U$ random, $\theta$ fixed. Confidence is the
 </div>
 
 
-
-<div class="c-note small">
-
-**$z$ from $\alpha$:** $P(-z \leq Z \leq z) = 1 - \alpha$ for
-$Z \sim N(0, 1)$: 1.28, 1.96, 2.58 at 80, 95, 99%.
-
 </div>
 
 
-</div>
 
+<div class="fragment">
 
-</div>
-
-
-For the mean, the central limit theorem, $\overline{X} \approx N(\mu, \mathrm{SE}^2)$,
-gives $P(|\overline{X} - \mu| \leq z\\,\mathrm{SE}) \approx 1 - \alpha$, hence
-
-<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
- data-params='{"labels": ["the estimate, here x̄", "the quantile set by α: 1.96 for 95%", "the standard error, here σ/√n"]}'>
-
-$$
-\eqa{\hat{\theta}} \pm \eqb{z} \cdot \eqc{\mathrm{SE}(\hat{\theta})}
-$$
+$\alpha$ is the miss rate the procedure is allowed: a 95% interval
+($\alpha = 0.05$) misses $\theta$ in 1 of 20 samples.
 
 </div>
+
 
 Notes:
 $\alpha$ is the miss rate the procedure is allowed: $\alpha = 0.05$ for a 95%
@@ -5765,17 +5741,94 @@ writes the definition with $\geq$). Equality for every $\theta$ makes the
 interval exact, as for the mean of normal data with known $\sigma$. For
 discrete data an exact level is usually unattainable, and intervals such as
 Clopper–Pearson for a proportion cover with probability above $1 - \alpha$
-(conservative). The interval from the central limit theorem below meets the
-level only approximately, for large $n$; its coverage can fall short of
-$1 - \alpha$ for small samples or skewed data.
+(conservative). The interval from the central limit theorem on the next slide
+meets the level only approximately, for large $n$; its coverage can fall short
+of $1 - \alpha$ for small samples or skewed data.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Interval for a Mean
+
+
+<div class="grid-3-2">
+
+
+<div class="column">
+
+<div class="viz viz-full" data-viz="math/normal-interval" data-steps="1"></div>
+
+</div>
+
+
+<div class="column middle">
+
+
+<div class="q">
+
+$Z \sim N(0, 1)$. Where must $L$ and $U$ lie so that
+$P(L \leq Z \leq U) = 1 - \alpha$ — and where is $\alpha$?
+
+</div>
+
+
+
+<div class="fragment">
+
+Symmetric, $L = -z$ and $U = z$, each tail $\alpha/2$: the **shortest**
+such interval. $z = 1.28,\ 1.96,\ 2.58$ at 80, 95, 99%.
+
+</div>
+
+
+
+<div class="fragment">
+
+For the mean, by the CLT $(\overline{X} - \mu)/\mathrm{SE} \approx Z$, so
+$P(|\overline{X} - \mu| \leq z\\,\mathrm{SE}) \approx 1 - \alpha$, hence
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="fragment">
+
+<div class="viz eq-explain" data-viz="core/equation-explain" data-steps="3"
+ data-params='{"labels": ["the estimate, here x̄", "the quantile set by α: 1.96 for 95%", "the standard error, here σ/√n"]}'>
+
+$$
+\eqa{\hat{\theta}} \pm \eqb{z} \cdot \eqc{\mathrm{SE}(\hat{\theta})}
+$$
+
+</div>
+
+</div>
+
+
+Notes:
+Drag $L$ and $U$ (or use the sliders): the teal area is $P(L \leq Z \leq U)$,
+the violet tails are what the interval misses. Many pairs enclose 95%, e.g.
+$L = -1.75$, $U = 2.33$ (tails 0.04 and 0.01) has width 4.08; the symmetric
+pair $\pm 1.96$ has width 3.92. Because the density is symmetric and highest at
+0, the shortest interval of a given area is the symmetric one; the answer step
+places it, and the level control moves it. $z$ is the $1 - \alpha/2$ quantile
+of $N(0, 1)$: 1.282 for 80%, 1.645 for 90%, 1.960 for 95%, 2.576 for 99%.
 
 For the mean, the interval follows from the normal approximation:
+$(\overline{X} - \mu)/\mathrm{SE} \approx N(0, 1)$ gives
 $P(|\overline{X} - \mu| \leq z\\,\mathrm{SE}) \approx 1 - \alpha$, and the event
 $|\overline{X} - \mu| \leq z\\,\mathrm{SE}$ is the same as
 $\mu \in [\overline{X} - z\\,\mathrm{SE}, \overline{X} + z\\,\mathrm{SE}]$, so
-$L = \overline{X} - z\\,\mathrm{SE}$ and $U = \overline{X} + z\\,\mathrm{SE}$.
-$z$ is the $1 - \alpha/2$ quantile of $N(0, 1)$: 1.645 for 90%, 1.96 for 95%,
-2.576 for 99%.
+$L = \overline{X} - z\\,\mathrm{SE}$ and $U = \overline{X} + z\\,\mathrm{SE}$:
+the bounds of the standardised $Z$, $-z$ and $z$, carried back to the scale of
+$\mu$.
 
 The interval widens with a higher confidence level, with larger $\sigma$, and
 with smaller $n$. The formula treats $\sigma$ as known. When $\sigma$ is
