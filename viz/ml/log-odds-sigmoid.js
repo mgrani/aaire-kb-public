@@ -18,7 +18,7 @@ const RULE = '#dde3ea'
 
 const DEFAULT_POINTS = [
   { s: Math.log(1 / 999), label: 'base rate' },
-  { s: Math.log(210 / 999), label: 'three red flags' },
+  { s: Math.log(210 / 999), label: 'three attributes at yes' },
 ]
 
 const sigma = (s) => 1 / (1 + Math.exp(-s))
@@ -32,7 +32,7 @@ export async function mount(el, { d3, params, steps, isPrint }) {
   const x = d3.scaleLinear().domain([-8, 4]).range([M.l, W - M.r])
   const y = d3.scaleLinear().domain([0, 1]).range([H - M.b, M.t])
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', 'The sigmoid curve: log-odds on the horizontal axis, probability on the vertical axis, with the base rate and the three-flag transaction marked')
+    .attr('aria-label', 'The sigmoid curve: log-odds on the horizontal axis, probability on the vertical axis, with the base rate and the transaction with three attributes at yes marked')
   const g = svg.append('g')
   const text = (tx, ty, t, o = {}) => g.append('text').attr('x', tx).attr('y', ty)
     .attr('font-size', o.size ?? 15).attr('font-weight', o.bold ? 700 : 400)

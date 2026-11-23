@@ -183,7 +183,7 @@ function patterns(el, { d3, params, steps, isPrint }) {
   const MAXH = RH - 10
 
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', 'With every added flag the frauds split into twice as many patterns, with fewer frauds in each and more patterns empty')
+    .attr('aria-label', 'With every added binary attribute the frauds split into twice as many patterns, with fewer frauds in each and more patterns empty')
   const g = svg.append('g')
   const text = (x, y, t, o = {}) => g.append('text').attr('x', x).attr('y', y)
     .attr('font-size', o.size ?? 18).attr('font-weight', o.bold ? 700 : 400)
@@ -191,8 +191,8 @@ function patterns(el, { d3, params, steps, isPrint }) {
 
   function render(shown) {
     g.selectAll('*').remove()
-    text(X0 + BW / 2, 20, 'frauds per flag pattern — 100 frauds', { size: 20, anchor: 'middle', bold: true })
-    text(X0 + BW / 2, 42, 'each flag splits every pattern in two: yes | no', { size: 16, anchor: 'middle', colour: GREY })
+    text(X0 + BW / 2, 20, 'frauds per value pattern — 100 frauds', { size: 20, anchor: 'middle', bold: true })
+    text(X0 + BW / 2, 42, 'each binary attribute splits every pattern in two: yes | no', { size: 16, anchor: 'middle', colour: GREY })
     text(COL[0], 42, 'patterns', { size: 16, anchor: 'end', colour: GREY })
     text(COL[1], 42, 'average', { size: 16, anchor: 'end', colour: GREY })
     text(COL[2], 42, 'empty', { size: 16, anchor: 'end', colour: RED })

@@ -27,11 +27,12 @@ Probabilistic Machine Learning
 Prof. Dr. Michael Granitzer
 
 Notes:
-Six exercises, pen and paper; a calculator helps for 6.B.1 and 6.C.2. 6.A
+Seven exercises, pen and paper; a calculator helps for 6.B.1 and 6.C.3. 6.A
 covers the confusion matrix, costs and precision under a changed base rate,
 and the Bayes error; 6.B error bars on a recall (standard error, Beta
 posterior, required test-set size, paired comparison of two models); 6.C cost
-thresholds, the effect of miscalibration, and log-loss versus Brier score; 6.D
+thresholds, the effect of miscalibration, costs and prior as one threshold on
+the likelihood ratio (6.C.2, formerly 3.D.1), and log-loss versus Brier score; 6.D
 MAP as regularised ERM ($\lambda = \sigma^2/(n\tau^2)$) and which methods are
 ERM. Every number in the solutions was recomputed (numpy/scipy).
 
@@ -239,7 +240,47 @@ to the raw score. The cost rule needs **calibrated** probabilities.
 
 --
 
-## Exercise 6.C.2: Scoring Probabilities
+## Exercise 6.C.2: Costs, Prior and One Threshold
+
+A naive Bayes fraud model at the base rate $1 : 999$, with the costs of 6.C.1:
+€5 for a check, €500 for a missed fraud.
+
+1. Above which likelihood ratio should a transaction be checked?
+2. Three transactions have likelihood ratios 6, 84 and 1,140. Which are
+   checked?
+3. Which of the three does the Bayes decision rule (equal costs) call fraud?
+4. A new market has a fraud rate of 1 in 100 and the same fraud patterns.
+   What is the threshold on the likelihood ratio there — and must the model
+   be refitted?
+
+
+--
+
+## Exercise 6.C.2: Costs, Prior and One Threshold — Solution
+
+
+<div class="fragment">
+
+**1.** $p^\* = 5/505$, as odds $p^\*/(1 - p^\*) = 5/500$, so
+$\mathrm{LR} > \frac{5}{500} \cdot 999 \approx 10$.
+
+**2.** Posteriors $6/1{,}005 = 0.6\\%$, $84/1{,}083 = 7.8\\%$ and
+$1{,}140/2{,}139 = 53\\%$: the last two are checked.
+
+**3.** Only the last: a posterior above 50% needs $\mathrm{LR} > 999$.
+
+**4.** $\mathrm{LR} > \frac{5}{500} \cdot 99 \approx 1$. No refit: only the prior
+changes, provided $p(x \mid y)$ is the same in the new market — a generative
+model swaps $P(y)$ and keeps its likelihoods.
+
+</div>
+
+
+
+
+--
+
+## Exercise 6.C.3: Scoring Probabilities
 
 Five held-out transactions with outcomes $y = (1, 0, 0, 0, 1)$ (1 = fraud).
 
@@ -255,7 +296,7 @@ Five held-out transactions with outcomes $y = (1, 0, 0, 0, 1)$ (1 = fraud).
 
 --
 
-## Exercise 6.C.2: Scoring Probabilities — Solution
+## Exercise 6.C.3: Scoring Probabilities — Solution
 
 
 <div class="fragment">
@@ -316,7 +357,7 @@ Multiplying by $2\sigma^2/n$ does not move the minimum and gives the stated form
 with $\lambda = \sigma^2/(n\tau^2)$.
 
 **2.** $n = 20$: $\lambda = 1{,}600/2{,}000 = 0.8$. $n = 2{,}000$: $\lambda = 0.008$.
-The prior's weight falls like $1/n$ — <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s pseudo-counts being swamped
+The prior's weight falls like $1/n$ — <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s pseudo-counts being swamped
 by data.
 
 **3.**

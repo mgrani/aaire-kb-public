@@ -25,16 +25,23 @@
 
 Prof. Dr. Michael Granitzer
 
+<!-- 2026-11-22: Deciding on a Class (bayes-decision-rule) moved here from
+Lecture 03 as the first module, with exercise 3.D.1 (now 6.C.2). -->
+
 Notes:
 The lecture uses the fraud model of <a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>
-throughout (prevalence 1/1,000, recall 99%, false-positive rate 1%). Evaluating
+throughout (prevalence 1/1,000, recall 99%, false-positive rate 1%). Deciding
+on a Class turns a posterior into an action: given $x$ the class is a random
+variable, so the error and the cost of a decision are random variables; the
+Bayes decision rule minimises the expected loss, which gives the most probable
+class for the 0/1 loss and the threshold $c\_{FP}/(c\_{FP} + c\_{FN})$ for a cost
+matrix, and its risk $R(h)$ is the quantity that ERM later estimates. Evaluating
 Rare-Class Classifiers defines the true error and the Bayes error, the aleatoric floor of
 <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>, and shows that on a rare
 class accuracy favours the model that catches nothing. Uncertainty of Metrics treats every
 metric as an estimate, with a standard error or a Beta posterior
 (<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). Decisions and Scoring Rules recalls the decision
-threshold $c\_{FP}/(c\_{FP} + c\_{FN})$ derived from the costs in
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (the loan threshold of
+threshold $c\_{FP}/(c\_{FP} + c\_{FN})$ of the first module (the loan threshold of
 <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>), sweeps it, and scores the probabilities with
 log-loss and the Brier score. Empirical Risk Minimisation defines risk and empirical risk:
 training by ERM keeps a loss and returns probabilities only when that loss is a
@@ -51,13 +58,16 @@ learning courses and are recapped in one slide each.
 
 <div class="img-h-xl">
 
-![Argument map for Lecture 06: from measuring a rare class to error bars, cost thresholds and ERM as the shortcut that keeps the loss and drops the probabilities](/courses/probabilistic-machine-learning/figures/l06-argument-map.svg)
+![Argument map for Lecture 06: from deciding on a class by the smallest expected loss to measuring a rare class, error bars, cost thresholds and ERM as the shortcut that keeps the loss and drops the probabilities](/courses/probabilistic-machine-learning/figures/l06-argument-map.svg)
 
 </div>
 
 
 Notes:
-Evaluating Rare-Class Classifiers: on a rare class accuracy rewards the model that catches nothing, and
+Deciding on a Class: the Bayes decision rule takes the action with the
+smallest expected loss; under the 0/1 loss the most probable class, under the
+fraud costs a check above $p = c\_{FP}/(c\_{FP} + c\_{FN})$; its risk $R(h)$ leads
+to the empirical risk. Evaluating Rare-Class Classifiers: on a rare class accuracy rewards the model that catches nothing, and
 every classifier has a floor, the Bayes error. Uncertainty of Metrics: every metric is an
 estimate; for a rare class its error bar is set by the number of rare cases.
 Decisions and Scoring Rules: a calibrated probability plus the costs determines the decision, and
@@ -66,6 +76,525 @@ average loss on the sample (the empirical risk); unless that loss was a
 negative log-probability, the output carries no probability, and calibration
 on held-out data is needed to recover one — the reason the decision rule and
 the scoring rules of the decisions module require calibrated probabilities.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+# Deciding on a Class
+
+
+<div class="guiding-question">
+
+**Guiding Question:** The model says 17% fraud. Block, check or let it
+through — and who decides where the line is?
+
+</div>
+
+
+--
+
+## The Error as a Random Variable
+
+
+<div class="q">
+
+1,000 transactions share the same $x$, each with $P(\text{fraud} \mid x) = 0.17$.
+One decision for all of them: flag or pass. Which makes fewer errors?
+
+</div>
+
+
+
+<div class="fragment">
+
+| decide | wrong if the transaction is | errors among 1,000 |
+|---|---|---|
+| flag | honest, probability 0.83 | 830 |
+| pass | fraud, probability 0.17 | **170** |
+
+</div>
+
+
+
+<div class="fragment c-definition">
+
+Given $x$, the class $Y$ is still a **random variable**; the decision $a$ is
+ours. So the error $\mathbb{1}[Y \neq a]$ is a random variable, Bernoulli with
+$P(\text{error} \mid x) = 1 - P(Y = a \mid x)$.
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Fewest errors: the class with the **largest posterior**. With two classes, flag
+iff $p > 1 - p$, i.e. $p > 0.5$.
+
+</div>
+
+
+Notes:
+The table reads the posterior as a natural frequency: among 1,000
+transactions with these attributes about 170 are fraud and 830 honest. The
+decision does not change which transactions are fraud; it only decides which
+of them count as errors. Flagging is wrong for the honest ones, passing for
+the frauds.
+
+$\mathbb{1}[\cdot]$ is 1 if the condition holds, else 0, so
+$\mathbb{1}[Y \neq a]$ takes the value 1 with probability $P(Y \neq a \mid x)$:
+a Bernoulli random variable
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). Its expectation is that
+probability, and among $n$ transactions with the same $x$ the expected number
+of errors is $n \cdot P(Y \neq a \mid x)$; by the law of large numbers
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>) the observed share of errors
+approaches it. Everything the model says about $Y$ given $x$ is the posterior
+$P(Y \mid x)$, so the decision can depend on $x$ only through the posterior.
+
+With $K$ classes the error probability of deciding class $a$ is
+$1 - P(Y = a \mid x)$, smallest for the class with the largest posterior. With
+two classes the posteriors are $p$ and $1 - p$, and $p > 1 - p$ is $p > 0.5$;
+at $p = 0.5$ both decisions err equally often. The 0.17 is the three-flag
+transaction of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> (17.4%).
+
+--
+
+## Decision Regions and Their Errors
+
+<div class="viz viz-lg" data-viz="ml/class-densities" data-steps="3"
+ data-params='{"view": "decide", "prior": 0.1, "cut": 1000}'></div>
+
+
+<div class="q">
+
+One $x$ is decided by its posterior. Now all amounts at once: flag every
+transaction above a cut. Where does the cut make the fewest errors?
+
+</div>
+
+
+Notes:
+The model of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, one normal per
+class over $\log\_{10}$ amount, with a fraud share of 10% so that the fraud curve is visible. Each
+curve is $p(x, y) = p(x \mid y)\\, P(y)$: how much of all transactions belongs
+to that class at that amount; the area under each curve is its prior. A cut
+splits the axis into two **decision regions**, pass below and flag above. The
+frauds below the cut are passed (orange area), the honest transactions above
+it are flagged (navy area); the error rate is the sum of the two areas.
+
+Step 1: a cut at 1,000 € passes 84 of 100 frauds per 1,000 transactions and
+flags 0.6 honest ones, 85 errors per 1,000. Step 2: between the cut and the
+point where the curves cross, the fraud curve lies above the honest one, so
+every transaction there is more often fraud than not and is passed anyway;
+that wedge (red) is avoidable. Step 3: the cut at the crossing, about 300 €,
+makes 38 + 18 = 56 errors per 1,000, the minimum. At the crossing
+$p(x \mid \text{fraud}) P(\text{fraud}) = p(x \mid \text{honest}) P(\text{honest})$,
+which is $P(\text{fraud} \mid x) = 0.5$. The slider and the button "best cut"
+repeat the experiment for other priors.
+
+--
+
+## Two Kinds of Error
+
+The best cut of the last slide, about 300 €, per 1,000 transactions (100 of them
+fraud):
+
+| | is fraud | is honest |
+|---|---|---|
+| **flag** (decide fraud) | 62 — true positive | **18 — false positive**: type I error, a false alarm |
+| **pass** (decide honest) | **38 — false negative**: type II error, a missed fraud | 882 — true negative |
+
+
+<div class="q">
+
+Move the cut to 1,000 €. What happens to the two errors?
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+False alarms fall to 0.6, missed frauds rise to 84: moving the cut **trades one
+error for the other**. The Bayes rule minimises their **sum**; unequal costs
+weigh them.
+
+</div>
+
+
+Notes:
+"Positive" means flagged as fraud, the class searched for; "true" and "false"
+say whether the decision was right. The numbers follow from the two normals of
+the previous slide at the cut $\log\_{10} 301$: $100 \cdot 0.381 = 38$ frauds
+lie below it, $900 \cdot 0.020 = 18$ honest transactions above it. As rates
+within each true class, the false positive rate is $18/900 = 2\\%$ and the
+false negative rate $38/100 = 38\\%$; one minus the latter, 62%, is the share
+of frauds caught (recall, in <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>).
+
+The names type I and type II come from statistical testing. Read the decision
+as a test of the null hypothesis $H\_0$: "the transaction is honest". A type I
+error rejects $H\_0$ although it is true (an honest transaction flagged); its
+probability is the significance level $\alpha$ of a test. A type II error keeps
+$H\_0$ although it is false (a fraud let through); its probability is $\beta$,
+and $1 - \beta$ is the power. For a given model, $\alpha$ and $\beta$ move in
+opposite directions with the cut: at 100 € the false alarms rise to 143 and
+the missed frauds fall to 7 (150 errors); at 1,000 € they are 0.6 and 84
+(85 errors). Only better attributes, which separate the two curves further,
+lower both at once.
+
+--
+
+## The Bayes Decision Rule
+
+
+<div class="c-definition">
+
+The **Bayes decision rule** decides the most probable class:
+$$
+h^{\*}(x) = \arg\max\_y P(y \mid x) = \arg\max\_y p(x \mid y)\\, P(y)
+$$
+No other rule on the same attributes makes fewer errors.
+
+</div>
+
+
+
+<div class="grid-2">
+
+
+<div class="card">
+
+### From one $x$ to all $x$
+By total probability,
+$P(\text{error}) = \sum\_x P(\text{error} \mid x)\\, P(x)$. The decision at $x$
+changes only its own term, so the smallest term at every $x$ gives the
+smallest sum.
+
+</div>
+
+
+<div class="card">
+
+### Two classes, as odds
+$P(\text{fraud} \mid x) > P(\text{honest} \mid x)$: posterior odds $> 1$,
+$$
+\mathrm{LR}(x) > \frac{P(\text{honest})}{P(\text{fraud})} = 999
+$$
+
+</div>
+
+
+</div>
+
+
+Notes:
+For a continuous $x$ the sum is an integral: the error rate of a rule $h$
+is $P(\text{error}) = \int \big(1 - P(h(x) \mid x)\big)\\, p(x)\\, dx$, the
+law of total probability with $x$ as the partition
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>). The
+integrand is non-negative and depends on the rule only through the class it
+picks at $x$, so the integral is smallest when every integrand is smallest,
+which is the class with the largest posterior. Since $p(x)$ does not depend on
+$y$, the largest posterior is the largest $p(x \mid y) P(y)$: the higher curve
+of the previous slide. The regions where each class is decided are the
+decision regions; the boundary between them is where the posteriors are equal.
+The same rule holds for any number of classes.
+
+What remains is the area under the lower curve everywhere, the overlap of the
+classes. It is the Bayes error of
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>: the lowest error any
+classifier can reach with these attributes, a property of the data, not of the
+model. The rule is also called the MAP decision (maximum a posteriori class).
+It should not be confused with MAP *estimation*
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), which picks the most probable
+parameter value given the training data; both maximise a posterior, over
+different unknowns.
+
+Odds form, from <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: the
+posterior odds are the prior odds times the likelihood ratio, and they exceed
+1 iff $\mathrm{LR}(x) > P(\text{honest})/P(\text{fraud})$. At the base rate of
+1 in 1,000 the three red flags (ratio 210) and the amount of 1,250 € (190) each
+fall short; amount and new device together (1,140) pass it.
+
+--
+
+## The Cost as a Random Variable
+
+| loss $L(a, y)$ | is fraud | is honest |
+|---|---|---|
+| **check it** (a text to the customer) | 0 | €5 ($c\_{FP}$, false positive) |
+| **let it through** | €500 ($c\_{FN}$, false negative) | 0 |
+
+
+<div class="q">
+
+At $p = P(\text{fraud} \mid x) = 0.17$, what does each action cost?
+
+</div>
+
+
+
+<div class="fragment c-definition">
+
+Given $x$, the cost (**loss**) of an action is a **random variable** $L(a, Y)$: letting
+through costs €500 with probability $p$, else 0. Its **expectation** weighs
+each cost by its probability: $\mathbb{E}[L(a, Y) \mid x] = \sum\_y L(a, y)\\, P(y \mid x)$.
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Per 1,000 such transactions: letting through 170 × €500, **€85** each;
+checking 830 × €5, **€4.15** each. A cost of 1 per error gives the error rate.
+
+</div>
+
+
+Notes:
+The table is a cost matrix: the cost of each action in each true state; a
+correct action costs 0 here. Which entry of a row applies depends on $Y$,
+which is random given $x$, so the cost of an action is a function of a random
+variable and thus a random variable itself, with the distribution of $Y$ given
+$x$. The expectation of a discrete random variable is the sum of its values
+weighted by their probabilities
+(<a href="/courses/probabilistic-machine-learning/lecture/l02-probability-and-statistics/">Lecture 02</a>):
+$0.17 \cdot €500 + 0.83 \cdot €0 = €85$ for letting through,
+$0.17 \cdot €0 + 0.83 \cdot €5 = €4.15$ for checking.
+
+The expectation is the long-run average: over many transactions with the same
+posterior the cost per transaction approaches it (law of large numbers), and a
+bank decides millions of transactions. The most probable cost would mislead:
+letting a 17% transaction through most probably costs €0, and that ignores
+the rare €500. The worst case would mislead the other way: checking every
+transaction. Minimising the expectation is right when the same kind of
+decision is repeated many times; for a single decision with a ruinous loss,
+decision theory replaces the cost by a utility that weighs large losses more
+than proportionally.
+
+With $L(a, y) = 1$ for every wrong action and 0 for every right one, the
+expected cost is $P(Y \neq a \mid x)$, the error probability of "The Error as
+a Random Variable": the error rate is the special case of equal costs. In
+general, with actions $a$ and costs $L(a, y)$, the rule chooses
+$\arg\min\_a \sum\_y L(a, y)\\, P(y \mid x)$, the action with the smallest
+expected cost (the conditional risk at $x$); averaged over $x$ by total
+probability as before, this gives the smallest expected cost overall, the
+Bayes risk.
+
+--
+
+## The Cost Threshold
+
+
+<div class="q">
+
+With $p = P(\text{fraud} \mid x)$, at which $p$ is checking the cheaper action?
+
+</div>
+
+
+
+<div class="fragment">
+
+Compare the two expected costs:
+$$
+\underbrace{(1 - p)\\, c\_{FP}}\_{\text{check}} < \underbrace{p\\, c\_{FN}}\_{\text{let through}}
+\quad\Longleftrightarrow\quad
+p > p^{\*} = \frac{c\_{FP}}{c\_{FP} + c\_{FN}} = \frac{5}{505} \approx 1\\%
+$$
+
+</div>
+
+
+
+<div class="fragment c-insight">
+
+Equal costs give $p^\* = 0.5$: the Bayes decision rule is the **equal-cost
+case**. <a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>'s loan threshold, for fraud:
+the three-flag transaction (17%) is not more likely fraud than not, and well
+worth a check.
+
+</div>
+
+
+Notes:
+Solving $(1 - p)\\, c\_{FP} < p\\, c\_{FN}$ for $p$: $c\_{FP} < p\\,(c\_{FP} +
+c\_{FN})$. Only the ratio of the costs matters: dividing both by $c\_{FP}$ gives
+$p^\* = 1/(1 + c\_{FN}/c\_{FP})$, here $1/101$. The threshold falls as a missed
+fraud becomes more expensive relative to a check.
+
+A third action, deferring to a human, adds a band of posteriors around the
+threshold in which neither automatic action is cheap enough
+(<a href="/courses/probabilistic-machine-learning/lecture/l01-introduction/">Lecture 01</a>).
+
+The threshold applies to a calibrated probability; the naive Bayes posterior
+is over-confident where flags are correlated, so the threshold is applied to a
+number that may be too high
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Loss, Risk and the Bayes Decision Rule
+
+
+<div class="c-definition">
+
+A **decision rule** $h$ maps the attributes to an action, $a = h(x)$; the
+**loss** $L(a, y)$ is the cost of $a$ when the class is $y$.
+
+- **conditional risk** of $a$ at $x$: $R(a \mid x) = \mathbb{E}[L(a, Y) \mid x] = \sum\_y L(a, y)\\, P(y \mid x)$
+- **risk** of $h$: $R(h) = \mathbb{E}[L(h(X), Y)] = \sum\_x R(h(x) \mid x)\\, P(x)$
+
+</div>
+
+
+
+<div class="fragment c-important">
+
+**Theorem.** $h^{\*}(x) = \arg\min\_a R(a \mid x)$ minimises $R(h)$: the
+**Bayes decision rule**. Its risk $R(h^{\*})$ is the **Bayes risk**.
+
+</div>
+
+
+
+<div class="fragment">
+
+| loss | Bayes decision rule |
+|---|---|
+| 0/1: $L(a, y) = \mathbb{1}[a \neq y]$ | the most probable class; Bayes risk = Bayes error |
+| cost matrix: $c\_{FP}$, $c\_{FN}$ | check iff $P(\text{fraud} \mid x) > c\_{FP}/(c\_{FP} + c\_{FN})$ |
+
+</div>
+
+
+Notes:
+The four terms collect what the previous slides used. The loss is a function
+of the action and the true class; the cost matrix is a loss, and the 0/1 loss
+counts errors. The conditional risk is the expectation of the loss under the
+posterior at one $x$, also called the posterior expected loss; the risk
+averages it over $x$. The second equality of the risk is the law of total
+expectation, $\mathbb{E}[L] = \mathbb{E}\big[\mathbb{E}[L \mid X]\big]$, the
+expectation version of the law of total probability; for a continuous $x$ the
+sum is an integral over $p(x)$.
+
+Proof of the theorem: in $R(h) = \sum\_x R(h(x) \mid x)\\, P(x)$ every term
+has a non-negative weight and depends on $h$ only through the action at its own
+$x$. Choosing at every $x$ the action with the smallest conditional risk makes
+every term as small as it can be, hence the sum. This is the argument of "The
+Bayes Decision Rule" for the error, now for any loss. With the 0/1 loss
+$R(a \mid x) = 1 - P(Y = a \mid x)$, minimised by the most probable class; with
+the cost matrix the two conditional risks are those of "The Cost Threshold".
+
+The Bayes decision rule needs the true posterior $P(y \mid x)$. A classifier
+plugs in its model's posterior, so its decisions are only as good as that
+posterior is calibrated (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>). The
+risk $R(h)$ is the quantity that
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a> cannot compute and
+replaces by the average loss on the training sample. The name "Bayes" refers to
+the use of the posterior; the rule is the core of statistical decision theory
+(Wald 1950; Berger 1985).
+
+--
+
+## Costs and Prior in One Threshold
+
+<div class="viz viz-lg" data-viz="ml/class-densities" data-steps="2"
+ data-params='{"view": "decide", "costs": true, "prior": 0.1}'></div>
+
+$$
+\text{check iff}\quad \mathrm{LR}(x) > \frac{c\_{FP}}{c\_{FN}} \cdot \frac{P(\text{honest})}{P(\text{fraud})}
+$$
+
+
+<div class="q">
+
+**Predict before the last click:** fraud becomes 100 times rarer. Where does
+the cut go?
+
+</div>
+
+
+Notes:
+In odds form the rule $p > c\_{FP}/(c\_{FP} + c\_{FN})$ reads: posterior odds
+$> c\_{FP}/c\_{FN}$, and with posterior odds = prior odds × likelihood ratio,
+$\mathrm{LR}(x) > (c\_{FP}/c\_{FN}) \cdot P(\text{honest})/P(\text{fraud})$. The
+costs and the prior enter only as this product; the model's part, the
+likelihood ratio, is untouched. In the figure each curve is weighted by the
+cost of misclassifying its class, $c\_{FN}\\, p(x, \text{fraud})$ and
+$c\_{FP}\\, p(x, \text{honest})$, and the best cut is where the weighted curves
+cross.
+
+Step 0: fraud share 10%, equal costs: threshold on the ratio 9, cut at about
+300 €. Step 1: a missed fraud costs €500, a check €5: the fraud curve grows a
+hundredfold, the threshold on the ratio falls to $0.09$ and the cut moves to
+about 49 €, flagging more than a third of the honest transactions — at a fraud
+share of 10% that is the cheaper policy. Step 2: fraud share 0.1%: the threshold is
+$0.01 \cdot 999 \approx 10$ again and the cut returns to about 314 €. A class
+that is 100 times rarer and 100 times costlier to miss gets the same
+boundary. At the real base rate with equal costs the cut would lie at about
+3,000 €.
+
+A generative model changes both factors without refitting: a new base rate
+replaces $P(y)$, new costs replace $c\_{FP}/c\_{FN}$. A discriminative model can
+take new costs the same way, and a new base rate by correcting its odds
+(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>); a rule has to be learned
+again. How the threshold trades recall against precision, and how its cost
+curve looks, is <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>.
+
+--
+
+## Mini-Exercise
+
+A transaction has likelihood ratio **20**; prior odds $1 : 999$.
+
+
+<div class="q">
+
+Is it fraud under the Bayes decision rule? Is it worth a €5 check against a
+€500 loss?
+
+</div>
+
+
+
+<div class="fragment">
+
+**No, and yes.** $20 < 999$: $P(\text{fraud} \mid x) = 20/1{,}019 ≈ 2\\%$. The
+check pays above $1\\%$: on the ratio, above $999 \cdot 5/500 ≈ 10$.
+
+</div>
+
+
+Notes:
+Posterior odds $20 : 999$, probability $20/1{,}019 = 0.0196$. Under the Bayes
+decision rule (equal costs) fraud would need a ratio above 999. With
+$c\_{FP}$ = €5 and $c\_{FN}$ = €500 the threshold on the posterior is
+$5/505 = 0.0099$, on the likelihood ratio $(5/500) \cdot 999 = 9.99$; the
+ratio 20 exceeds it. Expected costs: checking 0.98 × €5 = €4.90,
+letting it through 0.0196 × €500 = €9.80.
+
+--
+
+## Takeaway
+
+
+<div class="takeaway">
+
+Given $x$ the class is still **random**, so the error and the cost of a
+decision are random variables: decide by their **expectation**, the conditional
+risk $\mathbb{E}[L(a, Y) \mid x]$. Fewest errors:
+the **most probable class**, the **Bayes decision rule** ($p > 0.5$ for two
+classes); what remains is the overlap of the classes. **Unequal costs** move
+the threshold to $c\_{FP}/(c\_{FP} + c\_{FN})$. For a generative model costs and
+**prior** meet in one threshold on the likelihood ratio.
+
+</div>
+
 
 ---
 
@@ -131,7 +660,7 @@ amount of data removes.
 Notes:
 The Bayes-optimal rule predicts, for every $x$, the label with the larger
 conditional probability — the Bayes decision rule of
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>. On that $x$ it errs exactly with the probability of
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>. On that $x$ it errs exactly with the probability of
 the other label, $\min\big(p(y{=}1 \mid x), 1 - p(y{=}1 \mid x)\big)$;
 averaging over $p(x)$ gives the formula. The error is not zero because $Y$
 given $X = x$ is still random: identical attribute vectors carry different
@@ -444,7 +973,7 @@ After 9 caught and 1 missed, with a flat prior: $\mathrm{Beta}(10, 2)$ — mean
 Notes:
 Each test fraud is one Bernoulli observation of
 $\theta = P(\text{flag} \mid \text{fraud})$: caught = 1, missed = 0. This is the
-Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>: with
+Beta–Bernoulli model of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: with
 prior $\mathrm{Beta}(1, 1)$, $k$ catches out of $n$ give
 $\mathrm{Beta}(1 + k, 1 + n - k)$. Step 0 of the viz shows the flat prior; step
 $i$ the posterior after the first $i$ frauds, in the order ✓✓✓✗✓✓✓✓✓✓. Each
@@ -575,7 +1104,7 @@ let it through — and who decides where the line is?
 | **check it** (a text to the customer) | 0 | €5 ($c\_{FP}$) |
 | **let it through** | €500 ($c\_{FN}$) | 0 |
 
-From <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>: check iff
+From <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>: check iff
 $$
 p(\text{fraud} \mid \mathbf{x}) > p^{\*} = \frac{c\_{FP}}{c\_{FP} + c\_{FN}} = \frac{5}{505} \approx 0.01
 $$
@@ -600,7 +1129,7 @@ precision.
 
 Notes:
 The threshold and the cost matrix are derived in
-<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>, where the prior and the costs
+<a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>, where the prior and the costs
 are combined into one threshold on the likelihood ratio. Checking costs $c\_{FP}$ if the transaction is legitimate (probability $1 - p$)
 and nothing otherwise; letting it through costs $c\_{FN}$ if it is a fraud
 (probability $p$). Check iff $(1 - p) \cdot c\_{FP} < p \cdot c\_{FN}$, i.e.
@@ -704,7 +1233,7 @@ the true probability. Accuracy is not strictly proper — it cannot tell 0.51 fr
 Notes:
 Log-loss is the average negative log-likelihood of the observed labels under
 the model's predictive distribution: the Bernoulli negative log-likelihood of
-<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a> and the cross-entropy that logistic
+<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a> and the cross-entropy that logistic
 regression minimises in training
 (<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), here evaluated on data
 the model has not seen. On training data it would carry the optimistic bias of
@@ -871,8 +1400,9 @@ $R(h)$ = the expected cost of the decisions module
 It is the quantity that matters — and **uncomputable**: $p$ is unknown.
 
 Notes:
-The risk is defined for any loss $L$ and any distribution $p$ over
-$(\mathbf{x}, y)$. With the 0/1 loss $L = \mathbb{1}[h(\mathbf{x}) \neq y]$ it is
+The risk is the $R(h)$ of <a href="/courses/probabilistic-machine-learning/lecture/l06-evaluation-and-risk/">Lecture 06</a>,
+now for a trained hypothesis $h$; it is defined for any loss $L$ and any
+distribution $p$ over $(\mathbf{x}, y)$. With the 0/1 loss $L = \mathbb{1}[h(\mathbf{x}) \neq y]$ it is
 the true error $\mathrm{err}^{\*}(h)$ of the rare-class module; with the fraud cost matrix it
 is the expected cost per transaction of the decisions module. The minimiser over all
 functions is the Bayes decision rule for that loss — predict the label with the
@@ -930,7 +1460,7 @@ NP-hard in general, even for linear classifiers; cross-entropy and hinge are
 convex surrogates for it.
 
 ERM is one recipe among several. The Beta posterior
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>), inference in a Bayesian
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>), inference in a Bayesian
 network (<a href="/courses/probabilistic-machine-learning/lecture/l05-bayesian-networks/">Lecture 05</a>) and Bayesian linear
 regression (<a href="/courses/probabilistic-machine-learning/lecture/l07-probabilistic-algorithms/">Lecture 07</a>) condition on
 the data; nothing is minimised.
@@ -1059,7 +1589,7 @@ $$
 <div class="c-insight">
 
 The $\frac{1}{n}$ is the point: the prior's weight **fades as data grows** — the
-pseudo-counts of <a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>'s Beta prior. A Gaussian prior
+pseudo-counts of <a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>'s Beta prior. A Gaussian prior
 $\mathcal{N}(0, \tau^2 \mathbf{I})$ gives $\lambda \Omega(\mathbf{w}) = \lVert\mathbf{w}\rVert^2/(2n\tau^2)$.
 
 </div>
@@ -1079,7 +1609,7 @@ same way.
 Penalty, capacity control and prior are three readings of one term. The $1/n$
 explains why regularisation matters for small samples and fades for large ones,
 as the pseudo-counts of a Beta prior
-(<a href="/courses/probabilistic-machine-learning/lecture/l04-linear-models/">Lecture 04</a>) are swamped by data.
+(<a href="/courses/probabilistic-machine-learning/lecture/l03-naive-bayes/">Lecture 03</a>) are swamped by data.
 
 MAP still returns a single parameter vector. It controls the generalisation gap
 but carries no uncertainty about $\mathbf{w}$; predictions that reflect

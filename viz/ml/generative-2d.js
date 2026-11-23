@@ -29,6 +29,9 @@
 //     (card testing: small amounts far away; large amounts near home). Steps:
 //     0 one normal per class · 1 a mixture of two normals for fraud, fitted
 //     with each row's pattern known. A choice control repeats the steps.
+//     With params.resample, a button replaces 10 rows by fresh draws from the
+//     same classes and refits: the boundary of the original table stays as a
+//     dashed line, so how much a model moves with the data can be seen.
 //
 // params:
 //   view:      "rule" | "discriminative" | "generative" | "fit"
@@ -40,6 +43,8 @@
 //   model:     view "fit": the model of step 0 ("naive" | "full" | "shared" |
 //              "one" | "mix"), so that one slide per covariance case can
 //              show its own; later steps continue from it
+//   resample:  view "fit", one fraud pattern: show the "replace 10 rows" and
+//              "original table" buttons (default false)
 
 import { addControls, rng } from '../core/controls.js'
 
@@ -466,32 +471,55 @@ export async function mount(el, { d3, params, steps, isPrint }) {
     } else {
       rows = trainingTable(DEFAULT)
     }
-    const byClass = (y) => rows.filter((p) => p.y === y)
-    const mH = moments(byClass('honest'))
-    const mF = moments(byClass('fraud'))
-    const prior = mF.n / rows.length
-    const pooled = [0, 1].map((i) => [0, 1].map((j) =>
-      (mH.n * mH.S[i][j] + mF.n * mF.S[i][j]) / rows.length))
     const diag = (S) => [[S[0][0], 0], [0, S[1][1]]]
     const corr = (S) => S[0][1] / Math.sqrt(S[0][0] * S[1][1])
-    // a class model is a list of weighted components { w, mu, S }
-    const MODELS = two
-      ? {
-          one: { honest: [{ w: 1, ...mH }], fraud: [{ w: 1, ...mF }] },
-          mix: {
-            honest: [{ w: 1, ...mH }],
-            fraud: ['testing', 'large'].map((z) => {
-              const m = moments(rows.filter((p) => p.z === z))
-              return { w: m.n / mF.n, ...m }
-            }),
-          },
-        }
-      : {
-          naive: { honest: [{ w: 1, mu: mH.mu, S: diag(mH.S) }], fraud: [{ w: 1, mu: mF.mu, S: diag(mF.S) }] },
-          full: { honest: [{ w: 1, ...mH }], fraud: [{ w: 1, ...mF }] },
-          shared: { honest: [{ w: 1, mu: mH.mu, S: pooled }], fraud: [{ w: 1, mu: mF.mu, S: pooled }] },
-        }
-    const ORDER = Object.keys(MODELS)
+    // fit every model to a table; a class model is a list of weighted
+    // components { w, mu, S }
+    const fitAll = (rows) => {
+      const byClass = (y) => rows.filter((p) => p.y === y)
+      const mH = moments(byClass('honest'))
+      const mF = moments(byClass('fraud'))
+      const prior = mF.n / rows.length
+      const pooled = [0, 1].map((i) => [0, 1].map((j) =>
+        (mH.n * mH.S[i][j] + mF.n * mF.S[i][j]) / rows.length))
+      const MODELS = two
+        ? {
+            one: { honest: [{ w: 1, ...mH }], fraud: [{ w: 1, ...mF }] },
+            mix: {
+              honest: [{ w: 1, ...mH }],
+              fraud: ['testing', 'large'].map((z) => {
+                const m = moments(rows.filter((p) => p.z === z))
+                return { w: m.n / mF.n, ...m }
+              }),
+            },
+          }
+        : {
+            naive: { honest: [{ w: 1, mu: mH.mu, S: diag(mH.S) }], fraud: [{ w: 1, mu: mF.mu, S: diag(mF.S) }] },
+            full: { honest: [{ w: 1, ...mH }], fraud: [{ w: 1, ...mF }] },
+            shared: { honest: [{ w: 1, mu: mH.mu, S: pooled }], fraud: [{ w: 1, mu: mF.mu, S: pooled }] },
+          }
+      return { MODELS, mH, mF, prior }
+    }
+    const original = fitAll(rows)
+    let fit = original
+    const ORDER = Object.keys(original.MODELS)
+    // replace k random rows by fresh draws of the same class (table size and
+    // class shares stay fixed); the count of replaced rows is shown
+    const fresh = sampler(20261123)
+    let replaced = 0
+    const replace = (k) => {
+      rows = rows.slice()
+      for (let i = 0; i < k; i++) {
+        const at = Math.floor(fresh.r() * rows.length)
+        const y = rows[at].y
+        let p
+        do p = fresh.point(DEFAULT[y]); while (!(p.u > U[0] && p.u < U[1] && p.v > V[0] && p.v < V[1]))
+        rows[at] = { ...p, y, fresh: true }
+      }
+      replaced += k
+      fit = fitAll(rows)
+    }
+    const originalRows = rows
     // per-instance id: a deck mounts this figure more than once
     const clipId = `fit-clip-${Math.random().toString(36).slice(2, 9)}`
 
@@ -514,22 +542,32 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         .attr('clip-path', `url(#${clipId})`)
     }
 
-    const render = (key) => {
-      g.selectAll('*').remove()
-      const m = MODELS[key]
-      const dens = (comps) => comps.map((c) => ({ w: c.w, f: gauss(c.mu, c.S) }))
+    const dens = (comps) => comps.map((c) => ({ w: c.w, f: gauss(c.mu, c.S) }))
+    const mix = (cs, u, v) => cs.reduce((t, c) => t + c.w * c.f(u, v), 0)
+    const posterior = (m, prior) => {
       const dH = dens(m.honest), dF = dens(m.fraud)
-      const mix = (cs, u, v) => cs.reduce((t, c) => t + c.w * c.f(u, v), 0)
-      const post = (u, v) => {
+      return (u, v) => {
         const a = mix(dF, u, v) * prior, b = mix(dH, u, v) * (1 - prior)
         return a / (a + b)
       }
+    }
+
+    const render = (key) => {
+      g.selectAll('*').remove()
+      const { MODELS, mH, mF, prior } = fit
+      const m = MODELS[key]
+      const post = posterior(m, prior)
       const { sx, sy } = panel(110, 50, 400, 320)
       g.append('clipPath').attr('id', clipId).append('rect')
         .attr('x', 110).attr('y', 50).attr('width', 400).attr('height', 320)
       // the region decided as fraud, faintly
       heat(sx, sy, post, (p) => (p > 0.5 ? 'rgba(217,119,6,0.12)' : 'rgba(0,0,0,0)'))
       dots(sx, sy, rows, 4.5)
+      // replaced rows get a violet ring
+      for (const p of rows.filter((q) => q.fresh)) {
+        g.append('circle').attr('cx', sx(p.u)).attr('cy', sy(p.v)).attr('r', 8)
+          .attr('fill', 'none').attr('stroke', VIOLET).attr('stroke-width', 1.6)
+      }
       for (const [comps, colour] of [[m.honest, NAVY], [m.fraud, '#8a4b06']]) {
         for (const c of comps) {
           ellipse(sx, sy, c, 1, colour, 2.5)
@@ -537,6 +575,11 @@ export async function mount(el, { d3, params, steps, isPrint }) {
           g.append('text').attr('x', sx(c.mu[0])).attr('y', sy(c.mu[1]) + 6).attr('text-anchor', 'middle')
             .attr('font-size', 18).attr('font-weight', 700).attr('fill', colour).text('×')
         }
+      }
+      if (replaced) {
+        const before = posterior(original.MODELS[key], original.prior)
+        g.append('path').attr('d', levelPath(before, sx, sy)).attr('fill', 'none').attr('stroke', VIOLET)
+          .attr('stroke-width', 2).attr('stroke-dasharray', '5 5').attr('stroke-opacity', 0.7)
       }
       g.append('path').attr('d', levelPath(post, sx, sy)).attr('fill', 'none').attr('stroke', VIOLET)
         .attr('stroke-width', 3).attr('stroke-linecap', 'round')
@@ -552,21 +595,18 @@ export async function mount(el, { d3, params, steps, isPrint }) {
         naive: () => ['Gaussian naive Bayes', [
           'Σ diagonal: amount and distance',
           'independent within each class',
-          '',
-          'per class: 2 means + 2 spreads = 4',
+          'per class: 2 means + 2 variances = 4',
           'boundary: curved — the spreads differ',
         ]],
         full: () => ['One Gaussian per class', [
-          'Σ full: spreads and correlation',
-          `fitted correlation: fraud ${r2(corr(mF.S))}, honest ${r2(corr(mH.S))}`,
-          '',
-          'per class: 2 + 2 + 1 correlation = 5',
+          'Σ full: variances and covariance',
+          `correlation: fraud ${r2(corr(mF.S))}, honest ${r2(corr(mH.S))}`,
+          'per class: 2 + 2 + 1 covariance = 5',
           'boundary: curved (quadratic)',
         ]],
         shared: () => ['One Σ shared by both classes', [
-          'same spreads and correlation',
+          'same variances and covariance',
           'for honest and fraud',
-          '',
           'per class: 2 means; Σ once: 3',
           'boundary: a straight line',
         ]],
@@ -587,10 +627,39 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       }
       const [head, body] = TEXT[key]()
       line(78, head, { bold: true })
-      body.forEach((t, i) => line(108 + i * 26, t, { size: 15 }))
-      line(258, `prior: the training share, ${Math.round(prior * 100)}% fraud`, { size: 14, colour: GREY })
-      line(300, '×  mean   —  1σ   - -  2σ', { size: 14, colour: GREY })
-      line(324, 'violet: P(fraud | x) = 0.5', { size: 14, colour: VIOLET })
+      if (two) {
+        body.forEach((t, i) => line(108 + i * 26, t, { size: 15 }))
+      } else {
+        // the two covariance matrices as fitted (log10 units), between the
+        // description and the parameter count
+        body.slice(0, 2).forEach((t, i) => line(104 + i * 22, t, { size: 15 }))
+        const matrix = (x, name, S, colour) => {
+          const t = line(160, 'Σ', { size: 16, colour, bold: true })
+          t.append('tspan').attr('dy', 4).attr('font-size', 12).text(name)
+          const left = x + 8, right = x + 150
+          for (const [bx, dir] of [[left, 1], [right, -1]]) {
+            g.append('path').attr('d', `M${bx + 6 * dir},170 h${-6 * dir} v50 h${6 * dir}`)
+              .attr('fill', 'none').attr('stroke', colour).attr('stroke-width', 1.5)
+          }
+          S.forEach((row, i) => row.forEach((v, j) => {
+            const zero = Math.abs(v) < 1e-12
+            g.append('text').attr('x', left + 62 + j * 68).attr('y', 190 + i * 22).attr('text-anchor', 'end')
+              .attr('font-size', 15).attr('fill', zero ? GREY : colour).text(zero ? '0' : v.toFixed(3))
+          }))
+          t.attr('x', x)
+        }
+        matrix(560, 'fraud', m.fraud[0].S, '#8a4b06')
+        matrix(730, 'honest', m.honest[0].S, NAVY)
+        body.slice(2).forEach((t, i) => line(248 + i * 22, t, { size: 15 }))
+      }
+      const y0 = two ? 258 : 296
+      line(y0, `prior: the training share, ${Math.round(prior * 100)}% fraud`, { size: 14, colour: GREY })
+      line(y0 + 24, '×  mean   —  1σ   - -  2σ', { size: 14, colour: GREY })
+      line(y0 + 46, 'violet: P(fraud | x) = 0.5', { size: 14, colour: VIOLET })
+      if (replaced) {
+        line(y0 + 70, `${rows.filter((q) => q.fresh).length} of ${rows.length} rows replaced (ringed)`, { size: 14, colour: VIOLET })
+        line(y0 + 92, 'dashed: the boundary before', { size: 14, colour: VIOLET })
+      }
       caption.text({
         naive: 'Naive: a normal per attribute and class — no tilt',
         full: 'Full covariance: the fraud ellipse tilts with the data',
@@ -600,13 +669,22 @@ export async function mount(el, { d3, params, steps, isPrint }) {
       }[key])
     }
 
+    const resample = params.resample && !two
     const controls = addControls(el, { isPrint }, [
       { id: 'model', label: 'model', type: 'choice', value: ORDER[0],
         options: ORDER.map((k) => ({ value: k, label: {
           naive: 'naive (diagonal Σ)', full: 'full Σ per class', shared: 'shared Σ',
           one: 'one Gaussian', mix: 'mixture of two',
         }[k] })) },
-    ], (id, v) => render(v.model))
+      ...(resample
+        ? [{ id: 'replace', label: 'Replace 10 rows', type: 'button' },
+            { id: 'reset', label: 'Original table', type: 'button' }]
+        : []),
+    ], (id, v) => {
+      if (id === 'replace') replace(10)
+      if (id === 'reset') { rows = originalRows; replaced = 0; fit = original }
+      render(v.model)
+    })
     // params.model shifts the steps: step 0 shows that model
     const first = Math.max(0, ORDER.indexOf(params.model))
     const setStep = (i) => {
