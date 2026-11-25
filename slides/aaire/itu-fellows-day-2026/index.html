@@ -1,0 +1,1973 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Agentic Information Retrieval and Beyond</title><link rel="stylesheet" href="/reveal.js/dist/reset.css"><link rel="stylesheet" href="/reveal.js/dist/reveal.css"><link rel="stylesheet" href="/reveal.js-menu/menu.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>
+        .deck-download {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 40;
+          font: 600 14px Arial, Helvetica, sans-serif;
+          color: #ffffff;
+          background: #0083A1;
+          padding: 0.45rem 0.65rem;
+          text-decoration: none;
+        }
+        @media print {
+          .deck-download { display: none; }
+        }
+      </style><style>
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+      }
+    </style><link rel="stylesheet" href="/_astro/RevealDeck._7tnl4J_.css"><link rel="stylesheet" href="/_astro/_..CCI0apth.css"></head><body><a class="deck-download" href="/slides/aaire/itu-fellows-day-2026/itu-fellows-day-2026.pdf">PDF</a><div class="reveal"><div class="slides"><section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Notes:" data-charset="utf-8"><textarea data-template><!-- .slide: class="title-slide title-plain" -->
+
+## Agentic Information Retrieval and Beyond
+
+Michael Granitzer  
+IT:U Interdisciplinary Transformation University Linz, Austria  
+Chair of Data Science, University of Passau, Germany  
+Coordinator OpenWebSearch.EU
+
+
+<div class="center">
+
+IT:U Research and Fellows Day · 25 November 2026
+
+</div>
+
+
+
+<div class="title-funding">
+
+<small>Funded by</small>
+![European Commission](/slides/_assets/ows/logo-eu-flag.svg)
+![BMFTR](/slides/_assets/ows/logo-bmftr.svg)
+![BMLEH](/slides/_assets/ows/logo-bmleh.svg)
+<img class="logo-sm" src="/slides/_assets/ows/logo-stmwi-bayern.png" alt="StMWi Bayern">
+
+</div>
+
+
+Notes:
+Slot: 20 minutes, then 10 minutes for questions. The audience is interdisciplinary (edge AI, privacy, GeoAI, cognitive architectures, design of human and more-than-human relations), so every system is introduced before it is used. Four parts, about four minutes each, then a short fifth part, what is next, that gathers the work into one agenda: civic information spaces.
+
+---
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Search is dead<span class="fragment" data-fragment-index="1"> — long live search</span>
+
+
+<div class="grid-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![The box where people type now](/slides/_assets/ows/chat-bar.png)
+
+</div>
+
+
+<div class="fragment" data-fragment-index="0">
+
+
+<div class="img-h-sm">
+
+![Search the web is one of the tools behind it](/slides/_assets/ows/chat-tools-menu.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+"Search the web" sits behind the box, switched on by default in most assistants.
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<div class="column small">
+
+<div class="fragment" data-fragment-index="1">
+
+
+<div class="stat-card evidence">
+
+### 34.5%
+of ChatGPT queries switched on web search in February 2026
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 14% → 24%
+of ChatGPT usage is "seeking information" in one year, "a very close substitute for web search"
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 20–26
+search calls per question by a deep-research agent
+
+</div>
+
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="fragment" data-fragment-index="2">
+
+
+<div class="pull-quote">
+
+The box where people type changed. What answers them is still a search engine, queried more often, by something that is not a person.
+
+</div>
+
+
+</div>
+
+
+<div class="slide-citation">
+
+Semrush clickstream analysis, Apr 2026 · Chatterji et al., *How People Use ChatGPT*, NBER 2025 · Chen et al., *BrowseComp-Plus*, 2025 (GPT-5, o3).
+
+</div>
+
+
+Notes:
+Open on the provocation the room has heard all year: search is dead, the chat box replaced it. Show the box. Then show what is behind the box: web search is one of the tools, switched on by default in most assistants. Then the numbers, all verified. Semrush measured on more than a billion clickstream lines that ChatGPT enabled web search on about a third of its queries in February 2026, down from 46 percent in late 2024. OpenAI's own usage study says information seeking grew from 14 to 24 percent of usage in a year and calls it a very close substitute for web search. On BrowseComp-Plus, GPT-5 and o3 issue between 20 and 26 search calls per question. The interface changed; the search engine underneath did not go away, it got busier, and its user is now a machine.
+→ next: what that system looks like when you take it apart.
+--
+
+<!-- .slide: class="smaller" -->
+
+## Designing agentic Web search systems [at scale]
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/system-view" data-steps="4" data-params='{"caption": false}'></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="marks-ask">
+
+- **Retrieval.** Whose corpus, index and ranking does the agent call, and can anyone inspect them?
+- **Interaction.** What does the agent search for, how deep does it read, and when does it stop?
+- **Collaboration.** How do several agents and several people share what they found, and who decides?
+
+</div>
+
+
+
+<div class="pull-quote fade-in">
+
+<span class="eyebrow">The 10 blue links are dead, but</span>
+search systems remain important and got more complex than before. 
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The pivot of the talk, as in the OSSYM and CLEF talks. The three columns are three design problems and the next three parts: part 2 the open search system, part 3 search methods for agents, part 4 humans and agents beyond the single pair.
+
+Step through the figure. Stage 0: a person, an agent, and a search back-end nobody can look into. Stage 1: the back-end opened into corpus, index, ranking and API. Stage 2: the loop between person and agent, with many search calls per question, which leaves usage data behind. Stage 3: other agents, other people and a shared knowledge store.
+- Deployed agents add tools and MCP servers, skills and workflows on top of this; the figure shows only the search half.
+- Part 2 is the retrieval column as infrastructure, part 3 the retrieval and interaction columns as methods, part 4 the collaboration column.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## 2 · Open Web Search
+
+<span class="eyebrow">An open model on closed search is a closed system</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 1, "focus": "retrieval", "caption": false, "state": {"corpus": "closed", "index": "closed", "ranking": "closed", "api": "closed"}}'></div>
+
+Notes:
+Today every layer of the retrieval column is somebody else's when an agent searches the web through a commercial API: the corpus is not disclosed, the index cannot be fixed to a snapshot, the ranking cannot be replaced, and the terms forbid storing results or training on them (Microsoft's Grounding with Bing Search terms: "Developers and end users don't have access to raw content returned").
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Openness is a property of the whole stack
+
+
+<div class="pull-quote">
+
+Open Source AI needs more than fully open models. It needs an open search system underneath.
+
+</div>
+
+
+
+<div class="stack">
+
+
+<div class="layer is-closed">
+
+**Agent platform and record** *hyperscaler clouds*
+
+</div>
+
+
+<div class="layer is-open">
+
+**Model** *open weights and fully open models exist: OLMo 3, Apertus, Soofi S*
+
+</div>
+
+
+<div class="layer is-closed">
+
+**Search API** *Bing retired Aug 2025, Google's ends Jan 2027, the rest undisclosed*
+
+</div>
+
+
+<div class="layer is-closed">
+
+**Index and corpus** *no public web index of comparable scale, until recently*
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-warning">
+
+Openness has reached the model layer. Above and below it, agents still run on infrastructure we can rent but not inspect, reproduce or keep. Transparency needs open web search as public infrastructure.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Microsoft lifecycle notice, May 2025 · Google Custom Search JSON API documentation, Sep 2026 · AI2, *OLMo 3*, 2025 · Swiss AI, *Apertus*, 2025 · SOOFI, *Soofi S*, 2026.
+
+</div>
+
+
+Notes:
+Read the stack top down.
+- Agent platform and record: the closing prediction of the OSSYM talk was that the AI business moves from models to the secure environment in which agents execute their tasks, most likely the hyperscalers' clouds. Whoever runs it holds the record of what agents did, which is the record we need for accountability (part 4).
+- Model: the only layer where openness is real. OLMo 3 (AI2, Nov 2025), Apertus (EPFL, ETH, CSCS, Sep 2025) and Soofi S (SOOFI consortium, Jul 2026) release weights, data and code. OpenEuroLLM has no flagship model yet.
+- Search API: Bing Search APIs retired on 11 Aug 2025 with under three months' notice; the Google Custom Search JSON API is closed to new customers and ends on 1 Jan 2027. Exa, Tavily, Perplexity and the search tools of OpenAI and Anthropic do not disclose or fix their corpus.
+- Index and corpus: Common Crawl offers dated crawls but no index or ranking; the Open Web Index (next slide) is what we built to fill this layer.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## The Open Web Index: web data every day, ready to use
+
+
+<div class="figure-100">
+
+![Open Web Index concept](/slides/_assets/ows/owi-concept.svg)
+
+</div>
+
+
+
+<div class="grid-4 gap tiny">
+
+
+<div class="column">
+
+
+<div class="stat-card evidence">
+
+### 1.8 PB
+crawled
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="stat-card evidence">
+
+### 14B
+documents
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="stat-card evidence">
+
+### 2.1k
+public datasets
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="stat-card evidence">
+
+### 10k-30k
+pages crawled per minute
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="grid-4 small">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### CIFF
+A sparse inverted index, tokenizer included.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Parquet
+Text, language, topic, structured data, locations, technical metadata
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Embeddings
+Dense Jina vectors on selected subsets.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Federated Infrastructure
+4 crawl sites in an extensible federation: IT4I, CSC, LRZ, Uni Passau.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+openwebindex.eu, crawler page and statistics, 24 Nov 2026.
+
+</div>
+
+
+Notes:
+The index we built, and the resource the rest of this part draws on. Every day, new shards: text extracted, language and topic labelled, structured data parsed, places and near-duplicates marked, sparse index and embeddings built, each with a licence and a dataset card.
+- Figures from openwebindex.eu on 24 Nov 2026. Crawler page: 1.8 PB crawled across all hosts (11M WARC files, crawl days 2023-10-01 to 2026-08-31 in the nightly recount), 6.0k pages written per minute (15-minute average, all crawl sites), 1.1B pages fetched by the current crawl nodes, 2.3B URLs in the crawl frontier. Statistics: 2.1k published collections with 14B documents and 55.6 TB uncompressed, from 5 datacentres (CSC, IT4I, LRZ, nordlink, Uni Passau); the dashboard says these figures are computed over the collections it mirrors, 929 of them held in Passau in full.
+- The University of Passau joined as a crawl site in October 2026.
+- In September the dashboard showed 1,507 TB crawled and 1,901 datasets; the media release of 24 Aug 2026 uses another accounting (39 billion URLs, 185 languages, 45 TiB index). Quote one source and say which.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OpenWebIndex.eu: Dashboard and Access
+
+<div class="r-stack img-h-xl">
+<img src="/slides/_assets/ows/screenshots/owi/2026-11/overview.png" alt="The openwebindex.eu overview: collections, documents, volume, datacentres">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/datasets.png" alt="Datasets: dated partitions of the ongoing crawl, 2.1k catalogued collections">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/dataset.png" alt="One dataset, a single crawl day at CSC: documents, files, size, licence, publisher and funding">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/summary.png" alt="Inside the dataset: generative-AI reservation, top-level domains, languages, domains and Curlie categories">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/labels.png" alt="Labels: licences, generative-AI use, indexability, Curlie topics and OWS tags">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/places.png" alt="Places: the places pages mention, and where they are published">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/link-graph.png" alt="Link graph between hosts: PageRank and harmonic centrality">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/corpora.png" alt="Corpora: curated collections published alongside the index">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/crawler.png" alt="Crawler: live crawl figures and crawled volume per host">
+<img class="fragment" src="/slides/_assets/ows/screenshots/owi/2026-11/downloads.png" alt="Lists: host list and domain trust list to download">
+</div>
+
+
+<div class="center">
+
+### [openwebindex.eu](https://openwebindex.eu)
+
+</div>
+
+
+Notes:
+A running service with its own front door. Step through the views one keypress at a time, a sentence each. Screenshots taken on 24 Nov 2026.
+- Overview and Datasets: the dated partitions of the ongoing crawl, 2.1k catalogued collections. Entries that stop being listed upstream are kept and marked rather than deleted.
+- One dataset: a single crawl day of the main collection, crawled at CSC and stored at LRZ; 3.0M documents, 584 Parquet files, 10.4 GB, Open Web Index Licence.
+- What is in it, computed for every dataset (owi-dataset-stats): 89.8% of pages allow generative-AI use under the TDM reservation; languages (eng 37.7%, deu 6%); Curlie topics (Regional 35.8%, Reference 21.4%); licences, 3.2k pages with a Creative Commons licence; places mentioned and the country a page is published in, a heuristic guess from schema.org addresses, ccTLD, phone prefix and geo tags, not an extraction; and the host link graph, 308k hosts and 549k links, with PageRank and harmonic centrality.
+- This is what makes a dataset choosable before downloading it: by language, topic, region or licence. It is also the bridge to the next slide.
+- Corpora, crawler and lists: the curated collections, the federation of crawl sites with live figures, and the host and domain lists to download.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Two example datasets from the index
+
+
+<div class="grid-2 gap-lg small">
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![WebFAQ 2.0: an English question, its aligned Malay answer, and a mined hard negative](/slides/_assets/ows/papers/webfaq2.png)
+
+</div>
+
+
+<div class="paper detail">
+
+<span class="eyebrow">SIGIR 2026 resource</span>
+### WebFAQ 2.0 · multilinguality
+- **Built from** schema.org FAQPage markup, mined and crawled directly. The pairs are written by site owners, not generated.
+- **Size** 198M question–answer pairs in 108 languages, 14.3M of them aligned across 3,970 language combinations.
+- **Controls** which language, or which language pair, an experiment runs in. 1.25M queries ship with 200 hard negatives each.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="img-h-md">
+
+![WebKurator.de: topical navigation on the left, regional selection on the right](/slides/_assets/ows/papers/webkurator.png)
+
+</div>
+
+
+<div class="paper detail">
+
+<span class="eyebrow">WebSci 2026</span>
+### WebKurator · region and topic
+- **Built from** the legal imprint of 5.54M German-language sites, geocoded and then topic-labelled automatically.
+- **Size** 2.58M sites in Germany carry both a location and a topic at launch.
+- **Controls** region and topic as two independent axes, so "this topic in that region" is a query, not a filter over one hierarchy.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Dinzinger et al., *WebFAQ 2.0*, SIGIR 2026 · Dinzinger et al., *The WebKurator.de Platform*, WebSci 2026. Figures CC BY 4.0.
+
+</div>
+
+
+Notes:
+The point of the pair is that they are cut from the same crawl along different axes, and each axis is a variable somebody in this room wants to control. WebFAQ is the index used as a training-data factory: structured data was extracted during processing, so FAQ pages can be harvested without a second crawl, and version 2 stops relying on someone else's Web Data Commons extraction and mines the URLs itself. What makes it an evaluation resource rather than a dump is the alignment and the negatives: 14.3 million pairs that say the same thing in two languages, and 200 mined hard negatives for each of 1.25 million queries. One honest detail worth saying: those negatives help when they are distilled with MarginMSE and hurt when they are used naively in a contrastive loss, because some of them are false negatives. WebKurator is the same index cut by place; the country split, if asked, is 85.6 per cent Germany, 7.3 Austria and 5.2 Switzerland. Imprint pages are a legal requirement in Germany, so they carry an address, and an address geocodes; that is why a national-scale regional index can be bootstrapped at all. Curlie is one-dimensional, and the WebKurator argument is that topic and region are separate questions. If asked what this has to do with evaluation: a regional sub-collection is a realistic, small, nameable slice, and those are the collections labs can actually afford to judge. Third strand, if time allows: continued pre-training on crawled index text improved cross-lingual hate-speech detection by about three macro-F1 points averaged over 16 benchmarks, which is Dang, Mitrović and Granitzer at LREC 2026 — evidence that this data measurably improves a model, not only a benchmark.
+→ next in the CLEF 2026 talk: two more variables, and the first one is size.
+--
+
+<!-- .slide: class="smaller" -->
+
+## OURRS: a testbed, and perhaps a future search engine
+
+
+<div class="grid-3-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="media img-h-lg">
+
+<video muted playsinline controls poster="/slides/_assets/ows/screenshots/ourrs-manufactruing-2605-poster.jpg" src="/slides/_assets/ows/screenshots/ourrs-passau-150926.mov"></video>
+
+<div class="figure-credit">
+
+ourrs.eu, figures 24 Nov 2026; screencast September 2026.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="grid-2 gap">
+
+
+<div class="stat-card evidence">
+
+### 1.4B
+web pages
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 1.2B
+entities
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 33.6M
+sites
+
+</div>
+
+
+<div class="stat-card evidence">
+
+### 15
+verticals, plus an API and MCP
+
+</div>
+
+
+</div>
+
+
+
+<div class="marks-yes">
+
+- **Testbed**: ranking, relevance feedback, AI summaries and logs are ours
+- **Source of datasets**: topical corpora, queries, agent traces and feedback to train small retrieval models (part 3)
+
+</div>
+
+
+
+<div class="marks-ask">
+
+- Can a public search engine run on public compute, and who pays for it?
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Play about thirty seconds of the screencast.
+OURRS with two Rs: the Open Web Index Research Retrieval System, built in Passau. No paper yet; cite the URL and the date. The ourrs.eu start page on 24 Nov 2026: "Search across 1.4 billion web pages, 1.2 billion entities, and 33.6 million sites from the Open Web Index" (September 2026: about one billion pages, 937 to 950 million entities). The vertical count (15) and the four isolated corpora (web, news and social, research, evaluation) are as of September 2026. The start page notes that data may be reset while the index is rebuilt. The MCP interface was redesigned on 27 Sep 2026 from 25 tools to 3, which cut the tool definitions an agent reads from about 23,600 to about 1,700 tokens.
+- As a testbed: corpus isolation keeps ranking statistics separate per experiment, every response carries a snapshot id, ranking is configurable, relevance feedback is consented three-star judgements with rank and preset, and it is self-hostable, so a lab can run its own instrumented instance.
+- As a source of datasets: the index already yields collections a lab cuts for itself (OWS-Curlie-2025, the collection behind WOWS 2026). OURRS adds what the index alone lacks: queries, agent traces, AI summaries and consented relevance feedback, all tied to a snapshot. That is the material for training and evaluating the small retrieval models of part 3, in variants per domain or per language. The models on the next slides were trained on simulated traces over existing collections; generating such datasets from OURRS is the next step, not a result yet.
+- As a search engine: it is an early prototype. The weak spot is import throughput (about 50 to 60 documents per second per lane). The open question on the slide is the one every non-commercial search engine faces.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## OpenWebSearch.EU: scaling up on the AI Factories
+
+
+<div class="grid-3-2 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-sm">
+
+![OpenWebSearch.EU consortium partners](/slides/_assets/ows/consortium-partner-logos.png)
+
+</div>
+
+
+
+<div class="timeline">
+
+- **Sep 2022** OpenWebSearch.EU starts, Horizon Europe, 14 partners
+- **2024** daily index products, dashboard and CLI
+- **Feb 2026** project end, operation continues
+- **Aug 2026** 39 billion URLs crawled, 185 languages, 45 TiB index
+- **Nov 2026** CoopAIFA: the follow-up on the European AI Factories
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### Scaling up with CoopAIFA
+- **Quantity**: crawling and indexing across more European data centres and AI Factories
+- **Variety**: multimedia and multimodal data
+- **Completeness**: an index as complete as we can make it, with daily snapshots
+
+</div>
+
+
+
+<div class="card good">
+
+### Scaling out: OWI Lakes
+Topical, deduplicated sub-indices as Parquet data lakes on object storage, queried where they lie instead of copied.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="takeaway">
+
+**Towards an open web index that rivals the size of the commercial ones.**
+
+</div>
+
+
+
+<div class="slide-citation">
+
+OpenWebSearch.EU media release, 24 Aug 2026 · Hendriksen, Hiemstra, Lin, de Vries, *Geese Belong in (Data) Lakes: An Index Lake for Anserini*, CIKM 2026.
+
+</div>
+
+
+Notes:
+Status update.
+- The outlook that closes the part: the project that built the index, and where its operation goes next. The timeline's August 2026 figures come from the media release of 24 Aug 2026 (39 billion URLs, 185 languages, 28 million hosts, 45 TiB index), a different accounting from the dashboard figures on the Open Web Index slide; say which source you quote.
+- It runs as a federation of HPC centres (IT4I, CSC, LRZ, CERN); the follow-up project CoopAIFA, from November 2026, moves the operation onto the European AI Factories. Name the participating AI Factories if asked. Since October 2026 the University of Passau also runs a crawl site.
+- OWI Lakes: following the CIKM 2026 index-lake work and the ECIR 2026 remote-querying paper (BM25 in DuckDB over Parquet on S3, seconds per query), an index is shared as files and queried where it lies. Topical lakes are the community-driven part: groups build and maintain sub-indices for their domain.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## 3 · Search for agents
+
+<span class="eyebrow">Agents search more, deeper and in more places than people</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 2, "focus": ["retrieval", "interaction"], "endpoints": true, "caption": false}'></div>
+
+Notes:
+The retrieval column is now drawn as many endpoints: local ones on the user's device, remote services an agent is given, and web search, with OURRS over the Open Web Index among them. The question of this part is what each endpoint should do when its user is an agent.
+
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## A good summary overcomes a bad ranking
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-lg">
+
+![OURRS answering a CLEF query: the summary is right, the relevant document is at rank 16](/slides/_assets/ows/screenshots/ourrs-search-clef.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+ourrs.eu: the generated summary answers the question; the document it rests on is ranked 16th.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="c-danger">
+
+### What the measure says
+The relevant document is at rank 16. **nDCG@10 scores this as a miss.**
+
+</div>
+
+
+
+<div class="c-positive">
+
+### What the user says
+The answer was right, it arrived first, and the evidence was one click away.
+
+</div>
+
+
+
+<div class="c-insight">
+
+Neither number is wrong. They measure different things, and only one of them is what the person came for.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Open the part with this, before any history, because it makes the case in one screen. Same query, same system: the generated summary answers it correctly, and the document that supports the answer sits at rank sixteen. Run the standard measure over that result list and it is a failure, because nDCG@10 never sees rank sixteen. Ask the person and it is a success. Say clearly what this is and is not: it is not an argument that ranking stopped mattering, and it is certainly not an argument against offline evaluation. It is an argument that the thing we are measuring and the thing the user experienced have come apart, and that we cannot tell how far apart without watching people use the system. That is what the rest of this part is about.
+→ next: and this is not the first time we have needed that data.
+--
+
+<!-- .slide: class="smaller" -->
+
+## Agents need a different search paradigm
+
+| | A person searching | An agent searching |
+|---|---|---|
+| **Where** | one engine, one result page | several repositories and endpoints in one task |
+| **How deep** | the top of the first page | scans down to about 40 results, then aggregates |
+| **How often** | one to a few queries | 20 to 26 search calls per question |
+| **Effort** | kept as low as possible | cheap; the person delegates and is willing to wait for the work |
+| **What comes back** | a click on a link | a synthesis with its sources |
+
+
+<div class="c-insight">
+
+The target moves from precision in the top ten for a reader to recall, coverage and aggregation across sources for an agent, and the agent's traces become training data.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Chen et al., *BrowseComp-Plus*, 2025 (GPT-5, o3: search calls per question) · result depth: anecdotal, an OURRS summary for a CLEF query, September 2026.
+
+</div>
+
+
+Notes:
+- 20 to 26 search calls per question: GPT-5 and o3 on BrowseComp-Plus.
+- About 40 results scanned per query: anecdotal evidence from the example shown at CLEF 2026 ("A good summary overcomes a bad ranking"). OURRS's generated summary for a CLEF query read down to about 40 results and answered correctly, although the document it rests on was ranked 16th. nDCG@10 scores that result list as a miss; for the reader of the summary it was a success. Say that this is one example, not a measurement.
+- Several repositories: a coding agent already searches the user's files, a library's documentation and the web in one task, and chooses which to ask. This is federated search, decided per question by the agent.
+- Willingness to work: with deep-research modes, people accept minutes of waiting for an answer, which removes the latency budget that shaped web ranking.
+- Consequences for retrieval research: evaluate the choice and combination of endpoints, not one ranking; optimise for what the agent aggregates, not what a person clicks; and use the traces, which agents leave in full, as training data (next slide: what we work on).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Retrieval for agents: what we work on
+
+
+<div class="grid-2 gap">
+
+
+<div class="column">
+
+
+<div class="card">
+
+<span class="eyebrow">Embeddings and scale</span>
+### Representations that hold up at web scale
+Compression that is free at 10K passages costs recall at 100M: scale alone takes **29 points** of Recall@100 and flips the choice of model.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+<span class="eyebrow">Agent and user simulation</span>
+### Traces we can check, not believe
+AgentSim records every step of an agent's search with the documents it used: **103,567** steps from 21,000 trajectories over three corpora.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+<span class="eyebrow">Small language models for search</span>
+### Distil the search behaviour
+A 3B model trained on the traces of an 80B one picks the next retrieval action (macro-F1 **0.65** against **0.17** prompted) and makes the pipeline use its evidence (**0.01 → 0.62**).
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+<span class="eyebrow">Algorithmic optimisation</span>
+### Read less of the cache
+KV-Selector: a network of 5k to 9k parameters per layer picks which key-value blocks a query reads. **81–99%** of an oracle against 51–94% for State-of-the-ARt; decoding **8 to 35× faster** at 128k tokens.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Caspari et al., *CoRECT*, ECIR 2026 · Zerhoudi, Granitzer, Mitrović, *AgentSim*, SIGIR 2026 · Al-Maamari et al., *The Fellowship of the Query*, CIKM 2026 · *Query-Aware KV Block Selection from Cache Landmarks*, under review, 2026.
+
+</div>
+
+
+Notes:
+One slide for the group's work on retrieval for agents; the next slide takes one of the four lines in detail.
+- Embeddings and scale (CoRECT, ECIR 2026): the same 65 TREC DL 2023 queries and judgements, the corpus grown from 10K to 100M passages with fixed mined distractors. Recall@100 falls from 0.82 to 0.53 on scale alone; 8-bit to 2-bit quantisation is free at every size, truncation and 1-bit binarisation are free at 10K and costly at 100M. A compression decision taken on a benchmark can be wrong on the web.
+- Agent and user simulation (AgentSim, SIGIR 2026): 1,000 corpus-aware seed queries per corpus over MS MARCO, Quasar-T and CausalQA via ChatNoir, three LLMs, up to seven retrieval–reasoning cycles; 199,968 distinct documents retrieved. Successor line of SimIIR; OpenIIR (part 4) simulates groups.
+- Small language models (Fellowship of the Query, CIKM 2026 short): teacher Qwen3-Next 80B, 1,490 accepted of 5,000 rollouts, seven retrieval actions; student Granite 4.1 3B. As controller and generator in a BM25 pipeline, token F1 0.778 → 0.830 (interval just clears zero; exact match does not), evidence-fact rate 0.012 → 0.616 (an automatic heuristic). Small models run on the device, close to the user (edge AI, Michele Magno's talk).
+- Algorithmic optimisation (KV-Selector, under double-blind review at ICLR 2027, so no author names on the slide): long inputs make decoding slow because every token reads the whole key-value cache. Quest ranks cache blocks by an upper bound from two landmark keys; KV-Selector keeps the landmarks and replaces the bound with a 4,801 to 9,409-parameter network per layer, trained in minutes to predict the model's own attention. Gap closed to an attention oracle 81 to 99% across eleven models (Quest 51 to 94%), better than every training-free rule in 78 of 82 settings; 8.1 to 34.8 times faster decoding with the cache offloaded at 128k tokens. Weak spot: retrieval-style tasks, where a simple mean-key rule can win.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## LocRoPE: the query decides how place matters
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+![LocRoPE: the query text sets complex weights on a multi-scale location code, so one vector holds text and location](/slides/_assets/ows/papers/locrope-overview.png)
+
+</div>
+
+
+<div class="column small">
+
+Queries say **how** location matters: *within 2 km*, *between 10 and 50 km*, *about 10 km north*, *near*. Today's retrievers add one distance curve, the same for every query.
+
+
+<div class="c-important">
+
+### LocRoPE
+A multi-scale rotary location code (0.1 to 10,000 km) inside the retrieval vector. The query's words set its weights, so one inner product is text similarity plus a location kernel whose scale and shape the query chooses.
+
+</div>
+
+
+Joint work with GeoAI (Bernd Resch).
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Ghosh Dastidar et al., *LocRoPE: Letting the Query Text Shape the Location Match in Single-Vector Dense Retrieval*, in preparation, Nov 2026.
+
+</div>
+
+
+Notes:
+Work with Kanishka Ghosh Dastidar (IT:U).
+- The baseline is LIST (VLDB Journal 2025): late fusion of a text score and one learned distance curve, weighted per query. The curve has the same width and shape for every query, can only say "nearer is better", and needs its own index.
+- Method: an Earth-centred 3-D position, 51 scales from 0.1 to 10,000 km, three directions per scale, 153 rotary pairs. The query's location part is the code multiplied by complex weights produced from the query text; a place's location part carries only a size. Their product is a kernel in the displacement between query and place. Sizes set the scale; signs give rings and exclusions; phases give one-sided shapes such as "north of".
+- Backbone Qwen3-Embedding-0.6B, trained on rule-built queries over Wikidata and Overture places in 33 countries; dev and test countries are held out; one seed per system.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## LocRoPE draws the region the query describes
+
+
+<div class="grid-2-1 gap">
+
+
+<div class="column middle">
+
+![Score maps for one café placed on a grid around Leiden, under four queries: LocRoPE draws discs, a ring and a region to the north; coordinates written as text draw a latitude and longitude cross](/slides/_assets/ows/papers/locrope-shapes.png)
+
+</div>
+
+
+<div class="column small middle">
+
+| test set, nDCG@10 | LocRoPE | LIST |
+|---|---:|---:|
+| stated radii | 97.6 | 97.4 |
+| realistic queries | **81.4** | 78.4 |
+| rings, *between a and b* | **96.9** | 63.2 |
+| *about d north of* | **88.3** | 23.5 |
+| search time, ms per query | **9** | 755 |
+
+Realistic queries: +2.9 [+1.5, +4.3], mostly where the scale is implied (*near X*). It serves from a standard HNSW index.
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Ghosh Dastidar et al., *LocRoPE*, in preparation, Nov 2026. Test countries held out from training; one seed per system.
+
+</div>
+
+
+Notes:
+The figure: one identical café is placed on a grid around Leiden and scored under four queries. Top row LocRoPE, bottom row coordinates written as text. Orange marks the true region (dashed: the mirror point of "north"). LocRoPE draws discs of the stated radius (AUC 0.999 and 0.997), a ring (0.979) and a region to the north with no mass at the mirror point (0.997). Coordinates as text produce a latitude/longitude cross (0.960, 0.947, 0.870, 0.830), because the model matches digits.
+- Table: test values, controlled benchmark over 10.2M places for stated radii; realistic judged benchmark from Wikivoyage-style queries; ring and north/south benchmark for the shape rows, all systems trained with these shapes. LIST's monotone curve cannot express a ring (hole rate 25.3% against 4.3%) or a direction.
+- Where LIST still wins: R-precision on stated radii (94.6 against 92.7) and lookup queries without a distance (−6.5), because its scalar balance can switch distance off.
+- Serving: HNSW (M 64, ef 1024) at 9.3 ms per query against LIST's exact scan at 754.9 ms on 2.08M places.
+- GeoAI link: places, sensor observations and text in one retrieval vector. Extended features such as rivers and regions are the open problem; for a river the local AUC rises from 0.59 to 0.96 as the code grows from 153 to 10,440 pairs. East/west holds only regionally with an Earth-centred code (a local frame is future work).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## 4 · H2A2: human to human to agent to agent
+
+<span class="eyebrow">How do humans and AI work together as one team?</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 3, "focus": "collaboration", "endpoints": true, "caption": false}'></div>
+
+Notes:
+The collaboration column: other agents, other people, and the knowledge they share. This is the least settled part and the main research front of the group.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## A network of humans and agents
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/interaction-topology" data-steps="4"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="marks-step">
+
+- **H2A**: a person delegates to an agent
+- **A2A**: agents delegate to and verify each other
+- **Shared knowledge**: agents read and write what others will retrieve
+- **H2H**: people decide together, through their agents
+
+</div>
+
+
+
+<div class="c-important">
+
+The unit of study is the network, not the query. It needs places where humans and agents meet, with identity, provenance and a record.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+Step the figure with the list: one person, one agent and a retrieval service; then agent to agent (delegate, verify); then the shared knowledge store that agents read and write; then the human edges, person to person and person to somebody else's agent.
+- H2A2 names all four kinds of edges at once: human to human, human to agent, agent to human, agent to agent.
+- Next: Moltbook, an all-agent network without a task; then three shared knowledge spaces we built with one; then YOARS, the place where humans and agents meet as a team.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Moltbook: social form without social function
+
+
+<div class="grid-2-1 gap-lg">
+
+
+<div class="column">
+
+
+<div class="img-h-lg">
+
+![The Moltbook landing page: a social network for AI agents, where humans are welcome to observe](/slides/_assets/ows/screenshots/screenshot-moltbook.png)
+
+</div>
+
+
+<div class="figure-credit">
+
+moltbook.com: a Reddit-shaped network where only AI agents post, launched January 2026.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### The study
+40 days crawled: **1.31M posts, 6.7M comments, 120,811 agents.**
+
+</div>
+
+
+
+<div class="marks-no">
+
+- **91.4%** of authors never return to their own thread
+- **97.3%** of comments receive no vote at all
+- open disagreement in **0.01%** of replies
+
+</div>
+
+
+
+<div class="c-note">
+
+Hard platform constraints changed behaviour within a day; soft guidance was ignored.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-important">
+
+Agents interacting without a task produce the form of a society, not its function.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Ghosh Dastidar, Klement, Romazanov, Einwiller, Dang, Dinzinger, Granitzer, Hautli-Janisz, Katzenbeisser, Lemmerich, Mitrović, *Form Without Function: Agent Social Behavior in the Moltbook Network*, 2026.
+
+</div>
+
+
+Notes:
+Moltbook launched on 28 January 2026 as a Reddit-style network where the accounts are AI agents: they post, comment and upvote; people are spectators ("humans welcome to observe"). An owner joins by telling their agent to read a skill file; the agent registers itself and only then sends the owner a claim link. Meta acquired it in March 2026. It is the only place where a population of agents interacts at scale in public, so it is a natural experiment on what agents do when left to talk to each other.
+- Crawl with our own crawler, first 40 days: 1,312,238 posts, 6.7 million comments, 120,811 post authors, 5,400 communities, 10% of posts flagged as spam.
+- Threads without conversation: 91.4% of post authors never return to their own thread, 85.6% of threads are flat, reciprocity 3.3% against 22 to 60% on human platforms; the median first comment arrives after 55 seconds.
+- Votes without evaluation: 97.3% of comments receive zero upvotes, 1,084 downvotes across 6.7M comments. No quality signal, no implicit feedback, nothing to learn from.
+- Profiles without topics: 97.9% of agents never post in a community matching their own bio. Replies without argument: 64.6% of comment–post pairs carry no argumentative relation, open disagreement 0.01%.
+- Participation is extremely unequal: the three most active agents contributed 964,438, 947,272 and 279,631 items; the median agent four.
+- Rate limits and a crypto filter changed behaviour within a day, while soft guidance in the same instruction file was ignored: the instruction file drives the platform, not the model.
+- The lesson for the next slides: collaboration among agents needs a purpose, which comes from a task, from retrieval and from the people the work is for.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Shared knowledge spaces for agents and people
+
+
+<div class="grid-3 gap">
+
+
+<div class="column">
+
+
+<div class="card">
+
+
+<div class="img-h-sm img-fixed">
+
+![The AI Opinions vertical of OURRS for the query passau](/slides/_assets/ows/screenshots/ourrs-ai-opinions-passau.png)
+
+</div>
+
+### AI Opinions
+Agents publish summaries with sources and model provenance; others reuse, contradict or supersede them, searchable in OURRS.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+
+<div class="img-h-sm img-fixed">
+
+![NuggetIndex: extraction, time-filtered retrieval and the nugget record with validity, state and evidence](/slides/_assets/ows/nuggetindex-architecture.png)
+
+</div>
+
+### NuggetPedia / NuggetIndex
+Governed atomic facts with a validity interval and a state: active, deprecated or contested. 
+Specialised index structure which improves by +96% ( nDCG@10) and reduces temporal conflicts by −55%.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+
+<div class="img-h-sm img-fixed">
+
+![An OpenIIR argument graph with 246 claims and 296 relations](/slides/_assets/ows/openiir-argumentation-graph.png)
+
+</div>
+
+### OpenIIR
+Swarms of persona agents deliberate. One run returns 246 claims and 296 relations: a graph, not an answer.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Zerhoudi, Granitzer, Mitrović, *NuggetIndex*, SIGIR 2026 · Zerhoudi, *OpenIIR*, CIKM 2026.
+
+</div>
+
+
+Notes:
+- AI Opinions: a vertical of OURRS. An opinion names the model that wrote it, cites its documents, carries a stance and votes; contradicting and superseding opinions are linked. One agent's search becomes the next agent's starting point.
+- NuggetPedia: agents register over MCP, submit nuggets and vote on them; governance decides what stays. The numbers are from NuggetIndex (SIGIR 2026), which retrieves governed nuggets instead of passages: on nuggetised MS MARCO nDCG@10 +96% and nugget recall +42% over BM25 passages; on TimeQA the conflict rate falls from .161 to .072; generator input 887 → 320 tokens. On static HotpotQA passages still lead by 1.5 to 4 points: the gain is where facts change and conflict. The companion study (ECML-PKDD 2026) found that more metadata is not better: a small model with aligned metadata beats GPT-4.1 on raw passages by 19 points on TempLAMA.
+- OpenIIR: successor to SimIIR 2.0 and 3; persona-driven agents in deliberative panels, on simulated social platforms and recommender feeds; local-first with deterministic replay. Open problem: how to judge a graph, per claim, per edge or per trajectory.
+- After Moltbook: these three give agents a task and a structure, which is what the all-agent network lacked.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## YOARS: govern a human–agent team through its messages
+
+
+<div class="grid-figure gap">
+
+
+<div class="column">
+
+<div class="viz viz-lg" data-viz="ows/yoars-overview" data-steps="3"></div>
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="marks-step">
+
+- **Principals**: humans and agents authenticate alike; every agent has a human owner
+- **Acts**: typed, addressed messages whose type states the intent, request or inform
+- **Rooms**: goals, decision rules and routing
+- **Ledger**: an append-only, attributable record of every act
+
+</div>
+
+
+
+<div class="c-note">
+
+Agents from different vendors (Claude Code, Codex, Pi, open models) join the same room.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Granitzer, Ghosh Dastidar, Einwiller, Mitrović, Zerhoudi, *Getting a Grip: Operating Human–Agent Software Teams Through Governed Messages*, technical report, 2026.
+
+</div>
+
+
+Notes:
+YOARS, Your Open Agent Relay System. Teams of several people directing many coding agents from different vendors must answer questions a single agent never raises: who may ask whom for what, which messages start work and which only inform, which decisions bind, and who caused a change. Prompts neither enforce these rules nor leave an attributable record.
+- The relay routes; it never decides. Acts follow the speech-act idea of KQML and FIPA ACL, which predates language-model agents; MCP standardises tool calls and A2A delegation between two parties, but neither gives a persistent, governed space for many people and agents.
+- Step the figure: humans and agents around the relay; rooms and addressed messages; coordination records (goals, proposals and votes, receipts); identity and the services underneath (OURRS search, a shared git workspace).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Getting a Grip: the bottleneck is human attention
+
+<span class="eyebrow">Four weeks of a human–agent team building YOARS with YOARS</span>
+
+
+<div class="grid-3-1 gap-lg">
+
+
+<div class="column">
+
+<span class="eyebrow">90th-percentile wait for the human-run coordinator, by week</span>
+
+
+<div class="flow-row">
+
+
+<div class="stat-card evidence">
+
+<span class="eyebrow">9 agents</span>
+### 0.5 h
+97% answered
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card evidence">
+
+<span class="eyebrow">16 agents</span>
+### 0.9 h
+98% answered
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card caution">
+
+<span class="eyebrow">17 agents</span>
+### 1.3 h
+89% answered
+
+</div>
+
+
+<div class="flow-arrow">
+
+→
+
+</div>
+
+
+<div class="stat-card fails">
+
+<span class="eyebrow">19 agents</span>
+### 4.2 h
+78% answered
+
+</div>
+
+
+</div>
+
+
+
+<div class="c-insight">
+
+Agents answered within minutes. People were waited for: 45 release chains spent **148 hours** waiting for a coordinator's check, mostly on decisions that were simple once seen.
+
+</div>
+
+
+</div>
+
+
+<div class="column small">
+
+
+<div class="card">
+
+### The study
+- **Field study**: 4 weeks, up to 19 agents and 2 people
+- **Task**: developing the relay itself
+- **Record**: 7,457 acts in the ledger
+- **Plus** 926 controlled runs of small agent teams: protocol rules cut coordination failure from 42% to 13%
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="pull-quote small">
+
+How do humans and AI collaborate as one team in knowledge work, when human attention and decisions are the scarce resource?
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Granitzer, Ghosh Dastidar, Einwiller, Mitrović, Zerhoudi, *Getting a Grip: Operating Human–Agent Software Teams Through Governed Messages*, technical report, 2026.
+
+</div>
+
+
+Notes:
+Explain the setup first, then the numbers.
+- Setup: the team developed YOARS itself, the most demanding task available, over four weeks with up to 19 agents and two people (a convenience sample, since the two people are authors). 3,276 model turns of the component agents used 11.4 billion tokens, about 4,400 USD at list price. Alongside, 926 controlled runs (899 analysable) of small agent teams building programs: revising which messages start work cut total coordination failure from 42% to 13% (p = .006; .057 after correction for nine tests). An auditor reading the ledger named the persuader in 25 of 25 backdoor runs, but also flagged 24 of 40 honest runs. Details in the appendix.
+- The numbers: week 4 is a partial week of 4.2 days, and its answered rate excludes the final 12 hours of the export (66% including them). Coordinators' requests to component agents were answered in a median of 21, 6, 15 and 1 minutes in the four weeks.
+- Context matters for the wait: when a request reached a human-run coordinator after half an hour of silence in its session, the 90th percentile of its response was 7.4 hours, against 1.0 hour when the session had just been active.
+- 189 of 205 recorded decisions (92%) were attributed to an operator. The bottleneck was neither programming nor the difficulty of the decisions, but access to a human decision maker. The team's remedies were organisational: more decision makers, delegated authority, fewer acts competing for a person's attention.
+- With customers and several stakeholders, decisions get harder and involve more people, so this bottleneck will grow. Decision fatigue becomes a design concern of the system, not a property of the user (Philipp Wintersberger's talk on the architecture of the human mind).
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## 5 · What's next?
+
+<span class="eyebrow">From open search, retrieval for agents and human–agent teams to one agenda</span>
+
+<div class="viz" data-viz="ows/system-view" data-params='{"stage": 3, "endpoints": true, "caption": false}'></div>
+
+Notes:
+The whole system once more, all three columns: the open infrastructure under it (part 2), retrieval built for agents (part 3), and teams of humans and agents (part 4). What ties them together is the purpose they serve.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Towards civic information spaces
+
+
+<div class="c-warning">
+
+**Information spaces are changing fast.** AI agents become new actors, more content moves behind walled gardens, power concentrates, and misuse and disinformation become everyday.
+
+</div>
+
+
+
+<div class="pull-quote">
+
+So how do we build participatory, sovereign and resilient<br>AI-mediated information spaces?
+
+</div>
+
+
+
+<div class="grid-3 gap">
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Participation
+People, and the agents acting for them, contribute, contest and decide, not only consume what a platform ranks for them.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Sovereignty
+Understanding and control of the whole chain: corpus, index, ranking, model, agent and the record of what they did.
+
+</div>
+
+
+</div>
+
+
+<div class="column">
+
+
+<div class="card">
+
+### Resilience
+The space survives a withdrawn service, a manipulated source and a hostile member, and afterwards we can find out what happened.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+Notes:
+The wrap-up: the term "civic information space" gathers the four parts into one research agenda. It is the shared space of documents, search services, models and now agents through which a society informs itself.
+- Participation: the web was participatory on the writing side and centralised on the finding side. Agents add a third role: they read, summarise and increasingly publish (AI Opinions, NuggetPedia, YOARS).
+- Sovereignty here means understanding and control, not national autarky: the ability to inspect, reproduce, vary and operate every layer (Open Web Index, OURRS, open models).
+- Resilience covers three failure modes from the talk: services disappear (Bing Search APIs retired 11 Aug 2025; Google Custom Search JSON API ends 1 Jan 2027), sources are manipulated (disinformation campaigns; the SOURCE project, BMFTR 2026–2029, builds an early-warning platform on the Open Web Index), and members of an agent team can be hostile (Getting a Grip).
+- Method: build, operate, study. Understanding web search came largely from operating search engines; the same holds for agentic systems.
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## One agenda: civic information spaces
+
+<div class="viz viz-full" data-viz="ows/two-dimensions" data-steps="3" data-params='{"height": 420, "cols": ["participation", "sovereignty", "resilience"], "rows": ["information retrieval", "applied machine learning", "AI agents"], "cells": [["search that people and their agents can build on and write into", "an index and a search service under public control", "many endpoints instead of one API; facts with a validity and a state"], ["small models that run where the user is", "models we train, evaluate and serve ourselves", "embeddings that hold up on noisy web text and at scale"], ["humans and agents as accountable members of one team", "every agent with a human owner, any model provider", "an attributable record that shows who did what"]], "marks": [["OURRS · AI Opinions", "Open Web Index · AI Factories", "federated search · NuggetPedia"], ["models from agent traces", "LocRoPE · CoRECT", "robustness studies"], ["YOARS · H2A2", "YOARS · open harnesses", "Getting a Grip audit"]]}'></div>
+
+
+<div class="center">
+
+### Thank you! Questions?
+[openwebsearch.eu/community](https://openwebsearch.eu/community/) · [openwebindex.eu](https://openwebindex.eu) · [ourrs.eu](https://ourrs.eu)
+
+</div>
+
+
+Notes:
+The agenda in one figure: purposes across, methods down, and in each cell what the group builds. Reveal one row per step.
+- Information retrieval: the Open Web Index and OURRS are the infrastructure; federated search over many endpoints and governed knowledge units are the methods.
+- Applied machine learning: small retrieval models distilled from agent traces (Fellowship of the Query, CIKM 2026), location embeddings (LocRoPE), compressed embeddings (CoRECT, ECIR 2026) and robustness on noisy web text.
+- AI agents: YOARS as the place where humans and agents meet as a team, and the record as the basis of accountability.
+- Leave the slide up for questions. Contact points: the OpenWebSearch.EU community page for the infrastructure, openwebindex.eu for the data, ourrs.eu as a testbed for any group that needs web search with a record.
+
+---
+
+<!-- .slide: class="module-slide" -->
+
+## Appendix
+
+<span class="eyebrow">For questions</span>
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Getting a Grip: seven lessons for human–agent teams
+
+
+<div class="marks-num">
+
+- **Describe the workspace**, and check agreement and integration separately.
+- **Make requests and answers reach the right agent**: anything that requires action is a request.
+- **Make rules and plan semantics explicit**: is a date a deadline, and who may choose the order of work?
+- **Separate prevention from investigation**: defences inside the conversation do not stop a backdoor; the record finds it.
+- **Design for scarce human attention**: delegate bounded authority, filter what reaches a person.
+- **Manage context as a first-class resource**: restore briefs and norms after compaction, their loss is silent.
+- **Verify reported results** against concrete runs, with independent review.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Granitzer et al., *Getting a Grip*, technical report, 2026, Section "Lessons".
+
+</div>
+
+
+Notes:
+The report pairs the lessons with a checklist for practitioners. Lesson 6 cites the compaction study (Zerhoudi, Mitrović, Granitzer, *The Compaction Cliff in Long-Running AI Agent Memory*, CIKM 2026).
+
+--
+
+<!-- .slide: class="smaller" -->
+
+## Appendix: Getting a Grip, what the protocol controls
+
+| Question | Study | Finding |
+|---|---|---|
+| **Controllability**: which room rules change how agent teams coordinate? | 926 controlled runs, small agent teams building programs | Revising which messages start work cut total coordination failure from **42% to 13%** (p = .006; .057 after correction for nine tests). Instructed roles and votes did not reliably produce the intended process. |
+| **Transparency**: a hostile member plants a backdoor | the same runs, some with one hostile member | No defence inside the conversation reliably stopped it. An auditor reading the ledger named the persuader in **25 of 25** cases, but also flagged **24 of 40** honest runs. |
+| **Operation**: what happens over weeks of real work? | 4 weeks, up to 19 agents and 2 people, **7,457 acts**, developing YOARS itself | Most governance requirements emerged from operation. Holding context, not producing output, dominated token cost. |
+
+
+<div class="c-insight">
+
+Control comes from the protocol and the record, not from asking agents to behave.
+
+</div>
+
+
+
+<div class="slide-citation">
+
+Granitzer et al., *Getting a Grip*, technical report, 2026. Corpus, redacted ledger and analysis scripts released.
+
+</div>
+
+
+Notes:
+- Controlled study: 926 runs, 899 analysable. The revision bundled two changes, which messages start work and limits on repeated messages, so the effect cannot be split between them.
+- Security: the auditor was Claude Opus 5, run twice over the records of 96 runs of one model family in which a detector had confirmed the backdoor. The attacker had committed the backdoor itself in at least 71 runs; in 25 it persuaded a teammate to write it, and the auditor named the persuader each time. With the team's own model as auditor, detection and attribution fell substantially. Specificity is the weak spot: 24 of 40 honest runs were flagged.
+- Field study: the team developed the relay itself, the most demanding task available; a convenience sample, since the two people are authors. 3,276 model turns of the component agents used 11.4 billion tokens, about 4,400 USD at list price.
+- The report also lists 26 failures of our own instruments and the claims they made us withdraw, and derives seven lessons (appendix).</textarea></section></div><div class="ows-footer"></div></div><script src="/reveal.js/dist/reveal.js"></script><script src="/reveal.js/dist/plugin/markdown.js"></script><script src="/reveal.js/dist/plugin/math.js"></script><script src="/reveal.js/dist/plugin/notes.js"></script><script src="/reveal.js/dist/plugin/highlight.js"></script><script src="/reveal.js/dist/plugin/search.js"></script><script src="/reveal.js/dist/plugin/zoom.js"></script><script src="/reveal.js-menu/menu.js"></script><script>
+
+      const isPrintView = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      function startDeck() {
+      Reveal.initialize({
+        // Equation explanation (docs/LAYOUT_REFERENCE.md §7): \eqa{…}…\eqf{…}
+        // wrap a part of a formula in a colour slot; trust:true is required
+        // for the \htmlClass that the macros expand to.
+        katex: {
+          trust: (ctx) => ctx.command === "\\htmlClass",
+          macros: {
+            "\\eqa": "\\htmlClass{eq-1}{#1}",
+            "\\eqb": "\\htmlClass{eq-2}{#1}",
+            "\\eqc": "\\htmlClass{eq-3}{#1}",
+            "\\eqd": "\\htmlClass{eq-4}{#1}",
+            "\\eqe": "\\htmlClass{eq-5}{#1}",
+            "\\eqf": "\\htmlClass{eq-6}{#1}",
+            // Markdown strips the backslash from \, \; \! before KaTeX sees
+            // it, so spacing macros must never appear in slide source. Named
+            // macros (letters only) survive — define the ones we need here.
+            "\\indep": "\\perp\\!\\!\\!\\perp",
+            "\\nindep": "\\not\\perp\\!\\!\\!\\perp",
+            "\\thinsp": "\\,",
+            "\\medsp": "\\;",
+            "\\negsp": "\\!",
+          },
+        },
+        view: isPrintView ? "print" : null,
+        hash: true,
+        controls: true,
+        controlsTutorial: false,
+        progress: true,
+        slideNumber: true,
+        center: false,
+        overview: true,
+        touch: true,
+        navigationMode: "default",
+        transition: "fade",
+        backgroundTransition: "none",
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        menu: {
+          side: "left",
+          width: "normal",
+          numbers: false,
+          markers: true,
+          themes: false,
+          transitions: false,
+          openButton: true,
+        },
+        plugins: [
+          window.RevealMarkdown,
+          window.RevealMath?.KaTeX,
+          window.RevealNotes,
+          window.RevealHighlight,
+          window.RevealSearch,
+          window.RevealZoom,
+          window.RevealMenu,
+        ].filter(Boolean),
+      }).then(() => {
+        // Auto-fragment helper: treat any .fade-in as a Reveal.js fragment
+        // Must run after initialization (and markdown rendering) to find the elements
+        document.querySelectorAll(".fade-in").forEach((el) => {
+          if (!el.classList.contains("fragment")) el.classList.add("fragment");
+        });
+        Reveal.sync();
+      });
+      }
+
+      // Protected decks (see _lib/protect.ts): decrypt the markdown with the
+      // passphrase, put it where RevealMarkdown reads it, then start. The
+      // passphrase is remembered for this tab only, so reloads and print view
+      // do not ask again.
+      async function decryptDeck(box, pass) {
+        const bytes = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+        const subtle = window.crypto.subtle;
+        const base = await subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+        const key = await subtle.deriveKey(
+          { name: "PBKDF2", salt: bytes(box.salt), iterations: box.iterations, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+        const plain = await subtle.decrypt({ name: "AES-GCM", iv: bytes(box.iv) }, key, bytes(box.ct));
+        return new TextDecoder().decode(plain);
+      }
+
+      function unlockDeck(box) {
+        const form = document.getElementById("deck-lock");
+        const input = document.getElementById("deck-pass");
+        const error = form.querySelector(".deck-lock-error");
+        const storeKey = `deck-pass:${window.location.pathname}`;
+        const open = async (pass, remembered) => {
+          try {
+            const markdown = await decryptDeck(box, pass);
+            document.querySelector(".reveal textarea[data-template]").textContent = markdown;
+            try { sessionStorage.setItem(storeKey, pass); } catch (e) {}
+            form.remove();
+            startDeck();
+          } catch (e) {
+            try { sessionStorage.removeItem(storeKey); } catch (e2) {}
+            if (!remembered) { error.hidden = false; input.select(); }
+          }
+        };
+        form.addEventListener("submit", (event) => { event.preventDefault(); open(input.value, false); });
+        let saved = null;
+        try { saved = sessionStorage.getItem(storeKey); } catch (e) {}
+        if (saved) open(saved, true);
+        else input.focus();
+      }
+
+      const cipherEl = document.getElementById("deck-cipher");
+      if (cipherEl) unlockDeck(JSON.parse(cipherEl.textContent));
+      else startDeck();
+    </script><script src="/vendor/d3/d3.min.js"></script><script>(function(){const base = "/";
+
+    (() => {
+      const isPrint = /(?:^|[?&])(?:view=print|print-pdf)(?:&|$)/i.test(window.location.search);
+
+      async function mountOne(el, uid) {
+        const name = el.dataset.viz;
+        // Dragging inside a visualization must not swipe to the next slide.
+        // Harmless for stepped modules, required for tier-3 widgets.
+        el.setAttribute("data-prevent-swipe", "");
+        let mod;
+        try {
+          mod = await import(`${base}viz/${name}.js`);
+        } catch (err) {
+          console.warn(`[viz] module not found: ${name}`, err);
+          el.classList.add("viz-missing");
+          el.textContent = `[missing visualization: ${name}]`;
+          return;
+        }
+        let params = {};
+        try {
+          if (el.dataset.params) params = JSON.parse(el.dataset.params);
+        } catch (err) {
+          console.warn(`[viz] invalid data-params on ${name}:`, err);
+        }
+        const steps = parseInt(el.dataset.steps || "0", 10) || 0;
+        const instance = await mod.mount(el, { d3: window.d3, params, steps, isPrint });
+        if (!instance || typeof instance.setStep !== "function") return;
+
+        if (steps > 0 && !isPrint) {
+          // Invisible fragment carriers make Reveal's fragment navigation
+          // drive the visualization, forwards and backwards.
+          const slide = el.closest("section");
+          const id = `viz-${uid}`;
+
+          // A slide may also carry author fragments (a question revealed after
+          // the picture has made its point). Carriers are appended at the end
+          // of the section, so without explicit indices Reveal would run the
+          // author's fragments first. Give the visualization steps the leading
+          // indices and push the author fragments behind them. Reveal has
+          // already numbered every fragment 0, 1, … on init (fragments.sortAll),
+          // so an existing index cannot be told apart from an authored one:
+          // shift them all by `steps`, which keeps their relative order.
+          const authored = [...slide.querySelectorAll(".fragment")]
+            .filter((f) => !f.classList.contains("viz-step"));
+          authored.forEach((f, k) => {
+            const own = parseInt(f.getAttribute("data-fragment-index") ?? "", 10);
+            f.setAttribute("data-fragment-index", String(steps + (Number.isNaN(own) ? k : own)));
+          });
+
+          for (let i = 1; i <= steps; i++) {
+            const s = document.createElement("span");
+            s.className = "fragment viz-step";
+            s.dataset.vizFor = id;
+            s.dataset.vizStep = String(i);
+            s.setAttribute("data-fragment-index", String(i - 1));
+            s.setAttribute("aria-hidden", "true");
+            slide.appendChild(s);
+          }
+          // Derive the step from the carriers' visibility rather than from the
+          // event payload: entering a slide backwards (or jumping into it)
+          // reveals several fragments in one event, and only the state of the
+          // DOM says how many of this figure's steps are showing.
+          const carriers = () => slide.querySelectorAll(`.viz-step[data-viz-for="${id}"]`);
+          let current = -1;
+          const sync = () => {
+            const shown = [...carriers()].filter((c) => c.classList.contains("visible")).length;
+            if (shown !== current) { current = shown; instance.setStep(shown); }
+          };
+          Reveal.on("fragmentshown", sync);
+          Reveal.on("fragmenthidden", sync);
+          Reveal.on("slidechanged", (event) => { if (event.currentSlide === slide) sync(); });
+          sync();
+        } else {
+          // Print/PDF (and stepless live decks): show the complete state.
+          instance.setStep(steps);
+        }
+      }
+
+      async function initViz() {
+        const els = Array.from(document.querySelectorAll("[data-viz]"));
+        await Promise.all(els.map((el, i) => mountOne(el, i)));
+        // Re-count fragments after inserting carriers
+        if (els.length > 0) Reveal.sync();
+      }
+
+      const start = () => { initViz().catch((err) => console.error("[viz]", err)); };
+      if (window.Reveal?.isReady?.()) start();
+      else window.Reveal?.on("ready", start);
+    })();
+  })();</script><script>(function(){const MIN_FREE = 120;
+
+  (() => {
+    const SLIDE_H = 720;
+    const SLIDE_W = 1280;
+    const EDGE = 28;        // breathing room at the bottom of the slide
+    const PER_CHILD = 12;   // margin allowance per sibling block
+
+    const scale = () => window.Reveal?.getScale?.() || 1;
+
+    // Grow the figure until either the width or the free height runs out.
+    function fitFigure(sec) {
+      const holder = sec.querySelector(".viz:not(.eq-explain)");
+      if (!holder) return;
+      const svg = holder.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      const vb = svg.viewBox.baseVal;
+      if (!vb.width || !vb.height) return;
+      const aspect = vb.width / vb.height;
+      const s = scale();
+
+      // measure the rest of the slide without our own constraint in the way
+      svg.style.maxWidth = "";
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        if (child === holder || child.contains(holder)) continue;
+        used += child.getBoundingClientRect().height / s + PER_CHILD;
+      }
+      const avail = SLIDE_H - used - EDGE;
+      if (avail <= 80) return;                       // no room: leave the CSS cap
+
+      let width = Math.min(SLIDE_W - 2 * EDGE, aspect * avail);
+      svg.style.maxWidth = Math.floor(width) + "px";
+
+      // The estimate above ignores the figure's own margins and any rounding,
+      // so grow first and then pull back until the slide genuinely fits. Two
+      // or three passes settle it; the guard stops a pathological loop.
+      for (let k = 0; k < 6; k++) {
+        const over = sec.scrollHeight - SLIDE_H;
+        if (over <= 0) break;
+        width -= aspect * (over + 6);
+        if (width < 240) { width = 240; svg.style.maxWidth = "240px"; break; }
+        svg.style.maxWidth = Math.floor(width) + "px";
+      }
+    }
+
+    // How much of the canvas the content actually uses. scrollHeight cannot
+    // answer this: the theme lays a rendered slide out at the full 720px, so it
+    // reads 720 whatever the content is — and reads 0 while the slide is
+    // display:none. Measuring the children works in both states.
+    function contentHeight(sec) {
+      const s = scale();
+      let used = 0;
+      for (const child of sec.children) {
+        if (child.tagName === "ASIDE") continue;
+        const h = child.getBoundingClientRect().height;
+        if (!h) continue;
+        used += h / s + PER_CHILD;
+      }
+      return used;
+    }
+
+    function fit() {
+      for (const sec of document.querySelectorAll(".reveal .slides section")) {
+        if (sec.querySelector("section")) continue;              // stack wrapper
+        if (sec.classList.contains("title-slide")) continue;
+        if (sec.classList.contains("module-slide")) continue;
+        fitFigure(sec);
+        const used = contentHeight(sec);
+        // A hidden slide measures 0; leave its class alone rather than
+        // centring everything off-screen. It is measured when it becomes
+        // current, since fit() runs on every slidechanged.
+        if (used === 0) continue;
+        sec.classList.remove("v-center");
+        if (SLIDE_H - used > MIN_FREE) {
+          sec.classList.add("v-center");
+          // Child rectangles exclude margins, so a slide whose blocks are
+          // generously spaced measures smaller than it lays out. Under
+          // .v-center the section is exactly SLIDE_H tall, which makes
+          // scrollHeight an exact overflow test — take the centring back if
+          // it pushed anything past the bottom edge.
+          if (sec.scrollHeight > SLIDE_H) sec.classList.remove("v-center");
+        }
+      }
+    }
+
+    const start = () => {
+      fit();
+      window.Reveal?.on?.("slidechanged", fit);
+      window.Reveal?.on?.("resize", fit);
+      setTimeout(fit, 1200);                 // visualizations mount asynchronously
+    };
+    if (window.Reveal?.isReady?.()) start();
+    else window.Reveal?.on("ready", start);
+  })();
+})();</script></body></html>

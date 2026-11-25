@@ -7,6 +7,8 @@
 //   rows:  three row headers (the requirements)
 //   cells: 3 × 3 strings, row-major
 //   marks: 3 × 3 strings drawn small under each cell (the concrete system)
+//   height: viewBox height (default 480); lower makes the grid wider than
+//           tall, so a height-fitted slide draws it larger
 // steps: 3 — step i reveals row i.
 
 const NAVY = '#164374'
@@ -36,7 +38,7 @@ const ROW_COLOUR = [NAVY, TEAL, VIOLET]
 
 export async function mount(el, { d3, params, steps, isPrint }) {
   const cfg = Object.assign({}, DEFAULTS, params)
-  const W = 960, H = 480
+  const W = 960, H = cfg.height ?? 480
   const L = 190, T = 64, GAP = 10
   const CW = (W - L - 20 - 2 * GAP) / 3
   const RH = (H - T - 16 - 2 * GAP) / 3
